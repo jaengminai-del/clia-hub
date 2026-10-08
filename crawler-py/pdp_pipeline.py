@@ -468,6 +468,19 @@ LG PDP 구조 및 그룹핑 규칙 (필수 준수):
 """
 
 
+def _html_product_title(html: str) -> str:
+    """Gemini 없이 HTML에서 제품명 추출 (og:title → h1 → <title>)."""
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(html or "", "html.parser")
+    og = soup.find("meta", attrs={"property": "og:title"})
+    if og and og.get("content"):
+        return og["content"].split("|")[0].strip()
+    h1 = soup.find("h1")
+    if h1 and h1.get_text(strip=True):
+        return h1.get_text(" ", strip=True)
+    return (soup.title.get_text(strip=True).split("|")[0].strip() if soup.title else "")
+
+
 def run_gemini(md: str, pc_tiles: List[Path]) -> dict:
     from google import genai
     from google.genai import types
@@ -502,6 +515,10 @@ def run_gemini(md: str, pc_tiles: List[Path]) -> dict:
                 if current_model == "gemini-2.5-flash":
                     current_model = "gemini-2.5-pro"
                     print("   ⚠️ gemini-2.5-flash 과부하로 인해 gemini-2.5-pro 모델로 즉시 폴백합니다.")
+            elif isinstance(e, json.JSONDecodeError) and current_model == "gemini-2.5-flash":
+                # 긴 PDP에서 flash 응답 JSON이 잘리거나 깨지는 경우 → pro 로 재시도
+                current_model = "gemini-2.5-pro"
+                print("   ⚠️ Gemini 응답 JSON 손상 → gemini-2.5-pro 모델로 재시도합니다.")
             wait_sec = attempt * 5
             print(f"   ⚠️ 구글 API 분석 오류 발생 (시도 {attempt}/3): {str(e)[:150]}")
             print(f"   ➜ {wait_sec}초 동안 대기 후 다시 시도합니다...")
@@ -587,6 +604,9 @@ def run_qa(result: dict, pc_tiles: List[Path]) -> dict:
                 if current_model == "gemini-2.5-flash":
                     current_model = "gemini-2.5-pro"
                     print("   ⚠️ gemini-2.5-flash 과부하로 인해 gemini-2.5-pro 모델로 즉시 폴백합니다.")
+            elif isinstance(e, json.JSONDecodeError) and current_model == "gemini-2.5-flash":
+                current_model = "gemini-2.5-pro"
+                print("   ⚠️ Gemini 응답 JSON 손상 → gemini-2.5-pro 모델로 재시도합니다.")
             wait_sec = attempt * 5
             print(f"   ⚠️ 구글 API QA 오류 발생 (시도 {attempt}/3): {str(e)[:150]}")
             print(f"   ➜ {wait_sec}초 동안 대기 후 다시 시도합니다...")
@@ -653,6 +673,9 @@ def run_correction(result: dict, qa: dict, md: str, pc_tiles: List[Path]) -> dic
                 if current_model == "gemini-2.5-flash":
                     current_model = "gemini-2.5-pro"
                     print("   ⚠️ gemini-2.5-flash 과부하로 인해 gemini-2.5-pro 모델로 즉시 폴백합니다.")
+            elif isinstance(e, json.JSONDecodeError) and current_model == "gemini-2.5-flash":
+                current_model = "gemini-2.5-pro"
+                print("   ⚠️ Gemini 응답 JSON 손상 → gemini-2.5-pro 모델로 재시도합니다.")
             wait_sec = attempt * 5
             print(f"   ⚠️ 구글 API 보정 오류 발생 (시도 {attempt}/3): {str(e)[:150]}")
             print(f"   ➜ {wait_sec}초 동안 대기 후 다시 시도합니다...")
@@ -1099,7 +1122,20 @@ def main():
 
     # Step 4 — Gemini 융합 분석 (PC 단일 뷰포트 분석)
     write_progress(65, f"4단계: Gemini {GEMINI_MODEL} 멀티모달 시각 구조 대조 분석 중 (20~40초 소요)...")
-    result = run_gemini(pre_md, tiles["pc"])
+    _cf_origin = "https://" + (args.url.split("//", 1)[-1].split("/", 1)[0] or "www.lg.com")
+    gemini_ok = True
+    try:
+        result = run_gemini(pre_md, tiles["pc"])
+    except Exception as _ge:
+        # 최종 미러는 컴포넌트-우선(Step7-CF)으로 만들어지므로, HTML 컴포넌트 근거가 충분하면
+        # Gemini 분석 없이도 완료할 수 있다 (Gemini 결과는 제품명 정도만 쓰임).
+        _probe = build_from_components(component_data, "", _cf_origin).get("_cf_stats", {})
+        if _probe.get("renderable", 0) < 3:
+            raise
+        gemini_ok = False
+        print(f"   ⚠️ Gemini 분석 실패 → 컴포넌트-우선 미러로 계속 진행 (노출 섹션 {_probe['renderable']}): {str(_ge)[:120]}")
+        write_progress(80, "4단계: AI 분석 응답 오류 — HTML 컴포넌트 구조로 계속 진행합니다")
+        result = {"product_title": _html_product_title(datasets["pc"]["html"]), "layout_flow": []}
     # [프로그램적 강제 분리 보완] 디스클레이머와 타이틀이 합쳐진 경우 강제 분리
     result["layout_flow"] = post_process_split_disclaimers(result["layout_flow"])
 
@@ -1112,27 +1148,43 @@ def main():
     # Step 5 — 후단 검증
     write_progress(82, "5단계: 수집 본문 실존 여부 및 원문 훼손율 검증 중...")
     corpus = pre_md + "\n" + datasets["pc"]["html"]
-    report = verify(result, corpus)
+    report = verify(result, corpus) if gemini_ok else {"pass": True, "_note": "gemini skipped"}
     (out / "verify_report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
     # Step 6 — LLM 시각 QA (화면 인지 기준 매칭 재검수)
     write_progress(85, "6단계: LLM 자기치유형 시각 매칭 검수(Visual QA) 수행 중...")
-    qa = run_qa(result, tiles["pc"])
+    qa = {"match_score": None, "issues": [], "_note": "gemini skipped — component-first mirror"}
+    if gemini_ok:
+        try:
+            qa = run_qa(result, tiles["pc"])
+        except Exception as _qe:   # QA는 결과를 다듬는 선택 단계 — 실패해도 계속
+            print(f"   ⚠️ 시각 QA 실패 → 건너뜀: {str(_qe)[:120]}")
+            qa = {"match_score": None, "issues": [], "_note": "qa failed: " + str(_qe)[:200]}
 
     # Step 6.5 — QA 자동 보정 루프: 발견 → 교정 → 재검증 → 재QA (수렴까지)
     qa_history = [{"loop": 0, "score": qa.get("match_score"), "issues": len(qa.get("issues", []))}]
     for loop in range(1, MAX_QA_LOOPS + 1):
-        if qa.get("match_score", 0) >= QA_PASS_SCORE and not qa.get("issues"):
+        if not gemini_ok or qa.get("match_score") is None or (qa.get("match_score", 0) >= QA_PASS_SCORE and not qa.get("issues")):
             break
         write_progress(88 + loop * 2, f"6.{loop}단계: 시각 정렬 불일치 보정 루프 기동 중 (루프 {loop}/{MAX_QA_LOOPS})...")
-        corrected = run_correction(result, qa, pre_md, tiles["pc"])
+        try:
+            corrected = run_correction(result, qa, pre_md, tiles["pc"])
+        except Exception as _ce:   # 보정 실패 시 기존 결과 유지
+            print(f"   ⚠️ 보정 실패 → 기존 결과 유지 (loop {loop}): {str(_ce)[:120]}")
+            qa_history.append({"loop": loop, "failed": str(_ce)[:200]})
+            break
         # 보정본 기계 검증 — 환각/원문훼손 있으면 보정 폐기(기존 유지)
         c_report = verify(corrected, corpus)
         if not c_report["pass"]:
             print(f"   ⚠️ 보정본이 기계 검증 실패 → 폐기, 기존 결과 유지 (loop {loop})")
             qa_history.append({"loop": loop, "rejected": True})
             break
-        c_qa = run_qa(corrected, tiles["pc"])
+        try:
+            c_qa = run_qa(corrected, tiles["pc"])
+        except Exception as _qe2:
+            print(f"   ⚠️ 보정본 QA 실패 → 기존 결과 유지 (loop {loop}): {str(_qe2)[:120]}")
+            qa_history.append({"loop": loop, "failed": str(_qe2)[:200]})
+            break
         qa_history.append({"loop": loop, "score": c_qa.get("match_score"), "issues": len(c_qa.get("issues", []))})
         # 개선됐을 때만 채택 (점수 하락 시 기존 유지 후 종료)
         if c_qa.get("match_score", 0) >= qa.get("match_score", 0):
@@ -1164,7 +1216,6 @@ def main():
     write_progress(96, "7단계: 최종 리테일용 mirror.json 인덱스 및 자석형 레이아웃 바인딩 중...")
     mirror, _cf_used = None, False
     try:
-        _cf_origin = "https://" + (args.url.split("//", 1)[-1].split("/", 1)[0] or "www.lg.com")
         _cf = build_from_components(component_data, result.get("product_title", ""), _cf_origin)
         _st = _cf.get("_cf_stats", {})
         if _st.get("renderable", 0) >= 3:          # 최소 품질 게이트

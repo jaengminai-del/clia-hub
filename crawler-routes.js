@@ -86,10 +86,23 @@ function snapshot(jobId) {
     };
   }
   if (job.exited) {
-    let tail = job.spawnError || '';
-    try { tail = tail || fs.readFileSync(path.join(job.out, 'pipeline.log'), 'utf-8').slice(-500); } catch {}
+    let error = job.spawnError || '';
+    if (!error) {
+      // pipeline.log 의 Python 트레이스백 원문 대신, 사람이 읽을 수 있는 마지막 오류 한 줄만 전달
+      try {
+        const lines = fs.readFileSync(path.join(job.out, 'pipeline.log'), 'utf-8')
+          .replace(/\x1b\[[0-9;]*m/g, '').split('\n').map((l) => l.trim()).filter(Boolean);
+        const last = lines.reverse().find((l) => /error|exception|✗|failed|실패/i.test(l)) || lines[0] || '';
+        error = last.replace(/^[\w.]+(Error|Exception):\s*/, (m) => m.split('.').pop()).slice(0, 300);
+        // 자주 나는 원인은 사용자 문장으로
+        if (/JSONDecodeError/.test(error)) error = 'The AI analysis returned an incomplete response (this page is very long). Please try again.';
+        else if (/GEMINI_API_KEY/.test(error)) error = 'GEMINI_API_KEY is not set on the server.';
+        else if (/FIRECRAWL|402|Payment Required/i.test(error)) error = 'Page collection failed (Firecrawl key or credits). ' + error.slice(0, 120);
+        else if (/429|RESOURCE_EXHAUSTED|quota/i.test(error)) error = 'The AI service quota was exceeded. Please try again later.';
+      } catch {}
+    }
     return { job_id: jobId, status: 'failed', progress_percent: prog.percent || 0,
-      error: tail || 'pipeline exited without result' };
+      error: error || 'pipeline exited without result' };
   }
   return { job_id: jobId, status: 'processing', progress_percent: prog.percent || 0,
     log_message: prog.message || '', updated_at: prog.updated_at };

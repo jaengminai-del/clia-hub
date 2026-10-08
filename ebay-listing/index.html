@@ -383,7 +383,7 @@ async function analyzePDP() {
         if (!gen.ok) throw new Error(gd.error || `generate ${gen.status}`);
         generatedHTML = gd.html;
         showPreview(generatedHTML);
-        const qa = mir._qa ? ` · 시각 QA ${mir._qa.match_score}점` : '';
+        const qa = (mir._qa && mir._qa.match_score != null) ? ` · visual QA ${mir._qa.match_score}/100` : '';
         setStatus(`✓ eBay HTML generated — ${crawledFeatures.length} sections${qa}`, 'ok');
         renderSections();
         btn.disabled = false; btn.textContent = 'Analyze';

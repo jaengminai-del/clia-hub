@@ -5254,7 +5254,7 @@ async function analyzePDP() {
           rawFeatures = mirrorToFeatures(mir).filter(f => f.headline || f.images?.length);
           console.log('[analyzePDP] Crawler API mirror 사용:', mir.sections.length, 'sections | 시각 QA',
             mir._qa ? mir._qa.match_score + '점/' + (mir._qa.issues || []).length + '건' : 'n/a');
-          status.textContent = `Crawl loaded (QA ${mir._qa ? mir._qa.match_score : '-'}/100)`;
+          status.textContent = (mir._qa && mir._qa.match_score != null) ? `Crawl loaded (QA ${mir._qa.match_score}/100)` : 'Crawl loaded';
         }
       }
     } catch (vErr) {
