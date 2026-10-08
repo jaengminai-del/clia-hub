@@ -20,7 +20,6 @@
   },
   "homepage": "https://github.com/jaengminai-del/clia-hub#readme",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.89.0",
     "cors": "^2.8.6",
     "docx": "^9.6.1",
     "dotenv": "^17.4.2",
