@@ -627,6 +627,8 @@ function toggleEdit() {
     frame.querySelectorAll('img').forEach(img => makeImageEditable(img));
     // ── 삭제 버튼 + 높이 조절 핸들 추가 ──
     addEditControls(frame);
+    // ── 카드 단위 삭제 버튼 + 빈 카드 자동 정리 (shared/clia-card-edit.js) ──
+    if (window.CLIACardEdit) CLIACardEdit.attach(frame);
   } else {
     btn.textContent = '✏ Edit';
     btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
@@ -638,6 +640,7 @@ function toggleEdit() {
     });
     // ── edit controls 정리 ──
     removeEditControls(frame);
+    if (window.CLIACardEdit) CLIACardEdit.detach(frame);   // 카드 삭제 버튼 제거 + 빈 카드 정리
     // ── 이미지 수정 bake (크롭 반영) → 정리 ──
     bakeAllImageEdits(frame).then(() => {
       generatedHTML = frame.innerHTML;
@@ -971,5 +974,6 @@ function resetAll() {
   document.getElementById('statusArea').innerHTML = '';
 }
 </script>
+<script src="../shared/clia-card-edit.js"></script>
 </body>
 </html>
