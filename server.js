@@ -370,7 +370,7 @@ app.post('/api/analyze', async (req, res) => {
 
   const browser = await puppeteer.launch({
     headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox',
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage',
            '--disable-blink-features=AutomationControlled', '--disable-web-security',
            '--lang=en-US,en']
   });
@@ -1853,7 +1853,7 @@ app.post('/api/ebay-analyze', async (req, res) => {
 
   const browser = await puppeteer.launch({
     headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox',
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage',
            '--disable-blink-features=AutomationControlled', '--disable-web-security',
            '--lang=en-US,en']
   });
