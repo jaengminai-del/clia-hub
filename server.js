@@ -14,7 +14,10 @@ app.use(require('./crawler-routes')); // 내장 PDP 크롤러 (/api/v1/*) — �
 app.use('/crawler-py', (req, res) => res.sendStatus(404)); // 크롤러 소스·산출물은 정적 노출 금지
 app.use(express.static('.'));
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+// Claude 클라이언트 — 예전 A+ 생성 API(/api/generate)에서만 사용. CLIA 화면은 쓰지 않으므로
+// ANTHROPIC_API_KEY 없이도 서버가 뜨도록 호출 시점에 만든다.
+let _claude = null;
+const claude = () => (_claude ||= new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }));
 
 /* ──────────────────────────────────────────
    1. PDP 크롤러
@@ -321,7 +324,7 @@ IMPORTANT:
 - Truncate only if exceeding character limits
 - Generate 5-8 modules minimum`;
 
-  const message = await client.messages.create({
+  const message = await claude().messages.create({
     model: 'claude-haiku-4-5',
     max_tokens: 4096,
     messages: [{ role: 'user', content: prompt }]

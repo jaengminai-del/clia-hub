@@ -45,7 +45,7 @@ node server.js                # http://localhost:3001/clia/
 |---|---|---|
 | GET | `/api/v1/products?country=uk` | 크롤링된 제품 목록 |
 | GET | `/api/v1/products/:slug` | 제품 1건 (원본 URL + mirror + geo) |
-| POST | `/api/v1/products/:slug/geo` | GEO Q&A·키워드 AI 생성 (`geo.json` 캐시) |
+| POST | `/api/v1/products/:slug/geo` | GEO Q&A·키워드 생성 — Gemini (`geo.json` 캐시) |
 | POST | `/api/v1/crawl` → GET `/api/v1/jobs/:id` | URL 크롤링 작업 등록 / 상태 조회 |
 | GET | `/api/v1/ebay-html?url=` | eBay HTML (CCG 스타일) |
 | POST | `/api/pcg-vision` | 빌더용 크롤 결과(mirror) |

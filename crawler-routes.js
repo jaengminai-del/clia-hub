@@ -11,7 +11,7 @@
  *   GET  /api/v1/ebay-html?url=         → URL 직접 지정 렌더
  *   GET  /api/v1/products?country=uk    → 크롤 완료 제품 목록 (허브 Product List 검색용, 크롤러에 계속 누적)
  *   GET  /api/v1/products/:slug         → 제품 1건 (원본 URL + mirror + geo)
- *   POST /api/v1/products/:slug/geo     → GEO Q&A·키워드 AI 생성 (out/<slug>/geo.json 캐시, force:true 재생성)
+ *   POST /api/v1/products/:slug/geo     → GEO Q&A·키워드 생성 (Gemini, out/<slug>/geo.json 캐시, force:true 재생성)
  */
 const express = require('express');
 const fs = require('fs');
@@ -198,70 +198,27 @@ router.get('/api/v1/products/:slug', auth, (req, res) => {
     mirror: { ...mirror, _qa: readJson(path.join(OUT_DIR, slug, 'qa_report.json')) } });
 });
 
-// ── GEO: 크롤 원문만 근거로 AI 검색 인용용 Q&A + 타겟 키워드 생성 (제품당 1회, geo.json 저장) ──
-const GEO_SCHEMA = {
-  type: 'object',
-  properties: {
-    faq: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          q: { type: 'string' },
-          a: { type: 'string' },
-          source: { type: 'string', description: 'Heading of the product-page section that supports the answer' },
-        },
-        required: ['q', 'a', 'source'],
-        additionalProperties: false,
-      },
-    },
-    keywords: { type: 'array', items: { type: 'string' } },
-  },
-  required: ['faq', 'keywords'],
-  additionalProperties: false,
-};
-
-function mirrorToSourceText(mirror) {
-  const parts = [`# ${mirror.product_title || ''}`];
-  for (const s of mirror.sections || []) {
-    if (/disclaimer/i.test(String(s.order))) continue;
-    const text = String(s.text || '').trim();
-    if (text) parts.push(text);
-    const specs = (s.specs || []).filter((x) => x && x.label);
-    if (specs.length) parts.push('## Specifications\n' + specs.map((x) => `- ${x.label}: ${x.value || ''}`).join('\n'));
+// ── GEO: 크롤 원문만 근거로 AI 검색 인용용 Q&A + 타겟 키워드 생성 (Gemini, crawler-py/geo_gen.py)
+//    제품당 1회 생성 후 out/<slug>/geo.json 에 저장해 재사용한다.
+const GEO_GEN = path.join(CRAWLER_DIR, 'geo_gen.py');
+function generateGeo(slug) {
+  const dir = path.join(OUT_DIR, slug);
+  if (!fs.existsSync(path.join(dir, 'mirror.json'))) {
+    return Promise.reject(Object.assign(new Error('mirror not found'), { status: 404 }));
   }
-  return parts.join('\n\n');
-}
-
-let _anthropic = null;
-async function generateGeo(slug) {
-  const mirror = readJson(path.join(OUT_DIR, slug, 'mirror.json'));
-  if (!mirror) throw Object.assign(new Error('mirror not found'), { status: 404 });
-  if (!_anthropic) { const Anthropic = require('@anthropic-ai/sdk'); _anthropic = new Anthropic(); }
-  const response = await _anthropic.beta.messages.create({
-    model: 'claude-opus-5-5',
-    max_tokens: 16000,
-    betas: ['server-side-fallback-2026-07-01'],
-    fallbacks: 'default',
-    output_config: { effort: 'medium', format: { type: 'json_schema', schema: GEO_SCHEMA } },
-    system: 'You write GEO (Generative Engine Optimization) assets for LG Electronics product pages: '
-      + 'question-and-answer pairs that AI shopping assistants (ChatGPT, Perplexity, Google AI Overviews, Bing Copilot) can quote, '
-      + 'and the search keywords shoppers would use. Use only facts stated in the product page text you are given; '
-      + 'if the page does not state something, do not ask or answer about it. Write in the same language as the product page text.',
-    messages: [{
-      role: 'user',
-      content: `Product page text (crawled from ${(readJson(path.join(OUT_DIR, slug, 'source.json')) || {}).url || 'LG.com'}):\n\n`
-        + `<product_page>\n${mirrorToSourceText(mirror)}\n</product_page>\n\n`
-        + 'Return 6-8 FAQ entries that real shoppers ask (features, use, specs, compatibility), each answer 1-3 sentences grounded in the page, '
-        + 'and 10-15 target keywords (short phrases, most important first).',
-    }],
+  return new Promise((resolve, reject) => {
+    execFile(resolvePython(), [GEO_GEN, dir], {
+      cwd: CRAWLER_DIR, timeout: 3 * 60 * 1000, maxBuffer: 8 * 1024 * 1024,
+      env: { ...process.env, PYTHONIOENCODING: 'utf-8' },
+    }, (err, stdout, stderr) => {
+      if (err) return reject(new Error((stderr || err.message).trim().split('\n').pop()));
+      try {
+        const geo = { ...JSON.parse(stdout), generated_at: Date.now() / 1000 };
+        fs.writeFileSync(path.join(dir, 'geo.json'), JSON.stringify(geo, null, 2));
+        resolve(geo);
+      } catch (e) { reject(new Error('invalid GEO output: ' + e.message)); }
+    });
   });
-  if (response.stop_reason === 'refusal') throw new Error('model declined: ' + ((response.stop_details || {}).category || 'refusal'));
-  const block = response.content.find((b) => b.type === 'text');
-  if (!block) throw new Error('no text in model response');
-  const geo = { ...JSON.parse(block.text), model: response.model, generated_at: Date.now() / 1000 };
-  fs.writeFileSync(path.join(OUT_DIR, slug, 'geo.json'), JSON.stringify(geo, null, 2));
-  return geo;
 }
 
 router.post('/api/v1/products/:slug/geo', auth, async (req, res) => {

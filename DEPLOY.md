@@ -3,14 +3,13 @@
 이 저장소만 있으면 Docker를 지원하는 클라우드(Railway, Render, Google Cloud Run 등)에 그대로 배포됩니다.
 Node.js 20 · Python 3.12 · Chromium(Playwright·Puppeteer)은 `Dockerfile`이 빌드할 때 자동으로 설치합니다.
 
-## 1. 준비물 — API 키 3개
+## 1. 준비물 — API 키 2개
 
 API 키는 **저장소에 넣지 않고** 클라우드 관리 화면의 환경 변수(Variables / Environment / Secrets)에 입력합니다.
 
 | 변수 | 필수 | 용도 | 발급 |
 |---|---|---|---|
-| `ANTHROPIC_API_KEY` | ✅ | GEO Q&A·키워드 생성, A+ 모듈 생성 | console.anthropic.com |
-| `GEMINI_API_KEY` | ✅ | 크롤러 비전 분석 | aistudio.google.com |
+| `GEMINI_API_KEY` | ✅ | 크롤러 비전 분석 + GEO Q&A·키워드 생성 | aistudio.google.com |
 | `FIRECRAWL_API_KEY` | ✅ | 크롤러 페이지 수집 | firecrawl.dev |
 | `DATA_DIR` | 권장 | 크롤링 결과를 영구 보관할 볼륨 경로 (예: `/data`) | — |
 | `PORT` | 자동 | 대부분의 클라우드가 자동 지정. 직접 지정 시 `3001` | — |
@@ -25,7 +24,7 @@ API 키는 **저장소에 넣지 않고** 클라우드 관리 화면의 환경 �
 
 1. railway.app → **New Project → Deploy from GitHub repo** → 이 저장소 선택
    (Dockerfile을 자동 인식해 빌드합니다)
-2. 서비스 → **Variables**에 위 API 키 3개 입력, `DATA_DIR=/data` 추가
+2. 서비스 → **Variables**에 위 API 키 2개 입력, `DATA_DIR=/data` 추가
 3. 서비스 → **Settings → Volumes → Add Volume**, Mount path `/data`
 4. **Settings → Networking → Generate Domain** → 발급된 주소로 접속
 5. 헬스체크 경로(선택): `/api/health`
@@ -34,7 +33,7 @@ API 키는 **저장소에 넣지 않고** 클라우드 관리 화면의 환경 �
 
 1. render.com → **New → Web Service** → 이 저장소 연결, Runtime **Docker**
 2. Instance type: 2GB 이상 (Standard 이상)
-3. **Environment**에 API 키 3개 + `DATA_DIR=/data`
+3. **Environment**에 API 키 2개 + `DATA_DIR=/data`
 4. **Disks → Add Disk**, Mount path `/data`, 5GB 이상
 5. Health Check Path: `/api/health` → Create Web Service
 
@@ -43,7 +42,7 @@ API 키는 **저장소에 넣지 않고** 클라우드 관리 화면의 환경 �
 ```bash
 gcloud run deploy clia-hub --source . --region asia-northeast3 \
   --memory 2Gi --cpu 2 --timeout 3600 --port 3001 \
-  --set-env-vars ANTHROPIC_API_KEY=...,GEMINI_API_KEY=...,FIRECRAWL_API_KEY=... \
+  --set-env-vars GEMINI_API_KEY=...,FIRECRAWL_API_KEY=... \
   --allow-unauthenticated
 ```
 Cloud Run은 기본적으로 디스크가 유지되지 않습니다. 크롤링 결과를 보관하려면 Cloud Storage 볼륨을 `/data`에 마운트하고 `DATA_DIR=/data`를 지정하세요.
@@ -64,6 +63,6 @@ Cloud Run은 기본적으로 디스크가 유지되지 않습니다. 크롤링 �
 
 ## 문제 해결
 
-- **크롤이 바로 실패** → API 키 3개가 모두 입력됐는지, 메모리가 2GB 이상인지 확인
+- **크롤이 바로 실패** → API 키 2개가 모두 입력됐는지, 메모리가 2GB 이상인지 확인
 - **재배포 후 새로 크롤한 제품이 사라짐** → 볼륨 마운트와 `DATA_DIR` 설정 확인
 - **화면은 뜨는데 eBay/Shopee 스타일이 예전 모양** → 브라우저 강력 새로고침 (캐시)
