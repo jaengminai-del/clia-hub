@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "source": "LG.com GP1_Content Creation Guideline_v1.5.6 (Obsidian crawler-research/CCG_*.md)",
+    "note": "eBay 빌더용 기계 판독 스펙. desktop_px 폰트는 1440px 기준 캔버스 값 — 렌더 시 container_scale(컨테이너폭/1440)로 축소.",
+    "reference_canvas_px": 1440
+  },
+  "gp1_tokens": {
+    "_source": "claude.ai/design 'LG GP1 Design System' (projectId 8216a163-4515-4b89-8198-4c0e0b89f0ce), sourced from [GP1] 01 Element.fig Figma Variables via DesignSync — tokens/fig-tokens.css, tokens/typography.css, readme.md. Mode 1 (default) theme values.",
+    "colors": {
+      "background_default": "#F0ECE4",
+      "surface_main": "#FFFFFF",
+      "stroke_main": "#E1E2E5",
+      "onsurface_main": "#111111",
+      "onsurface_main_supporting": "#2D2D2D",
+      "onsurface_sub": "#697072",
+      "active_red_50": "#EA1917",
+      "active_red_40": "#C00011",
+      "active_red_95": "#FFEDEA",
+      "heritage_red_35": "#A50034"
+    },
+    "colors_note": "active_red_50은 GP1의 실제 브랜드 액센트(CTA/세일/링크). heritage_red_35(#A50034)는 GP1 readme상 LG 로고 마크 내부에만 쓰이는 색으로, 일반 UI 액센트로는 쓰지 않음.",
+    "radius": {"card_l": 28, "card_xl": 20, "card_m": 12, "card_s": 8},
+    "font_family": {
+      "headline": "'LGEIHeadline','LG EI Headline','LGEIText',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif",
+      "body": "'LGEIText','LG EI Text',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"
+    }
+  },
+  "text_colors": ["#FFFFFF", "#000000"],
+  "components": {
+    "ST0001": {
+      "name": "Hero Image",
+      "layout": "hero_full_width",
+      "variants": {
+        "default_hero": {"desktop": "1920x720", "overlay": true},
+        "pdp_hero": {"desktop": "1920xFlex", "overlay": true},
+        "icon_block_hero": {"desktop": "1600x1400", "overlay": false}
+      },
+      "overlay_rule": "오버레이는 진짜 KV(문서 최상단 히어로)만. 그 외 ST0001 재사용 섹션은 이미지+텍스트 하단 배치.",
+      "text_width_px": {"wide": 862, "narrow": 642, "narrow_small": 520},
+      "roles": {
+        "eyebrow": {"max_chars": 50, "desktop_px": 20, "weight": 400},
+        "headline": {"max_chars": 60, "desktop_px": 56, "weight": 600},
+        "body": {"max_chars": 200, "desktop_px": 16, "weight": 400}
+      }
+    },
+    "ST0003": {
+      "name": "Title",
+      "layout": "vertical_stack",
+      "roles": {
+        "eyebrow": {"max_chars": 50, "desktop_px": 16, "weight": 400},
+        "headline": {"max_chars": 100, "desktop_px": 36, "weight": 600},
+        "body": {"max_chars": 700, "desktop_px": 16, "weight": 400}
+      },
+      "align_options": ["left", "center", "right"]
+    },
+    "ST0004": {
+      "name": "Block Content",
+      "layout": "grid",
+      "blocks": {"2": "952x409", "3": "830x409", "4": "586x842", "5": "464x409"},
+      "roles": {
+        "headline": {"max_chars": 40, "desktop_px": 36, "weight": 600},
+        "body": {"max_chars": 200, "desktop_px": 16, "weight": 400}
+      }
+    },
+    "ST0007": {
+      "name": "Block Image",
+      "layout": "grid",
+      "blocks": {"2": "708x472", "3": "464x314", "4": "342x228"},
+      "roles": {
+        "eyebrow": {"max_chars": 50, "desktop_px": 16, "weight": 400},
+        "headline": {"max_chars": 50, "desktop_px": 56, "weight": 600},
+        "body": {"max_chars": 400, "desktop_px": 24, "weight": 400}
+      }
+    },
+    "ST0009": {
+      "name": "Large Image",
+      "layout": "image_text_side",
+      "image": {"main": "1098x696", "side": "732x488", "thumb": "244x206"},
+      "roles": {
+        "eyebrow": {"max_chars": 50, "desktop_px": 16, "weight": 400},
+        "headline": {"max_chars": 100, "desktop_px": 56, "weight": 600},
+        "body": {"max_chars": 300, "desktop_px": 24, "weight": 400}
+      }
+    },
+    "ST0010": {
+      "name": "Text",
+      "layout": "vertical_stack",
+      "usage": "disclaimer/footnote",
+      "roles": {"body": {"desktop_px": 12, "weight": 400, "color": "#697072"}}
+    },
+    "ST0013": {
+      "name": "Side Image",
+      "layout": "image_text_side",
+      "image": {"small": "488x275", "standard": "609x342", "large": "732x411"},
+      "text_position_pc": ["left", "right"],
+      "roles": {
+        "eyebrow": {"max_chars": 50, "desktop_px": 16, "weight": 400},
+        "headline": {"max_chars": 100, "desktop_px": 56, "weight": 600},
+        "body": {"max_chars": 350, "desktop_px": 24, "weight": 400},
+        "disclaimer": {"max_chars": 100, "desktop_px": 16, "weight": 400}
+      }
+    },
+    "ST0016": {
+      "name": "Image Text (Folding)",
+      "layout": "image_text_folding",
+      "render_as": "image_top_text_below",
+      "roles": {
+        "eyebrow": {"max_chars": 50, "desktop_px": 20, "weight": 400},
+        "headline": {"max_chars": 100, "desktop_px": 56, "weight": 600},
+        "body": {"max_chars": 700, "desktop_px": 24, "weight": 400}
+      }
+    },
+    "ST0027": {
+      "name": "Key Benefit Summary",
+      "layout": "icon_grid",
+      "items": {"min": 2, "max": 6},
+      "roles": {
+        "headline": {"max_chars": 100, "desktop_px": 56, "weight": 600},
+        "title": {"desktop_px": 36, "weight": 600},
+        "description": {"desktop_px": 16, "weight": 400}
+      }
+    },
+    "ST0036": {
+      "name": "Feature Icon Tab",
+      "layout": "tab_content",
+      "render_as": "sections_stacked",
+      "note": "eBay엔 탭 UI 불가 — 탭 컨텐츠를 순차 섹션으로 펼침, 탭 셀렉터 아이콘은 role=icon 제외"
+    },
+    "ST0048": {
+      "name": "Carousel",
+      "layout": "carousel",
+      "render_as": "sections_stacked",
+      "slide_component": "ST0001"
+    },
+    "ST0053": {
+      "name": "Award",
+      "layout": "award_row",
+      "items_max": 3,
+      "render_as": "card_row_image_caption"
+    },
+    "PD0008": {
+      "name": "Spec",
+      "layout": "spec_table",
+      "render_as": "label_value_table",
+      "roles": {
+        "label": {"desktop_px": 14, "weight": 600, "color": "#2D2D2D"},
+        "value": {"desktop_px": 14, "weight": 400, "color": "#697072"}
+      }
+    },
+    "PD0012": {
+      "name": "Product Visual (Gallery)",
+      "layout": "product_gallery",
+      "render_as": "skip",
+      "note": "eBay 컨텐츠에 제품 갤러리 썸네일 미포함 (사용자 확정 원칙)"
+    }
+  },
+  "render_defaults": {
+    "container_px": 800,
+    "headline_min_px": 18,
+    "headline_max_px": 32,
+    "body_min_px": 13,
+    "body_max_px": 16,
+    "_fixed_note": "261007 법인 피드백: 모바일 가독성 — 모든 제목(h2/h3) 36px, 모든 본문(p) 24px 고정. 행간은 기존(제목 1.25 / 본문 1.6) 대비 20% 축소.",
+    "fixed_headline_px": 36,
+    "fixed_body_px": 24,
+    "headline_line_height": 1.0,
+    "body_line_height": 1.28,
+    "eyebrow_color": "#697072",
+    "body_color": "#2D2D2D",
+    "headline_color": "#111111",
+    "disclaimer_color": "#697072",
+    "page_background": "#FFFFFF",
+    "card_background": "#FFFFFF",
+    "card_stroke": "#F0ECE4",
+    "overlay_scrim": "linear-gradient(90deg, rgba(0,0,0,0.45), rgba(0,0,0,0))"
+  }
+}

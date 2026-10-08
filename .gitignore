@@ -1,0 +1,15 @@
+# 비밀키
+.env
+.env.*
+!.env.example
+
+node_modules/
+crawler-py/.venv/
+__pycache__/
+*.log
+.DS_Store
+
+# 크롤러 API 공유 터널 런타임 파일
+crawler-py/share-api/*.pid
+crawler-py/share-api/url.txt
+crawler-py/share-api/PROMPT_FOR_PARTNER*.md

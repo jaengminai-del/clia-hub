@@ -1,0 +1,9 @@
+requests
+beautifulsoup4
+python-dotenv
+Pillow
+pydantic
+playwright==1.55.0
+google-genai
+fastapi
+uvicorn[standard]

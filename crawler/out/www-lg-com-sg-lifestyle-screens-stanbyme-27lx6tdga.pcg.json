@@ -1,0 +1,1069 @@
+{
+  "version": "0.1",
+  "source": {
+    "url": "https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/",
+    "crawledAt": "2026-07-24T06:46:50.575Z",
+    "engine": "firecrawl",
+    "geometry": true
+  },
+  "product": {
+    "title": "27 inch LG StanbyME 2 Super Portable Touch Screen - 27LX6TDGA.ATC.EASL.SG.C | LG Singapore",
+    "description": "Discover LG 27LX6TDGA. Click for pictures, reviews, and tech specs for the LG product 27 inch LG StanbyME 2 Super Portable Touch Screen.",
+    "model": "27lx6tdga",
+    "gallery": [
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-15.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Bottom view of the LG StanbyME 2 stand. Wheels beneath the stand are visible.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-15.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-15.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-01.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Front view of 27 inch LG StanbyME 2 Super Portable Touch Screen 27LX6TDGA",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-01.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-01.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-02.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "A person rolling their LG StanbyME 2 using the TV stand. The text explains how the Super Portable Screen has 4 hours of wireless playback and USB-C.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-02.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-03.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG StanbyME 2 is hung on the wall to showcase its Motion Art Screen. Mood Maker is in use. An artwork is on display showing how it can be used as a stylish addition to any space.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-03.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-04.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG StanbyME 2 is on a table. Let's Draw is in use. A person is creating artwork using just their finger and the touchscreen. The text talks about how you can use your screen as a digital canvas and display artwork through the Always On Display.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-04.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-05.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "A group of friends playing a board game on the LG StanbyME 2 on the table. The Big Tablet Screen is featured. Text talks about playing directly on the touchscreen.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-05.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-06.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG StanbyME 2. A hand interacting with the touch screen showing ease of use. The text talks about being able to connect your screen with other devices easily.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-06.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-07.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "iF Design Award 2025 logo. Design Award Winner.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-07.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-08.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "A girl with her puppy is watching a show on the LG StanbyME 2. The folio cover is used and the screen is propped up like a tablet.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-08.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-09.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Front view of LG StanbyME 2 on the stand.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-09.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-10.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG StanbyME 2 is hung on the wall using the wall strap.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-10.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-11.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG StanbyME 2 propped up like a tablet using the folio cover.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-11.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-12.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Length, width, height, and depth dimensions of the LG StanbyME 2 and the stand.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-12.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-13.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "45 degree side view of the LG StanbyME 2 on stand. Screen is tilted to show its flexible orientation.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-13.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-14.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Rear view of the LG StanbyME 2 on stand. Screen is tilted to show its flexible orientation.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-gallery-14.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-01.jpg",
+        "alt": "Front view of 27 inch LG StanbyME 2 Super Portable Touch Screen 27LX6TDGA",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-01.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-02.jpg",
+        "alt": "A person rolling their LG StanbyME 2 using the TV stand. The text explains how the Super Portable Screen has 4 hours of wireless playback and USB-C.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-02.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-03.jpg",
+        "alt": "LG StanbyME 2 is hung on the wall to showcase its Motion Art Screen. Mood Maker is in use. An artwork is on display showing how it can be used as a stylish addition to any space.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-03.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-04.jpg",
+        "alt": "LG StanbyME 2 is on a table. Let's Draw is in use. A person is creating artwork using just their finger and the touchscreen. The text talks about how you can use your screen as a digital canvas and display artwork through the Always On Display.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-04.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-05.jpg",
+        "alt": "A group of friends playing a board game on the LG StanbyME 2 on the table. The Big Tablet Screen is featured. Text talks about playing directly on the touchscreen.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-05.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-06.jpg",
+        "alt": "LG StanbyME 2. A hand interacting with the touch screen showing ease of use. The text talks about being able to connect your screen with other devices easily.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-06.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-07.jpg",
+        "alt": "iF Design Award 2025 logo. Design Award Winner.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-07.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-08.jpg",
+        "alt": "A girl with her puppy is watching a show on the LG StanbyME 2. The folio cover is used and the screen is propped up like a tablet.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-08.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-09.jpg",
+        "alt": "Front view of LG StanbyME 2 on the stand.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-09.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-10.jpg",
+        "alt": "LG StanbyME 2 is hung on the wall using the wall strap.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-10.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-11.jpg",
+        "alt": "LG StanbyME 2 propped up like a tablet using the folio cover.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-11.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-12.jpg",
+        "alt": "Length, width, height, and depth dimensions of the LG StanbyME 2 and the stand.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-12.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-13.jpg",
+        "alt": "45 degree side view of the LG StanbyME 2 on stand. Screen is tilted to show its flexible orientation.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-13.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-14.jpg",
+        "alt": "Rear view of the LG StanbyME 2 on stand. Screen is tilted to show its flexible orientation.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-14.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-15.jpg",
+        "alt": "Bottom view of the LG StanbyME 2 stand. Wheels beneath the stand are visible.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/gallery/stanbyme2-27lx6t-2025-thumbnail-15.jpg"
+        ]
+      }
+    ]
+  },
+  "sections": [
+    {
+      "id": "sec-01",
+      "order": 1,
+      "eyebrow": "",
+      "headline": "27 inch LG StanbyME 2 Super Portable Touch Screen",
+      "body": "27LX6TDGA\nCopy model name\nChat with an expert\n27LX6TDGA\n4.8 out of 5 stars, average rating value. Read 103 Reviews.\nSame page link.\n4.8\n\\|\n103 Reviews\n25 out of 26 (96%) reviewers recommend this product\nWrite a review\n()\nopen gallery popup\nPrevious slide\nNext slide\nPrevious slide\nNext slide\nKey Features\n- Detachable, Super Portable Screen with USB-C and built-in battery with 4 hours of playback\n- Express your style with different themes from Mood Maker\n- Use as a digital canvas with Let's Draw\n- Play board games directly on the touch screen\n- With HDMI and USB for Dual Monitor Setups\n- 2025 iF Design Award Winner\n[More](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#)\n- Free Delivery\n[**Features**](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#pdp-overview-section) [**Specs**](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#pdp-specs-section) [**Reviews**](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#pdp-review) [**Support**](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#pdp-support-section) [**Where to buy**](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#find-a-store)\nGallery\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\nzoom inzoom out\n[](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#)\n[](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#)\n[](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#)\n[](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#)\n[](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#)\n[](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#)\n[](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#)\n[](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#)\n[](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#)\n[](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#)\n[](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#)\n[](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#)\n[](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#)\n[](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#)\n[](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#)\nPPrevious slide\n1 / 15\nNext slide\nPrevious slide\n1 / 1\nNext slide\nPromotions\n- Members’ Double Day Sale\nSign up to unlock upsized welcome coupon with storewide coupon & more!\n03/07/2026 ~ 13/07/2026\n[Buy now](https://www.lg.com/sg/promotions/7-7-double-day-promotion/)\n- Housewarming Deals Up to 46%\nSign in & shop LG essentials to enjoy bigger coupons, exclusive member savings & free gifts\\*! Free delivery, installation & disposal\\*.\n18/06/2026 ~ 31/07/2026\n[Buy now](https://www.lg.com/sg/promotions/member-deals-housewarming-by-lg-promotion/)\n- LG TV and Audio Islandwide Promotion\n01/07/2026 ~ 31/07/2026\n[Buy now](https://www.lg.com/sg/tvs-soundbars/all-tvs-soundbars/?ec_model_status_code=Active)\nPause carouselPlay carousel\n[\\\\\n\\\\\niF Design Award - Winner\\\\\n\\\\\nStanbyME 2](https://ifdesign.com/en/winner-ranking/project/lg-stanbyme-2/700535)\nPrevious slide\n1 / 1\nNext slide",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-02",
+      "order": 2,
+      "eyebrow": "",
+      "headline": "LG StanbyME 2,  Unframe your world",
+      "body": "[Super Portable Screen](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#01) [Motion Art Screen](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#02) [Big Tablet Screen](https://www.lg.com/sg/lifestyle-screens/stanbyme/27lx6tdga/#03)\nPrevious slide\nNext slide",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-01-feature-award-d.jpg",
+          "alt": "IF Design Award logo.",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 100,
+            "top": 1552,
+            "left": 264
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-02-feature-kv-m.jpg",
+          "alt": "LG StanbyME 2 screens displayed in a modern living room. There is a StanbyME 2 on a stand, one is hung on the wall, and the other is propped up on a table using the folio cover.",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 1920,
+            "top": 1724,
+            "left": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-03",
+      "order": 3,
+      "eyebrow": "",
+      "headline": "Super Portable Screen",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-04",
+      "order": 4,
+      "eyebrow": "",
+      "headline": "Roll it, hang it, detach it",
+      "body": "Explore different ways to enjoy content and express your style. Roll the screen around with the adjustable stand. Detach it and hang it up. Or use it like a tablet with the folio cover.\nPlay videoPause video",
+      "disclaimers": [
+        "*The screen automatically charges when you connect the power cable to the docking stand and attach the screen to its stand.",
+        "*Mobility may vary depending on flooring.",
+        "*Do not roll or drag the product outdoors as it may cause damage to the bottom.",
+        "*Screen angle adjustment range: Rotation (±90), Tilt (±25), Swivel (±90).",
+        "*Only use the provided wall mount holder from LG. During installation, the wall material should be taken into account. Otherwise, issues such as tilting or falling may occur. Refer to the manual provided for more information.",
+        "*Be cautious when mounting on the wall. Do not use for purposes other than intended."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-03-feature-super-portable-screen-m-1.jpg",
+          "alt": "A woman sitting in her outside balcony, watching content on an LG StanbyME 2 on the rollable, adjustable stand.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/new/features/mobile/stanbyme2-27lx6t-2025-03-feature-super-portable-screen-m-2.jpg",
+          "alt": "Different living spaces showing the different ways to use and enjoy the LG StanbyME 2 screen. Some spaces show it propped up like a tablet using the folio cover. Other spaces show it hung on the wall as a stylish addition to the interior design. Other spaces are showing how the screen can be easily mounted on the rollable, adjustable TV stand.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-05",
+      "order": 5,
+      "eyebrow": "",
+      "headline": "Enjoy a long-lasting built-in battery",
+      "body": "Detach your LG StanbyME 2’s portable touch screen and watch content for longer. Take the screen everywhere. Improved battery power allows a single charge to deliver up to 4 hours of wireless playback.\nPlay videoPause video",
+      "disclaimers": [
+        "*Up to 4 hours wireless use in Eco/Low Power Mode with built-in battery. Battery life may vary by usage. Requires a minimum output of 65W or more for charging. Devices must support USB PD.",
+        "*Screen may scratch if carried without a folio cover. Product may be damaged by impact from drops. This device is not water-or dust-resistant. Prolonged exposure to sunlight may cause discoloration or screen issues."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-04-feature-4hour-battery-m.jpg",
+          "alt": "Close-up of StanbyME 2 screen being detached, transitioning to a model carrying it with the folio cover and strap.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1440,
+            "top": 6178,
+            "left": 240
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-06",
+      "order": 6,
+      "eyebrow": "",
+      "headline": "Now with a USB-C port for better connectivity",
+      "body": "Made more convenient. Easily charge and connect your screen with the new USB-C port.",
+      "disclaimers": [
+        "*Supports USB 2.0, USB-C DP, and DP ALT.",
+        "*For other devices to be connected, its USB-C port must support DP ALT.",
+        "*MacOS and iOS only support mirroring and charging.",
+        "*USB-C earphones and headphones are not supported."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-05-feature-usb-c-cable-m.jpg",
+          "alt": "Close-up shot of USB-C Cable attached to StanbyME 2.",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 7086,
+            "left": 160
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-07",
+      "order": 7,
+      "eyebrow": "",
+      "headline": "Motion Art Screen",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-08",
+      "order": 8,
+      "eyebrow": "",
+      "headline": "Mood Maker sets the vibe through art in motion",
+      "body": "Express your style and taste with artwork through content and themes like clock, weather, turntable, and more. Showcase your favorite visuals with a screen that can act like a digital photo frame.\nA woman sitting in her outside balcony, watching content on an LG StanbyME 2 on the rollable, adjustable stand.\nPlay videoPause video\nA woman sitting in her outside balcony, watching content on an LG StanbyME 2 on the rollable, adjustable stand.\nPlay videoPause video\nA woman sitting in her outside balcony, watching content on an LG StanbyME 2 on the rollable, adjustable stand.\nPlay videoPause video\nA woman sitting in her outside balcony, watching content on an LG StanbyME 2 on the rollable, adjustable stand.\nPlay videoPause video\nA woman sitting in her outside balcony, watching content on an LG StanbyME 2 on the rollable, adjustable stand.\nPlay videoPause video",
+      "disclaimers": [
+        "*It is recommended to use the provided wall mount holder offered by LG. Product's weight should be considered when installing; otherwise, issues such as tilting or falling may occur."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-06-feature-mood-maker-m.jpg",
+          "alt": "Different living spaces with LG StanbyME 2 screens on the wall. Art Poster content are on the screens.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 8166,
+            "left": 160
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-06-feature-art-poster-title-m.jpg",
+          "alt": "Title reads, Art Posters bring vibrant flair to your space",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 9040,
+            "left": 160
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-06-feature-art-poster-m.jpg",
+          "alt": "Different living spaces with LG StanbyME 2 screens on the wall. Art Poster content are on the screens.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 9220,
+            "left": 160
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-06-feature-tuntable-title-m.jpg",
+          "alt": "Title reads, Turntable sets the mood with music",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 10124,
+            "left": 160
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-06-feature-tuntable-m.jpg",
+          "alt": "Different living spaces with LG StanbyME 2 screens on the wall. A music turntable artwork is displayed on each screen.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 10304,
+            "left": 160
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-06-feature-landscapes-title-m.jpg",
+          "alt": "Title reads, Sceneries for a daily dose of nature",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 11348,
+            "left": 160
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-06-feature-landscapes-m.jpg",
+          "alt": "Different living spaces with LG StanbyME 2 screens on the wall. Landscape photos are displayed on the screens.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 11528,
+            "left": 160
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-06-feature-date-time-title-m.jpg",
+          "alt": "Title reads, Date & Time, designed with style",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 12908,
+            "left": 160
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-06-feature-date-time-m.jpg",
+          "alt": "Different living spaces with LG StanbyME 2 screens. Different themed clocks and calendars are displayed on the screens.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 13088,
+            "left": 160
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-09",
+      "order": 9,
+      "eyebrow": "",
+      "headline": "Innovative, award-winning design",
+      "body": "Discover the award-winning StanbyME 2, our art frame screen celebrated for its design and functionality.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-07-feature-if-design-award-m.jpg",
+          "alt": "iF Design Award 2025 logo. Design Award Winner.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-10",
+      "order": 10,
+      "eyebrow": "",
+      "headline": "Big Tablet Screen",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-11",
+      "order": 11,
+      "eyebrow": "",
+      "headline": "With Let's Draw, turn your ideas into art",
+      "body": "Create art using the full touch screen and display your masterpieces through the Always On Display.",
+      "disclaimers": [
+        "*Touch pen is not included. No dedicated touch pen for StanbyME 2.",
+        "*Please ensure compatibility with third-party touch pens before purchase."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-08-feature-lets-draw-m.jpg",
+          "alt": "Model drawing on the screen of StanbyME 2.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1920,
+            "top": 14688,
+            "left": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-12",
+      "order": 12,
+      "eyebrow": "",
+      "headline": "Full Touch Screen",
+      "body": "The built-in 27-inch touch screen makes it easy and convenient to use, providing more ways to enjoy your screen. Draw, explore educational content, game and bring all your ideas to life with a touch.",
+      "disclaimers": [
+        "*App availability may vary by region. Some apps may require a separate subscription."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/2025_ms_lg-com/tv/stanbyme-2/27lx6t/gp1/features/mobile/stanbyme2-27lx6t-2025-09-feature-full-touch-screen-m.jpg",
+          "alt": "StanbyME 2 with touchscreen in use by a person.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-13",
+      "order": 13,
+      "eyebrow": "",
+      "headline": "Enjoy board games together",
+      "body": "Enjoy titles like Memory Game, Million Marble, Spot the Difference, Chess, and more even without a smartphone. Play directly on the touch screen and enjoy casual fun with family and friends.",
+      "disclaimers": [
+        "*App availability may vary by region. Subscription may be required for certain apps."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-10-feature-board-games-m.jpg",
+          "alt": "Three images showing StanbyME 2 used for different board games in a modern living space by three different parties.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 15260,
+            "left": 160
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-14",
+      "order": 14,
+      "eyebrow": "",
+      "headline": "Easily connect to other devices with HDMI and USB",
+      "body": "Connect your portable touch screen to a wide range of other devices. From monitors, laptops, IPTV set-top boxes, mobile devices, game consoles, and more through the built-in USB and HDMI ports.",
+      "disclaimers": [
+        "*HDMI cables and other accessories should be purchased separately."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-11-feature-multi-port-compatibility-m.jpg",
+          "alt": "StanbyME 2 connected to another device displaying meeting materials.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 15612,
+            "left": 160
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-15",
+      "order": 15,
+      "eyebrow": "",
+      "headline": "Smart Cam for workouts, video calls, and more",
+      "body": "Connect a Smart Cam to the portable touch screen and enjoy additional video features. Use the camera for video calls. Use it when exercising to compare your movements with the workout video.",
+      "disclaimers": [
+        "*Smart Cam is sold separately."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/new/features/mobile/stanbyme2-27lx6t-2025-12-feature-smart-cam-m.jpg",
+          "alt": "A woman in a yoga pose reflected on the screen of StanbyME 2.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-16",
+      "order": 16,
+      "eyebrow": "",
+      "headline": "Mirroring and OTT for a seamless entertainment experience",
+      "body": "Access your favorite content and streaming services even without a smartphone. Use the built-in OTT apps or mirror and stream from iOS and Android with AirPlay and Google Cast support.",
+      "disclaimers": [
+        "*Requires the same network (Wi-Fi) connection.",
+        "*OTT services may require a separate subscription and purchase.",
+        "*LG StanbyME 2 is a display that operates on LG webOS. While it offers portability similar to tablet, it is product that uses a TV-based operating system."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-13-feature-ott-and-mirroring-m.jpg",
+          "alt": "StanbyME 2 in the center with multiple OTT programs arranged in a web formation around it.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1920,
+            "top": 16128,
+            "left": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-17",
+      "order": 17,
+      "eyebrow": "",
+      "headline": "Far-Field Voice Recognition",
+      "body": "StanbyME 2 can recognize your voice even from a distance. Just say \"Hi LG\" and it will begin listening to your requests from afar.",
+      "disclaimers": [
+        "*This feature is available after enabling the product’s direct voice recognition function and agreeing to provide personal information.",
+        "*Voice recognition performance may vary depending on the surrounding environment. The effective recognition range can differ based on factors such as distance, background noise, and usage conditions."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-14-feature-far-field-voice-recognition-d.jpg",
+          "alt": "A person using voice recognition on StanbyME 2, a speech bubble is visible with text that reads Hi, LG!",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 732,
+            "top": 16442,
+            "left": 240
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-18",
+      "order": 18,
+      "eyebrow": "",
+      "headline": "Magnetic clip-on remote",
+      "body": "Control your portable touch screen with a convenient remote. Its magnets snap to the side of your screen and folio cover, making it easy-to-reach and store.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-19",
+      "order": 19,
+      "eyebrow": "",
+      "headline": "New upgrades up to 5 years with award-winning webOS Re:New Program",
+      "body": "Keep your device's operating system up-to-date. Get full upgrades and enjoy the benefits of the latest features and software for your StanbyME 2.",
+      "disclaimers": [
+        "*webOS Re:New Program applies to 2025 LG StanbyME 2.",
+        "*The webOS Re:New Program supports up to five years, the threshold is the pre-installed version of webOS, and upgrade schedule varies by model and region.",
+        "*Updates and the schedule to some features, applications, and services may vary by model and region."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-15-feature-simple-magnetic-remote-d.jpg",
+          "alt": "Two images of StanbyME 2. One is of the magnetic remote attached to the topside of the device. Another is the magnetic remote attached to the back of the device.",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 732,
+            "top": 16872,
+            "left": 948
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-16-feature-webos-re-new-program-d.jpg",
+          "alt": "webOS Re:New Program logo alongside CES Innovation Awards emblem.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 732,
+            "top": 17242,
+            "left": 240
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-20",
+      "order": 20,
+      "eyebrow": "",
+      "headline": "Now with alpha 8 AI Processor and QHD for your screen",
+      "body": "Go beyond full HD and get QHD quality even on a 27-inch portable touch screen with the alpha 8 AI processor. Enjoy remarkable picture and sound on a convenient and portable screen.",
+      "disclaimers": [
+        "*Compared to the same year entry level Smart TV alpha 7 AI Processor Gen8 based on internal spec comparison."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-17-feature-ai-processor-m.jpg",
+          "alt": "alpha 8 AI Processor chip visible with LG logo on an orange-lit mechanical plate.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-21",
+      "order": 21,
+      "eyebrow": "",
+      "headline": "AI Brightness Control adjusts screen brightness to any light",
+      "body": "Get the most optimal brightness settings. AI reacts to the ambient light in your space and automatically configures and adjusts your screen.",
+      "disclaimers": [
+        "*All LG webOS 25 TVs feature AI Brightness Control, excluding those without light sensors."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-18-feature-ai-brightness-control-m.jpg",
+          "alt": "StanbyME 2 mounted on a wall in a modern living space split between daytime and nighttime settings.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1440,
+            "top": 18092,
+            "left": 240
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-22",
+      "order": 22,
+      "eyebrow": "",
+      "headline": "AI Sound Pro ensures fine-tuned cinematic sound",
+      "body": "AI Clear Sound\nDiscover an exceptional audio experience from AI-enhanced sound clarity.",
+      "disclaimers": [],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 2
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-19-feature-ai-sound-pro-m-2.jpg",
+          "alt": "Vocalist singing into a microphone with soundwaves visualized across.",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 1440,
+            "top": 18448,
+            "left": -5520
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-19-feature-ai-sound-pro-m-1.jpg",
+          "alt": "Soundwaves emanating from StanbyME 2.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1440,
+            "top": 18448,
+            "left": -3600
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-23",
+      "order": 23,
+      "eyebrow": "",
+      "headline": "Virtual 9.1.2 channels delivers captivating surround sound",
+      "body": "Get the surround sound experience on your portable touch screen. Your LG StanbyME 2 uses AI deep learning algorithms to make it feel as if sound is coming from 9.1.2 channels all around you.",
+      "disclaimers": [],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-19-feature-ai-sound-pro-m-2.jpg",
+          "alt": "Vocalist singing into a microphone with soundwaves visualized across.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1440,
+            "top": 18448,
+            "left": -5520
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-24",
+      "order": 24,
+      "eyebrow": "",
+      "headline": "AI Clear Sound",
+      "body": "Discover an exceptional audio experience from AI-enhanced sound clarity.\nVirtual 9.1.2 channels delivers captivating surround sound\nGet the surround sound experience on your portable touch screen. Your LG StanbyME 2 uses AI deep learning algorithms to make it feel as if sound is coming from 9.1.2 channels all around you.\n1\n2\nPreviousNextPausePlay",
+      "disclaimers": [
+        "*AI Clear Sound must be activated through the Sound Mode menu.",
+        "*Sound may vary according to the listening environment."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/feature/stanbyme2-27lx6t-2025-19-feature-ai-sound-pro-m-1.jpg",
+          "alt": "Soundwaves emanating from StanbyME 2.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1440,
+            "top": 18448,
+            "left": -3600
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-25",
+      "order": 25,
+      "eyebrow": "",
+      "headline": "Dolby Vision & Dolby Atmos for immersive picture and sound",
+      "body": "Enjoy thrilling picture and sound with Dolby Vision and Dolby Atmos. With your screen's side-firing speakers, you can have a Dolby theatre experience in the comfort of home.\nPrint\nSee all specs",
+      "disclaimers": [
+        "*Accessories included in the package may vary per region. Smart Cam and speaker are sold separately. Check the included items in the product package before purchasing.",
+        "*The images above in this product detail page are for illustrative purposes only. Refer to the gallery images for a more accurate representation.",
+        "*All images above are simulated.",
+        "*Service availability varies by region and country.",
+        "*Personalized services may vary depending on the policies of the 3rd party application."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/new/features/mobile/stanbyme2-27lx6t-2025-20-feature-dolby-vision-atmos-m.jpg",
+          "alt": "Soundwaves emanating from StanbyME 2 with Dolby Vision and Dolby Atmos logos displayed.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    }
+  ],
+  "unassignedAssets": [
+    {
+      "type": "video",
+      "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/new/video/stanbyme2-27lx6t-2025-03-video-super-portable-screen-m-2.mp4",
+      "poster": "",
+      "matchedBy": "unassigned"
+    },
+    {
+      "type": "video",
+      "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/new/video/stanbyme2-27lx6t-2025-03-video-super-portable-screen-d-2.mp4",
+      "poster": "",
+      "matchedBy": "unassigned"
+    },
+    {
+      "type": "video",
+      "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/video/stanbyme2-27lx6t-2025-04-video-4hour-battery-d.mp4",
+      "poster": "",
+      "matchedBy": "unassigned",
+      "variants": [
+        "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/video/stanbyme2-27lx6t-2025-04-video-4hour-battery-m.mp4"
+      ]
+    },
+    {
+      "type": "video",
+      "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/video/stanbyme2-27lx6t-2025-06-video-mood-maker-d.mp4",
+      "poster": "",
+      "matchedBy": "unassigned",
+      "variants": [
+        "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/video/stanbyme2-27lx6t-2025-06-video-mood-maker-m.mp4"
+      ]
+    },
+    {
+      "type": "video",
+      "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/video/stanbyme2-27lx6t-2025-06-video-art-poster-d.mp4",
+      "poster": "",
+      "matchedBy": "unassigned",
+      "variants": [
+        "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/video/stanbyme2-27lx6t-2025-06-video-art-poster-m.mp4"
+      ]
+    },
+    {
+      "type": "video",
+      "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/video/stanbyme2-27lx6t-2025-06-video-tuntable-d.mp4",
+      "poster": "",
+      "matchedBy": "unassigned",
+      "variants": [
+        "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/video/stanbyme2-27lx6t-2025-06-video-tuntable-m.mp4"
+      ]
+    },
+    {
+      "type": "video",
+      "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/video/stanbyme2-27lx6t-2025-06-video-landscapes-d.mp4",
+      "poster": "",
+      "matchedBy": "unassigned",
+      "variants": [
+        "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/video/stanbyme2-27lx6t-2025-06-video-landscapes-m.mp4"
+      ]
+    },
+    {
+      "type": "video",
+      "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/video/stanbyme2-27lx6t-2025-06-video-date-time-d.mp4",
+      "poster": "",
+      "matchedBy": "unassigned",
+      "variants": [
+        "https://www.lg.com/content/dam/channel/wcms/sg/products/tvs/lifestyle-screen/27lx6tdga/video/stanbyme2-27lx6t-2025-06-video-date-time-m.mp4"
+      ]
+    }
+  ],
+  "review": {
+    "imageCoverage": {
+      "inMarkdown": 62,
+      "captured": 60,
+      "coveragePct": 97,
+      "missing": [
+        "https://www.lg.com/content/dam/channel/wcms/sg/images/dehumidifier/md19gqga1/gallery/MD19GQGA1_Dehumidifier_350-B.jpg",
+        "https://www.lg.com/content/dam/channel/wcms/sg/01-assets/general/footer/CSB-SG-2026-Gold.png"
+      ]
+    },
+    "verbatimFails": [],
+    "emptySections": [
+      {
+        "id": "sec-03",
+        "headline": "Super Portable Screen"
+      },
+      {
+        "id": "sec-07",
+        "headline": "Motion Art Screen"
+      },
+      {
+        "id": "sec-10",
+        "headline": "Big Tablet Screen"
+      }
+    ],
+    "unassignedCount": 8
+  }
+}

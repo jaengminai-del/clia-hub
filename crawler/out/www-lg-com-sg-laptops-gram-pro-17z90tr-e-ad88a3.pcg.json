@@ -1,0 +1,1389 @@
+{
+  "version": "0.1",
+  "source": {
+    "url": "https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/",
+    "crawledAt": "2026-07-24T06:22:30.742Z",
+    "engine": "firecrawl",
+    "geometry": true
+  },
+  "product": {
+    "title": "LG gram Pro 17\" | Lightweight 32GB RAM Intel® Core™ Ultra Processor Laptop | Windows 11 Home, gram Dual AI, NVIDIA GeForce RTX 5050, Copilot, LG gram Link, 16:10 IPS LCD display - 17Z90TR-E.AD88A3 | LG Singapore",
+    "description": "Get more information on the 17Z90TR-E.AD88A3. Click for pictures, reviews & tech specs for the LG LG gram Pro 17\" | Lightweight 32GB RAM Intel® Core™ Ultra Processor Laptop | Windows 11 Home, gram Dual AI, NVIDIA GeForce RTX 5050, Copilot, LG gram Link, 16:10 IPS LCD display.",
+    "model": "17z90tr-e-ad88a3",
+    "gallery": [
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/windows11_bold_andbreak_2010x1334.png/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "windows 11",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/windows11_bold_andbreak_2010x1334.png/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/windows11_bold_andbreak_2010x1334.png/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/WIN25-Win10EOS-EasyTransition-30s-16x9_frame1.png",
+        "alt": "17Z90TR-E.AD88A3",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/WIN25-Win10EOS-EasyTransition-30s-16x9_frame1.png",
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/WIN25-Win10EOS-EasyTransition-30s-16x9_frame1.png",
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/WIN25-Win10EOS-EasyTransition-30s-16x9_frame1.png"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-02.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Front view with keyboard",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-02.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-03.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "-30 degree side view and cover open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-03.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-04.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "-30 degree side port zoom-in view with cover open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-04.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-05.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "+30 degree side port zoom-in view with cover open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-05.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-06.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Top-down view and cover closed",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-06.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-07.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Top-down view of keyboard",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-07.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-09.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Right side view and cover open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-09.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-10.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Left side view and cover closed",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-10.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-11.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Life style image",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-11.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-12.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Life style image",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-12.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-13.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Life style image",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-13.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-14.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Life style image",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-14.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-15.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Unleash AU, break limits",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-gallery-15.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-02.jpg",
+        "alt": "Front view with keyboard",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-02.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-03.jpg",
+        "alt": "-30 degree side view and cover open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-03.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-04.jpg",
+        "alt": "-30 degree side port zoom-in view with cover open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-04.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-05.jpg",
+        "alt": "+30 degree side port zoom-in view with cover open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-05.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-06.jpg",
+        "alt": "Top-down view and cover closed",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-06.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-07.jpg",
+        "alt": "Top-down view of keyboard",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-07.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-09.jpg",
+        "alt": "Right side view and cover open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-09.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-10.jpg",
+        "alt": "Left side view and cover closed",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-10.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-11.jpg",
+        "alt": "Life style image",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-11.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-12.jpg",
+        "alt": "Life style image",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-12.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-13.jpg",
+        "alt": "Life style image",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-13.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-14.jpg",
+        "alt": "Life style image",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-14.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-15.jpg",
+        "alt": "Unleash AU, break limits",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/gram-pro-17z90tr-2025-black-gallery-thumbnail-15.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/windows11_bold_andbreak_350x350.png",
+        "alt": "windows 11",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/gallery/windows11_bold_andbreak_350x350.png"
+        ]
+      }
+    ]
+  },
+  "sections": [
+    {
+      "id": "sec-01",
+      "order": 1,
+      "eyebrow": "",
+      "headline": "LG gram Pro 17\" \\| Windows 11 Home \\| Lightweight \\| 32GB RAM Intel® Core™ Ultra Processor Laptop \\| gram Dual AI \\| NVIDIA GeForce RTX 5050 \\| Copilot \\| LG gram Link \\| 16:10 IPS LCD display",
+      "body": "17Z90TR-E.AD88A3\nCopy model name\nChat with an expert\n4.3\n\\|\n41 Reviews\n0 out of 1 (0%) reviewers recommend this product\nWrite a review\n()\nWIN25-Win10EOS-EasyTransition-30s-16x9\nVideo Player is loading.\nPlay Video\nPlay\nMute\nCurrent Time 0:00\n/\nDuration 0:00\nLoaded: 0%\n0:00\nStream Type LIVE\nSeek to live, currently behind liveLIVE\nRemaining Time -0:00\n1x\nPlayback Rate\nChapters\n- Chapters\nDescriptions\n- descriptions off, selected\nSubtitles\n- subtitles settings, opens subtitles settings dialog\n- subtitles off, selected\nAudio Track\nPicture-in-PictureFullscreen\nThis is a modal window.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-02",
+      "order": 2,
+      "eyebrow": "",
+      "headline": "The video connection was lost, please confirm you are connected to the internet",
+      "body": "Technical details\n:\nHLS playlist request error at URL: https://manifest.prod.boltdns.net/manifest/v1/hls/v4/clear/1695959172001/3cab0b06-28d1-453c-aa6d-985fbee45210/10s/master.m3u8?fastly\\_token=NmE2MzViNzNfNzcwMmMyMmRlOTdhODM0MmQzYmU3YzlmYWUyYTY3MTcxOTE5YTgwNzU4ZmU0NGE5ZGFhYTI5MjdiOGE1ZDM1MA%3D%3D.\nOK\nClose Modal Dialog\nBeginning of dialog window. Escape will cancel and close the window.\nTextColorWhiteBlackRedGreenBlueYellowMagentaCyanTransparencyOpaqueSemi-TransparentBackgroundColorBlackWhiteRedGreenBlueYellowMagentaCyanTransparencyOpaqueSemi-TransparentTransparentWindowColorBlackWhiteRedGreenBlueYellowMagentaCyanTransparencyTransparentSemi-TransparentOpaque\nFont Size50%75%100%125%150%175%200%300%400%Text Edge StyleNoneRaisedDepressedUniformDropshadowFont FamilyProportional Sans-SerifMonospace Sans-SerifProportional SerifMonospace SerifCasualScriptSmall Caps\nReset restore all settings to the default valuesDone\nClose Modal Dialog\nEnd of dialog window.\nClose Modal Dialog\nThis is a modal window. This modal can be closed by pressing the Escape key or activating the close button.\n17Z90TR-E.AD88A3\nOpen gallery popup\nopen gallery popup\nPrevious slide\nNext slide\nPrevious slide\nNext slide\nKey Features\n- 17” 16:10 WQXGA (2560x1600) IPS LCD display\n- Windows 11 Home\n- AI optimized Intel® Core™ Ultra Processor \\| LPDDR5x RAM / NVMe Gen4 SSD\n- NVIDIA GeForce RTX 5050\n- gram Dual AI / LG gram Link\n- 1,479g Lightweight / 77Wh smart battery\n[More](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#)\n- Free Delivery\n[**Features**](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#pdp-overview-section) [**Specs**](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#pdp-specs-section) [**Reviews**](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#pdp-review) [**Support**](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#pdp-support-section) [**Where to buy**](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#find-a-store)\nGalleryMovie\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\nzoom inzoom out\n[](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#)\n[](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#)\n[](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#)\n[](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#)\n[](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#)\n[](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#)\n[](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#)\n[](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#)\n[](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#)\n[](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#)\n[](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#)\n[](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#)\n[](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#)\n[](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#)\n[](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#)\nPPrevious slide\n1 / 15\nNext slide\n[](https://www.lg.com/sg/laptops/gram-pro/17z90tr-e-ad88a3/#)\nPrevious slide\n1 / 1\nNext slide\nPromotions\n- Housewarming Deals Up to 46%\nSign in & shop LG essentials to enjoy bigger coupons, exclusive member savings & free gifts\\*! Free delivery, installation & disposal\\*.\n18/06/2026 ~ 31/07/2026\n[Buy now](https://www.lg.com/sg/promotions/member-deals-housewarming-by-lg-promotion/)\n- Pay Easier with DBS Interest‑Free Instalments\\*\nUp to 24 months instalment plans at 0% interest\\*\\*. T&Cs apply\n01/06/2026 ~ 31/12/2026\n[Buy now](https://www.lg.com/sg/promotions/dbs-interest-free-promotion/)\nPause carouselPlay carousel",
+      "disclaimers": [
+        "**Error Code:** MEDIA\\_ERR\\_NETWORK",
+        "**Session ID:** 2026-07-24:72d42ee4b1f3f86943a7bdce **Player Element ID:** vjs\\_video\\_3",
+        "**Error Code:** MEDIA\\_ERR\\_NETWORK",
+        "**Session ID:** 2026-07-24:71bd5dc06154519261572b1c **Player Element ID:** vjs\\_video\\_676"
+      ],
+      "layout": {
+        "type": "multi-image",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/01-assets/products/laptops/lg-gram-pro/17z90tr-e-ad88a3/gram-pro-17z90tr-2025-black-gallery-gallery-01.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+          "alt": "Front view of LG gram Pro 17\" | Windows 11 Home | Lightweight | 32GB RAM Intel® Core™ Ultra Processor Laptop | gram Dual AI | NVIDIA GeForce RTX 5050 | Copilot | LG gram Link | 16:10 IPS LCD display 17Z90TR-E.AD88A3",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 732,
+            "top": 230,
+            "left": 939
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/01-assets/products/laptops/lg-gram-pro/17z90tr-e-ad88a3/gram-pro-17z90tp-2025-black-gallery-thumb-01.jpg",
+          "alt": "Front view of LG gram Pro 17\" | Windows 11 Home | Lightweight | 32GB RAM Intel® Core™ Ultra Processor Laptop | gram Dual AI | NVIDIA GeForce RTX 5050 | Copilot | LG gram Link | 16:10 IPS LCD display 17Z90TR-E.AD88A3",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 72,
+            "top": 752,
+            "left": 1070
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-01-1-lg-gram-logo-m.jpg",
+          "alt": "LG gram Pro AI logo.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1920,
+            "top": 1494,
+            "left": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-03",
+      "order": 3,
+      "eyebrow": "",
+      "headline": "The Power of Dual AI",
+      "body": "Experience gram Pro with a Dual AI—where cloud and on-device AI empower you to achieve professional results anytime, anywhere.\nDual AI\nRTX 5050\nVarible Refresh Rate\nLight yet durable\nLG gram Link\nIntel's AI Processor",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience.",
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience.",
+        "*The image shows the representative LG gram product for illustrative purpose. Please see the gallery images taken with the actual product.",
+        "*The above mobile device is not included in the package (sold separately)."
+      ],
+      "layout": {
+        "type": "multi-image",
+        "imgsPerRow": 2
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/01-assets/products/laptops/lg-gram-pro/17z90tr-e-ad88a3/gram-pro-17z90tp-2025-black-gallery-thumb-01.jpg",
+          "alt": "Front view of LG gram Pro 17\" | Windows 11 Home | Lightweight | 32GB RAM Intel® Core™ Ultra Processor Laptop | gram Dual AI | NVIDIA GeForce RTX 5050 | Copilot | LG gram Link | 16:10 IPS LCD display 17Z90TR-E.AD88A3",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 72,
+            "top": 752,
+            "left": 1070
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/01-assets/products/laptops/lg-gram-pro/17z90tr-e-ad88a3/gram-pro-17z90tr-2025-black-gallery-gallery-01.jpg/jcr:content/renditions/thum-1600x1062.jpeg",
+          "alt": "Front view of LG gram Pro 17\" | Windows 11 Home | Lightweight | 32GB RAM Intel® Core™ Ultra Processor Laptop | gram Dual AI | NVIDIA GeForce RTX 5050 | Copilot | LG gram Link | 16:10 IPS LCD display 17Z90TR-E.AD88A3",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 732,
+            "top": 230,
+            "left": 939
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-01-3-intro-kv-m.jpg",
+          "alt": "The image shows the laptop with its screen open and angled to the left, and the laptop with the logo visible behind it. There is a purple cylindrical image crossing the screen.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1920,
+            "top": 1946,
+            "left": 0
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-2in1-16t90tp-2025-black-feature-01-5-1-gram-ai-m-new.jpg",
+          "alt": "A split-screen image showcasing 'Dual AI' with two distinct modes: 'On-Device AI' on the left, represented by a pink icon, and 'Cloud AI' on the right, represented by a blue icon. The screen displays an AI interface, symbolizing seamless AI functionality across both modes.",
+          "title": "-",
+          "matchedBy": "card-pair"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-01-5-2-rtx-m.jpg",
+          "alt": "NVIDIA GeForce RTX logo with green and black design, featuring the text 'Powering Advanced AI' and 'RTX 5050' below.",
+          "title": "-",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 464,
+            "top": 2834,
+            "left": 728
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-01-5-3-variable-refresh-rate-m.jpg",
+          "alt": "A laptop displaying an action-packed football scene on its screen with a highlighted text '31Hz - 144Hz,' surrounded by additional screens featuring diverse visuals. This setup emphasizes gaming and multimedia versatility with a variable refresh rate.",
+          "title": "-",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 464,
+            "top": 2834,
+            "left": 1216
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-01-5-4-slim-lightweight-m.jpg",
+          "alt": "A sleek, partially open laptop with a minimalist design, showcased against a soft gradient background. The MIL-STD durability certification badge is prominently displayed in the top right corner, emphasizing its slim, lightweight, yet durable build.",
+          "title": "-",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 464,
+            "top": 3476,
+            "left": 240
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-01-5-5-gram-link-m.jpg",
+          "alt": "This image shows a laptop and a smartphone wirelessly sharing files. The laptop screen displays a file transfer progress window, while the smartphone screen shows a gallery of received files. A blurred, colorful file icon appears mid-transfer, illustrating the wireless sharing process.",
+          "title": "-",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 464,
+            "top": 3321,
+            "left": 728
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-01-5-6-intel-ai-processor-m.jpg",
+          "alt": "A close-up of an Intel Core Ultra processor embedded in a high-tech circuit board. The chip is surrounded by intricate circuitry with glowing orange and blue lights, creating a futuristic and high-performance aesthetic.",
+          "title": "-",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 464,
+            "top": 3205,
+            "left": 1216
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-04",
+      "order": 4,
+      "eyebrow": "Dual AI",
+      "headline": "Dual AI: On-Device and Cloud synergy",
+      "body": "Powered by both on-device and cloud AI, Dual AI offers seamless performance and personalized insights wherever you are. Work smarter, stay secure, and achieve more—whether you’re online or offline.\nPlay video",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience.",
+        "*Please note that gram chat On-Device is designed for specific requests and does not support continuous conversations. For best results, use it for straightforward, one-time requests only."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-02-1-gram-chat-m.jpg",
+          "alt": "A split-screen image showcasing 'Hybrid AI' with two distinct modes: 'gram chat On-Device' on the left, represented by a pink icon, and 'gram chat Cloud' on the right, represented by a blue icon. The screen displays an AI interface, symbolizing seamless AI functionality across both modes.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 4336,
+            "left": 160
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-05",
+      "order": 5,
+      "eyebrow": "",
+      "headline": "Always on, even offline with On-Device AI",
+      "body": "This image shows a timeline for document revisions with two versions of a file titled 'Fundamentals of Geology.' The left version reflects changes at 3:56 PM, while the right shows updates at 4:00 PM on 10.02.2025. A clock icon at the top indicates the ability to revert edits, and a slider below highlights the time gap between the revisions.\nTime travel\\*\\*\nRecover lost files\nSearch with any clues you recall or browse your previous screens, including documents and websites.\nThis image shows hands typing on a laptop with a search bar displaying the question, 'What was the global project budget?\nSearching\nGet tailored answers based on your files\nProvides personalized answers based on local data from documents and images.\nThis image shows a search bar at the top with the text 'Summarize this document,' accompanied by a red PDF icon and a cursor pointing to it. Below, a preview of a PDF document is partially visible, and a summary of the document's content is displayed in a chat window labeled 'gram chat On-Device.' The interface suggests an AI-driven feature for summarizing documents.\nSummarize\nInstant summaries, even offline\nSummarize text or document files directly in an on-device environment.\nThis image shows a search bar with the text 'Turn on dark mode,' above two screenshots of a desktop. The first screenshot displays a light mode interface, while the second shows the same interface in dark mode, connected by a curved arrow indicating the transition.\nSetting\nChange settings with your words\nSet various\\*\\*\\* system options in gram chat On-Device with easy, conversational commands.\nThis image shows a search bar with the query 'Wifi isn't working, What should I do?' above a laptop screen. The screen displays a customer support interface with troubleshooting options and a progress bar running diagnostics, accompanied by a Wi-Fi signal icon with a slash, indicating a connectivity issue.\nTroubleshooting\n24/7 Support, always within reach\nOffer 24/7 instant support for product inquiries, even without Wi-Fi.\nPrevious slide\n1 / 2\nNext slide",
+      "disclaimers": [
+        "*Images are for illustrative purposes, with sequences shortened, and may differ from actual user experience.",
+        "*The gram chat On-Device function allows you to interact with documents stored on your PC, and it does not handle simple daily information or questions requiring internet searches. \"Search by Conversation\" is currently in Beta and will be updated in the future.",
+        "*Some features may not work properly during initial use due to the On-Device AI's need for pre-learning time to adapt to the user. ① gram chat On-Device requires indexing to combine words with data from your PC content, which may take time to deliver desired results. ② At least 80 hours of pattern learning are required to use the battery usage detection notification.",
+        "*This feature supports English and Korean language only.",
+        "*AI search results may vary depending on the data at the time of search, and the accuracy of the content is not guaranteed, so user verification is required.",
+        "*This feature supports English and Korean language only.",
+        "*\\*The PC screen is captured approximately once every 2 seconds, with a storage limit of about 13GB. Captured images are automatically deleted after a certain period. Users can customize settings such as whether to use the feature, screen storage duration, and capacity via the gear icon at the top of gram chat.",
+        "*\\*This feature is disabled by default and is opt-in, which you can activate if you wish to use it.",
+        "*\\*This feature: ① May have difficulty searching for handwritten text, blurry images, or decorative fonts. ② Searches rely on exact text matches, including spacing. ③ Using audio capture may reduce computing performance.",
+        "*\\*This function doesn't recover lost files; instead, it helps users navigate to the previous screen by searching keywords. Users can retrieve files using copy and paste.",
+        "*\\*\\*Supported system settings: • Dark mode / • Fn lock / • Battery life extension / • AI battery usage detection / • Reader mode / • Touchpad / • Battery saving mode / • USB-C offline charging / • Brightness Control / • Sound Control"
+      ],
+      "layout": {
+        "type": "multi-image",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-02-3-1-time-travel.jpg",
+          "alt": "Always on, even offline with On-Device AI",
+          "matchedBy": "doc-order"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-02-3-4-setting.jpg",
+          "alt": "Learn more",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-02-3-3-summarize.jpg",
+          "alt": "Learn more",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-02-3-2-searching.jpg",
+          "alt": "Learn more",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-06",
+      "order": 6,
+      "eyebrow": "",
+      "headline": "Smart AI assistant with Cloud AI",
+      "body": "A chat interface showing a user asking for recommendations for activities at Lake Bled, and an AI response listing three suggestions: 1. Visit Bled Island and the church, 2. Explore Bled Castle, 3. Walk around Lake Bled.\nGet instant answers with AI Chatbot\nFrom solving homework problems to satisfying your curiosity, the AI assistant delivers the information you need in seconds.\nAn infographic showcasing three AI-powered features: Summarization, represented by a document icon transforming into a simplified file; Text Extraction, symbolized by an image converting into a document; and Translation, depicted by a document changing to another language format.\nSimple translation and summarization\nLet AI analyze and extract key details from your documents, saving you time and effort.\nAn illustration featuring various productivity app icons, such as Google Drive, Gmail, Google Sheets, and Google Calendar, surrounding a central gram AI Cloud logo. The image represents seamless integration of gram AI Cloud with popular productivity tools.\nEffortless scheduling and emailing\nTalk to your AI assistant, and watch it handle your tasks. From drafting emails to scheduling meetings, seamlessly connect with productivity tools.\nPrevious slide\nNext slide\n|     |\n| --- |\n| Microsoft Copilot |",
+      "disclaimers": [
+        "*Images are for illustrative purposes, with sequences shortened, and may differ from actual user experience.",
+        "*This service offers paid features of GPT4o but does not support search integration or coding editor functionality. gram chat Cloud is free for the first year after user registration, after which it becomes a paid service. Users will be notified separately during this period and can opt out if they wish.",
+        "*gram chat Cloud requires installation prior to use and the creation of a separate account.",
+        "*Usage limits apply to gram chat Cloud. The maximum monthly token usage is 200K, with a monthly usage limit of 450 requests and a daily usage limit of 30 requests.",
+        "*Exceeding these limits will result in a downgrade to the GPT-4o mini model and disable function calling.",
+        "*While gram chat Cloud does not collect personal prompts, it may request access to your Google or Microsoft account for feature integration purposes.",
+        "*\\*Linked Google Workspace, Microsoft 365."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-02-5-1-qna-chatbot.jpg",
+          "alt": "Smart AI assistant with Cloud AI",
+          "matchedBy": "doc-order"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-02-5-2-searching.jpg",
+          "alt": "Get instant answers with AI Chatbot",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-02-5-3-function-calling.jpg",
+          "alt": "Let AI analyze and extract key details from your documents, saving you time and effort.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-02-6-chat-cloud-free-m.jpg",
+          "alt": "Customers who purchase LG gram can use gram chat Cloud powered by OpenAI GPT-4o free of charge for one year.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1920,
+            "top": 6854,
+            "left": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-07",
+      "order": 7,
+      "eyebrow": "",
+      "headline": "Your everyday AI companion",
+      "body": "Get real answers based on the internet and generate images with ease using Copilot in Windows. This powerful AI tool leverages online resources to provide you with accurate, up-to-date information tailored to your queries. With just a few clicks, you can obtain the answers you need and create custom images to enhance your projects.\nPlay videoPause video",
+      "disclaimers": [
+        "*Screens simulated. Features and app availability may vary by region. Requires a Microsoft account and an internet connection to function properly.",
+        "*Copilot in Windows 11 is rolling out gradually in preview within the latest update to Windows 11 in select global markets. Not all users will have access to Copilot simultaneously, as the timing of availability varies by device and market.",
+        "*AI features with Copilot in Windows 11 may vary in performance depending on user needs and usage environments, and may not provide the same level of performance across all use cases."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-03-1-copilot-windows-11-m.jpg",
+          "alt": "A laptop featuring the Windows Copilot logo above the screen and Windows Copilot interface on the display, showcasing a sleek design with a large screen and the Windows 11 interface in the background.",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 7274,
+            "left": 160
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-03-3-1-copilot-instantly.jpg",
+          "alt": "The image features a user interface segment, showcasing icons in a taskbar or app launcher. The center icon, highlighted with a cursor, represents the Windows Copilot, a colorful symbol indicating AI-powered assistance.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 342,
+            "top": 8202,
+            "left": 240
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/video/gram-pro-17z90tr-2025-black-feature-03-3-1-copilot-instantly.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/video/gram-pro-17z90tr-2025-black-feature-10-3-1-1-wqxga-17-10.mp4",
+          "poster": "",
+          "matchedBy": "dam-folder"
+        }
+      ]
+    },
+    {
+      "id": "sec-08",
+      "order": 8,
+      "eyebrow": "",
+      "headline": "Activate Copilot instantly",
+      "body": "You can start Copilot integration from the taskbar or by pressing the Windows + C keys simultaneously. You can also use a keyboard hotkey to quickly access intelligent tools on your gram.\nPlay videoPause video",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-03-3-2-bing-chat.jpg",
+          "alt": "The image shows a digital assistant input box where the user types, \"Play something to help me focus.\" It’s part of a Windows taskbar interface, with standard system icons below, indicating a request for focus music.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 342,
+            "top": 8202,
+            "left": 606
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/video/gram-pro-17z90tr-2025-black-feature-03-3-2-bing-chat.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-09",
+      "order": 9,
+      "eyebrow": "",
+      "headline": "Ready to command with Bing Chat",
+      "body": "Simply request multiple things, from song recommendations for your mood to organizing complex pages and setting preferences, with Copilot through Bing Chat.\nPlay videoPause video",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-03-3-3-summarize-content.jpg",
+          "alt": "The image shows a cursor hovering over a \"Summarize\" button in a digital assistant interface. Below are options like \"Explain this\" and \"Rewrite.\"",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 342,
+            "top": 8202,
+            "left": 972
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/video/gram-pro-17z90tr-2025-black-feature-03-3-3-summarize-content.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-10",
+      "order": 10,
+      "eyebrow": "",
+      "headline": "Simplify complex content with a click",
+      "body": "Copilot can summarize long emails and complicated content, making it more efficient for processing work information and saving valuable time.\nPlay videoPause video",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-03-3-4-handles-image.jpg",
+          "alt": "The image shows a photo of a person wearing bright orange and blue clothes against a clear sky, with the entire area selected with the mouse pointer and the click of \"Remove Background\", the background is removed and only the person remains.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 342,
+            "top": 8202,
+            "left": 1338
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/video/gram-pro-17z90tr-2025-black-feature-03-3-4-handles-image.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-11",
+      "order": 11,
+      "eyebrow": "",
+      "headline": "Handles image editing and more",
+      "body": "From simple tasks like adjusting image size and brightness to more complex ones like background removal and upscaling, request it all from Copilot.",
+      "disclaimers": [
+        "*Screens simulated. Features and app availability may vary by region. Requires a Microsoft account and an internet connection to function properly.",
+        "*Copilot in Windows 11 is rolling out gradually in preview within the latest update to Windows 11 in select global markets. Not all users will have access to Copilot simultaneously, as the timing of availability varies by device and market.",
+        "*AI features with Copilot in Windows 11 may vary in performance depending on user needs and usage environments, and may not provide the same level of performance across all use cases."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-12",
+      "order": 12,
+      "eyebrow": "",
+      "headline": "Pro power meets AI brilliance",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-13",
+      "order": 13,
+      "eyebrow": "",
+      "headline": "Latest Intel® Core™ Ultra Processor: Up to 18% Boost in performance for Enhanced productivity",
+      "body": "Experience powerful performance with the Intel® Core™ Ultra Processor. Built for the demands of tomorrow, its delivers lightning-fast speeds, enabling you to tackle even intensive tasks with ease. Whether you're creating content, managing complex workflows, or gaming, it helps you to enjoy maximum efficiency, every time.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-14",
+      "order": 14,
+      "eyebrow": "",
+      "headline": "13 TOPS   NPU",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-15",
+      "order": 15,
+      "eyebrow": "",
+      "headline": "74 TOPS   GPU",
+      "body": "",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience.",
+        "*Intel®, the Intel logo, and Intel Core are trademarks of the Intel Corporation or its subsidiaries.",
+        "*The performance of the NPU and GPU varies depending on the processor, and the above TOPS value stated is shown as 'Up to'.",
+        "*The Intel® Core™ UltraCore CPU is expected to deliver up to 18% greater performance than its predecessor, based on Intel's IA (Intelligent Automation) performance measurements."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-04-4-intel-arrow-lake-m.jpg",
+          "alt": "A close-up of an Intel Core Ultra processor embedded in a high-tech circuit board. The chip is surrounded by complex circuitry with glowing orange and blue lights, creating a futuristic, high-performance aesthetic. The 25-year-old Intel Core Ultra processor delivers up to 18 percent more performance than the 24-year-old Intel Core processor.",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 9554,
+            "left": 160
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-16",
+      "order": 16,
+      "eyebrow": "",
+      "headline": "Elevate your performance",
+      "body": "Intel's powerful processor, with storage options including up to 2TB NVMe SSD and expandable storage via an additional NVMe slot, configurable up to 32GB of LPDDR5x RAM, delivers exceptional processing power. From video editing and 3D work to AI-driven tasks, achieve pro-level results that exceed expectations.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-17",
+      "order": 17,
+      "eyebrow": "",
+      "headline": "LPDDR5x",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-18",
+      "order": 18,
+      "eyebrow": "",
+      "headline": "NVMe (Gen4)",
+      "body": "",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience.",
+        "*The above Memory and SSD options require separate purchase, and prices may vary depending on country and model.",
+        "*The above program is not included in the package (sold separately)."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-05-3-unleash-ai-power-m.jpg",
+          "alt": "A sleek laptop is showcased with a vibrant video editing interface on its screen, surrounded by additional screens displaying various creative workflows.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-19",
+      "order": 19,
+      "eyebrow": "",
+      "headline": "RTX 5050: Speed at the core",
+      "body": "Engineered for gamers and content creators, gram Pro with RTX 5050 delivers stunning visuals and smooth performance for editing, rendering, and gaming—without compromising on speed or style. Elevate your gaming experience and creativity with a laptop built for power.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-20",
+      "order": 20,
+      "eyebrow": "",
+      "headline": "AI-enhanced graphics and performanceN/A",
+      "body": "NVIDIA DLSS 4 with multi frame generation",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-21",
+      "order": 21,
+      "eyebrow": "",
+      "headline": "Game-winning responsiveness",
+      "body": "NVIDIA reflex 2 with frame warp",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-22",
+      "order": 22,
+      "eyebrow": "",
+      "headline": "True-to-life-graphics",
+      "body": "Full ray tracing with neural rendering",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-23",
+      "order": 23,
+      "eyebrow": "",
+      "headline": "Smart power, unplug and play",
+      "body": "Powered by a 77Wh high-capacity battery offering up to 27 hours of usage time and equipped with our AI Smart Assistant, gram analyzes user patterns to optimize battery efficiency. Boost your productivity and enjoy uninterrupted play.",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience.",
+        "*Actual battery life will vary from specifications depending on model, setup configuration, applications used, features utilized and power management settings.",
+        "*To use the AI Smart Assistant's battery usage detection notification feature, at least 80 hours of pattern learning is required."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-06-3-rtx-m.jpg",
+          "alt": "A racing scene from Assetto Corsa Competizione showing a bright green sports car leading a line of cars on a track. The NVIDIA GeForce RTX logo with the phrase “Powering Advanced AI” is displayed in the top right corner.",
+          "matchedBy": "doc-order"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-07-1-smart-battery.jpg",
+          "alt": "A laptop displaying a battery usage interface on its screen, surrounded by a circular visual representation of time. The text '27 hrs' is prominently featured, highlighting extended battery life.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 610,
+            "top": 11380,
+            "left": 240
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-24",
+      "order": 24,
+      "eyebrow": "",
+      "headline": "Stay cool. Stay creative.",
+      "body": "Work and play with passion, yet stay cool. Our powerful cooling system keeps your projects flowing smoothly, even with resource-intensive AI-based heavyweight tasks.",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience.",
+        "*AI cooling mode will take effect after a reboot following the BIOS update. The BIOS update is automatically performed during the first boot after purchase, and it will be installed upon reboot if the user agrees to reboot."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-08-1-stay-cool.jpg",
+          "alt": "A laptop with a video editing interface on its screen, showcasing dual cooling fans emitting blue airflow visuals, emphasizing advanced cooling technology.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 610,
+            "top": 11884,
+            "left": 240
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-25",
+      "order": 25,
+      "eyebrow": "gram Link",
+      "headline": "Get all connected",
+      "body": "LG gram easily connects as many as 10 devices all at once, whether the device is iOS or Android. Share, collaborate, and create by turning your workspace into a concert of technology.\nThis image shows a laptop and a smartphone wirelessly sharing files. The laptop screen displays a file transfer progress window, while the smartphone screen shows a gallery of received files. A blurred, colorful file icon appears mid-transfer, illustrating the wireless sharing process.\nData transfer\nEasy data transfer between gram and mobile (Android & iOS).\nThis image shows a laptop and a tablet side by side, both displaying the same portfolio website. The screens feature a grid of images, including nature and architectural photos, highlighting seamless synchronization between devices.\nDisplay expansion & duplication\nUse your tablet or smartphone as a second screen.\nThis image shows a laptop displaying a search interface for photos with the keyword 'birthday.' The screen features a grid of colorful photo thumbnails, each tagged with icons, indicating categorized or filtered search results.\nAI image classification\nAI automatically handles image classification and tagging.\nA laptop displaying a video conference with multiple participants on the screen, accompanied by a smartphone showing an individual participant in the same call. This setup emphasizes seamless connectivity and multitasking for virtual meetings.\nPhone as webcam\nUse your smartphone's high-performance camera for video calls.\nA laptop and a smartphone are placed on a desk, both displaying the same music playback interface, indicating synchronized functionality. The setup highlights seamless integration between devices for multimedia activities.\nAudio sharing on phone\nShare your smartphone sound directly with LG gram's speakers.\nThis image shows a laptop and a smartphone connected wirelessly, both playing the same music track titled 'Bubble Gum.' The laptop screen displays a music player interface, and the smartphone mirrors the playback. Surrounding waves illustrate seamless audio synchronization.\nMake and receive calls\nMake and receive calls directly from your LG gram.\nThe image features a person holding a smartphone in front of a gray laptop, both displaying the same video of a woman performing a yoga pose. The scene highlights seamless screen mirroring or content sharing between devices.\nScreen mirroring\nCast your tablet or smartphone screen to the gram.\nThis image shows a laptop screen displaying a call interface. The interface includes a contact list on the left and an ongoing call with 'Dan' on the right, featuring a profile image and audio controls. The design highlights the laptop's capability to manage voice calls.\nKeyboard & mouse share\nControl your tablet or smartphone with the keyboard and mouse of your gram.\nPrevious slide\n1 / 3\nNext slide",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience.",
+        "*To work properly, install the LG gram Link app on your mobile devices, with iOS version 15.2 or later and Android version 9 or higher required.",
+        "*To install the LG gram Link app, you can use the \\[LG Update program\\] to automatically find and install the LG Update app that matches your system. (Applies to models released in 2024 and later).",
+        "*The above tablet and mobile devices are not included in the package (sold separately).",
+        "*The image shows the representative LG gram product for illustrative purpose. Please see the gallery images taken with the actual product.",
+        "*gram Link is scheduled for future updates, and the version update schedule may vary by country."
+      ],
+      "layout": {
+        "type": "multi-image",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-09-2-1-data-transfer.jpg",
+          "alt": "Get all connected",
+          "matchedBy": "doc-order"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-09-2-2-display-expansion.jpg",
+          "alt": "Data transfer",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-09-2-3-ai-classification.jpg",
+          "alt": "Use your tablet or smartphone as a second screen.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-09-2-4-phone-as-webcam.jpg",
+          "alt": "AI automatically handles image classification and tagging.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-09-2-5-audio-sharing-phone.jpg",
+          "alt": "Use your smartphone's high-performance camera for video calls.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-09-2-6-make-receive-calls.jpg",
+          "alt": "Share your smartphone sound directly with LG gram's speakers.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-09-2-7-screen-mirroring.jpg",
+          "alt": "Make and receive calls directly from your LG gram.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-09-2-8-keyboard-mouse-share.jpg",
+          "alt": "Cast your tablet or smartphone screen to the gram.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-26",
+      "order": 26,
+      "eyebrow": "",
+      "headline": "Ultra-portable, ultra-durable",
+      "body": "The LG gram Pro evolves with Dual AI, yet its slim, lightweight essence stays true. Durability validated by military-grade testing, it offers the joy of lightness and limitless value. With enhanced portability, take your world with you anywhere.\nLightweight\n|     |\n| --- |\n| Super Slim |\nstrong body-durability-military-grade-test.\nPlay videoPause video",
+      "disclaimers": [
+        "**1,479g**",
+        "**14.5mm**",
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience.",
+        "*The thickness stated above measures the slimmest part of the product, and the weight is based on the laptop only. Please see the specification for a detailed product description.",
+        "*LG gram: MIL-STD-810H standard testing and certification by KOLAS Labs. Passed 7 different MIL-STD 810H Tests for durability conducted by an independent laboratory that conforms to U.S. military standards. Compliant with the following methods for MIL-STD-810H: Method 500.6 Low Pressure (Altitude) (Procedure I – Storage and Method and Procedure II - Operation); Method 501.7 High Temperature (Procedure I – Storage and Procedure II - Operation); Method 502.7 Low Temperature (Procedure I – Storage and Procedure II - Operation); Method 509.7 – Salt Fog Test; Method 510.7 - Dust; Method 514.8 – Vibration; Method 516.8 Shock (Procedure I – Functional and Procedure Ⅳ - Transit Drop). Device may not perform as tested in all conditions. Test performed in controlled environment. Do not attempt.",
+        "*If a consumer runs this experiment and causes damage to the gram, it is not covered under warranty.",
+        "*Passing this test does not mean it is suitable for military use."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-10-3-slim-light-m.jpg",
+          "alt": "An animation showcasing a lightweight laptop with '1,479g' displayed in the first frame and '14.5mm' thickness in the second frame. Both frames include the MIL-STD durability badge, emphasizing portability and durability.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 13606,
+            "left": 160
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/video/gram-pro-17z90tr-2025-black-feature-10-3-slim-light-m.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-27",
+      "order": 27,
+      "eyebrow": "",
+      "headline": "Pro-grade display, vivid and sharp",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-28",
+      "order": 28,
+      "eyebrow": "",
+      "headline": "17\" 16:10    WQXGA",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-29",
+      "order": 29,
+      "eyebrow": "Wide and clear visuals",
+      "headline": "IPS    Panel",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-30",
+      "order": 30,
+      "eyebrow": "Wide viewing angles",
+      "headline": "DCI-P3    99% (Typ.)",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-31",
+      "order": 31,
+      "eyebrow": "Rich color gamut",
+      "headline": "Up to    144Hz",
+      "body": "Smooth refresh rate\nWQXGA display",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-32",
+      "order": 32,
+      "eyebrow": "",
+      "headline": "Sharp vision, vivid reality",
+      "body": "Unlock the potential of your creativity and elevate your everyday experiences with a\nlaptop that brings your ideas to\nlife in stunning detail!",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-11-1-3-wqxga-display-m.jpg",
+          "alt": "A laptop displaying a vivid and colorful landscape of vibrant mountains on its screen, emphasizing high-resolution and rich color reproduction. The background features a blurred version of the same landscape, drawing attention to the screen quality.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-33",
+      "order": 33,
+      "eyebrow": "VRR (Variable Refresh Rate)",
+      "headline": "Fluid display, the pro way",
+      "body": "Experience fluid visuals, optimized to your work and needs. The gram Pro intuitively syncs refresh rates (range of 31Hz-144Hz) with your activities, delivering vivid detail when you’re on a roll and power-saving stillness when you’re not.\nPlay videoPause video\nPlay videoPause video",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience.",
+        "*The above program is not included in the package (sold separately)."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-11-2-2-variable-refresh-rate-m.jpg",
+          "alt": "An animation shows a laptop displaying an racing game of car scene on its screen with a highlighted text '31Hz - 144Hz,' surrounded by additional screens featuring diverse visuals. This setup emphasizes gaming and multimedia versatility with a variable refresh rate.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 14686,
+            "left": 160
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-11-3-1-1-wqxga-16-10.jpg",
+          "alt": "A laptop showcasing a video editing interface with a stunning mountain landscape on the screen. An animation highlighting the transition from a 16:9 aspect ratio to a 16:10 aspect ratio, emphasizing the expanded vertical workspace provided by the 16:10 ratio.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 464,
+            "top": 14830,
+            "left": 240
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/video/gram-pro-17z90tr-2025-black-feature-11-2-2-variable-refresh-rate-m.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-34",
+      "order": 34,
+      "eyebrow": "",
+      "headline": "More room to breathe",
+      "body": "LG gram Pro with the 16:10 aspect ratio display allows you to see more content with less scrolling.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-35",
+      "order": 35,
+      "eyebrow": "",
+      "headline": "See the full spectrum",
+      "body": "Thanks to the wide color of DCI-P3 99% (Typ.), you can enjoy vivid details and rich colors while 400nits (Typ.) of brightness accentuate fine textural details.\nPlay videoPause video",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 2
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-11-3-1-2-dci-pc-99.jpg",
+          "alt": "A vibrant close-up of a person wearing colorful accessories and reflective sunglasses, showcasing vivid, lifelike colors. The image emphasizes the DCI-P3 99% color gamut, highlighting accurate and rich color reproduction",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 464,
+            "top": 14830,
+            "left": 728
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-11-3-1-3-anti-glare.jpg",
+          "alt": "A person sitting comfortably in a chair, using a laptop that displays a presentation with charts and graphs. An animation demonstrates the anti-glare screen by showing no light reflection even when sunlight shines directly onto the display.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 464,
+            "top": 14830,
+            "left": 1216
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/video/gram-pro-17z90tr-2025-black-feature-11-3-1-3-anti-glare.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-36",
+      "order": 36,
+      "eyebrow": "",
+      "headline": "Uninterrupted clarity",
+      "body": "Work comfortably anywhere with the LG gram Pro’s anti-glare panel and 178-degree viewing angle, offering clear and vibrant visuals from various perspectives.",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience.",
+        "*DCI-P3 Typical 99%, Minimum 95%. (DCI-P3: The color standard defined by the Digital Cinema Initiatives (DCI)).",
+        "*The brightness is 400nits (Typ.)."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-37",
+      "order": 37,
+      "eyebrow": "Dolby Atmos®",
+      "headline": "Immerse your sense",
+      "body": "Soundscapes come alive. Dolby Atmos® technology envelops you in a lush, expansive, 360-degree auditory adventure.",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience.",
+        "*Dolby, Dolby Atmos® and the double-D symbol are registered trademarks of Dolby Laboratories Licensing Corporation."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-12-1-dolby-atmos-m.jpg",
+          "alt": "A person sitting on a couch, enjoying immersive audio while using an LG gram laptop. The text highlights Dolby Atmos technology, emphasizing a rich, expansive, 360-degree auditory experience. Surrounding sound waves in the background visually represent the immersive soundscape.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-38",
+      "order": 38,
+      "eyebrow": "Easy connectivity",
+      "headline": "Simple, instant connectivity",
+      "body": "Connect with gram +view, high-speed storage, bigger monitors, or cutting-edge devices. So many ports make a plug-and-play paradise of greater productivity and endless entertainment.\nPrint",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience.",
+        "*USB Type-C™ (USB 4 Gen 3x2, Thunderbolt™), USB Type-A (USB 3.2 Gen 1x1).",
+        "*USB Type-C™ and USB-C™ are trademarks of USB Implementers Forum."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-13-1-multi-ports-m.jpg",
+          "alt": "A side view of a laptop showcasing its ports, including USB 3.2, headphone/microphone combo jack (HP/MIC), HDMI, and USB 4 Type-C (Thunderbolt™ 4). The clean layout highlights versatile connectivity options.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 15544,
+            "left": 160
+          }
+        }
+      ]
+    }
+  ],
+  "unassignedAssets": [],
+  "review": {
+    "imageCoverage": {
+      "inMarkdown": 77,
+      "captured": 74,
+      "coveragePct": 96,
+      "missing": [
+        "https://www.lg.com/content/dam/channel/wcms/sg/images/dehumidifier/md19gqga1/gallery/MD19GQGA1_Dehumidifier_350-B.jpg",
+        "https://www.lg.com/content/dam/channel/wcms/sg/01-assets/general/footer/CSB-SG-2026-Gold.png",
+        "https://www.lg.com/content/dam/channel/wcms/sg/products/monitor-pc/laptops/17z90tr/feature/gram-pro-17z90tr-2025-black-feature-02-3-5-troubleshooting.jpg"
+      ]
+    },
+    "verbatimFails": [
+      {
+        "id": "sec-01",
+        "field": "headline",
+        "text": "LG gram Pro 17\" \\| Windows 11 Home \\| Lightweight \\| 32GB RA"
+      }
+    ],
+    "emptySections": [
+      {
+        "id": "sec-12",
+        "headline": "Pro power meets AI brilliance"
+      },
+      {
+        "id": "sec-14",
+        "headline": "13 TOPS   NPU"
+      },
+      {
+        "id": "sec-17",
+        "headline": "LPDDR5x"
+      },
+      {
+        "id": "sec-21",
+        "headline": "Game-winning responsiveness"
+      },
+      {
+        "id": "sec-22",
+        "headline": "True-to-life-graphics"
+      },
+      {
+        "id": "sec-27",
+        "headline": "Pro-grade display, vivid and sharp"
+      },
+      {
+        "id": "sec-28",
+        "headline": "17\" 16:10    WQXGA"
+      },
+      {
+        "id": "sec-29",
+        "headline": "IPS    Panel"
+      },
+      {
+        "id": "sec-30",
+        "headline": "DCI-P3    99% (Typ.)"
+      },
+      {
+        "id": "sec-31",
+        "headline": "Up to    144Hz"
+      }
+    ],
+    "unassignedCount": 0
+  }
+}

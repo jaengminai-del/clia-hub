@@ -1,0 +1,377 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   clia-ui.css — CLIA 공통 UI 스타일 (261008)
+   Retail OBS Content Builder(lg-retail-obs-content-builder)의 "LG Design System v3"를 따른다.
+     · 따뜻한 회색 뉴트럴만 사용 (차가운 회색 금지)
+     · Active Red #FD312E = UI 강조(CTA·활성·포커스), #A50034 은 LG 로고 전용
+     · 서체: LG EI Headline (UI 전반)
+     · 흰 헤더 64px + 아이콘 레일 64px + 본문 배경 #F8F7F5, 알약형 버튼, 흰 카드 + 연회색 테두리
+   사용: <body class="clia-hub"> (CLIA 허브) / 빌더는 body 에 clia-skin-* 클래스를 붙이면 해당 블록 적용.
+   제품 컨텐츠(프리뷰·생성물)의 스타일은 건드리지 않는다.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --clia-font: 'LGEIHeadline', 'LG EI Headline', 'LGEIText', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+  --clia-gray-50: #FAF9F5;
+  --clia-gray-100: #F6F3EB;
+  --clia-gray-200: #E6E1D6;
+  --clia-gray-300: #CBC8C2;
+  --clia-gray-400: #A19E99;
+  --clia-gray-500: #716F6A;
+  --clia-gray-600: #5C5B5A;
+  --clia-gray-700: #4A4946;
+  --clia-gray-800: #333333;
+  --clia-gray-900: #262626;
+  --clia-page: #F8F7F5;
+  --clia-brand: #FD312E;
+  --clia-brand-hover: #E22825;
+  --clia-brand-soft: rgba(253, 49, 46, .08);
+  --clia-heritage: #A50034;
+  --clia-radius-sm: 8px;
+  --clia-radius: 12px;
+  --clia-radius-lg: 20px;
+  --clia-shadow: 0 1px 2px rgba(38, 38, 38, .04), 0 4px 16px rgba(38, 38, 38, .04);
+}
+
+/* ── 공통 컴포넌트 ─────────────────────────────────────────────────────── */
+.clia-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--clia-gray-300); background: #fff; color: var(--clia-gray-700); font: 500 14px/1 var(--clia-font); cursor: pointer; transition: background .15s, border-color .15s, color .15s; white-space: nowrap; }
+.clia-btn:hover { border-color: var(--clia-gray-700); color: var(--clia-gray-900); }
+.clia-btn.primary { background: var(--clia-brand); border-color: var(--clia-brand); color: #fff; }
+.clia-btn.primary:hover { background: var(--clia-brand-hover); border-color: var(--clia-brand-hover); }
+.clia-btn:disabled { opacity: .5; cursor: default; }
+.clia-input { width: 100%; height: 44px; padding: 0 14px; border: 1px solid var(--clia-gray-300); border-radius: 10px; background: #fff; color: var(--clia-gray-900); font: 400 14px var(--clia-font); outline: none; transition: border-color .15s, box-shadow .15s; box-sizing: border-box; }
+.clia-input:focus { border-color: var(--clia-brand); box-shadow: 0 0 0 3px var(--clia-brand-soft); }
+.clia-input::placeholder { color: var(--clia-gray-400); }
+
+/* ═══════════════════════════════════ CLIA 허브 ═══════════════════════════ */
+body.clia-hub { font-family: var(--clia-font); background: var(--clia-page); color: var(--clia-gray-900); font-size: 13px; -webkit-font-smoothing: antialiased; }
+body.clia-hub button, body.clia-hub input, body.clia-hub select, body.clia-hub textarea { font-family: var(--clia-font); }
+
+/* 헤더 */
+.clia-hub .topbar { height: 64px; background: #fff; color: var(--clia-gray-900); border-bottom: 1px solid var(--clia-gray-200); padding: 0 24px 0 20px; gap: 14px; }
+.clia-hub .tb-logo { display: flex; align-items: center; gap: 12px; }
+.clia-hub .tb-logo img { height: 24px; display: block; }
+.clia-hub .tb-div { width: 1px; height: 16px; background: var(--clia-gray-200); }
+.clia-hub .tb-title { font-weight: 700; font-size: 15px; color: var(--clia-gray-900); }
+.clia-hub .tb-right { gap: 12px; }
+.clia-hub .tb-corp { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border: 1px solid var(--clia-gray-300); border-radius: 999px; background: #fff; color: var(--clia-gray-700); font-size: 14px; font-weight: 500; }
+.clia-hub .tb-avatar { width: 36px; height: 36px; background: var(--clia-gray-100); color: var(--clia-gray-700); font-size: 12px; border: 1px solid var(--clia-gray-200); }
+.clia-hub .tb-logout { height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--clia-gray-300); background: #fff; color: var(--clia-gray-700); font-size: 14px; font-weight: 500; }
+.clia-hub .tb-logout:hover { border-color: var(--clia-gray-700); color: var(--clia-gray-900); background: #fff; }
+
+/* 아이콘 레일 (마우스를 올리면 라벨까지 펼쳐짐) */
+.clia-rail { position: fixed; top: 64px; left: 0; bottom: 0; width: 64px; z-index: 190; }
+.clia-rail-in { position: absolute; inset: 0 auto 0 0; width: 64px; background: #fff; border-right: 1px solid var(--clia-gray-200); display: flex; flex-direction: column; padding: 12px 0; overflow: hidden; transition: width .2s ease, box-shadow .2s ease; }
+.clia-rail:hover .clia-rail-in { width: 240px; box-shadow: 0 12px 32px rgba(38, 38, 38, .12); }
+.clia-rail-item { display: flex; align-items: center; gap: 14px; height: 44px; padding: 0 22px; border: none; background: none; color: var(--clia-gray-500); font: 500 15px var(--clia-font); cursor: pointer; white-space: nowrap; text-align: left; width: 100%; }
+.clia-rail-item svg { width: 20px; height: 20px; flex-shrink: 0; stroke: currentColor; stroke-width: 1.75; fill: none; }
+.clia-rail-item span { opacity: 0; transition: opacity .15s; }
+.clia-rail:hover .clia-rail-item span { opacity: 1; }
+.clia-rail-item:hover { color: var(--clia-gray-900); background: var(--clia-gray-50); }
+.clia-rail-item.act { color: var(--clia-brand); background: var(--clia-brand-soft); }
+.clia-rail-bottom { margin-top: auto; padding-top: 8px; border-top: 1px solid var(--clia-gray-100); }
+
+/* 레이아웃 */
+.clia-hub .wrap { margin-top: 64px; margin-left: 64px; height: calc(100vh - 64px); }
+.clia-hub .left { width: 440px; min-width: 440px; background: #fff; border-right: 1px solid var(--clia-gray-200); }
+.clia-hub .right { background: var(--clia-page); }
+
+/* 제품 목록 */
+.clia-hub .lh { padding: 24px 24px 12px; border-bottom: none; }
+.clia-hub .lh h2 { font-size: 20px; font-weight: 700; color: var(--clia-gray-900); letter-spacing: -.2px; }
+.clia-hub .lh-meta { font-size: 13px; color: var(--clia-gray-500); margin-top: 6px; gap: 12px; }
+.clia-hub .lh-ctrl { padding: 8px 24px 16px; gap: 8px; border-bottom: 1px solid var(--clia-gray-200); }
+.clia-hub .seg { display: inline-flex; padding: 3px; background: var(--clia-gray-100); border-radius: 999px; gap: 2px; }
+.clia-hub .seg button { height: 28px; padding: 0 14px; border: none; border-radius: 999px; background: transparent; color: var(--clia-gray-500); font-size: 12px; font-weight: 500; cursor: pointer; }
+.clia-hub .seg button.act { background: #fff; color: var(--clia-gray-900); box-shadow: 0 1px 3px rgba(38, 38, 38, .12); }
+.clia-hub .fbtn { height: 30px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--clia-gray-300); background: #fff; color: var(--clia-gray-700); font-size: 12px; font-weight: 500; }
+.clia-hub .fbtn:hover { border-color: var(--clia-gray-700); }
+.clia-hub .fbtn.act { background: var(--clia-brand-soft); border-color: var(--clia-brand); color: var(--clia-brand); }
+.clia-hub .sbox { height: 40px; padding: 0 14px; border: 1px solid var(--clia-gray-300); border-radius: 10px; font-size: 13px; color: var(--clia-gray-900); background: #fff; transition: border-color .15s, box-shadow .15s; }
+.clia-hub .sbox:focus { border-color: var(--clia-brand); box-shadow: 0 0 0 3px var(--clia-brand-soft); }
+.clia-hub .sbox::placeholder { color: var(--clia-gray-400); }
+.clia-hub #prodSearch { flex-basis: 100%; margin-top: 4px; }
+.clia-hub .crawl-url-row { gap: 8px; margin-top: 2px; }
+.clia-hub .crawl-url-btn { height: 40px; padding: 0 20px; border-radius: 999px; background: var(--clia-brand); font-size: 13px; font-weight: 600; }
+.clia-hub .crawl-url-btn:hover { background: var(--clia-brand-hover); }
+.clia-hub .crawl-url-btn:disabled { background: var(--clia-gray-300); }
+.clia-hub .list-warn { border-radius: 10px; font-size: 12px; padding: 8px 12px; background: #FFF4F0; border-color: #FFD9CF; color: #B4371F; }
+.clia-hub .lt { font-size: 13px; }
+.clia-hub .lt th { background: #fff; padding: 10px 8px; font-size: 11px; font-weight: 500; color: var(--clia-gray-500); letter-spacing: .04em; border-bottom: 1px solid var(--clia-gray-200); }
+.clia-hub .lt th:first-child, .clia-hub .lt td:first-child { padding-left: 24px; }
+.clia-hub .lt th:last-child, .clia-hub .lt td:last-child { padding-right: 24px; }
+.clia-hub .lt td { padding: 10px 8px; border-bottom: 1px solid var(--clia-gray-100); color: var(--clia-gray-700); }
+.clia-hub .lt td b { color: var(--clia-gray-900); font-weight: 600; }
+.clia-hub .lt tr:hover { background: var(--clia-gray-50); }
+.clia-hub .lt tr.sel { background: var(--clia-brand-soft); box-shadow: inset 3px 0 0 var(--clia-brand); }
+.clia-hub .lt .thumb, .clia-hub .lt .thumb-ph { width: 44px; height: 44px; border-radius: 10px; background: var(--clia-gray-100); }
+.clia-hub .dt { padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; }
+.clia-hub .dt-ms { background: #EEF0F6; color: #3B4A6B; }
+.clia-hub .dt-ha { background: var(--clia-gray-100); color: var(--clia-gray-700); }
+.clia-hub .st { padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; }
+.clia-hub .st-ok { background: #EAF6EF; color: #23784A; }
+.clia-hub .st-pend { background: var(--clia-gray-100); color: var(--clia-gray-500); }
+.clia-hub .st-md { background: #F1ECF7; color: #6A4A92; }
+.clia-hub .det-btn { height: 28px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--clia-gray-300); color: var(--clia-gray-700); font-size: 12px; font-weight: 500; background: #fff; }
+.clia-hub .det-btn:hover { background: #fff; color: var(--clia-brand); border-color: var(--clia-brand); }
+.clia-hub .empty { color: var(--clia-gray-400); }
+.clia-hub .empty .ico { font-size: 40px; opacity: .6; }
+
+/* 제품 상세 */
+.clia-hub .dp { padding: 28px 32px 40px; max-width: 1280px; }
+.clia-hub .dp-top { background: #fff; border: 1px solid var(--clia-gray-200); border-radius: var(--clia-radius-lg); padding: 24px; gap: 32px; margin-bottom: 24px; }
+.clia-hub .dp-left { width: 380px; }
+.clia-hub .dp-main-img { background: var(--clia-gray-50); border: none; border-radius: 16px; }
+.clia-hub .dp-thumbs { gap: 6px; }
+.clia-hub .dp-th { width: 52px; height: 52px; border: 1px solid var(--clia-gray-200); border-radius: 8px; }
+.clia-hub .dp-th:hover, .clia-hub .dp-th.act { border: 2px solid var(--clia-brand); }
+.clia-hub .dp-img-count { font-size: 12px; color: var(--clia-gray-500); }
+.clia-hub .dp-cat { font-size: 13px; color: var(--clia-gray-500); margin-bottom: 8px; }
+.clia-hub .dp-name { font-size: 24px; font-weight: 700; line-height: 1.3; color: var(--clia-gray-900); margin-bottom: 10px; letter-spacing: -.2px; }
+.clia-hub .dp-meta { font-size: 13px; color: var(--clia-gray-500); margin-bottom: 10px; }
+.clia-hub .dp-meta code { background: var(--clia-gray-100); color: var(--clia-gray-700); border-radius: 6px; padding: 2px 8px; font-size: 12px; }
+.clia-hub .dp-price { color: var(--clia-gray-900); font-size: 22px; font-weight: 700; }
+.clia-hub .dp-link { font-size: 13px; margin-bottom: 24px; }
+.clia-hub .dp-link a { color: var(--clia-brand); font-weight: 500; }
+.clia-hub .ch-section { border-top: 1px solid var(--clia-gray-200); padding-top: 20px; }
+.clia-hub .ch-label { font-size: 12px; font-weight: 600; color: var(--clia-gray-500); letter-spacing: .06em; margin-bottom: 12px; }
+.clia-hub .ch-btns { gap: 8px; }
+.clia-hub .ch-btn { height: 32px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--clia-gray-200); background: #fff; color: var(--clia-gray-700); font-size: 12px; font-weight: 500; }
+.clia-hub .ch-btn:hover { transform: none; opacity: 1; border-color: var(--clia-gray-700); }
+.clia-hub .ch-main-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; width: 100%; margin-bottom: 4px; }
+.clia-hub .ch-btn.ch-main { height: 56px; border-radius: var(--clia-radius); border: 1px solid var(--clia-gray-200); background: #fff; color: var(--clia-gray-900); font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: var(--clia-shadow); }
+.clia-hub .ch-btn.ch-main::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--ch-color, var(--clia-brand)); }
+.clia-hub .ch-btn.ch-main:hover { border-color: var(--clia-brand); color: var(--clia-brand); box-shadow: 0 0 0 3px var(--clia-brand-soft); }
+.clia-hub .ch-btn.ch-disabled { opacity: .45; filter: none; background: var(--clia-gray-50); border-color: var(--clia-gray-200); color: var(--clia-gray-500); }
+.clia-hub .ch-btn.ch-disabled:hover { opacity: .45; border-color: var(--clia-gray-200); }
+.clia-hub .ch-btn.ch-disabled:hover::after { background: var(--clia-gray-900); border-radius: 6px; font-family: var(--clia-font); }
+.clia-hub .ch-sub-label { width: 100%; font-size: 11px; color: var(--clia-gray-400); margin: 10px 0 2px; }
+.clia-hub .feat-header { font-size: 16px; font-weight: 700; color: var(--clia-gray-900); border-bottom: none; padding: 0; margin: 8px 0 12px; gap: 8px; }
+.clia-hub .feat-grid { gap: 10px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); margin-bottom: 28px; }
+.clia-hub .feat-thumb { border-radius: var(--clia-radius); border: 1px solid var(--clia-gray-200); background: #fff; }
+.clia-hub .feat-thumb:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(38, 38, 38, .12); border-color: var(--clia-gray-300); }
+.clia-hub .spec-t { background: #fff; border: 1px solid var(--clia-gray-200); border-radius: var(--clia-radius); border-collapse: separate; border-spacing: 0; overflow: hidden; font-size: 13px; margin-bottom: 24px; }
+.clia-hub .spec-t td { border: none; border-bottom: 1px solid var(--clia-gray-100); padding: 10px 16px; color: var(--clia-gray-700); }
+.clia-hub .spec-t tr:last-child td { border-bottom: none; }
+.clia-hub .spec-t td:first-child { background: var(--clia-gray-50); color: var(--clia-gray-900); font-weight: 600; }
+.clia-hub .ptag { background: var(--clia-gray-100); color: var(--clia-gray-600); border-radius: 999px; padding: 3px 10px; font-size: 11px; }
+.clia-hub .ai-tag { background: var(--clia-brand-soft); color: var(--clia-brand); border-radius: 999px; padding: 2px 8px; font-size: 10px; font-weight: 600; }
+
+/* GEO */
+.clia-hub .geo-sec { border: 1px solid var(--clia-gray-200); border-radius: var(--clia-radius-lg); margin-top: 8px; }
+.clia-hub .geo-hd { background: #fff; color: var(--clia-gray-900); border-bottom: 1px solid var(--clia-gray-200); padding: 18px 24px; }
+.clia-hub .geo-hd h3 { font-size: 16px; font-weight: 700; }
+.clia-hub .geo-bar { background: var(--clia-gray-100); }
+.clia-hub .geo-num { font-family: var(--clia-font); font-size: 20px; }
+.clia-hub .geo-bd { padding: 20px 24px 24px; }
+.clia-hub .geo-sub { font-size: 13px; font-weight: 600; color: var(--clia-gray-700); margin: 20px 0 10px; }
+.clia-hub .geo-ps { border: 1px solid var(--clia-gray-200); border-radius: var(--clia-radius); padding: 12px 14px; }
+.clia-hub .geo-ps-hd { font-size: 12px; color: var(--clia-gray-700); font-weight: 600; }
+.clia-hub .geo-ps-hd b { font-size: 18px; }
+.clia-hub .geo-ps-why { font-size: 11px; color: var(--clia-gray-500); }
+.clia-hub .geo-faq { border: 1px solid var(--clia-gray-200); border-radius: 10px; margin-bottom: 8px; }
+.clia-hub .geo-fq { background: #fff; font-size: 13px; font-weight: 600; color: var(--clia-gray-900); padding: 12px 16px; }
+.clia-hub .geo-fq:hover { background: var(--clia-gray-50); }
+.clia-hub .geo-fa { font-size: 13px; color: var(--clia-gray-700); padding: 12px 16px; border-top: 1px solid var(--clia-gray-100); background: var(--clia-gray-50); }
+.clia-hub .geo-cl { border: 1px solid var(--clia-gray-200); border-radius: 10px; font-size: 12px; }
+.clia-hub .geo-cl .src { color: var(--clia-gray-500); }
+.clia-hub .geo-cmp th { background: var(--clia-gray-50); border-color: var(--clia-gray-200); }
+.clia-hub .geo-cmp td { border-color: var(--clia-gray-200); }
+.clia-hub .geo-schema { background: var(--clia-gray-900); border-radius: 10px; font-size: 11px; max-height: 160px; }
+.clia-hub .geo-gen { border-radius: 10px; background: var(--clia-gray-50); border-color: var(--clia-gray-300); color: var(--clia-gray-600); font-size: 12px; }
+.clia-hub .geo-gen .spinner { border-top-color: var(--clia-brand); }
+.clia-hub .geo-md-btn { height: 40px; padding: 0 20px; border-radius: 999px; background: var(--clia-gray-900); border-color: var(--clia-gray-900); font-size: 13px; font-weight: 600; margin-top: 20px; }
+.clia-hub .geo-md-btn:hover { background: #000; }
+.clia-hub .geo-retry { border-radius: 999px; padding: 4px 12px; }
+.clia-hub .geo-sec [data-no-i18n] span[style*="EEF2FF"] { background: var(--clia-gray-100) !important; color: var(--clia-gray-700) !important; font-size: 11px !important; padding: 4px 10px !important; }
+
+/* Coffee Break */
+.clia-hub .coffee-card { border-radius: 24px; font-family: var(--clia-font); }
+.clia-hub .coffee-title { font-family: var(--clia-font); font-weight: 700; }
+.clia-hub .coffee-msg { color: var(--clia-gray-600); font-size: 14px; }
+.clia-hub .coffee-bar { background: var(--clia-gray-100); }
+.clia-hub .coffee-bar-fill { background: var(--clia-brand); }
+.clia-hub .coffee-status { color: var(--clia-gray-500); font-size: 12px; }
+
+/* 채널 빌더 오버레이 (eBay / Amazon / Shopee·Lazada) */
+.clia-hub .ebay-builder-overlay, .clia-hub .chb-overlay { background: var(--clia-page); }
+.clia-hub .ebb-header { height: 64px; background: #fff; border-bottom: 1px solid var(--clia-gray-200); padding: 0 24px; gap: 12px; }
+.clia-hub .ebb-logo { font-size: 0; display: flex; align-items: center; }
+.clia-hub .ebb-logo::before { content: ''; width: 58px; height: 24px; background: url('assets/lg-logo.svg') left center / contain no-repeat; }
+.clia-hub .ebb-sep { width: 1px; height: 16px; background: var(--clia-gray-200); }
+.clia-hub .ebb-title { font-size: 15px; font-weight: 700; color: var(--clia-gray-900); }
+.clia-hub .ebb-close { height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--clia-gray-300); color: var(--clia-gray-700); font-size: 14px; font-weight: 500; }
+.clia-hub .ebb-close:hover { background: #fff; color: var(--clia-gray-900); border-color: var(--clia-gray-700); }
+.clia-hub .ebb-left { border-right: 1px solid var(--clia-gray-200); }
+.clia-hub .ebb-panel-head { height: 56px; background: #fff; border-bottom: 1px solid var(--clia-gray-200); padding: 0 20px; }
+.clia-hub .ebb-panel-title { font-size: 15px; font-weight: 700; color: var(--clia-gray-900); }
+.clia-hub .ebb-badge { background: var(--clia-brand-soft); color: var(--clia-brand); font-size: 11px; font-weight: 600; }
+.clia-hub .ebb-btn { height: 34px; padding: 0 14px; border-radius: 999px; border-color: var(--clia-gray-300); color: var(--clia-gray-700); font-size: 13px; font-weight: 500; }
+.clia-hub .ebb-btn:hover { background: #fff; border-color: var(--clia-gray-700); color: var(--clia-gray-900); }
+.clia-hub .ebb-btn.primary { background: var(--clia-brand); border-color: var(--clia-brand); color: #fff; }
+.clia-hub .ebb-btn.primary:hover { background: var(--clia-brand-hover); }
+.clia-hub .ebb-btn.danger { color: var(--clia-gray-700); border-color: var(--clia-gray-300); }
+.clia-hub .ebb-btn.danger:hover { background: #fff; color: var(--clia-brand); border-color: var(--clia-brand); }
+.clia-hub .ebb-compliance-bar { padding: 10px 20px; font-size: 12px; }
+.clia-hub .ebb-compliance-bar.ok { background: var(--clia-gray-100); border-color: var(--clia-gray-200); color: var(--clia-gray-700); }
+.clia-hub .ebb-preview-scroll { background: var(--clia-page); padding: 24px; }
+.clia-hub .ebb-preview-frame { border-radius: var(--clia-radius); box-shadow: var(--clia-shadow); border: 1px solid var(--clia-gray-200); }
+.clia-hub .ebb-preview-empty { border-color: var(--clia-gray-300); color: var(--clia-gray-400); }
+.clia-hub .ebb-bottom-bar { background: #fff; border-top: 1px solid var(--clia-gray-200); }
+.clia-hub .ebb-right { background: var(--clia-page); }
+.clia-hub .ebb-input-section { background: #fff; border-bottom: 1px solid var(--clia-gray-200); }
+.clia-hub .ebb-label { font-size: 12px; font-weight: 600; color: var(--clia-gray-500); letter-spacing: .04em; }
+.clia-hub .ebb-url-input { height: 40px; border: 1px solid var(--clia-gray-300); border-radius: 10px; font-size: 13px; }
+.clia-hub .ebb-url-input:focus { border-color: var(--clia-brand); box-shadow: 0 0 0 3px var(--clia-brand-soft); }
+.clia-hub .ebb-analyze-btn { height: 40px; border-radius: 999px; background: var(--clia-brand); font-weight: 600; }
+.clia-hub .ebb-analyze-btn:hover { background: var(--clia-brand-hover); }
+.clia-hub .ebb-hint, .clia-hub .ebb-lib-section { background: #fff; border: 1px solid var(--clia-gray-200); border-radius: var(--clia-radius); font-size: 12px; color: var(--clia-gray-600); }
+.clia-hub .ebb-lib-title { color: var(--clia-gray-500); }
+.clia-hub .ebb-lib-chip { border-color: var(--clia-gray-300); color: var(--clia-gray-700); font-size: 12px; padding: 5px 12px; }
+.clia-hub .ebb-lib-chip:hover { background: var(--clia-brand-soft); border-color: var(--clia-brand); color: var(--clia-brand); }
+.clia-hub .chb-overlay iframe { background: var(--clia-page); }
+
+/* 크롤 모달 (개발자용) */
+.clia-hub .crwl-box { border-radius: var(--clia-radius-lg); font-family: var(--clia-font); }
+.clia-hub .crwl-btn { border-radius: 999px; }
+.clia-hub .crwl-btn-primary { background: var(--clia-brand); border-color: var(--clia-brand); }
+.clia-hub .crawl-btn { border-radius: 999px; background: var(--clia-brand); }
+
+/* 로그인 */
+.clia-login { position: fixed; inset: 0; z-index: 100000; background: var(--clia-page); display: flex; flex-direction: column; font-family: var(--clia-font); color: var(--clia-gray-900); animation: cliaFade .35s ease-out; }
+.clia-login.hidden { display: none; }
+.clia-login.fading-out { animation: cliaFadeOut .35s ease-out forwards; }
+@keyframes cliaFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cliaFadeOut { to { opacity: 0; } }
+.clia-login-hd { height: 64px; background: #fff; border-bottom: 1px solid var(--clia-gray-200); display: flex; align-items: center; gap: 12px; padding: 0 32px; flex-shrink: 0; }
+.clia-login-hd img { height: 24px; display: block; }
+.clia-login-hd .tb-div { width: 1px; height: 16px; background: var(--clia-gray-200); }
+.clia-login-hd b { font-size: 15px; font-weight: 700; }
+.clia-login-body { flex: 1; display: flex; align-items: center; justify-content: center; padding: 32px 24px; overflow-y: auto; }
+.clia-login-stack { width: min(440px, 100%); display: flex; flex-direction: column; align-items: center; text-align: center; }
+.clia-login-pill { display: inline-block; background: var(--clia-brand); color: #fff; font-size: 14px; font-weight: 500; padding: 6px 14px; border-radius: 999px; margin-bottom: 20px; }
+.clia-login-title { font-size: 40px; font-weight: 700; letter-spacing: -.6px; line-height: 1.15; margin: 0 0 10px; }
+.clia-login-sub { font-size: 16px; color: var(--clia-gray-500); margin: 0 0 32px; line-height: 1.5; }
+.clia-login-card { width: 100%; background: #fff; border: 1px solid var(--clia-gray-200); border-radius: 24px; padding: 32px; text-align: left; display: flex; flex-direction: column; gap: 18px; box-shadow: var(--clia-shadow); }
+.clia-field label { display: block; font-size: 13px; font-weight: 600; color: var(--clia-gray-700); margin-bottom: 8px; }
+.clia-select { appearance: none; -webkit-appearance: none; background: #fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23716F6A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>") right 14px center no-repeat; padding-right: 40px; cursor: pointer; }
+.clia-select:invalid { color: var(--clia-gray-400); }
+.clia-login-err { min-height: 18px; font-size: 13px; color: var(--clia-brand); margin: -6px 0 -6px; }
+.clia-login-btn { width: 100%; height: 48px; font-size: 16px; font-weight: 600; }
+.clia-login-hint { margin-top: 20px; font-size: 13px; color: var(--clia-gray-400); }
+
+/* 261008 보정: 목록 폭·배지 줄바꿈, 대표 이미지, GEO 점 */
+.clia-hub .left { width: 480px; min-width: 480px; }
+.clia-hub .lt .st, .clia-hub .lt .dt, .clia-hub .det-btn { white-space: nowrap; }
+.clia-hub .det-btn { padding: 0 10px; }
+.clia-hub .dp-main-img { background: #fff; border: 1px solid var(--clia-gray-200); }
+.clia-hub .geo-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
+.clia-hub .lh h2 { display: flex; align-items: baseline; gap: 6px; }
+
+/* ═══════════════════ 빌더 공통: 허브 안(iframe)에서 열리면 빌더 자체 헤더 숨김 ═══════════════ */
+.clia-embedded .header, .clia-embedded header.header { display: none !important; }
+
+/* ═══════════════ eBay Listing · Shopee/Lazada PDP 빌더 (body.clia-skin-pdp) ═══════════════ */
+body.clia-skin-pdp { font-family: var(--clia-font); background: var(--clia-page); color: var(--clia-gray-900); -webkit-font-smoothing: antialiased; }
+.clia-skin-pdp button, .clia-skin-pdp input, .clia-skin-pdp select { font-family: var(--clia-font); }
+.clia-skin-pdp .header { height: 64px; background: #fff; border-bottom: 1px solid var(--clia-gray-200); padding: 0 24px; gap: 12px; }
+.clia-skin-pdp .header-logo { height: 24px; }
+.clia-skin-pdp .header-sep { height: 16px; background: var(--clia-gray-200); }
+.clia-skin-pdp .header-title { font-family: var(--clia-font); font-size: 15px; font-weight: 700; color: var(--clia-gray-900); }
+.clia-skin-pdp .btn-home { height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--clia-gray-300); color: var(--clia-gray-700); font-size: 14px; font-weight: 500; font-family: var(--clia-font); }
+.clia-skin-pdp .btn-home:hover { background: #fff; color: var(--clia-gray-900); border-color: var(--clia-gray-700); }
+.clia-skin-pdp .panel-left { border-right: 1px solid var(--clia-gray-200); }
+.clia-skin-pdp .panel-head { height: 56px; background: #fff; border-bottom: 1px solid var(--clia-gray-200); padding: 0 20px; }
+.clia-skin-pdp .panel-head-title { font-family: var(--clia-font); font-size: 15px; font-weight: 700; color: var(--clia-gray-900); }
+.clia-skin-pdp .badge-ebay { background: var(--clia-brand-soft); color: var(--clia-brand); font-size: 11px; font-weight: 600; }
+.clia-skin-pdp .btn-sm { height: 34px; padding: 0 14px; border-radius: 999px; border-color: var(--clia-gray-300); color: var(--clia-gray-700); font-size: 13px; font-weight: 500; font-family: var(--clia-font); }
+.clia-skin-pdp .btn-sm:hover { background: #fff; border-color: var(--clia-gray-700); color: var(--clia-gray-900); }
+.clia-skin-pdp .btn-sm.primary { background: var(--clia-brand); border-color: var(--clia-brand); color: #fff; }
+.clia-skin-pdp .btn-sm.primary:hover { background: var(--clia-brand-hover); }
+.clia-skin-pdp .btn-sm.danger { color: var(--clia-gray-700); border-color: var(--clia-gray-300); }
+.clia-skin-pdp .btn-sm.danger:hover { background: #fff; color: var(--clia-brand); border-color: var(--clia-brand); }
+.clia-skin-pdp .preview-scroll { background: var(--clia-page); padding: 24px; }
+.clia-skin-pdp .preview-frame { border-radius: var(--clia-radius); border: 1px solid var(--clia-gray-200); box-shadow: var(--clia-shadow); }
+.clia-skin-pdp .preview-empty { border-color: var(--clia-gray-300); color: var(--clia-gray-400); }
+.clia-skin-pdp .preview-empty-text { color: var(--clia-gray-500); font-size: 13px; }
+.clia-skin-pdp .bottom-bar { border-top: 1px solid var(--clia-gray-200); padding: 12px 20px; }
+.clia-skin-pdp .bottom-bar input, .clia-skin-pdp .bottom-bar select { height: 32px !important; border: 1px solid var(--clia-gray-300) !important; border-radius: 8px !important; font-size: 12px !important; font-family: var(--clia-font) !important; }
+.clia-skin-pdp .char-count { color: var(--clia-gray-500); font-size: 12px; }
+.clia-skin-pdp .panel-right { background: var(--clia-page); }
+.clia-skin-pdp .input-section { padding: 20px; border-bottom: 1px solid var(--clia-gray-200); }
+.clia-skin-pdp .input-label { font-size: 12px; font-weight: 600; color: var(--clia-gray-500); letter-spacing: .04em; }
+.clia-skin-pdp .url-input { height: 40px; border: 1px solid var(--clia-gray-300); border-radius: 10px; background: #fff; font-family: var(--clia-font); }
+.clia-skin-pdp .url-input:focus { border-color: var(--clia-brand); box-shadow: 0 0 0 3px var(--clia-brand-soft); }
+.clia-skin-pdp .btn-analyze { background: var(--clia-brand); border-radius: 999px; font-weight: 600; font-family: var(--clia-font); }
+.clia-skin-pdp .btn-analyze:hover { background: var(--clia-brand-hover); }
+.clia-skin-pdp .btn-analyze:disabled { background: var(--clia-gray-300); }
+.clia-skin-pdp .status-msg { font-size: 12px; color: var(--clia-gray-500); }
+.clia-skin-pdp .status-msg .spinner { border-top-color: var(--clia-brand); }
+.clia-skin-pdp .status-msg.error { color: var(--clia-brand); }
+.clia-skin-pdp .sections-panel { padding: 20px; }
+.clia-skin-pdp .sections-title { font-size: 12px; font-weight: 600; color: var(--clia-gray-500); border-bottom-color: var(--clia-gray-200); }
+.clia-skin-pdp .section-card { border: 1px solid var(--clia-gray-200); border-radius: var(--clia-radius); padding: 12px; }
+.clia-skin-pdp .section-card:hover { border-color: var(--clia-gray-400); }
+.clia-skin-pdp .section-thumb { border-radius: 8px; background: var(--clia-gray-100); }
+.clia-skin-pdp .section-hl { font-size: 13px; font-weight: 600; color: var(--clia-gray-900); }
+.clia-skin-pdp .section-body { font-size: 12px; color: var(--clia-gray-500); }
+.clia-skin-pdp .section-meta { font-size: 11px; color: var(--clia-gray-400); }
+.clia-skin-pdp .hint-box { background: #fff; border: 1px solid var(--clia-gray-200); border-radius: var(--clia-radius); font-size: 12px; color: var(--clia-gray-600); }
+.clia-skin-pdp .compliance-bar { font-size: 12px; padding: 10px 20px; }
+.clia-skin-pdp .compliance-bar.ok { background: var(--clia-gray-100); border-color: var(--clia-gray-200); color: var(--clia-gray-700); }
+.clia-skin-pdp .edit-banner { background: var(--clia-brand-soft); border-bottom-color: rgba(253, 49, 46, .25); color: var(--clia-brand); font-size: 12px; }
+.clia-skin-pdp .intro-view { background: var(--clia-page); }
+.clia-skin-pdp .intro-title { font-family: var(--clia-font); font-weight: 700; letter-spacing: -.6px; }
+.clia-skin-pdp .intro-subtitle { font-family: var(--clia-font); color: var(--clia-gray-500); }
+.clia-skin-pdp .intro-input-shell { border: 1px solid var(--clia-gray-200); border-radius: 999px; padding: 6px 6px 6px 22px; box-shadow: var(--clia-shadow); }
+.clia-skin-pdp .intro-input-shell:focus-within { border-color: var(--clia-brand); box-shadow: 0 0 0 3px var(--clia-brand-soft); }
+.clia-skin-pdp .intro-input { font-family: var(--clia-font); font-size: 16px; }
+.clia-skin-pdp .btn-intro-go { border-radius: 999px; background: var(--clia-brand); font-family: var(--clia-font); font-size: 15px; height: 44px; width: 96px; }
+.clia-skin-pdp .btn-intro-go:hover:not(:disabled) { background: var(--clia-brand-hover); }
+.clia-skin-pdp .intro-hint { color: var(--clia-gray-400); }
+
+/* ═══════════════ Amazon A+ 빌더 (body.clia-skin-aplus) — UI 요소만, A+ 모듈(컨텐츠) 스타일은 제외 ═══════════════ */
+body.clia-skin-aplus { font-family: var(--clia-font); background: var(--clia-page); -webkit-font-smoothing: antialiased; }
+.clia-skin-aplus .header { height: 64px; background: #fff; border-bottom: 1px solid var(--clia-gray-200); padding: 0 24px; gap: 12px; }
+.clia-skin-aplus .header-logo-img { height: 24px; }
+.clia-skin-aplus .header-sep { height: 16px; background: var(--clia-gray-200); }
+.clia-skin-aplus .header-title { font-family: var(--clia-font); font-size: 15px; font-weight: 700; color: var(--clia-gray-900); }
+.clia-skin-aplus .btn-home { height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--clia-gray-300); color: var(--clia-gray-700); font-family: var(--clia-font); font-size: 14px; font-weight: 500; }
+.clia-skin-aplus .btn-home:hover { background: #fff; color: var(--clia-gray-900); border-color: var(--clia-gray-700); }
+.clia-skin-aplus .panel-left { border-right: 1px solid var(--clia-gray-200); }
+.clia-skin-aplus .panel-head { height: 56px; min-height: 56px; max-height: 56px; background: #fff; border-bottom: 1px solid var(--clia-gray-200); padding: 0 20px; }
+.clia-skin-aplus .panel-head-title { font-family: var(--clia-font); font-size: 15px; font-weight: 700; color: var(--clia-gray-900); }
+.clia-skin-aplus .btn-sm { height: 34px; padding: 0 14px; border-radius: 999px; border-color: var(--clia-gray-300); color: var(--clia-gray-700); font-family: var(--clia-font); font-size: 13px; font-weight: 500; }
+.clia-skin-aplus .btn-sm:hover { background: #fff; border-color: var(--clia-gray-700); color: var(--clia-gray-900); }
+.clia-skin-aplus .btn-sm.danger:hover { background: #fff; color: var(--clia-brand); border-color: var(--clia-brand); }
+.clia-skin-aplus .btn-edit-mode.active { background: var(--clia-brand) !important; border-color: var(--clia-brand) !important; }
+.clia-skin-aplus .btn-primary, .clia-skin-aplus .btn-export, .clia-skin-aplus .btn-modal-confirm, .clia-skin-aplus .btn-video-load, .clia-skin-aplus .btn-capture { background: var(--clia-brand); border-radius: 999px; font-family: var(--clia-font); font-weight: 600; }
+.clia-skin-aplus .btn-primary:hover, .clia-skin-aplus .btn-export:hover, .clia-skin-aplus .btn-modal-confirm:hover, .clia-skin-aplus .btn-video-load:hover { background: var(--clia-brand-hover); }
+.clia-skin-aplus .url-input, .clia-skin-aplus .pdp-url-input, .clia-skin-aplus .slot-url-input { border: 1px solid var(--clia-gray-300); border-radius: 10px; background: #fff; font-family: var(--clia-font); }
+.clia-skin-aplus .url-input:focus, .clia-skin-aplus .pdp-url-input:focus, .clia-skin-aplus .slot-url-input:focus { border-color: var(--clia-brand); box-shadow: 0 0 0 3px var(--clia-brand-soft); }
+.clia-skin-aplus .pdp-url-bar { background: #fff; border-bottom: 1px solid var(--clia-gray-200); padding: 10px 20px; }
+.clia-skin-aplus .btn-generate { background: var(--clia-brand); border-color: var(--clia-brand); border-radius: 999px; font-family: var(--clia-font); }
+.clia-skin-aplus .mode-tabs { background: #fff; border-bottom: 1px solid var(--clia-gray-200); }
+.clia-skin-aplus .mode-tab { font-family: var(--clia-font); }
+.clia-skin-aplus .mode-tab.active-standard, .clia-skin-aplus .mode-tab.active-premium { background: #fff; color: var(--clia-brand); box-shadow: inset 0 -2px 0 var(--clia-brand); }
+.clia-skin-aplus .gallery-wrap { background: var(--clia-page); }
+.clia-skin-aplus .input-type-tabs { background: var(--clia-gray-100); border-radius: 999px; }
+.clia-skin-aplus .input-tab-vid.itab-active { color: var(--clia-brand); }
+.clia-skin-aplus .mod-card { border-color: var(--clia-gray-200); border-radius: 16px; }
+.clia-skin-aplus .mod-card:hover { border-color: var(--clia-gray-400); box-shadow: 0 8px 24px rgba(38, 38, 38, .10); }
+.clia-skin-aplus .mod-card-name { font-family: var(--clia-font); }
+.clia-skin-aplus .mod-card-btn { border-radius: 999px; font-family: var(--clia-font); background: var(--clia-gray-900); }
+.clia-skin-aplus .mod-card-btn:hover, .clia-skin-aplus .mod-card-btn.btn-multi:hover, .clia-skin-aplus .mod-card-btn.btn-premium:hover { background: var(--clia-brand); }
+.clia-skin-aplus .kw-badge { background: var(--clia-brand-soft); color: var(--clia-brand); }
+.clia-skin-aplus .kw-card.selected { border-color: var(--clia-brand); box-shadow: 0 0 0 3px var(--clia-brand-soft); }
+.clia-skin-aplus .kw-card.selected .kw-check, .clia-skin-aplus .kw-order { background: var(--clia-brand); border-color: var(--clia-brand); }
+.clia-skin-aplus .btn-kw-generate { background: var(--clia-brand); border-radius: 999px; font-family: var(--clia-font); }
+.clia-skin-aplus .btn-kw-generate:hover:not(:disabled) { background: var(--clia-brand-hover); }
+.clia-skin-aplus .modal-apply-all:hover:not(:disabled), .clia-skin-aplus #btnReSelect:hover { border-color: var(--clia-brand); color: var(--clia-brand); background: #fff; }
+.clia-skin-aplus .intro-view { background: var(--clia-page); }
+.clia-skin-aplus .intro-title, .clia-skin-aplus .intro-subtitle { font-family: var(--clia-font); }
+.clia-skin-aplus .intro-input-shell { border: 1px solid var(--clia-gray-200); border-radius: 999px; padding: 6px 6px 6px 22px; }
+.clia-skin-aplus .intro-input, .clia-skin-aplus .intro-input::placeholder { font-family: var(--clia-font); }
+.clia-skin-aplus .btn-intro-create { background: var(--clia-brand); border-radius: 999px; height: 44px; width: 104px; font-family: var(--clia-font); }
+.clia-skin-aplus .btn-intro-create:hover:not(:disabled) { background: var(--clia-brand-hover); }
+.clia-skin-aplus .intro-self-link:hover { color: var(--clia-brand); }
+.clia-skin-aplus .intro-status .spinner { border-top-color: var(--clia-brand); }

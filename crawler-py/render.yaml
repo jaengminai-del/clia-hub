@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: clia-crawler-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: standard          # Playwright/Chromium 메모리 여유 (starter는 OOM 위험)
+    healthCheckPath: /healthz
+    autoDeploy: true
+    disk:
+      name: crawl-cache
+      mountPath: /app/out    # mirror.json 캐시 영속화 (재배포에도 유지)
+      sizeGB: 5
+    envVars:
+      - key: FIRECRAWL_API_KEY
+        sync: false          # Render 대시보드에서 직접 입력
+      - key: GEMINI_API_KEY
+        sync: false          # 마스터 키 (AI 비용 우리 부담)
+      # CLIA_API_TOKEN: 미설정 = 무인증(누구나 호출, 자유 테스트용).
+      #   나중에 접근 제한하려면 대시보드에서 이 키에 임의 문자열을 넣으면
+      #   그때부터 Authorization: Bearer <값> 이 필요해짐.
+      # - key: CLIA_API_TOKEN
+      #   generateValue: true

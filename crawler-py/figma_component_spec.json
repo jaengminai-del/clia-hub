@@ -1,0 +1,994 @@
+{
+  "ST0001": {
+    "component_id": "ST0001",
+    "name": "Hero Image",
+    "is_overlay": false,
+    "fonts": [
+      "14/16",
+      "14/14",
+      "16/20",
+      "16/18",
+      "16/16",
+      "20/24",
+      "24/28"
+    ],
+    "colors": [
+      "#000000",
+      "#333333",
+      "#646464",
+      "#ea1917"
+    ]
+  },
+  "ST0002": {
+    "component_id": "ST0002",
+    "name": "Tab Anchor",
+    "is_overlay": false,
+    "fonts": [
+      "16/20",
+      "20/24"
+    ],
+    "colors": [
+      "#000000",
+      "#333333",
+      "#4a4946",
+      "#646464",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0003": {
+    "component_id": "ST0003",
+    "name": "Title",
+    "is_overlay": false,
+    "fonts": [
+      "16/20",
+      "24/28",
+      "36/42"
+    ],
+    "colors": [
+      "#000000",
+      "#333333",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0004": {
+    "component_id": "ST0004",
+    "name": "Block Image - Text Overlay",
+    "is_overlay": true,
+    "fonts": [
+      "14/16",
+      "16/20",
+      "20/24",
+      "24/28",
+      "36/42"
+    ],
+    "colors": [
+      "#000000",
+      "#333333",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0005": {
+    "component_id": "ST0005",
+    "name": "Image CTA Overlay",
+    "is_overlay": true,
+    "fonts": [
+      "16/20",
+      "24/28",
+      "36/42"
+    ],
+    "colors": [
+      "#000000",
+      "#333333",
+      "#646464",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0006": {
+    "component_id": "ST0006",
+    "name": "Category Selector",
+    "is_overlay": false,
+    "fonts": [
+      "16/20",
+      "24/28",
+      "36/42"
+    ],
+    "colors": [
+      "#000000",
+      "#333333",
+      "#646464",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0007": {
+    "component_id": "ST0007",
+    "name": "Block Image",
+    "is_overlay": false,
+    "fonts": [
+      "16/20",
+      "16/16",
+      "24/28",
+      "24/24",
+      "36/42"
+    ],
+    "colors": [
+      "#000000",
+      "#333333",
+      "#4a4946",
+      "#646464",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0009": {
+    "component_id": "ST0009",
+    "name": "Large Image",
+    "is_overlay": false,
+    "fonts": [
+      "16/20",
+      "24/28",
+      "36/42"
+    ],
+    "colors": [
+      "#000000",
+      "#333333",
+      "#4a4946",
+      "#646464",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0010": {
+    "component_id": "ST0010",
+    "name": "Text",
+    "is_overlay": false,
+    "fonts": [
+      "16/20",
+      "24/28",
+      "36/42"
+    ],
+    "colors": [
+      "#000000",
+      "#333333",
+      "#4a4946",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0011": {
+    "component_id": "ST0011",
+    "name": "Compare Image",
+    "is_overlay": false,
+    "fonts": [
+      "14/16",
+      "16/20",
+      "20/24",
+      "24/28",
+      "36/42"
+    ],
+    "colors": [
+      "#000000",
+      "#333333",
+      "#666666",
+      "#999999",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0012": {
+    "component_id": "ST0012",
+    "name": "Table",
+    "is_overlay": false,
+    "fonts": [
+      "16/20"
+    ],
+    "colors": [
+      "#000000",
+      "#333333",
+      "#4a4946",
+      "#646464",
+      "#666666",
+      "#cbc8c2",
+      "#e6e1d6",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0013": {
+    "component_id": "ST0013",
+    "name": "Side Image",
+    "is_overlay": false,
+    "fonts": [
+      "14/16",
+      "16/20",
+      "24/28",
+      "36/42"
+    ],
+    "colors": [
+      "#000000",
+      "#333333",
+      "#4a4946",
+      "#666666",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0014": {
+    "component_id": "ST0014",
+    "name": "Image - Layered Text",
+    "is_overlay": true,
+    "fonts": [
+      "16/20",
+      "24/28"
+    ],
+    "colors": [
+      "#000000",
+      "#333333",
+      "#666666",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0015": {
+    "component_id": "ST0015",
+    "name": "Recommended Promotions",
+    "is_overlay": false,
+    "fonts": [
+      "14/16",
+      "14/14",
+      "16/18",
+      "16/16",
+      "20/24"
+    ],
+    "colors": [
+      "#000000",
+      "#333333",
+      "#646464",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0016": {
+    "component_id": "ST0016",
+    "name": "Image - Text (folding feature)",
+    "is_overlay": false,
+    "fonts": [
+      "12/14",
+      "14/16",
+      "16/20",
+      "20/24",
+      "24/28",
+      "36/42"
+    ],
+    "colors": [
+      "#333333",
+      "#4a4946",
+      "#666666",
+      "#e6e1d6",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0017": {
+    "component_id": "ST0017",
+    "name": "Large Image - Large or 2 Small Image",
+    "is_overlay": false,
+    "fonts": [
+      "16/20",
+      "24/28"
+    ],
+    "colors": [
+      "#333333",
+      "#666666",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0018": {
+    "component_id": "ST0018",
+    "name": "Centered Image Block",
+    "is_overlay": false,
+    "fonts": [
+      "16/20"
+    ],
+    "colors": [
+      "#333333",
+      "#666666",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0019": {
+    "component_id": "ST0019",
+    "name": "Gallery - 10Pickers",
+    "is_overlay": false,
+    "fonts": [
+      "16/20",
+      "24/28"
+    ],
+    "colors": [
+      "#333333",
+      "#666666",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0020": {
+    "component_id": "ST0020",
+    "name": "Product Spec Info",
+    "is_overlay": false,
+    "fonts": [
+      "16/20",
+      "24/28",
+      "36/42"
+    ],
+    "colors": [
+      "#4a4946",
+      "#666666",
+      "#cbc8c2",
+      "#e6e1d6",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0021": {
+    "component_id": "ST0021",
+    "name": "Link Icon - Text",
+    "is_overlay": false,
+    "fonts": [
+      "16/20",
+      "24/28",
+      "36/42"
+    ],
+    "colors": [
+      "#333333",
+      "#cbc8c2",
+      "#f0ece4"
+    ]
+  },
+  "ST0022": {
+    "component_id": "ST0022",
+    "name": "Coupon code",
+    "is_overlay": false,
+    "fonts": [
+      "16/20",
+      "20/24"
+    ],
+    "colors": [
+      "#333333",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0023": {
+    "component_id": "ST0023",
+    "name": "PDP Support",
+    "is_overlay": false,
+    "fonts": [
+      "14/16",
+      "16/18",
+      "16/16",
+      "24/24"
+    ],
+    "colors": [
+      "#262626",
+      "#333333",
+      "#646464",
+      "#666666",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0024": {
+    "component_id": "ST0024",
+    "name": "Step Up Chart",
+    "is_overlay": false,
+    "fonts": [
+      "16/20",
+      "24/28"
+    ],
+    "colors": [
+      "#333333",
+      "#646464",
+      "#cbc8c2",
+      "#e6e1d6",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0025": {
+    "component_id": "ST0025",
+    "name": "FAQ (Type : PDP FAQ)",
+    "is_overlay": false,
+    "fonts": [
+      "16/20",
+      "20/24",
+      "24/28",
+      "56/60"
+    ],
+    "colors": [
+      "#333333",
+      "#646464",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0027": {
+    "component_id": "ST0027",
+    "name": "Key Benefit Summary",
+    "is_overlay": false,
+    "fonts": [
+      "16/20",
+      "24/28",
+      "36/42",
+      "56/60"
+    ],
+    "colors": [
+      "#333333",
+      "#646464",
+      "#666666",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0028": {
+    "component_id": "ST0028",
+    "name": "Article List",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0029": {
+    "component_id": "ST0029",
+    "name": "Event Banner",
+    "is_overlay": false,
+    "fonts": [
+      "16/20",
+      "24/28"
+    ],
+    "colors": [
+      "#333333",
+      "#666666",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0030": {
+    "component_id": "ST0030",
+    "name": "Event Map",
+    "is_overlay": false,
+    "fonts": [
+      "16/20",
+      "24/28"
+    ],
+    "colors": [
+      "#000000",
+      "#333333",
+      "#666666",
+      "#e6e6e6",
+      "#ea1917",
+      "#eeeeee",
+      "#f0ece4"
+    ]
+  },
+  "ST0031": {
+    "component_id": "ST0031",
+    "name": "Business Showroom",
+    "is_overlay": false,
+    "fonts": [
+      "16/20",
+      "24/28",
+      "36/42"
+    ],
+    "colors": [
+      "#333333",
+      "#666666",
+      "#ea1917",
+      "#f0ece4",
+      "#f6f6f6"
+    ]
+  },
+  "ST0032": {
+    "component_id": "ST0032",
+    "name": "B2B Air Solution Resource",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#333333",
+      "#cbc8c2",
+      "#e6e1d6",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0034": {
+    "component_id": "ST0034",
+    "name": "Vertical Selector",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#666666",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0035": {
+    "component_id": "ST0035",
+    "name": "Interactive Gallery Image",
+    "is_overlay": false,
+    "fonts": [
+      "14/16"
+    ],
+    "colors": [
+      "#333333",
+      "#646464",
+      "#666666",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0036": {
+    "component_id": "ST0036",
+    "name": "Feature Icon Tab_OLD Ver.",
+    "is_overlay": false,
+    "fonts": [
+      "14/16",
+      "16/18",
+      "24/28"
+    ],
+    "colors": [
+      "#333333",
+      "#646464",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0037": {
+    "component_id": "ST0037",
+    "name": "Back to list button",
+    "is_overlay": false,
+    "fonts": [
+      "14/14",
+      "16/16"
+    ],
+    "colors": [
+      "#646464",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0038": {
+    "component_id": "ST0038",
+    "name": "Scroll Image",
+    "is_overlay": false,
+    "fonts": [
+      "14/14",
+      "16/16"
+    ],
+    "colors": [
+      "#333333",
+      "#646464",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0039": {
+    "component_id": "ST0039",
+    "name": "Link Icon - Text (Tab)",
+    "is_overlay": false,
+    "fonts": [
+      "16/18",
+      "20/24"
+    ],
+    "colors": [
+      "#333333",
+      "#646464",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0040": {
+    "component_id": "ST0040",
+    "name": "PLP Stock",
+    "is_overlay": false,
+    "fonts": [
+      "14/14"
+    ],
+    "colors": [
+      "#333333",
+      "#646464",
+      "#cbc8c2",
+      "#e6e1d6",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0041": {
+    "component_id": "ST0041",
+    "name": "Promotion Notify Me",
+    "is_overlay": false,
+    "fonts": [
+      "12/14",
+      "14/16",
+      "14/14",
+      "16/20",
+      "16/18",
+      "16/16"
+    ],
+    "colors": [
+      "#333333",
+      "#4a4946",
+      "#646464",
+      "#999999",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0044": {
+    "component_id": "ST0044",
+    "name": "Block Content_old",
+    "is_overlay": false,
+    "fonts": [
+      "12/14",
+      "14/16",
+      "14/14",
+      "16/16",
+      "20/24"
+    ],
+    "colors": [
+      "#000000",
+      "#333333",
+      "#4a4946",
+      "#646464",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0045": {
+    "component_id": "ST0045",
+    "name": "Article Title",
+    "is_overlay": false,
+    "fonts": [
+      "12/14",
+      "14/16",
+      "16/18"
+    ],
+    "colors": [
+      "#333333",
+      "#646464",
+      "#666666",
+      "#cbc8c2",
+      "#e6e1d6",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0047": {
+    "component_id": "ST0047",
+    "name": "Product Finder Link_v1.2",
+    "is_overlay": false,
+    "fonts": [
+      "14/14",
+      "16/16"
+    ],
+    "colors": [
+      "#646464",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0048": {
+    "component_id": "ST0048",
+    "name": "Carousel Component",
+    "is_overlay": false,
+    "fonts": [
+      "16/18"
+    ],
+    "colors": [
+      "#333333",
+      "#ea1917"
+    ]
+  },
+  "ST0049": {
+    "component_id": "ST0049",
+    "name": "Block Image",
+    "is_overlay": false,
+    "fonts": [
+      "14/16",
+      "14/14",
+      "16/16"
+    ],
+    "colors": [
+      "#333333",
+      "#4a4946",
+      "#646464",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0050": {
+    "component_id": "ST0050",
+    "name": "Attached Multimedia",
+    "is_overlay": false,
+    "fonts": [
+      "14/16"
+    ],
+    "colors": [
+      "#333333",
+      "#999999",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0053": {
+    "component_id": "ST0053",
+    "name": "Award (Type: Category Selector Award)",
+    "is_overlay": false,
+    "fonts": [
+      "14/16"
+    ],
+    "colors": [
+      "#333333",
+      "#666666",
+      "#cbc8c2",
+      "#e6e6e6",
+      "#ea1917",
+      "#f0ece4",
+      "#f6f6f6"
+    ]
+  },
+  "ST0058": {
+    "component_id": "ST0058",
+    "name": "Product Category",
+    "is_overlay": false,
+    "fonts": [
+      "12/12",
+      "14/16",
+      "14/14",
+      "16/18",
+      "16/16",
+      "20/24"
+    ],
+    "colors": [
+      "#333333",
+      "#646464",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0060": {
+    "component_id": "ST0060",
+    "name": "Secret Coupon Popup",
+    "is_overlay": false,
+    "fonts": [
+      "14/14",
+      "16/16"
+    ],
+    "colors": [
+      "#333333",
+      "#4a4946",
+      "#646464",
+      "#cbc8c2",
+      "#ea1917",
+      "#f0ece4"
+    ]
+  },
+  "ST0061": {
+    "component_id": "ST0061",
+    "name": "Secret Coupon Page",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#333333",
+      "#4a4946",
+      "#646464",
+      "#666666",
+      "#ea1917"
+    ]
+  },
+  "PD0001": {
+    "component_id": "PD0001",
+    "name": "Product List",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#000000",
+      "#1a1a1a",
+      "#cbc8c2",
+      "#ea1917",
+      "#eeb404",
+      "#f0ece4",
+      "#ff6224"
+    ]
+  },
+  "PD0002": {
+    "component_id": "PD0002",
+    "name": "Selective Offering",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#ea1917"
+    ]
+  },
+  "PD0003": {
+    "component_id": "PD0003",
+    "name": "Product Summary",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#a50034",
+      "#da0f47",
+      "#ea1917"
+    ]
+  },
+  "PD0004": {
+    "component_id": "PD0004",
+    "name": "PDP Reviews",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#ea1917",
+      "#ffca28"
+    ]
+  },
+  "PD0005": {
+    "component_id": "PD0005",
+    "name": "PDP Gallery",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#ea1917"
+    ]
+  },
+  "PD0006": {
+    "component_id": "PD0006",
+    "name": "Product Service and Support",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#a50034",
+      "#ea1917"
+    ]
+  },
+  "PD0007": {
+    "component_id": "PD0007",
+    "name": "PDP Bundle",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#ea1917"
+    ]
+  },
+  "PD0008": {
+    "component_id": "PD0008",
+    "name": "PDP Specs",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#ea1917"
+    ]
+  },
+  "PD0009": {
+    "component_id": "PD0009",
+    "name": "Article Utility Button",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#ea1917"
+    ]
+  },
+  "PD0011": {
+    "component_id": "PD0011",
+    "name": "Product Finder",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#a50034",
+      "#da0f47",
+      "#ea1917"
+    ]
+  },
+  "PD0012": {
+    "component_id": "PD0012",
+    "name": "Product Visual",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#ea1917"
+    ]
+  },
+  "PD0038": {
+    "component_id": "PD0038",
+    "name": "Compare Result (PD0014 Sticky Compare + PD0038 Compare Result)",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#a50034",
+      "#da0f47",
+      "#ea1917",
+      "#f7b500"
+    ]
+  },
+  "PD0041": {
+    "component_id": "PD0041",
+    "name": "Hot&New&Best, GP1_Mobile",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#ea1917"
+    ]
+  },
+  "PD0044": {
+    "component_id": "PD0044",
+    "name": "Toast Popup_v1.0",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#ea1917"
+    ]
+  },
+  "PD0046": {
+    "component_id": "PD0046",
+    "name": "Product Content, GP1_Mobile",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#ea1917"
+    ]
+  },
+  "PD0053": {
+    "component_id": "PD0053",
+    "name": "Image with layer popup_v1.0",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#ea1917"
+    ]
+  },
+  "PD0061": {
+    "component_id": "PD0061",
+    "name": "Foldable Container_v1.0",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#ea1917"
+    ]
+  },
+  "PD0062": {
+    "component_id": "PD0062",
+    "name": "Entrance banner (PLP use)",
+    "is_overlay": false,
+    "fonts": [],
+    "colors": [
+      "#ea1917",
+      "#ff6224"
+    ]
+  }
+}

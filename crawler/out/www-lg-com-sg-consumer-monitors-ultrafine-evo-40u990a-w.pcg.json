@@ -1,0 +1,952 @@
+{
+  "version": "0.1",
+  "source": {
+    "url": "https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/",
+    "crawledAt": "2026-07-07T09:00:20.912Z",
+    "engine": "firecrawl",
+    "geometry": true
+  },
+  "product": {
+    "title": "LG UltraFine™ 40-inch Nano IPS Black 5K2K with Thunderbolt™ 5 - 40U990A-W | LG Singapore",
+    "description": "Get more information on the 40U990A-W. Click for pictures, reviews & tech specs for the LG LG UltraFine™ 40-inch Nano IPS Black 5K2K with Thunderbolt™ 5.",
+    "model": "40u990a-w",
+    "gallery": [
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-15.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "USP card: VESA certified Display HDR 600",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-15.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-15.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-01.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Front view of LG UltraFine™ 40-inch Nano IPS Black 5K2K with Thunderbolt™ 5 40U990A-W",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-01.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-01.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-02.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "-15 degree side view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-02.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-03.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "+15 degree side view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-03.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-04.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Rear side view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-04.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-05.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Rear side view with screen tilted upward",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-05.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-06.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Side view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-06.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-07.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Top view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-07.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-08.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Rear view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-08.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-09.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Rear side view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-09.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-10.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Rear view with stand disassembled",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-10.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-11.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Ports close-up",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-11.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-12.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "USP card: Product main image",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-12.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-13.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "USP card: 5K2K Display",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-13.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-14.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "USP card: Professional display",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/gallery/ultrafine-uhd-4k-5k-40u990a-2025-gallery-gallery-14.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-01.jpg",
+        "alt": "Front view of LG UltraFine™ 40-inch Nano IPS Black 5K2K with Thunderbolt™ 5 40U990A-W",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-01.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-02.jpg",
+        "alt": "-15 degree side view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-02.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-03.jpg",
+        "alt": "+15 degree side view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-03.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-04.jpg",
+        "alt": "Rear side view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-04.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-05.jpg",
+        "alt": "Rear side view with screen tilted upward",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-05.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-06.jpg",
+        "alt": "Side view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-06.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-07.jpg",
+        "alt": "Top view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-07.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-08.jpg",
+        "alt": "Rear view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-08.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-09.jpg",
+        "alt": "Rear side view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-09.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-10.jpg",
+        "alt": "Rear view with stand disassembled",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-10.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-11.jpg",
+        "alt": "Ports close-up",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-11.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-12.jpg",
+        "alt": "USP card: Product main image",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-12.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-13.jpg",
+        "alt": "USP card: 5K2K Display",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-13.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-14.jpg",
+        "alt": "USP card: Professional display",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-14.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-15.jpg",
+        "alt": "USP card: VESA certified Display HDR 600",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/gallery/thumbnail/ultrafine-uhd-4k-5k-40u990a-2025-gallery-thumbnail-15.jpg"
+        ]
+      }
+    ]
+  },
+  "sections": [
+    {
+      "id": "sec-01",
+      "order": 1,
+      "eyebrow": "",
+      "headline": "LG UltraFine™ 40-inch Nano IPS Black 5K2K with Thunderbolt™ 5",
+      "body": "40U990A-W\nCopy model name\nChat with an expert\n40U990A-W\n3.9 out of 5 stars, average rating value. Read 33 Reviews.\nSame page link.\n3.9\n\\|\n33 Reviews\n10 out of 13 (77%) reviewers recommend this product\nWrite a review\n()\nopen gallery popup\nPrevious slide\nNext slide\n360°\nPrevious slide\nNext slide\nKey Features\n- Nano IPS Black\n- 5K2K 5120x2160\n- VESA DisplayHDR™600\n- Thunderbolt™ 5\n[More](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#)\n- Free Delivery / Installation.\n[**Features**](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#pdp-overview-section) [**Specs**](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#pdp-specs-section) [**Reviews**](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#pdp-review) [**Support**](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#pdp-support-section) [**Where to buy**](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#find-a-store)\nGallery360°\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\nzoom inzoom out\n[](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#)\n[](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#)\n[](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#)\n[](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#)\n[](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#)\n[](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#)\n[](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#)\n[](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#)\n[](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#)\n[](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#)\n[](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#)\n[](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#)\n[](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#)\n[](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#)\n[](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#)\nPPrevious slide\n1 / 15\nNext slide\nPrevious slide\n1 / 1\nNext slide\nLG 360 VIEW\nLG 360 VIEW\nPromotions\n- LG Monitor July Promotion\nFree gifts worth up to $209 on selected UltraFine, UltraGear and Smart monitors.\n01/07/2026 ~ 31/07/2026\n[Buy now](https://www.lg.com/sg/promotions/lg-monitor-july-promotion/)\nPause carouselPlay carousel\n[Display](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#01) [Compatibility](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#02) [Usability](https://www.lg.com/sg/consumer-monitors/ultrafine-evo/40u990a-w/#03)\nPrevious slide\nNext slide",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-02",
+      "order": 2,
+      "eyebrow": "",
+      "headline": "Award-winning excellence",
+      "body": "Digital Trends 2025\nReaders’ Choice best monitor lineup for gamers and those demanding high-quality performance\nPrevious slide\n1 / 1\nNext slide\nWorld's first Thunderbolt™5 5K2K Display\\* Engineered for Precision",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience.",
+        "*https://www.thunderbolttechnology.net/products"
+      ],
+      "layout": {
+        "type": "multi-image",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-0-4-award-logo-1.png",
+          "alt": "Digital Trends Award logo",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 100,
+            "top": 1679,
+            "left": 264
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-01-1-main-kv-logo-m.jpg",
+          "alt": "LG UltraFine Monitor logo.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1920,
+            "top": 1851,
+            "left": 0
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-01-2-main-kv-image-m.jpg",
+          "alt": "Front view of UltraFine monitor with a girl's image in it showing how color is shown accurately on it.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1920,
+            "top": 2273,
+            "left": 0
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-02-summary-m.jpg",
+          "alt": "5 different images with text implying UltraFine's key features",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 3168,
+            "left": 160
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-03-section-divider-performance-m.jpg",
+          "alt": "No images included",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 4040,
+            "left": 160
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-03",
+      "order": 3,
+      "eyebrow": "",
+      "headline": "5K2K Display.  Sharper, wider, clearer.",
+      "body": "The 5K2K Nano IPS1) Black display (5120x2160) offers 33% more pixels2) than standard 4K UHD (3840x2160), providing a wider canvas to view more content and reducing the need to switch between programs. Its high resolution delivers razor-sharp images and precise detail, making it suitable for professional video editing, graphic design, and any visual work where accuracy is critical. The vivid clarity allows you to spot even the fine details without constant zooming or panning.\nPlay videoPause video\n1) Nano IPS is an advanced IPS technology that uses nanometer-sized particles on the screen's LED.\n2) The total number of pixels was calculated by multiplying the horizontal and vertical resolutions, resulting in 8.29 million pixels for 4K UHD and 11.05 million pixels for 5K2K.\nProfessional display.\nProfessional performance.\nFor tasks like color grading, music production, and coding, the 40-inch 5K2K display provides the clarity and screen area needed for focus and precision.",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-04-5k2k-display-mov-m.jpg",
+          "alt": "A video clip shows 5K2K display's wideness by comparing with 4K UHD's screen size.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 5140,
+            "left": 160
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-05-1-creator-carousel-3-m.jpg",
+          "alt": "A guy is working with design program on UltraFine Monitor. A camera is placed next to the monitor.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 6292,
+            "left": -5600
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-04-5k2k-display-mov.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-04",
+      "order": 4,
+      "eyebrow": "",
+      "headline": "Professional display.  Professional performance.",
+      "body": "For tasks like color grading, music production, and coding, the 40-inch 5K2K display provides the clarity and screen area needed for focus and precision.\nProfessional display.\nProfessional performance.\nFor tasks like color grading, music production, and coding, the 40-inch 5K2K display provides the clarity and screen area needed for focus and precision.\nPreviousNextPausePlay\nNano IPS Black technology controls light to deliver deeper blacks for cinematic clarity.\nAccurate and vibrant color gamut ideal for video editing and photo retouching naturally.\nCertified to VESA DisplayHDR™ 600 standards, it enhances brightness and color accuracy to deliver more lifelike visuals.\nA high contrast ratio deepens shadows and refines highlights, even in varying lighting conditions.",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience.",
+        "**Nano IPS\\* Black**",
+        "**DCI-P3 99%**",
+        "**VESA DisplayHDR™ 600**",
+        "**2000:1 Contrast**",
+        "*Nano IPS is an advanced IPS technology that uses nanometer-sized particles on the screen's LED."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 2
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-05-1-creator-carousel-1-m.jpg",
+          "alt": "In a dark room with blue and violet lighting a UltraFine monitor stands with recording program on it. On the desk where it stands a keyboard, tablet, headphone and other accessories are placed.",
+          "matchedBy": "doc-order-trailing",
+          "variants": [
+            "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-05-1-creator-carousel-1-m.jpg"
+          ],
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 6340,
+            "left": -3680
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-05-1-creator-carousel-2-m.jpg",
+          "alt": "A guy is working with a video-creating program on UltraFine Monitor.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 6292,
+            "left": -1760
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-05-1-creator-carousel-3-m.jpg",
+          "alt": "A guy is working with design program on UltraFine Monitor. A camera is placed next to the monitor.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 6292,
+            "left": -5600
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-05",
+      "order": 5,
+      "eyebrow": "",
+      "headline": "Every colour nuance, fully realized",
+      "body": "VESA DisplayHDR™ 600 offers bright highlights, deep shadows, and accurate colour representation for creative professionals. It enhances textures, elements, and natural interplay of light and shadow.",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding and may differ from actual experience."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-07-1-displayhdr-600-m.jpg",
+          "alt": "Front view of UltraFine monitor with a girl's image in it showing how color is shown accurately on it.",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 7572,
+            "left": 160
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-06",
+      "order": 6,
+      "eyebrow": "",
+      "headline": "The full spectrum of colors you imagined",
+      "body": "99% (Typ.) of the DCI-P3 color gamut delivers a 25% wider color gamut than sRGB, covering nearly all the colors used in print, digital, and broadcast content. From vivid to subtle shades, accurate color reproduction, enabling a realistic video, photo output.",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience.",
+        "*Brightness: 450nits (Typ.), Color Gamut: DCI-P3 99% (Typ.)",
+        "*Nano IPS is an advanced IPS technology that uses nanometer-sized particles on the screen's LED.",
+        "*The images simulated to enhance feature understanding. It may differ from actual use.",
+        "*Nano IPS is an advanced IPS technology that uses nanometer-sized particles on the screen's LED."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-08-dci-p3-m.jpg",
+          "alt": "A full-size screen image with designing program showing vibrant colors.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 8484,
+            "left": 160
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-09-contrast-ratio-2-d.jpg",
+          "alt": "A black&white image of a mountain with 2000:1 contrast ratio to show deeper black color than 1000:1 ratio.",
+          "title": "Contrast 2000:1",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 732,
+            "top": 9380,
+            "left": 240
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-09-contrast-ratio-1-d.jpg",
+          "alt": "A black&white image of a mountain with 1000:1 contrast ratio to show its black color expression compared to that of 2000:1 contrast ratio.",
+          "title": "Contrast 1000:1",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 732,
+            "top": 9380,
+            "left": 240
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-07",
+      "order": 7,
+      "eyebrow": "",
+      "headline": "2000:1 deeper black and rich shadows",
+      "body": "Because contrast ratio impacts accurate color representation, Nano IPS Black enhances the contrast ratio from the standard IPS 1000:1 to 2000:1—delivering vibrant colors and sharper detail in objects, shadows, and backgrounds. Experience deeper blacks and richer shadows that remain consistent color expression on the screen from edge to edge, and a heightened sense of realism that conveys your visual outputs naturally.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-08",
+      "order": 8,
+      "eyebrow": "",
+      "headline": "Protect your eyes,  perserve every detail",
+      "body": "This display is verified with TÜV Rheinland's 5-Star Eye Comfort rating: new eye comfort 3.0, meeting the high standards for eye comfort. It features a high refresh rate, accurate color reproduction, and built-in low blue light technology that combines RGB hardware and software adjustments to reduce harmful emissions without compromising color.",
+      "disclaimers": [
+        "*TÜV Rheinland certification ID (Eye Comfort): 1111298743",
+        "*The images simulated to enhance feature understanding."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-10-eye-comfort-d.jpg",
+          "alt": "Protect your eyes, perserve every detail",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 610,
+            "top": 9848,
+            "left": 1070
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-11-section-divider-compatibility-m.jpg",
+          "alt": "No images included",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 10359,
+            "left": 160
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-09",
+      "order": 9,
+      "eyebrow": "",
+      "headline": "World's first Thunderbolt™5 5K2K Display\\*\\*",
+      "body": "Thunderbolt™ 5 enables the production of commercial outputs such as documentary videos, movies, and game titles on an outstanding 5K2K display. It also offers data transfers that are twice as fast to connected devices compared to Thunderbolt™ 4 and allows for charging your laptop (up to 96W) through a single cable, ensuring stability, scalability, and security.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-10",
+      "order": 10,
+      "eyebrow": "",
+      "headline": "2x Faster\\* Transfer",
+      "body": "(Up to 80 Gbps)",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-11",
+      "order": 11,
+      "eyebrow": "",
+      "headline": "96W Power Delivery",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-12",
+      "order": 12,
+      "eyebrow": "",
+      "headline": "5K2K Display",
+      "body": "※ Note ※\n1\\. Windows:Display may not work properly depending on the Intel processor and Windows OS version.\n2\\. macOS:Display may not work properly on non-Apple Silicon devices depending on the macOS version.",
+      "disclaimers": [
+        "*\\*https://www.thunderbolttechnology.net/products\\*Images have been simulated to enhance feature understanding, and may differ from actual use experience.\\*To work properly, the Thunderbolt 5 cable included in this package is required to connect the Thunderbolt 5 port to the monitor.\\*To access all features including 96W charging and 5120×2160 @120Hz output, your device must support Thunderbolt 5 or DisplayPort 2.1.\\*DP, HDMI, USB-C and Thunderbolt cables are included in the package.",
+        "*Minimum requirements: Intel 12th Gen or later, Windows 11 or later.",
+        "*Minimum requirements: macOS Sequoia (version 15) or later."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-12-3-thunderbolt5-image-m.jpg",
+          "alt": "A UltraFine monitor is placed with program screen on it beside a smaller monitor, a PC and a storage, connected with cables showing its multi-connectivity.",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 11907,
+            "left": 160
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-13",
+      "order": 13,
+      "eyebrow": "",
+      "headline": "The Productive Workstation",
+      "body": "Thunderbolt™ 5 and DisplayPort support 5K2K Daisy Chain for streamlined setup. So you can connect two monitors and a laptop for enhanced productivity.",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience.",
+        "*DPx1, HDMIx1, USB-Cx1, Power cordx1 and Thunderboltx1 cables are included in the package."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-13-the-productive-workstation-m.jpg",
+          "alt": "Two UltraFine monitors are placed side by side, connecting to one another with a laptop. The workstation shows how seemlessly the whole devices are connected.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 13091,
+            "left": 160
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-14",
+      "order": 14,
+      "eyebrow": "",
+      "headline": "Multiple setups with multiple ports",
+      "body": "Connect your laptop, camera, tablet, or external storages through versatile ports including Thunderbolt™ 5, HDMI 2.1, and USB-C. Get smooth and stable performance without extra adapters or splitters.",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-14-1-multi-ports-m.jpg",
+          "alt": "Close-up image of UltraFine monitor's ports to show the various cable connectivity it has.",
+          "matchedBy": "doc-order"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-15-section-divider-usability-m.jpg",
+          "alt": "No images included",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 13511,
+            "left": 160
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-15",
+      "order": 15,
+      "eyebrow": "",
+      "headline": "Feel every beat and scene",
+      "body": "Dive into your content and let the action surround you. Dual 10W built-in speakers with Rich Bass and AMD FreeSync technology brings every scene to play with deeper sound and smoother visuals.",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-16-1-rich-bass-m.jpg",
+          "alt": "A UltraFine monitor is placed in a virtual space with soundwaves coming from the bottom part of the monitor moving forward. On  the screen a woman in a red-space-suit is facing forward.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-16",
+      "order": 16,
+      "eyebrow": "",
+      "headline": "AMD FreeSync Premium",
+      "body": "With FreeSync Premium technology, it helps achieve seamless, fluid movement when mixing sound while reviewing fast-paced games or high-resolution movies by reducing screen tearing and stuttering.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-17",
+      "order": 17,
+      "eyebrow": "",
+      "headline": "Switch swiftly for creating",
+      "body": "LG Switch app optimizes your monitor for both work and play. Effortlessly customize your preferred image quality and brightness with personlized picture wizard. Plus, you can split the display into 11 options and quickly launch your video call platform, making it even more convenient.\nPlay videoPause video",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience.",
+        "*To download the latest version of the LG Switch app, visit LG.com"
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-17-amd-freesync-d.jpg",
+          "alt": "Ein Gameplay-Bild eines riesigen Monsters mit silberner Rüstung und rotem Cape, das einen Schild hält.",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 610,
+            "top": 13893,
+            "left": 1070
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-18-lg-switch-app-mov-m.jpg",
+          "alt": "LG Switch app's Personalized Picture Wizard setting video",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 14243,
+            "left": 160
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-18-lg-switch-app-mov.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-18",
+      "order": 18,
+      "eyebrow": "",
+      "headline": "Clutter-free, slim design",
+      "body": "A virtually borderless 3-sided design with the clutter-free L-stand, paired with a fully adjustable base for swivel, tilt and height adjustments. It is crafted to save desk space, making your workflow efficient and also can help you stay focued longer while editing video clips and retouching various photos.\nPrevious slide\n1 / 4\nNext slide",
+      "disclaimers": [],
+      "layout": {
+        "type": "grid-4",
+        "imgsPerRow": 4
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-19-2-design-carousel-1-m.jpg",
+          "alt": "Front view of UltraFine monitor with its infill image on it.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1440,
+            "top": 14747,
+            "left": 240
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-19-2-design-carousel-2-m.jpg",
+          "alt": "Top view of UltraFine monitor in a white background",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1440,
+            "top": 14747,
+            "left": 1680
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-19-2-design-carousel-3-m.jpg",
+          "alt": "Side view of UltraFine monitor in a white background",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1440,
+            "top": 14747,
+            "left": 3120
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/monitor/ultrafine-uhd-4k---5k/40u990a-w/features/ultrafine-uhd-4k-5k-40u990a-2025-feature-19-2-design-carousel-4-m.jpg",
+          "alt": "Rear view of UltraFine monitor in a white background",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1440,
+            "top": 14747,
+            "left": 4560
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-19",
+      "order": 19,
+      "eyebrow": "",
+      "headline": "Borderless Design",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-20",
+      "order": 20,
+      "eyebrow": "",
+      "headline": "Swivel",
+      "body": "±20°",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-21",
+      "order": 21,
+      "eyebrow": "",
+      "headline": "Tilt",
+      "body": "（-5°〜20°）",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-22",
+      "order": 22,
+      "eyebrow": "",
+      "headline": "Height",
+      "body": "（130mm）\nPrint\nSee all specs",
+      "disclaimers": [
+        "*Images have been simulated to enhance feature understanding, and may differ from actual use experience."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    }
+  ],
+  "unassignedAssets": [],
+  "review": {
+    "imageCoverage": {
+      "inMarkdown": 58,
+      "captured": 56,
+      "coveragePct": 97,
+      "missing": [
+        "https://www.lg.com/content/dam/channel/wcms/sg/images/dehumidifier/md19gqga1/gallery/MD19GQGA1_Dehumidifier_350-B.jpg",
+        "https://www.lg.com/content/dam/channel/wcms/sg/01-assets/general/footer/CSB-SG-2026-Gold.png"
+      ]
+    },
+    "verbatimFails": [
+      {
+        "id": "sec-09",
+        "field": "headline",
+        "text": "World's first Thunderbolt™5 5K2K Display\\*\\*"
+      },
+      {
+        "id": "sec-10",
+        "field": "headline",
+        "text": "2x Faster\\* Transfer"
+      }
+    ],
+    "emptySections": [
+      {
+        "id": "sec-10",
+        "headline": "2x Faster\\* Transfer"
+      },
+      {
+        "id": "sec-11",
+        "headline": "96W Power Delivery"
+      },
+      {
+        "id": "sec-19",
+        "headline": "Borderless Design"
+      },
+      {
+        "id": "sec-20",
+        "headline": "Swivel"
+      },
+      {
+        "id": "sec-21",
+        "headline": "Tilt"
+      },
+      {
+        "id": "sec-22",
+        "headline": "Height"
+      }
+    ],
+    "unassignedCount": 0
+  }
+}

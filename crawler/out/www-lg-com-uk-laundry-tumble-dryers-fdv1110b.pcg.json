@@ -1,0 +1,716 @@
+{
+  "version": "0.1",
+  "source": {
+    "url": "https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/",
+    "crawledAt": "2026-07-13T06:39:04.651Z",
+    "engine": "firecrawl",
+    "geometry": true
+  },
+  "product": {
+    "title": "10kg Dual Heat Pump™ Tumble Dryer Black Steel | LG UK",
+    "description": "Shop LG 10kg DUAL Inverter HeatPump Dryer Black Steel A+++. Click for pictures, reviews, and tech specs of the FDV1110B. Get 5% off your first order.",
+    "model": "fdv1110b",
+    "gallery": [
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/350x350/01_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Front.jpg",
+        "alt": "10kg Dual Inverter Heat Pump™ Tumble Dryer Series 7, Black"
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/12_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Back.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "back side",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/12_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Back.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/12_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Back.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/01_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Front.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Front view of 10kg Dual Inverter Heat Pump™ Tumble Dryer Series 7, Black FDV1110B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/01_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Front.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/01_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Front.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/02_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Front_Open.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Front view with Door open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/02_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Front_Open.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/03_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Top_Left_Panel_Detail.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Detail view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/03_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Top_Left_Panel_Detail.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/04_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Top_Right_Drawer_Open_Detail.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Drawer open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/04_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Top_Right_Drawer_Open_Detail.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/05_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_English_Drum_Detail.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "drum detail",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/05_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_English_Drum_Detail.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/06_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_English_Drum_Filter_Detail.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Drum detail",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/06_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_English_Drum_Filter_Detail.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/07_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_English_Drum_Light_Detail.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Drum detail",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/07_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_English_Drum_Light_Detail.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/08_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Left.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Right View",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/08_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Left.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/09_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Right_Open.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "left View door open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/09_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Right_Open.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/10_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Right.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "left view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/10_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Right.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/11_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_English_Side.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Side View",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/1100x730/11_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_English_Side.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/01_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Front.jpg",
+        "alt": "Front view of 10kg Dual Inverter Heat Pump™ Tumble Dryer Series 7, Black FDV1110B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/01_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Front.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/02_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Front_Open.jpg",
+        "alt": "Front view with Door open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/02_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Front_Open.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/03_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Top_Left_Panel_Detail.jpg",
+        "alt": "Detail view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/03_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Top_Left_Panel_Detail.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/04_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Top_Right_Drawer_Open_Detail.jpg",
+        "alt": "Drawer open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/04_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Top_Right_Drawer_Open_Detail.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/05_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_English_Drum_Detail.jpg",
+        "alt": "drum detail",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/05_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_English_Drum_Detail.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/06_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_English_Drum_Filter_Detail.jpg",
+        "alt": "Drum detail",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/06_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_English_Drum_Filter_Detail.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/07_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_English_Drum_Light_Detail.jpg",
+        "alt": "Drum detail",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/07_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_English_Drum_Light_Detail.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/08_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Left.jpg",
+        "alt": "Right View",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/08_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Left.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/09_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Right_Open.jpg",
+        "alt": "left View door open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/09_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Right_Open.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/10_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Right.jpg",
+        "alt": "left view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/10_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Right.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/11_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_English_Side.jpg",
+        "alt": "Side View",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/11_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_English_Side.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/12_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Back.jpg",
+        "alt": "back side",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/fdv1110b/gallery/180x180/12_Vivace_V905_10KG_PB_Dryer_RH10V9ZV2WR_UK_Back.jpg"
+        ]
+      }
+    ]
+  },
+  "sections": [
+    {
+      "id": "sec-01",
+      "order": 1,
+      "eyebrow": "",
+      "headline": "10kg Dual Inverter Heat Pump™ Tumble Dryer Series 7, Black",
+      "body": "FDV1110B\nCopy model name\n4.8\nRead 561 Reviews. Same page link.\n\\|\n561 Reviews\n422 out of 432 (98%) reviewers recommend this product\nShare your thoughts!\n(2)\nopen gallery popup\nPrevious Slide\nNext Slide\nPrevious Slide\nNext Slide\nKey Features\n- DUAL Dry™ allows choice to the drying course, for Energy or Time focus.\n- LG's Auto Cleaning Condenser automatically cleans the condenser each cycle.\n- The DUAL Inverter Heat Pump cycles faster and more effectively, with a 10 year warranty.\n- Smart Pairing™ receives data from compatible LG washers to set the dryer automatically\n- LG ThinQ™ Wi-Fi models allow simple control, monitoring and even download of new cycles.\n- LG dryers use R290 refrigerant, a natural refrigerant with lower global warming potential.\n[More](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#)\n[Ask LG anything](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#) [Tumble Dryers buying tips](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#) [Best Tumble Dryers for me](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#) [Why choose LG Tumble Dryers?](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#)\n[**Features**](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#pdp-overview-section) [**Specs**](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#pdp-specs-section) [**Reviews**](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#pdp-review) [**Support**](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#pdp-support-section) [**Where to Buy**](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#find-a-store)\nDeals & Offers\n- After having purchased, register for your 5 year warranty [here.](https://www.lg.com/uk/5-year-warranty/).\nDeals & Offers\nGallery\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\nzoom inzoom out\n[](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#)\n[](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#)\n[](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#)\n[](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#)\n[](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#)\n[](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#)\n[](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#)\n[](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#)\n[](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#)\n[](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#)\n[](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#)\n[](https://www.lg.com/uk/laundry/tumble-dryers/fdv1110b/#)\nPPrevious Slide\n1 / 12\nNext Slide\nPrevious Slide\n1 / 1\nNext Slide",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-02",
+      "order": 2,
+      "eyebrow": "",
+      "headline": "Quiet Mark",
+      "body": "Tumble Dryers",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/awards/quiet-mark/Quiet-Mark-Logo---Label---RGB.jpg",
+          "alt": "Quiet Mark",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 100,
+            "top": 1137,
+            "left": 264
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-03",
+      "order": 3,
+      "eyebrow": "",
+      "headline": "5 Year Warranty",
+      "body": "Tumble Dryers\nPrevious Slide\n1 / 1\nNext Slide",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/awards/5-year-warranty/5yr_180x180.jpg",
+          "alt": "5 year warranty",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 100,
+            "top": 1137,
+            "left": 996
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-04",
+      "order": 4,
+      "eyebrow": "",
+      "headline": "Care For What You Wear",
+      "body": "A conscious clothing lifestyle begins with\nsmall actions we take. Find out more to make\nour clothes last longer and create a better\ntomorrow with LG.\n[Care For What You WearLearn More](https://www.lg.com/uk/appliances/care-for-what-you-wear-2022/)",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/WM/features/M_768x347_Dryer_NOTEXT.jpg",
+          "alt": "Care For What You Wear",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-05",
+      "order": 5,
+      "eyebrow": "DUAL Inverter Heat Pump™ Dryer",
+      "headline": "For Consistent  Performance, Sustainable Care",
+      "body": "Live to a New Standard of Energy Saving,\nConvenience and healthy Drying.\nDUAL Inverter Heat Pump™",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/WM/features/Dryer-EU-Vivace-V900-VC2-TUV-White-01-1-Sustainable-Care-R290-M.jpg",
+          "alt": "For Consistent Performance, Sustainable Care",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-06",
+      "order": 6,
+      "eyebrow": "",
+      "headline": "Less Energy Consumption, More Peace of Mind",
+      "body": "The DUAL Inverter Heat Pump™ dryer competently performs for satisfactory efficiency levels.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-07",
+      "order": 7,
+      "eyebrow": "",
+      "headline": "A+++ Energy Efficiency\\*",
+      "body": "Dry with top class A+++ energy efficiency thanks to LG heat pump dryers.",
+      "disclaimers": [
+        "*A+++ to D scale. According to the IEC standard, Cotton Cycle with Energy Mode."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/WM/features/Dryer-EU-Vivace-V900-VC2-TUV-White-03-1-Energy-R290-M.gif",
+          "alt": "A+++ Energy Efficiency*",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-08",
+      "order": 8,
+      "eyebrow": "",
+      "headline": "Dual 10 Year Warranty",
+      "body": "DUAL Inverter Compressor 10 Year Warranty meets with Inverter Motor 10 Year Warranty.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/WM/features/Dryer-Vivace-V900-VC2-White-03-Warranty-M.jpg",
+          "alt": "Dual 10 Year Warranty",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-09",
+      "order": 9,
+      "eyebrow": "Auto Cleaning Condenser",
+      "headline": "For Less Hassles,   More Consistent Results",
+      "body": "Helps keep drying performance on your behalf with auto cleaning condenser.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/WM/features/Dryer-Vivace-V900-VC2-White-06-1-Auto-Cleaning-Condenser-20072021-M.jpg",
+          "alt": "For Less Hassles, More Consistent Results",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-10",
+      "order": 10,
+      "eyebrow": "",
+      "headline": "Auto Cleaning Condenser",
+      "body": "Automatically washes out the condenser 1~3 times/cycle, giving you more time\nfor other tasks.",
+      "disclaimers": [
+        "*The cleanliness of the condenser may differ depending on the operating environment."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/WM/features/Dryer-Vivace-V900-VC2-White-06-2-Auto-Cleaning-Condenser-M.jpg",
+          "alt": "Auto Cleaning Condenser",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-11",
+      "order": 11,
+      "eyebrow": "Allergy Care",
+      "headline": "99.9% Reduction",
+      "body": "The Allergy Care reduces 99.9% of live house dust mites that can cause allergy or respiratory issues.\nImprove your quality of life.",
+      "disclaimers": [
+        "*Allergy Care cycle reduces 99.9% live house dust mites."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/WM/features/Dryer-EU-Vivace-V900-VC2-White-08-1-Allergy-Care-M.jpg",
+          "alt": "99.9% Reduction",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-12",
+      "order": 12,
+      "eyebrow": "",
+      "headline": "BAF approved",
+      "body": "Offers performance backed by BAF (British Allergy Foundation) approval, and prevents allergens that can cause respiratory and skin diseases.\n1 / 1\nNext Slide",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/WM/FDV708W/Dryer-Vivace-V900-VC2-White-09-BAF.jpg",
+          "alt": "BAF approved",
+          "title": "Previous Slide",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 244,
+            "top": 7023,
+            "left": 240
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/WM/features/Dryer-Vivace-V900-VC2-White-10-Dual-Filter-M.jpg",
+          "alt": "Keeps Clothes Clean",
+          "title": "Dual Filter",
+          "matchedBy": "card-pair"
+        }
+      ]
+    },
+    {
+      "id": "sec-13",
+      "order": 13,
+      "eyebrow": "",
+      "headline": "Keeps Clothes Clean",
+      "body": "A Dual Filter assists drying performance by filtering out lint.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-14",
+      "order": 14,
+      "eyebrow": "Fabric Protection",
+      "headline": "Ensure the Clothes Feel Like New",
+      "body": "Low temperature heat pump technology reduces shrinkage and takes gentle care of delicate garments.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/WM/features/Dryer-Vivace-V900-VC2-White-11-Fabric-Protection-20072021-M.jpg",
+          "alt": "Ensure the Clothes Feel Like New",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-15",
+      "order": 15,
+      "eyebrow": "Sensor Dry",
+      "headline": "Facilitates Drying Performance",
+      "body": "The unit's moisture sensor and temperature sensor automatically detect the levels to set the optimal drying time. It save your clothes from the excessive heat damage.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/WM/features/Dryer-Vivace-V900-VC2-White-12-Sensor-Dry-M.jpg",
+          "alt": "Facilitates Drying Performance",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-16",
+      "order": 16,
+      "eyebrow": "LG Washer & Dryer Pair Option",
+      "headline": "Perfectly Synchronized with SmartThinQ™",
+      "body": "From setting the proper drying cycle, to downloading new programs, your dryer just got smarter. Wi-Fi connectivity allows for easy interaction and access to the latest innovations.\n[Perfectly Synchronized with SmartThinQ™ Learn more about ThinQ app](https://www.lg.com/uk/thinq-up/)",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/WM/features/Dryer-Vivace-V900-VC2-White-13-SamrtThinQ-M_v.jpg",
+          "alt": "Perfectly Synchronized with SmartThinQ™",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-17",
+      "order": 17,
+      "eyebrow": "",
+      "headline": "Smart Pairing",
+      "body": "Operate or monitor your laundry from anywhere, anytime. You can also track energy consumption.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-18",
+      "order": 18,
+      "eyebrow": "",
+      "headline": "Cycle Download",
+      "body": "Cycle Download lets users download new dry program such as Gym Clothes, Blanket Refresh, Lingerie and minimise wrinkles",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/WM/FDV708W/Dryer-Vivace-V900-VC2-White-14-1-Smart-Pairing.jpg",
+          "alt": "Smart Pairing",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 244,
+            "top": 11342,
+            "left": 240
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-19",
+      "order": 19,
+      "eyebrow": "",
+      "headline": "Smart Remote Control",
+      "body": "Operate or monitor your laundry from anywhere, anytime. You can also track energy consumption.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/tumble-dryers/FDC309W_BBWQKUK_EEUK_UK_C/feature/D11-02_Global_NewClassic_2018_Feature_14_2_CycleDownload.jpg",
+          "alt": "Cycle Download",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 244,
+            "top": 11342,
+            "left": 1690
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-20",
+      "order": 20,
+      "eyebrow": "",
+      "headline": "Smart Diagnosis™",
+      "body": "Cycle Download lets users download new dry program such as Gym Clothes, Blanket Refresh, Lingerie and minimise wrinkles\n1 / 4\nNext Slide",
+      "disclaimers": [],
+      "layout": {
+        "type": "multi-image",
+        "imgsPerRow": 2
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/WM/features/Global_NewClassic_2018_Feature_14_1_RemoteControl.jpg",
+          "alt": "Smart Remote Control",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 244,
+            "top": 11342,
+            "left": 3140
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/WM/features/Global_NewClassic_2018_Feature_14_3_SmartDiagnosis.jpg",
+          "alt": "Smart Diagnosis™",
+          "title": "Previous Slide",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 244,
+            "top": 11342,
+            "left": 4590
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/WM/features/Dryer-Vivace-V900-VC2-White-17-Tempered-Glass-M.jpg",
+          "alt": "Even More Durable and Elegant",
+          "title": "Tempered Glass",
+          "matchedBy": "card-pair"
+        }
+      ]
+    },
+    {
+      "id": "sec-21",
+      "order": 21,
+      "eyebrow": "",
+      "headline": "Even More Durable and Elegant",
+      "body": "Tempered glass with boosted durability was utilized to give an elegant look that lasts.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/lge/gb/lg-experience/helpful-hints/2024/heat-pump-lg-experience-pdp-image-mobile.png",
+          "alt": "Heat pump LG Experience pages",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-22",
+      "order": 22,
+      "eyebrow": "",
+      "headline": "Heat Pump   Tumble Dryers",
+      "body": "[Heat Pump <br>Tumble DryersBuying Guide](https://www.lg.com/uk/lg-experience/helpful-hints/heat-pump-tumble-dryer-guide/)",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    }
+  ],
+  "unassignedAssets": [
+    {
+      "type": "video",
+      "url": "https://www.lg.com/content/dam/lge/demo/dummy/media_asklg.mp4",
+      "poster": "",
+      "matchedBy": "unassigned"
+    }
+  ],
+  "review": {
+    "imageCoverage": {
+      "inMarkdown": 50,
+      "captured": 45,
+      "coveragePct": 90,
+      "missing": [
+        "https://www.lg.com/content/dam/channel/wcms/uk/images/spec/FrontLoader_Dimension-Mobile-H.jpg",
+        "https://www.lg.com/content/dam/lge/common/payment-icons/icon-paypal-black.png",
+        "https://www.lg.com/content/dam/lge/common/payment-icons/icon-raylo-new-mini.png",
+        "https://www.lg.com/content/dam/channel/wcms/uk/images/fridge-freezers/gbv5240cep/gallery/350x350/01_F-VB_203_Better_GW-B509FQ7C_GBV5240CEP_EP_Front.jpg",
+        "https://www.lg.com/content/dam/channel/wcms/uk/images/fridge-freezers/GSXV80PZLE_APZQLGU_EEUK_UK_C/gallery/350.jpg"
+      ]
+    },
+    "verbatimFails": [
+      {
+        "id": "sec-07",
+        "field": "headline",
+        "text": "A+++ Energy Efficiency\\*"
+      }
+    ],
+    "emptySections": [],
+    "unassignedCount": 1
+  }
+}

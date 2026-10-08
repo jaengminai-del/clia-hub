@@ -1,0 +1,554 @@
+{
+  "version": "0.1",
+  "source": {
+    "url": "https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/",
+    "crawledAt": "2026-07-05T14:36:44.960Z",
+    "engine": "firecrawl",
+    "geometry": true
+  },
+  "product": {
+    "title": "10kg/6kg TurboWash™ Washer Dryer Slate Grey | LG UK",
+    "description": "Get more information on the LG FWY606GBLN1. Click for pictures & tech specs for the TurboWash™ Steam™ Washer Dryer in Slate Grey. Get 5% off your first order.",
+    "model": "fwy606gbln1",
+    "gallery": [
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/350x350/350.jpg",
+        "alt": "10kg / 6kg AI Direct Drive™ Washer Dryer Series 4, Grey"
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/15_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_Back.jpg?w=800",
+        "alt": "Back view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/15_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_Back.jpg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/15_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_Back.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/01_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_Front.jpg?w=800",
+        "alt": "Front view of 10kg / 6kg AI Direct Drive™ Washer Dryer Series 4, Grey FWY606GBLN1",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/01_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_Front.jpg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/01_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_Front.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/02_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_FrontOpen.jpg?w=800",
+        "alt": "Front view Open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/02_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_FrontOpen.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/03_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_TopLeftPanel.jpg?w=800",
+        "alt": "Display",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/03_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_TopLeftPanel.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/2010x1334/lg-laundry-FWY606GBLN1-add-1-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG washer-dryer technical drawing: W 600, H 850, D 565mm (door open 1100mm), including installation clearances.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/2010x1334/lg-laundry-FWY606GBLN1-add-1-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/2010x1334/lg-laundry-FWY606GBLN1-add-2-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "An energy efficiency class graphic for the LG washer-dryer FWY606GBLN1.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/2010x1334/lg-laundry-FWY606GBLN1-add-2-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/2010x1334/lg-laundry-FWY606GBLN1-add-3-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "The LG FWY606GBLN1 washer-dryer in Slate Grey, highlighting its bigger 10kg wash capacity in the same standard-sized drum.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/2010x1334/lg-laundry-FWY606GBLN1-add-3-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/2010x1334/lg-laundry-FWY606GBLN1-add-4-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Close-up of the LG 10kg washer-dryer FWY606GBLN1 in Slate Grey, featuring its deep-learning AI DD™ technology.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/2010x1334/lg-laundry-FWY606GBLN1-add-4-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/2010x1334/lg-laundry-FWY606GBLN1-add-5-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "The LG 10kg/6kg washer-dryer FWY606GBLN1 in Slate Grey, shown installed in a stylish, modern laundry closet.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/2010x1334/lg-laundry-FWY606GBLN1-add-5-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/04_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_Drum.jpg?w=800",
+        "alt": "Drum",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/04_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_Drum.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/05_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_FrontPanel.jpg.jpg?w=800",
+        "alt": "Panel view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/05_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_FrontPanel.jpg.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/06_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_TopRightDrawerOpen.jpg?w=800",
+        "alt": "Left Drawer open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/06_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_TopRightDrawerOpen.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/07_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_TopDrawerOpen.jpg?w=800",
+        "alt": "Top Drawer open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/07_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_TopDrawerOpen.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/08_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_TopLeftPerspective.jpg?w=800",
+        "alt": "Top perspective view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/1600x1062/08_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_TopLeftPerspective.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/180x180/01_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_Front.jpg",
+        "alt": "Front view of 10kg / 6kg AI Direct Drive™ Washer Dryer Series 4, Grey FWY606GBLN1",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/180x180/01_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_Front.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/180x180/02_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_FrontOpen.jpg",
+        "alt": "Front view Open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/180x180/02_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_FrontOpen.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/180x180/03_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_TopLeftPanel.jpg",
+        "alt": "Display",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/180x180/03_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_TopLeftPanel.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/450x450/lg-laundry-FWY606GBLN1-add-1-450.jpg",
+        "alt": "LG washer-dryer technical drawing: W 600, H 850, D 565mm (door open 1100mm), including installation clearances.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/450x450/lg-laundry-FWY606GBLN1-add-1-450.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/450x450/lg-laundry-FWY606GBLN1-add-2-450.jpg",
+        "alt": "An energy efficiency class graphic for the LG washer-dryer FWY606GBLN1.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/450x450/lg-laundry-FWY606GBLN1-add-2-450.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/450x450/lg-laundry-FWY606GBLN1-add-3-450.jpg",
+        "alt": "The LG FWY606GBLN1 washer-dryer in Slate Grey, highlighting its bigger 10kg wash capacity in the same standard-sized drum.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/450x450/lg-laundry-FWY606GBLN1-add-3-450.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/450x450/lg-laundry-FWY606GBLN1-add-4-450.jpg",
+        "alt": "Close-up of the LG 10kg washer-dryer FWY606GBLN1 in Slate Grey, featuring its deep-learning AI DD™ technology.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/450x450/lg-laundry-FWY606GBLN1-add-4-450.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/450x450/lg-laundry-FWY606GBLN1-add-5-450.jpg",
+        "alt": "The LG 10kg/6kg washer-dryer FWY606GBLN1 in Slate Grey, shown installed in a stylish, modern laundry closet.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/gallery/450x450/lg-laundry-FWY606GBLN1-add-5-450.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/180x180/04_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_Drum.jpg",
+        "alt": "Drum",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/180x180/04_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_Drum.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/180x180/05_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_FrontPanel.jpg.jpg",
+        "alt": "Panel view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/180x180/05_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_FrontPanel.jpg.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/180x180/06_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_TopRightDrawerOpen.jpg",
+        "alt": "Left Drawer open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/180x180/06_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_TopRightDrawerOpen.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/180x180/07_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_TopDrawerOpen.jpg",
+        "alt": "Top Drawer open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/180x180/07_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_TopDrawerOpen.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/180x180/08_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_TopLeftPerspective.jpg",
+        "alt": "Top perspective view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/180x180/08_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_TopLeftPerspective.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/180x180/15_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_Back.jpg",
+        "alt": "Back view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/gallery/180x180/15_Vivace_R500_10-6kg_MiddleBlack_F4Y5RRPYJ_UK_Back.jpg"
+        ]
+      }
+    ]
+  },
+  "sections": [
+    {
+      "id": "sec-01",
+      "order": 1,
+      "eyebrow": "",
+      "headline": "10kg / 6kg AI Direct Drive™ Washer Dryer Series 4, Grey",
+      "body": "£1,184 energy saving\nGold rating (top 20%)Gold rating (top 20%)Silver rating (20–40%)Bronze rating (40–60%)Good value (lower 40%)Good value (lower 40%)\nThis action will open Youreko's Energy Savings Tool.\nFWY606GBLN1\nCopy model name\n4.7\nRead 5107 Reviews. Same page link.\n\\|\n5107 Reviews\n2922 out of 3040 (96%) reviewers recommend this product\nShare your thoughts!\n- [Grey](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/)\n- [White](https://www.lg.com/uk/laundry/washer-dryers/fwy606wwln1/)\n(2)\nopen gallery popup\nPrevious Slide\nNext Slide\nPrevious Slide\nNext Slide\nKey Features\n- LG's Steam™ technology uses powerful sanitizing steam to reduce allergens by up to 99.99%\n- LG AI Direct Drive™ detects load and fabric characteristics to offer 18% more fabric care.\n- The AI Wash cycle uses the best motion and stroke depending on the fabric for optimal care\n- With clever packaging LG offers increased capacities in less space than industry standard.\n[More](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#)\n[Ask LG anything](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#) [LG washing machine steam function meaning](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#) [Proper wash cycle selection](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#) [Deep-learning AI DD laundry benefits](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#)\n[**Features**](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#pdp-overview-section) [**Specs**](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#pdp-specs-section) [**Reviews**](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#pdp-review) [**FAQ**](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#pdp-faq-section) [**Support**](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#pdp-support-section) [**Where to Buy**](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#find-a-store)\nDeals & Offers\n- After having purchased, register for your 5 year warranty [here](https://www.lg.com/uk/5-year-warranty/)\n- Get £50 off when you trade-up your laundry machine. Use TRADEUPHA50 Select Trade-up at checkout. [Terms apply.](https://www.lg.com/uk/tncs/trade-up-terms/)\nDeals & Offers\nGallery\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\nzoom inzoom out\n[](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#)\n[](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#)\n[](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#)\n[](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#)\n[](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#)\n[](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#)\n[](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#)\n[](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#)\n[](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#)\n[](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#)\n[](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#)\n[](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#)\n[](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#)\n[](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#)\n[](https://www.lg.com/uk/laundry/washer-dryers/fwy606gbln1/#)\nPPrevious Slide\n1 / 15\nNext Slide\nPrevious Slide\n1 / 1\nNext Slide\nDiscover our latest promotions\n- 5 year warranty on selected home appliances\nAfter having purchased a participating appliance, register for your 5 year warranty.\n~\n[Buy Now](https://www.lg.com/uk/promotion/home-appliance/)\n- Trade-Up\nGet an instant discount when you buy selected products and trade in a product from the same category. Only on LG.com/uk.\n~\n[Buy Now](https://www.lg.com/uk/tradeup/)\nPause carouselPlay carousel",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-02",
+      "order": 2,
+      "eyebrow": "",
+      "headline": "Quiet Mark",
+      "body": "Washer Dryers\n2024",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/awards/5-year-warranty/5yr_180x180.jpg",
+          "alt": "5 year warranty",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 72,
+            "top": 752,
+            "left": 1158
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/awards/quiet-mark/Quiet-Mark-Logo---Label---RGB.jpg",
+          "alt": "Quiet Mark",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 100,
+            "top": 1210,
+            "left": 264
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-03",
+      "order": 3,
+      "eyebrow": "",
+      "headline": "5 Year Warranty",
+      "body": "Washer Dryers\nPrevious Slide\n1 / 1\nNext Slide",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/awards/5-year-warranty/5yr_180x180.jpg",
+          "alt": "5 year warranty",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 72,
+            "top": 752,
+            "left": 1158
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-04",
+      "order": 4,
+      "eyebrow": "High energy efficiency",
+      "headline": "A-10% energy efficiency: the smart way to save",
+      "body": "Save costs and energy, with an excellent wash.\n|     |\n| --- |\n| Bigger capacity |",
+      "disclaimers": [
+        "*10% lower in the Energy Efficiency Index compared to the minimum threshold of energy efficiency class A as defined by EU Regulation 2019/2014."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/pt/images/tratamento-de-roupa/md07582521/features/WM-VivaceRefresh-R500-white-gp1-01-1-mobile.jpg",
+          "alt": "LG washing machine with A-rated energy efficiency, green arrow, and energy scale in futuristic setting.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-05",
+      "order": 5,
+      "eyebrow": "",
+      "headline": "Same size, fits more",
+      "body": "|     |\n| --- |\n| Wash 2kg more clothes at once in the same size washer, with increased drum capacity. |\n|     |\n| --- |\n| \\*Vibration sensor included in 615/565 depth model only. (excluding Slim type)<br>\\*Friction Damper & Weight Balance's number may be different depending on the model.<br>\\*Increased capacity - 3kg in 615mm(Depth), 2kg in 565mm/475mm(Depth) 615 Depth: F4Y9LDP2W vs F14U1JBSK2 / 565 Depth: F4Y7RYW2W vs FH4U2VCNW2 / 475 Depth: F2Y7FYPYH vs F2J8HYP2W. |\nPlay videoPause video\nDeep-learning AI DD™",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy606gbln1/features/WM-VivaceRefresh-R500-white-gp1-03-1-mobile.jpg",
+          "alt": "Blankets and pillows are next to the washing machine, and there is an arrow that increases 2kg on the pillow.",
+          "matchedBy": "doc-order"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/master/h-a/living/wm/front_load/vivace-refresh/vivacerefresh_r500_white_pdp_gp1/wm-vivacerefresh-r500-white-pdp-gp1-feature/mobile/wm-vivacerefresh-r500-white-gp1-03-1-mobile/WM-VivaceRefresh-R500-white-gp1-03-1-mobile.jpg",
+          "alt": "A white piece of cloth is shown in the drum of the washing machine front load washer being washed.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/master/h-a/living/wm/front_load/vivace-refresh/vivacerefresh_r500_white_pdp_gp1/wm-vivacerefresh-r500-white-pdp-gp1-feature/mobile/wm-vivacerefresh-r500-white-gp1-03-1-mobile/WM-VivaceRefresh-R500-white-gp1-03-1-mobile.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-06",
+      "order": 6,
+      "eyebrow": "",
+      "headline": "Maximize cleansing performance and protect your clothes",
+      "body": "Automatic sensing runs the optimal wash pattern based on fabric weight and softness.\nToggle Contents\nWear your clothes with confidence knowing that allergens are  reduced with LG Steam™.\nPrevious Slide\nNext Slide\nClose Contents",
+      "disclaimers": [
+        "*Tested by Intertek on January 2023. Al Wash cycle with 3kg of load compared to Cotton cycle (F4Y7RYW0W). The results may be different depending on the clothes and environment.",
+        "*AI sensing is not activated when the Steam option is selected.",
+        "**Steam away allergens from your fabrics**"
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/master/h-a/living/wm/front_load/vivace-refresh/vivacerefresh_r500_white_pdp_gp1/wm-vivacerefresh-r500-white-pdp-gp1-feature/mobile/WM-VivaceRefresh-R500-white-gp1-04-mobile.jpg",
+          "alt": "Line",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washer-dryers/fwy706wwtn1/WM-VivaceRefresh-R700-white-gp1-08-desktop-update.jpg",
+          "alt": "A soft white robe and stuffed animal are shown with steam in the drum of the washing machine.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1440,
+            "top": 5671,
+            "left": 240
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-07",
+      "order": 7,
+      "eyebrow": "",
+      "headline": "Hygienic & durable lifters",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washing-machines/vivacerefresh_r700_pdp_gp1/desktop/WM-VivaceRefresh-R700-white-gp1-10-1-desktop.jpg",
+          "alt": "The inside image of the washing machine where the Stainless Lifter can be seen.",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 586,
+            "top": 5386,
+            "left": 240
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-08",
+      "order": 8,
+      "eyebrow": "",
+      "headline": "Tempered glass door",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washing-machines/vivacerefresh_r700_pdp_gp1/desktop/WM-VivaceRefresh-R700-white-gp1-10-2-desktop.jpg",
+          "alt": "The image of the washing machine with the Tempered Glass Door clearly visible.",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 830,
+            "top": 5386,
+            "left": 850
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-09",
+      "order": 9,
+      "eyebrow": "",
+      "headline": "A more visible display",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washing-machines/vivacerefresh_r700_pdp_gp1/desktop/WM-VivaceRefresh-R700-white-gp1-10-4-desktop.jpg",
+          "alt": "This is an enlarged image of the washing machine panel so that the display can be clearly seen.",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 830,
+            "top": 6402,
+            "left": 850
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-10",
+      "order": 10,
+      "eyebrow": "Step-by-step guide",
+      "headline": "Set up your new LG washing machine: quick and easy",
+      "body": "Follow our simple step-by-step video guide to install your new LG front-loading washing machine, including water and drain connections and levelling. Start washing today.\nPlay video",
+      "disclaimers": [
+        "*Images based on a representative 3D model for illustrative purposes and may differ from the actual product. Installation steps may vary by product model and local regulations. Always refer to your product manual for safety and model-specific instructions."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm00-installationguidevideo/front-loading-washer/frontloader-thumbnail-mobile.jpg",
+          "alt": "LG front-loading washing machine installation guide: step-by-step video for water and drain connections and levelling",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    }
+  ],
+  "unassignedAssets": [
+    {
+      "type": "image",
+      "url": "https://www.lg.com/content/dam/channel/wcms/uk/awards/5-year-warranty/5yr_2010x1334.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+      "alt": "5 year warranty",
+      "matchedBy": "unassigned",
+      "variants": [
+        "https://www.lg.com/content/dam/channel/wcms/uk/awards/5-year-warranty/5yr_2010x1334.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+      ]
+    },
+    {
+      "type": "image",
+      "url": "https://www.lg.com/content/dam/channel/wcms/uk/awards/5-year-warranty/5yr_180x180.jpg",
+      "alt": "5 year warranty",
+      "matchedBy": "unassigned"
+    },
+    {
+      "type": "video",
+      "url": "https://www.lg.com/content/dam/master/h-a/living/wm/front_load/vivace-refresh/vivacerefresh_r500_white_pdp_gp1/wm-vivacerefresh-r500-white-pdp-gp1-feature/desktop/wm-vivacerefresh-r500-white-gp1-03-1-desktop/WM-VivaceRefresh-R500-white-gp1-03-1-desktop.mp4",
+      "poster": "",
+      "matchedBy": "unassigned"
+    },
+    {
+      "type": "video",
+      "url": "https://www.lg.com/content/dam/lge/demo/dummy/media_asklg.mp4",
+      "poster": "",
+      "matchedBy": "unassigned"
+    }
+  ],
+  "review": {
+    "imageCoverage": {
+      "inMarkdown": 45,
+      "captured": 41,
+      "coveragePct": 91,
+      "missing": [
+        "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm28-washerdryer-fwy606gbln1/dimension/WM-FL-24-Dimension-VX-Vivace-Standard-English-M.jpg",
+        "https://www.lg.com/content/dam/lge/common/payment-icons/icon-paypal-black.png",
+        "https://www.lg.com/content/dam/lge/common/payment-icons/icon-raylo-new-mini.png",
+        "https://www.lg.com/content/dam/channel/wcms/uk/images/fridge-freezers/gbv5240cep/gallery/350x350/01_F-VB_203_Better_GW-B509FQ7C_GBV5240CEP_EP_Front.jpg"
+      ]
+    },
+    "verbatimFails": [],
+    "emptySections": [],
+    "unassignedCount": 4
+  }
+}

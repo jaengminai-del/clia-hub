@@ -1,0 +1,425 @@
+{
+  "version": "0.1",
+  "source": {
+    "url": "https://www.lg.com/sa_en/speakers/party-speakers/rnc7/",
+    "crawledAt": "2026-07-02T07:08:51.070Z",
+    "engine": "firecrawl"
+  },
+  "product": {
+    "title": "LG XBOOM RNC7 - RNC7 | LG Saudi Arabia",
+    "description": "Discover LG RNC7. Click for pictures, reviews, and tech specs for the LG LG XBOOM RNC7.",
+    "model": "rnc7",
+    "gallery": [
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-10.jpg?w=800",
+        "alt": "LG XBOOM RNC7, RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-10.jpg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-10.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-01.jpg?w=800",
+        "alt": "Front view of LG XBOOM RNC7 RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-01.jpg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-01.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-02.jpg?w=800",
+        "alt": "LG XBOOM RNC7, RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-02.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-03.jpg?w=800",
+        "alt": "LG XBOOM RNC7, RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-03.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-04.jpg?w=800",
+        "alt": "LG XBOOM RNC7, RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-04.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-05.jpg?w=800",
+        "alt": "LG XBOOM RNC7, RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-05.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-06.jpg?w=800",
+        "alt": "LG XBOOM RNC7, RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-06.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-07.jpg?w=800",
+        "alt": "LG XBOOM RNC7, RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-07.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-08.jpg?w=800",
+        "alt": "LG XBOOM RNC7, RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-08.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-09.jpg?w=800",
+        "alt": "LG XBOOM RNC7, RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/DZ-09.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-01.jpg",
+        "alt": "Front view of LG XBOOM RNC7 RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-01.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-02.jpg",
+        "alt": "LG XBOOM RNC7, RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-02.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-03.jpg",
+        "alt": "LG XBOOM RNC7, RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-03.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-04.jpg",
+        "alt": "LG XBOOM RNC7, RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-04.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-05.jpg",
+        "alt": "LG XBOOM RNC7, RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-05.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-06.jpg",
+        "alt": "LG XBOOM RNC7, RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-06.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-07.jpg",
+        "alt": "LG XBOOM RNC7, RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-07.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-08.jpg",
+        "alt": "LG XBOOM RNC7, RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-08.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-09.jpg",
+        "alt": "LG XBOOM RNC7, RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-09.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-10.jpg",
+        "alt": "LG XBOOM RNC7, RNC7",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/gallery/S-10.jpg"
+        ]
+      }
+    ]
+  },
+  "sections": [
+    {
+      "id": "sec-01",
+      "order": 1,
+      "eyebrow": "",
+      "headline": "LG XBOOM RNC7",
+      "body": "RNC7\nCopy model name\nChat with an expert\n4.4\nRead 45 Reviews. Same page link.\n\\|\n45 Reviews\n17 out of 19 (89%) reviewers recommend this product\nShare your thoughts!\n()\nopen gallery popup\nPrevious Slide\nNext Slide\nPrevious Slide\nNext Slide\nKey Features\n- Bass Blast+\n- Multi Color (RGB) Speaker Lighting\n- DJ Function\n- Karaoke Function\n- Juke Box\n- Bluetooth Remote app (Android/iOS)\n[More](https://www.lg.com/sa_en/speakers/party-speakers/rnc7/#)\n[**Features**](https://www.lg.com/sa_en/speakers/party-speakers/rnc7/#pdp-overview-section) [**Specs**](https://www.lg.com/sa_en/speakers/party-speakers/rnc7/#pdp-specs-section) [**Reviews**](https://www.lg.com/sa_en/speakers/party-speakers/rnc7/#pdp-review) [**Support**](https://www.lg.com/sa_en/speakers/party-speakers/rnc7/#pdp-support-section) [**Where to Buy**](https://www.lg.com/sa_en/speakers/party-speakers/rnc7/#find-a-store)\nGallery\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\nzoom inzoom out\n[](https://www.lg.com/sa_en/speakers/party-speakers/rnc7/#)\n[](https://www.lg.com/sa_en/speakers/party-speakers/rnc7/#)\n[](https://www.lg.com/sa_en/speakers/party-speakers/rnc7/#)\n[](https://www.lg.com/sa_en/speakers/party-speakers/rnc7/#)\n[](https://www.lg.com/sa_en/speakers/party-speakers/rnc7/#)\n[](https://www.lg.com/sa_en/speakers/party-speakers/rnc7/#)\n[](https://www.lg.com/sa_en/speakers/party-speakers/rnc7/#)\n[](https://www.lg.com/sa_en/speakers/party-speakers/rnc7/#)\n[](https://www.lg.com/sa_en/speakers/party-speakers/rnc7/#)\n[](https://www.lg.com/sa_en/speakers/party-speakers/rnc7/#)\nPPrevious Slide\n1 / 10\nNext Slide\nPrevious Slide\n1 / 1\nNext Slide\nDiscover our latest promotions - Don't miss savings!\n- All Offers\n~\n[Buy Now](https://www.lg.com/sa_en/promotions/all-offers/)\n- weekend-sale\n~\n[Buy Now](https://www.lg.com/sa_en/promotions/weekend-sale)\n- All Offers\n~\n[Buy Now](https://www.lg.com/sa_en/all-offers)\nPause carouselPlay carousel\nA low angle view of the left side of LG XBOOM against a purple background. The XBOOM light are also purple.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-02",
+      "order": 2,
+      "eyebrow": "LG XBOOM RNC7",
+      "headline": "The All-in-One for Bold Party Sound",
+      "body": "A Super Bass Boost, and other fun features deliver big, powerful beats that take the party atmosphere up a notch.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/av/features/AV-XBOOM-RNC7-01-Identity-Mobile.jpg",
+          "alt": "A low angle view of the left side of LG XBOOM against a purple background. The XBOOM light are also purple.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-03",
+      "order": 3,
+      "eyebrow": "Super Bass Boost",
+      "headline": "Powerful Sound the Party Will Feel",
+      "body": "LG XBOOM RNC7 generates extra airflow behind the speaker unit to produce thumping bass that sparks any party into life.\nPlay video",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/av/features/AV-XBOOM-RNC7-02-DoubleSuperBassBoost-Mobile.jpg",
+          "alt": "A low angle view of the right side of LG XBOOM against a purple background. The XBOOM lights are red.",
+          "matchedBy": "doc-order"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/av/features/AV-XBOOM-RNC7-03-MultiColorLighting-Thumbnail-Mobile.jpg",
+          "alt": "A video preview showing the different lighting of three LG XBOOMs.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-04",
+      "order": 4,
+      "eyebrow": "",
+      "headline": "Light Up the Dance Floor with Multi Color Lighting",
+      "body": "Colorful LED lights vary and change with the rhythm of the beat to add more excitement to your parties.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-05",
+      "order": 5,
+      "eyebrow": "Party Strobe",
+      "headline": "Sync Your Smartphone with the Beat",
+      "body": "Shine a little more fun on the party. Connect up to three smartphones and hold them up as the rear light flashes in sync with the music.",
+      "disclaimers": [
+        "*This feature only works on Android."
+      ],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/av/features/AV-XBOOM-RNC7-04-PartyStrobe-MOB-00100.jpg",
+          "alt": "A close-up view of the top of LG XBOOM. Two flashing smartphones are floating around it.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-06",
+      "order": 6,
+      "eyebrow": "DJ App",
+      "headline": "Spin the Decks from the Dance Floor",
+      "body": "Get the party dancing. Apply sound effects straight from the DJ App on either Android or iOS, or control the DJ Pad on the speaker.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/av/features/AV-XBOOM-RNC7-05-DJapp-Mobile.jpg",
+          "alt": "A hand holding a smartphone next to a top view of LG XBOOM.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-07",
+      "order": 7,
+      "eyebrow": "Karaoke Star",
+      "headline": "Sing It Loud and Clear",
+      "body": "Adjust the music and microphone volume separately, reduce track vocals with the Voice Canceller, and tune the music to your voice with the Key Changer. Then when you're ready, sing your heart out.",
+      "disclaimers": [
+        "*Microphone not included.",
+        "*\\*Vocal sound is microphone volume for your own voice."
+      ],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/av/features/AV-XBOOM-RNC7-06-Karaokestar-Mobile.jpg",
+          "alt": "A hand holding a microphone tries to press the Voice canceller button on the top of LG XBOOM.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-08",
+      "order": 8,
+      "eyebrow": "Wireless Party Link",
+      "headline": "Double the Fun",
+      "body": "Wirelessly link two LG XBOOM RNC7 to double the sound output. Bigger sound only means one thing — better parties and more fun.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/av/features/AV-XBOOM-RNC7-07-WirelessPartyLink-MOBV00100.jpg",
+          "alt": "Two LG XBOOMs facing each other at diagonal angles against a purple background with a Bluetooth logo in between.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-09",
+      "order": 9,
+      "eyebrow": "Party Saver",
+      "headline": "Relive the Fun with Friends",
+      "body": "Record your playlists and DJ mixes to USB so you can listen back to them at anytime. Copy them to another USB, or even send them to friends over Bluetooth®.",
+      "disclaimers": [
+        "*There is no internal storage."
+      ],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/av/features/AV-XBOOM-RNC7-08-PartySaver-Mobile.jpg",
+          "alt": "A closeup view of controls on top of LG XBOOM, with two USBs plugged in. A Bluetooth logo is shown in the upper left corner.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-10",
+      "order": 10,
+      "eyebrow": "Connectivity",
+      "headline": "More Ways to Enjoy the Party",
+      "body": "Plug in to the guitar input and get the room rocking. Or use a USB and the radio to play music.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/av/features/AV-XBOOM-RNC7-08-Connectivity-Mobile00100.jpg",
+          "alt": "A close up of the top of LG XBOOM, connectivity icons are shown around the product.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-11",
+      "order": 11,
+      "eyebrow": "Multi Bluetooth & XBOOM App",
+      "headline": "Share Playlists on One App",
+      "body": "Pair three devices at the same time via the XBOOM App. Use any of the connected devices to seamlessly control a playlist with no interruption to music. Get it on the Google Play Store or the Apple App Store.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/av/features/AV-XBOOM-RNC7-10-Multi-Bluetooth-XBOOM-App-MobileV.jpg",
+          "alt": "A smartphone is on an LG XBOOM with two other smartphones floating around it. A Bluetooth logo is in the upper left corner.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-12",
+      "order": 12,
+      "eyebrow": "TV Sound Sync",
+      "headline": "Feel the Excitement of a Live Performance",
+      "body": "Connect the RN7 to your LG TV via optical cable or Bluetooth® to experience more impressive, room-filing sound.\nPrint\nSee All Specs",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/av/features/AV-XBOOM-RNC7-11-TV-Sound-Sync-Mobile00.jpg",
+          "alt": "A TV is on a wall with an LG XBOOM to the right of it.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    }
+  ],
+  "unassignedAssets": [],
+  "review": {
+    "imageCoverage": {
+      "inMarkdown": 37,
+      "captured": 31,
+      "coveragePct": 84,
+      "missing": [
+        "https://www.lg.com/content/dam/channel/wcms/sa_en/images/home-theaters/rnc7_dsauelk_emsj_sa_en_c/RNC7_DSAUELK_EMSJ_SA_EN_C-350x350.jpg",
+        "https://www.lg.com/content/dam/channel/wcms/sa_en/img/product/buyonline/Al-Manea.jpg",
+        "https://www.lg.com/content/dam/channel/wcms/sa_en/img/product/buyonline/extra-store-logo.jpg",
+        "https://www.lg.com/content/dam/channel/wcms/sa_en/img/product/buyonline/lulu.jpg",
+        "https://www.lg.com/content/dam/channel/wcms/sa_en/img/product/buyonline/swsg.jpg",
+        "https://www.lg.com/content/dam/channel/wcms/sa_en/images/wtb/storeImage/UnitedWateen_20260126212305733_.jpg"
+      ]
+    },
+    "verbatimFails": [],
+    "emptySections": [],
+    "unassignedCount": 0
+  }
+}

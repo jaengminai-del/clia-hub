@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>PCG Viewer — 크롤 산출물 검수</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, 'LGEIText', Arial, sans-serif; background: #f4f2ee; color: #222; }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    background: #fff; border-bottom: 1px solid #e4e4e4;
+    padding: 14px 28px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .topbar h1 { font-size: 16px; font-weight: 700; }
+  .topbar h1 span { color: #A50034; }
+  .drop {
+    border: 2px dashed #c9c4bb; border-radius: 8px; padding: 8px 14px;
+    font-size: 12px; color: #777; cursor: pointer; transition: .15s; flex-shrink: 0;
+  }
+  .drop:hover, .drop.over { border-color: #A50034; color: #A50034; background: #fdf5f7; }
+  .meta-chip { font-size: 12px; background: #f0ede8; border-radius: 20px; padding: 5px 14px; color: #555; }
+
+  .url-shell {
+    flex: 1; min-width: 320px; display: flex; align-items: center; gap: 8px;
+    background: #f7f6f3; border: 1px solid #e4e4e4; border-radius: 10px; padding: 4px 6px 4px 14px;
+  }
+  .url-shell:focus-within { border-color: #A50034; }
+  .url-shell input[type=url] {
+    flex: 1; border: none; background: none; outline: none;
+    font-size: 13px; color: #222; font-family: inherit;
+  }
+  .cache-check { font-size: 12px; color: #777; display: flex; align-items: center; gap: 4px; flex-shrink: 0; cursor: pointer; }
+  #btnCrawl {
+    background: #A50034; color: #fff; border: none; border-radius: 8px;
+    padding: 8px 18px; font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0;
+    font-family: inherit; transition: .15s;
+  }
+  #btnCrawl:hover:not(:disabled) { background: #c4184f; }
+  #btnCrawl:disabled { opacity: .55; cursor: wait; }
+  #btnVision {
+    background: #1a237e; color: #fff; border: none; border-radius: 8px;
+    padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0;
+    font-family: inherit; transition: .15s;
+  }
+  #btnVision:hover:not(:disabled) { background: #303f9f; }
+  #btnVision:disabled { opacity: .55; cursor: wait; }
+
+  .status-bar {
+    display: flex; align-items: center; gap: 10px; justify-content: center;
+    background: #fffbe8; border-bottom: 1px solid #f0e6b8;
+    padding: 10px; font-size: 13px; color: #7a6a1e;
+  }
+  .spinner {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid rgba(122,106,30,.25); border-top-color: #A50034;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .geo-chip {
+    display: inline-block; font-size: 10px; background: #eef3fb; color: #1565c0;
+    border-radius: 10px; padding: 2px 8px; margin-left: 6px; font-weight: 700;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px; }
+  .product-card {
+    background: #fff; border-radius: 12px; padding: 24px 28px; margin-bottom: 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.05);
+  }
+  .product-card h2 { font-size: 20px; margin-bottom: 6px; }
+  .product-card p { font-size: 13px; color: #666; }
+  .gallery-strip { display: flex; gap: 8px; overflow-x: auto; margin-top: 16px; padding-bottom: 6px; }
+  .gallery-strip img { height: 84px; border-radius: 6px; background: #eee; flex-shrink: 0; }
+
+  .section-card {
+    background: #fff; border-radius: 12px; margin-bottom: 18px; overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    display: grid; grid-template-columns: 340px 1fr;
+  }
+  .sec-media { background: #fafafa; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .asset { position: relative; }
+  .asset img, .asset video { width: 100%; border-radius: 8px; background: #eee; display: block; }
+  .badge {
+    position: absolute; top: 8px; left: 8px; font-size: 10px; font-weight: 700;
+    padding: 3px 9px; border-radius: 12px; color: #fff; letter-spacing: .03em;
+  }
+  .badge.doc-order          { background: #2e7d32; }
+  .badge.doc-order-trailing { background: #1565c0; }
+  .badge.dam-folder         { background: #6a1b9a; }
+  .badge.file-stem          { background: #00695c; }
+  .badge.card-pair          { background: #e65100; }
+  .badge.unassigned         { background: #c62828; }
+
+  .review-card {
+    background: #fff; border-radius: 12px; padding: 18px 24px; margin-bottom: 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.05); border-left: 4px solid #2e7d32;
+  }
+  .review-card.warn { border-left-color: #e65100; }
+  .review-card h4 { font-size: 14px; margin-bottom: 10px; }
+  .review-grid { display: flex; gap: 24px; flex-wrap: wrap; font-size: 13px; }
+  .review-grid .kpi b { font-size: 20px; display: block; }
+  .review-list { font-size: 11px; color: #a33; margin-top: 8px; line-height: 1.6; }
+  .alt-text { font-size: 11px; color: #888; line-height: 1.45; padding: 0 2px; }
+  .alt-text b { color: #555; }
+  .no-asset { font-size: 12px; color: #bbb; text-align: center; padding: 40px 0; border: 1px dashed #e2e2e2; border-radius: 8px; }
+
+  .sec-body { padding: 20px 26px; }
+  .sec-head-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
+  .sec-id { font-size: 11px; color: #aaa; font-weight: 700; }
+  .comp-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+    background: #ede7f6; color: #4527a0; letter-spacing: .02em;
+  }
+  .comp-badge .lt { font-weight: 500; color: #6a52c9; }
+  .comp-badge.na { background: #f0f0f0; color: #bbb; }
+  .eyebrow {
+    font-size: 11px; font-weight: 700; color: #A50034; background: #fbeef2;
+    padding: 3px 10px; border-radius: 12px;
+  }
+  .sec-body h3 { font-size: 17px; margin: 4px 0 10px; line-height: 1.35; }
+  .sec-body .body-text { font-size: 13px; color: #444; line-height: 1.65; white-space: pre-wrap; }
+  .disclaimers { margin-top: 14px; border-top: 1px solid #f0f0f0; padding-top: 10px; }
+  .disclaimers div { font-size: 11px; color: #999; line-height: 1.5; }
+  .layout-tag { font-size: 11px; color: #999; margin-top: 12px; }
+
+  .group-title { font-size: 14px; font-weight: 700; color: #777; margin: 26px 0 12px; }
+  .empty-state { text-align: center; padding: 100px 20px; color: #999; font-size: 15px; }
+  .empty-state .big { font-size: 42px; margin-bottom: 14px; }
+  @media (max-width: 820px) { .section-card { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1><span>PCG</span> Viewer</h1>
+  <div class="url-shell">
+    <input type="url" id="urlInput" placeholder="LG.com PDP URL을 입력하세요 (예: https://www.lg.com/sg/washing-machines/.../fv1411s2b/)">
+    <label class="cache-check" title="이전에 크롤한 적 있으면 원시 데이터 재사용 (Firecrawl 비용 0, 빠름)">
+      <input type="checkbox" id="useCache" checked> 캐시
+    </label>
+    <button id="btnCrawl" onclick="crawlUrl()">🔍 Crawl</button>
+    <button id="btnVision" onclick="crawlVision()" title="Python vision 파이프라인 (Firecrawl 듀얼 + 스크린샷 + Gemini 융합 + 시각 QA)">🧠 Vision</button>
+  </div>
+  <label class="drop" id="drop" title="이미 생성된 pcg.json 파일 직접 열기">
+    📂 JSON 열기
+    <input type="file" id="fileInput" accept=".json" style="display:none">
+  </label>
+  <span class="meta-chip" id="chipSections" style="display:none"></span>
+  <span class="meta-chip" id="chipAssets" style="display:none"></span>
+  <span class="meta-chip" id="chipCrawled" style="display:none"></span>
+  <span class="meta-chip" id="chipComp" style="display:none"></span>
+</div>
+<div class="status-bar" id="statusBar" style="display:none; flex-direction: column; align-items: center; gap: 8px; padding: 12px;">
+  <div style="display: flex; align-items: center; gap: 10px; justify-content: center;">
+    <span class="spinner"></span><span id="statusText"></span>
+  </div>
+  <div id="progressContainer" style="display: none; width: 100%; max-width: 600px; height: 6px; background: #e0dcd3; border-radius: 3px; overflow: hidden; margin-top: 4px;">
+    <div id="statusProgress" style="width: 0%; height: 100%; background: #A50034; transition: width 0.4s ease;"></div>
+  </div>
+</div>
+
+<div class="wrap" id="content">
+  <div class="empty-state">
+    <div class="big">🔍</div>
+    <div>상단에 <b>PDP URL</b>을 입력하고 <b>Crawl</b>을 누르세요.</div>
+    <div style="font-size:12px;margin-top:8px;color:#bbb">
+      크롤 완료 후 섹션별 이미지·텍스트·매칭 근거·레이아웃(행당 이미지 수)을 검수할 수 있습니다.<br>
+      ※ 서버 실행 필요: <code>node server.js</code> → 이 페이지를 <code>http://localhost:3001/crawler/viewer.html</code> 로 열면 가장 편합니다.
+    </div>
+  </div>
+</div>
+
+<script>
+// ── URL 크롤 (서버 /api/pcg 호출) ──────────────────────────────
+const API_BASE = location.protocol === 'file:' ? 'http://localhost:3001' : '';
+
+async function crawlUrl() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) { document.getElementById('urlInput').focus(); return; }
+  const btn = document.getElementById('btnCrawl');
+  const bar = document.getElementById('statusBar');
+  const txt = document.getElementById('statusText');
+  btn.disabled = true;
+  bar.style.display = 'flex';
+  txt.textContent = '크롤링 중... Firecrawl + geometry 수집 (첫 크롤은 2~4분, 캐시 있으면 수십 초)';
+
+  try {
+    const res = await fetch(API_BASE + '/api/pcg', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, cache: document.getElementById('useCache').checked, geometry: true }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'HTTP ' + res.status);
+    render(data);
+  } catch (e) {
+    const hint = /Failed to fetch/i.test(e.message)
+      ? '\n\n서버가 꺼져 있는 것 같습니다. 터미널에서 node server.js 를 실행해주세요.'
+      : '';
+    alert('크롤 실패: ' + e.message + hint);
+  } finally {
+    btn.disabled = false;
+    bar.style.display = 'none';
+  }
+}
+document.getElementById('urlInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); crawlUrl(); }
+});
+
+// ── Vision 크롤 (Python 파이프라인 /api/pcg-vision) ──────────────────
+async function crawlVision() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) { document.getElementById('urlInput').focus(); return; }
+  const btn = document.getElementById('btnVision');
+  const bar = document.getElementById('statusBar');
+  const txt = document.getElementById('statusText');
+  const progContainer = document.getElementById('progressContainer');
+  const statusProgress = document.getElementById('statusProgress');
+  
+  btn.disabled = true;
+  bar.style.display = 'flex';
+  progContainer.style.display = 'block';
+  statusProgress.style.width = '0%';
+  txt.textContent = 'Vision 분석 인프라 기동 대기 중 (0%)...';
+  
+  let pollInterval = null;
+  
+  // 1초 간격 실시간 진행도 폴링 가동
+  pollInterval = setInterval(async () => {
+    try {
+      const res = await fetch(API_BASE + '/api/pcg-vision/progress?url=' + encodeURIComponent(url));
+      if (res.ok) {
+        const data = await res.json();
+        txt.textContent = `${data.message} (${data.percent}%)`;
+        statusProgress.style.width = `${data.percent}%`;
+      }
+    } catch (_) {}
+  }, 1000);
+
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 20 * 60 * 1000);
+    const res = await fetch(API_BASE + '/api/pcg-vision', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+      signal: ctrl.signal,
+    }).finally(() => clearTimeout(t));
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'HTTP ' + res.status);
+    render(data);  // layout_flow 감지 → renderFinalFlow
+  } catch (e) {
+    const hint = /Failed to fetch/i.test(e.message)
+      ? '\n\n서버가 꺼져 있는 것 같습니다. node server.js 를 실행해주세요.' : '';
+    alert('Vision 크롤 실패: ' + e.message + hint);
+  } finally {
+    if (pollInterval) clearInterval(pollInterval);
+    btn.disabled = false;
+    bar.style.display = 'none';
+    progContainer.style.display = 'none';
+  }
+}
+
+const drop = document.getElementById('drop');
+const fileInput = document.getElementById('fileInput');
+drop.addEventListener('click', () => fileInput.click());
+drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+drop.addEventListener('drop', e => {
+  e.preventDefault(); drop.classList.remove('over');
+  const f = e.dataTransfer.files[0];
+  if (f) readFile(f);
+});
+fileInput.addEventListener('change', () => fileInput.files[0] && readFile(fileInput.files[0]));
+
+function readFile(f) {
+  const r = new FileReader();
+  r.onload = () => {
+    try { render(JSON.parse(r.result)); }
+    catch (e) { alert('JSON 파싱 실패: ' + e.message); }
+  };
+  r.readAsText(f);
+}
+
+const esc = s => (s || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// CCG 컴포넌트 배지 — 섹션에 매칭된 component_id(+layout_type) 표시. 미매칭이면 회색 배지.
+const compBadge = s => s && s.component_id
+  ? `<span class="comp-badge">${esc(s.component_id)}${s.layout_type ? ` <span class="lt">· ${esc(s.layout_type)}</span>` : ''}</span>`
+  : `<span class="comp-badge na">CCG 미매칭</span>`;
+
+function assetHtml(a) {
+  const media = a.type === 'video'
+    ? `<video src="${esc(a.url)}" controls muted playsinline poster="${esc(a.poster||'')}"></video>`
+    : `<img src="${esc(a.url)}" loading="lazy" onerror="this.style.opacity=.25">`;
+  const variants = (a.variants || []).length
+    ? `<div class="alt-text">variants: ${a.variants.length}개 (모바일/데스크톱)</div>` : '';
+  const geo = a.geometry
+    ? `<div class="alt-text"><b>geometry:</b> 렌더폭 ${a.geometry.renderWidth}px · top ${a.geometry.top} · left ${a.geometry.left}</div>` : '';
+  return `<div class="asset">${media}
+    <span class="badge ${esc(a.matchedBy||'unassigned')}">${esc(a.matchedBy||'?')}</span></div>
+    ${a.title ? `<div class="alt-text" style="font-size:12px;color:#333"><b>▸ ${esc(a.title)}</b></div>` : ''}
+    ${a.alt ? `<div class="alt-text"><b>alt:</b> ${esc(a.alt)}</div>` : ''}${geo}${variants}`;
+}
+
+// 검수 리포트 패널 (crawl-agent validatePCG 결과)
+function renderReview(r) {
+  if (!r) return '';
+  const cov = r.imageCoverage || {};
+  const warn = (cov.coveragePct ?? 100) < 95 || (r.verbatimFails||[]).length > 0;
+  return `
+    <div class="review-card ${warn ? 'warn' : ''}">
+      <h4>${warn ? '⚠️' : '✅'} 검수 리포트 — 닷컴 원본 ↔ PCG 기계 대조</h4>
+      <div class="review-grid">
+        <div class="kpi"><b>${cov.coveragePct ?? '-'}%</b>이미지 커버리지 (${cov.captured}/${cov.inMarkdown})</div>
+        <div class="kpi"><b>${(r.verbatimFails||[]).length}</b>원문 훼손 (0=정상)</div>
+        <div class="kpi"><b>${(r.emptySections||[]).length}</b>빈 섹션</div>
+        <div class="kpi"><b>${r.unassignedCount ?? 0}</b>미배정 자산</div>
+      </div>
+      ${(cov.missing||[]).length ? `<div class="review-list"><b>누락 이미지:</b><br>${cov.missing.map(u=>'…'+esc(u.slice(-70))).join('<br>')}</div>` : ''}
+      ${(r.verbatimFails||[]).length ? `<div class="review-list"><b>원문 불일치:</b> ${r.verbatimFails.map(v=>esc(v.id+' '+v.text)).join(' / ')}</div>` : ''}
+    </div>`;
+}
+
+// ── Python 파이프라인(final.json / FinalPDPData) 렌더러 ─────────────────
+// 시각 흐름(layout_flow)을 화면에 보이는 순서 그대로 미러링 표시.
+function renderFinalFlow(d) {
+  const flow = d.layout_flow || [];
+  const medias = flow.filter(s => s.content_type === 'media');
+  document.getElementById('chipSections').style.display = '';
+  document.getElementById('chipSections').textContent = `flow ${flow.length}개`;
+  document.getElementById('chipAssets').style.display = '';
+  document.getElementById('chipAssets').textContent = `media ${medias.length}개 (Python vision 파이프라인)`;
+  const qa = d._qa;
+  const chipQ = document.getElementById('chipCrawled');
+  if (qa) {
+    chipQ.style.display = '';
+    chipQ.textContent = `시각 QA ${qa.match_score}점 · 이슈 ${(qa.issues || []).length}건`;
+  } else chipQ.style.display = 'none';
+  const chipC = document.getElementById('chipComp');
+  const summary = d._component_summary || {};
+  const kinds = Object.keys(summary).length;
+  const matchedSecs = flow.filter(s => s.component_id).length;
+  if (kinds || matchedSecs) {
+    chipC.style.display = '';
+    chipC.textContent = `CCG 컴포넌트 ${kinds}종 · 매칭 ${matchedSecs}/${flow.length}섹션`;
+  } else chipC.style.display = 'none';
+
+  let html = `<div class="product-card">
+    <h2>${esc(d.product_title || '(제목 없음)')}</h2>
+    <p>crawler-py 시각 흐름 미러링 — 화면 상단→하단 순서 그대로 (Gemini 융합 + 시각 QA 통과본)</p>
+  </div>`;
+  if (qa && (qa.issues || []).length) {
+    html += `<div class="review-card warn"><h4>⚠️ 시각 QA 이슈 ${qa.issues.length}건 (${qa.match_score}점)</h4>
+      <div class="review-list">${qa.issues.map(i =>
+        `#${i.sequence} [${esc(i.issue_type)}] ${esc(i.description)} → ${esc(i.suggested_fix)}`).join('<br>')}</div></div>`;
+  }
+
+  html += flow.map(s => {
+    if (s.content_type === 'media') {
+      const ma = s.media_assets || {};
+      const cells = [];
+      if (ma.unified_url) cells.push(['COMMON', ma.unified_url]);
+      if (ma.pc_url) cells.push(['PC', ma.pc_url]);
+      if (ma.mobile_url) cells.push(['MOBILE', ma.mobile_url]);
+      const mediaHtml = cells.map(([lab, u]) => {
+        const isVid = /\.(mp4|webm|mov)(\?|$)/i.test(u);
+        return `<div class="asset">${isVid
+          ? `<video src="${esc(u)}" controls muted playsinline></video>`
+          : `<img src="${esc(u)}" loading="lazy" onerror="this.style.opacity=.25">`}
+          <span class="badge doc-order">${lab}</span></div>`;
+      }).join('');
+      return `<div class="section-card">
+        <div class="sec-media">${mediaHtml || '<div class="no-asset">URL 없음</div>'}</div>
+        <div class="sec-body">
+          <div class="sec-head-row"><span class="sec-id">#${s.sequence}</span><span class="eyebrow">media</span>${compBadge(s)}</div>
+          <div class="body-text">${esc(s.associated_context || '')}</div>
+        </div>
+      </div>`;
+    }
+    return `<div class="section-card" style="grid-template-columns:1fr">
+      <div class="sec-body">
+        <div class="sec-head-row"><span class="sec-id">#${s.sequence}</span>${compBadge(s)}</div>
+        <div class="body-text">${esc(s.text_content || '')}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('content').innerHTML = html;
+}
+
+// ── mirror.json 렌더러 — lg.com 원문 미러 (AI 서술 0%) ─────────────────
+function renderMirror(d) {
+  const secs = d.sections || [];
+  const nMedia = secs.reduce((n, s) => n + (s.media || []).length, 0);
+  document.getElementById('chipSections').style.display = '';
+  document.getElementById('chipSections').textContent = `섹션 ${secs.length}개`;
+  document.getElementById('chipAssets').style.display = '';
+  document.getElementById('chipAssets').textContent = `미디어 ${nMedia}개 · 원문 미러 (AI 서술 없음)`;
+  const mq = d._qa, chipM = document.getElementById('chipCrawled');
+  if (mq) { chipM.style.display = ''; chipM.textContent = `시각 QA ${mq.match_score}점 · 이슈 ${(mq.issues || []).length}건`; }
+  else chipM.style.display = 'none';
+  // CCG 컴포넌트 요약 칩 — 매칭된 섹션 수 + 사용 컴포넌트 종류
+  const chipC = document.getElementById('chipComp');
+  const summary = d._component_summary || {};
+  const kinds = Object.keys(summary).length;
+  const matchedSecs = secs.filter(s => s.component_id).length;
+  if (kinds || matchedSecs) {
+    chipC.style.display = '';
+    chipC.textContent = `CCG 컴포넌트 ${kinds}종 · 매칭 ${matchedSecs}/${secs.length}섹션`;
+  } else chipC.style.display = 'none';
+
+  let html = `<div class="product-card">
+    <h2>${esc(d.product_title || '(제목 없음)')}</h2>
+    <p>${esc(d.note || 'lg.com 원문 미러')}</p>
+  </div>`;
+
+  html += secs.map(s => {
+    const mediaHtml = (s.media || []).map(m => {
+      const cells = [];
+      if (m.unified_url) cells.push(['COMMON', m.unified_url]);
+      if (m.pc_url) cells.push(['PC', m.pc_url]);
+      if (m.mobile_url) cells.push(['MOBILE', m.mobile_url]);
+      return cells.map(([lab, u]) => {
+        const isVid = /\.(mp4|webm|mov)(\?|$)/i.test(u);
+        return `<div class="asset">${isVid
+          ? `<video src="${esc(u)}" controls muted playsinline></video>`
+          : `<img src="${esc(u)}" loading="lazy" onerror="this.style.opacity=.25">`}
+          <span class="badge doc-order">${lab}</span></div>`;
+      }).join('');
+    }).join('');
+    return `<div class="section-card">
+      <div class="sec-media">${mediaHtml || '<div class="no-asset">텍스트 섹션</div>'}</div>
+      <div class="sec-body">
+        <div class="sec-head-row"><span class="sec-id">#${s.order}</span>${compBadge(s)}</div>
+        <div class="body-text">${esc(s.text || '')}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('content').innerHTML = html;
+}
+
+function render(pcg) {
+  // Python 산출물 형식 감지 → 전용 렌더러
+  if (pcg && pcg.layout_flow) return renderFinalFlow(pcg);           // final.json
+  if (pcg && pcg.sections && pcg.sections[0] && pcg.sections[0].media) return renderMirror(pcg); // mirror.json
+  const secs = pcg.sections || [];
+  const totalAssets = secs.reduce((n, s) => n + (s.assets||[]).length, 0);
+  document.getElementById('chipComp').style.display = 'none';
+  document.getElementById('chipSections').style.display = '';
+  document.getElementById('chipSections').textContent = `섹션 ${secs.length}개`;
+  document.getElementById('chipAssets').style.display = '';
+  document.getElementById('chipAssets').textContent =
+    `자산 ${totalAssets}개 · 갤러리 ${(pcg.product?.gallery||[]).length}장 · 미배정 ${(pcg.unassignedAssets||[]).length}개`;
+  document.getElementById('chipCrawled').style.display = '';
+  document.getElementById('chipCrawled').textContent = (pcg.source?.crawledAt || '').slice(0, 16).replace('T', ' ');
+
+  let html = `
+    <div class="product-card">
+      <h2>${esc(pcg.product?.title || '(제목 없음)')}</h2>
+      <p>${esc(pcg.product?.description || '')}</p>
+      <p style="margin-top:6px"><b>model:</b> ${esc(pcg.product?.model||'')} · <b>source:</b> ${esc(pcg.source?.url||'')}</p>
+      ${(pcg.product?.gallery||[]).length ? `
+        <div class="gallery-strip">
+          ${pcg.product.gallery.map(g => `<img src="${esc(g.url)}" loading="lazy" title="${esc(g.alt||'')}">`).join('')}
+        </div>` : ''}
+    </div>
+    ${renderReview(pcg.review)}
+    <div class="group-title">📑 Sections (문서 순서 보존 · 텍스트는 PDP 원문 그대로)</div>`;
+
+  html += secs.map(s => `
+    <div class="section-card">
+      <div class="sec-media">
+        ${(s.assets||[]).length ? s.assets.map(assetHtml).join('') : '<div class="no-asset">자산 없음 (텍스트 섹션)</div>'}
+      </div>
+      <div class="sec-body">
+        <div class="sec-head-row">
+          <span class="sec-id">${esc(s.id)}</span>
+          ${s.eyebrow ? `<span class="eyebrow">${esc(s.eyebrow)}</span>` : ''}
+        </div>
+        <h3>${esc(s.headline)}</h3>
+        <div class="body-text">${esc(s.body)}</div>
+        ${(s.disclaimers||[]).length ? `
+          <div class="disclaimers">${s.disclaimers.map(d => `<div>${esc(d)}</div>`).join('')}</div>` : ''}
+        <div class="layout-tag">layout: ${esc(s.layout?.type||'-')}${s.layout?.imgsPerRow ? `<span class="geo-chip">행당 ${s.layout.imgsPerRow}개</span>` : ''} · assets: ${(s.assets||[]).length}</div>
+      </div>
+    </div>`).join('');
+
+  if ((pcg.unassignedAssets||[]).length) {
+    html += `<div class="group-title">⚠️ Unassigned Assets (검수 필요)</div>
+      <div class="section-card"><div class="sec-media" style="flex-direction:row;flex-wrap:wrap">
+        ${pcg.unassignedAssets.map(assetHtml).join('')}
+      </div><div class="sec-body"><p class="body-text">어느 섹션에도 매칭되지 못한 자산입니다.</p></div></div>`;
+  }
+
+  document.getElementById('content').innerHTML = html;
+}
+</script>
+</body>
+</html>

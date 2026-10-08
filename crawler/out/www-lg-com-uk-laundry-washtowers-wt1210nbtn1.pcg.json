@@ -1,0 +1,956 @@
+{
+  "version": "0.1",
+  "source": {
+    "url": "https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/",
+    "crawledAt": "2026-07-05T14:47:27.284Z",
+    "engine": "firecrawl",
+    "geometry": true
+  },
+  "product": {
+    "title": "12/10kg WashTower Green/Beige WT1210NBTN1 | LG UK",
+    "description": "Get more information on the LG WT1210NBTN1. Click for pictures & tech specs for the 12/10kg WashTower in Green and Beige. Get free delivery and 5% off your first order.",
+    "model": "wt1210nbtn1",
+    "gallery": [
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-9.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "detergent port",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-9.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-9.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-1.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Front view of 12kg / 10kg LG WashTower | DUAL Inverter Heat Pump™ TurboWash™360, Green / Beige WT1210NBTN1",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-1.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-1.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-2.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 12kg / 10kg LG WashTower | DUAL Inverter Heat Pump™ TurboWash™360, Green / Beige, WT1210NBTN1, Front View",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-2.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-3.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 12kg / 10kg LG WashTower | DUAL Inverter Heat Pump™ TurboWash™360, Green / Beige, WT1210NBTN1, Door Open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-3.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-4.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "top door open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-4.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/2010x1334/lg-laundry-WT1210NBTN1-add-1-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Rear view of the LG WashTower WT1210NBTN1 in black, showing the separate power cord connections for the washer and dryer units.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/2010x1334/lg-laundry-WT1210NBTN1-add-1-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/2010x1334/lg-laundry-WT1210NBTN1-add-2-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "The LG WashTower WT1210NBTN1 in black, highlighting the all-in-one Center Control panel which is conveniently located for easy access.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/2010x1334/lg-laundry-WT1210NBTN1-add-2-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/2010x1334/lg-laundry-WT1210NBTN1-add-3-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Close-up of the LG WashTower WT1210NBTN1's Smart Pairing feature, showing how it automatically syncs the dryer cycle to the selected wash cycle.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/2010x1334/lg-laundry-WT1210NBTN1-add-3-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/2010x1334/lg-laundry-WT1210NBTN1-add-4-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG WashTower dimensions graphic: W 60, H 165.5, D 66cm, shown next to a 170cm person for scale.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/2010x1334/lg-laundry-WT1210NBTN1-add-4-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/2010x1334/lg-laundry-WT1210NBTN1-add-5-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Technical installation guide for the LG WashTower, showing required clearances including 10cm from the rear wall and 5cm from the sides.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/2010x1334/lg-laundry-WT1210NBTN1-add-5-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/2010x1334/lg-laundry-WT1210NBTN1-add-6-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "The LG WashTower WT1210NBTN1 in black, featuring its space-saving single-unit design installed in a modern laundry closet.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/2010x1334/lg-laundry-WT1210NBTN1-add-6-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-5.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "front open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-5.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-6.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "top perspective view with door open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-6.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-7.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "top zoom perspective view lights on",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-7.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-8.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "top zoom perspective view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/DZ-8.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/S1.jpg",
+        "alt": "Front view of 12kg / 10kg LG WashTower | DUAL Inverter Heat Pump™ TurboWash™360, Green / Beige WT1210NBTN1",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/S1.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/S2.jpg",
+        "alt": "LG 12kg / 10kg LG WashTower | DUAL Inverter Heat Pump™ TurboWash™360, Green / Beige, WT1210NBTN1, Front View",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/S2.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/S3.jpg",
+        "alt": "LG 12kg / 10kg LG WashTower | DUAL Inverter Heat Pump™ TurboWash™360, Green / Beige, WT1210NBTN1, Door Open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/S3.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/S4.jpg",
+        "alt": "top door open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/S4.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/450x450/lg-laundry-WT1210NBTN1-add-1-450.jpg",
+        "alt": "Rear view of the LG WashTower WT1210NBTN1 in black, showing the separate power cord connections for the washer and dryer units.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/450x450/lg-laundry-WT1210NBTN1-add-1-450.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/450x450/lg-laundry-WT1210NBTN1-add-2-450.jpg",
+        "alt": "The LG WashTower WT1210NBTN1 in black, highlighting the all-in-one Center Control panel which is conveniently located for easy access.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/450x450/lg-laundry-WT1210NBTN1-add-2-450.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/450x450/lg-laundry-WT1210NBTN1-add-3-450.jpg",
+        "alt": "Close-up of the LG WashTower WT1210NBTN1's Smart Pairing feature, showing how it automatically syncs the dryer cycle to the selected wash cycle.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/450x450/lg-laundry-WT1210NBTN1-add-3-450.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/450x450/lg-laundry-WT1210NBTN1-add-4-450.jpg",
+        "alt": "LG WashTower dimensions graphic: W 60, H 165.5, D 66cm, shown next to a 170cm person for scale.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/450x450/lg-laundry-WT1210NBTN1-add-4-450.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/450x450/lg-laundry-WT1210NBTN1-add-5-450.jpg",
+        "alt": "Technical installation guide for the LG WashTower, showing required clearances including 10cm from the rear wall and 5cm from the sides.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/450x450/lg-laundry-WT1210NBTN1-add-5-450.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/450x450/lg-laundry-WT1210NBTN1-add-6-450.jpg",
+        "alt": "The LG WashTower WT1210NBTN1 in black, featuring its space-saving single-unit design installed in a modern laundry closet.",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm02-washtower-wt1210nbtn1/gallery/450x450/lg-laundry-WT1210NBTN1-add-6-450.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/S5.jpg",
+        "alt": "front open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/S5.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/S6.jpg",
+        "alt": "top perspective view with door open",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/S6.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/S7.jpg",
+        "alt": "top zoom perspective view lights on",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/S7.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/S8.jpg",
+        "alt": "top zoom perspective view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/S8.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/S9.jpg",
+        "alt": "detergent port",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/gallery/S9.jpg"
+        ]
+      }
+    ]
+  },
+  "sections": [
+    {
+      "id": "sec-01",
+      "order": 1,
+      "eyebrow": "",
+      "headline": "12kg / 10kg LG WashTower \\| DUAL Inverter Heat Pump™ TurboWash™360, Green / Beige",
+      "body": "WT1210NBTN1\nCopy model name\n4.5\nRead 243 Reviews. Same page link.\n\\|\n243 Reviews\n74 out of 78 (95%) reviewers recommend this product\nShare your thoughts!\n()\nopen gallery popup\nPrevious Slide\nNext Slide\nPrevious Slide\nNext Slide\nKey Features\n- Space-saving, innovative and stylish, LG's WashTower brings ease to your Laundry Room\n- Improved fabric care and simplified operation with smart AI Direct Drive and Smart Pairing\n- Blitz through a 5kg load in just 39 minutes with TurboWash™360 tech, maintaining quality.\n- The DUAL Inverter Heat Pump cycles faster and more effectively, with a 10 year warranty.\n- With Allergy Care cycles on washer and dryer the LG WashTower reduces allergens by 99.99%\n- LG's Auto Cleaning Condenser automatically cleans the condenser each cycle.\n[More](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#)\n[Ask LG anything](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#) [LG WashTower one plug feature](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#) [stack model meaning](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#) [Machine vent vs ventless type](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#)\n[**Features**](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#pdp-overview-section) [**Specs**](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#pdp-specs-section) [**Reviews**](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#pdp-review) [**FAQ**](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#pdp-faq-section) [**Support**](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#pdp-support-section) [**Where to Buy**](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#find-a-store)\nDeals & Offers\n- After having purchased, register for your 5 year warranty [here](https://www.lg.com/uk/5-year-warranty/).\n- Get £100 off when you trade-up your laundry machine. Use TRADEUPHA100 Select Trade-up at checkout. [Terms apply.](https://www.lg.com/uk/tncs/trade-up-terms/)\nDeals & Offers\nGallery\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\nzoom inzoom out\n[](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#)\n[](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#)\n[](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#)\n[](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#)\n[](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#)\n[](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#)\n[](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#)\n[](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#)\n[](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#)\n[](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#)\n[](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#)\n[](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#)\n[](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#)\n[](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#)\n[](https://www.lg.com/uk/laundry/washtowers/wt1210nbtn1/#)\nPPrevious Slide\n1 / 15\nNext Slide\nPrevious Slide\n1 / 1\nNext Slide\nDiscover our latest promotions\n- Trade-Up\nGet an instant discount when you buy selected products and trade in a product from the same category. Only on LG.com/uk.\n~\n[Buy Now](https://www.lg.com/uk/tradeup/)\n- 5 year warranty on selected home appliances\nAfter having purchased a participating appliance, register for your 5 year warranty.\n~\n[Buy Now](https://www.lg.com/uk/promotion/home-appliance/)\nPause carouselPlay carousel",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-02",
+      "order": 2,
+      "eyebrow": "",
+      "headline": "Quiet Mark",
+      "body": "WashTowers",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/awards/quiet-mark/Quiet-Mark-Logo---Label---RGB.jpg",
+          "alt": "Quiet Mark",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 100,
+            "top": 1138,
+            "left": 264
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-03",
+      "order": 3,
+      "eyebrow": "",
+      "headline": "5 Year Warranty",
+      "body": "WashTowers\nPrevious Slide\n1 / 1\nNext Slide\n-mobile.jpg)\nPlay videoPause video",
+      "disclaimers": [
+        "*The product images in the image or video are for illustrational purposes only and might differ from the real product."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/awards/5-year-warranty/5yr_180x180.jpg",
+          "alt": "5 year warranty",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 100,
+            "top": 1138,
+            "left": 996
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-04",
+      "order": 4,
+      "eyebrow": "",
+      "headline": "A Tower of Laundry Innovation",
+      "body": "Fits small spaces neatly\nNo bending or stepping up\nAI tech for load & fabric\nWash and dry in 1 hour\nPrevious Slide\n1 / 1\nNext Slide\nLG WashTower",
+      "disclaimers": [],
+      "layout": {
+        "type": "grid-4",
+        "imgsPerRow": 4
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/master/h-a/living/wm/front_load/washtower/washtower_24_platinum-black_pdp_gp1/wd-washtower-24-platinum-black-pdp-gp1-feature-2023/mobile/wd-washtower-24-platinum-black-pdp-gp1-01-mobile/wd-washtower-24-platinum-black-PDP-GP1-01-(thumbnail",
+          "alt": "There is a WashTower in the open interior",
+          "matchedBy": "doc-order"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/desktop/wd-washtower-24-green-beige-PDP-GP1-03-1-desktop.jpg",
+          "alt": "Wash Tower in Laundry",
+          "title": "Space-saving",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 342,
+            "top": 2138,
+            "left": 240
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/desktop/wd-washtower-24-green-beige-PDP-GP1-03-2-desktop.jpg",
+          "alt": "Operation of the control panel located in the center of the washing machine",
+          "title": "Easy-reach control panel",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 342,
+            "top": 2138,
+            "left": 606
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/desktop/wd-washtower-24-green-beige-PDP-GP1-03-3-desktop.jpg",
+          "alt": "Fabric care function type",
+          "title": "Fabric care",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 342,
+            "top": 2138,
+            "left": 972
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/desktop/wd-washtower-24-green-beige-PDP-GP1-03-4-desktop_1.jpg",
+          "alt": "Quick wash and quick dry",
+          "title": "Time-saving",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 342,
+            "top": 2138,
+            "left": 1338
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/master/h-a/living/wm/front_load/washtower/washtower_24_platinum-black_pdp_gp1/wd-washtower-24-platinum-black-pdp-gp1-feature-2023/mobile/wd-washtower-24-platinum-black-pdp-gp1-01-mobile/wd-washtower-24-platinum-black-PDP-GP1-01-mobile.mp4",
+          "poster": "",
+          "matchedBy": "dam-folder"
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/desktop/wd-washtower-24-green-beige-PDP-GP1-23-desktop.mp4",
+          "poster": "",
+          "matchedBy": "dam-folder"
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/desktop/HA-Objet-Washer-WashTower-Nature-Green-Beige-35-dual-inveter-heatpump-mobile.mp4",
+          "poster": "",
+          "matchedBy": "dam-folder"
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/desktop/HA-Objet-Washer-WashTower-Nature-Green-Beige-35-dual-inveter-heatpump-desktop.mp4",
+          "poster": "",
+          "matchedBy": "dam-folder"
+        }
+      ]
+    },
+    {
+      "id": "sec-05",
+      "order": 5,
+      "eyebrow": "",
+      "headline": "A single unit washer and dryer tucks into small spaces",
+      "body": "WashTower is suitable for any interior and makes your space look more elegant and beautiful.\nIntelligent Washer and Dryer Solution",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/mobile/wd-washtower-24-green-beige-PDP-GP1-05-4-mobile.jpg",
+          "alt": "Wash tower installed in high-end interior laundry room",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/mobile/wd-washtower-24-green-beige-PDP-GP1-23-mobile.mp4",
+          "poster": "",
+          "matchedBy": "dam-folder"
+        }
+      ]
+    },
+    {
+      "id": "sec-06",
+      "order": 6,
+      "eyebrow": "",
+      "headline": "Compact size with easy-reach center control panel",
+      "body": "Compare with a stacked washer and dryer, it is 45mm shorter and the center control panel is placed 85mm higher.",
+      "disclaimers": [
+        "*Space saving when compare with LG’s 24-inch stacked washer and dryer."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/mobile/wd-washtower-24-green-beige-PDP-GP1-07-mobile.jpg",
+          "alt": "Wash tower with average female height height",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-07",
+      "order": 7,
+      "eyebrow": "",
+      "headline": "Intelligent Technology",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-08",
+      "order": 8,
+      "eyebrow": "Smart Pairing",
+      "headline": "The dryer cycle syncs with the washing cycle selected",
+      "body": "Dryer setting is automatically selected based on which washing cycle you selected.\n-desktop-resize.jpg)",
+      "disclaimers": [
+        "*The product images in the image and video are for illustrational purposes only and might differ from the real product."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-09",
+      "order": 9,
+      "eyebrow": "AIDD",
+      "headline": "Built-in intelligence takes out the guesswork",
+      "body": "Auto sense AIDD technology detects the most suitable wash cycle to handle your clothes with care.\n-desktop-resize.jpg)",
+      "disclaimers": [
+        "*Tested by Intertek on May 2022. Cotton cycle with 2 kg load compared to LG Conventional Cotton cycle. (F13EJN) Tested average fabric damage by inserting 5-hole swatches and comparing AI Class 1 vs AI Class 3 in Cotton cycle.",
+        "*The results may be different depending on the clothes and environment.",
+        "*For Cotton, Mixed Fabric, Easy Care cycles only."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210bbtn1/washtower_24_platinum-black_pdp_gp1/wd-washtower-24-platinum-black-pdp-gp1-feature-2023/desktop/wd-washtower-24-platinum-black-pdp-gp1-12-desktop/wd-washtower-24-platinum-black-PDP-GP1-12-(thumbnail",
+          "alt": "Control pad on LG WashTower",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-10",
+      "order": 10,
+      "eyebrow": "",
+      "headline": "Time-saving",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210bbtn1/washtower_24_platinum-black_pdp_gp1/wd-washtower-24-platinum-black-pdp-gp1-feature-2023/desktop/wd-washtower-24-platinum-black-pdp-gp1-12-desktop/wd-washtower-24-platinum-black-PDP-GP1-14-(thumbnail",
+          "alt": "AI WashTower",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-11",
+      "order": 11,
+      "eyebrow": "",
+      "headline": "Complete washing and drying in an hour",
+      "body": "The dryer starts to preheat before the end of washing, so drying takes less time.",
+      "disclaimers": [
+        "*Tested by Intertek. Tested with 3 each load conditions; Women sportswear(polyester 89%, spandex 11%, 3 sheets of shirts(polyester 65%, cotton 35%), and two pair of pajamas(cotton 73%, polyester 27%). Tested with Speed Wash (Quick Wash) cycle on washer, Small Load (Quick Dry) cycle on dryer and \"Prepare to Dry\" option.",
+        "*The results may be differenct depending on the clothes and environment."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210bbtn1/washtower_24_platinum-black_pdp_gp1/wd-washtower-24-platinum-black-pdp-gp1-feature-2023/wd-washtower-24-platinum-black-PDP-GP1-17-desktop.jpg",
+          "alt": "Wash and dry in under an hour",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 610,
+            "top": 6163,
+            "left": 1070
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-12",
+      "order": 12,
+      "eyebrow": "TurboWash 360",
+      "headline": "Get your laundry done in less time",
+      "body": "Your laundry can be thoroughly cleaned in just 39 minutes without compromising fabric protection.\nAllergy care",
+      "disclaimers": [
+        "*Tested by Intertek on January 2023, Cotton program with TurboWash option with 2kg load.",
+        "*The results may be different depending on the environment."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210bbtn1/washtower_24_platinum-black_pdp_gp1/wd-washtower-24-platinum-black-pdp-gp1-feature-2023/desktop/wd-washtower-24-platinum-black-pdp-gp1-12-desktop/wd-washtower-24-platinum-black-PDP-GP1-19-(thumbnail",
+          "alt": "Turbowash 360",
+          "title": "-desktop-resize.jpg)",
+          "matchedBy": "card-pair"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210bbtn1/washtower_24_platinum-black_pdp_gp1/wd-washtower-24-platinum-black-pdp-gp1-feature-2023/mobile/wd-washtower-24-platinum-black-PDP-GP1-21-mobile.jpg",
+          "alt": "Graphical for dividing web pages",
+          "title": "Graphical for dividing web pages",
+          "matchedBy": "card-pair"
+        }
+      ]
+    },
+    {
+      "id": "sec-13",
+      "order": 13,
+      "eyebrow": "",
+      "headline": "Reduce live house dust mites",
+      "body": "Wear your clothes confidently knowing that the LG allergy care cycle reduces live house dust mites.\nIntelligent Washer and Dryer Solution\n-mobile.jpg)\nPlay videoPause video\n.jpg)\nPlay videoPause video\nDUAL Inverter Heat Pump",
+      "disclaimers": [
+        "*Allergy Care cycle approved by BAF (British Allergy Foundation) reduces house dust mites allergen.",
+        "*Hygiene program can be downloaded via the ThinQ app or selected directly from Cloud Cycle within the app.",
+        "*Tested by Intertek, Hygiene program in washer reduces bacteria (S. aureus, P. aeruginosa, and K. pneumoniae) with 3.6kg of cotton test load.",
+        "*The product images in the video are for illustrational purposes only and might differ from the real product."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-14",
+      "order": 14,
+      "eyebrow": "",
+      "headline": "An energy-saving   way to dry",
+      "body": "The dual cylinders allow for faster drying and energy saving.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/mobile/wd-washtower-24-green-beige-PDP-GP1-23-(thumbnail",
+          "alt": "Left - Allergy Care by Washer , right - Allergy Care by Dryer",
+          "matchedBy": "doc-order"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/desktop/HA-Objet-Washer-WashTower-Nature-Green-Beige-35-dual-inveter-heatpump-mobile(thumbnail",
+          "alt": "Comparison video of conventional inverter and dual inverter.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-15",
+      "order": 15,
+      "eyebrow": "Auto cleaning condenser",
+      "headline": "Condenser with convenient cleaning",
+      "body": "The auto cleaning condenser self-cleans, ensuring hassle-free maintenance for you.\n[Learn more about ThinQ app](https://www.lg.com/uk/thinq-up/)",
+      "disclaimers": [
+        "*The cleanliness of the condenser may differ depending on the environment.",
+        "*Tested by Intertek on January 2021. Cotton(Normal) cycle with 3.83 kg load compared to LG conventional heater dryer. (RC90V9AV2W vs. RC9066A3F)",
+        "*The frequency of running ‘auto cleaning condenser’ may vary depending on the size the initial moisture amount of the laundry.",
+        "*Product images are for illustrative purposes only and may differ from actual product. Refer to product image gallery."
+      ],
+      "layout": {
+        "type": "grid-3",
+        "imgsPerRow": 3
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/desktop/HA-Objet-Washer-WashTower-Nature-Green-Beige-36-dual-inveter-heatpump-mobile.jpg",
+          "alt": "The image shows how fine dust generated during the drying process is purified through three filters in the condenser.",
+          "matchedBy": "doc-order"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/desktop/wd-washtower-24-green-beige-PDP-GP1-31-1-2-desktop.jpg",
+          "alt": "Monitoring",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/desktop/wd-washtower-24-green-beige-PDP-GP1-31-1-1-desktop.jpg",
+          "alt": "Monitoring",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 64,
+            "top": 10301,
+            "left": 684
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/desktop/wd-washtower-24-green-beige-PDP-GP1-31-2-2-desktop.jpg",
+          "alt": "Remote Control",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 64,
+            "top": 10301,
+            "left": 928
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/desktop/wd-washtower-24-green-beige-PDP-GP1-31-2-1-desktop.jpg",
+          "alt": "Remote Control",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/desktop/wd-washtower-24-green-beige-PDP-GP1-31-3-2-desktop.jpg",
+          "alt": "Voice Control",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 64,
+            "top": 10301,
+            "left": 1172
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/desktop/wd-washtower-24-green-beige-PDP-GP1-31-3-1-desktop.jpg",
+          "alt": "Voice Control",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-16",
+      "order": 16,
+      "eyebrow": "",
+      "headline": "Efficient maintenance",
+      "body": "The LG ThinQ app  continuously monitors your washer. Whether it’s everyday maintenance or something else, the app allows you to easily monitor energy usage. You can also get smart notifications and download the course you like.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-17",
+      "order": 17,
+      "eyebrow": "",
+      "headline": "Smart connectivity",
+      "body": "The LG ThinQ™ app allows you to easily connect with your washer in a way you never could before. Start your washer with just the tap of a button.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/mobile/wd-washtower-24-green-beige-PDP-GP1-31-1-3-mobile.jpg",
+          "alt": "LG stacked washer-dryer with energy monitoring app, surrounded by lush plants, offers efficiency and style.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-18",
+      "order": 18,
+      "eyebrow": "",
+      "headline": "Voice-assisted control",
+      "body": "Tell you washer exactly what you need, when you need it. Say “What cycle is the washer?” and the AI speaker will listen and check the cycle to let you know.",
+      "disclaimers": [
+        "*Support for smart home devices that are compatible with Alexa and Google Assistant may vary by country and your individual smart home setup."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/mobile/wd-washtower-24-green-beige-PDP-GP1-31-2-3-mobile.jpg",
+          "alt": "Smartphone displays LG washer delay start at 2:30, with washer on the right in a dimly lit room.",
+          "matchedBy": "doc-order"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/mobile/wd-washtower-24-green-beige-PDP-GP1-31-3-3-mobile.jpg",
+          "alt": "Woman sits by a window holding a mug, smart speaker and LG washing machine in the room.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-19",
+      "order": 19,
+      "eyebrow": "",
+      "headline": "WashTower installation guide",
+      "body": "WashTower is a one-unit set which fits your space optimally.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/mobile/wd-washtower-24-green-beige-PDP-GP1-33-mobile.jpg",
+          "alt": "Checking the measurements of the desk with a tape measure",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-20",
+      "order": 20,
+      "eyebrow": "",
+      "headline": "Measurement guide",
+      "body": "Before installation, please check the below guide and watch video by click “+” button below.\nToggle Contents\nPlay video\nPlay video\nClose Contents",
+      "disclaimers": [
+        "**1\\. Measuring with the faucet next to the appliance**",
+        "**2\\. Measuring with the faucet behind the appliance**"
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/mobile/wd-washtower-24-green-beige-PDP-GP1-34-1-mobile.jpg",
+          "alt": "LG stacked washer dryer in modern kitchen, 1655mm high, 600mm wide, side and front dimensions shown.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 12597,
+            "left": 160
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210bbtn1/washtower_24_platinum-black_pdp_gp1/wd-washtower-24-platinum-black-pdp-gp1-feature-2023/mobile/wd-washtower-24-platinum-black-pdp-gp1-34-mobile/wd-washtower-24-platinum-black-PDP-GP1-34-2-(thumbnail",
+          "alt": "Washing machine and water connection guide video",
+          "title": "-mobile.jpg)",
+          "matchedBy": "card-pair"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210bbtn1/washtower_24_platinum-black_pdp_gp1/wd-washtower-24-platinum-black-pdp-gp1-feature-2023/mobile/wd-washtower-24-platinum-black-pdp-gp1-34-mobile/wd-washtower-24-platinum-black-PDP-GP1-34-3-(thumbnail",
+          "alt": "Washing machine installation video",
+          "title": "-mobile.jpg)",
+          "matchedBy": "card-pair"
+        }
+      ]
+    },
+    {
+      "id": "sec-21",
+      "order": 21,
+      "eyebrow": "",
+      "headline": "Parts & kits",
+      "body": "See what parts are included.\n- [](https://www.lg.com/uk/support/product-support/manuals-software/)\n[Owner’s manual](https://www.lg.com/uk/support/product-support/manuals-software/)\n-",
+      "disclaimers": [
+        "**User guide**"
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210nbtn1/feature/mobile/wd-washtower-24-green-beige-PDP-GP1-36-mobile.jpg",
+          "alt": "Detailed images of parts and kits",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 12853,
+            "left": 160
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210bbtn1/washtower_24_platinum-black_pdp_gp1/wd-washtower-24-platinum-black-pdp-gp1-feature-2023/desktop/wd-washtower-24-platinum-black-pdp-gp1-37-desktop/wd-washtower-24-platinum-black-PDP-GP1-37-1-desktop.jpg",
+          "alt": "Owner’s manual icon",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 125,
+            "top": 13013,
+            "left": 847
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-22",
+      "order": 22,
+      "eyebrow": "Step-by-step guide",
+      "headline": "Set up your new LG washing machine: quick and easy",
+      "body": "Follow our simple step-by-step video guide to install your new LG WashTower™, including water and drain connections, levelling, and stabilizing the stacked design. Start washing and drying today.\nPlay video",
+      "disclaimers": [
+        "*Images based on a representative 3D model for illustrative purposes and may differ from the actual product. Installation steps may vary by product model and local regulations. Always refer to your product manual for safety and model-specific instructions."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/images/washtower/wt1210bbtn1/washtower_24_platinum-black_pdp_gp1/wd-washtower-24-platinum-black-pdp-gp1-feature-2023/desktop/wd-washtower-24-platinum-black-pdp-gp1-37-desktop/wd-washtower-24-platinum-black-PDP-GP1-37-2-desktop.jpg",
+          "alt": "User guide icon",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 77,
+            "top": 13013,
+            "left": 996
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/uk/d2c-content/hs/laundry/uk-wm00-installationguidevideo/washtower/washtower-thumbnail-mobile.jpg",
+          "alt": "LG WashTower™ installation guide: step-by-step video for water and drain connections, levelling, and stabilizing the stacked design",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 13405,
+            "left": 160
+          }
+        }
+      ]
+    }
+  ],
+  "unassignedAssets": [
+    {
+      "type": "video",
+      "url": "https://www.lg.com/content/dam/master/h-a/living/wm/front_load/washtower/washtower_24_platinum-black_pdp_gp1/wd-washtower-24-platinum-black-pdp-gp1-feature-2023/desktop/wd-washtower-24-platinum-black-pdp-gp1-01-desktop/wd-washtower-24-platinum-PDP-GP1-2023-01-desktop.mp4",
+      "poster": "",
+      "matchedBy": "unassigned"
+    },
+    {
+      "type": "video",
+      "url": "https://www.lg.com/content/dam/lge/demo/dummy/media_asklg.mp4",
+      "poster": "",
+      "matchedBy": "unassigned"
+    }
+  ],
+  "review": {
+    "imageCoverage": {
+      "inMarkdown": 68,
+      "captured": 64,
+      "coveragePct": 94,
+      "missing": [
+        "https://www.lg.com/content/dam/channel/wcms/uk/images/spec/WT1210NBTN1-GB-spec-mobile.jpg",
+        "https://www.lg.com/content/dam/lge/common/payment-icons/icon-paypal-black.png",
+        "https://www.lg.com/content/dam/lge/common/payment-icons/icon-raylo-new-mini.png",
+        "https://www.lg.com/content/dam/channel/wcms/uk/images/fridge-freezers/gbv5240cep/gallery/350x350/01_F-VB_203_Better_GW-B509FQ7C_GBV5240CEP_EP_Front.jpg"
+      ]
+    },
+    "verbatimFails": [
+      {
+        "id": "sec-01",
+        "field": "headline",
+        "text": "12kg / 10kg LG WashTower \\| DUAL Inverter Heat Pump™ TurboWa"
+      }
+    ],
+    "emptySections": [
+      {
+        "id": "sec-07",
+        "headline": "Intelligent Technology"
+      }
+    ],
+    "unassignedCount": 2
+  }
+}

@@ -1,0 +1,571 @@
+{
+  "version": "0.1",
+  "source": {
+    "url": "https://www.lg.com/sa_en/monitors/gaming/32gs75q-b/",
+    "crawledAt": "2026-07-02T07:08:51.018Z",
+    "engine": "firecrawl"
+  },
+  "product": {
+    "title": "LG UltraGear™, 180Hz, IPS 1ms (GtG), VESA DisplayHDR™ 400, sRGB 99% (Typ.), NVIDIA® G-SYNC® Compatible, AMD FreeSync™ | LG Saudi Arabia",
+    "description": "Discover LG 32GS75Q-B. Click for pictures, reviews, and tech specs for the LG 32” UltraGear™ QHD IPS 180Hz gaming monitor | 1ms (GtG), DisplayHDR™ 400.",
+    "model": "32gs75q-b",
+    "gallery": [
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-10-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "front view with the display pivoting 90 degrees in a portrait view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-10-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-10-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-01-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Front view of 32” UltraGear™ QHD IPS 180Hz gaming monitor | 1ms (GtG), DisplayHDR™ 400 32GS75Q-B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-01-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-01-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-02-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "-15 degree side view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-02-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-03-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "+15 degree side view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-03-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-04-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "perspective view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-04-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-05-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "side view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-05-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-06-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "rear view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-06-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-07-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "rear perspective view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-07-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-08-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "close-up view of ports",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-08-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-09-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "side view of the monitor moving downwards for height adjustment",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-gallery-09-2010.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-01.jpg",
+        "alt": "Front view of 32” UltraGear™ QHD IPS 180Hz gaming monitor | 1ms (GtG), DisplayHDR™ 400 32GS75Q-B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-01.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-02.jpg",
+        "alt": "-15 degree side view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-02.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-03.jpg",
+        "alt": "+15 degree side view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-03.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-04.jpg",
+        "alt": "perspective view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-04.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-05.jpg",
+        "alt": "side view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-05.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-06.jpg",
+        "alt": "rear view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-06.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-07.jpg",
+        "alt": "rear perspective view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-07.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-08.jpg",
+        "alt": "close-up view of ports",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-08.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-09.jpg",
+        "alt": "side view of the monitor moving downwards for height adjustment",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-09.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-10.jpg",
+        "alt": "front view with the display pivoting 90 degrees in a portrait view",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/gallery/ultragear-32gs75q-thumbnail-10.jpg"
+        ]
+      }
+    ]
+  },
+  "sections": [
+    {
+      "id": "sec-01",
+      "order": 1,
+      "eyebrow": "",
+      "headline": "32” UltraGear™ QHD IPS 180Hz gaming monitor \\| 1ms (GtG), DisplayHDR™ 400",
+      "body": "32GS75Q-B\nCopy model name\nChat with an expert\n4.4\nRead 1055 Reviews. Same page link.\n\\|\n1055 Reviews\n368 out of 417 (88%) reviewers recommend this product\nShare your thoughts!\n()\nopen gallery popup\nPrevious Slide\nNext Slide\nPrevious Slide\nNext Slide\nKey Features\n- 31.5-inch QHD (2560x1440) IPS display\n- 180Hz refresh rate\n- IPS 1ms (GtG) response time\n- DisplayHDR™ 400 / sRGB 99% (Typ.)\n- 3-side virtually borderless design\n- NVIDIA® G-SYNC® Compatible, AMD FreeSync™\n[More](https://www.lg.com/sa_en/monitors/gaming/32gs75q-b/#)\n[**Features**](https://www.lg.com/sa_en/monitors/gaming/32gs75q-b/#pdp-overview-section) [**Specs**](https://www.lg.com/sa_en/monitors/gaming/32gs75q-b/#pdp-specs-section) [**Reviews**](https://www.lg.com/sa_en/monitors/gaming/32gs75q-b/#pdp-review) [**Support**](https://www.lg.com/sa_en/monitors/gaming/32gs75q-b/#pdp-support-section) [**Where to Buy**](https://www.lg.com/sa_en/monitors/gaming/32gs75q-b/#find-a-store)\nGallery\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\nzoom inzoom out\n[](https://www.lg.com/sa_en/monitors/gaming/32gs75q-b/#)\n[](https://www.lg.com/sa_en/monitors/gaming/32gs75q-b/#)\n[](https://www.lg.com/sa_en/monitors/gaming/32gs75q-b/#)\n[](https://www.lg.com/sa_en/monitors/gaming/32gs75q-b/#)\n[](https://www.lg.com/sa_en/monitors/gaming/32gs75q-b/#)\n[](https://www.lg.com/sa_en/monitors/gaming/32gs75q-b/#)\n[](https://www.lg.com/sa_en/monitors/gaming/32gs75q-b/#)\n[](https://www.lg.com/sa_en/monitors/gaming/32gs75q-b/#)\n[](https://www.lg.com/sa_en/monitors/gaming/32gs75q-b/#)\n[](https://www.lg.com/sa_en/monitors/gaming/32gs75q-b/#)\nPPrevious Slide\n1 / 10\nNext Slide\nPrevious Slide\n1 / 1\nNext Slide\nDiscover our latest promotions - Don't miss savings!\n- All Offers\n~\n[Buy Now](https://www.lg.com/sa_en/all-offers/)\n- Tamara\n~\n[Buy Now](https://www.lg.com/sa_en/promotions/tamara/)\n- All Offers\n~\n[Buy Now](https://www.lg.com/sa_en/all-offers)\nPause carouselPlay carousel",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-02",
+      "order": 2,
+      "eyebrow": "UltraGear™ Logo.",
+      "headline": "Born to game",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/feature/ultragear-32gs75q-01-1-lg-ultragear-m.png",
+          "alt": "UltraGear™ Logo.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-03",
+      "order": 3,
+      "eyebrow": "",
+      "headline": "Faster movement.  Closer to winning.",
+      "body": "|     |\n| --- |\n| Rev up your gaming world with 180Hz speed. Ignite your gameplay with a QHD resolution, IPS wide viewing angles, and a jaw-dropping 180Hz refresh rate. |",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/feature/ultragear-32gs75q-01-2-lg-ultragear-m.jpg",
+          "alt": "Side view of a monitor with a gaming archer character on the screen image.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-04",
+      "order": 4,
+      "eyebrow": "",
+      "headline": "Display",
+      "body": "31.5'' QHD (2560x1440) IPS\nDisplayHDR™ 400 / sRGB 99% (Typ.)",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-05",
+      "order": 5,
+      "eyebrow": "",
+      "headline": "Speed",
+      "body": "180Hz refresh rate\nIPS 1ms (GtG) response time",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-06",
+      "order": 6,
+      "eyebrow": "",
+      "headline": "Technology",
+      "body": "NVIDIA® G-SYNC® Compatible\nAMD FreeSync™",
+      "disclaimers": [
+        "*The images simulated to enhance feature understanding. It may differ from actual use.",
+        "*The refresh rate has been upgraded compared to the previous model, 32GP750."
+      ],
+      "layout": {
+        "type": "single"
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-07",
+      "order": 7,
+      "eyebrow": "180Hz refresh rate",
+      "headline": "Upgraded speed.  New standard.",
+      "body": "We have raised UltraGear's speed standard to 180Hz. You can enjoy ultra-clear and smooth images with a 180Hz refresh rate, which loads images 180 times in a second.",
+      "disclaimers": [
+        "*The images simulated to enhance feature understanding. It may differ from actual use."
+      ],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/feature/ultragear-32gs75q-02-1-180hz-refresh-rate-m.jpg",
+          "alt": "It is a comparison image of a fast-paced game with a low refresh rate and a clear image with a 200Hz (O/C) high refresh rate.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-08",
+      "order": 8,
+      "eyebrow": "IPS 1ms (GtG)",
+      "headline": "Sharp image  From any angle",
+      "body": "Experience the vibrant visuals with a 1ms fast response time, which reduces reverse ghosting and input lag. In addition, the IPS panel allows you to enjoy these stunning images clearly from a wide angle (up to 178 degrees).\nDisplayHDR™ 400 with sRGB 99% (Typ.)",
+      "disclaimers": [
+        "*The images simulated to enhance feature understanding. It may differ from actual use.",
+        "*Select 'Faster Mode' to perform '1ms Response Time'. (Game Adjust → Response Time → Faster Mode).",
+        "*The viewing angle of this IPS display is 178 degrees."
+      ],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/feature/ultragear-32gs75q-03-1-ips-1ms-gtg.jpg",
+          "alt": "With IPS 1ms (GtG), you can experience vivid and clear images from any angle.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-09",
+      "order": 9,
+      "eyebrow": "",
+      "headline": "Feel true-to-life colour",
+      "body": "This monitor supports a wide colour gamut, sRGB 99% (Typ.), and VESA DisplayHDR™ 400, reproducing high-fidelity colours for gamers to see the dramatic colours the game developers intended regardless of the battlefield.",
+      "disclaimers": [
+        "*The images simulated to enhance feature understanding. It may differ from actual use."
+      ],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/feature/ultragear-32gs75q-04-1-hdr-400-srgb-99-m.jpg",
+          "alt": "High-quality color robot images with sRGB 99% and DisplayHDR™ 400.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-10",
+      "order": 10,
+      "eyebrow": "",
+      "headline": "Technology for flawless gaming",
+      "body": "Enjoy the perfect graphic with reduced tearing, stuttering, or jittering caused by differences in the hardware and software specification by synchronizing through NVIDIA® G-SYNC® Compatible, AMD FreeSync™.",
+      "disclaimers": [
+        "*The images simulated to enhance feature understanding. It may differ from actual use.",
+        "*The performance of the feature is compared to the models not applied the Sync technology.",
+        "*Errors or delays may occur depending on the network connection."
+      ],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/feature/ultragear-32gs75q-05-2-sync-technology-m.jpg",
+          "alt": "Comparison of fluid gaming image - The left image is tearing, and the Right image is tear-free.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-11",
+      "order": 11,
+      "eyebrow": "",
+      "headline": "Gamer-centric design",
+      "body": "Enhance your gaming experience with a 3-side virtually borderless design for an immersive viewing. The adjustable base, which supports tilt, height, and pivot, helps you play games more comfortably.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-12",
+      "order": 12,
+      "eyebrow": "",
+      "headline": "Borderless design",
+      "body": "3-side virtually borderless",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-13",
+      "order": 13,
+      "eyebrow": "",
+      "headline": "Tilt",
+      "body": "-5°~+15°",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-14",
+      "order": 14,
+      "eyebrow": "",
+      "headline": "Height adjustment",
+      "body": "110 mm",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-15",
+      "order": 15,
+      "eyebrow": "",
+      "headline": "Pivot",
+      "body": "Clockwise\nHDMI\nDisplayPort",
+      "disclaimers": [
+        "*The images simulated to enhance feature understanding. It may differ from actual use."
+      ],
+      "layout": {
+        "type": "multi-image"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/feature/ultragear-32gs75q-06-3-gamer-centric-design-m.jpg",
+          "alt": "Three monitor images demonstrating tilt, pivot, and height adjustments.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/feature/ultragear-32gs75q-06-4-1-hdmi.jpg",
+          "alt": "HDMI icon.",
+          "title": "-",
+          "matchedBy": "card-pair"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/feature/ultragear-32gs75q-06-4-2-displayport.jpg",
+          "alt": "DisplayPort icon.",
+          "title": "-",
+          "matchedBy": "card-pair"
+        }
+      ]
+    },
+    {
+      "id": "sec-16",
+      "order": 16,
+      "eyebrow": "Gaming GUI",
+      "headline": "Award winning gaming GUI",
+      "body": "Gamers can use On-Screen Display and OnScreen Control to easily customize the setting from adjusting basic monitor options to registering ‘User Defined Key’ that user can set the shortcut.\n|     |\n| --- |\n| \\*To download the latest OnScreen Control software, visit LG.COM.<br>\\*The images simulated to enhance feature understanding. It may differ from actual use. |",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-17",
+      "order": 17,
+      "eyebrow": "",
+      "headline": "Dynamic Action Sync",
+      "body": "Reducing input lag with Dynamic Action Sync, gamers can catch critical moments in real-time and respond quickly.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/feature/ultragear-32gs75q-07-1-gaming-gui.jpg",
+          "alt": "Graphical User Interface (GUI) image of UltraGear monitor.",
+          "matchedBy": "doc-order"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/feature/ultragear-32gs75q-08-1-1-dynamic-action-sync.jpg",
+          "alt": "Comparison of Dynamic Action Sync - The left image does not support DAS, and the Right image does support DAS.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-18",
+      "order": 18,
+      "eyebrow": "",
+      "headline": "Black Stabilizer",
+      "body": "Black Stabilizer helps gamers to detect snipers lurking in the darkest corners and swiftly navigate flash explosions.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/feature/ultragear-32gs75q-08-1-2-black-stabilizer.jpg",
+          "alt": "Comparison of Black Stabilizer - The left image is the Black Stabilizer 'off,' and the Right image is the Black Stabilizer 'on'",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-19",
+      "order": 19,
+      "eyebrow": "",
+      "headline": "Crosshair",
+      "body": "The target point is fixed in the center to enhance shooting accuracy.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/feature/ultragear-32gs75q-08-1-3-crosshair.jpg",
+          "alt": "Comparison of Crosshair - The left image is the Crosshair 'off,' and the Right image is the Crosshair 'on'",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-20",
+      "order": 20,
+      "eyebrow": "",
+      "headline": "FPS Counter",
+      "body": "The FPS Counter will let you see how well everything is loading. Whether you're editing, playing games, or watching a movie, every frame matters, and with the FPS Counter, you'll have real-time data.\nPrint\nSee All Specs",
+      "disclaimers": [
+        "*The images simulated to enhance feature understanding. It may differ from actual use.",
+        "*The Crosshair feature is unavailable while the FPS Counter is activated.",
+        "*FPS Counter may display the value that exceeds the monitor’s maximum refresh rate.",
+        "*FPS (Frame Per Second) Counter: Measurement of frames per second."
+      ],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sa_en/images/mn/32gs75q-b/feature/ultragear-32gs75q-08-1-4-fps-counter.jpg",
+          "alt": "Display the FPS Counter in the corner of the screen.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    }
+  ],
+  "unassignedAssets": [],
+  "review": {
+    "imageCoverage": {
+      "inMarkdown": 35,
+      "captured": 34,
+      "coveragePct": 97,
+      "missing": [
+        "https://www.lg.com/content/dam/channel/wcms/sa_en/images/wtb/storeImage/UnitedWateen_20260126212305733_.jpg"
+      ]
+    },
+    "verbatimFails": [
+      {
+        "id": "sec-01",
+        "field": "headline",
+        "text": "32” UltraGear™ QHD IPS 180Hz gaming monitor \\| 1ms (GtG), Di"
+      }
+    ],
+    "emptySections": [
+      {
+        "id": "sec-12",
+        "headline": "Borderless design"
+      },
+      {
+        "id": "sec-13",
+        "headline": "Tilt"
+      },
+      {
+        "id": "sec-14",
+        "headline": "Height adjustment"
+      }
+    ],
+    "unassignedCount": 0
+  }
+}

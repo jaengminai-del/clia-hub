@@ -1,0 +1,673 @@
+{
+  "version": "0.1",
+  "source": {
+    "url": "https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/",
+    "crawledAt": "2026-07-02T07:08:50.964Z",
+    "engine": "firecrawl"
+  },
+  "product": {
+    "title": "11KG AI DD™ Front Load Washing Machine in Black | LG Singapore",
+    "description": "Discover LG 11KG AI Direct Drive™ Front Load Washing Machine in Black. Click for pictures, reviews, and tech specs of the FV1411S2B",
+    "model": "fv1411s2b",
+    "gallery": [
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-15.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-15.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-15.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-1.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Front view of 11kg, AI Direct Drive Front Load Washing Machine FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-1.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-1.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-2.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-2.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-3.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-3.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-4.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-4.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-5.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-5.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-6.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-6.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-7.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-7.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-8.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-8.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-9.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-9.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-10.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-10.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-11.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-11.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-12.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-12.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-13.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-13.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-14.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-DZ-14.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-1.jpg",
+        "alt": "Front view of 11kg, AI Direct Drive Front Load Washing Machine FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-1.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-2.jpg",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-2.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-3.jpg",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-3.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-4.jpg",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-4.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-5.jpg",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-5.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-6.jpg",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-6.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-7.jpg",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-7.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-8.jpg",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-8.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-9.jpg",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-9.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-10.jpg",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-10.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-11.jpg",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-11.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-12.jpg",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-12.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-13.jpg",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-13.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-14.jpg",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-14.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-15.jpg",
+        "alt": "LG 11kg, AI Direct Drive Front Load Washing Machine, FV1411S2B",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1411s2b_ablqesl_easl_sg_c/gallery/FV1411S2B-front-loader-S-15.jpg"
+        ]
+      }
+    ]
+  },
+  "sections": [
+    {
+      "id": "sec-01",
+      "order": 1,
+      "eyebrow": "",
+      "headline": "11kg, AI Direct Drive Front Load Washing Machine",
+      "body": "FV1411S2B\nCopy model name\nChat with an expert\nFV1411S2B\n4.4 out of 5 stars, average rating value. Read 22 Reviews.\nSame page link.\n4.4\n\\|\n22 Reviews\n11 out of 14 (79%) reviewers recommend this product\nWrite a review\n()\nopen gallery popup\nPrevious slide\nNext slide\nPrevious slide\nNext slide\nKey Features\n- AI Direct DriveTM\n- TurboWashTM 39min\n- Steam+\n- Bigger Capacity\n- Available with TWINWashTM\n- ThinQTM\n[More](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#)\n- Free delivery/installation/disposal\n[**Features**](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#pdp-overview-section) [**Specs**](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#pdp-specs-section) [**Reviews**](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#pdp-review) [**Support**](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#pdp-support-section) [**Where to buy**](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#find-a-store)\nGallery\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\nzoom inzoom out\n[](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#)\n[](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#)\n[](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#)\n[](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#)\n[](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#)\n[](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#)\n[](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#)\n[](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#)\n[](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#)\n[](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#)\n[](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#)\n[](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#)\n[](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#)\n[](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#)\n[](https://www.lg.com/sg/washing-machines/front-load-washing-machines/fv1411s2b/#)\nPPrevious slide\n0 / 0\nNext slide\nPrevious slide\n0 / 0\nNext slide\nPromotions\n- Housewarming Deals Up to 46%\nSign in & shop LG essentials to enjoy bigger coupons, exclusive member savings & free gifts\\*! Free delivery, installation & disposal\\*.\n18/06/2026 ~ 31/07/2026\n[Buy now](https://www.lg.com/sg/promotions/member-deals-housewarming-by-lg-promotion/)\n- LG Home Appliances Islandwide Promotion\nFree grocery vouchers and exclusive gifts!\n01/06/2026 ~ 31/07/2026\n[Buy now](https://www.lg.com/sg/promotions/home-appliances-promotion/)\n- Pay Easier with DBS Interest‑Free Instalments\\*\nUp to 24 months instalment plans at 0% interest\\*\\*. T&Cs apply\n01/06/2026 ~ 31/12/2026\n[Buy now](https://www.lg.com/sg/promotions/dbs-interest-free-promotion/)\nPause carouselPlay carousel",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-02",
+      "order": 2,
+      "eyebrow": "",
+      "headline": "Thoroughly Gentle Yet Incredibly Fast",
+      "body": "",
+      "disclaimers": [
+        "*Product images are for illustrative purpose only and may differ from actual product."
+      ],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-01-intro-m.jpg",
+          "alt": "The washing machine is working against the background of the father and daughter laughing.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-03",
+      "order": 3,
+      "eyebrow": "AI DD™",
+      "headline": "Intelligent Care with 18% More Fabric Protection",
+      "body": "AI DD™ offers optimized wash to protect your laundry by sensing fabric softness automatically.",
+      "disclaimers": [
+        "*The product images in the image and video are for illustrational purposes only and might differ from the real product.",
+        "*Tested by Intertek on March 2019. Cotton cycle with 2kg of underwear compared to LG Conventional Cotton cycle(F4V9RWP2W vs. FC1450S2W). The results may be different depending on the clothes and environment.",
+        "*AI DD is available in 3 cycles.(Cotton, Mixed Fabric, Easy Care)."
+      ],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-02-ai-dd-m.gif",
+          "alt": "White cloth is being washed in the washing machine.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-04",
+      "order": 4,
+      "eyebrow": "TurboWash™360˚",
+      "headline": "Thoroughly Clean in 39 minutes",
+      "body": "With TurboWash™360˚, your laundry can be thoroughly done in just 39 minutes with more fabric protection. 4 directions of 3D multi nozzles which reaches every inch of your laundry.\nPlay videoPause video\nTriple A",
+      "disclaimers": [
+        "*The product images in the image and video are for illustrational purposes only and might differ from the real product.",
+        "*Tested by Intertek, based on IEC 60456 : edition 5.0. TurboWash39 cycle with 5kg of IEC load compared to Conventional Cotton Cycle with TurboWash (F4V9RWP2W vs. FC1450S2W). The results may be different depending on the environment."
+      ],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-04-turbowash-360-m.jpg",
+          "alt": "Water flows out of the washing machine in four directions and is doing laundry.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-05-1-energy-efficiency-m.jpg",
+          "alt": "There are 3 A's on the stage in front of the world map background.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-05-1-energy-efficiency-m.webm",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-05",
+      "order": 5,
+      "eyebrow": "",
+      "headline": "Experience Triple A benefits of LG Washing Machine",
+      "body": "Marked \"Triple A\" for energy efficiency, spinning performance, and noise level.",
+      "disclaimers": [
+        "**Energy Efficiency**"
+      ],
+      "layout": {
+        "type": "single"
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-06",
+      "order": 6,
+      "eyebrow": "Steam+™",
+      "headline": "Less Wrinkles, More Hygienic",
+      "body": "Steam+™ reduces 99.9% dust mites that can cause respiratory issues with 30% less wrinkles.\nPlay videoPause video",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-06-1-steam-plus-m.jpg",
+          "alt": "Less Wrinkles, More Hygienic3",
+          "matchedBy": "doc-order"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-06-2-steam-plus-m.jpg",
+          "alt": "There is laundry in the washing machine, and steam is running.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-06-2-steam-plus.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-07",
+      "order": 7,
+      "eyebrow": "",
+      "headline": "30% Less Wrinkles",
+      "body": "The wrinkles are disappeared through the steam.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-06-3-steam-plus-m.jpg",
+          "alt": "There are shirts with half wrinkled and half less wrinkled.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-08",
+      "order": 8,
+      "eyebrow": "",
+      "headline": "Eliminates 99.9% of Dust Mites",
+      "body": "99.9% of dust mites are eliminated by the steam.",
+      "disclaimers": [
+        "*The product images in the image and video are for illustrational purposes only and might differ from the real product.",
+        "*The Allergy Care cycle approved by the BAF (British Allergy Foundation) eliminates 99.9% of dust mite allergens.",
+        "*Tested by Intertek in December 2018 in accordance with AATCC standard. Cotton cycle with the “Wrinkle Care\" option (3 mixed shirts) compared to the cotton cycle without option. Results may be different depending on clothes and environment.",
+        "*The Wrinkle Care function is optionally available in 6 cycles."
+      ],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-06-4-steam-plus-m.jpg",
+          "alt": "Half are contaminated and the other half are clean baby clothes.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-09",
+      "order": 9,
+      "eyebrow": "Bigger Capacity",
+      "headline": "Bigger Capacity in the Same Space",
+      "body": "Get bigger drum capacity in same size﻿!",
+      "disclaimers": [
+        "*The product images in the image and video are for illustrational purposes only and might differ from the real product."
+      ],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-07-bigger-capacity-m.gif",
+          "alt": "A washing machine, expressed as a large capacity, is in front of the laundry basket image.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-10",
+      "order": 10,
+      "eyebrow": "Durability",
+      "headline": "More Durable and Hygienic",
+      "body": "Boosted externals, durable tempered glass door, developed hygienic and enduring stainless lifter.\n- Tempered Glass Door\n- Stainless Lifter (99% Anti Bacteria\\*)\n- Larger Display",
+      "disclaimers": [
+        "*The product images in the image and video are for illustrational purposes only and might differ from the real product.",
+        "*Tested by Intertek on July 2013. Bactericidal effect for P.aeruginosa of stainless steel against initial amount in 12 days."
+      ],
+      "layout": {
+        "type": "multi-image"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-08-1-durability-m.jpg",
+          "alt": "More Durable and Hygienic3",
+          "matchedBy": "doc-order"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-08-2-2-stainless-lifter-m.jpg",
+          "alt": "The inside image of the washing machine where the Stainless Lifter can be seen.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-09-1-1-larger-display-m.jpg",
+          "alt": "This is an enlarged image of the washing machine panel so that the display can be clearly seen.",
+          "title": "- Elegant Metal Knob",
+          "matchedBy": "card-pair"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-09-1-2-elegant-metal-knob-m.jpg",
+          "alt": "This is an enlarged image of the metal knob on the panel of a washing machine.",
+          "title": "Design",
+          "matchedBy": "card-pair"
+        }
+      ]
+    },
+    {
+      "id": "sec-11",
+      "order": 11,
+      "eyebrow": "",
+      "headline": "More Visible and Elegant",
+      "body": "Made a more visible display and increased the knob size.",
+      "disclaimers": [
+        "*Product images are for illustrative purpose only and may differ from actual product."
+      ],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-08-2-1-tempered-galss-door-m.jpg",
+          "alt": "The image of the washing machine with the Tempered Glass Door clearly visible.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-12",
+      "order": 12,
+      "eyebrow": "Compatibility",
+      "headline": "Available with TWINWash™ Mini",
+      "body": "Plus a TWINWash™ Mini according to your preferences to suit your lifestyle and interior design needs. Save you time and money in your busy life.",
+      "disclaimers": [
+        "*Product images are for illustrative purpose only and may differ from actual product.",
+        "*TWINWash™ Mini may not be available in all country or in all local retailers."
+      ],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-10-compatibility-m.jpg",
+          "alt": "Three interior photos with twinwash and washing machine.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-13",
+      "order": 13,
+      "eyebrow": "ThinQ®",
+      "headline": "Smart Control, Smarter Life",
+      "body": "Voice Control\nRemote Control",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-11-2-1-ico-voice-control-gray.jpg",
+          "alt": "A woman sitting on the couch and drinking tea is giving orders to her washing machine through her AI speaker.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-14",
+      "order": 14,
+      "eyebrow": "Monitoring",
+      "headline": "Simple Control with Voice Assistant",
+      "body": "Tell your washer exactly what you need, when you need it. Say, “What cycle is the washer?” and the AI speaker will listen and check the cycle to let you know.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-11-2-3-ico-monitoring-gray.jpg",
+          "alt": "A man is monitoring the condition of the washing machine through a mobile phone app.",
+          "matchedBy": "doc-order"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-11-2-3-ico-monitoring-red.jpg",
+          "alt": "A man is monitoring the condition of the washing machine through a mobile phone app.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-15",
+      "order": 15,
+      "eyebrow": "",
+      "headline": "Connect and Control from Anywhere",
+      "body": "The LG ThinQ® app allows you to easily connect with your washer in a way you never could before. Start your washer with just the tap of a button.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-11-2-1-voice-control-m.jpg",
+          "alt": "A woman sitting on the couch and drinking tea is giving orders to her washing machine through her AI speaker.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-16",
+      "order": 16,
+      "eyebrow": "",
+      "headline": "Efficient Product Maintenance",
+      "body": "Check the status of the washer, download new cycles, or monitor energy usage with LG ThinQ®.",
+      "disclaimers": [
+        "*Product images are for illustrative purpose only and may differ from actual product.",
+        "*Google and Google Home are trademarks of Google LLC.",
+        "*Amazon, Alexa, Echo and all related logos and motion marks are trademarks of Amazon.com, Inc or its affiliates.",
+        "*LG SmartThinQ® is now renamed as LG ThinQ®.",
+        "*Smart features and voice assistant product may vary by country and model. Check with your local retailer or LG for service availability.",
+        "*Voice-enabled smart speaker device is not included."
+      ],
+      "layout": {
+        "type": "single"
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-11-2-2-remote-control-m.jpg",
+          "alt": "A man outdoors is checking the condition of a washing machine at home through a mobile phone app.",
+          "matchedBy": "doc-order"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-11-2-3-monitoring-m.jpg",
+          "alt": "A man is monitoring the condition of the washing machine through a mobile phone app.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    }
+  ],
+  "unassignedAssets": [
+    {
+      "type": "image",
+      "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-11-2-1-ico-voice-control-red.jpg",
+      "alt": "A woman sitting on the couch and drinking tea is giving orders to her washing machine through her AI speaker.",
+      "matchedBy": "unassigned"
+    },
+    {
+      "type": "image",
+      "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-11-2-2-ico-remote-control-gray.jpg",
+      "alt": "A man outdoors is checking the condition of a washing machine at home through a mobile phone app.",
+      "matchedBy": "unassigned"
+    },
+    {
+      "type": "image",
+      "url": "https://www.lg.com/content/dam/channel/wcms/sg/images/washing-machines/fv1413s2ba_ablqesl_easl_sg_c/features/FV1413S2BA-wm-Front_Load_Washer_wm-vivace-v950-black-11-2-2-ico-remote-control-red.jpg",
+      "alt": "A man outdoors is checking the condition of a washing machine at home through a mobile phone app.",
+      "matchedBy": "unassigned"
+    }
+  ],
+  "review": {
+    "imageCoverage": {
+      "inMarkdown": 57,
+      "captured": 54,
+      "coveragePct": 95,
+      "missing": [
+        "https://www.lg.com/content/dam/channel/wcms/sg/images/spec/FV1411S2B-Techspec-M.jpg",
+        "https://www.lg.com/content/dam/channel/wcms/sg/images/dehumidifier/md19gqga1/gallery/MD19GQGA1_Dehumidifier_350-B.jpg",
+        "https://www.lg.com/content/dam/channel/wcms/sg/01-assets/general/footer/CSB-SG-2026-Gold.png"
+      ]
+    },
+    "verbatimFails": [],
+    "emptySections": [],
+    "unassignedCount": 3
+  }
+}

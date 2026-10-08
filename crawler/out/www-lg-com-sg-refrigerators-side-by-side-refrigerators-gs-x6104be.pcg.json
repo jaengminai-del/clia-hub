@@ -1,0 +1,652 @@
+{
+  "version": "0.1",
+  "source": {
+    "url": "https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/",
+    "crawledAt": "2026-08-04T08:19:48.773Z",
+    "engine": "firecrawl",
+    "geometry": true
+  },
+  "product": {
+    "title": "628L InstaView® Door-in-Door® Refrigerator in Beige | LG Singapore",
+    "description": "Discover 628L InstaView® Door-in-Door® Side by Side Fridge with Ice Dispenser in Beige. Enjoy optimal cooling and humidity with Linear Cooling™ technology.",
+    "model": "gs-x6104be",
+    "gallery": [
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/15-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_RightSide.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/15-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_RightSide.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/15-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_RightSide.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/01-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_Front_Food.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Front view of 628L InstaView® Door-in-Door® Side by Side Fridge in Beige GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/01-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_Front_Food.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/01-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_Front_Food.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/02-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_Front.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/02-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_Front.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/03-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontDIDOpen.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/03-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontDIDOpen.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/04-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontOpen_Food.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/04-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontOpen_Food.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/05-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontOpen.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/05-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontOpen.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/06-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontRightOpen_Food.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/06-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontRightOpen_Food.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/07-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontRightOpen.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/07-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontRightOpen.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/08-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_InstaView_LightOff_Hand.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/08-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_InstaView_LightOff_Hand.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/09-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_InstaView_LightOff.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/09-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_InstaView_LightOff.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/10-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_InstaView_LightOn_Hand.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/10-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_InstaView_LightOn_Hand.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/11-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_HiddenButton.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/11-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_HiddenButton.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/12-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_LeftSide_Food.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/12-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_LeftSide_Food.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/13-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_LeftSide.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/13-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_LeftSide.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/14-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_RightSide_Food.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/2010x1334/14-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_RightSide_Food.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/01-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_Front_Food.jpg",
+        "alt": "Front view of 628L InstaView® Door-in-Door® Side by Side Fridge in Beige GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/01-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_Front_Food.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/02-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_Front.jpg",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/02-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_Front.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/03-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontDIDOpen.jpg",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/03-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontDIDOpen.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/04-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontOpen_Food.jpg",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/04-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontOpen_Food.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/05-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontOpen.jpg",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/05-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontOpen.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/06-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontRightOpen_Food.jpg",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/06-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontRightOpen_Food.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/07-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontRightOpen.jpg",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/07-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_FrontRightOpen.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/08-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_InstaView_LightOff_Hand.jpg",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/08-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_InstaView_LightOff_Hand.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/09-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_InstaView_LightOff.jpg",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/09-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_InstaView_LightOff.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/10-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_InstaView_LightOn_Hand.jpg",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/10-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_InstaView_LightOn_Hand.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/11-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_HiddenButton.jpg",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/11-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_HiddenButton.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/12-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_LeftSide_Food.jpg",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/12-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_LeftSide_Food.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/13-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_LeftSide.jpg",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/13-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_LeftSide.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/15-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_RightSide.jpg",
+        "alt": "LG 628L InstaView® Door-in-Door® Side by Side Fridge in Beige, GS-X6104BE",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/15-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_RightSide.jpg",
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/15-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_RightSide.jpg",
+          "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/gallery/180x180/15-VS6-E_X_Best_GC-X257EQAO_GS-X6104BE_NPlumb_EE_RightSide.jpg"
+        ]
+      }
+    ]
+  },
+  "sections": [
+    {
+      "id": "sec-01",
+      "order": 1,
+      "eyebrow": "",
+      "headline": "628L InstaView® Door-in-Door® Side by Side Fridge in Beige",
+      "body": "GS-X6104BE\nCopy model name\nChat with an expert\n5.0\n\\|\n1 Review\nWrite a review\n()\nopen gallery popup\nPrevious slide\nNext slide\nPrevious slide\nNext slide\nKey Features\n- InstaView® Door-in-Door®\n- Linear Cooling™\n- Door Cooling+™\n- Ice & Water Dispenser\n- Smart Inverter Compressor\n- ThinQ® (Wi-Fi)\n[More](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#)\n- Free delivery/installation/disposal\n[**Features**](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#pdp-overview-section) [**Specs**](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#pdp-specs-section) [**Reviews**](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#pdp-review) [**FAQ**](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#pdp-faq-section) [**Support**](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#pdp-support-section) [**Where to buy**](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#find-a-store)\nGallery\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\nzoom inzoom out\n[](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#)\n[](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#)\n[](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#)\n[](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#)\n[](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#)\n[](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#)\n[](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#)\n[](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#)\n[](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#)\n[](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#)\n[](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#)\n[](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#)\n[](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#)\n[](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#)\n[](https://www.lg.com/sg/refrigerators/side-by-side-refrigerators/gs-x6104be/#)\nPPrevious slide\n1 / 15\nNext slide\nPrevious slide\n1 / 1\nNext slide\nPromotions\n- LG Home Appliances Islandwide Promotion\nFree grocery vouchers and exclusive gifts!\n01/08/2026 ~ 30/09/2026\n[Buy now](https://www.lg.com/sg/promotions/home-appliances-promotion/)\n- Pay Easier with DBS Interest‑Free Instalments\\*\nUp to 24 months instalment plans at 0% interest\\*\\*. T&Cs apply\n01/06/2026 ~ 31/12/2026\n[Buy now](https://www.lg.com/sg/promotions/dbs-interest-free-promotion/)\nPause carouselPlay carousel",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-02",
+      "order": 2,
+      "eyebrow": "",
+      "headline": "Sophisticated Design, Fresh Innovation",
+      "body": "Knock twice to see inside\nRemoves up to 99.99% of harmful bacteria\\*\nLower energy consumption and cost savings\n10 years part warranty\nPrevious slide\n1 / 1\nNext slide",
+      "disclaimers": [
+        "*The UVnano (function name: Self Care) was assessed by laboratory tests by TÜV Rheinland using internal testing methods of measuring reduction of E. coli, S. aureus and P. aeruginosa in distilled water samples after exposure to the product’s UV LED for 10 minutes each hour, after a total of 24 hours in normal household use. Actual results may vary depending on environmental conditions and usage. The product does not treat or cure health-related conditions and does not guarantee that water filtered by the product will be free from contaminants such as microbiological particles affecting health of users. UVnano is a compound of the words UV(ultraviolet) and nanometer(unit of length)."
+      ],
+      "layout": {
+        "type": "grid-4",
+        "imgsPerRow": 4
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/new/gs-x6104be-instaview-d.jpg",
+          "alt": "Knock twice to see inside",
+          "title": "InstaView® Door-in-Door®",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 342,
+            "top": 1608,
+            "left": 240
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/new/gs-x6104be-uvnano-d.jpg",
+          "alt": "UV Nano® Water Dispenser",
+          "title": "UV Nano® Water Dispenser",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 342,
+            "top": 1608,
+            "left": 606
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/new/gs-x6104be-nea-d.jpg",
+          "alt": "3 Ticks Energy Efficiency",
+          "title": "3 Ticks Energy Efficiency",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 342,
+            "top": 1608,
+            "left": 972
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/new/ref-f-vb-gbv3100cpy-gp1-01-4-key-benefit-summary-d.jpg",
+          "alt": "Fresh food-filled refrigerator with open door and 10-year warranty label of smart inverter compressor.",
+          "title": "Smart Inverter Compressor™",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 342,
+            "top": 1608,
+            "left": 1338
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-03",
+      "order": 3,
+      "eyebrow": "Black Glass InstaView®",
+      "headline": "Knock Twice, See Inside",
+      "body": "Knock twice on the glass to see inside the refrigerator without opening the door. This prevents cold air from escaping and helps keep food fresher for longer.\nPlay videoPause video",
+      "disclaimers": [
+        "**Door-in-Door®**"
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/multi-door/gf-g4534ep/features/mobile/ref-f-next8-gf-g4534ep-03-instaview-m.jpg",
+          "alt": "Light on inside when knocking twice.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/multi-door/gf-g4534ep/features/desktop/ref-f-next8-gf-g4534ep-03-instaview-d.webm",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-04",
+      "order": 4,
+      "eyebrow": "",
+      "headline": "Easy Access to Your Favourites",
+      "body": "The Door-in-Door® feature allows you to easily access your favorite snacks and beverages without opening the entire fridge door, reducing cold air loss and helping to keep food fresher for longer.\nFlat Door with Compact Design",
+      "disclaimers": [],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/new/gs-x6104be-Door-in-Door-m.jpg",
+          "alt": "Door-in-Door™",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 3554,
+            "left": 160
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-05",
+      "order": 5,
+      "eyebrow": "",
+      "headline": "Timeless and Contemporary Design for the Modern Kitchen",
+      "body": "The flat door and pocket handle effortlessly modernise and add a touch of elegance to your kitchen.",
+      "disclaimers": [],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/new/ref-f-vb-gbv3100cpy-gp1-02-seamless-design-m.jpg",
+          "alt": "Modern kitchen with a refrigerator that blends seamlessly into surrounding cabinetry, resembling a built-in model.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 4722,
+            "left": 160
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-06",
+      "order": 6,
+      "eyebrow": "",
+      "headline": "Metal Fresh™",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-b6473py/feature/GS-B6473PY-side-by-side-refrigerators--07-2-1-Metal-Fresh-D.jpg",
+          "alt": "Metal Fresh™",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 586,
+            "top": 5530,
+            "left": 240
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-07",
+      "order": 7,
+      "eyebrow": "",
+      "headline": "Soft LED Lighting",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104ev/features/desktop/ref-f-vb-gbv3100cpy-gp1-05-2-design-d.jpg",
+          "alt": "Soft LED Lighting",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 830,
+            "top": 5530,
+            "left": 850
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-08",
+      "order": 8,
+      "eyebrow": "",
+      "headline": "Square Pocket Handle",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/new/ref-f-vb-gbv3100cpy-gp1-05-3-design-d.jpg",
+          "alt": "Square Pocket Handle",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 830,
+            "top": 5964,
+            "left": 850
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-09",
+      "order": 9,
+      "eyebrow": "NatureFRESH™",
+      "headline": "Seals in Farm Freshness Longer",
+      "body": "Enjoy fresh food with LG's temperature control and cooling technology that keeps your food fresher, longer.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104ev/features/mobile/ref-f-vb-gbv3100cpy-gp1-06-naturefresh-m.jpg",
+          "alt": "Bowl of fresh vegetables as if freshly harvested from a farm with the help of a refrigerator's cooling technology.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-10",
+      "order": 10,
+      "eyebrow": "",
+      "headline": "Keep Food Fresh for up to 7 Days",
+      "body": "Linear Cooling™ reduces temperature fluctuations to within ±0.5℃, locking in freshness for up to 7 days\\*.",
+      "disclaimers": [
+        "*Based on UL test results using LG’s internal testing method of measuring the time it took to reach the 5% weight reduction rate of pak choi on the shelf of the fresh food compartment of LGE Linear Cooling model. Applicable models only. The result may vary in actual usage. Product image is for illustrative purpose only and may differ from actual product."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104ev/features/desktop/ref-f-vb-gbv3100cpy-gp1-07-linearcooling-d.jpg",
+          "alt": "Linear cooling graph with fresh vegetables nearby, showing temperature fluctuations kept within ±0.5℃ for food freshness.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 610,
+            "top": 7402,
+            "left": 240
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-11",
+      "order": 11,
+      "eyebrow": "",
+      "headline": "Delivers Freshness Evenly & Faster",
+      "body": "Door Cooling+™ provides faster cooling that distributes evenly to door sides. This not only keeps drinks cooler but with special air vents, allows freshness no matter where in the fridge food is placed.\nToggle contents\nFRESHConverter™ retains the right temperature for each item or food group such as meat, fish, and vegetables.\nExpress Cool refreshes and retains freshness with a speedy, powerful blast of cold air.\nPrevious slide\n1 / 2\nNext slide\nClose contents",
+      "disclaimers": [
+        "*Product image is for illustrative purpose only and may differ from actual product.",
+        "*Based on UL test results using LG’s internal testing method comparing the time needed for temperature of the top door basket to drop from 24.8℃ to 8℃ between LGE’s Non-Door Cooling+ model (GBB60NSZHE) and Door Cooling+ model (GBB72NSDFN). Door Cooling+™ is supposed to stop working when the door is opened.",
+        "**Adjustable Temperatures**",
+        "**Instantly Chill with a Blast of Cold Air**"
+      ],
+      "layout": {
+        "type": "multi-image",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104ev/features/desktop/ref-f-vb-gbv3100cpy-gp1-09-doorcooling-d.jpg",
+          "alt": "Close-up of air vents located at the front of the refrigerator, ensuring efficient and even cooling.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 610,
+            "top": 7918,
+            "left": 1070
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104ev/features/desktop/ref-f-vb-gbv3100cpy-gp1-12-1-naturefresh-d.jpg",
+          "alt": "Close-up of meat-filled fresh converter, set at proper temperature for meat among meat, fish, and vegetables options.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1440,
+            "top": 8856,
+            "left": 240
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104ev/features/desktop/ref-f-vb-gbv3100cpy-gp1-12-2-naturefresh-d.jpg",
+          "alt": "Close-up of the express cool button located at the top of the refrigerator.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1440,
+            "top": 8892,
+            "left": 1704
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-12",
+      "order": 12,
+      "eyebrow": "",
+      "headline": "Fresher and Easier with Multi Air Flow",
+      "body": "Total No Frost maintains freshness with Multi Air Flow in every corner. It frees you from having to remove frost manually.",
+      "disclaimers": [
+        "*Product image is for illustrative purpose only and may differ from actual product."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/new/ref-f-vb-gbv3100cpy-gp1-13-total-no-frost-d.jpg",
+          "alt": "No-frost freezer with even cooling and circulated cold air to keep food fresh in all corners.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 610,
+            "top": 8739,
+            "left": 240
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-13",
+      "order": 13,
+      "eyebrow": "Smart Inverter Compressor™",
+      "headline": "10 Year Parts Warranty",
+      "body": "With low vibration and minimal moving parts, the LG Smart Inverter Compressor™ is quiet and durable. As the heart of your refrigerator, we back the Smart Inverter Compressor™ with a 10 year parts warranty\\*.",
+      "disclaimers": [
+        "*2 years parts and labour warranty on the product, additional 3 years parts only warranty on sealed refrigeration system (compressor, evaporator, dryer and tubing) and additional 5 years parts only warranty on the compressor."
+      ],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/sg/products/refrigerators/side-by-side/gs-x6104be/new/gs-x6104be-energy-m.jpg",
+          "alt": "Refrigerator with efficient cooling system by smart inverter compressor and 10-year warranty label of compressor.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 9207,
+            "left": 160
+          }
+        }
+      ]
+    }
+  ],
+  "unassignedAssets": [],
+  "review": {
+    "imageCoverage": {
+      "inMarkdown": 48,
+      "captured": 46,
+      "coveragePct": 96,
+      "missing": [
+        "https://www.lg.com/content/dam/channel/wcms/sg/images/dehumidifier/md19gqga1/gallery/MD19GQGA1_Dehumidifier_350-B.jpg",
+        "https://www.lg.com/content/dam/channel/wcms/sg/01-assets/general/footer/CSB-SG-2026-Gold.png"
+      ]
+    },
+    "verbatimFails": [],
+    "emptySections": [],
+    "unassignedCount": 0
+  }
+}

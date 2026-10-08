@@ -1,0 +1,1888 @@
+{
+  "version": "0.1",
+  "source": {
+    "url": "https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/",
+    "crawledAt": "2026-07-05T10:56:06.374Z",
+    "engine": "firecrawl",
+    "geometry": true
+  },
+  "product": {
+    "title": "75inch LG QNED evo AI QNED87 Mini LED 4K Smart TV - 75QNED87B6A | LG UK",
+    "description": "Discover the next generation of LG's Smart AI TVs, 75QNED87B6A, for the optimal viewing experience tailored to you through the webOS platform's smart AI features. Click for pictures, reviews, and tech specs for the LG QNED evo AI QNED86 Mini LED 75 inch 4K Smart TV. Get free delivery and 5% off your first order.",
+    "model": "75qned87b6a",
+    "gallery": [
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/13_2010x1334.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/13_2010x1334.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/13_2010x1334.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/_2010x133475QNED87B6A_WORLDCUP_.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "Front view of 75 inch LG QNED evo AI Mini LED QNED87 4K Smart TV 2026 75QNED87B6A",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/_2010x133475QNED87B6A_WORLDCUP_.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/_2010x133475QNED87B6A_WORLDCUP_.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/01_2010x1334.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/01_2010x1334.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/02_2010x1334_QNED86.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/02_2010x1334_QNED86.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/03_2010x1334.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/03_2010x1334.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/04_2010x1334.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/04_2010x1334.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/new/_2010x1334_W6.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/new/_2010x1334_W6.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/06_2010x1334_QNED_evo.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/06_2010x1334_QNED_evo.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/07_2010x1334_a8.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/07_2010x1334_a8.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/08_2010x1334_webOS.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/08_2010x1334_webOS.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/09_2010x1334_MagicRemote.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/09_2010x1334_MagicRemote.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/10_2010x1334_QNED_87_75.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/10_2010x1334_QNED_87_75.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/11_2010x1334_Sport.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/11_2010x1334_Sport.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/12_2010x1334_Games.jpg/jcr:content/renditions/thum-1600x1062.jpeg?w=800",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/12_2010x1334_Games.jpg/jcr:content/renditions/thum-1600x1062.jpeg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/_350x350_75QNED87B6A.jpg",
+        "alt": "Front view of 75 inch LG QNED evo AI Mini LED QNED87 4K Smart TV 2026 75QNED87B6A",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/_350x350_75QNED87B6A.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/01_350.jpg",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/01_350.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/02_350_QNED86.jpg",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/02_350_QNED86.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/03_350.jpg",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/03_350.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/04_350.jpg",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/04_350.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/new/_350x350_W6.jpg",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/new/_350x350_W6.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/06_350_QNED_evo.jpg",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/06_350_QNED_evo.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/07_350_a8.jpg",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/07_350_a8.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/08_350_webOS.jpg",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/08_350_webOS.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/09_350_MagicRemote.jpg",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/09_350_MagicRemote.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/10_350_QNED_87_75.jpg",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/10_350_QNED_87_75.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/11_350_Sport.jpg",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/11_350_Sport.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/12_350_Games.jpg",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/12_350_Games.jpg"
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/13_350.jpg",
+        "alt": "75 inch LG QNED evo AI QNED87 Mini LED 4K Smart TV 2026",
+        "variants": [
+          "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/gallery/75-qned85/75qned87b6a/13_350.jpg"
+        ]
+      }
+    ]
+  },
+  "sections": [
+    {
+      "id": "sec-01",
+      "order": 1,
+      "eyebrow": "",
+      "headline": "75 inch LG QNED evo AI Mini LED QNED87 4K Smart TV 2026",
+      "body": "75QNED87B6A\nCopy model name\n4.8\nRead 3490 Reviews. Same page link.\n\\|\n3490 Reviews\n1510 out of 1539 (98%) reviewers recommend this product\nShare your thoughts!\n- [75\"](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/)\n- [65\"](https://www.lg.com/uk/tvs-soundbars/qned-evo/65qned87b6a/)\n- [55\"](https://www.lg.com/uk/tvs-soundbars/qned-evo/55qned87b6a/)\n- [50\"](https://www.lg.com/uk/tvs-soundbars/qned-evo/50qned87b6a/)\n- [43\"](https://www.lg.com/uk/tvs-soundbars/qned-evo/43qned87b6a/)\n(5)\nopen gallery popup\nPrevious Slide\nNext Slide\nPrevious Slide\nNext Slide\nKey Features\n- Immersive viewing experience on a Ultra Big TV\n- LG's unique wide colour gamut technology delivers incredibly rich colour palette with Dynamic QNED Colour Pro\n- Mini LED with Precision Dimming ensures the sharpest picture and reveals the finest details\n- Award‑winning webOS brings advanced AI experiences—powered by Google Gemini and Microsoft Copilot\n- The AI button unlocks AI Hub for a smart, personalised experience, secured by LG Shield\n[More](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#)\n[Ask LG anything](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#) [Best QNED evo for me](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#) [QNED evo buying tips](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#) [Why choose LG QNED evo?](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#)\n[**Features**](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#pdp-overview-section) [**Specs**](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#pdp-specs-section) [**Reviews**](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#pdp-review) [**Support**](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#pdp-support-section) [**Where to Buy**](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#find-a-store)\nGallery\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\nzoom inzoom out\n[](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#)\n[](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#)\n[](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#)\n[](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#)\n[](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#)\n[](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#)\n[](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#)\n[](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#)\n[](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#)\n[](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#)\n[](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#)\n[](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#)\n[](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#)\n[](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#)\nPPrevious Slide\n1 / 14\nNext Slide\nPrevious Slide\n1 / 1\nNext Slide\nDiscover our latest promotions\n- Up to 50% off selected soundbars\nwhen you buy an eligible TV\n20/01/2026 ~ 20/01/2027\n[Buy Now](https://www.lg.com/uk/promotion/soundbar-offer/)\nPause carouselPlay carousel",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-02",
+      "order": 2,
+      "eyebrow": "",
+      "headline": "Why LG QNED evo \\| Mini LED?",
+      "body": "Previous Slide\n1 / 3\nNext Slide",
+      "disclaimers": [],
+      "layout": {
+        "type": "grid-4",
+        "imgsPerRow": 6
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-02-key-features-ultra-big-tv-d.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED Ultra Big TV is wall-mounted in a living room, displaying a sports victory celebration with vivid colors and refined picture quality across the wide screen as a family seated on sofas cheers together.",
+          "title": "Dynamic Sports on an Ultra Big TV",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 342,
+            "top": 1273,
+            "left": 240
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-02-key-features-dynamic-qned-color-pro-d-uk.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with Dynamic QNED colour Pro fills the screen with vivid, fluid bursts of multicoloured, paint-like motion, showcasing enhanced colour vibrancy certified for 100% colour Volume.",
+          "title": "Dynamic QNED Colour Pro",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 342,
+            "top": 1273,
+            "left": 606
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-02-key-features-mini-led-precision-dimming-d.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED highlights Mini LED with Precision Dimming in a split forest scene, comparing conventional LED with deeper blacks and more refined contrast as sunlight filters through the trees for greater clarity and depth.",
+          "title": "Mini LED with Precision Dimming",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 342,
+            "top": 1273,
+            "left": 972
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-02-key-features-multi-ai-webos-d.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with Award-winning Multi AI webOS is presented on a dark background featuring Microsoft Copilot and Google Gemini logos, indicating support for AI-related services accessible through the TV interface.",
+          "title": "Award-winning Multi AI webOS",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 342,
+            "top": 1273,
+            "left": 1338
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-02-key-features-ai-hub-gb-d.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED features AI Hub for personalisation, with an AI symbol above a remote control surrounded by labels for Multi AI Search, AI Concierge, AI Voice ID with My Page, AI Chatbot, AI Picture Wizard, and AI Sound Wizard.",
+          "title": "AI Hub for Personalisation",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 342,
+            "top": 1273,
+            "left": 1704
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-02-key-features-lg-shield-d.jpg",
+          "alt": "LG Shield emblem is shown on a dark background with security icons, highlighting webOS protection for privacy, data security, and system integrity.",
+          "title": "Secured by LG Shield",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 342,
+            "top": 1273,
+            "left": 2070
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-03",
+      "order": 3,
+      "eyebrow": "",
+      "headline": "How does LG QNED evo Mini LED bring big size and colour to every scene?",
+      "body": "LG QNED evo’s Dynamic QNED colour Pro, which is certified for 100% colour Volume, and Mini LED with Precision Dimming's advanced dimming zones, come together to deliver ultra-vivid colour and detail. Enjoy an immersive viewing experience from sports to movies and beyond on an ultra big screen.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-04",
+      "order": 4,
+      "eyebrow": "Ultra Big TV",
+      "headline": "Discover next-level immersion with an ultra-big screen",
+      "body": "Enjoy sports action, every film, and game on an expansive LG QNED evo Ultra Big TV. With its vivid colours and refined picture quality, action unfolds with breathtaking scale and clarity.1)\nPreviousNextPausePlay\nDynamic QNED colour Pro",
+      "disclaimers": [],
+      "layout": {
+        "type": "multi-image",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-03-ultra-big-tv-movie-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED Ultra Big TV is wall-mounted in a modern living space, displaying a large-scale astronaut scene across a wide screen that visually fills the room and creates a strong cinematic presence.",
+          "matchedBy": "doc-order-trailing",
+          "variants": [
+            "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-03-ultra-big-tv-movie-m.jpg"
+          ]
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-03-ultra-big-tv-sports-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED Ultra Big TV is wall-mounted in a living room, displaying a sports victory celebration with vivid colours and refined picture quality across the wide screen as a family seated on sofas cheers together.",
+          "matchedBy": "doc-order-trailing",
+          "variants": [
+            "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-03-ultra-big-tv-sports-m.jpg"
+          ]
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-03-ultra-big-tv-documentary-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED Ultra Big TV design is wall-mounted in a bright living space, displaying a giraffe in a natural landscape with vivid detail that emphasizes immersive scale and presence for a child seated nearby.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-05",
+      "order": 5,
+      "eyebrow": "",
+      "headline": "LG’s Nano-based colour gamut technology delivers 100% colour Volume on your TV",
+      "body": "View more dynamic and vibrant colour in motion with LG’s Nano-based wider colour gamut technology replacing Quantum Dot, enhancing your TV’s colour reproduction rate to express a variety of moods with Dynamic QNED colour Pro.2)",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-04-dynamic-qned-color-pro-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with Dynamic QNED colour Pro fills the screen with vivid, fluid bursts of multicoloured, paint-like motion, with fluid transitions and a wide colour range exceeding that of typical quantum dot displays.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-06",
+      "order": 6,
+      "eyebrow": "",
+      "headline": "See the 100% colour Volume Certification of LG QNED evo3)",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-05-certification-colour-volume-d-uk.jpg",
+          "alt": "Intertek certification sticker highlights that LG QNED evo AI is certified by Intertek for “100% colour Volume to DCI-P3.”",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 732,
+            "top": 4213,
+            "left": 948
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-07",
+      "order": 7,
+      "eyebrow": "Mini LED with Precision Dimming",
+      "headline": "Mini LED meets Precision Dimming brings out clarity with better contrast and detail",
+      "body": "Mini LEDs and advanced dimming zones work together to control light, improving picture contrast, detail, and clarity.",
+      "disclaimers": [
+        "*Images above are simulated for illustrative purposes."
+      ],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-06-mini-led-precision-dimming-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED highlights Mini LED with Precision Dimming in a split forest scene, comparing conventional LED with deeper blacks and more refined contrast as sunlight filters through the trees for greater clarity and depth.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-08",
+      "order": 8,
+      "eyebrow": "alpha 8 AI Processor 4K Gen3",
+      "headline": "Advanced AI engine with X5.0 faster NPU performance",
+      "body": "Our next-generation processor enhances the capabilities of your TV, enabling AI to provide a viewing experience tailored to your preferences with sharper 4K detail, richer sound, and vivid colour. 4)",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-07-ai-processor-alpha8-gen3-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED’s alpha 8 AI Processor 4K Gen3 glows in blue light on a circuit board, highlighting AI processing performance with NPU x5.0 Faster Neural Processing, GPU 10% More Powerful Graphics, and 20% Memory Enhanced Throughput.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-09",
+      "order": 9,
+      "eyebrow": "",
+      "headline": "Why LG AI TV?",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-10",
+      "order": 10,
+      "eyebrow": "",
+      "headline": "LG AI TV optimises picture and sound while making every day smarter with personalised AI Hub",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-08-ai-tv-virtual-11-1-2-ch-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with Virtual 11.1.2 Ch fills a modern living space as an opera performance plays on screen, delivering multi-directional sound that surrounds the seating area and enhances immersion throughout the room.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-11",
+      "order": 11,
+      "eyebrow": "Virtual 11.1.2 Ch",
+      "headline": "Immersive and room-filling sound with Virtual 11.1.2 Ch",
+      "body": "AI Sound refines sound quality to deliver multi-dimensional audio that surrounds you, heightening your senses through deeper immersion.7)\nLG QNED evo AI QNED80 Mini LED with 4K Super Upscaling shows an orca swimming over a coral reef and fish, as AI upscales every frame toward 4K quality, then zooms out to reveal a child watching up close, immersed in the vivid detail.\nPlay videoPause video\nAI Picture Pro",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-08-ai-tv-ai-picture-pro-ultra-big-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with AI Picture Pro shows an underwater scene of a sea turtle gliding above coral and fish, as AI recognises and upscales each frame up to 4K resolution, then zooms out to reveal a child watching up close, immersed in the vivid detail.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-12",
+      "order": 12,
+      "eyebrow": "",
+      "headline": "Upscale every frame up to 4K even on Ultra Big TVs",
+      "body": "Enjoy a larger screen without sacrifices on quality. AI Super Upscaling refines image quality up to 4K and Dynamic Tone Mapping Pro ensures balanced brightness and detail for each object in every frame.5)",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-08-ai-tv-ai-object-remastering-pro-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with AI Object Remastering Pro shows a couple dancing at a lively indoor party, enhancing voices and key sounds amid surrounding music and crowd noise for clearer, more immersive audio.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-13",
+      "order": 13,
+      "eyebrow": "AI Object Remastering Pro",
+      "headline": "Hear voices clearly in every scene with AI Object Remastering Pro",
+      "body": "No need to adjust the volume to hear voices clearly. AI Sound automatically fine-tunes voices, background music, and sound effects for crystal-clear audio and an immersive experience.6)",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-08-ai-tv-virtual-11-1-2-ch-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with Virtual 11.1.2 Ch fills a modern living space as an opera performance plays on screen, delivering multi-directional sound that surrounds the seating area and enhances immersion throughout the room.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-14",
+      "order": 14,
+      "eyebrow": "Virtual 11.1.2 Ch",
+      "headline": "Immersive and room-filling sound with Virtual 11.1.2 Ch",
+      "body": "AI Sound refines sound quality to deliver multi-dimensional audio that surrounds you, heightening your senses through deeper immersion.7)\nLG QNED evo AI QNED80 Mini LED with 4K Super Upscaling shows an orca swimming over a coral reef and fish, as AI upscales every frame toward 4K quality, then zooms out to reveal a child watching up close, immersed in the vivid detail.\nPlay videoPause video\nAI Picture Pro",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-08-ai-tv-ai-picture-pro-ultra-big-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with AI Picture Pro shows an underwater scene of a sea turtle gliding above coral and fish, as AI recognises and upscales each frame up to 4K resolution, then zooms out to reveal a child watching up close, immersed in the vivid detail.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-15",
+      "order": 15,
+      "eyebrow": "",
+      "headline": "Upscale every frame up to 4K even on Ultra Big TVs",
+      "body": "Enjoy a larger screen without sacrifices on quality. AI Super Upscaling refines image quality up to 4K and Dynamic Tone Mapping Pro ensures balanced brightness and detail for each object in every frame.5)\nAI Picture Pro\nAI Object Remastering Pro\nVirtual 11.1.2 Ch\nPreviousNextPausePlay\nAI HDR Remastering",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-16",
+      "order": 16,
+      "eyebrow": "",
+      "headline": "Upgrade every frame to HDR quality",
+      "body": "AI automatically optimises colour, brightness, and contrast and elevates SDR picture quality to HDR levels for richer, more realistic visuals.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-17",
+      "order": 17,
+      "eyebrow": "",
+      "headline": "Discover 3 standout benefits of AI Hub",
+      "body": "Multi AI Search\nAI Concierge\nAI Voice ID with My Page",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-09-ai-hdr-remastering-d.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with AI HDR Remastering is shown in a split cityscape comparison, with SDR on the left and AI HDR Remastering on the right, displaying brighter city lights, deeper contrast, and more vivid detail across the scene.",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 732,
+            "top": 8424,
+            "left": 948
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-18",
+      "order": 18,
+      "eyebrow": "",
+      "headline": "Advanced Multi AI search with Google Gemini and Microsoft Copilot",
+      "body": "Simply say what you are searching for, then select the AI model that suits you the best. The system connects to multiple AI models to deliver broader, more relevant results.8)\nPlay videoPause video",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-10-multi-ai-search-m.jpg",
+          "alt": "Simply say what you are searching for, then select the AI model that suits you the best. The system connects to multiple AI models to deliver broader, more relevant results.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/video/lg-qned-evo-qned85-2026-feature-10-multi-ai-search-d.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-19",
+      "order": 19,
+      "eyebrow": "",
+      "headline": "Get personalised content recommendations and information",
+      "body": "AI Concierge suggests content and updates tailored to your interests. In This Scene provides relevant recommendations and information based on what you’re watching, while Generative AI enables searching and creating images.9)\nPlay videoPause video",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-10-ai-concierge-gb-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with AI Concierge shows an AI-based menu overlay on the left side of the movie screen, displaying scene-based content suggestions and AI keywords such as OST and reviews, accessed by a short remote press.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/video/lg-qned-evo-qned85-2026-feature-10-ai-concierge-gb-d.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-20",
+      "order": 20,
+      "eyebrow": "",
+      "headline": "LG AI TV recognises your voice and leads you to My Page tailored just for you!",
+      "body": "Taken to My Page, you can see everything at a glance, from weather, calendar, and widgets to your favourite sports scores.10)\nPlay videoPause video",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-10-ai-voice-id-gb-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED featuring AI Voice ID with My Page shows the webOS home screen with personalised recommendations tailored to the active user.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-11-award-winning-multi-ai-m.jpg",
+          "alt": "The CES Innovation Awards 2026 Honoree badge is shown on a dark background. Multi-AI Architecture is recognised in the Artificial Intelligence category.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/video/lg-qned-evo-qned85-2026-feature-10-ai-voice-id-gb-d.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-21",
+      "order": 21,
+      "eyebrow": "",
+      "headline": "Award-winning Multi AI webOS",
+      "body": "LG Mini RGB evo AI MRGB9M with Virtual 11.1.2 Ch fills a living room as a live music performance plays on screen, delivering multi-directional audio that surrounds the room and heightens immersion throughout the space. (219)\nPlay videoPause video\nAI Sound Wizard",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-12-ai-sound-wizard-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with AI Sound Wizard presents multiple sound profile options arranged in a grid, allowing users to select preferred audio settings that guide the creation of a personalised sound profile.",
+          "matchedBy": "doc-order"
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/video/lg-qned-evo-qned85-2026-feature-12-ai-sound-wizard-m.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-22",
+      "order": 22,
+      "eyebrow": "",
+      "headline": "Making your sound, your way",
+      "body": "Your TV adjusts the sound to your hearing preferences and optimises overall sound quality to create a sound profile tuned precisely to you.\nPlay videoPause video\nAI Chatbot",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-12-ai-chatbot-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with AI Chatbot displays an on-screen message that identifies a sudden power-off issue and offers a solution before user input, demonstrating proactive AI detection and guidance through the TV interface.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/video/lg-qned-evo-qned85-2026-feature-12-ai-chatbot-m.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-23",
+      "order": 23,
+      "eyebrow": "",
+      "headline": "Knowing the problem before you ask",
+      "body": "When your TV shows signs of trouble, the system detects the issue and provides step-by-step guidance right on your screen, helping you resolve it instantly or connect to support.11)\nLG Mini RGB evo AI MRGB9M with AI Object Remastering Ultra shows two people facing each other at a crowded concert, clarifying voices amid loud background noise and delivering crystal-clear, immersive audio. (208)\nPlay videoPause video\nAI Picture Wizard",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-12-ai-picture-wizard-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with AI Picture Wizard shows multiple versions of the same photo arranged in a grid, allowing users to select preferred options that guide the creation of personalised pictures on screen.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/video/lg-qned-evo-qned85-2026-feature-12-ai-picture-wizard-m.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-24",
+      "order": 24,
+      "eyebrow": "",
+      "headline": "Making your picture, your way",
+      "body": "Advanced algorithms learn your preferences. Based on your selections, your TV creates a personalised picture just for you.\nLG Mini RGB evo AI MRGB9M with Virtual 11.1.2 Ch fills a living room as a live music performance plays on screen, delivering multi-directional audio that surrounds the room and heightens immersion throughout the space. (219)\nPlay videoPause video\nAI Sound Wizard",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-12-ai-sound-wizard-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with AI Sound Wizard presents multiple sound profile options arranged in a grid, allowing users to select preferred audio settings that guide the creation of a personalised sound profile.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-25",
+      "order": 25,
+      "eyebrow": "",
+      "headline": "Making your sound, your way",
+      "body": "Your TV adjusts the sound to your hearing preferences and optimises overall sound quality to create a sound profile tuned precisely to you.\nPlay videoPause video\nAI Chatbot",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-12-ai-chatbot-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with AI Chatbot displays an on-screen message that identifies a sudden power-off issue and offers a solution before user input, demonstrating proactive AI detection and guidance through the TV interface.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-26",
+      "order": 26,
+      "eyebrow": "",
+      "headline": "Knowing the problem before you ask",
+      "body": "When your TV shows signs of trouble, the system detects the issue and provides step-by-step guidance right on your screen, helping you resolve it instantly or connect to support.11)\nAI Chatbot\nAI Picture Wizard\nAI Sound Wizard\nPreviousNextPausePlay",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-27",
+      "order": 27,
+      "eyebrow": "",
+      "headline": "Award-winning webOS now secured by LG Shield",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-13-avforums-award-m.jpg",
+          "alt": "The AVForums Editor’s Choice badge is shown on a dark background for LG webOS 25, named Best Smart TV System 2025/2026.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-28",
+      "order": 28,
+      "eyebrow": "",
+      "headline": "8 Years as the Best Smart TV System",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-14-lg-shield-m.jpg",
+          "alt": "LG Shield emblem is shown on a dark background with security icons, highlighting webOS protection for privacy, data security, and system integrity. A CES Innovation Awards 2026 Honoree badge is also shown.",
+          "matchedBy": "doc-order"
+        }
+      ]
+    },
+    {
+      "id": "sec-29",
+      "order": 29,
+      "eyebrow": "LG Shield",
+      "headline": "Security you can trust",
+      "body": "LG Shield's 7 core technologies ensure your data stays safe with secure data storage and management, secure cryptographic algorithms, ensured software integrity, user authentication and access control, secure data transmission, security event detection and response, and secure update management.\n[Security you can trustDiscover more about LG Shield](https://lgshield.lge.com/en/why-lg-shield/solutions)",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-30",
+      "order": 30,
+      "eyebrow": "webOS Re:New Program",
+      "headline": "Upgrade your TV up to 5 years for free12)",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-15-webos-re-new-program-d.jpg",
+          "alt": "webOS Re:New Program logo is shown on a dark background.",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 732,
+            "top": 13779,
+            "left": 948
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-16-lg-quad-protection-m.jpg",
+          "alt": "LG Quad Protection is shown through four protection icons on a yellow background. Each icon features Lightning Strikes Protection, Humidity Protection, Surge Protection, and webOS Protection with LG Shield.",
+          "matchedBy": "doc-order-trailing"
+        }
+      ]
+    },
+    {
+      "id": "sec-31",
+      "order": 31,
+      "eyebrow": "LG Quad Protection",
+      "headline": "Your LG TV is built to last with LG Quad Protection",
+      "body": "From hardware to software, your LG TV is protected. Built-in capacitors protect against high voltages, including lightning strikes, while semiconductors are engineered with surge protection. Silicon gel and protective coatings shield chipsets from humidity and even your data stays safe and secure with LG Shield.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-32",
+      "order": 32,
+      "eyebrow": "AI Magic Remote",
+      "headline": "Easily navigate and point like an air mouse to enjoy AI Hub",
+      "body": "Control your TV easily with AI Magic Remote. With a motion sensor and scroll wheel, click, drag, and drop to use it like an air mouse or simply speak for voice commands.13)",
+      "disclaimers": [],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-17-ai-magic-remote-gb-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED features AI Hub for personalisation, with an AI icon above a remote control surrounded by labels for Multi AI Search, AI Concierge, AI Voice ID with My Page, AI Chatbot, AI Picture Wizard, and AI Sound Wizard.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 15298,
+            "left": 160
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-33",
+      "order": 33,
+      "eyebrow": "",
+      "headline": "Immerse yourself in every sports match",
+      "body": "Sports Forecast by AI Concierge\nTruMotion\nSports Alert\nSports Forecast by AI Concierge",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-34",
+      "order": 34,
+      "eyebrow": "",
+      "headline": "Receive game predictions with AI",
+      "body": "AI analyses your team’s stats and performance to provide game predictions. Cheer harder and enjoy supporting your team armed with these AI-generated insights.14)",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-35",
+      "order": 35,
+      "eyebrow": "TruMotion",
+      "headline": "Motion smoothing that adapts to every genre",
+      "body": "AI Genre Selection identifies content genre and TruMotion adjusts judder levels to apply the right amount of smoothing for a natural viewing experience from movies, sports, and more.",
+      "disclaimers": [],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-18-sports-forecast-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED Sports Forecast by AI Concierge displays a live soccer match with an on-screen AI panel presenting predictions, game insights, and league data, suggesting how AI analyses gameplay to forecast match outcomes.",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 15920,
+            "left": 160
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-36",
+      "order": 36,
+      "eyebrow": "Sports Alert",
+      "headline": "Set up alerts and never miss a moment",
+      "body": "Catch every moment of the action. Set up your alerts and get notified about your team’s game schedules, scores, and more.\nPlay videoPause video",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-18-sports-trumoition-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with TruMotion highlights motion smoothing in a split-screen soccer scene, contrasting blurred action with TruMotion Off and sharp, clear movement with TruMotion On to emphasize clarity in fast-paced sports.",
+          "matchedBy": "doc-order"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-18-sports-alert-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED shows a drama scene of a person riding in a car, then a Sports Alert for a live soccer match pops up with real-time scores and, when tapped, switches straight to the live game.",
+          "matchedBy": "doc-order-trailing"
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/video/lg-qned-evo-qned85-2026-feature-18-sports-alert-d.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-37",
+      "order": 37,
+      "eyebrow": "",
+      "headline": "Step into a world tuned for winning",
+      "body": "Ultimate Gameplay",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-38",
+      "order": 38,
+      "eyebrow": "",
+      "headline": "Game to win with boosted-up refresh rates up to 288Hz",
+      "body": "Experience ultra-fast gaming with 144Hz, AMD FreeSync Premium, and VRR. With Motion Booster bringing up refresh rates to reduce motion blur and the first-ever BT ULL-certified controller, enjoy high-performance, ideal for competitive gaming.15)\n[](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#)[](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#)[](https://www.lg.com/uk/tvs-soundbars/qned-evo/75qned87b6a/#)",
+      "disclaimers": [],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 2
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-19-ultimate-gameplay-motion-booster-288-m.jpg",
+          "alt": "LG QNED evo AI QNED80 Mini LED foLG QNED evo AI QNED85 Mini LED for Ultimate Gameplay shows a vibrant, high-speed racing scene with a blurred comparison inset highlighting Motion Booster 288, while supporting 144Hz, VRR, AMD FreeSync, ALLM, HGiG, and GeForce NOW.r Ultimate Gameplay shows a high-speed racing scene with a comparison inset highlighting smoother motion through Motion Booster 120, while supporting 60Hz, VRR, AMD FreeSync, ALLM, HGiG, and GeForce NOW.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 16452,
+            "left": 160
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-20-game-experience-thunmbnail-bluetooth-ultra-low-latency-d.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with Bluetooth Ultra Low Latency shows a wireless game controller labeled “Razer Wolverine V3 Bluetooth” on screen, indicating optimised Bluetooth controller support for responsive gameplay.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 244,
+            "top": 16612,
+            "left": 1436
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-20-game-experience-thunmbnail-lg-gaming-portal-xbox-d.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED features the LG Gaming Portal with a gaming hub layout, combining featured content and game tiles in a unified interface that expands to provide access to Xbox Cloud Gaming, GeForce NOW, and webOS game apps.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 244,
+            "top": 16660,
+            "left": 1436
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-20-game-experience-thunmbnail-game-dashboard-d.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with Game Dashboard and optimiser shows side-by-side game screens and an on-screen menu for adjusting gameplay settings such as refresh rate, latency, and visual modes in real time.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 244,
+            "top": 16708,
+            "left": 1436
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-20-game-experience-bluetooth-ultra-low-latency-d.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with Bluetooth Ultra Low Latency shows a wireless game controller labeled “Razer Wolverine V3 Bluetooth” on screen, indicating optimised Bluetooth controller support for responsive gameplay.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1098,
+            "top": 16612,
+            "left": 240
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-20-game-experience-lg-gaming-portal-d-xbox-d.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED features the LG Gaming Portal with a gaming hub layout, combining featured content and game tiles in a unified interface that expands to provide access to Xbox Cloud Gaming, GeForce NOW, and webOS game apps.",
+          "title": "Play video",
+          "matchedBy": "card-pair"
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-20-game-experience-game-dashboard-d.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with Game Dashboard and optimiser shows side-by-side game screens and an on-screen menu for adjusting gameplay settings such as refresh rate, latency, and visual modes in real time.",
+          "title": "Bluetooth Ultra Low Latency",
+          "matchedBy": "card-pair"
+        }
+      ]
+    },
+    {
+      "id": "sec-39",
+      "order": 39,
+      "eyebrow": "",
+      "headline": "World's first TV to support Bluetooth Ultra Low Latency Controllers",
+      "body": "Experience ultra-low latency, high-performance cloud gaming with Bluetooth Ultra Low Latency Controller support, reducing input delay to less than 3.0ms. Enjoy seamless, responsive control that feels just like a wired connection, even when playing in the cloud.16)",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-40",
+      "order": 40,
+      "eyebrow": "LG Gaming Portal",
+      "headline": "Your one-stop hub for gaming—no console required",
+      "body": "Explore thousands of games from NVIDIA GeForce Now, native webOS apps, and more. Easily find games for remote or gamepad and even compete with other players via Challenge Mode.17)",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-41",
+      "order": 41,
+      "eyebrow": "Game Dashboard & optimiser",
+      "headline": "Easily fine-tune game settings to suit your play style",
+      "body": "customise your gaming experience easily using Game Dashboard for quick, real-time control and Game optimiser to fine-tune your preferred settings. Adjust refresh rate, latency, and visual modes to optimise every game session with ease.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-42",
+      "order": 42,
+      "eyebrow": "",
+      "headline": "True Cinema, preserved in exact detail",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-21-cinema-filmmaker-mode-d.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED is shown in a studio as a director works at a control panel while editing a movie displayed on screen. The Dolby Vision and FILMMAKER MODE logos appear at the bottom left.",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 708,
+            "top": 17198,
+            "left": 240
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-43",
+      "order": 43,
+      "eyebrow": "",
+      "headline": "Dolby Vision & FILMMAKER MODE",
+      "body": "Delivering clearer contrast and richer colour, FILMMAKER MODE adapts to your surroundings to keep visuals as close as possible to their original form and the creator's intent.",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-44",
+      "order": 44,
+      "eyebrow": "",
+      "headline": "Dolby Atmos",
+      "body": "By rendering sound as immersive 360° audio objects rather than static channels, the system creates a home cinema environment where detail and depth stay true to the scene.18)",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-21-cinema-dolby-atmos-d.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with Dolby Atmos shows an artist performing live acoustic music on screen in a living room, with visualized sound waves surrounding the space to indicate immersive, multi-directional, object-based audio.",
+          "matchedBy": "doc-order",
+          "geometry": {
+            "renderWidth": 708,
+            "top": 17198,
+            "left": 972
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-45",
+      "order": 45,
+      "eyebrow": "",
+      "headline": "Design, made to elevate your space",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-46",
+      "order": 46,
+      "eyebrow": "Super Slim Design",
+      "headline": "Sleekness suited for modern spaces",
+      "body": "Made to integrate into your interior design, the super slim silhouette of your TV is clean and refined without adding to visual clutter.",
+      "disclaimers": [],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-22-super-slim-design-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with Super Slim Design is wall-mounted in a bright, open living space and blends into the interior while displaying bold geometric abstract artwork.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 17866,
+            "left": 160
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-47",
+      "order": 47,
+      "eyebrow": "",
+      "headline": "Discover limitless masterpieces with LG Gallery+",
+      "body": "",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-48",
+      "order": 48,
+      "eyebrow": "LG Gallery+",
+      "headline": "Style your space with over 5000+ curated art content",
+      "body": "LG Gallery+ lets you access countless artworks and content from our partners like The National Gallery, MMCA, Magnum, and more. Elevate and personalise your space with art that reflects your style.19)\nPlay videoPause video",
+      "disclaimers": [],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-23-lg-gallery-plus-intro-paid-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with LG Gallery+ displays curated artwork in a home interior, featuring artworks in rotation, along with partner museum references and a “1 Month Free” message.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 18414,
+            "left": 160
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-24-lg-gallery-plus-content-paid-game-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with LG Gallery+ displays the “Assassin’s Creed Shadows” artwork by Ubisoft on a wall-mounted screen in a dark, immersive gaming room, presented as part of the TV’s art display mode.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 18478,
+            "left": -7520
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/video/lg-qned-evo-qned85-2026-feature-23-lg-gallery-plus-intro-paid-d.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-49",
+      "order": 49,
+      "eyebrow": "Diverse Art Content",
+      "headline": "Explore a wide selection of premium art content",
+      "body": "Find content that fits your style perfectly. Choose from world-renowned artworks, stunning nature landscapes, modern digital and 3D art, gaming wallpapers, and more.\nDiverse Art Content\nDiverse Art Content\nDiverse Art Content\nDiverse Art Content\nPreviousNextPausePlay\nLG Mini RGB evo AI MRGB9M with LG Gallery+ displays a nature-themed artwork by Varvara Alay, wall-mounted flush-fit against a blue living room wall as part of the TV’s curated art content experience.\nPlay videoPause video\nGenerative AI Artwork",
+      "disclaimers": [],
+      "layout": {
+        "type": "grid-4",
+        "imgsPerRow": 4
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-24-lg-gallery-plus-content-paid-art-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with LG Gallery+ Diverse Art Content displays artworks on a wall-mounted screen in a gallery-style living space, accompanied by a canvas and additional framed art nearby.",
+          "matchedBy": "doc-order-trailing",
+          "variants": [
+            "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-24-lg-gallery-plus-content-paid-art-m.jpg"
+          ],
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 18478,
+            "left": -5600
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-24-lg-gallery-plus-content-paid-scenery-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with LG Gallery+, offering diverse art content, displays a night-sky landscape artwork by Babak Tafreshi in a modern living space as part of a curated art experience within the TV interface.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 18478,
+            "left": -3680
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-24-lg-gallery-plus-content-paid-digital-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with LG Gallery+ displays a nature-themed artwork by Varvara Alay, wall-mounted flush-fit against a blue living room wall as part of the TV’s curated art content experience.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 18478,
+            "left": -1760
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-24-lg-gallery-plus-content-paid-game-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with LG Gallery+ displays the “Assassin’s Creed Shadows” artwork by Ubisoft on a wall-mounted screen in a dark, immersive gaming room, presented as part of the TV’s art display mode.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 18478,
+            "left": -7520
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-25-lg-gallery-plus-personalization-paid-generative-ai-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with LG Gallery+ generative AI shows a voice prompt to draw a cat in a brightly coloured hot air balloon basket, then displays the generated artwork, followed by additional prompt examples with their images.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 18502,
+            "left": -7520
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/video/lg-qned-evo-qned85-2026-feature-25-lg-gallery-plus-personalization-paid-generative-ai-m.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-50",
+      "order": 50,
+      "eyebrow": "",
+      "headline": "Turn your ideas into art with Generative AI",
+      "body": "Bring your ideas to life with your TV’s built-in generative AI. Write out a prompt to create unique artworks, and even send them to your phone via LG Link to enjoy them anywhere.22)\nLG Mini RGB evo AI MRGB9M with LG Gallery+ Diverse Art Content displays a Vincent van Gogh landscape artwork on a wall-mounted screen in a gallery-style living space, accompanied by a canvas and additional framed art nearby.",
+      "disclaimers": [],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-25-lg-gallery-plus-personalization-paid-bgm-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED’s LG Gallery+ with BGM and Music Lounge shows the “Forest Evening” forest lake scene on screen, with a visible music lounge UI panel for mood music, Bluetooth playback, and controls.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 18502,
+            "left": -5600
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-51",
+      "order": 51,
+      "eyebrow": "BGM with Music Lounge",
+      "headline": "Set the right vibe with music",
+      "body": "Create the right atmosphere with music that matches your visuals. Use music recommended according to your preferences or connect via Bluetooth to play your own tracks.\nPlay Video\nLG Mini RGB evo AI MRGB9M with LG Gallery+, offering diverse art content, displays a night-sky landscape artwork by Babak Tafreshi in a modern living space as part of a curated art experience within the TV interface.\nPlay videoPause video\nGallery Curation",
+      "disclaimers": [],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-25-lg-gallery-plus-personalization-paid-curation-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED shows the LG Gallery+ gray interface with a music and theme selection menu, moving from selecting preferences to creating My Album and showing curated artwork.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 18502,
+            "left": -3680
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/video/lg-qned-evo-qned85-2026-feature-25-lg-gallery-plus-personalization-paid-curation-m.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-52",
+      "order": 52,
+      "eyebrow": "",
+      "headline": "Discover auto-curated content based on your preferences",
+      "body": "Answering a series of short questions lets your TV know what kind of artworks you like. LG Gallery+ can then start serving you content recommendations personalised to your taste.21)\nLG Mini RGB evo AI MRGB9M with LG Gallery+ displays a nature-themed artwork by Varvara Alay, wall-mounted flush-fit against a blue living room wall as part of the TV’s curated art content experience.\nPlay videoPause video\nGenerative AI Artwork",
+      "disclaimers": [],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-25-lg-gallery-plus-personalization-paid-generative-ai-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with LG Gallery+ generative AI shows a voice prompt to draw a cat in a brightly coloured hot air balloon basket, then displays the generated artwork, followed by additional prompt examples with their images.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 18502,
+            "left": -7520
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-53",
+      "order": 53,
+      "eyebrow": "",
+      "headline": "Turn your ideas into art with Generative AI",
+      "body": "Bring your ideas to life with your TV’s built-in generative AI. Write out a prompt to create unique artworks, and even send them to your phone via LG Link to enjoy them anywhere.22)\nLG Mini RGB evo AI MRGB9M with LG Gallery+ Diverse Art Content displays a Vincent van Gogh landscape artwork on a wall-mounted screen in a gallery-style living space, accompanied by a canvas and additional framed art nearby.",
+      "disclaimers": [],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-25-lg-gallery-plus-personalization-paid-bgm-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED’s LG Gallery+ with BGM and Music Lounge shows the “Forest Evening” forest lake scene on screen, with a visible music lounge UI panel for mood music, Bluetooth playback, and controls.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 18502,
+            "left": -5600
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-54",
+      "order": 54,
+      "eyebrow": "BGM with Music Lounge",
+      "headline": "Set the right vibe with music",
+      "body": "Create the right atmosphere with music that matches your visuals. Use music recommended according to your preferences or connect via Bluetooth to play your own tracks.\nPlay Video\nBGM with Music Lounge\nGallery Curation\nGenerative AI Artwork\nPreviousNextPausePlay",
+      "disclaimers": [],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-26-lg-gallery-plus-my-photo-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED shows a Google Photos grid of family snapshots, while a phone displays an album list with the Family Trip album toggle switched on.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1920,
+            "top": 18526,
+            "left": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-55",
+      "order": 55,
+      "eyebrow": "My Photos",
+      "headline": "Easily access Google Photos and showcase your memories",
+      "body": "Conveniently connect your Google Photos account to your TV just by using your phone. Effortlessly personalise your space by using content from your own photo library.23)\nLG Mini RGB evo AI MRGB9M shows a Google Photos grid of family snapshots, while a phone displays an album list with the Family Trip album toggle switched on.\nPlay videoPause video\nInformation Board",
+      "disclaimers": [],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-27-lg-gallery-plus-inforamtion-board-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED is wall-mounted on a green wall above a red console, displaying an information board including weather, sports scores, TV Scheduler, and Home Hub.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1920,
+            "top": 18574,
+            "left": 0
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/video/lg-qned-evo-qned85-2026-feature-27-lg-gallery-plus-inforamtion-board-m.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-56",
+      "order": 56,
+      "eyebrow": "",
+      "headline": "Stay updated with an all-in-one personalised dashboard",
+      "body": "See important information at a glance. Get weather updates, sports alerts, view your Google Calendar, and even set up notifications for Home Hub, your viewing reservations and more.\nPlay videoPause video\nGallery Mode",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-28-lg-gallery-plus-smart-paid-gallery-mode-d.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED looks powered down on the wall, then Gallery Mode turns on, shows information, and cycles through different artworks.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 464,
+            "top": 18646,
+            "left": 240
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/video/lg-qned-evo-qned85-2026-feature-28-lg-gallery-plus-smart-paid-gallery-mode-d.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-57",
+      "order": 57,
+      "eyebrow": "",
+      "headline": "Switch from TV to artwork seamlessly",
+      "body": "With Gallery Mode turned on, your TV can continue to save energy even while displaying your selected artworks adding a touch of style and elegance to your space.\nPlay videoPause video\nAuto Brightness Control",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-28-lg-gallery-plus-smart-paid-auto-brightness-d.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED is wall-mounted in a bright room, showing a colourful floral-and-fruit artwork in Gallery Mode while brightness control adjusts for optimal viewing in any light.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 464,
+            "top": 18646,
+            "left": 728
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/video/lg-qned-evo-qned85-2026-feature-28-lg-gallery-plus-smart-paid-auto-brightness-d.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-58",
+      "order": 58,
+      "eyebrow": "",
+      "headline": "Optimal brightness in any light",
+      "body": "Brightness Control automatically adjusts the screen output based on ambient lighting, ensuring clear and comfortable viewing in any environment.24)\nPlay videoPause video\nMotion Sensor",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-28-lg-gallery-plus-smart-motion-sensor-d.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED is wall-mounted with the screen off, then turns on as a person approaches, using motion sensors to display an abstract swirling artwork.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 464,
+            "top": 18646,
+            "left": 1216
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/video/lg-qned-evo-qned85-2026-feature-28-lg-gallery-plus-smart-motion-sensor-d.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-59",
+      "order": 59,
+      "eyebrow": "",
+      "headline": "Responsive to your presence",
+      "body": "Motion detection lets your TV respond intelligently, switching modes depending on whether or not you're nearby.25)",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-60",
+      "order": 60,
+      "eyebrow": "LG Channels",
+      "headline": "Endless entertainment for free",
+      "body": "LG Channels brings together diverse content from live and on-demand platforms into a single hub, making it easier than ever to find content you love.26)\nSmart Connectivity",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/desktop/lg-qned-evo-qned85-2026-feature-29-lg-channels-d.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED home screen navigates into the LG Channels interface, showcasing free live TV channels, movies, and exclusive content. The video highlights direct access to hundreds of entertainment options.",
+          "title": "Play videoPause video",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 732,
+            "top": 19124,
+            "left": 948
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-30-smart-connectivity-gb-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with Smart Connectivity displays the Home Hub interface on screen, showing connections to Google Home and LG ThinQ, with panels for TV, devices, and apps in a single control layout.",
+          "title": "Play videoPause video",
+          "matchedBy": "card-pair",
+          "geometry": {
+            "renderWidth": 1920,
+            "top": 19322,
+            "left": 0
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/video/lg-qned-evo-qned85-2026-feature-29-lg-channels-d.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/video/lg-qned-evo-qned85-2026-feature-30-smart-connectivity-gb-m.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-61",
+      "order": 61,
+      "eyebrow": "",
+      "headline": "Home Hub, your all-in-one smart home platform",
+      "body": "Home Hub brings all your smart devices together. Seamlessly connect, control, and interact with your home IoT devices across Google Home and more.27)",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-62",
+      "order": 62,
+      "eyebrow": "",
+      "headline": "LG Sound Suite elevates every scene with fuller surround",
+      "body": "Sound Suite with Dolby Atmos Flex Connect",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    },
+    {
+      "id": "sec-63",
+      "order": 63,
+      "eyebrow": "",
+      "headline": "Immersive audio tuned to your preferences",
+      "body": "LG TV's DAFC(Dolby Atmos Flex Connect) optimises audio based on speaker placement, delivering a tailored, deeply immersive surround experience wherever your speakers are positioned.28)\nPlay videoPause video",
+      "disclaimers": [],
+      "layout": {
+        "type": "full-width",
+        "imgsPerRow": 1
+      },
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-31-sound-suite-with-dolby-m.jpg",
+          "alt": "LG QNED evo AI QNED85 Mini LED with Sound Suite shows a wide room where the TV and wireless speakers are freely positioned, conveying immersive Dolby Atmos audio optimized for flexible speaker placement.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 19874,
+            "left": 160
+          }
+        },
+        {
+          "type": "image",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/feature/mobile/lg-qned-evo-qned85-2026-feature-32-accessibility-m.jpg",
+          "alt": "A family with children and their grandparents sits together on a sofa in a bright living room, holding a remote while watching TV.",
+          "matchedBy": "doc-order-trailing",
+          "geometry": {
+            "renderWidth": 1600,
+            "top": 19986,
+            "left": 160
+          }
+        },
+        {
+          "type": "video",
+          "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/video/lg-qned-evo-qned85-2026-feature-31-sound-suite-with-dolby-d.mp4",
+          "poster": "",
+          "matchedBy": "file-stem"
+        }
+      ]
+    },
+    {
+      "id": "sec-64",
+      "order": 64,
+      "eyebrow": "Accessibility",
+      "headline": "Assistive features make viewing more inclusive",
+      "body": "LG TVs are designed with accessibility in mind with features such as Colour Adjustment Filter, a Sign Language Guide, and direct connectivity support for audio assistive devices.\nDisclaimer\n\\\\* The images above in this product detail page are for illustrative purposes only. Refer to the gallery images for a more accurate representation.\n\\\\* Specifications and features vary by region, model, and size.\n\\\\* Service availability varies by region and country.\n\\\\* Personalised services may vary depending on the policies of the 3rd party application.\n\\\\* LG Account and acceptance of relevant Terms & Conditions is required to access network-based smart services and features, including streaming apps. Without LG Account, only external device connections (e.g. via HDMI) and terrestrial/over-the-air TV (only for TVs with tuners) is available. There is no fee to create LG Account.\n1) \\* Maximum screen size may vary by model and region.\n2) \\* QNED evo features a wider colour gamut as compared to QNED.\n3) \\* Display Colour Gamut Volume (CGV) is equivalent or exceeds the CGV of the DCI-P3 colour space as verified independently by Intertek.\n4) \\* Compared to 2025 alpha 8 AI Processor 4K Gen2 based on internal spec comparison.\n5) \\* AI Picture Pro will work with any copyright-protected content on OTT services.\n\\\\* Images are upscaled to up to 4K-like quality. Results may vary depending on the source resolution.\n6) \\* Must be activated through the Sound Mode menu. And sound may vary according to the listening environment.\n7) \\* Sound may vary according to the listening environment.\n8) \\* AI Search (Copilot) is available on webOS Re:New Program-enabled OLED/MRGB/QNED/NANO 4K UHD models, including models released from 2022 onwards.\n\\\\* An internet connection is required, and partner AI services may be subject to change or require a subscription.\n\\\\* This feature may vary by region and model and is not available in countries where LLM support is not provided.\n9) \\* Some of these features may not be supported in certain regions or models.\n\\\\* Menus displayed may be different upon release.\n\\\\* Keyword recommendations vary according to the app and time of day.\n\\\\* ‘In This Scene’ card is available in countries that support EPG(Electronic Program Guide).\n\\\\* ‘On Now’ card is not available on Netflix and Other CP(Content Provider) apps, so the card will not be displayed.\n\\\\* ‘Generative AI’ card is available in certain regions or models.\n10) \\* Reduced or limited content may be shown depending on region and network connectivity.\n\\\\* Voice ID support may vary by region and country and is available on OLED, QNED, NANO 4K UHD TVs released from 2024 onwards, as well as on MRGB and FHD TVs released from 2026.\n\\\\* It works only with apps that support the Voice ID account.\n\\\\* The lock can be unlocked by someone with a similar voice, and if the voice changes due to health reasons or other factors, recognition may not work effectively.\n\\\\* The widgets provided may vary by country and are subject to change or discontinuance without prior notice.\n\\\\* My Page applies to 2026 OLED, MRGB, QNED, NANO 4K UHD TVs.\n11) \\* Internet connection required.\n\\\\* It is possible to link the AI Chatbot to customer service.\n\\\\* In countries where NLP is not supported, voice-based app access and usage may not be available.\n12) \\* webOS Re:New is a software upgrade program and is available on select models only. The number of upgrades and Re:New support duration may vary by product, model, or region.\n\\\\* Upgrade schedule, as well as features, applications, and services may vary by model and region.\n\\\\* Available features, contents and services are subject to change without notice and may vary by product, model or region.\n13) \\* Provides quick access to the TV's AI features but has no built-in AI processing.\n\\\\* AI Magic Remote's design, availability and functions may vary by region and supported language, even for the same model.\n\\\\* Some features may require an internet connection.\n\\\\* AI Voice Recognition is only provided in countries that support NLP in their native language.\n14) \\* ‘In This Scene’ card is available in countries that support EPG.\n\\\\* The scope of support may vary by country.\n\\\\* Information provided by AI Concierge is for general informational purposes only and may not be accurate. LG assumes no responsibility or liability for any actions or decisions made in reliance on such information.\n15) \\* AMD FreeSync Premium validation based on low input lag, stutter reduction, and flicker-free performance.\n\\\\* 144Hz is the maximum refresh rate based on the variable refresh rate (VRR) and only works with inputs that support 144Hz.\n\\\\* HGiG is a volunteer group of companies from the game and TV display industries that meet to specify and make available for the public guidelines to improve consumer gaming experiences in HDR.\n\\\\* Support for HGiG may vary by country.\n\\\\* In Motion Booster mode, resolution may decrease to ensure optimal performance.\n\\\\* Motion Booster 288 delivers up to 288Hz refresh rate at optimised Full HD resolution for ultra-smooth gameplay.\n16) \\* Bluetooth Ultra Low Latency only applies to select 2026 LG TVs. ULL controller functionality is supported only when connected to compatible devices.\n\\\\* In ULL mode, only one controller (gamepad) can be connected. Use of other Bluetooth devices may be affected.\n\\\\* For best performance, Ethernet or 5GHz Wi-Fi connection is recommended.\n\\\\* Gaming controller is sold separately.\n18) \\* FILMMAKER MODE is a trademark of UHD Alliance, Inc.\n\\\\* FILMMAKER MODE auto starts on AppleTV+ and Amazon Prime video app.\n19) \\* Available content may vary by region and is subject to change.\n\\\\* Service is available through a paid subscription. One-month free trial available with login and payment method registration. Subscription automatically renews to a paid plan unless canceled before the trial ends. Subscription may be cancelled at any time during the trial period.\n21) \\* 16 different profiles are provided, with content recommendations generated by matching data to each type of profile.\n22) \\* Generative AI feature is only available in certain regions or models.\n\\\\* A subscription includes 20 credits per month. One credit lets you generate one image.\n\\\\* Depending on device performance, file size, and network speed, LG Link's file transfer speed may vary.\n\\\\* Some file extensions may not be supported by LG Link depending on your device specifications.\n\\\\* LG Link can use an external storage device when used according to the device memory specifications.\n23) \\* The feature works when logged in to your Google Photos account and you have at least 10 photos in the app.\n24) \\* Brightness sensors may vary by model.\n25) \\* Motion sensors are only available on the W6 and G6 models only.\n26) \\* Support for certain LG Channels varies by region.\n27) \\* LG supports 'Matter' Wi-Fi devices. 'Matter' supported services and features may vary depending on the connected devices. Initial connection for ThinQ and Matter should be via ThinQ mobile app.\n28) \\* The Sound Suite model matched may vary depending on country, region, and TV model.\n\\\\* Soundbar can be purchased separately.\n\\\\* Sound Mode Control may vary by model.\n\\\\* When connected to a Soundbar, up to 13.1.7 channels are supported. Supported channel configurations may vary depending on the Soundbar model.\n\\\\* Please note that the service may not be available at the time of purchase. A network connection is required for updates.\n\\\\* LG TV remote usage is limited to certain features only.\nPrint",
+      "disclaimers": [],
+      "layout": {
+        "type": "single",
+        "imgsPerRow": 0
+      },
+      "assets": []
+    }
+  ],
+  "unassignedAssets": [
+    {
+      "type": "video",
+      "url": "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/video/lg-qned-evo-qned85-2026-feature-09-ai-tv-ai-picture-pro-ultra-big-d.mp4",
+      "poster": "",
+      "matchedBy": "unassigned",
+      "variants": [
+        "https://www.lg.com/content/dam/channel/wcms/1-channel/uk/ms/lgcom/2026/tv-audio-video/tv/qned-evo/qned85/gp1/video/lg-qned-evo-qned85-2026-feature-09-ai-tv-ai-picture-pro-ultra-big-m.mp4"
+      ]
+    },
+    {
+      "type": "video",
+      "url": "https://www.lg.com/content/dam/lge/demo/dummy/media_asklg.mp4",
+      "poster": "",
+      "matchedBy": "unassigned"
+    }
+  ],
+  "review": {
+    "imageCoverage": {
+      "inMarkdown": 90,
+      "captured": 87,
+      "coveragePct": 97,
+      "missing": [
+        "https://www.lg.com/content/dam/lge/common/payment-icons/icon-paypal-black.png",
+        "https://www.lg.com/content/dam/lge/common/payment-icons/icon-raylo-new-mini.png",
+        "https://www.lg.com/content/dam/channel/wcms/uk/images/fridge-freezers/gbv5240cep/gallery/350x350/01_F-VB_203_Better_GW-B509FQ7C_GBV5240CEP_EP_Front.jpg"
+      ]
+    },
+    "verbatimFails": [
+      {
+        "id": "sec-02",
+        "field": "headline",
+        "text": "Why LG QNED evo \\| Mini LED?"
+      }
+    ],
+    "emptySections": [
+      {
+        "id": "sec-09",
+        "headline": "Why LG AI TV?"
+      },
+      {
+        "id": "sec-37",
+        "headline": "Step into a world tuned for winning"
+      },
+      {
+        "id": "sec-45",
+        "headline": "Design, made to elevate your space"
+      },
+      {
+        "id": "sec-47",
+        "headline": "Discover limitless masterpieces with LG Gallery+"
+      }
+    ],
+    "unassignedCount": 2
+  }
+}
