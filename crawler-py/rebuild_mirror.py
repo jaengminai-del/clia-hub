@@ -16,7 +16,7 @@ from pathlib import Path
 
 from component_parser import parse_html_components
 from component_mirror import build_from_components, _origin_from_slug
-from make_mirror import drop_duplicate_sections, drop_ui_control_media, sanitize_texts, tag_media_roles, upgrade_media_resolution
+from make_mirror import drop_duplicate_sections, drop_ui_control_media, extract_gallery, sanitize_texts, tag_media_roles, upgrade_media_resolution
 
 ROOT = Path(__file__).resolve().parent
 
@@ -38,6 +38,9 @@ def rebuild(d: Path) -> str:
             (d / "components.json").write_text(json.dumps(comps, ensure_ascii=False, indent=2), encoding="utf-8")
 
     dup = drop_duplicate_sections(mirror)
+    gal = extract_gallery(html, _origin_from_slug(d.name))
+    if gal:
+        mirror["_gallery"] = gal
     ui = drop_ui_control_media(mirror, html)
     if mode == "rebuild":           # 파이프라인 Step7 후처리와 동일 (filter 모드는 텍스트·URL 불변)
         sanitize_texts(mirror)
@@ -46,7 +49,7 @@ def rebuild(d: Path) -> str:
 
     shutil.copyfile(mfp, d / "mirror.json.pre-rebuild.bak")
     mfp.write_text(json.dumps(mirror, ensure_ascii=False, indent=2), encoding="utf-8")
-    return f"{mode}: 섹션 {len(old.get('sections', []))} → {len(mirror['sections'])}, 중복 {dup}, UI 이미지 제외 {ui}"
+    return f"{mode}: 섹션 {len(old.get('sections', []))} → {len(mirror['sections'])}, 중복 {dup}, UI 이미지 제외 {ui}, 갤러리 {len(mirror.get('_gallery', []))}장"
 
 
 def main():

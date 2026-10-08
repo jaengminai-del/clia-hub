@@ -1004,6 +1004,62 @@ def drop_ui_control_media(mirror: dict, html: str) -> int:
     return removed
 
 
+def extract_gallery(html: str, origin: str = "https://www.lg.com") -> list:
+    """LG.com 제품 갤러리(.c-gallery — 상단 바이박스 옆 대표 이미지 영역)를 화면 순서대로 추출.
+
+    큰 이미지 슬라이드(.c-gallery__item--display-image)를 슬라이드 번호(data-swiper-slide-index)
+    순서로 모으고, 루프용 복제 슬라이드(같은 번호)는 한 번만 쓴다. 썸네일(180px)·갤러리 밖
+    이미지(인증 로고 등)는 포함하지 않는다. 갤러리를 못 찾으면 빈 리스트.
+    """
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(html or "", "html.parser")
+    gal = soup.select_one(".c-gallery")
+    if gal is None:
+        return []
+
+    def abs_url(u: str) -> str:
+        u = (u or "").strip().split(" ")[0]
+        if not u or u.startswith("data:"):
+            return ""
+        if u.startswith("//"):
+            return "https:" + u
+        if u.startswith("/"):
+            return origin.rstrip("/") + u
+        return u
+
+    def img_url(item) -> str:
+        img = item.find("img")
+        src = (img.get("src") or img.get("data-src") or "") if img else ""
+        if not src:
+            for so in item.find_all("source"):
+                src = (so.get("srcset") or so.get("data-srcset") or "").split(",")[0]
+                if src:
+                    break
+        return abs_url(src)
+
+    items = gal.select(".c-gallery__item--display-image")
+    by_index, ordered = {}, []
+    for it in items:
+        slide = it if it.has_attr("data-swiper-slide-index") else it.find_parent(attrs={"data-swiper-slide-index": True})
+        idx = slide.get("data-swiper-slide-index") if slide is not None else None
+        url = img_url(it)
+        if not url or "lg.com" not in url:
+            continue
+        if idx is not None:
+            by_index.setdefault(int(idx), url)
+        else:
+            ordered.append(url)
+    urls = [by_index[k] for k in sorted(by_index)] if by_index else ordered
+    seen, out = set(), []
+    for u in urls:
+        k = _dam_path_key(u)   # 전체 DAM 경로 기준 (LG는 폴더만 다르고 파일명이 같은 경우가 많음)
+        if k in seen:
+            continue
+        seen.add(k)
+        out.append({"pc_url": u, "mobile_url": "", "unified_url": "", "type": "image", "role": "content"})
+    return out
+
+
 def _section_signature(s: dict):
     """섹션 동일성 키 — 이미지 에셋 집합 + 정규화한 텍스트. 둘 다 같아야 같은 컨텐츠."""
     imgs = tuple(sorted(_dam_path_key(_best_url(m)) for m in (s.get("media") or []) if _best_url(m)))

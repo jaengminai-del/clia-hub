@@ -32,7 +32,7 @@ from dotenv import load_dotenv
 from PIL import Image
 from pydantic import BaseModel, Field
 
-from make_mirror import to_mirror, order_by_document, tag_media_roles, ensure_product_gallery, upgrade_media_resolution, rehome_by_md_anchor, merge_same_component, pair_title_image, sanitize_texts, _best_url, _is_disclaimer_section, drop_ui_control_media, drop_duplicate_sections
+from make_mirror import to_mirror, order_by_document, tag_media_roles, ensure_product_gallery, upgrade_media_resolution, rehome_by_md_anchor, merge_same_component, pair_title_image, sanitize_texts, _best_url, _is_disclaimer_section, drop_ui_control_media, drop_duplicate_sections, extract_gallery
 from component_parser import ComponentParser, parse_html_components, LayoutType
 from text_filters import is_image_description
 from component_mirror import build_from_components
@@ -1230,6 +1230,11 @@ def main():
     if mirror is None:
         mirror = to_mirror(result, pre_md)
     print(f"→ [Step7] mirror.json 생성 (섹션 {len(mirror['sections'])})")
+    # 제품 갤러리: LG.com 상단 갤러리(.c-gallery)를 화면 순서 그대로 (못 찾으면 기존 값 유지)
+    _gal = extract_gallery(datasets["pc"]["html"], _cf_origin)
+    if _gal:
+        mirror["_gallery"] = _gal
+        print(f"   ✓ 제품 갤러리 {len(_gal)}장 (LG.com 갤러리 영역 순서)")
 
     # Step 7.5 — mirror 시각 QA: 최종 레이아웃을 PC 스크린샷과 직접 대조하여
     #            화면과 동일해지도록 배치(미디어 이동·섹션 순서)만 교정. 텍스트/URL 불변.
