@@ -1,0 +1,9 @@
+.git
+.env
+.env.*
+!.env.example
+node_modules
+crawler-py/.venv
+**/__pycache__
+*.log
+.DS_Store

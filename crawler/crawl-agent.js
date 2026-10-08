@@ -401,7 +401,7 @@ async function collectGeometry(url) {
   const puppeteer = require('puppeteer');
   const browser = await puppeteer.launch({
     headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled'],
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-blink-features=AutomationControlled'],
   });
   try {
     const page = await browser.newPage();

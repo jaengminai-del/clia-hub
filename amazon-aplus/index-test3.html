@@ -5213,6 +5213,9 @@ function pcgToFeatures(pcg) {
   return feats;
 }
 
+// 서버 주소: 서버를 통해 열었으면 그 서버(클라우드 배포 포함), 파일로 열었으면 로컬 서버(3001)
+const APLUS_API = /^https?:$/.test(location.protocol) ? location.origin : 'http://localhost:3001';
+
 async function analyzePDP() {
   const urlInput = document.getElementById('pdpUrlInput');
   const btn      = document.getElementById('btnGenerate');
@@ -5239,7 +5242,7 @@ async function analyzePDP() {
       // 크롤러 API(FastAPI) 위임 — 실제 크롤 트리거 (캐시 있으면 즉시).
       // 최대 18분(첫 크롤 45s~3min, 캐시 0s)
       status.textContent = 'Crawling via CLIA Crawler API... (cached: instant, first run: ~1–3min)';
-      const rv = await fetch('http://localhost:3001/api/pcg-vision', {
+      const rv = await fetch(APLUS_API + '/api/pcg-vision', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url }),
@@ -5262,7 +5265,7 @@ async function analyzePDP() {
       const ctrl1 = new AbortController();
       const t1 = setTimeout(() => ctrl1.abort(), 300000); // 첫 크롤 최대 5분
       status.textContent = 'Crawling via PCG agent... (cached: ~30s, first run: 2–4min)';
-      const res1 = await fetch('http://localhost:3001/api/pcg', {
+      const res1 = await fetch(APLUS_API + '/api/pcg', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url, cache: true, geometry: true }),
@@ -5281,7 +5284,7 @@ async function analyzePDP() {
       status.textContent = 'Crawling LG.com page... (30–60s)';
       const ctrl = new AbortController();
       const t = setTimeout(() => ctrl.abort(), 120000);
-      const res = await fetch('http://localhost:3001/api/analyze', {
+      const res = await fetch(APLUS_API + '/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url }),
@@ -5770,7 +5773,7 @@ async function loadProxiedImage(url, targetW, targetH) {
     blob = await response.blob();
   } else {
     // 외부 URL — CORS 우회를 위해 서버 프록시 경유
-    const proxyUrl = `http://localhost:3001/api/proxy-image?url=${encodeURIComponent(url)}`;
+    const proxyUrl = `${APLUS_API}/api/proxy-image?url=${encodeURIComponent(url)}`;
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 20000); // 20초 타임아웃
     const response = await fetch(proxyUrl, { signal: ctrl.signal }).finally(() => clearTimeout(t));
@@ -5863,7 +5866,7 @@ async function downloadImages() {
 
   // Fix 4: 서버 상태 먼저 확인
   try {
-    const hc = await fetch('http://localhost:3001/api/health', { signal: AbortSignal.timeout(3000) });
+    const hc = await fetch(APLUS_API + '/api/health', { signal: AbortSignal.timeout(3000) });
     if (!hc.ok) throw new Error('not ok');
   } catch (e) {
     alert('⚠️ A server is required to download images.\n\nRun the following command in your terminal:\n\ncd "/Users/kangjaeyeong/Desktop/AI Study/lg-web-project"\nnode server.js\n\nThen try again.');
@@ -5958,7 +5961,7 @@ async function downloadImages() {
   btn.textContent = origText;
 
   if (count === 0) {
-    alert('No images to process.\nPlease make sure server.js is running (http://localhost:3001)');
+    alert('No images to process.\nPlease make sure the CLIA server is running (' + APLUS_API + ')');
     return;
   }
 

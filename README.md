@@ -17,7 +17,11 @@ LG.com 제품 페이지(PDP)를 한 번 크롤링해서 **eBay · Amazon A+ · S
 | `crawler/` | Firecrawl 기반 보조 크롤러 |
 | `css/`, `fonts/` | LG EI Headline / LG EI Text 폰트 |
 
-## 실행
+## 클라우드 배포
+
+**[DEPLOY.md](DEPLOY.md)** 참고 — `Dockerfile`이 Node.js·Python·Chromium을 모두 설치하므로, 이 저장소를 Docker 지원 클라우드(Railway·Render·Cloud Run)에 연결하고 API 키만 환경 변수로 넣으면 됩니다.
+
+## 로컬 실행
 
 ```bash
 npm install
