@@ -214,12 +214,35 @@ class ComponentParser:
         # c-wrapper 클래스를 가진 모든 요소 찾기
         wrappers = self.soup.find_all(class_=re.compile(r'c-wrapper'))
 
+        # 캐러셀(Swiper) 루프 모드는 무한 회전처럼 보이도록 슬라이드를 복제해 앞뒤에 붙인다.
+        # 복제본은 원본과 id·data-swiper-slide-index·이미지·문구가 모두 같으므로
+        # (캐러셀, 슬라이드 번호)가 이미 나온 슬라이드는 건너뛰고, 슬라이드는 원래 순서로 정렬한다.
+        seen_slides = set()
+        carousel_slots = {}   # 캐러셀 → 그 캐러셀 슬라이드들이 차지한 components 위치 목록
         for wrapper in wrappers:
+            slide = wrapper.find_parent(attrs={'data-swiper-slide-index': True})
+            carousel = slide.find_parent(class_=re.compile(r'\bswiper\b|cmp-carousel')) if slide else None
+            if slide is not None:
+                key = (id(carousel), slide.get('data-swiper-slide-index'))
+                if key in seen_slides:
+                    continue
+                seen_slides.add(key)
             component = self._parse_component(wrapper)
             if component:
-                component.dom_index = len(self.components)  # DOM 등장 순번 부여
+                if slide is not None:
+                    carousel_slots.setdefault(id(carousel), []).append(
+                        (len(self.components), int(slide.get('data-swiper-slide-index') or 0)))
                 self.components.append(component)
 
+        # 같은 캐러셀의 슬라이드는 슬라이드 번호 순서(1→2→3)로 재배치 (루프 모드는 DOM 순서가 회전돼 있음)
+        for slots in carousel_slots.values():
+            positions = [pos for pos, _ in slots]
+            ordered = [self.components[pos] for pos, _ in sorted(slots, key=lambda x: x[1])]
+            for pos, comp in zip(positions, ordered):
+                self.components[pos] = comp
+
+        for i, component in enumerate(self.components):
+            component.dom_index = i  # DOM 등장 순번 부여
         return self.components
 
     def _parse_component(self, element: Tag) -> Optional[ParsedComponent]:

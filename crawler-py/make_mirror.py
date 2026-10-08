@@ -957,8 +957,8 @@ def sanitize_texts(mirror: dict) -> int:
     return changed
 
 
-def _asset_key(u: str) -> str:
-    """같은 에셋 판정용 키 — 도메인·쿼리·렌디션 접미(/jcr:content/...)를 뗀 DAM 경로."""
+def _dam_path_key(u: str) -> str:
+    """UI 컨트롤 이미지 판정용 키 (위의 _asset_key 와 별개 — 이름이 겹쳐 덮어쓰던 문제 수정) — 도메인·쿼리·렌디션 접미(/jcr:content/...)를 뗀 DAM 경로."""
     u = re.sub(r"^https?://[^/]+", "", (u or "").split("?")[0])
     return u.split("/jcr:content")[0].lower()
 
@@ -977,7 +977,7 @@ def ui_control_asset_keys(html: str) -> set:
         src = el.get("src") or el.get("data-src") or (el.get("srcset") or "").split(",")[0].strip().split(" ")[0]
         if not src or src.startswith("data:"):
             continue
-        (inside if ComponentParser._is_ui_control_media(el) else outside).add(_asset_key(src))
+        (inside if ComponentParser._is_ui_control_media(el) else outside).add(_dam_path_key(src))
     return inside - outside
 
 
@@ -990,17 +990,42 @@ def drop_ui_control_media(mirror: dict, html: str) -> int:
     removed = 0
     for bucket in ("sections", "_feature_cards"):
         for s in mirror.get(bucket, []) or []:
-            kept = [m for m in s.get("media", []) if _asset_key(_best_url(m)) not in keys]
+            kept = [m for m in s.get("media", []) if _dam_path_key(_best_url(m)) not in keys]
             removed += len(s.get("media", [])) - len(kept)
             s["media"] = kept
     for bucket in ("_gallery", "unassigned_media"):
         if mirror.get(bucket):
             before = len(mirror[bucket])
-            mirror[bucket] = [m for m in mirror[bucket] if _asset_key(_best_url(m)) not in keys]
+            mirror[bucket] = [m for m in mirror[bucket] if _dam_path_key(_best_url(m)) not in keys]
             removed += before - len(mirror[bucket])
     mirror["sections"] = [s for s in mirror.get("sections", [])
                           if (s.get("text", "").strip() or s.get("media"))]
     renumber(mirror)
+    return removed
+
+
+def _section_signature(s: dict):
+    """섹션 동일성 키 — 이미지 에셋 집합 + 정규화한 텍스트. 둘 다 같아야 같은 컨텐츠."""
+    imgs = tuple(sorted(_dam_path_key(_best_url(m)) for m in (s.get("media") or []) if _best_url(m)))
+    text = re.sub(r"\s+", " ", (s.get("text") or "")).strip().lower()
+    specs = tuple((x.get("label"), x.get("value")) for x in (s.get("specs") or []) if x)
+    return imgs, text, specs
+
+
+def drop_duplicate_sections(mirror: dict) -> int:
+    """이미지와 텍스트가 모두 같은 섹션은 처음 것만 남긴다 (캐러셀 복제 슬라이드 등).
+    이미지만 같거나 텍스트만 같은 섹션은 다른 컨텐츠일 수 있으므로 유지."""
+    seen, kept = set(), []
+    for s in mirror.get("sections", []):
+        sig = _section_signature(s)
+        if (sig[0] or sig[1] or sig[2]) and sig in seen:
+            continue
+        seen.add(sig)
+        kept.append(s)
+    removed = len(mirror.get("sections", [])) - len(kept)
+    if removed:
+        mirror["sections"] = kept
+        renumber(mirror)
     return removed
 
 

@@ -744,6 +744,17 @@ def build_ebay_html(mirror: dict, fragment: bool = False) -> str:
     # ── 전처리 1: 제품 갤러리 스킵 (eBay 컨텐츠에 갤러리 썸네일 미포함 원칙)
     sections = [s for s in sections if s.get("layout_type") != "product_gallery"]
 
+    # ── 전처리 1-1: 이미지·텍스트가 모두 같은 섹션은 한 번만 (캐러셀 루프 복제 슬라이드 등)
+    from make_mirror import _section_signature
+    _seen, _uniq = set(), []
+    for s in sections:
+        sig = _section_signature(s)
+        if (sig[0] or sig[1] or sig[2]) and sig in _seen:
+            continue
+        _seen.add(sig)
+        _uniq.append(s)
+    sections = _uniq
+
     # ── 전처리 2: 연속된 '단일 이미지 grid_N' 섹션 병합 → 한 행 카드(card_row)
     #    (lg.com에선 한 행 비교 카드인데 크롤 구조상 섹션이 갈라지는 케이스 복원)
     #    DOM 선언 컬럼 수(column_count)가 있으면 그 수만큼씩 청크로 나눠 정확히

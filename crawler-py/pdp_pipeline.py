@@ -32,7 +32,7 @@ from dotenv import load_dotenv
 from PIL import Image
 from pydantic import BaseModel, Field
 
-from make_mirror import to_mirror, order_by_document, tag_media_roles, ensure_product_gallery, upgrade_media_resolution, rehome_by_md_anchor, merge_same_component, pair_title_image, sanitize_texts, _best_url, _is_disclaimer_section, drop_ui_control_media
+from make_mirror import to_mirror, order_by_document, tag_media_roles, ensure_product_gallery, upgrade_media_resolution, rehome_by_md_anchor, merge_same_component, pair_title_image, sanitize_texts, _best_url, _is_disclaimer_section, drop_ui_control_media, drop_duplicate_sections
 from component_parser import ComponentParser, parse_html_components, LayoutType
 from text_filters import is_image_description
 from component_mirror import build_from_components
@@ -1229,6 +1229,10 @@ def main():
             print(f"   ✓ 타이틀-이미지 페어링: {_pt}건 (파편 텍스트 → 진짜 타이틀)")
     # UI 컨트롤(탭 버튼 아이콘·썸네일, 버튼, # 앵커) 전용 이미지 제거 — 클릭해서 콘텐츠로
     # 이동/전환시키는 UI라 콘텐츠가 아니다. Gemini 경로로 유입된 경우까지 여기서 일괄 차단.
+    # 이미지·텍스트가 모두 같은 섹션 제거 (캐러셀 루프 복제 슬라이드 등)
+    _dup = drop_duplicate_sections(mirror)
+    if _dup:
+        print(f"   ✓ 중복 섹션 제거: {_dup}건 (이미지·텍스트 동일)")
     _ui = drop_ui_control_media(mirror, datasets["pc"]["html"])
     if _ui:
         print(f"   ✓ UI 컨트롤 이미지 제외: {_ui}건 (탭 아이콘·썸네일 등)")
