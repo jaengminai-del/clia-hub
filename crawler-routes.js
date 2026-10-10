@@ -18,6 +18,7 @@ const fs = require('fs');
 const path = require('path');
 const { spawn, execFile } = require('child_process');
 const crypto = require('crypto');
+const store = require('./crawl-store'); // 버킷 동기화 (설정 없으면 no-op)
 
 const CRAWLER_DIR = path.join(__dirname, 'crawler-py');
 const OUT_DIR = path.join(CRAWLER_DIR, 'out');
@@ -69,7 +70,13 @@ function launchPipeline(jobId, url, usePro, geminiKey, fullAi) {
   fs.closeSync(logFd);
   const job = jobs.get(jobId);
   Object.assign(job, { slug, out, proc, exited: false });
-  proc.on('exit', () => { job.exited = true; });
+  proc.on('exit', (code) => {
+    job.exited = true;
+    // 크롤 결과를 버킷에 보관 (재배포해도 유지)
+    if (code === 0 && fs.existsSync(path.join(out, 'mirror.json'))) {
+      store.pushProduct(slug).then((n) => n && console.log(`[crawl-store] ${slug}: ${n}개 파일 업로드`));
+    }
+  });
   proc.on('error', (e) => { job.exited = true; job.spawnError = e.message; });
 }
 
@@ -229,6 +236,7 @@ function generateGeo(slug) {
       try {
         const geo = { ...JSON.parse(stdout), generated_at: Date.now() / 1000 };
         fs.writeFileSync(path.join(dir, 'geo.json'), JSON.stringify(geo, null, 2));
+        store.pushPaths([path.join(dir, 'geo.json')]);
         resolve(geo);
       } catch (e) { reject(new Error('invalid GEO output: ' + e.message)); }
     });

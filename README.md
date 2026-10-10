@@ -13,6 +13,7 @@ LG.com 제품 페이지(PDP)를 한 번 크롤링해서 **eBay · Amazon A+ · S
 | `amazon-aplus/` | Amazon A+ 빌더 — Feature Card 7개 선택 → A+ 모듈 자동 구성 |
 | `shared/` | 공용 UI 스타일(`clia-ui.css`, LG Design System v3), 빌더 번역 엔진(`clia-i18n.js`), LG 로고 |
 | `server.js`, `crawler-routes.js` | Node 서버 (기본 :3001) — 정적 파일 + API |
+| `crawl-store.js` | 크롤링 결과 ↔ S3 호환 버킷 동기화 (서버 시작 시 내려받기, 크롤 후 올리기, `node crawl-store.js push`) |
 | `crawler-py/` | LG.com PDP 크롤러 (Python) + CCG 스타일 렌더러(`ebay_builder.py`) + 크롤링 캐시(`out/`) |
 | `crawler/` | Firecrawl 기반 보조 크롤러 |
 | `css/`, `fonts/` | LG EI Headline / LG EI Text 폰트 |

@@ -2364,6 +2364,7 @@ app.post('/api/pcg', async (req, res) => {
     console.log(`[pcg] crawl 시작: ${url} (cache:${cache}, geometry:${geometry})`);
     const pcg = await crawlToPCG(url, { useCache: !!cache, geometry: !!geometry });
     console.log(`[pcg] 완료: 섹션 ${pcg.sections.length}개`);
+    require('./crawl-store').pushCrawlerOut(url.replace(/https?:\/\//, '').replace(/[^\w]+/g, '-').replace(/-+$/, ''));
     res.json(pcg);
   } catch (e) {
     console.error('/api/pcg error:', e.message);
@@ -2692,4 +2693,12 @@ app.listen(PORT, () => {
   console.log(`\n✅ A+ Content Generator Server`);
   console.log(`   http://localhost:${PORT}`);
   console.log(`   API Key: ${process.env.ANTHROPIC_API_KEY ? '✓ loaded' : '✗ missing'}\n`);
+  // 버킷에 보관된 크롤 결과를 로컬 폴더로 내려받는다 (서버는 바로 응답, 제품 목록은 받는 대로 채워짐)
+  const store = require('./crawl-store');
+  if (store.enabled()) {
+    console.log('[crawl-store] 버킷 → 로컬 동기화 시작');
+    store.pullAll()
+      .then((s) => console.log(`[crawl-store] 동기화 완료: 다운로드 ${s.downloaded}, 같음 ${s.unchanged}, 실패 ${s.failed}`))
+      .catch((e) => console.error('[crawl-store] 동기화 실패:', e.message));
+  }
 });
