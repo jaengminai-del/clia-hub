@@ -98,5 +98,6 @@ Cloud Run은 기본적으로 디스크가 유지되지 않습니다. 크롤링 �
 
 - **크롤이 바로 실패** → API 키 2개가 모두 입력됐는지, 메모리가 2GB 이상인지 확인
 - **재배포 후 새로 크롤한 제품이 사라짐** → 버킷 변수 5개가 서비스에 들어가 있는지, 서버 로그에 `[crawl-store]` 업로드 메시지가 있는지 확인
+- **GitHub에 push해도 Railway가 배포하지 않음** → Railway GitHub 앱이 저장소 **소유 계정**에 설치돼 있어야 합니다. 서비스 **Settings → Source → Connect Repo** 목록에 저장소가 없으면 목록의 **Configure GitHub App**에서 소유 계정(예: `jaengminai-del`)에 앱을 설치한 뒤 다시 연결하세요
 - **제품 목록이 비어 있음** → 서버 로그의 `[crawl-store] 동기화 완료` 확인. `node crawl-store.js status`로 버킷에 데이터가 있는지 확인
 - **화면은 뜨는데 eBay/Shopee 스타일이 예전 모양** → 브라우저 강력 새로고침 (캐시)
