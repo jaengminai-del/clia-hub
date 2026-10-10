@@ -1027,13 +1027,75 @@ def enrich_with_component_data(layout_flow: list, component_data: list) -> list:
     return enriched_flow
 
 
+def _attach_gallery(mirror: dict, html: str, origin: str):
+    """제품 갤러리: LG.com 상단 갤러리(.c-gallery)를 화면 순서 그대로 (못 찾으면 기존 값 유지)."""
+    gal = extract_gallery(html, origin)
+    if gal:
+        mirror["_gallery"] = gal
+        print(f"   ✓ 제품 갤러리 {len(gal)}장 (LG.com 갤러리 영역 순서)")
+
+
+def _polish_mirror(mirror: dict, html: str):
+    """미러 최종 정리 — 빠른 경로·기존 경로 공통."""
+    # 이미지·텍스트가 모두 같은 섹션 제거 (캐러셀 루프 복제 슬라이드 등)
+    _dup = drop_duplicate_sections(mirror)
+    if _dup:
+        print(f"   ✓ 중복 섹션 제거: {_dup}건 (이미지·텍스트 동일)")
+    # UI 컨트롤(탭 버튼 아이콘·썸네일, 버튼, # 앵커) 전용 이미지 제거 — 클릭해서 콘텐츠로
+    # 이동/전환시키는 UI라 콘텐츠가 아니다. Gemini 경로로 유입된 경우까지 여기서 일괄 차단.
+    _ui = drop_ui_control_media(mirror, html)
+    if _ui:
+        print(f"   ✓ UI 컨트롤 이미지 제외: {_ui}건 (탭 아이콘·썸네일 등)")
+    _san = sanitize_texts(mirror)   # 최종 방어: 캡션 신설 등으로 뒤늦게 유입된 alt 묘사문 제거
+    if _san:
+        print(f"   ✓ 텍스트 최종 정제: {_san}개 섹션에서 alt 묘사문 제거")
+    tag_media_roles(mirror)
+
+    # 이미지 해상도 업그레이드 — 썸네일(180x180 등)로 잡힌 미디어를 HTML에 실재하는
+    # 같은 에셋의 최고 해상도(원본)로 교체. 갤러리·로고·아이콘이 흐리게 나오는 문제 해결.
+    up = upgrade_media_resolution(mirror, html)
+    if up:
+        print(f"   ✓ 이미지 해상도 업그레이드: {up}건 (썸네일→원본)")
+
+
+def content_checks(mirror: dict) -> dict:
+    """빠른 경로의 qa_report — AI 시각 QA 대신 결과 데이터를 코드로 점검한 수치.
+    match_score 는 없음(null). 빌더는 checks 를 표시한다."""
+    sections = mirror.get("sections", [])
+    media = [m for s in sections for m in s.get("media", [])]
+    no_url = sum(1 for m in media if not (m.get("pc_url") or m.get("unified_url") or m.get("mobile_url")))
+    checks = {
+        "sections": len(sections),
+        "sections_with_image_and_text": sum(1 for s in sections if s.get("media") and (s.get("text") or "").strip()),
+        "images": len(media) - no_url,
+        "images_missing_url": no_url,
+        "gallery_images": len(mirror.get("_gallery") or []),
+        "feature_cards": len(mirror.get("_feature_cards") or []),
+        "has_title": bool((mirror.get("product_title") or "").strip()),
+    }
+    issues = []
+    if not checks["has_title"]:
+        issues.append("제품명을 찾지 못했습니다")
+    if checks["gallery_images"] == 0:
+        issues.append("제품 갤러리 이미지가 없습니다")
+    if checks["sections_with_image_and_text"] < 3:
+        issues.append(f"이미지와 텍스트가 함께 있는 섹션이 {checks['sections_with_image_and_text']}개뿐입니다")
+    if no_url:
+        issues.append(f"주소가 없는 이미지 {no_url}개")
+    return {"mode": "component", "match_score": None, "checks": checks, "issues": issues}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("url")
     ap.add_argument("--skip-ai", action="store_true", help="Step 1~3만 실행")
     ap.add_argument("--cache", action="store_true", help="저장된 크롤/스크린샷 재사용")
     ap.add_argument("--pro", action="store_true", help="Gemini 2.5 Pro 사용 (기본값: Gemini 2.5 Flash)")
+    ap.add_argument("--full-ai", action="store_true",
+                    help="빠른 컴포넌트 경로를 쓰지 않고 기존 방식(스크린샷 + Gemini 분석·시각 QA)으로 실행. "
+                         "환경 변수 CRAWLER_FULL_AI=1 로 전체 적용")
     args = ap.parse_args()
+    full_ai = args.full_ai or os.getenv("CRAWLER_FULL_AI", "").strip() == "1"
 
     if not FIRECRAWL_KEY:
         sys.exit("✗ FIRECRAWL_API_KEY 없음 (.env)")
@@ -1070,6 +1132,36 @@ def main():
         md, html = md_cached, html_cached
         
     datasets["pc"] = {"md": md, "html": html}
+    _cf_origin = "https://" + (args.url.split("//", 1)[-1].split("/", 1)[0] or "www.lg.com")
+
+    # ★ 빠른 경로 (2026-10-10~): 최종 미러는 컴포넌트-우선(Step7-CF)으로 만들어지고 Gemini 결과는
+    #   제품명만 쓰였다. 컴포넌트 근거가 충분하면 스크린샷·Gemini 분석·시각 QA(기존 10분+)를 건너뛰고
+    #   HTML 컴포넌트만으로 바로 완성한다. 품질이 떨어지면 --full-ai / CRAWLER_FULL_AI=1 로 기존 방식 복귀.
+    if not full_ai and not args.skip_ai:
+        write_progress(60, "2단계: CCG 컴포넌트 ID 및 레이아웃 구조 파싱 중...")
+        component_data = parse_html_components(html)
+        _cf = build_from_components(component_data, _html_product_title(html), _cf_origin)
+        _st = _cf.get("_cf_stats", {})
+        if _st.get("renderable", 0) >= 3:          # Step7-CF 와 같은 최소 품질 게이트
+            (out / "components.json").write_text(
+                json.dumps(component_data, ensure_ascii=False, indent=2), encoding="utf-8")
+            print(f"→ [Fast] 컴포넌트 {len(component_data)}개 → 노출섹션 {_st['renderable']} "
+                  f"(결합 {_st.get('stitched', 0)} / 카드후보 {len(_cf.get('_feature_cards', []))} "
+                  f"/ 전체이미지 {_st.get('assets_all', 0)}장) — 스크린샷·Gemini 분석 생략")
+            write_progress(90, "3단계: 리테일용 컨텐츠 데이터 생성 중...")
+            mirror = _cf
+            _attach_gallery(mirror, html, _cf_origin)
+            _polish_mirror(mirror, html)
+            # 예전 실행의 Gemini 산출물은 이번 결과와 무관하므로 정리
+            for f in ("final.json", "verify_report.json", "mirror_qa_report.json"):
+                (out / f).unlink(missing_ok=True)
+            (out / "qa_report.json").write_text(
+                json.dumps(content_checks(mirror), ensure_ascii=False, indent=2), encoding="utf-8")
+            (out / "mirror.json").write_text(json.dumps(mirror, ensure_ascii=False, indent=2), encoding="utf-8")
+            write_progress(100, "분석 완료!")
+            print(f"\n✓ 완료 (빠른 컴포넌트 경로). 산출물: {out}/mirror.json")
+            return
+        print(f"→ [Fast] 컴포넌트 근거 부족(노출 {_st.get('renderable', 0)}) → 기존 방식(스크린샷 + Gemini 분석)으로 진행")
 
     # Step 2 — PC 단일 스크린샷 + 타일 (시간 단축 극대화)
     tiles = {}
@@ -1122,7 +1214,6 @@ def main():
 
     # Step 4 — Gemini 융합 분석 (PC 단일 뷰포트 분석)
     write_progress(65, f"4단계: Gemini {GEMINI_MODEL} 멀티모달 시각 구조 대조 분석 중 (20~40초 소요)...")
-    _cf_origin = "https://" + (args.url.split("//", 1)[-1].split("/", 1)[0] or "www.lg.com")
     gemini_ok = True
     try:
         result = run_gemini(pre_md, tiles["pc"])
@@ -1230,11 +1321,7 @@ def main():
     if mirror is None:
         mirror = to_mirror(result, pre_md)
     print(f"→ [Step7] mirror.json 생성 (섹션 {len(mirror['sections'])})")
-    # 제품 갤러리: LG.com 상단 갤러리(.c-gallery)를 화면 순서 그대로 (못 찾으면 기존 값 유지)
-    _gal = extract_gallery(datasets["pc"]["html"], _cf_origin)
-    if _gal:
-        mirror["_gallery"] = _gal
-        print(f"   ✓ 제품 갤러리 {len(_gal)}장 (LG.com 갤러리 영역 순서)")
+    _attach_gallery(mirror, datasets["pc"]["html"], _cf_origin)
 
     # Step 7.5 — mirror 시각 QA: 최종 레이아웃을 PC 스크린샷과 직접 대조하여
     #            화면과 동일해지도록 배치(미디어 이동·섹션 순서)만 교정. 텍스트/URL 불변.
@@ -1283,25 +1370,7 @@ def main():
         _pt = pair_title_image(mirror)  # 타이틀 전용 컴포넌트 ↔ 다음 이미지 섹션 형제 페어링
         if _pt:
             print(f"   ✓ 타이틀-이미지 페어링: {_pt}건 (파편 텍스트 → 진짜 타이틀)")
-    # UI 컨트롤(탭 버튼 아이콘·썸네일, 버튼, # 앵커) 전용 이미지 제거 — 클릭해서 콘텐츠로
-    # 이동/전환시키는 UI라 콘텐츠가 아니다. Gemini 경로로 유입된 경우까지 여기서 일괄 차단.
-    # 이미지·텍스트가 모두 같은 섹션 제거 (캐러셀 루프 복제 슬라이드 등)
-    _dup = drop_duplicate_sections(mirror)
-    if _dup:
-        print(f"   ✓ 중복 섹션 제거: {_dup}건 (이미지·텍스트 동일)")
-    _ui = drop_ui_control_media(mirror, datasets["pc"]["html"])
-    if _ui:
-        print(f"   ✓ UI 컨트롤 이미지 제외: {_ui}건 (탭 아이콘·썸네일 등)")
-    _san = sanitize_texts(mirror)   # 최종 방어: 캡션 신설 등으로 뒤늦게 유입된 alt 묘사문 제거
-    if _san:
-        print(f"   ✓ 텍스트 최종 정제: {_san}개 섹션에서 alt 묘사문 제거")
-    tag_media_roles(mirror)
-
-    # 이미지 해상도 업그레이드 — 썸네일(180x180 등)로 잡힌 미디어를 HTML에 실재하는
-    # 같은 에셋의 최고 해상도(원본)로 교체. 갤러리·로고·아이콘이 흐리게 나오는 문제 해결.
-    up = upgrade_media_resolution(mirror, datasets["pc"]["html"])
-    if up:
-        print(f"   ✓ 이미지 해상도 업그레이드: {up}건 (썸네일→원본)")
+    _polish_mirror(mirror, datasets["pc"]["html"])
 
     (out / "mirror.json").write_text(json.dumps(mirror, ensure_ascii=False, indent=2), encoding="utf-8")
 

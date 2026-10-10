@@ -393,7 +393,10 @@ async function analyzePDP() {
         if (!gen.ok) throw new Error(gd.error || `generate ${gen.status}`);
         generatedHTML = gd.html;
         showPreview(generatedHTML);
-        const qa = (mir._qa && mir._qa.match_score != null) ? ` · visual QA ${mir._qa.match_score}/100` : '';
+        // 빠른 컴포넌트 경로(_qa.checks)는 AI 점수 대신 데이터 점검 결과, 기존 Gemini 경로는 시각 QA 점수
+        const qa = !mir._qa ? ''
+          : mir._qa.checks ? ` · gallery ${mir._qa.checks.gallery_images} images${(mir._qa.issues || []).length ? ` · ⚠ ${mir._qa.issues.length} check(s)` : ''}`
+          : mir._qa.match_score != null ? ` · visual QA ${mir._qa.match_score}/100` : '';
         setStatus(`✓ PDP content generated — ${crawledFeatures.length} sections${qa}`, 'ok');
         renderSections();
         btn.disabled = false; btn.textContent = 'Analyze';

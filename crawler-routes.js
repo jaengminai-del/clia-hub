@@ -4,7 +4,7 @@
  * 예전 crawler-py/api.py (FastAPI) 와 동일한 /api/v1/* 계약을 제공하되,
  * 별도 서버(8080)·터널 없이 메인 Node 서버가 crawler-py/pdp_pipeline.py 를 자식 프로세스로 실행한다.
  * server.js 의 /api/pcg-vision 도 crawl() 을 직접 호출한다.
- *   POST /api/v1/crawl                  → 202 { job_id }
+ *   POST /api/v1/crawl                  → 202 { job_id }  (full_ai:true → 기존 Gemini 분석 방식 강제)
  *   GET  /api/v1/jobs/:id               → 상태/결과
  *   GET  /api/v1/jobs/:id/stream        → SSE 진행률
  *   GET  /api/v1/jobs/:id/ebay-html     → eBay HTML fragment
@@ -48,7 +48,7 @@ function auth(req, res, next) {
   next();
 }
 
-function launchPipeline(jobId, url, usePro, geminiKey) {
+function launchPipeline(jobId, url, usePro, geminiKey, fullAi) {
   const slug = slugify(url);
   const out = path.join(OUT_DIR, slug);
   fs.mkdirSync(out, { recursive: true });
@@ -60,6 +60,7 @@ function launchPipeline(jobId, url, usePro, geminiKey) {
 
   const args = [PIPELINE, url, '--cache'];
   if (usePro) args.push('--pro');
+  if (fullAi) args.push('--full-ai'); // 기존 방식(스크린샷 + Gemini 분석·시각 QA) 강제
   const env = { ...process.env, PYTHONIOENCODING: 'utf-8' };
   if (geminiKey) env.GEMINI_API_KEY = geminiKey; // BYOK
 
@@ -128,7 +129,7 @@ router.get('/healthz', (req, res) => res.json({
 }));
 
 // 크롤 작업 등록 → { jobId, cached }. 캐시(mirror.json)가 있으면 파이프라인 없이 즉시 완료.
-function startCrawl(url, { force = false, pro = false, geminiKey = null } = {}) {
+function startCrawl(url, { force = false, pro = false, geminiKey = null, fullAi = false } = {}) {
   const slug = slugify(url);
   const out = path.join(OUT_DIR, slug);
   if (fs.existsSync(path.join(out, 'mirror.json')) && !force) {
@@ -143,7 +144,7 @@ function startCrawl(url, { force = false, pro = false, geminiKey = null } = {}) 
   }
   const jobId = 'job_' + crypto.randomBytes(6).toString('hex');
   jobs.set(jobId, { url, slug, startedAt: Date.now() / 1000 });
-  launchPipeline(jobId, url, pro, geminiKey);
+  launchPipeline(jobId, url, pro, geminiKey, fullAi);
   return { jobId, cached: false };
 }
 
@@ -243,12 +244,12 @@ router.post('/api/v1/products/:slug/geo', auth, async (req, res) => {
 });
 
 router.post('/api/v1/crawl', auth, (req, res) => {
-  const { url, force_refresh = false, use_pro_model = false } = req.body || {};
+  const { url, force_refresh = false, use_pro_model = false, full_ai = false } = req.body || {};
   if (typeof url !== 'string' || !url.startsWith('http')) {
     return res.status(400).json({ detail: 'valid url required' });
   }
   const { jobId, cached } = startCrawl(url, {
-    force: !!force_refresh, pro: !!use_pro_model, geminiKey: req.get('x-gemini-api-key') || null,
+    force: !!force_refresh, pro: !!use_pro_model, fullAi: !!full_ai, geminiKey: req.get('x-gemini-api-key') || null,
   });
   if (cached) {
     return res.status(202).json({ job_id: jobId, status: 'completed', cached: true,

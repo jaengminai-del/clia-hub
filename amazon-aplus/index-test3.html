@@ -5252,9 +5252,10 @@ async function analyzePDP() {
         const mir = await rv.json();
         if (mir.sections && mir.sections[0] && mir.sections[0].media !== undefined) {
           rawFeatures = mirrorToFeatures(mir).filter(f => f.headline || f.images?.length);
-          console.log('[analyzePDP] Crawler API mirror 사용:', mir.sections.length, 'sections | 시각 QA',
-            mir._qa ? mir._qa.match_score + '점/' + (mir._qa.issues || []).length + '건' : 'n/a');
-          status.textContent = (mir._qa && mir._qa.match_score != null) ? `Crawl loaded (QA ${mir._qa.match_score}/100)` : 'Crawl loaded';
+          console.log('[analyzePDP] Crawler API mirror 사용:', mir.sections.length, 'sections | 점검',
+            mir._qa ? (mir._qa.checks || mir._qa.match_score + '점') : 'n/a', (mir._qa && mir._qa.issues) || []);
+          status.textContent = (mir._qa && mir._qa.checks) ? `Crawl loaded (gallery ${mir._qa.checks.gallery_images} images)`
+            : (mir._qa && mir._qa.match_score != null) ? `Crawl loaded (QA ${mir._qa.match_score}/100)` : 'Crawl loaded';
         }
       }
     } catch (vErr) {

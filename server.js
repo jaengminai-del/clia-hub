@@ -2377,7 +2377,7 @@ app.post('/api/pcg', async (req, res) => {
    — 산출물(final.json)이 이미 있으면 즉시 반환 (force:true 로 재실행)
 ────────────────────────────────────────── */
 app.post('/api/pcg-vision', async (req, res) => {
-  const { url, force = false, cacheOnly = false, pro = false } = req.body || {};
+  const { url, force = false, cacheOnly = false, pro = false, fullAi = false } = req.body || {};
   if (!url) return res.status(400).json({ error: 'url required' });
   const path = require('path');
   const fs = require('fs');
@@ -2407,7 +2407,7 @@ app.post('/api/pcg-vision', async (req, res) => {
   try {
     console.log(`[pcg-vision] 크롤 시작: ${url}`);
     const { crawl } = require('./crawler-routes');
-    const result = await crawl(url, { pro: !!pro, force: !!force, geminiKey });
+    const result = await crawl(url, { pro: !!pro, force: !!force, fullAi: !!fullAi, geminiKey });
     res.json({ ...result, _source: 'crawler-py' });
   } catch (e) {
     console.error('[pcg-vision] 크롤 실패:', e.message);
