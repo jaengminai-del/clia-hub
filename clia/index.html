@@ -961,6 +961,8 @@ const I18N={en:{
   'crawl.otherCorp':'This URL belongs to another country site ({c}). It will be saved under that country and will not appear in this list. Continue?',
   'crawl.failed':'Crawling failed: ',
   'crawl.done':'Crawling complete',
+  // 크롤 진행 단계 (progress.json step 코드)
+  'crawl.step.queued':'Queued…','crawl.step.init':'Preparing…','crawl.step.fetch':'Collecting the LG.com product page…','crawl.step.fetched':'Product page collected','crawl.step.parse':'Reading page components and layout…','crawl.step.build':'Building content data…','crawl.step.done':'Analysis complete','crawl.step.screenshot':'Capturing page screenshots…','crawl.step.prepare':'Preparing AI analysis…','crawl.step.ai':'AI is analysing the page layout…','crawl.step.qa':'Checking the analysis result…','crawl.step.working':'Crawling…','ebb.crawling':'Running CLIA Crawler… (new URL about 1 minute, cached URL instant)','ebb.crawlPct':'Crawling {pct}% — {step}','ebb.rendering':'Rendering CCG design…','ebb.serverFail':'Cannot connect to the server. Start server.js first.',
   'ch.comingSoon':'Coming soon',
   'ebb.height':'Total content height: {h}px · Use Edit to delete unnecessary content or modify the text. When you finish editing, be sure to Lock.',
   'list.serverDown':'Crawler server (localhost:3001) is not responding — crawled products cannot be loaded.',
@@ -988,6 +990,8 @@ I18N.de={
   'crawl.invalid':'Bitte geben Sie die URL einer LG.com-Produktseite ein.',
   'crawl.otherCorp':'Diese URL gehört zu einer anderen Länderseite ({c}). Sie wird unter diesem Land gespeichert und erscheint nicht in dieser Liste. Fortfahren?',
   'crawl.failed':'Crawlen fehlgeschlagen: ','crawl.done':'Crawlen abgeschlossen',
+  // 크롤 진행 단계 (progress.json step 코드)
+  'crawl.step.queued':'In Warteschlange…','crawl.step.init':'Wird vorbereitet…','crawl.step.fetch':'LG.com-Produktseite wird abgerufen…','crawl.step.fetched':'Produktseite abgerufen','crawl.step.parse':'Seitenkomponenten und Layout werden gelesen…','crawl.step.build':'Content-Daten werden erstellt…','crawl.step.done':'Analyse abgeschlossen','crawl.step.screenshot':'Screenshots der Seite werden erstellt…','crawl.step.prepare':'KI-Analyse wird vorbereitet…','crawl.step.ai':'KI analysiert das Seitenlayout…','crawl.step.qa':'Analyseergebnis wird geprüft…','crawl.step.working':'Crawlen läuft…','ebb.crawling':'CLIA Crawler läuft… (neue URL ca. 1 Minute, gespeicherte URL sofort)','ebb.crawlPct':'Crawlen {pct}% — {step}','ebb.rendering':'CCG-Design wird gerendert…','ebb.serverFail':'Keine Verbindung zum Server. Starten Sie zuerst server.js.',
   'list.serverDown':'Der Crawler-Server (localhost:3001) antwortet nicht — gecrawlte Produkte können nicht geladen werden.',
 };
 I18N.th={
@@ -1011,6 +1015,8 @@ I18N.th={
   'crawl.invalid':'กรุณากรอก URL หน้าสินค้าของ LG.com',
   'crawl.otherCorp':'URL นี้เป็นของเว็บไซต์ประเทศอื่น ({c}) ระบบจะบันทึกไว้ในประเทศนั้นและจะไม่แสดงในรายการนี้ ดำเนินการต่อหรือไม่?',
   'crawl.failed':'ครอว์ลไม่สำเร็จ: ','crawl.done':'ครอว์ลเสร็จสมบูรณ์',
+  // 크롤 진행 단계 (progress.json step 코드)
+  'crawl.step.queued':'อยู่ในคิว…','crawl.step.init':'กำลังเตรียมการ…','crawl.step.fetch':'กำลังดึงหน้าสินค้า LG.com…','crawl.step.fetched':'ดึงหน้าสินค้าเรียบร้อย','crawl.step.parse':'กำลังอ่านคอมโพเนนต์และเลย์เอาต์ของหน้า…','crawl.step.build':'กำลังสร้างข้อมูลคอนเทนต์…','crawl.step.done':'วิเคราะห์เสร็จสมบูรณ์','crawl.step.screenshot':'กำลังจับภาพหน้าจอของหน้า…','crawl.step.prepare':'กำลังเตรียมการวิเคราะห์ด้วย AI…','crawl.step.ai':'AI กำลังวิเคราะห์เลย์เอาต์ของหน้า…','crawl.step.qa':'กำลังตรวจสอบผลการวิเคราะห์…','crawl.step.working':'กำลังครอว์ล…','ebb.crawling':'กำลังรัน CLIA Crawler… (URL ใหม่ประมาณ 1 นาที, URL ที่บันทึกไว้แสดงทันที)','ebb.crawlPct':'ครอว์ล {pct}% — {step}','ebb.rendering':'กำลังเรนเดอร์ดีไซน์ CCG…','ebb.serverFail':'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาเริ่ม server.js ก่อน',
   'list.serverDown':'เซิร์ฟเวอร์ครอว์เลอร์ (localhost:3001) ไม่ตอบสนอง — ไม่สามารถโหลดสินค้าที่ครอว์ลไว้ได้',
 };
 I18N.ar={
@@ -1034,6 +1040,8 @@ I18N.ar={
   'crawl.invalid':'يرجى إدخال رابط صفحة منتج على LG.com.',
   'crawl.otherCorp':'هذا الرابط تابع لموقع دولة أخرى ({c}). سيتم حفظه ضمن تلك الدولة ولن يظهر في هذه القائمة. هل تريد المتابعة؟',
   'crawl.failed':'فشل الزحف: ','crawl.done':'اكتمل الزحف',
+  // 크롤 진행 단계 (progress.json step 코드)
+  'crawl.step.queued':'في قائمة الانتظار…','crawl.step.init':'جارٍ التحضير…','crawl.step.fetch':'جارٍ جمع صفحة المنتج من LG.com…','crawl.step.fetched':'تم جمع صفحة المنتج','crawl.step.parse':'جارٍ قراءة مكونات الصفحة وتخطيطها…','crawl.step.build':'جارٍ إنشاء بيانات المحتوى…','crawl.step.done':'اكتمل التحليل','crawl.step.screenshot':'جارٍ التقاط لقطات شاشة للصفحة…','crawl.step.prepare':'جارٍ التحضير لتحليل الذكاء الاصطناعي…','crawl.step.ai':'يقوم الذكاء الاصطناعي بتحليل تخطيط الصفحة…','crawl.step.qa':'جارٍ التحقق من نتيجة التحليل…','crawl.step.working':'جارٍ الزحف…','ebb.crawling':'جارٍ تشغيل CLIA Crawler… (الرابط الجديد حوالي دقيقة واحدة، والرابط المحفوظ فورًا)','ebb.crawlPct':'الزحف {pct}% — {step}','ebb.rendering':'جارٍ عرض تصميم CCG…','ebb.serverFail':'تعذّر الاتصال بالخادم. شغّل server.js أولاً.',
   'list.serverDown':'خادم الزاحف (localhost:3001) لا يستجيب — لا يمكن تحميل المنتجات التي تم الزحف إليها.',
 };
 // 정적 마크업 문구(원문 그대로) → 번역. 동적 문구는 t() 키 사용.
@@ -6287,7 +6295,8 @@ function aptNav(dir){aptCurrent=Math.max(0,Math.min(APT_SLIDES.length-1,aptCurre
 // 같은 서버로 열었으면 그 서버, file:// 로 열었으면 로컬 서버(3001)를 사용
 const CRAWLER_API = /^https?:$/.test(location.protocol) ? location.origin : 'http://localhost:3001';
 
-// 크롤 등록 → 완료까지 폴링. onProgress(percent, message). 캐시된 URL은 즉시 반환.
+// 크롤 등록 → 완료까지 폴링. onProgress(percent, message, step). 캐시된 URL은 즉시 반환.
+// step(단계 코드)은 crawlStepText()로 법인 언어 문구로 바꿔 보여준다 — message는 한국어 로그용.
 async function crawlerRun(url, { force = false, onProgress } = {}) {
   const r = await fetch(CRAWLER_API + '/api/v1/crawl', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -6302,7 +6311,7 @@ async function crawlerRun(url, { force = false, onProgress } = {}) {
     if (!sr.ok) throw new Error(snap.detail || ('HTTP ' + sr.status));
     if (snap.status === 'completed') return { jobId: job.job_id, result: snap.result, cached: !!job.cached };
     if (snap.status === 'failed') throw new Error((snap.error || 'pipeline failed').slice(-300));
-    if (onProgress) onProgress(snap.progress_percent || 0, snap.log_message || '');
+    if (onProgress) onProgress(snap.progress_percent || 0, snap.log_message || '', snap.step || '');
     await new Promise(res => setTimeout(res, 3000));
   }
   throw new Error('crawl timeout (20분)');
@@ -6422,7 +6431,9 @@ function showCoffee(){
   _coffeeTimer=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);tm.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');},1000);
   document.getElementById('coffeeOv').classList.add('show');
 }
-function updateCoffee(pct,msg){document.getElementById('coffeeBar').style.width=Math.max(2,Math.min(100,pct))+'%';if(msg)document.getElementById('coffeeStep').textContent=pct+'% · '+msg;}
+function crawlStepText(step){const k='crawl.step.'+step;return t(step&&I18N.en[k]!=null?k:'crawl.step.working');}
+// 크롤러 진행(onProgress)은 step 코드를 번역해 표시, 직접 호출(완료 등)은 넘긴 문구 그대로
+function updateCoffee(pct,msg,step){document.getElementById('coffeeBar').style.width=Math.max(2,Math.min(100,pct))+'%';const txt=step!==undefined?crawlStepText(step):msg;if(txt)document.getElementById('coffeeStep').textContent=pct+'% · '+txt;}
 function hideCoffee(){clearInterval(_coffeeTimer);document.getElementById('coffeeOv').classList.remove('show');}
 async function crawlNewUrl(){
   const inp=document.getElementById('newCrawlUrl'),btn=document.getElementById('newCrawlBtn');
@@ -7201,12 +7212,12 @@ async function ebbAnalyze() {
   if (!url) return;
   const btn = document.getElementById('ebbAnalyzeBtn');
   btn.disabled = true; btn.textContent = 'Analyzing...';
-  ebbSetStatus('<span class="spinner"></span> CLIA Crawler 실행 중... (신규 URL 약 1분, 캐시는 즉시)', '');
+  ebbSetStatus('<span class="spinner"></span> '+t('ebb.crawling'), '');
   document.getElementById('ebbServerWarn').style.display = 'none';
   try {
-    const { jobId } = await crawlerRun(url, { onProgress: (pct, msg) =>
-      ebbSetStatus(`<span class="spinner"></span> 크롤 ${pct}% — ${msg}`, '') });
-    ebbSetStatus('<span class="spinner"></span> CCG 디자인 렌더 중...', '');
+    const { jobId } = await crawlerRun(url, { onProgress: (pct, msg, step) =>
+      ebbSetStatus('<span class="spinner"></span> '+t('ebb.crawlPct',{pct,step:crawlStepText(step)}), '') });
+    ebbSetStatus('<span class="spinner"></span> '+t('ebb.rendering'), '');
     const html = await crawlerEbayHtml({ jobId });
     EBB.generatedHTML = html;
     ebbShowPreview(html);
@@ -7215,7 +7226,7 @@ async function ebbAnalyze() {
     const msg = e.message||String(e);
     if (msg.includes('fetch')||msg.includes('Network')||msg.includes('Failed')) {
       document.getElementById('ebbServerWarn').style.display = 'block';
-      ebbSetStatus('✕ 서버 연결 실패. server.js를 먼저 실행하세요.', 'error');
+      ebbSetStatus('✕ '+t('ebb.serverFail'), 'error');
     } else {
       ebbSetStatus('✕ '+msg, 'error');
     }

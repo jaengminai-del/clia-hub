@@ -55,13 +55,15 @@ MAX_TILES_PER_DEVICE = 14           # Gemini 입력 이미지 수 제한 (비용
 
 PROGRESS_FILE = None
 
-def write_progress(percent: int, message: str):
+def write_progress(percent: int, message: str, step: str = ""):
+    """step: 허브가 법인 언어로 번역해 보여주는 단계 코드 (crawl.step.<step>). message 는 로그용."""
     global PROGRESS_FILE
     if PROGRESS_FILE:
         try:
             PROGRESS_FILE.write_text(json.dumps({
                 "percent": percent,
                 "message": message,
+                "step": step,
                 "updated_at": time.time()
             }, ensure_ascii=False), encoding="utf-8")
         except Exception:
@@ -1104,7 +1106,7 @@ def main():
     
     global PROGRESS_FILE
     PROGRESS_FILE = out / "progress.json"
-    write_progress(5, "크롤 및 분석 인프라 초기화 완료")
+    write_progress(5, "크롤 및 분석 인프라 초기화 완료", "init")
 
     # CLI 인자에 따른 모델 다이내믹 라우팅 최적화 (Dual-Model Routing)
     global GEMINI_MODEL
@@ -1119,16 +1121,16 @@ def main():
     datasets = {}
     md_cached, html_cached = cached("pc.md"), cached("pc.html")
     if md_cached is None or html_cached is None:
-        write_progress(15, "1단계: Firecrawl 웹 스크래핑 및 HTML/DOM 트리 분석 중...")
+        write_progress(15, "1단계: Firecrawl 웹 스크래핑 및 HTML/DOM 트리 분석 중...", "fetch")
         print("→ [Step1] PC 크롤링 시작 (모바일 스킵으로 극단적 최적화)...")
         d = firecrawl_scrape(args.url, mobile=False)
         md, html = d.get("markdown", ""), d.get("html", "")
         (out / "pc.md").write_text(md, encoding="utf-8")
         (out / "pc.html").write_text(html, encoding="utf-8")
-        write_progress(35, "1단계 완료: 원본 웹페이지 마크다운 수집 성공")
+        write_progress(35, "1단계 완료: 원본 웹페이지 마크다운 수집 성공", "fetched")
     else:
         print("✓ [Step1] PC 크롤 캐시 사용")
-        write_progress(35, "1단계 (캐시): 웹 텍스트 수집 완료")
+        write_progress(35, "1단계 (캐시): 웹 텍스트 수집 완료", "fetched")
         md, html = md_cached, html_cached
         
     datasets["pc"] = {"md": md, "html": html}
@@ -1138,7 +1140,7 @@ def main():
     #   제품명만 쓰였다. 컴포넌트 근거가 충분하면 스크린샷·Gemini 분석·시각 QA(기존 10분+)를 건너뛰고
     #   HTML 컴포넌트만으로 바로 완성한다. 품질이 떨어지면 --full-ai / CRAWLER_FULL_AI=1 로 기존 방식 복귀.
     if not full_ai and not args.skip_ai:
-        write_progress(60, "2단계: CCG 컴포넌트 ID 및 레이아웃 구조 파싱 중...")
+        write_progress(60, "2단계: CCG 컴포넌트 ID 및 레이아웃 구조 파싱 중...", "parse")
         component_data = parse_html_components(html)
         _cf = build_from_components(component_data, _html_product_title(html), _cf_origin)
         _st = _cf.get("_cf_stats", {})
@@ -1148,7 +1150,7 @@ def main():
             print(f"→ [Fast] 컴포넌트 {len(component_data)}개 → 노출섹션 {_st['renderable']} "
                   f"(결합 {_st.get('stitched', 0)} / 카드후보 {len(_cf.get('_feature_cards', []))} "
                   f"/ 전체이미지 {_st.get('assets_all', 0)}장) — 스크린샷·Gemini 분석 생략")
-            write_progress(90, "3단계: 리테일용 컨텐츠 데이터 생성 중...")
+            write_progress(90, "3단계: 리테일용 컨텐츠 데이터 생성 중...", "build")
             mirror = _cf
             _attach_gallery(mirror, html, _cf_origin)
             _polish_mirror(mirror, html)
@@ -1158,7 +1160,7 @@ def main():
             (out / "qa_report.json").write_text(
                 json.dumps(content_checks(mirror), ensure_ascii=False, indent=2), encoding="utf-8")
             (out / "mirror.json").write_text(json.dumps(mirror, ensure_ascii=False, indent=2), encoding="utf-8")
-            write_progress(100, "분석 완료!")
+            write_progress(100, "분석 완료!", "done")
             print(f"\n✓ 완료 (빠른 컴포넌트 경로). 산출물: {out}/mirror.json")
             return
         print(f"→ [Fast] 컴포넌트 근거 부족(노출 {_st.get('renderable', 0)}) → 기존 방식(스크린샷 + Gemini 분석)으로 진행")
@@ -1167,30 +1169,30 @@ def main():
     tiles = {}
     png = out / "pc_full.png"
     if not (args.cache and png.exists() and (out / "tiles").exists()):
-        write_progress(40, "2단계: Playwright 헤드리스 브라우저 실행 및 스캔 중...")
+        write_progress(40, "2단계: Playwright 헤드리스 브라우저 실행 및 스캔 중...", "screenshot")
         print("→ [Step2] PC 풀페이지 스크린샷 캡처 (모바일 스킵으로 극단적 최적화)...")
         capture_screenshot(args.url, png, mobile=False)
-        write_progress(50, "2단계: 고화질 타일링(Tiling) 및 PIL 분할 가공 중...")
+        write_progress(50, "2단계: 고화질 타일링(Tiling) 및 PIL 분할 가공 중...", "screenshot")
     else:
         print("✓ [Step2] PC 스크린샷 캐시 사용")
-        write_progress(50, "2단계 (캐시): 고화질 스크린샷 로드 완료")
+        write_progress(50, "2단계 (캐시): 고화질 스크린샷 로드 완료", "screenshot")
         
     # 하단 위젯 경계 로드 (신규 캡처는 반환값, 캐시는 boundary.json)
     boundary = read_json(out / "boundary.json") or {"y": 0, "txt": "", "pageH": 0}
     tiles["pc"] = tile_screenshot(png, out / "tiles", "pc", max_height=boundary.get("y", 0))
-    write_progress(55, "2단계 완료: 비주얼 분석용 스크린샷 세트 가공 성공")
+    write_progress(55, "2단계 완료: 비주얼 분석용 스크린샷 세트 가공 성공", "screenshot")
 
     # Step 3 — 전처리 (PC md 기준 + PC html의 미디어 주입)
-    write_progress(58, "3단계: 원문 텍스트 내 비주얼 앵커 태그 매칭 및 주입 중...")
+    write_progress(58, "3단계: 원문 텍스트 내 비주얼 앵커 태그 매칭 및 주입 중...", "prepare")
     media = extract_media(datasets["pc"]["html"], args.url, "pc")
     pre_md = inject_custom_tags(datasets["pc"]["md"], media)
     # 마크다운도 하단 위젯 경계 텍스트에서 절단 → Gemini 텍스트 토큰 절감 (best-effort)
     pre_md = truncate_md_at_boundary(pre_md, boundary.get("txt", ""))
     (out / "preprocessed.md").write_text(pre_md, encoding="utf-8")
-    write_progress(60, "3단계 완료: 전처리 마크다운 빌드 완료 (AI 준비)")
+    write_progress(60, "3단계 완료: 전처리 마크다운 빌드 완료 (AI 준비)", "prepare")
 
     # Step 3.5 — CCG 컴포넌트 파싱 (HTML에서 컴포넌트 ID 및 레이아웃 구조 추출)
-    write_progress(62, "3.5단계: CCG 컴포넌트 ID 및 레이아웃 구조 파싱 중...")
+    write_progress(62, "3.5단계: CCG 컴포넌트 ID 및 레이아웃 구조 파싱 중...", "parse")
     component_data = parse_html_components(datasets["pc"]["html"])
     (out / "components.json").write_text(
         json.dumps(component_data, ensure_ascii=False, indent=2), encoding="utf-8"
@@ -1203,17 +1205,17 @@ def main():
         cid = comp.get("component_id", "UNKNOWN")
         component_summary[cid] = component_summary.get(cid, 0) + 1
     print(f"   컴포넌트 분포: {dict(sorted(component_summary.items()))}")
-    write_progress(64, f"3.5단계 완료: CCG 컴포넌트 {len(component_data)}개 인식")
+    write_progress(64, f"3.5단계 완료: CCG 컴포넌트 {len(component_data)}개 인식", "parse")
 
     if args.skip_ai:
-        write_progress(100, "분석 완료 (AI 분석 스킵)")
+        write_progress(100, "분석 완료 (AI 분석 스킵)", "done")
         print(f"\n✓ Step1~3 완료 (--skip-ai). 산출물: {out}")
         return
     if not GEMINI_KEY:
         sys.exit("✗ GEMINI_API_KEY 없음 (.env) — --skip-ai 로 1~3단계만 실행 가능")
 
     # Step 4 — Gemini 융합 분석 (PC 단일 뷰포트 분석)
-    write_progress(65, f"4단계: Gemini {GEMINI_MODEL} 멀티모달 시각 구조 대조 분석 중 (20~40초 소요)...")
+    write_progress(65, f"4단계: Gemini {GEMINI_MODEL} 멀티모달 시각 구조 대조 분석 중 (20~40초 소요)...", "ai")
     gemini_ok = True
     try:
         result = run_gemini(pre_md, tiles["pc"])
@@ -1225,7 +1227,7 @@ def main():
             raise
         gemini_ok = False
         print(f"   ⚠️ Gemini 분석 실패 → 컴포넌트-우선 미러로 계속 진행 (노출 섹션 {_probe['renderable']}): {str(_ge)[:120]}")
-        write_progress(80, "4단계: AI 분석 응답 오류 — HTML 컴포넌트 구조로 계속 진행합니다")
+        write_progress(80, "4단계: AI 분석 응답 오류 — HTML 컴포넌트 구조로 계속 진행합니다", "ai")
         result = {"product_title": _html_product_title(datasets["pc"]["html"]), "layout_flow": []}
     # [프로그램적 강제 분리 보완] 디스클레이머와 타이틀이 합쳐진 경우 강제 분리
     result["layout_flow"] = post_process_split_disclaimers(result["layout_flow"])
@@ -1234,16 +1236,16 @@ def main():
     #       run_correction으로 result를 Gemini 스키마(FinalPDPData)에 맞춰 재직렬화하면서
     #       사후 주입한 컴포넌트 필드를 벗겨내기 때문. 매칭은 QA 루프 종료 후(Step 6.9)에 수행한다.
     (out / "final.json").write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
-    write_progress(80, "4단계 완료: 멀티모달 레이아웃 흐름 데이터 추출 성공")
+    write_progress(80, "4단계 완료: 멀티모달 레이아웃 흐름 데이터 추출 성공", "ai")
 
     # Step 5 — 후단 검증
-    write_progress(82, "5단계: 수집 본문 실존 여부 및 원문 훼손율 검증 중...")
+    write_progress(82, "5단계: 수집 본문 실존 여부 및 원문 훼손율 검증 중...", "ai")
     corpus = pre_md + "\n" + datasets["pc"]["html"]
     report = verify(result, corpus) if gemini_ok else {"pass": True, "_note": "gemini skipped"}
     (out / "verify_report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
     # Step 6 — LLM 시각 QA (화면 인지 기준 매칭 재검수)
-    write_progress(85, "6단계: LLM 자기치유형 시각 매칭 검수(Visual QA) 수행 중...")
+    write_progress(85, "6단계: LLM 자기치유형 시각 매칭 검수(Visual QA) 수행 중...", "qa")
     qa = {"match_score": None, "issues": [], "_note": "gemini skipped — component-first mirror"}
     if gemini_ok:
         try:
@@ -1257,7 +1259,7 @@ def main():
     for loop in range(1, MAX_QA_LOOPS + 1):
         if not gemini_ok or qa.get("match_score") is None or (qa.get("match_score", 0) >= QA_PASS_SCORE and not qa.get("issues")):
             break
-        write_progress(88 + loop * 2, f"6.{loop}단계: 시각 정렬 불일치 보정 루프 기동 중 (루프 {loop}/{MAX_QA_LOOPS})...")
+        write_progress(88 + loop * 2, f"6.{loop}단계: 시각 정렬 불일치 보정 루프 기동 중 (루프 {loop}/{MAX_QA_LOOPS})...", "qa")
         try:
             corrected = run_correction(result, qa, pre_md, tiles["pc"])
         except Exception as _ce:   # 보정 실패 시 기존 결과 유지
@@ -1289,7 +1291,7 @@ def main():
 
     qa["_history"] = qa_history
     (out / "qa_report.json").write_text(json.dumps(qa, ensure_ascii=False, indent=2), encoding="utf-8")
-    write_progress(94, "6단계 완료: 최종 시각 정렬성 매칭 완료")
+    write_progress(94, "6단계 완료: 최종 시각 정렬성 매칭 완료", "qa")
 
     # Step 6.9 — CCG 컴포넌트 매칭 (QA 보정 루프 종료 후 최종 result 기준으로 사후 주입)
     #            보정 루프가 Gemini 스키마로 재직렬화하므로 매칭은 반드시 루프 이후에 수행해야
@@ -1304,7 +1306,7 @@ def main():
     #   컬럼 수·정렬·순서(dom_index)도 DOM에서 그대로 온다. 텍스트+이미지가 모두 모인
     #   섹션만 3P 콘텐츠로 노출하고, 한쪽만 있는 섹션은 feature 카드 후보로 분리한다.
     #   컴포넌트 파싱이 빈약한 구형 PDP는 기존 Gemini 기반 to_mirror로 자동 폴백.
-    write_progress(96, "7단계: 최종 리테일용 mirror.json 인덱스 및 자석형 레이아웃 바인딩 중...")
+    write_progress(96, "7단계: 최종 리테일용 mirror.json 인덱스 및 자석형 레이아웃 바인딩 중...", "build")
     mirror, _cf_used = None, False
     try:
         _cf = build_from_components(component_data, result.get("product_title", ""), _cf_origin)
@@ -1327,7 +1329,7 @@ def main():
     #            화면과 동일해지도록 배치(미디어 이동·섹션 순서)만 교정. 텍스트/URL 불변.
     #            단, 컴포넌트-우선 미러는 DOM 구조가 진실이라 이동 교정이 오히려
     #            정확한 그룹핑을 훼손하므로 스킵한다 (AI 호출도 절감).
-    write_progress(98, "7.5단계: 최종 레이아웃을 PC 화면과 대조하는 시각 QA·배치 교정 중...")
+    write_progress(98, "7.5단계: 최종 레이아웃을 PC 화면과 대조하는 시각 QA·배치 교정 중...", "build")
     mqa_history = []
     if _cf_used:
         print("   ✓ [Step7.5] 컴포넌트-우선 미러 — DOM 구조가 진실이므로 배치 QA 스킵")
@@ -1374,7 +1376,7 @@ def main():
 
     (out / "mirror.json").write_text(json.dumps(mirror, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    write_progress(100, "분석 완료! 검수용 플레이 패널을 출력합니다.")
+    write_progress(100, "분석 완료! 검수용 플레이 패널을 출력합니다.", "done")
     print(f"\n✓ 완료. 산출물: {out}/mirror.json (활용) + final.json / verify_report.json / qa_report.json")
 
 

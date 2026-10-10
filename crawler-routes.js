@@ -57,7 +57,7 @@ function launchPipeline(jobId, url, usePro, geminiKey, fullAi) {
   fs.writeFileSync(path.join(out, 'source.json'),
     JSON.stringify({ url, crawled_at: Date.now() / 1000 }, null, 2));
   fs.writeFileSync(path.join(out, 'progress.json'),
-    JSON.stringify({ percent: 0, message: '작업 대기열 등록됨', updated_at: Date.now() / 1000 }));
+    JSON.stringify({ percent: 0, message: '작업 대기열 등록됨', step: 'queued', updated_at: Date.now() / 1000 }));
 
   const args = [PIPELINE, url, '--cache'];
   if (usePro) args.push('--pro');
@@ -113,7 +113,7 @@ function snapshot(jobId) {
       error: error || 'pipeline exited without result' };
   }
   return { job_id: jobId, status: 'processing', progress_percent: prog.percent || 0,
-    log_message: prog.message || '', updated_at: prog.updated_at };
+    log_message: prog.message || '', step: prog.step || '', updated_at: prog.updated_at };
 }
 
 function renderEbayHtml(out) {
@@ -303,7 +303,7 @@ router.get('/api/v1/jobs/:id/stream', (req, res) => {
     }
     if (snap.status === 'failed') { send('error', { error: (snap.error || '').slice(0, 300) }); return stop(); }
     if (snap.progress_percent !== last) {
-      send('progress', { percent: snap.progress_percent, message: snap.log_message });
+      send('progress', { percent: snap.progress_percent, message: snap.log_message, step: snap.step });
       last = snap.progress_percent;
     }
     if (++ticks >= 2400) { send('error', { error: 'timeout' }); stop(); } // ~20분
