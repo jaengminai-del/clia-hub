@@ -238,6 +238,33 @@ def build_component_sections(component_data: list, origin: str = _LG_ORIGIN) -> 
             group_head = head[:1]            # 컴포넌트 레벨 제목(항목 밖) = 행 대제목
             n_items = len(item_groups)
             made = 0
+            lead = None
+            if not LEGACY:
+                # 항목(하위 카드) 밖의 메인 내용 — 본문이나 항목에 없는 이미지가 있으면 항목들 앞에 섹션으로 둔다.
+                # (ST0016 접이식: 메인 제목·본문·대표 이미지 + 펼치면 나오는 하위 카드 N개)
+                item_keys = {m["pc_url"] for it in item_groups for m in _pick_media_list(it.get("media"), origin)}
+                lead_media = [m for m in content_media if m["pc_url"] not in item_keys]
+                if body or lead_media:
+                    lead = {
+                        "component_id": cid,
+                        "component_dom_index": comp.get("dom_index", -1),
+                        "layout_type": comp.get("layout_type") or "unknown",
+                        "columns": 1,
+                        "text_alignment": comp.get("text_alignment") or "left",
+                        "eyebrow": texts["eyebrow"][:1],
+                        "headline": head,
+                        "body": body,
+                        "specs": [],
+                        "disclaimer": texts["disclaimer"],
+                        "media": lead_media,
+                        "kind": "content",
+                        "item_group": False,
+                        "group_heading": "",
+                        "renderable": bool(lead_media),   # 이미지가 있어야 노출 (텍스트만이면 카드 후보 — 공통 규칙)
+                    }
+                    sections.append(lead)
+                    if lead["renderable"]:
+                        group_head = []      # 제목은 노출되는 메인 섹션이 가졌으므로 항목 행 대제목으로 반복하지 않는다
             for it in item_groups:
                 it_texts = _promote_eyebrow(_pick_texts_list(it.get("texts")))
                 it_media = [m for m in _pick_media_list(it.get("media"), origin)
@@ -270,6 +297,8 @@ def build_component_sections(component_data: list, origin: str = _LG_ORIGIN) -> 
             # 항목이 2개 미만으로 살아남으면 통합 경로로 폴백 (부분 추가분 되돌리기)
             if made:
                 del sections[-made:]
+            if lead is not None:
+                sections.remove(lead)
 
         if not has_text and not has_img:
             continue
