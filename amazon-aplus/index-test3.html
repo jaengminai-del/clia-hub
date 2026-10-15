@@ -2935,6 +2935,25 @@ function badgeImg(url, td, px) {
   return `<div class="badge-box" style="${box}background:#ffffff;display:flex;align-items:center;justify-content:center;overflow:hidden;">${inner}</div>`;
 }
 
+// 이어 붙은 히어로 이미지들을 같은 폭으로 위아래 이어 붙여 한 장(JPEG data URL)으로 만든다.
+// 반환 { url, bg } — bg = 좌우 가장자리 평균색 (970×600 칸에 넣을 때 남는 쪽 채움색)
+async function mergeStackedImages(urls) {
+  const bms = [];
+  for (const u of urls) bms.push(await loadProxiedImage(u));
+  if (bms.length < 2) return null;
+  const W = bms[0].width;
+  const hs = bms.map(b => Math.round(b.height * W / b.width));
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = hs.reduce((a, b) => a + b, 0);
+  const cx = cv.getContext('2d');
+  let y = 0;
+  bms.forEach((b, i) => { cx.drawImage(b, 0, y, W, hs[i]); y += hs[i]; if (b.close) b.close(); });
+  const edge = [...cx.getImageData(0, 0, 4, cv.height).data, ...cx.getImageData(W - 4, 0, 4, cv.height).data];
+  let r = 0, g = 0, bl = 0, n = 0;
+  for (let i = 0; i < edge.length; i += 4) { r += edge[i]; g += edge[i + 1]; bl += edge[i + 2]; n++; }
+  const bg = `rgb(${Math.round(r / n)},${Math.round(g / n)},${Math.round(bl / n)})`;
+  return { url: cv.toDataURL('image/jpeg', 0.92), bg };
+}
+
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -3049,7 +3068,10 @@ const RENDERERS = {
     const body = td ? (td.body || '') : 'Body paragraph text (250 characters max) — describe the key product benefit shown in the image above.';
     return `<div class="aplus-root m-image-header-text">
       ${url
-        ? `<img class="m-image-header-text-img" src="${url}" alt="">`
+        ? ((td && td.stackBg)
+            // 합친 한 장: 970×600 칸 안에 전체가 보이게, 남는 좌우는 이미지 가장자리 색
+            ? `<img class="m-image-header-text-img" src="${url}" alt="" style="height:600px;object-fit:contain;background:${td.stackBg};">`
+            : `<img class="m-image-header-text-img" src="${url}" alt="">`)
         : `<div class="m-image-header-text-placeholder">970 × 600</div>`}
       <div class="m-image-header-text-body">
         <h3 data-maxchars="50">${escHtml(hl)}</h3>
@@ -5010,6 +5032,7 @@ function expandFeaturesForSelection(features) {
       } else out.push(f);
       return;
     }
+    if (f.stacked) { out.push(f); return; }   // 이어 붙은 히어로 → 카드 1장 (이미지별로 나누지 않음)
     const imgs = f.images || [];
     const layout = f.layout || {};
     const perRow = layout.imgsPerRow || 0;
@@ -5081,7 +5104,7 @@ function mirrorToFeatures(mirror) {
     const badgeBody = rawLines.filter((_, k) => k !== (hIdx >= 0 ? hIdx : 0)).map(l => l.replace(/^#+\s*/, '')).join(' ');
     return { eyebrow, headline, body, media, cc: s.column_count || 0,
              domIdx: s.component_dom_index, lt: s.layout_type || '', isHead, award,
-             badgeTitle, badgeBody, groupHeading: s.group_heading || '' };
+             badgeTitle, badgeBody, groupHeading: s.group_heading || '', stacked: !!s.stacked };
   });
 
   const toImgs = media => media.map(m => ({
@@ -5226,6 +5249,8 @@ function mirrorToFeatures(mirror) {
 
     // 3) 단독 섹션 → 개별 feature
     feats.push({
+      // 이어 붙은 히어로(LG.com이 이미지 2장을 붙여 한 장처럼 보여줌) → 모듈에서 한 장으로 합친다
+      ...(s.stacked && s.media.length >= 2 ? { stacked: true } : {}),
       headline:    s.headline,
       subheadline: s.eyebrow,
       body:        s.body,
@@ -5547,6 +5572,7 @@ function pickBestModule(feature) {
     const n = (feature.badges || images).length;
     return n >= 4 ? 'four-text' : n === 3 ? 'three-img' : 'left-img';
   }
+  if (feature.stacked) return 'image-header-text';   // 합친 한 장 → 단일 이미지 헤더 모듈
 
   // ── 규칙: 기본은 무조건 Image Header With Text(단일 풀폭 이미지). ───────────
   //  예외 — PDP에서 "가로로 나란히 연속된 이미지"가 확인된 경우에만:
@@ -5622,7 +5648,7 @@ function buildModulesFromKeywords() {
     const perRow = layout.imgsPerRow || 0;
     const isHorizontalRow = (perRow === 3 || perRow >= 4);
     const splitToSingles =
-      !feature.award &&
+      !feature.award && !feature.stacked &&
       !isHorizontalRow &&
       featureImages.length >= 2 &&
       currentMode !== 'premium';
@@ -5804,7 +5830,7 @@ function buildModulesFromKeywords() {
       items: itemsData,
     };
 
-    activeModules().push({
+    const mod = {
       type:         typeId,
       imageUrl,
       videoUrl:     null,
@@ -5813,7 +5839,17 @@ function buildModulesFromKeywords() {
       textData,
       ...(feature.award ? { fit: 'contain' } : {}),   // 배지: 칸을 채우지 않고 전체가 보이게 (흰 여백)
       id:           nextId++,
-    });
+    };
+    activeModules().push(mod);
+    if (feature.stacked && typeId === 'image-header-text') {
+      // 이어 붙은 히어로: 이미지들을 위아래로 이어 붙인 한 장을 만들어 모듈 이미지로 교체 (업로드용 실제 파일)
+      mergeStackedImages(featureImages.map(i => i.url)).then(r => {
+        if (!r) return;
+        mod.imageUrl = r.url; mod.fit = 'contain-full'; mod.bgColor = r.bg;
+        mod.textData = { ...mod.textData, stackBg: r.bg };
+        renderPagePreview();
+      }).catch(e => console.warn('[stacked] 합치기 실패:', e.message));
+    }
   });
 
   renderPagePreview();
@@ -5990,14 +6026,15 @@ async function downloadImages() {
       try {
         const bm = await loadProxiedImage(url, w, h);
 
-        if (m.fit === 'contain') {
+        if (m.fit === 'contain' || m.fit === 'contain-full') {
           // 배지: 모듈 규격(w×h) 안에 전체가 들어가게 + 흰 여백, 배너 배지는 배지 영역만 잘라서
+          // 합친 히어로(contain-full): 여백 없이 꽉 맞추고 남는 쪽은 이미지 가장자리 색으로
           const c = m.textData && m.textData.crops && m.textData.crops[url];
           const sx = c ? c.x * bm.width : 0, sy = c ? c.y * bm.height : 0;
           const sw = c ? c.w * bm.width : bm.width, sh = c ? c.h * bm.height : bm.height;
-          const k = Math.min(w / sw, h / sh) * 0.8;
+          const k = Math.min(w / sw, h / sh) * (m.fit === 'contain-full' ? 1 : 0.8);
           const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
-          const cx = cv.getContext('2d'); cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, w, h);
+          const cx = cv.getContext('2d'); cx.fillStyle = m.bgColor || '#ffffff'; cx.fillRect(0, 0, w, h);
           cx.drawImage(bm, sx, sy, sw, sh, (w - sw * k) / 2, (h - sh * k) / 2, sw * k, sh * k);
           if (bm.close) bm.close();
           const slotSuffixC = specs.length > 1 ? `-${i + 1}` : '';
