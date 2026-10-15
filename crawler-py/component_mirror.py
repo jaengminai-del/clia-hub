@@ -45,6 +45,14 @@ NOISE_IDS = {
 GALLERY_IDS = {"PD0012", "PD0033"}
 SPEC_IDS = {"PD0008", "ST0035"}
 
+try:
+    from component_parser import LEGACY      # CRAWLER_PARSER_LEGACY=1 → 2026-10-15 이전 규칙
+except Exception:
+    LEGACY = False
+
+# 이미지만 있어도 컨텐츠로 쓰는 히어로(KV) 컴포넌트 — 문구 없이 장면만 보여주는 도입 이미지 (F7)
+HERO_IDS = {"ST0001", "ST0002", "ST0008", "ST0009"}
+
 _TEXT_ROLES_HEAD = ("headline", "subheadline")
 _TEXT_ROLES_BODY = ("body_copy", "body", "description")
 
@@ -81,6 +89,15 @@ def _pick_texts_list(text_list: list) -> dict:
         else:
             out["body"].append(txt)
     return out
+
+
+def _promote_eyebrow(texts: dict) -> dict:
+    """제목·본문 없이 eyebrow 칸에만 문구가 있으면 그 문구를 제목으로 쓴다 (F4).
+    LG CMS는 같은 컴포넌트 안에서도 블록마다 제목을 headline/eyebrow 칸에 섞어 넣는다
+    (ST0004: 첫 블록은 headline, 나머지는 eyebrow 칸에 h2)."""
+    if not LEGACY and not texts["headline"] and not texts["body"] and texts["eyebrow"]:
+        texts = dict(texts, headline=texts["eyebrow"][:1], eyebrow=texts["eyebrow"][1:])
+    return texts
 
 
 def _pick_specs(comp: dict) -> List[dict]:
@@ -188,7 +205,7 @@ def build_component_sections(component_data: list, origin: str = _LG_ORIGIN) -> 
     for comp in sorted(component_data, key=lambda c: c.get("dom_index", 0)):
         cid = (comp.get("component_id") or "").upper()
         media = _pick_media(comp, origin)
-        texts = _pick_texts(comp)
+        texts = _promote_eyebrow(_pick_texts(comp))
 
         # 전수 이미지 목록 (노이즈 포함 — 누락 방지용)
         for m in media:
@@ -224,7 +241,7 @@ def build_component_sections(component_data: list, origin: str = _LG_ORIGIN) -> 
             n_items = len(item_groups)
             made = 0
             for it in item_groups:
-                it_texts = _pick_texts_list(it.get("texts"))
+                it_texts = _promote_eyebrow(_pick_texts_list(it.get("texts")))
                 it_media = [m for m in _pick_media_list(it.get("media"), origin)
                             if m["role"] == "content"]
                 it_head = it_texts["headline"]
@@ -413,7 +430,24 @@ def build_from_components(component_data: list, product_title: str = "", origin:
     """엔드투엔드: components.json → mirror 스키마 (그룹핑·컬럼·노출조건 적용)."""
     built = build_component_sections(component_data, origin)
     stitch_orphans(built)
+    keep_image_only_heroes(built)
     return to_mirror_format(built, product_title)
+
+
+def keep_image_only_heroes(built: dict) -> int:
+    """문구 없이 이미지만 있는 히어로(KV)도 컨텐츠로 노출 (F7).
+    텍스트 섹션과의 결합(stitch_orphans) 뒤에 실행해 결합 기회를 먼저 준다."""
+    if LEGACY:
+        return 0
+    n = 0
+    for s in built["sections"]:
+        if not s["renderable"] and s["media"] and not (s["headline"] or s["body"]) \
+                and (s["component_id"] in HERO_IDS or s["layout_type"] == "hero_full_width"):
+            s["renderable"] = True
+            n += 1
+    built["stats"]["image_only_heroes"] = n
+    built["stats"]["renderable"] = sum(1 for x in built["sections"] if x["renderable"])
+    return n
 
 
 def _origin_from_slug(slug: str) -> str:

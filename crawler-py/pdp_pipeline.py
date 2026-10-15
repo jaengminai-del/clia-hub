@@ -1060,9 +1060,10 @@ def _polish_mirror(mirror: dict, html: str):
         print(f"   ✓ 이미지 해상도 업그레이드: {up}건 (썸네일→원본)")
 
 
-def content_checks(mirror: dict) -> dict:
+def content_checks(mirror: dict, html: str = "") -> dict:
     """빠른 경로의 qa_report — AI 시각 QA 대신 결과 데이터를 코드로 점검한 수치.
-    match_score 는 없음(null). 빌더는 checks 를 표시한다."""
+    match_score 는 없음(null). 빌더는 checks 를 표시한다.
+    html 이 있으면 누락 점검(coverage_check — 크롤 HTML의 컨텐츠 문구·이미지가 결과에 다 있는지)도 함께."""
     sections = mirror.get("sections", [])
     media = [m for s in sections for m in s.get("media", [])]
     no_url = sum(1 for m in media if not (m.get("pc_url") or m.get("unified_url") or m.get("mobile_url")))
@@ -1084,7 +1085,19 @@ def content_checks(mirror: dict) -> dict:
         issues.append(f"이미지와 텍스트가 함께 있는 섹션이 {checks['sections_with_image_and_text']}개뿐입니다")
     if no_url:
         issues.append(f"주소가 없는 이미지 {no_url}개")
-    return {"mode": "component", "match_score": None, "checks": checks, "issues": issues}
+    report = {"mode": "component", "match_score": None, "checks": checks, "issues": issues}
+    if html:
+        try:
+            from coverage_check import check as coverage
+            cov = coverage(html, mirror)
+            report["coverage"] = cov
+            checks["coverage_texts_missing"] = cov["texts_missing"]
+            checks["coverage_images_missing"] = cov["images_missing"]
+            if cov["images_missing"]:
+                issues.append(f"크롤 HTML에는 있지만 결과에 없는 이미지 {cov['images_missing']}장")
+        except Exception as e:   # 점검 실패가 크롤을 막지 않게
+            report["coverage_error"] = str(e)[:200]
+    return report
 
 
 def main():
@@ -1158,7 +1171,7 @@ def main():
             for f in ("final.json", "verify_report.json", "mirror_qa_report.json"):
                 (out / f).unlink(missing_ok=True)
             (out / "qa_report.json").write_text(
-                json.dumps(content_checks(mirror), ensure_ascii=False, indent=2), encoding="utf-8")
+                json.dumps(content_checks(mirror, html), ensure_ascii=False, indent=2), encoding="utf-8")
             (out / "mirror.json").write_text(json.dumps(mirror, ensure_ascii=False, indent=2), encoding="utf-8")
             write_progress(100, "분석 완료!", "done")
             print(f"\n✓ 완료 (빠른 컴포넌트 경로). 산출물: {out}/mirror.json")

@@ -14,11 +14,39 @@ eBay 빌더가 동일한 레이아웃을 재현할 수 있도록 구조화된 �
 - AL: About LG Components
 """
 
+import os
 import re
+from urllib.parse import quote
 from bs4 import BeautifulSoup, Tag
 from typing import Optional, List, Dict, Any
 from dataclasses import dataclass, field, asdict
 from enum import Enum
+
+
+# 2026-10-15 파서 개선(F2 이미지 소스 선택·F3 공백 주소·F4/F5 반복 항목 인식)을 끄고 예전 방식으로 — 되돌리기용
+LEGACY = os.getenv("CRAWLER_PARSER_LEGACY", "").strip() == "1"
+
+
+def _clean_url(u: Optional[str]) -> Optional[str]:
+    """주소 안의 공백 등을 인코딩 (LG DAM 파일명에 공백이 들어간 경우가 있다 — 'fast washing-d.jpg')."""
+    if not u:
+        return u
+    return quote(u.strip(), safe=":/?#[]@!$&'()*+,;=%~")
+
+
+def _srcset_first(srcset: str) -> str:
+    """srcset 첫 후보의 URL. 끝의 '1x'·'800w' 설명자만 떼고, 파일명의 공백은 URL 일부로 본다."""
+    first = (srcset or "").split(",")[0].strip()
+    if LEGACY:
+        return first.split()[0] if first else ""
+    return _clean_url(re.sub(r"\s+\d+(\.\d+)?[wx]$", "", first)) or ""
+
+
+def _media_range(q: str):
+    """<source media> → (min-width, max-width). 없으면 None."""
+    lo = re.search(r"min-width:\s*(\d+)", q or "")
+    hi = re.search(r"max-width:\s*(\d+)", q or "")
+    return (int(lo.group(1)) if lo else None, int(hi.group(1)) if hi else None)
 
 
 class LayoutType(str, Enum):
@@ -372,7 +400,7 @@ class ComponentParser:
             source = picture.find('source')
             img = picture.find('img')
             if source and source.get('srcset'):
-                return ('image', source['srcset'].split(',')[0].strip().split()[0])
+                return ('image', _srcset_first(source['srcset']))
             elif img and img.get('src'):
                 return ('image', img['src'])
 
@@ -404,6 +432,8 @@ class ComponentParser:
     # 항목 반복 시 인스턴스별로 붙는 상태 클래스 — 항목 동일성 판정에서 무시한다
     _VOLATILE_CLASS = re.compile(
         r'^(swiper-slide-|swiper-pagination|is-|js-|active$|selected$|current$)', re.I)
+    # 상태·배치 수식어 — 탭 패널의 '--active'(첫 탭만 붙음), 블록 배치 'area-main'/'area-sub1' (F4·F5)
+    _VOLATILE_CLASS_V2 = re.compile(r'(--(active|selected|current|on)$|^area-)', re.I)
 
     def _parse_item_groups(self, component: Tag, skip_ids=None):
         """같은 모양으로 반복되는 항목(텍스트+이미지 동반)을 찾아 항목별로 묶는다.
@@ -430,7 +460,8 @@ class ComponentParser:
             if parent is None:
                 continue
             sig = (id(parent), el.name, ' '.join(sorted(
-                c for c in (el.get('class') or []) if not self._VOLATILE_CLASS.match(c))))
+                c for c in (el.get('class') or []) if not self._VOLATILE_CLASS.match(c)
+                and (LEGACY or not self._VOLATILE_CLASS_V2.search(c)))))
             groups.setdefault(sig, []).append(el)
 
         best = None
@@ -762,6 +793,46 @@ class ComponentParser:
         a = el.find_parent('a')
         return a is not None and (a.get('href') or '').strip().startswith('#')
 
+    @staticmethod
+    def _legacy_picture_sources(media, sources):
+        """예전 규칙: 769px 기준 하나만 인식 (CRAWLER_PARSER_LEGACY=1)."""
+        for source in sources:
+            media_query = source.get('media', '')
+            srcset = source.get('srcset', '')
+            if srcset:
+                src = srcset.split(',')[0].strip().split()[0]
+                if 'min-width: 769' in media_query or 'min-width:769' in media_query:
+                    media.src_desktop = src
+                elif 'max-width: 768' in media_query or 'max-width:768' in media_query:
+                    media.src_mobile = src
+                elif not media.src_desktop:
+                    media.src_desktop = src
+
+    @staticmethod
+    def _picture_sources(media, sources, img):
+        """<picture>의 media 쿼리를 폭 범위로 읽어 PC(넓은 화면)·모바일(좁은 화면) 이미지를 고른다 (F2).
+        LG는 768/769, 1279/1280 등 기준이 컴포넌트마다 다르다 (예: ≤768 · ≤1279 · ≥1280 세 개).
+          PC     = 최대 폭 제한이 없는 소스 중 min-width가 가장 큰 것 → 없으면 <img src>
+          모바일 = max-width가 가장 작은 소스 → 없으면 data-mobile-src"""
+        wide, narrow = [], []
+        for source in sources:
+            url = _srcset_first(source.get('srcset') or source.get('data-srcset') or '')
+            if not url:
+                continue
+            lo, hi = _media_range(source.get('media', ''))
+            if hi is None:
+                wide.append((lo or 0, url))
+            else:
+                narrow.append((hi, url))
+        if wide:
+            media.src_desktop = max(wide)[1]
+        elif img is not None and (img.get('src') or '').strip() and not img.get('src', '').startswith('data:'):
+            media.src_desktop = _clean_url(img.get('src'))
+        elif narrow:
+            media.src_desktop = max(narrow)[1]
+        if narrow:
+            media.src_mobile = min(narrow)[1]
+
     def _parse_media_elements(self, component: Tag) -> List[MediaElement]:
         """미디어 요소 파싱"""
         media_list = []
@@ -777,30 +848,21 @@ class ComponentParser:
                 continue
 
             media = MediaElement(type='image')
-
-            # Desktop 이미지 (media query로 구분)
             sources = picture.find_all('source')
-            for source in sources:
-                media_query = source.get('media', '')
-                srcset = source.get('srcset', '')
-
-                if srcset:
-                    src = srcset.split(',')[0].strip().split()[0]
-                    if 'min-width: 769' in media_query or 'min-width:769' in media_query:
-                        media.src_desktop = src
-                    elif 'max-width: 768' in media_query or 'max-width:768' in media_query:
-                        media.src_mobile = src
-                    elif not media.src_desktop:
-                        media.src_desktop = src
+            img = picture.find('img')
+            if LEGACY:
+                self._legacy_picture_sources(media, sources)
+            else:
+                self._picture_sources(media, sources, img)
 
             # img 태그에서 fallback
-            img = picture.find('img')
             if img:
                 media.alt = img.get('alt', '')
                 if not media.src_desktop:
-                    media.src_desktop = img.get('src')
+                    media.src_desktop = _clean_url(img.get('src')) if not LEGACY else img.get('src')
                 if not media.src_mobile:
-                    media.src_mobile = img.get('data-mobile-src') or img.get('src')
+                    m_src = img.get('data-mobile-src') or img.get('src')
+                    media.src_mobile = _clean_url(m_src) if not LEGACY else m_src
 
             if media.src_desktop or media.src_mobile:
                 media_list.append(media)
@@ -825,8 +887,8 @@ class ComponentParser:
             if src:
                 media_list.append(MediaElement(
                     type='image',
-                    src_desktop=src,
-                    src_mobile=img.get('data-mobile-src'),
+                    src_desktop=src if LEGACY else _clean_url(src),
+                    src_mobile=img.get('data-mobile-src') if LEGACY else _clean_url(img.get('data-mobile-src')),
                     alt=img.get('alt', '')
                 ))
 

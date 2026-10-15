@@ -16,6 +16,7 @@ model.py — [A] 공통 컨텐츠 모델 (1차 컨텐츠 생성)
   skip_disclaimer         디스클레이머 섹션 제외
   drop_text_only_sections 이미지 없는 텍스트-only 섹션 제외 (카드 행·스펙 표는 예외)
   max_card_columns        DOM 컬럼 수가 없을 때 카드 행 최대 열 수
+  use_group_heading       true면 카드 묶음(item_group)의 대제목(group_heading)을 카드 행 제목으로 (F6)
   legacy_gallery_path_filter  true면 모든 섹션에 예전 규칙(주소에 /gallery/ 가 있으면 제외) — 되돌리기용.
                           기본(false): 컴포넌트 구조로 만든 섹션(component_id 있음)의 이미지는 LG.com 그 컴포넌트에
                           실제로 보이는 컨텐츠이므로 모두 쓴다 (독일 등은 기능 이미지도 DAM /gallery/ 폴더에 둠).
@@ -77,7 +78,7 @@ def _dedupe(sections: list) -> list:
     return out
 
 
-def _merge_card_rows(sections: list, max_cols: int) -> list:
+def _merge_card_rows(sections: list, max_cols: int, use_group_heading: bool = False) -> list:
     """연속된 '단일 이미지 grid_N' 섹션 병합 → 한 행 카드(card_row).
     lg.com에선 한 행 비교 카드인데 크롤 구조상 섹션이 갈라지는 케이스 복원.
     DOM 선언 컬럼 수(column_count)가 있으면 그 수만큼씩 청크로 나눠 정확히 N열 카드 행을 만든다
@@ -96,6 +97,8 @@ def _merge_card_rows(sections: list, max_cols: int) -> list:
                 if nx.get("component_dom_index") != dom or is_disclaimer(nx):
                     break
                 um = usable_media(nx)
+                if um and use_group_heading and not heading_text and nx.get("group_heading"):
+                    heading_text = "## " + nx["group_heading"]   # 컴포넌트 대제목 (F6)
                 if um:
                     for mm in um:
                         cards.append({"img": best_image_url(mm), "text": nx.get("text", "")})
@@ -142,7 +145,8 @@ def build_blocks(mirror: dict, rules: dict) -> list:
     sections = [s for s in mirror.get("sections", []) if s.get("layout_type") not in skip_layouts]
     sections = _drop_gallery_media(sections, bool(rules.get("legacy_gallery_path_filter")))
     sections = _dedupe(sections)
-    sections = _merge_card_rows(sections, int(rules.get("max_card_columns") or 4))
+    sections = _merge_card_rows(sections, int(rules.get("max_card_columns") or 4),
+                                bool(rules.get("use_group_heading")))
 
     blocks, kv_seen = [], False
     for s in sections:
