@@ -42,6 +42,28 @@ def _srcset_first(srcset: str) -> str:
     return _clean_url(re.sub(r"\s+\d+(\.\d+)?[wx]$", "", first)) or ""
 
 
+# 수상 배지·로고 이미지 — 리뷰 기사 등으로 링크가 걸려 있어도 컨텐츠로 가져온다 (사용자 원칙 2026-10-15)
+#   'award-winning'(수상 경력 기능 소개 이미지)은 배지가 아니므로 제외한다
+AWARD_FILE_RE = re.compile(
+    r"(badge|award(?![-_ ]?winning)|reddot|red[-_]dot|testurteil|editors?[-_]?choice|best[-_]?of[-_]?(the[-_]?best|ces|show)|winner)",
+    re.I)
+
+
+def is_award_media(el) -> bool:
+    """수상 배지 이미지인가: award 영역(c-award-*) 안에 있거나 파일명이 배지·수상 로고 형태."""
+    for p in [el, *el.parents]:
+        if not hasattr(p, "get") or p.name in ("body", "html"):
+            break
+        if re.search(r"award", " ".join(p.get("class") or []), re.I):
+            return True
+    src = el.get("src") or el.get("data-src") or (el.get("srcset") or "").split(",")[0]
+    if not src and el.name == "picture":
+        img = el.find("img")
+        src = (img.get("src") if img else "") or ""
+    name = (src or "").split("?")[0].rsplit("/", 1)[-1]
+    return bool(AWARD_FILE_RE.search(name))
+
+
 def _media_range(q: str):
     """<source media> → (min-width, max-width). 없으면 None."""
     lo = re.search(r"min-width:\s*(\d+)", q or "")
@@ -807,6 +829,8 @@ class ComponentParser:
         a = el.find_parent('a')
         if LEGACY:
             return a is not None and (a.get('href') or '').strip().startswith('#')
+        if is_award_media(el):
+            return False                 # 수상 배지는 링크가 있어도 컨텐츠 (리뷰 기사 링크)
         # 사용자 원칙(2026-10-15): 링크가 걸리거나 클릭 동작이 걸린 이미지는 UI — 컨텐츠화하지 않는다
         if a is not None and ((a.get('href') or '').strip() or a.get('onclick')):
             return True

@@ -16,6 +16,7 @@ model.py — [A] 공통 컨텐츠 모델 (1차 컨텐츠 생성)
   skip_disclaimer         디스클레이머 섹션 제외
   drop_text_only_sections 이미지 없는 텍스트-only 섹션 제외 (카드 행·스펙 표는 예외)
   max_card_columns        DOM 컬럼 수가 없을 때 카드 행 최대 열 수
+  unify_awards            true면 수상·인증 배지(ST0053 또는 배지 파일명 이미지)를 작은 로고+텍스트 카드로 통일
   use_group_heading       true면 카드 묶음(item_group)의 대제목(group_heading)을 카드 행 제목으로 (F6)
   legacy_gallery_path_filter  true면 모든 섹션에 예전 규칙(주소에 /gallery/ 가 있으면 제외) — 되돌리기용.
                           기본(false): 컴포넌트 구조로 만든 섹션(component_id 있음)의 이미지는 LG.com 그 컴포넌트에
@@ -25,6 +26,17 @@ model.py — [A] 공통 컨텐츠 모델 (1차 컨텐츠 생성)
 import re
 
 from make_mirror import _section_signature
+
+try:
+    from component_parser import AWARD_FILE_RE
+except Exception:                       # 파서 구버전 폴백
+    AWARD_FILE_RE = re.compile(r"badge|award(?![-_ ]?winning)|reddot|winner", re.I)
+
+AWARD_IDS = {"ST0053"}                  # Award 컴포넌트 (수상·인증·보증 배지 슬라이드)
+
+
+def _is_award_url(u: str) -> bool:
+    return bool(AWARD_FILE_RE.search((u or "").split("?")[0].rsplit("/", 1)[-1]))
 
 _VID_EXT = (".mp4", ".webm", ".mov")
 # 갤러리 썸네일 렌디션·탭 ON/OFF 상태 이미지 — 컨텐츠화 금지
@@ -111,6 +123,11 @@ def _merge_card_rows(sections: list, max_cols: int, use_group_heading: bool = Fa
                         and not is_disclaimer(merged[-1]) and not usable_media(merged[-1]) \
                         and merged[-1].get("text"):
                     heading_text = merged.pop()["text"]
+                # 대제목이 첫 카드 제목과 같으면 생략 (탭형 컴포넌트는 대제목 칸에 첫 항목 제목을 넣는다)
+                if use_group_heading and heading_text:
+                    _first = next((re.sub(r"^#+\s*", "", l).strip() for l in (cards[0].get("text") or "").split("\n") if l.strip()), "")
+                    if re.sub(r"^#+\s*", "", heading_text.strip()).strip().lower() == _first.lower():
+                        heading_text = ""
                 per = cc if cc in range(2, max_cols + 1) else min(len(cards), max_cols)
                 for k in range(0, len(cards), per):
                     merged.append({
@@ -157,9 +174,12 @@ def build_blocks(mirror: dict, rules: dict) -> list:
             blocks.append({"kind": "spec_table", "section": s})
             continue
         if s.get("layout_type") == "card_row":
+            cards = s.get("cards", [])
+            award = bool(rules.get("unify_awards")) and (
+                s.get("component_id") in AWARD_IDS or (cards and all(_is_award_url(c.get("img")) for c in cards)))
             blocks.append({"kind": "card_row", "component_id": s.get("component_id", ""),
                            "cols": s.get("cols"), "heading": s.get("heading", ""),
-                           "cards": s.get("cards", [])})
+                           "cards": cards, "award": award})
             continue
         has_media = bool(usable_media(s))
         if rules.get("drop_text_only_sections", True) and not has_media:
@@ -168,5 +188,8 @@ def build_blocks(mirror: dict, rules: dict) -> list:
         kv = False
         if not kv_seen and has_media and s.get("layout_type") in ("hero_full_width", "text_over_image"):
             kv = kv_seen = True
-        blocks.append({"kind": "section", "section": s, "kv": kv})
+        um = usable_media(s)
+        award = bool(rules.get("unify_awards")) and bool(um) and (
+            s.get("component_id") in AWARD_IDS or all(_is_award_url(best_image_url(m)) for m in um))
+        blocks.append({"kind": "section", "section": s, "kv": kv and not award, "award": award})
     return blocks

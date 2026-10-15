@@ -47,6 +47,7 @@ class Style:
         self.table_group_px = ty.get("spec_table", {}).get("group_px", 20)
         self.table_cell_px = ty.get("spec_table", {}).get("cell_px", 18)
         self.card = spec.get("card", {})
+        self.award = spec.get("award", {})
         self.overlay = spec.get("overlay", {})
         self.layouts = spec.get("layouts", {})
         # LG 가이드 폰트는 1440px 캔버스 기준 → 매체 컨테이너 폭으로 비례 축소
@@ -158,6 +159,30 @@ def hcard(st: Style, image_url: str, lines: list, component_id: str = "") -> str
     return f'''
 <div class="lg-hcard" style="display: flex; align-items: center; gap: 24px; background: #FFFFFF; border: 1px solid {st.stroke}; border-radius: 16px; overflow: hidden;">
   <div class="lg-hcard-img" style="flex: 0 0 {img_w}; max-width: {img_w};"><img src="{image_url}" alt="{escape(title)}" style="width: 100%; height: auto; display: block;"></div>
+  {txt}
+</div>'''
+
+
+def award_card(st: Style, image_url: str, lines: list, component_id: str = "") -> str:
+    """수상·인증 배지 카드: 작은 로고(왼쪽, 비율 유지) + 제목·본문(오른쪽). 모든 배지를 같은 모양으로 통일."""
+    aw = st.award
+    h_px = st.px(component_id, "headline", 36)
+    b_px = st.px(component_id, "body", 16)
+    lines = [l for l in (lines or []) if l]
+    title = lines[0] if lines and len(lines[0]) <= HEADLINE_MAX_CHARS else ""
+    body = " ".join(lines[1:] if title else lines)
+    h = (f'<h3 style="font-family: {st.font_headline}; font-weight: 600; font-size: {h_px}px; '
+         f'line-height: {st.head_lh}; margin: 0 0 10px 0; color: {st.headline_color};">{escape(title)}</h3>') if title else ""
+    b = (f'<p style="font-family: {st.font_body}; font-size: {b_px}px; line-height: {st.body_lh}; '
+         f'margin: 0; color: {st.body_color};">{escape(body)}</p>') if body else ""
+    logo_w = aw.get("logo_column_width", "30%")
+    logo_max = aw.get("logo_max_px", 180)
+    pad = aw.get("logo_padding_px", 24)
+    txt = (f'<div class="lg-award-text" style="flex: 1 1 auto; padding: 20px 24px 20px 0; text-align: left;">{h}{b}</div>'
+           if (h or b) else "")
+    return f'''
+<div class="lg-hcard lg-award" style="display: flex; align-items: center; gap: 24px; background: #FFFFFF; border: 1px solid {st.stroke}; border-radius: 16px; overflow: hidden;">
+  <div class="lg-award-logo" style="flex: 0 0 {logo_w}; max-width: {logo_w}; padding: {pad}px; text-align: center;"><img src="{image_url}" alt="{escape(title)}" style="max-width: 100%; max-height: {logo_max}px; width: auto; height: auto; display: inline-block;"></div>
   {txt}
 </div>'''
 
@@ -309,7 +334,8 @@ def render_spec_table(st: Style, section: dict) -> str:
 
 def render_card_row(st: Style, block: dict) -> str:
     cid = block.get("component_id", "")
-    items = [hcard(st, c.get("img", ""), content_lines(c.get("text")), cid) for c in block.get("cards", [])]
+    card = award_card if block.get("award") else hcard
+    items = [card(st, c.get("img", ""), content_lines(c.get("text")), cid) for c in block.get("cards", [])]
     hd = content_lines(block.get("heading", ""))
     heading = hd[0] if hd else ""
     head_html = (f'<h2 style="font-family: {st.font_headline}; font-weight: 600; font-size: {st.px(cid, "headline", 36)}px; line-height: {st.head_lh}; '
@@ -352,6 +378,15 @@ def render_section(st: Style, section: dict, kv: bool, align: str) -> str:
     return centered_stack(media_list, html)
 
 
+def render_award_section(st: Style, section: dict) -> str:
+    """단독 섹션으로 들어온 배지(IFA 등)도 카드 행과 같은 배지 카드로."""
+    cid = section.get("component_id", "")
+    lines = content_lines(section.get("text", ""))
+    media = usable_media(section)
+    cards = [award_card(st, best_image_url(m), lines if i == 0 else [], cid) for i, m in enumerate(media)]
+    return hcard_list(cards)
+
+
 def render_blocks(st: Style, blocks: list, align: str) -> list:
     out = []
     for b in blocks:
@@ -359,6 +394,8 @@ def render_blocks(st: Style, blocks: list, align: str) -> list:
             h = render_spec_table(st, b["section"])
         elif b["kind"] == "card_row":
             h = render_card_row(st, b)
+        elif b.get("award"):
+            h = render_award_section(st, b["section"])
         else:
             h = render_section(st, b["section"], b.get("kv", False), align)
         if h:

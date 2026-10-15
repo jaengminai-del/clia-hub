@@ -42,6 +42,12 @@
     "image_width": "40%",
     "text_width": "60%"
   },
+  "award": {
+    "_note": "수상·인증 배지 카드 (ST0053·배지 파일명): 작은 로고 + 텍스트로 통일",
+    "logo_column_width": "30%",
+    "logo_max_px": 180,
+    "logo_padding_px": 24
+  },
   "overlay": {
     "_note": "텍스트를 이미지 위에 얹는 컴포넌트(figma 스펙 is_overlay: ST0004/05/14)의 스크림",
     "text_width": "55%",
@@ -59,7 +65,8 @@
     "max_card_columns": 4,
     "text_alignment": "center",
     "legacy_gallery_path_filter": false,
-    "use_group_heading": true
+    "use_group_heading": true,
+    "unify_awards": true
   },
   "layouts": {
     "_note": "크롤 컴포넌트의 layout_type → eBay 렌더 패턴. kv(문서 최상단 히어로)·overlay·card_row·spec_table은 별도 처리.",
