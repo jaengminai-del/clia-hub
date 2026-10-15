@@ -1,7 +1,7 @@
 {
   "_meta": {
     "source": "LG.com GP1_Content Creation Guideline_v1.5.6 (Obsidian crawler-research/CCG_*.md)",
-    "note": "eBay 빌더용 기계 판독 스펙. desktop_px 폰트는 1440px 기준 캔버스 값 — 렌더 시 container_scale(컨테이너폭/1440)로 축소.",
+    "note": "LG 디자인 가이드 원본 값(매체 공통). desktop_px 폰트는 1440px 기준 캔버스 값 — 렌더 시 매체 컨테이너폭/1440으로 축소. 매체별 렌더 값(글자 크기 고정·색·카드 비율 등)은 content_gen/media/<매체>/spec.json.",
     "reference_canvas_px": 1440
   },
   "gp1_tokens": {
@@ -153,25 +153,5 @@
       "render_as": "skip",
       "note": "eBay 컨텐츠에 제품 갤러리 썸네일 미포함 (사용자 확정 원칙)"
     }
-  },
-  "render_defaults": {
-    "container_px": 800,
-    "headline_min_px": 18,
-    "headline_max_px": 32,
-    "body_min_px": 13,
-    "body_max_px": 16,
-    "_fixed_note": "261007 법인 피드백: 모바일 가독성 — 모든 제목(h2/h3) 36px, 모든 본문(p) 24px 고정. 행간은 기존(제목 1.25 / 본문 1.6) 대비 20% 축소.",
-    "fixed_headline_px": 36,
-    "fixed_body_px": 24,
-    "headline_line_height": 1.0,
-    "body_line_height": 1.28,
-    "eyebrow_color": "#697072",
-    "body_color": "#2D2D2D",
-    "headline_color": "#111111",
-    "disclaimer_color": "#697072",
-    "page_background": "#FFFFFF",
-    "card_background": "#FFFFFF",
-    "card_stroke": "#F0ECE4",
-    "overlay_scrim": "linear-gradient(90deg, rgba(0,0,0,0.45), rgba(0,0,0,0))"
   }
 }
