@@ -104,7 +104,8 @@ def annotate_badge_crops(mirror: dict, min_aspect: float = 2.5) -> int:
 
 
 def find_text_band_crop(im: Image.Image, side: str, tol: int = 18, content_ratio: float = 0.06,
-                        margin: float = 0.02, min_keep: float = 0.25, min_content_rows: float = 0.4) -> Optional[dict]:
+                        margin: float = 0.01, min_keep: float = 0.25, min_content_rows: float = 0.4,
+                        trim_others: bool = True) -> Optional[dict]:
     """텍스트 자리로 비워 둔 배경 띠(side = top·bottom·left·right 쪽)를 잘라 낸 영역.
     가장자리 색(그 쪽 끝 줄의 중앙값)과 확연히 다른 픽셀이 한 줄의 content_ratio 이상이 되는 첫 줄까지를 빈 띠로 본다.
     남는 영역이 원본의 min_keep 보다 작으면(이미지 대부분이 빈 배경) None — 자르지 않는다."""
@@ -139,10 +140,56 @@ def find_text_band_crop(im: Image.Image, side: str, tol: int = 18, content_ratio
     if sum(rows) < len(rows) * min_content_rows:
         return None
     f = cut / n_lines
-    box = {"top": (0, f, 1, 1 - f), "bottom": (0, 0, 1, 1 - f),
-           "left": (f, 0, 1 - f, 1), "right": (0, 0, 1 - f, 1)}[side]
-    return {"x": round(box[0], 4), "y": round(box[1], 4), "w": round(box[2], 4), "h": round(box[3], 4),
+    t, b, l, r = {"top": (f, 0, 0, 0), "bottom": (0, f, 0, 0), "left": (0, 0, f, 0), "right": (0, 0, 0, f)}[side]
+    if trim_others:
+        # 텍스트 반대쪽·양옆에 남은 빈 배경도 잘라 낸다 (텍스트 쪽보다 엄격한 기준 — 옅은 받침대·그림자 보존)
+        x0, y0 = int(l * iw), int(t * ih)
+        sub = im.crop((x0, y0, iw - int(r * iw), ih - int(b * ih)))
+        o = trim_background(sub, skip=side)
+        sw_, sh_ = sub.size
+        t += o["top"] * sh_ / ih
+        b += o["bottom"] * sh_ / ih
+        l += o["left"] * sw_ / iw
+        r += o["right"] * sw_ / iw
+    return {"x": round(l, 4), "y": round(t, 4), "w": round(1 - l - r, 4), "h": round(1 - t - b, 4),
             "iw": iw, "ih": ih, "band": round(f, 4)}
+
+
+def _edge_band(px, sw: int, sh: int, side: str, tol: int, content_ratio: float) -> float:
+    """side 쪽 가장자리 색(끝 줄 중앙값)과 같은 줄이 안쪽으로 몇 % 이어지는지 (0~1)."""
+    vertical = side in ("top", "bottom")
+    n_lines, n_len = (sh, sw) if vertical else (sw, sh)
+
+    def line(i):
+        k = i if side in ("top", "left") else n_lines - 1 - i
+        return [px[j, k] if vertical else px[k, j] for j in range(n_len)]
+
+    edge = line(0)
+    ref = tuple(sorted(c[ch] for c in edge)[len(edge) // 2] for ch in range(3))
+    band = 0
+    for i in range(n_lines):
+        if sum(1 for c in line(i) if sum(abs(c[ch] - ref[ch]) for ch in range(3)) > tol * 3) >= n_len * content_ratio:
+            break
+        band = i + 1
+    return band / n_lines
+
+
+def trim_background(im: Image.Image, skip: str = "", tol: int = 8, content_ratio: float = 0.03,
+                    min_band: float = 0.02, margin: float = 0.02, min_keep: float = 0.5) -> dict:
+    """이미지 가장자리의 단색 빈 배경 비율 {top,bottom,left,right} (skip 쪽은 0).
+    · min_band 미만의 띠는 그대로 둔다 · 남는 폭/높이가 min_keep 미만이 되는 축은 자르지 않는다
+      (거의 단색인 이미지 — 동영상 자리 표시 등 — 보호) · 피사체 쪽으로 margin 만큼 여유를 남긴다."""
+    iw, ih = im.size
+    sw, sh = max(1, iw // 4), max(1, ih // 4)
+    px = im.resize((sw, sh)).load()
+    out = {}
+    for side in ("top", "bottom", "left", "right"):
+        v = 0.0 if side == skip else _edge_band(px, sw, sh, side, tol, content_ratio)
+        out[side] = max(0.0, v - margin) if v >= min_band else 0.0
+    for a, z in (("top", "bottom"), ("left", "right")):
+        if 1 - out[a] - out[z] < min_keep:
+            out[a] = out[z] = 0.0
+    return out
 
 
 def annotate_overlay_crops(mirror: dict) -> int:
