@@ -87,8 +87,20 @@ def generate(mirror: dict, medium: str = "ebay", fragment: bool = False) -> str:
     blocks = build_blocks(mirror, rules)
     sections = "\n".join(render_blocks(st, blocks, rules.get("text_alignment", "center")))
     if fragment:
-        out = m["fragment_css"] + _fill(m["fragment_html"], sections=sections)
-        if spec.get("output", {}).get("forbid_active_content"):
+        body = _fill(m["fragment_html"], sections=sections)
+        css = m["fragment_css"]
+        out_opts = spec.get("output", {})
+        if out_opts.get("inline_css"):
+            # 편집기가 <style> 을 지워도 같게 보이도록 모든 규칙을 인라인으로 (style 블록은 그대로 둠)
+            from .inline_css import inline
+            body = inline(body, re.sub(r"</?style>", "", css))
+        ff = out_opts.get("font_face") or {}
+        if ff.get("faces") and ff.get("base_url"):
+            # LG 글꼴: 배포 서버의 woff2/ttf (<style> 이 허용되는 편집기에서만 적용 — 인라인으로는 불가)
+            from .inline_css import font_face_css
+            css = css.replace("<style>", "<style>\n" + font_face_css(ff["faces"], ff["base_url"]), 1)
+        out = css + body
+        if out_opts.get("forbid_active_content"):
             assert_no_active_content(out)
         return out
     return _fill(m["document_html"], product_title=escape(mirror.get("product_title", "LG Product")),
