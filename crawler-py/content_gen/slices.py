@@ -115,7 +115,8 @@ def _int(v, default):
 
 def options(req: dict) -> dict:
     """요청 값 정리. medium 이 있으면 매체 spec.json 의 slices 를 기본값으로 쓴다."""
-    defaults = {"count": 6, "output_width": None, "format": "jpeg", "quality": 88, "viewport_px": 1600}
+    defaults = {"count": 6, "output_width": None, "format": "jpeg", "quality": 88, "viewport_px": 1600,
+                "max_slice_height": None, "max_bytes": None, "min_quality": 60}
     medium = req.get("medium")
     if isinstance(medium, str) and re.fullmatch(r"[a-z_]{2,32}", medium):
         try:
@@ -124,16 +125,35 @@ def options(req: dict) -> dict:
         except ValueError:
             pass
     pick = lambda *keys: next((req[k] for k in keys if req.get(k) not in (None, "")), None)
-    n = max(1, min(_int(pick("slices"), defaults["count"]) or defaults["count"], 20))
+    # 장수: 요청 값 > 규격 count > (count 가 null 이면) 자동 — 한 장 높이가 max_slice_height 를 넘지 않게 (render 에서 계산)
+    n_req = _int(pick("slices"), defaults["count"])
+    n = max(1, min(n_req, 40)) if n_req else 0
     vw = max(600, min(_int(pick("viewportWidth", "width"), defaults["viewport_px"]) or defaults["viewport_px"], 3000))
     ow = _int(pick("outputWidth"), defaults["output_width"] or 0) or 0
     fmt = "png" if (pick("format") or defaults["format"]) == "png" else "jpeg"
     q = max(40, min(_int(pick("quality"), defaults["quality"]) or defaults["quality"], 100))
     name = re.sub(r"[^a-zA-Z0-9_-]", "-", str(req.get("name") or "pdp"))[:60] or "pdp"
-    return {"n": n, "vw": vw, "ow": ow, "fmt": fmt, "q": q, "name": name}
+    return {"n": n, "vw": vw, "ow": ow, "fmt": fmt, "q": q, "name": name,
+            "max_h": _int(defaults.get("max_slice_height"), 0) or 0,
+            "max_bytes": _int(defaults.get("max_bytes"), 0) or 0,
+            "min_q": _int(defaults.get("min_quality"), 60) or 60}
 
 
-def _cuts(layout: dict, n: int) -> list:
+def _shrink_jpeg(data: bytes, q: int, min_q: int, max_bytes: int) -> bytes:
+    """JPEG 용량이 max_bytes 를 넘으면 화질을 5씩 낮춰 다시 저장 (min_q 까지). 그래도 크면 가장 작은 결과."""
+    from PIL import Image
+    im = Image.open(io.BytesIO(data)).convert("RGB")
+    best = data
+    for qq in range(q - 5, min_q - 1, -5):
+        buf = io.BytesIO()
+        im.save(buf, "JPEG", quality=qq, optimize=True, progressive=True)
+        best = buf.getvalue()
+        if len(best) <= max_bytes:
+            break
+    return best
+
+
+def _cuts(layout: dict, n: int, max_span: float = 0) -> list:
     """자를 위치: 이상적인 등분점에서 가장 가까운 섹션 경계로 스냅.
     경계가 너무 멀면(등분 높이의 45% 초과) 표 행/문단 경계, 그래도 없으면 등분점."""
     H = layout["height"]
@@ -143,7 +163,7 @@ def _cuts(layout: dict, n: int) -> list:
     def nearest(lst, target, min_y, tol):
         best = None
         for e in lst:
-            if e <= min_y + 8:
+            if e <= min_y + 8 or (max_span and e - min_y > max_span):   # 한 장 최대 높이 넘는 경계는 제외
                 continue
             d = abs(e - target)
             if d <= tol and (best is None or d < abs(best - target)):
@@ -157,7 +177,7 @@ def _cuts(layout: dict, n: int) -> list:
         if cut is None:
             cut = nearest(layout["fineEdges"], target, prev, ideal * 0.45)
         if cut is None:
-            cut = target
+            cut = min(target, prev + max_span) if max_span else target
         cuts.append(max(cut, prev + 8))
     cuts.append(H)
     return cuts
@@ -216,11 +236,18 @@ def render(req: dict, zip_path: Path) -> dict:
             H = layout["height"]
             if not H:
                 raise ValueError("렌더 높이가 0 — HTML이 비어있는지 확인하세요")
-            cuts = _cuts(layout, n)
-            blocks = page.evaluate(_JS_TEXTS)
-
             # 2) 선명도: 콘텐츠 폭이 좁으면 배율을 올려 촬영 (outputWidth 지정 시 그 폭, 없으면 ×2)
             scale = max(0.5, min(ow / layout["contentWidth"], 4)) if ow else 2
+            span = o["max_h"] / scale if o["max_h"] else 0          # 한 장 최대 높이 (CSS px)
+            auto = not n
+            if auto:
+                # 자동 장수: 출력 이미지 한 장의 높이가 max_h(px)를 넘지 않게 (규격 없으면 6장)
+                n = max(1, min(math.ceil(H * scale / o["max_h"]), 40)) if o["max_h"] else 6
+            cuts = _cuts(layout, n, span if auto else 0)
+            while auto and span and n < 40 and any(b - a > span + 1 for a, b in zip(cuts, cuts[1:])):
+                n += 1                                              # 경계 맞춤으로 넘친 장이 있으면 한 장 더
+                cuts = _cuts(layout, n, span)
+            blocks = page.evaluate(_JS_TEXTS)
             if scale != 1:
                 ctx.close()
                 ctx, page, stat = _open_page(browser, vw, scale, doc)
@@ -243,6 +270,8 @@ def render(req: dict, zip_path: Path) -> dict:
                         type=fmt, full_page=True,
                         **({"quality": q} if fmt == "jpeg" else {}),
                         clip={"x": layout["contentLeft"], "y": y, "width": layout["contentWidth"], "height": h})
+                    if fmt == "jpeg" and o["max_bytes"] and len(shot) > o["max_bytes"]:
+                        shot = _shrink_jpeg(shot, q, o["min_q"], o["max_bytes"])   # 용량 제한 (Lazada 1MB 권장)
                     fname = f"{name}-{i + 1:02d}.{ext}"
                     tname = re.sub(r"\.(jpg|png)$", ".txt", fname)
                     zf.writestr(fname, shot)

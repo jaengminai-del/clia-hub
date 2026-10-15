@@ -101,9 +101,12 @@
     "_default": "centered_stack"
   },
   "slices": {
-    "_note": "세로 슬라이스 이미지 기본값 (빌더에서 바꾸지 않으면 사용). output_width가 null이면 콘텐츠 실측 폭의 2배.",
-    "count": 6,
-    "output_width": null,
+    "_note": "세로 슬라이스 이미지(Shopee·Lazada 업로드용). output_width 1000 = Shopee 셀러센터 상세 이미지 최소 폭. count null = 자동(한 장 높이 ≤ max_slice_height). max_bytes 넘으면 JPEG 화질을 min_quality 까지 낮춤 (Lazada 설명 이미지 1MB 권장, Shopee 2MB 제한).",
+    "count": null,
+    "output_width": 1000,
+    "max_slice_height": 3000,
+    "max_bytes": 1000000,
+    "min_quality": 60,
     "format": "jpeg",
     "quality": 88,
     "viewport_px": 1600

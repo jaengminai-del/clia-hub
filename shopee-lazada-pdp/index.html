@@ -169,8 +169,8 @@ body{font-family:'LGEIText',Arial,sans-serif;background:#F6F3EB;height:100vh;ove
     </div>
     <div class="bottom-bar">
       <div class="char-count">
-        Slices <input type="number" id="sliceCount" value="6" min="1" max="20" oninput="updateContentInfo()" style="width:46px;padding:3px 5px;border:1px solid #E1E2E5;border-radius:4px;font-size:11px">
-        &nbsp;Output width <input type="number" id="sliceWidth" placeholder="auto" min="400" max="3000" step="20" title="Leave empty to save at 2x the measured content width (no side margins)" style="width:64px;padding:3px 5px;border:1px solid #E1E2E5;border-radius:4px;font-size:11px">px
+        Slices <input type="number" id="sliceCount" placeholder="auto" min="1" max="40" title="Leave empty: automatic (each image at most 3000px tall)" oninput="updateContentInfo()" style="width:46px;padding:3px 5px;border:1px solid #E1E2E5;border-radius:4px;font-size:11px">
+        &nbsp;Output width <input type="number" id="sliceWidth" placeholder="1000" min="400" max="3000" step="20" title="Leave empty: 1000px (Shopee seller centre description image width)" style="width:64px;padding:3px 5px;border:1px solid #E1E2E5;border-radius:4px;font-size:11px">px
         &nbsp;<select id="sliceFormat" style="padding:3px 5px;border:1px solid #E1E2E5;border-radius:4px;font-size:11px"><option value="jpeg">JPG</option><option value="png">PNG</option></select>
         &nbsp;<span id="sliceInfo" style="color:#697072"></span>
         <span id="charCount" style="display:none">0</span>
@@ -578,9 +578,13 @@ function updateContentInfo() {
   const bar = document.getElementById('complianceBar');
   if (!frame || !bar || bar.classList.contains('warn')) return;
   const show = () => {
-    const n = parseInt(document.getElementById('sliceCount').value, 10) || 6;
+    // 장수를 비우면 자동: 출력 폭 1000px 기준으로 한 장 높이 ≤ 3000px (서버 규격과 같은 계산)
+    const typed = parseInt(document.getElementById('sliceCount').value, 10);
+    const outW = parseInt(document.getElementById('sliceWidth').value, 10) || 1000;
+    const cw = (frame.querySelector('.lg-container') || frame).offsetWidth || 832;
+    const n = typed || Math.max(1, Math.ceil(frame.scrollHeight * (outW / cw) / 3000));
     bar.textContent = '📏 Total content height: ' + Math.round(frame.scrollHeight).toLocaleString() + 'px · '
-      + n + ' slices · Use Edit to delete unnecessary content or modify the text. When you finish editing, be sure to Lock.';
+      + n + ' slices' + (typed ? '' : ' (auto)') + ' · Use Edit to delete unnecessary content or modify the text. When you finish editing, be sure to Lock.';
   };
   show();
   frame.querySelectorAll('img').forEach(img => { if (!img.complete) img.addEventListener('load', show, { once: true }); });
@@ -624,7 +628,8 @@ async function downloadImages() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         html,
-        slices: parseInt(document.getElementById('sliceCount').value, 10) || 6,
+        // 비우면 서버 규격(shopee_lazada spec.slices): 폭 1000px, 장수 자동(한 장 ≤ 3000px), 1MB 이하
+        slices: parseInt(document.getElementById('sliceCount').value, 10) || undefined,
         // 비우면 서버가 콘텐츠 실측 폭(좌우 여백 제외)의 2배로 저장한다
         outputWidth: parseInt(document.getElementById('sliceWidth').value, 10) || undefined,
         format: document.getElementById('sliceFormat').value || 'jpeg',
