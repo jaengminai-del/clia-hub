@@ -178,6 +178,7 @@ class ParsedComponent:
     dom_index: int = -1                        # HTML DOM 등장 순번 (0부터). 섹션 정렬의 진실 기준
     column_count: int = 0                      # DOM이 선언한 컬럼 수(column-N 클래스). 0=미선언
     wrapper_classes: List[str] = field(default_factory=list)  # c-wrapper 수식 클래스 (no-spacing·bg-*·width-* 등)
+    text_overlay: Optional[Dict[str, str]] = None  # 텍스트가 이미지 위 div 로 떠 있음 {pc: left|right|center, mobile: top|bottom|middle}
 
     def to_dict(self) -> Dict[str, Any]:
         """딕셔너리 변환"""
@@ -188,6 +189,7 @@ class ParsedComponent:
             "layout_type": self.layout_type.value,
             "column_count": self.column_count,
             **({} if LEGACY else {"wrapper_classes": self.wrapper_classes}),
+            **({"text_overlay": self.text_overlay} if (self.text_overlay and not LEGACY) else {}),
             "text_alignment": self.text_alignment.value,
             "background_type": self.background_type,
             "background_value": self.background_value,
@@ -348,11 +350,26 @@ class ComponentParser:
             # 이어 붙은 히어로 판별용 (no-spacing = 다음 컴포넌트와 여백 없이 붙음)
             wrapper_classes=[c for c in classes if c != component_id and c != 'c-wrapper'
                              and re.match(r'^(no-spacing|bg-|width-|margin-)', c)],
+            text_overlay=None if LEGACY else self._text_overlay(element),
             text_alignment=text_alignment,
             background_type=bg_type,
             background_value=bg_value,
             elements=elements
         )
+
+    @staticmethod
+    def _text_overlay(element: Tag) -> Optional[Dict[str, str]]:
+        """텍스트가 이미지 위에 div 로 떠 있는 컴포넌트인가 (c-floating-contents: __floor=이미지, __floating=텍스트).
+        이런 이미지는 텍스트 자리가 빈 배경으로 비어 있다. 텍스트 위치를 PC·모바일 각각 기록한다."""
+        fl = element.find(class_=re.compile(r'c-floating-contents__floating'))
+        floor = element.find(class_=re.compile(r'c-floating-contents__floor'))
+        if fl is None or floor is None or not fl.get_text(strip=True) or not floor.find(['img', 'picture']):
+            return None
+        hb = element.find(class_=re.compile(r'(^|\s)c-hero-banner(\s|$)'))
+        cls = ' '.join(hb.get('class') or []) if hb is not None else ''
+        pc = next((p for p in ('left', 'right', 'center') if f'main-pos-{p}' in cls.split() or re.search(rf'main-pos-{p}(\s|$)', cls)), 'center')
+        mobile = (re.findall(r'main-pos-(top|bottom|middle)-mobile', cls) or ['top'])[0]
+        return {"pc": pc, "mobile": mobile}
 
     def _extract_column_count(self, element: Tag, classes: List[str]) -> int:
         """column-N 클래스에서 컬럼 수 추출 (컨테이너 자신 → 내부 캐러셀/그리드)."""

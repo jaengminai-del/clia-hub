@@ -50,6 +50,7 @@ class Style:
         self.award = spec.get("award", {})
         self.stacked = spec.get("stacked_image", {})
         self.compare = spec.get("compare", {})
+        self.overlay_image = spec.get("overlay_image", {})
         self.overlay = spec.get("overlay", {})
         self.layouts = spec.get("layouts", {})
         # LG 가이드 폰트는 1440px 캔버스 기준 → 매체 컨테이너 폭으로 비례 축소
@@ -237,11 +238,33 @@ def overlay_on_image(st: Style, image_url: str, html: str, alignment: str) -> st
 </section>'''
 
 
-def centered_stack(media_list: list, html: str) -> str:
+def content_img(st, m: dict, style: str) -> str:
+    """섹션 이미지 1장. 텍스트가 이미지 위에 떠 있던 히어로는 모바일 이미지 + 텍스트 자리 빈 배경을 잘라 낸 영역
+    (crawler image_crop.annotate_overlay_crops 가 기록). spec overlay_image.mode = "pc" 이면 예전처럼 PC 원본."""
+    mode = (st.overlay_image.get("mode", "mobile_crop") if st is not None else "pc")
+    url, crop = best_image_url(m), None
+    if mode != "pc":
+        if m.get("use_mobile") and m.get("mobile_crop") and m.get("mobile_url"):
+            url, crop = m["mobile_url"], m["mobile_crop"]
+        elif (m.get("crop") or {}).get("kind") == "overlay_band":
+            crop = m["crop"]
+    if not crop:
+        return f'<img src="{url}" alt="" style="{style}">'
+    x, y, w, h = crop["x"], crop["y"], crop["w"], crop["h"]
+    ratio = crop.get("ih", 1) / max(1, crop.get("iw", 1))
+    box = h * ratio / w
+    radius = re.search(r"border-radius:\s*[^;]+;", style)
+    margin = re.search(r"margin:\s*[^;]+;", style)
+    return (f'<div style="position: relative; width: 100%; padding-top: {box * 100:.2f}%; overflow: hidden; '
+            f'{radius.group(0) if radius else ""} {margin.group(0) if margin else ""}">'
+            f'<img src="{url}" alt="" style="position: absolute; top: 0; left: 0; width: {100 / w:.2f}%; max-width: none; '
+            f'height: auto; margin-left: -{x / w * 100:.2f}%; margin-top: -{y * ratio / w * 100:.2f}%;"></div>')
+
+
+def centered_stack(media_list: list, html: str, st=None) -> str:
     """이미지(중앙)를 위에, 텍스트(중앙)를 아래에 쌓는 단일 카드."""
     imgs = "\n".join(
-        f'<img src="{best_image_url(m)}" alt="" style="max-width: 100%; height: auto; '
-        f'display: block; margin: 0 auto {16 if i else 0}px auto; border-radius: 8px;">'
+        content_img(st, m, f'max-width: 100%; height: auto; display: block; margin: 0 auto {16 if i else 0}px auto; border-radius: 8px;')
         for i, m in enumerate(media_list))
     txt = (f'<div style="text-align: center; padding: 20px 6% 4px;">{html}</div>'
            if html else "")
@@ -302,14 +325,16 @@ def text_only(html: str, align: str) -> str:
 """
 
 
-def kv_card(image_url: str, html: str) -> str:
+def kv_card(image_url: str, html: str, st=None, media: dict = None) -> str:
     """KV(최상단 히어로): 흰 카드 상단에 중앙 텍스트, 그 아래 이미지가 카드 폭에 꽉 차게."""
+    img = (content_img(st, media, "width: 100%; height: auto; display: block;").replace('alt=""', 'alt="Hero Image"', 1)
+           if media is not None else f'<img src="{image_url}" alt="Hero Image" style="width: 100%; height: auto; display: block;">')
     return f'''
 <section class="lg-section lg-hero">
   <div class="lg-hero-text" style="padding: 36px 8% 24px; text-align: center;">
     {html}
   </div>
-  <img src="{image_url}" alt="Hero Image" style="width: 100%; height: auto; display: block;">
+  {img}
 </section>'''
 
 
@@ -428,7 +453,7 @@ def render_section(st: Style, section: dict, kv: bool, align: str) -> str:
     if cid in st.overlay_ids and html and len(media_list) == 1:
         return overlay_on_image(st, primary, html, align)
     if kv and html and layout_type in ("hero_full_width", "text_over_image"):
-        return kv_card(primary, html)
+        return kv_card(primary, html, st, media_list[0])
 
     pattern = st.pattern(layout_type)
     if pattern in ("card_list", "card_list_no_header"):
@@ -444,7 +469,7 @@ def render_section(st: Style, section: dict, kv: bool, align: str) -> str:
         return hcard_list([hcard(st, best_image_url(m), [], cid) for m in media_list])
     if pattern == "gallery":
         return gallery(media_list)
-    return centered_stack(media_list, html)
+    return centered_stack(media_list, html, st)
 
 
 def render_award_section(st: Style, section: dict) -> str:

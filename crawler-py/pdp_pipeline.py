@@ -1063,6 +1063,10 @@ def _polish_mirror(mirror: dict, html: str):
         bc = annotate_badge_crops(mirror)
         if bc:
             print(f"   ✓ 수상 배너 배지 영역: {bc}건")
+        from image_crop import annotate_overlay_crops     # 텍스트 오버레이 히어로 → 모바일 이미지 + 빈 띠 자르기
+        oc = annotate_overlay_crops(mirror)
+        if oc:
+            print(f"   ✓ 텍스트 자리 빈 배경 자르기: {oc}건")
     except Exception as e:
         print(f"   ⚠️ 배지 영역 계산 건너뜀: {str(e)[:100]}")
 

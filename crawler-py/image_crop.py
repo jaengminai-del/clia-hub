@@ -101,3 +101,88 @@ def annotate_badge_crops(mirror: dict, min_aspect: float = 2.5) -> int:
                 m["crop"] = dict(cache[url], kind="badge")
                 n += 1
     return n
+
+
+def find_text_band_crop(im: Image.Image, side: str, tol: int = 18, content_ratio: float = 0.06,
+                        margin: float = 0.02, min_keep: float = 0.25, min_content_rows: float = 0.4) -> Optional[dict]:
+    """텍스트 자리로 비워 둔 배경 띠(side = top·bottom·left·right 쪽)를 잘라 낸 영역.
+    가장자리 색(그 쪽 끝 줄의 중앙값)과 확연히 다른 픽셀이 한 줄의 content_ratio 이상이 되는 첫 줄까지를 빈 띠로 본다.
+    남는 영역이 원본의 min_keep 보다 작으면(이미지 대부분이 빈 배경) None — 자르지 않는다."""
+    iw, ih = im.size
+    sw, sh = max(1, iw // 4), max(1, ih // 4)
+    px = im.resize((sw, sh)).load()
+    vertical = side in ("top", "bottom")
+    n_lines, n_len = (sh, sw) if vertical else (sw, sh)
+
+    def line(i):
+        k = i if side in ("top", "left") else n_lines - 1 - i
+        return [px[j, k] if vertical else px[k, j] for j in range(n_len)]
+
+    edge = line(0)
+    ref = tuple(sorted(c[ch] for c in edge)[len(edge) // 2] for ch in range(3))
+    band = 0
+    for i in range(n_lines):
+        diff = sum(1 for c in line(i) if sum(abs(c[ch] - ref[ch]) for ch in range(3)) > tol * 3)
+        if diff >= n_len * content_ratio:
+            break
+        band = i + 1
+    if band == 0:
+        return None
+    cut = max(0, band - int(n_lines * margin))
+    keep = n_lines - cut
+    if keep < n_lines * min_keep:
+        return None
+    # 남는 영역이 거의 배경뿐이면(동영상 자리 표시 이미지 등) 자르지 않는다
+    #   (남는 줄 중 내용이 있는 줄이 min_content_rows 미만 — 예: 베이지 화면에 막대 하나)
+    rows = [sum(1 for c in line(i) if sum(abs(c[ch] - ref[ch]) for ch in range(3)) > tol * 3) >= n_len * content_ratio
+            for i in range(band, n_lines)]
+    if sum(rows) < len(rows) * min_content_rows:
+        return None
+    f = cut / n_lines
+    box = {"top": (0, f, 1, 1 - f), "bottom": (0, 0, 1, 1 - f),
+           "left": (f, 0, 1 - f, 1), "right": (0, 0, 1 - f, 1)}[side]
+    return {"x": round(box[0], 4), "y": round(box[1], 4), "w": round(box[2], 4), "h": round(box[3], 4),
+            "iw": iw, "ih": ih, "band": round(f, 4)}
+
+
+def annotate_overlay_crops(mirror: dict) -> int:
+    """텍스트가 이미지 위에 떠 있던 히어로(section.text_overlay)의 이미지에서 텍스트 자리 빈 배경을 잘라 낼 영역 기록.
+      · 모바일 이미지가 있으면: 모바일 텍스트 위치(위·아래) 쪽 빈 띠 → media.mobile_crop (+ use_mobile)
+      · 없으면: PC 텍스트 위치(왼쪽·오른쪽) 쪽 빈 영역 → media.crop (kind=overlay_band)
+    빈 띠를 못 찾거나 남는 부분이 거의 배경뿐(동영상 자리 표시 이미지 등)이면 기록하지 않는다 → 원래 이미지 그대로."""
+    try:
+        from component_parser import LEGACY
+    except Exception:
+        LEGACY = False
+    if LEGACY:
+        return 0
+    n, cache = 0, {}
+
+    def crop(url, side):
+        key = (url, side)
+        if key not in cache:
+            im = fetch_image(url)
+            cache[key] = find_text_band_crop(im, side) if im is not None else None
+        return cache[key]
+
+    for s in mirror.get("sections", []):
+        ov = s.get("text_overlay")
+        if not ov:
+            continue
+        for m in s.get("media", []):
+            if m.get("type") != "image" or m.get("mobile_crop") or (m.get("crop") or {}).get("kind") == "badge":
+                continue
+            mob, pc = m.get("mobile_url"), m.get("pc_url")
+            if mob and mob != pc and ov.get("mobile") in ("top", "bottom"):
+                c = crop(mob, ov["mobile"])
+                if c:
+                    m["mobile_crop"] = dict(c, kind="overlay_band")
+                    m["use_mobile"] = True
+                    n += 1
+                    continue
+            if not mob and pc and ov.get("pc") in ("left", "right"):
+                c = crop(pc, ov["pc"])
+                if c:
+                    m["crop"] = dict(c, kind="overlay_band")
+                    n += 1
+    return n

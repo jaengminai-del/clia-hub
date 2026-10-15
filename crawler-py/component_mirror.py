@@ -328,6 +328,7 @@ def build_component_sections(component_data: list, origin: str = _LG_ORIGIN) -> 
             "item_group": False,
             "group_heading": "",
             **({"compare": compare} if compare else {}),
+            **({"text_overlay": comp["text_overlay"]} if (comp.get("text_overlay") and not LEGACY) else {}),
             # 3P 노출 조건: 텍스트와 이미지가 둘 다 모여 그룹핑된 섹션만.
             # 단 스펙 표는 라벨/값 짝 자체가 완결된 정보라 이미지가 없어도 노출한다
             # (이미지 요건은 '텍스트 조각만 떠도는 섹션'을 걸러내기 위한 규칙).
@@ -386,7 +387,7 @@ def stitch_orphans(built: dict) -> int:
                 if img_only and abs(t["component_dom_index"] - s["component_dom_index"]) <= 2:
                     s = dict(s)
                     s["media"] = t["media"]
-                    for k in ("compare", "stacked"):      # 비교 슬라이더·이어 붙은 히어로 정보도 함께 옮긴다
+                    for k in ("compare", "stacked", "text_overlay"):   # 비교·이어 붙은 히어로·텍스트 오버레이 정보도 함께 옮긴다
                         if t.get(k):
                             s[k] = t[k]
                     s["columns"] = max(s["columns"], t["columns"])
@@ -449,6 +450,7 @@ def to_mirror_format(built: dict, product_title: str = "") -> dict:
             "text_alignment": s["text_alignment"],
             **({"stacked": True} if s.get("stacked") else {}),
             **({"compare": s["compare"]} if s.get("compare") else {}),
+            **({"text_overlay": s["text_overlay"]} if s.get("text_overlay") else {}),
         }
         if s["renderable"]:
             order += 1

@@ -60,6 +60,10 @@
     "after_label_weight": 700,
     "image_radius_px": 8
   },
+  "overlay_image": {
+    "_note": "텍스트가 이미지 위 div 로 떠 있던 히어로(c-floating-contents): mobile_crop = 모바일 이미지에서 텍스트 자리 빈 배경을 잘라 냄 / pc = 예전처럼 PC 원본",
+    "mode": "mobile_crop"
+  },
   "overlay": {
     "_note": "텍스트를 이미지 위에 얹는 컴포넌트(figma 스펙 is_overlay: ST0004/05/14)의 스크림",
     "text_width": "55%",
