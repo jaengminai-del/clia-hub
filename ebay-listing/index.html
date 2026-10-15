@@ -746,21 +746,42 @@ function removeEditControls(frame) {
 // Image Zoom & Pan (Edit Mode)
 // ══════════════════════════════════════════
 function makeImageEditable(img) {
-  // 이미 래핑된 경우 스킵
-  if (img.parentElement?.classList?.contains('img-edit-wrap')) return;
+  // 편집 중인 래퍼면 스킵 (Lock 후 다시 Edit 하면 기존 래퍼를 재사용)
+  if (img.parentElement?._editImg === img) return;
 
-  const state = { scale: 1, tx: 0, ty: 0, dragging: false, sx: 0, sy: 0 };
+  // 이전 편집의 확대·이동 값 이어받기
+  const prev = /scale\(([\d.]+)\)\s*translate\(([-\d.]+)px,\s*([-\d.]+)px\)/.exec(img.style.transform || '');
+  const state = { scale: prev ? +prev[1] : 1, tx: prev ? +prev[2] : 0, ty: prev ? +prev[3] : 0, dragging: false, sx: 0, sy: 0 };
 
   // 래퍼 생성 (overflow: hidden → 크롭 효과)
-  const wrap = document.createElement('div');
-  wrap.className = 'img-edit-wrap';
   const parent = img.parentElement;
   const inTableCell = parent && (parent.tagName === 'TD' || parent.closest('td'));
-  // 테이블 셀 안이면 셀 높이에 맞춰 확장
-  const heightStyle = inTableCell ? 'height:100%;min-height:200px;' : '';
-  wrap.style.cssText = `position:relative;overflow:hidden;cursor:grab;border:2px dashed rgba(229,50,56,.4);border-radius:4px;${heightStyle}`;
-  parent.insertBefore(wrap, img);
-  wrap.appendChild(img);
+  let wrap;
+  if (isCropBox(parent, img) || parent.classList.contains('img-edit-wrap')) {
+    // 이미 잘린 이미지(비율 상자 안의 absolute 이미지) → 그 상자를 그대로 프레임으로 사용
+    //   (새 래퍼를 끼우면 높이가 0이 되어 편집 중 이미지가 사라짐)
+    wrap = parent;
+    wrap.classList.add('img-edit-wrap');
+    wrap.style.cursor = 'grab';
+    wrap.style.outline = '2px dashed rgba(229,50,56,.4)';
+  } else {
+    wrap = document.createElement('div');
+    wrap.className = 'img-edit-wrap';
+    // 테이블 셀 안이면 셀 높이에 맞춰 확장
+    const heightStyle = inTableCell ? 'height:100%;min-height:200px;' : '';
+    wrap.style.cssText = `position:relative;overflow:hidden;cursor:grab;outline:2px dashed rgba(229,50,56,.4);border-radius:4px;${heightStyle}`;
+    parent.insertBefore(wrap, img);
+    wrap.appendChild(img);
+  }
+
+  // 프레임은 글자 편집 대상이 아님 (contenteditable 이면 빈 줄 높이가 더해져 프레임이 커짐)
+  wrap.removeAttribute('contenteditable');
+  if (wrap.style.outline.startsWith('1px dashed')) wrap.style.outline = '2px dashed rgba(229,50,56,.4)';
+
+  // 이벤트 정리용 (Lock 시 해제 → 다시 Edit 할 때 리스너가 중복되지 않게)
+  if (wrap._editAbort) wrap._editAbort.abort();
+  const ac = new AbortController();
+  wrap._editAbort = ac;
 
   // 이미지 스타일 조정
   img.style.transformOrigin = 'center center';
@@ -833,7 +854,7 @@ function makeImageEditable(img) {
     const delta = ev.deltaY > 0 ? -0.05 : 0.05;
     state.scale = Math.max(0.3, Math.min(5, state.scale + delta));
     applyTransform();
-  }, { passive: false });
+  }, { passive: false, signal: ac.signal });
 
   // 드래그 → 이동 (edit 모드에서만)
   wrap.addEventListener('mousedown', (ev) => {
@@ -843,7 +864,7 @@ function makeImageEditable(img) {
     state.sx = ev.clientX;
     state.sy = ev.clientY;
     wrap.style.cursor = 'grabbing';
-  });
+  }, { signal: ac.signal });
   document.addEventListener('mousemove', (ev) => {
     if (!state.dragging) return;
     const dx = (ev.clientX - state.sx) / state.scale;
@@ -853,17 +874,94 @@ function makeImageEditable(img) {
     state.sx = ev.clientX;
     state.sy = ev.clientY;
     applyTransform();
-  });
+  }, { signal: ac.signal });
   document.addEventListener('mouseup', () => {
     if (state.dragging) {
       state.dragging = false;
       wrap.style.cursor = '';
     }
-  });
+  }, { signal: ac.signal });
+
+  // 프레임 가장자리 핸들 (위·아래·왼쪽·오른쪽 끌어서 프레임 크기 조절) — 테이블 셀 안 이미지는 제외
+  if (!inTableCell) addFrameHandles(wrap, img, ac.signal);
 
   // 상태 저장
   wrap._editState = state;
   wrap._editImg = img;
+}
+
+// 비율 상자(padding-top + overflow:hidden) 안에 absolute 이미지가 든 구조인가 (1차 컨텐츠 생성의 크롭 이미지)
+function isCropBox(box, img) {
+  return !!box && box.tagName === 'DIV' && box.children.length === 1 && box.firstElementChild === img
+    && parseFloat(box.style.paddingTop) > 0 && img.style.position === 'absolute';
+}
+
+// ══════════════════════════════════════════
+// Frame Resize (Edit Mode) — 이미지 프레임의 위·아래·왼쪽·오른쪽 가장자리를 끌어 빈 배경을 잘라 냄
+//   결과는 비율 상자(%)로 저장 → HTML 복사·슬라이스 모두 같은 모양 (폭이 바뀌어도 비율 유지)
+// ══════════════════════════════════════════
+function frameParentWidth(frame) {
+  const p = frame.parentElement, cs = getComputedStyle(p);
+  return p.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+}
+
+// 일반 이미지 래퍼를 비율 상자 구조로 바꾼다 (첫 조절 시 1회). 현재 보이는 모양은 그대로.
+function toCropBox(frame, img) {
+  if (parseFloat(frame.style.paddingTop) > 0 && img.style.position === 'absolute') return;   // 이미 비율 상자
+  const pw = frameParentWidth(frame);
+  const fw = frame.getBoundingClientRect().width, fh = img.offsetHeight, iw = img.offsetWidth;
+  frame.style.width = (fw / pw * 100).toFixed(2) + '%';
+  frame.style.height = '0';
+  frame.style.paddingTop = (fh / pw * 100).toFixed(2) + '%';
+  frame.style.marginLeft = frame.style.marginRight = 'auto';
+  Object.assign(img.style, { position: 'absolute', top: '0', left: '0', maxWidth: 'none', height: 'auto',
+    width: (iw / fw * 100).toFixed(2) + '%', marginLeft: '0%', marginTop: '0%' });
+}
+
+function addFrameHandles(frame, img, signal) {
+  const MIN = 24;
+  const sides = { top: 'ns-resize', bottom: 'ns-resize', left: 'ew-resize', right: 'ew-resize' };
+  Object.entries(sides).forEach(([side, cursor]) => {
+    const h = document.createElement('div');
+    h.className = 'img-frame-handle';
+    h.title = 'Drag to crop the frame';
+    const pos = { top: 'top:0;left:0;right:0;height:8px;', bottom: 'bottom:0;left:0;right:0;height:8px;',
+                  left: 'left:0;top:0;bottom:0;width:8px;', right: 'right:0;top:0;bottom:0;width:8px;' }[side];
+    h.style.cssText = `position:absolute;${pos}z-index:15;cursor:${cursor};background:rgba(229,50,56,.55);opacity:0;transition:opacity .15s;`;
+    frame.appendChild(h);
+    frame.addEventListener('mouseenter', () => { h.style.opacity = '.6'; }, { signal });
+    frame.addEventListener('mouseleave', () => { if (!h._drag) h.style.opacity = '0'; }, { signal });
+    h.addEventListener('mousedown', (ev) => {
+      if (!editMode) return;
+      ev.preventDefault(); ev.stopPropagation();          // 이미지 이동(pan)과 분리
+      toCropBox(frame, img);
+      const pw = frameParentWidth(frame);
+      const r = frame.getBoundingClientRect();
+      const fh = parseFloat(frame.style.paddingTop) / 100 * pw;   // 프레임 높이 = padding-top (비율 상자)
+      h._drag = { x: ev.clientX, y: ev.clientY, fw: r.width, fh,
+        il: img.offsetLeft, it: img.offsetTop, iw: img.offsetWidth, pw };
+      h.style.opacity = '1';
+      document.body.style.cursor = cursor;
+    }, { signal });
+    document.addEventListener('mousemove', (ev) => {
+      const d = h._drag; if (!d) return;
+      const dx = ev.clientX - d.x, dy = ev.clientY - d.y;
+      let fw = d.fw, fh = d.fh, il = d.il, it = d.it;
+      if (side === 'bottom') fh = Math.max(MIN, d.fh + dy);
+      if (side === 'top')    { fh = Math.max(MIN, d.fh - dy); it = d.it - (d.fh - fh); }
+      if (side === 'right')  fw = Math.min(d.pw, Math.max(MIN, d.fw + dx));
+      if (side === 'left')   { fw = Math.min(d.pw, Math.max(MIN, d.fw - dx)); il = d.il - (d.fw - fw); }
+      frame.style.width = (fw / d.pw * 100).toFixed(2) + '%';
+      frame.style.paddingTop = (fh / d.pw * 100).toFixed(2) + '%';
+      img.style.width = (d.iw / fw * 100).toFixed(2) + '%';
+      img.style.marginLeft = (il / fw * 100).toFixed(2) + '%';
+      img.style.marginTop = (it / fw * 100).toFixed(2) + '%';
+    }, { signal });
+    document.addEventListener('mouseup', () => {
+      if (!h._drag) return;
+      h._drag = null; h.style.opacity = '0'; document.body.style.cursor = '';
+    }, { signal });
+  });
 }
 
 // Edit 종료 시: 래퍼 유지 + 편집 UI만 제거 (transform 보존)
@@ -874,7 +972,7 @@ async function bakeAllImageEdits(frame) {
     if (!img) continue;
 
     // 편집 UI 요소 제거 (뱃지, 버튼들)
-    wrap.querySelectorAll('.edit-del-btn, .edit-reframe-btn').forEach(b => b.remove());
+    wrap.querySelectorAll('.edit-del-btn, .edit-reframe-btn, .img-frame-handle').forEach(b => b.remove());
     wrap.querySelectorAll('div').forEach(d => {
       // 줌 뱃지 제거 (pointer-events:none인 div)
       if (d.style.pointerEvents === 'none') d.remove();
@@ -882,11 +980,13 @@ async function bakeAllImageEdits(frame) {
 
     // 편집 전용 스타일 정리 → 깔끔한 상태로 유지
     wrap.style.border = 'none';
+    wrap.style.outline = '';
     wrap.style.cursor = '';
     img.style.pointerEvents = '';
     img.draggable = true;
 
-    // 내부 데이터 제거
+    // 내부 데이터 제거 (편집 이벤트 해제)
+    if (wrap._editAbort) { wrap._editAbort.abort(); delete wrap._editAbort; }
     delete wrap._editState;
     delete wrap._editImg;
   }
