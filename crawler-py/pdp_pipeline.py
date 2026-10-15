@@ -1058,6 +1058,13 @@ def _polish_mirror(mirror: dict, html: str):
     up = upgrade_media_resolution(mirror, html)
     if up:
         print(f"   ✓ 이미지 해상도 업그레이드: {up}건 (썸네일→원본)")
+    try:                                    # 수상 배너 → 배지 영역 (배지 카드용, 픽셀 규칙·AI 없음)
+        from image_crop import annotate_badge_crops
+        bc = annotate_badge_crops(mirror)
+        if bc:
+            print(f"   ✓ 수상 배너 배지 영역: {bc}건")
+    except Exception as e:
+        print(f"   ⚠️ 배지 영역 계산 건너뜀: {str(e)[:100]}")
 
 
 def content_checks(mirror: dict, html: str = "") -> dict:

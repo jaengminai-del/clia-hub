@@ -38,6 +38,11 @@ AWARD_IDS = {"ST0053"}                  # Award 컴포넌트 (수상·인증·�
 def _is_award_url(u: str) -> bool:
     return bool(AWARD_FILE_RE.search((u or "").split("?")[0].rsplit("/", 1)[-1]))
 
+
+def _is_award_media(m: dict) -> bool:
+    """배지 이미지: 배지 파일명이거나, 크롤러가 수상 배너에서 배지 영역(crop kind=badge)을 찾은 이미지."""
+    return (m.get("crop") or {}).get("kind") == "badge" or _is_award_url(best_image_url(m))
+
 _VID_EXT = (".mp4", ".webm", ".mov")
 # 갤러리 썸네일 렌디션·탭 ON/OFF 상태 이미지 — 컨텐츠화 금지
 _THUMB_RE = re.compile(r"thum-\d+x\d+", re.I)
@@ -113,7 +118,8 @@ def _merge_card_rows(sections: list, max_cols: int, use_group_heading: bool = Fa
                     heading_text = "## " + nx["group_heading"]   # 컴포넌트 대제목 (F6)
                 if um:
                     for mm in um:
-                        cards.append({"img": best_image_url(mm), "text": nx.get("text", "")})
+                        cards.append({"img": best_image_url(mm), "text": nx.get("text", ""),
+                                      **({"crop": mm["crop"]} if mm.get("crop") else {})})
                 elif nx.get("text", "").strip().startswith("##") and not heading_text:
                     heading_text = nx["text"]      # ## 대제목 → 카드 행 헤딩
                 j += 1
@@ -176,7 +182,8 @@ def build_blocks(mirror: dict, rules: dict) -> list:
         if s.get("layout_type") == "card_row":
             cards = s.get("cards", [])
             award = bool(rules.get("unify_awards")) and (
-                s.get("component_id") in AWARD_IDS or (cards and all(_is_award_url(c.get("img")) for c in cards)))
+                s.get("component_id") in AWARD_IDS or (cards and all(
+                    (c.get("crop") or {}).get("kind") == "badge" or _is_award_url(c.get("img")) for c in cards)))
             blocks.append({"kind": "card_row", "component_id": s.get("component_id", ""),
                            "cols": s.get("cols"), "heading": s.get("heading", ""),
                            "cards": cards, "award": award})
@@ -190,6 +197,6 @@ def build_blocks(mirror: dict, rules: dict) -> list:
             kv = kv_seen = True
         um = usable_media(s)
         award = bool(rules.get("unify_awards")) and bool(um) and (
-            s.get("component_id") in AWARD_IDS or all(_is_award_url(best_image_url(m)) for m in um))
+            s.get("component_id") in AWARD_IDS or all(_is_award_media(m) for m in um))
         blocks.append({"kind": "section", "section": s, "kv": kv and not award, "award": award})
     return blocks

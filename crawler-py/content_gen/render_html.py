@@ -163,7 +163,22 @@ def hcard(st: Style, image_url: str, lines: list, component_id: str = "") -> str
 </div>'''
 
 
-def award_card(st: Style, image_url: str, lines: list, component_id: str = "") -> str:
+def _cropped_img(image_url: str, crop: dict, alt: str, max_h: int) -> str:
+    """이미지의 일부(crop: x·y·w·h 비율 + 원본 iw·ih)만 보이게 — 인라인 CSS만 사용(eBay·Lazada 설명란 호환).
+    컨테이너 높이는 padding-top %, 이미지 위치는 margin % (둘 다 컨테이너 '폭' 기준이라 비율이 유지된다)."""
+    x, y, w, h = crop["x"], crop["y"], crop["w"], crop["h"]
+    ratio = crop.get("ih", 1) / max(1, crop.get("iw", 1))        # 원본 세로/가로
+    box_ratio = h * ratio / w                                     # 잘라낸 영역 세로/가로
+    max_w = round(max_h / box_ratio) if box_ratio else max_h
+    return (f'<div style="display: inline-block; width: 100%; max-width: {max_w}px;">'
+            f'<div style="position: relative; width: 100%; padding-top: {box_ratio * 100:.2f}%; overflow: hidden;">'
+            f'<img src="{image_url}" alt="{escape(alt)}" style="position: absolute; top: 0; left: 0; '
+            f'width: {100 / w:.2f}%; max-width: none; height: auto; '
+            f'margin-left: -{x / w * 100:.2f}%; margin-top: -{y * ratio / w * 100:.2f}%;">'
+            f'</div></div>')
+
+
+def award_card(st: Style, image_url: str, lines: list, component_id: str = "", crop: dict = None) -> str:
     """수상·인증 배지 카드: 작은 로고(왼쪽, 비율 유지) + 제목·본문(오른쪽). 모든 배지를 같은 모양으로 통일."""
     aw = st.award
     h_px = st.px(component_id, "headline", 36)
@@ -180,9 +195,11 @@ def award_card(st: Style, image_url: str, lines: list, component_id: str = "") -
     pad = aw.get("logo_padding_px", 24)
     txt = (f'<div class="lg-award-text" style="flex: 1 1 auto; padding: 20px 24px 20px 0; text-align: left;">{h}{b}</div>'
            if (h or b) else "")
+    logo = (_cropped_img(image_url, crop, title, logo_max) if crop else
+            f'<img src="{image_url}" alt="{escape(title)}" style="max-width: 100%; max-height: {logo_max}px; width: auto; height: auto; display: inline-block;">')
     return f'''
 <div class="lg-hcard lg-award" style="display: flex; align-items: center; gap: 24px; background: #FFFFFF; border: 1px solid {st.stroke}; border-radius: 16px; overflow: hidden;">
-  <div class="lg-award-logo" style="flex: 0 0 {logo_w}; max-width: {logo_w}; padding: {pad}px; text-align: center;"><img src="{image_url}" alt="{escape(title)}" style="max-width: 100%; max-height: {logo_max}px; width: auto; height: auto; display: inline-block;"></div>
+  <div class="lg-award-logo" style="flex: 0 0 {logo_w}; max-width: {logo_w}; padding: {pad}px; text-align: center;">{logo}</div>
   {txt}
 </div>'''
 
@@ -334,8 +351,11 @@ def render_spec_table(st: Style, section: dict) -> str:
 
 def render_card_row(st: Style, block: dict) -> str:
     cid = block.get("component_id", "")
-    card = award_card if block.get("award") else hcard
-    items = [card(st, c.get("img", ""), content_lines(c.get("text")), cid) for c in block.get("cards", [])]
+    if block.get("award"):
+        items = [award_card(st, c.get("img", ""), content_lines(c.get("text")), cid, c.get("crop"))
+                 for c in block.get("cards", [])]
+    else:
+        items = [hcard(st, c.get("img", ""), content_lines(c.get("text")), cid) for c in block.get("cards", [])]
     hd = content_lines(block.get("heading", ""))
     heading = hd[0] if hd else ""
     head_html = (f'<h2 style="font-family: {st.font_headline}; font-weight: 600; font-size: {st.px(cid, "headline", 36)}px; line-height: {st.head_lh}; '
@@ -383,7 +403,7 @@ def render_award_section(st: Style, section: dict) -> str:
     cid = section.get("component_id", "")
     lines = content_lines(section.get("text", ""))
     media = usable_media(section)
-    cards = [award_card(st, best_image_url(m), lines if i == 0 else [], cid) for i, m in enumerate(media)]
+    cards = [award_card(st, best_image_url(m), lines if i == 0 else [], cid, m.get("crop")) for i, m in enumerate(media)]
     return hcard_list(cards)
 
 
