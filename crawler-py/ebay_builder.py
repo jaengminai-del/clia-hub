@@ -11,6 +11,7 @@ ebay_builder.py — eBay 1차 컨텐츠 생성 (CLI + 기존 호출부 호환)
     python ebay_builder.py <out/slug 디렉토리>              # 미리보기 문서 → ebay_content.html
     python ebay_builder.py <out/slug 디렉토리> --fragment   # eBay 설명란 조각
     python ebay_builder.py <out/slug 디렉토리> --preview    # 브라우저에서 미리보기
+    python ebay_builder.py <out/slug 디렉토리> --fragment --medium shopee_lazada   # 다른 매체 규격
 """
 import argparse
 import json
@@ -20,11 +21,11 @@ from pathlib import Path
 from content_gen import generate, assert_no_active_content  # noqa: F401  (assert_* 는 하위 호환용 재노출)
 
 
-def build_ebay_html(mirror: dict, fragment: bool = False) -> str:
-    """mirror.json → eBay용 HTML.
-    fragment=True: eBay 설명란 삽입용 조각(<style>+컨테이너, 문서 래퍼 없음)
+def build_ebay_html(mirror: dict, fragment: bool = False, medium: str = "ebay") -> str:
+    """mirror.json → 매체용 HTML (기본 eBay).
+    fragment=True: 설명란 삽입용 조각(<style>+컨테이너, 문서 래퍼 없음)
     fragment=False: 브라우저 미리보기용 완전한 HTML 문서"""
-    return generate(mirror, medium="ebay", fragment=fragment)
+    return generate(mirror, medium=medium, fragment=fragment)
 
 
 def main():
@@ -33,6 +34,7 @@ def main():
     ap.add_argument("--preview", action="store_true", help="브라우저에서 미리보기")
     ap.add_argument("--fragment", action="store_true", help="eBay 설명란 삽입용 조각 출력 (문서 래퍼 없음)")
     ap.add_argument("--output", "-o", help="출력 HTML 파일명 (기본: ebay_content.html)")
+    ap.add_argument("--medium", default="ebay", help="매체 규격 (content_gen/media/<medium>, 기본 ebay)")
     args = ap.parse_args()
 
     slug_dir = Path(args.slug_dir)
@@ -44,7 +46,7 @@ def main():
 
     mirror = json.loads(mirror_file.read_text(encoding="utf-8"))
     output_file = slug_dir / (args.output or "ebay_content.html")
-    output_file.write_text(build_ebay_html(mirror, fragment=args.fragment), encoding="utf-8")
+    output_file.write_text(build_ebay_html(mirror, fragment=args.fragment, medium=args.medium), encoding="utf-8")
     print(f"✓ eBay HTML 생성 완료: {output_file}")
 
     component_summary = mirror.get("_component_summary", {})

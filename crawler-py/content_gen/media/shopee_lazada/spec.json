@@ -1,0 +1,89 @@
+{
+  "_meta": {
+    "medium": "shopee_lazada",
+    "name": "Shopee / Lazada product description (sliced images)",
+    "note": "1차 컨텐츠 생성 — Shopee·Lazada 공통 규격. 2026-10-15 현재 값은 eBay와 같다(구조만 분리). Shopee·Lazada 규격이 확정되면 이 파일 값과 fragment.css를 교체한다.",
+    "files": {
+      "fragment_css": "fragment.css — eBay 설명란 삽입용 <style> (eBay는 <style> 허용, JS 금지)",
+      "fragment_html": "fragment.html — 설명란 조각 래퍼 ({sections})",
+      "document_html": "document.html — 브라우저 미리보기용 완전한 문서 ({product_title}, {sections})"
+    }
+  },
+  "container_px": 800,
+  "typography": {
+    "_note": "261007 법인 피드백: 모바일 가독성 — 모든 제목(h2/h3) 36px, 모든 본문(p) 24px 고정. 고정값을 비우면(null) LG 가이드(ccg_spec) desktop_px를 container_px/1440 비율로 축소 후 min/max로 클램프.",
+    "fixed_headline_px": 36,
+    "fixed_body_px": 24,
+    "guide_scaling": {
+      "headline_min_px": 18,
+      "headline_max_px": 32,
+      "body_min_px": 13,
+      "body_max_px": 16
+    },
+    "headline_line_height": 1.0,
+    "body_line_height": 1.28,
+    "spec_table": {
+      "_note": "261007 — 본문 24px보다 작게 해 표 길이 유지",
+      "group_px": 20,
+      "cell_px": 18
+    }
+  },
+  "colors": {
+    "headline": "#111111",
+    "body": "#2D2D2D",
+    "eyebrow": "#697072",
+    "disclaimer": "#697072",
+    "page_background": "#FFFFFF",
+    "card_background": "#FFFFFF",
+    "card_stroke": "#F0ECE4"
+  },
+  "card": {
+    "_note": "가로형 카드(lg-hcard): 이미지 왼쪽 / 텍스트 오른쪽. 텍스트가 없으면 이미지가 100%.",
+    "image_width": "40%",
+    "text_width": "60%"
+  },
+  "overlay": {
+    "_note": "텍스트를 이미지 위에 얹는 컴포넌트(figma 스펙 is_overlay: ST0004/05/14)의 스크림",
+    "text_width": "55%",
+    "scrim_left": "linear-gradient(90deg, rgba(0,0,0,0.45), rgba(0,0,0,0))",
+    "scrim_right": "linear-gradient(270deg, rgba(0,0,0,0.5), rgba(0,0,0,0))",
+    "scrim_center": "linear-gradient(0deg, rgba(0,0,0,0.5), rgba(0,0,0,0.1))"
+  },
+  "rules": {
+    "_note": "공통 컨텐츠 모델(model.py)에 넘기는 규칙",
+    "skip_layouts": [
+      "product_gallery"
+    ],
+    "skip_disclaimer": true,
+    "drop_text_only_sections": true,
+    "max_card_columns": 4,
+    "text_alignment": "center"
+  },
+  "layouts": {
+    "_note": "크롤 컴포넌트의 layout_type → eBay 렌더 패턴. kv(문서 최상단 히어로)·overlay·card_row·spec_table은 별도 처리.",
+    "hero_full_width": "centered_stack",
+    "text_over_image": "centered_stack",
+    "image_text_left": "centered_stack",
+    "image_text_right": "centered_stack",
+    "image_text_side": "centered_stack",
+    "grid_2_column": "card_list",
+    "grid_3_column": "card_list",
+    "grid_4_column": "card_list",
+    "icon_grid": "card_list_no_header",
+    "carousel": "image_cards",
+    "product_gallery": "gallery",
+    "vertical_stack": "centered_stack",
+    "_default": "centered_stack"
+  },
+  "slices": {
+    "_note": "세로 슬라이스 이미지 기본값 (빌더에서 바꾸지 않으면 사용). output_width가 null이면 콘텐츠 실측 폭의 2배.",
+    "count": 6,
+    "output_width": null,
+    "format": "jpeg",
+    "quality": 88,
+    "viewport_px": 1600
+  },
+  "output": {
+    "forbid_active_content": true
+  }
+}

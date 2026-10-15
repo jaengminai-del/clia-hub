@@ -29,7 +29,7 @@ const EXCLUDE = [
   /\.bak$/,
   /\.log$/,
   /(^|\/)progress\.json$/,
-  /(^|\/)ebay_content\.html$/,      // eBay 생성 때마다 새로 렌더
+  /(^|\/)[a-z_]+_content\.html$/,  // 매체별 1차 컨텐츠(ebay_content.html 등) — 생성 때마다 새로 렌더
   /(^|\/)\.DS_Store$/,
   /(^|\/)\.imgdims-cache\.json$/,
 ];

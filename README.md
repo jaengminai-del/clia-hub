@@ -15,7 +15,7 @@ LG.com 제품 페이지(PDP)를 한 번 크롤링해서 **eBay · Amazon A+ · S
 | `server.js`, `crawler-routes.js` | Node 서버 (기본 :3001) — 정적 파일 + API |
 | `crawl-store.js` | 크롤링 결과 ↔ S3 호환 버킷 동기화 (서버 시작 시 내려받기, 크롤 후 올리기, `node crawl-store.js push`) |
 | `crawler-py/` | LG.com PDP 크롤러 (Python) + 크롤링 캐시(`out/`) |
-| `crawler-py/content_gen/` | **1차 컨텐츠 생성 엔진** — `model.py`(공통 컨텐츠 모델) → `media/<매체>/spec.json`(매체 규격: 글자 크기·색·카드 비율·레이아웃 패턴) → `render_html.py`(렌더). 현재 매체: eBay (Shopee/Lazada가 같은 결과 사용). `ebay_builder.py`는 이 엔진을 부르는 CLI |
+| `crawler-py/content_gen/` | **1차 컨텐츠 생성 엔진** — `model.py`(공통 컨텐츠 모델) → `media/<매체>/spec.json`(매체 규격: 글자 크기·색·카드 비율·레이아웃 패턴) → `render_html.py`(렌더). 매체: `ebay`, `shopee_lazada`(Shopee·Lazada 공통 — 값은 규격 확정 시 교체). `slices.py`가 Shopee/Lazada 세로 슬라이스 이미지 ZIP 생성(`/api/render-slices`). `ebay_builder.py`는 이 엔진을 부르는 CLI |
 | `crawler/` | Firecrawl 기반 보조 크롤러 |
 | `css/`, `fonts/` | LG EI Headline / LG EI Text 폰트 |
 
@@ -51,6 +51,7 @@ node server.js                # http://localhost:3001/clia/
 | POST | `/api/v1/products/:slug/geo` | GEO Q&A·키워드 생성 — Gemini (`geo.json` 캐시) |
 | POST | `/api/v1/crawl` → GET `/api/v1/jobs/:id` | URL 크롤링 작업 등록 / 상태 조회 |
 | GET | `/api/v1/ebay-html?url=` | eBay HTML (CCG 스타일) |
+| GET | `/api/v1/content-html?url=&medium=` | 매체별 1차 컨텐츠 HTML (`ebay`, `shopee_lazada`) |
 | POST | `/api/pcg-vision` | 빌더용 크롤 결과(mirror) |
 | POST | `/api/render-slices` | Shopee/Lazada 이미지 슬라이스 ZIP |
 

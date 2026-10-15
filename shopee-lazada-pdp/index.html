@@ -219,6 +219,8 @@ let editMode = false;
 const API_BASE = (location.protocol === 'file:' || !location.origin || location.origin === 'null')
   ? 'http://localhost:3001'
   : location.origin;
+// 1차 컨텐츠 생성 매체 규격 (crawler-py/content_gen/media/shopee_lazada — Shopee·Lazada 공통)
+const MEDIUM = 'shopee_lazada';
 
 // ══════════════════════════════════════════
 // Intro
@@ -387,7 +389,7 @@ async function analyzePDP() {
         crawledFeatures = mirrorToEbayFeatures(mir);
         const gen = await fetch(API_BASE + '/api/ebay-generate', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ features: crawledFeatures, url }),
+          body: JSON.stringify({ features: crawledFeatures, url, medium: MEDIUM }),
         });
         const gd = await gen.json();
         if (!gen.ok) throw new Error(gd.error || `generate ${gen.status}`);
@@ -504,7 +506,8 @@ async function generateEbay() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         features: crawledFeatures,
-        url: document.getElementById('pdpUrl').value.trim()
+        url: document.getElementById('pdpUrl').value.trim(),
+        medium: MEDIUM
       })
     });
     if (!resp.ok) {
@@ -623,6 +626,7 @@ async function downloadImages() {
         outputWidth: parseInt(document.getElementById('sliceWidth').value, 10) || undefined,
         format: document.getElementById('sliceFormat').value || 'jpeg',
         name: slugFromUrl(),
+        medium: MEDIUM,
       }),
       signal: AbortSignal.timeout(10 * 60 * 1000),
     });

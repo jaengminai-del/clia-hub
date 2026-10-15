@@ -12,6 +12,8 @@ content_gen — 1차 컨텐츠 생성 엔진
   from content_gen import generate
   html = generate(mirror, medium="ebay", fragment=True)
 
+매체: ebay, shopee_lazada (Shopee·Lazada 공통 — 2026-10-15 현재 값은 eBay와 동일, 규격 확정 시 교체)
+슬라이스 이미지: content_gen/slices.py (spec.json "slices" 기본값, /api/render-slices 가 호출)
 매체 추가: media/<매체>/ 에 spec.json + fragment.css + fragment.html + document.html 을 만든다.
 """
 import json

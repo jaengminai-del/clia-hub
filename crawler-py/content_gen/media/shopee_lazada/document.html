@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{product_title} - LG Product Page</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'LGEIText', 'LG EI Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      line-height: 1.28;
+      color: #2D2D2D;
+      background: #FFFFFF;
+    }
+    .lg-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    .lg-section {
+      background: #FFFFFF;
+      border: 1px solid #F0ECE4;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .lg-grid, .lg-disclaimer {
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      overflow: visible;
+    }
+    .lg-grid-item {
+      background: #FFFFFF;
+      border: 1px solid #F0ECE4;
+      border-radius: 16px;
+      overflow: hidden;
+      padding-bottom: 16px;
+    }
+    .lg-grid-item h3, .lg-grid-item p, .lg-grid-item div {
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+    h1, h2, h3 {
+      font-family: 'LGEIHeadline', 'LG EI Headline', 'LGEIText', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      font-weight: 600;
+      color: #111111;
+    }
+    .disclaimer {
+      color: #697072;
+    }
+
+    /* 반응형 스타일 */
+    @media (max-width: 768px) {
+      .lg-image-text {
+        flex-direction: column !important;
+      }
+      .lg-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .lg-text-overlay {
+        position: static !important;
+        transform: none !important;
+        max-width: 100% !important;
+        background: rgba(0,0,0,0.7);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="lg-container">
+    {sections}
+  </div>
+</body>
+</html>

@@ -9,6 +9,7 @@
  *   GET  /api/v1/jobs/:id/stream        → SSE 진행률
  *   GET  /api/v1/jobs/:id/ebay-html     → eBay HTML fragment
  *   GET  /api/v1/ebay-html?url=         → URL 직접 지정 렌더
+ *   GET  /api/v1/content-html?url=&medium= → 매체별 1차 컨텐츠 HTML (content_gen/media/<medium>, 기본 ebay)
  *   GET  /api/v1/products?country=uk    → 크롤 완료 제품 목록 (허브 Product List 검색용, 크롤러에 계속 누적)
  *   GET  /api/v1/products/:slug         → 제품 1건 (원본 URL + mirror + geo)
  *   POST /api/v1/products/:slug/geo     → GEO Q&A·키워드 생성 (Gemini, out/<slug>/geo.json 캐시, force:true 재생성)
@@ -23,7 +24,7 @@ const store = require('./crawl-store'); // 버킷 동기화 (설정 없으면 no
 const CRAWLER_DIR = path.join(__dirname, 'crawler-py');
 const OUT_DIR = path.join(CRAWLER_DIR, 'out');
 const PIPELINE = path.join(CRAWLER_DIR, 'pdp_pipeline.py');
-const RENDER_EBAY = path.join(CRAWLER_DIR, 'render_ebay.py');
+const RENDER_CONTENT = path.join(CRAWLER_DIR, 'render_content.py');
 
 // 로컬은 crawler-py/.venv, 배포(Docker)는 시스템 python3. CRAWLER_PYTHON 으로 강제 지정 가능.
 function resolvePython() {
@@ -116,12 +117,14 @@ function snapshot(jobId) {
     log_message: prog.message || '', step: prog.step || '', updated_at: prog.updated_at };
 }
 
-function renderEbayHtml(out) {
+const mediumOf = (m) => (/^[a-z_]{2,32}$/.test(m || '') ? m : 'ebay');
+
+function renderEbayHtml(out, medium = 'ebay') {
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(path.join(out, 'mirror.json'))) {
       return reject(Object.assign(new Error('mirror not ready — crawl first'), { status: 404 }));
     }
-    execFile(resolvePython(), [RENDER_EBAY, out], { cwd: CRAWLER_DIR, maxBuffer: 64 * 1024 * 1024,
+    execFile(resolvePython(), [RENDER_CONTENT, out, mediumOf(medium)], { cwd: CRAWLER_DIR, maxBuffer: 64 * 1024 * 1024,
       env: { ...process.env, PYTHONIOENCODING: 'utf-8' } },
       (err, stdout, stderr) => (err ? reject(new Error(stderr || err.message)) : resolve(stdout)));
   });
@@ -287,6 +290,12 @@ router.get('/api/v1/jobs/:id/ebay-html', auth, async (req, res) => {
 router.get('/api/v1/ebay-html', auth, async (req, res) => {
   if (typeof req.query.url !== 'string') return res.status(400).json({ detail: 'url required' });
   try { res.type('html').send(await renderEbayHtml(path.join(OUT_DIR, slugify(req.query.url)))); }
+  catch (e) { res.status(e.status || 500).json({ detail: e.message }); }
+});
+
+router.get('/api/v1/content-html', auth, async (req, res) => {
+  if (typeof req.query.url !== 'string') return res.status(400).json({ detail: 'url required' });
+  try { res.type('html').send(await renderEbayHtml(path.join(OUT_DIR, slugify(req.query.url)), req.query.medium)); }
   catch (e) { res.status(e.status || 500).json({ detail: e.message }); }
 });
 

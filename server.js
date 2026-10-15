@@ -2030,6 +2030,8 @@ async function probeImageSize(url) {
 ────────────────────────────────────────── */
 app.post('/api/ebay-generate', async (req, res) => {
   const { features, url } = req.body;
+  // 1차 컨텐츠 생성 매체 규격 (crawler-py/content_gen/media/<medium>) — 기본 eBay
+  const medium = /^[a-z_]{2,32}$/.test(req.body.medium || '') ? req.body.medium : 'ebay';
   if (!features || !features.length) return res.status(400).json({ error: 'features required' });
 
   // ── CCG 경로 우선: 크롤 캐시 mirror에 컴포넌트 정보(component_id/layout_type)가
@@ -2050,10 +2052,11 @@ app.post('/api/ebay-generate', async (req, res) => {
           const py = fs.existsSync(venvPy) ? venvPy : 'python3';
           const script = path.join(__dirname, 'crawler-py', 'ebay_builder.py');
           const { execFileSync } = require('child_process');
-          execFileSync(py, [script, slugDir, '--fragment'], { timeout: 60 * 1000 });
-          const html = fs.readFileSync(path.join(slugDir, 'ebay_content.html'), 'utf8');
-          console.log(`[ebay-generate] CCG 빌더 렌더 완료 (${html.length} chars)`);
-          return res.json({ success: true, html, charCount: html.length, engine: 'ccg' });
+          const outName = `${medium}_content.html`;   // ebay → ebay_content.html (기존 파일명 유지)
+          execFileSync(py, [script, slugDir, '--fragment', '--medium', medium, '-o', outName], { timeout: 60 * 1000 });
+          const html = fs.readFileSync(path.join(slugDir, outName), 'utf8');
+          console.log(`[ebay-generate] CCG 빌더 렌더 완료 (${medium}, ${html.length} chars)`);
+          return res.json({ success: true, html, charCount: html.length, engine: 'ccg', medium });
         }
       }
     } catch (ccgErr) {
@@ -2447,7 +2450,60 @@ const PORT = process.env.PORT || 3001;
    실제 Chrome(puppeteer)으로 렌더한다 — LG 폰트·원격 DAM 이미지·인라인 CSS가
    브라우저와 100% 동일하게 나오고, 브라우저 canvas의 CORS 오염 문제도 없다.
 ────────────────────────────────────────── */
+// 슬라이스 생성은 1차 컨텐츠 생성 엔진(crawler-py/content_gen/slices.py, Playwright)이 담당 — 요청·응답 형식은 그대로.
+// SLICES_LEGACY=1 이면 아래 기존 Node(Puppeteer) 구현을 사용.
+function renderSlicesPy(body) {
+  const path = require('path');
+  const fs = require('fs');
+  const os = require('os');
+  const { spawn } = require('child_process');
+  const crawlerDir = path.join(__dirname, 'crawler-py');
+  const venvPy = path.join(crawlerDir, '.venv', 'bin', 'python');
+  const py = process.env.CRAWLER_PYTHON || (fs.existsSync(venvPy) ? venvPy : 'python3');
+  const zipPath = path.join(os.tmpdir(), `slices-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.zip`);
+  return new Promise((resolve, reject) => {
+    const proc = spawn(py, ['-m', 'content_gen.slices', zipPath], {
+      cwd: crawlerDir, env: { ...process.env, PYTHONIOENCODING: 'utf-8' },
+    });
+    let out = '', err = '';
+    const timer = setTimeout(() => proc.kill('SIGKILL'), 10 * 60 * 1000);
+    proc.stdout.on('data', (d) => { out += d; });
+    proc.stderr.on('data', (d) => { err += d; });
+    proc.on('error', (e) => { clearTimeout(timer); reject(e); });
+    proc.on('close', (code) => {
+      clearTimeout(timer);
+      let meta = {};
+      try { meta = JSON.parse(out); } catch (_) {}
+      if (code !== 0 || meta.error) {
+        fs.rmSync(zipPath, { force: true });
+        return reject(new Error(meta.error || (err.trim().split('\n').pop() || `slices exited ${code}`)));
+      }
+      try { resolve({ meta, buf: fs.readFileSync(zipPath) }); } catch (e) { reject(e); }
+      finally { fs.rmSync(zipPath, { force: true }); }
+    });
+    proc.stdin.end(JSON.stringify({ ...body, fontsCss: `http://127.0.0.1:${PORT}/css/fonts.css` }));
+  });
+}
+
 app.post('/api/render-slices', async (req, res) => {
+  if (process.env.SLICES_LEGACY !== '1') {
+    if (!req.body || typeof req.body.html !== 'string' || !req.body.html) {
+      return res.status(400).json({ error: 'html required' });
+    }
+    try {
+      const { meta, buf } = await renderSlicesPy(req.body);
+      console.log(`[render-slices] ${meta.log}`);
+      res.set('Content-Type', 'application/zip');
+      res.set('Content-Disposition', `attachment; filename="${meta.name}-images.zip"`);
+      res.set('X-Slice-Manifest', encodeURIComponent(JSON.stringify(meta.manifest)));
+      res.set('X-Images-Loaded', meta.images_loaded);
+      res.set('Access-Control-Expose-Headers', 'X-Slice-Manifest, X-Images-Loaded, Content-Disposition');
+      return res.send(buf);
+    } catch (e) {
+      console.error('/api/render-slices error:', e.message);
+      return res.status(500).json({ error: e.message });
+    }
+  }
   const {
     html,
     // 레이아웃 계산용 뷰포트 폭. 실제 잘라내는 폭은 콘텐츠 실측 경계로 정한다
