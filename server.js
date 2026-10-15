@@ -2032,7 +2032,8 @@ app.post('/api/ebay-generate', async (req, res) => {
   const { features, url } = req.body;
   // 1차 컨텐츠 생성 매체 규격 (crawler-py/content_gen/media/<medium>) — 기본 eBay
   const medium = /^[a-z_]{2,32}$/.test(req.body.medium || '') ? req.body.medium : 'ebay';
-  if (!features || !features.length) return res.status(400).json({ error: 'features required' });
+  // features 는 크롤 캐시(mirror)가 없을 때 쓰는 예비 템플릿용 — url 이 있으면 캐시로 먼저 만든다
+  if ((!features || !features.length) && !url) return res.status(400).json({ error: 'features required' });
 
   // ── CCG 경로 우선: 크롤 캐시 mirror에 컴포넌트 정보(component_id/layout_type)가
   //    있으면 ebay_builder.py(CCG 레이아웃 템플릿)로 렌더 — lg.com 디자인 가이드 재현.
@@ -2064,6 +2065,9 @@ app.post('/api/ebay-generate', async (req, res) => {
     }
   }
 
+  if (!features || !features.length) {
+    return res.status(400).json({ error: 'no crawl cache for this URL and no features for the fallback template' });
+  }
   try {
     console.log(`[ebay-generate] Building HTML from ${features.length} sections`);
 

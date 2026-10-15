@@ -264,7 +264,10 @@ function splitCopy(text) {
 function mirrorToEbayFeatures(mirror) {
   const isVid = u => /\.(mp4|webm|mov)(\?|$)/i.test(u || '');
   // eBay 컨텐츠엔 제품 갤러리 썸네일 제외 (마케팅 feature 이미지만)
-  const isGallery = u => /\/gallery\/|renditions\/thum|[-_]thum[-_]|thum-\d+x\d+/i.test(u || '');
+  // 갤러리 썸네일 렌디션만 제외. DAM '/gallery/' 폴더 규칙은 예전 Gemini 섹션(component_id 없음)에만 —
+  // 독일 등은 기능 이미지도 /gallery/ 폴더에 두므로 경로 규칙을 쓰면 컨텐츠가 통째로 빠진다 (crawler F1과 같은 규칙)
+  const isGallery = (u, s) => /renditions\/thum|[-_]thum[-_]|thum-\d+x\d+/i.test(u || '')
+    || (!(s && s.component_id) && /\/gallery\//i.test(u || ''));
   const bestUrl = m => m.pc_url || m.unified_url || m.mobile_url || '';
 
   // 1) 섹션 정규화 (텍스트 분리 + 유효 미디어 + 가로 그룹 정보)
@@ -276,7 +279,7 @@ function mirrorToEbayFeatures(mirror) {
       eyebrow = lines[0]; headline = lines[1]; body = lines.slice(2).join('\n');
     }
     // role==='icon': 크롤러가 태깅한 UI 보조 에셋(탭 아이콘·캐러셀 썸네일) — 컨텐츠화 금지
-    const media = (s.media || []).filter(m => { const u = bestUrl(m); return u && !isVid(u) && !isGallery(u) && m.role !== 'icon'; });
+    const media = (s.media || []).filter(m => { const u = bestUrl(m); return u && !isVid(u) && !isGallery(u, s) && m.role !== 'icon'; });
     return { isDisc, eyebrow, headline, body, media,
              rg: media[0]?.row_group || 0, cols: media[0]?.columns || 0,
              cc: s.column_count || 0, domIdx: s.component_dom_index };  // DOM 선언 컬럼 수
