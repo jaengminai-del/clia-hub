@@ -115,6 +115,7 @@ class SpecPair:
     label: str
     value: str
     group: Optional[str] = None   # 'DIMENSIONS & WEIGHT' 같은 스펙 그룹명
+    section: Optional[str] = None  # 그룹들을 묶는 상위 제목 ('Alle Spezifikationen') — 스펙 표 제목
 
 
 @dataclass
@@ -169,7 +170,8 @@ class ParsedComponent:
                 "texts": [asdict(t) for t in self.elements.texts],
                 "media": [asdict(m) for m in self.elements.media],
                 "ctas": [asdict(c) for c in self.elements.ctas],
-                "specs": [asdict(s) for s in self.elements.specs],
+                "specs": [{k: v for k, v in asdict(s).items() if not (LEGACY and k == "section")}
+                          for s in self.elements.specs],
                 "items": [{"texts": [asdict(t) for t in it.texts],
                            "media": [asdict(m) for m in it.media]}
                           for it in self.elements.items]
@@ -505,6 +507,9 @@ class ComponentParser:
     _SPEC_VALUE_RE = re.compile(r'__(bodycopy|spec-desc|value|desc|description|data)\b', re.I)
     # 스펙 그룹 제목 (Key Specs 등)
     _SPEC_GROUP_RE = re.compile(r'__(group-head|group-title|category)\b', re.I)
+    # 스펙 그룹 안의 소그룹 표 제목 (LG.com 'Alle Spezifikationen' 안의 'MATERIAL & AUSFÜHRUNG' 등)
+    _SPEC_TABLE_RE = re.compile(r'__table$', re.I)
+    _SPEC_TABLE_HEAD_RE = re.compile(r'__table-head\b', re.I)
     # 스펙 전용 컴포넌트 — 이 안에서는 dl/table도 스펙표로 취급한다
     SPEC_COMPONENT_IDS = ('PD0008', 'ST0035')
 
@@ -532,12 +537,12 @@ class ComponentParser:
         pairs: List[SpecPair] = []
         consumed = set()
 
-        def add(label_el, value_el, group=None):
+        def add(label_el, value_el, group=None, section=None):
             label = self._element_text(label_el)
             value = self._element_text(value_el)
             if not label or not value or label == value:
                 return False
-            pairs.append(SpecPair(label=label, value=value, group=group or None))
+            pairs.append(SpecPair(label=label, value=value, group=group or None, section=section or None))
             consumed.add(id(label_el))
             consumed.add(id(value_el))
             return True
@@ -560,7 +565,16 @@ class ComponentParser:
                 if g is not None and region not in g.parents:
                     g = None
                 group = self._element_text(g) if g is not None else None
-                add(labels[0], values[0], group)
+                section = None
+                if not LEGACY:
+                    # 소그룹 표(__table) 안이면 그 표 제목을 그룹으로 — 닷컴처럼 그룹별 표로 나눠 보이게
+                    table = item.find_parent(class_=self._SPEC_TABLE_RE)
+                    if table is not None and region in table.parents:
+                        head = table.find(class_=self._SPEC_TABLE_HEAD_RE)
+                        sub = self._element_text(head) if head is not None else ""
+                        if sub:
+                            section, group = group, sub
+                add(labels[0], values[0], group, section)
 
         # ②③ dl / table 방식 — 스펙 영역 안이거나 스펙 컴포넌트일 때만.
         #     제한이 없으면 결제 안내(Klarna 할부표) 같은 일반 정의목록도 스펙으로 오인한다.
@@ -791,7 +805,21 @@ class ComponentParser:
         if el.find_parent('button') or el.find_parent(attrs={'role': re.compile(r'^tab(list)?$')}):
             return True
         a = el.find_parent('a')
-        return a is not None and (a.get('href') or '').strip().startswith('#')
+        if LEGACY:
+            return a is not None and (a.get('href') or '').strip().startswith('#')
+        # 사용자 원칙(2026-10-15): 링크가 걸리거나 클릭 동작이 걸린 이미지는 UI — 컨텐츠화하지 않는다
+        if a is not None and ((a.get('href') or '').strip() or a.get('onclick')):
+            return True
+        for p in [el, *el.parents]:
+            if not hasattr(p, 'get') or p.name in ('body', 'html'):
+                break
+            if p.get('onclick') or p.get('role') == 'button' or p.get('data-href') or p.get('data-link'):
+                return True
+            cls = ' '.join(p.get('class') or [])
+            # 재생 버튼만 UI — 자동 재생 애니메이션(js-video 컨테이너)은 컨텐츠
+            if re.search(r'(^|\s)(c-video__play|video-play-btn|btn-play|play-button|c-play-btn)', cls, re.I):
+                return True
+        return False
 
     @staticmethod
     def _legacy_picture_sources(media, sources):

@@ -17,6 +17,8 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
+from component_parser import ComponentParser
+
 _ID_RE = re.compile(r"\b(ST|PD|CM|PR|PN|GN|AL|CS)\d{4}\b")
 SKIP_PREFIX = ("CM", "GN", "AL", "PN", "CS")
 SKIP_IDS = {"PD0001", "PD0002", "PD0004", "PD0006", "PD0044", "PD0056", "PD0012", "PD0033", "ST0010",
@@ -79,8 +81,8 @@ def html_inventory(html: str) -> list:
         for pic in w.find_all(["picture", "img"]):
             if pic.name == "img" and pic.find_parent("picture"):
                 continue
-            if _is_ui(pic):
-                continue
+            if _is_ui(pic) or ComponentParser._is_ui_control_media(pic):
+                continue                                   # 링크·클릭 동작이 걸린 UI 이미지 — 크롤러와 같은 규칙
             urls = []
             if pic.name == "picture":
                 urls = [s.get("srcset", "").split(",")[0].strip() for s in pic.find_all("source")]

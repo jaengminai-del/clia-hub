@@ -50,9 +50,6 @@ try:
 except Exception:
     LEGACY = False
 
-# 이미지만 있어도 컨텐츠로 쓰는 히어로(KV) 컴포넌트 — 문구 없이 장면만 보여주는 도입 이미지 (F7)
-HERO_IDS = {"ST0001", "ST0002", "ST0008", "ST0009"}
-
 _TEXT_ROLES_HEAD = ("headline", "subheadline")
 _TEXT_ROLES_BODY = ("body_copy", "body", "description")
 
@@ -116,7 +113,8 @@ def _pick_specs(comp: dict) -> List[dict]:
             continue
         seen.add(key)
         out.append({"label": label, "value": value,
-                    "group": (sp.get("group") or "").strip() or None})
+                    "group": (sp.get("group") or "").strip() or None,
+                    **({"section": sp["section"].strip()} if (sp.get("section") or "").strip() else {})})
     return out
 
 
@@ -376,7 +374,13 @@ def to_mirror_format(built: dict, product_title: str = "") -> dict:
     for s in built["sections"]:
         parts = []
         parts += s["eyebrow"]
-        parts += [f"## {h}" for h in s["headline"]]
+        spec_title = next((sp["section"] for sp in (s.get("specs") or []) if sp.get("section")), "")
+        if spec_title and not LEGACY:
+            # 스펙 표 제목은 닷컴 스펙 영역의 상위 제목('Alle Spezifikationen') — 컴포넌트 안의
+            # 다른 소영역 제목(규정 문서 'Compliance-Informationen' 등)이 표 제목이 되지 않게
+            parts.append(f"## {spec_title}")
+        else:
+            parts += [f"## {h}" for h in s["headline"]]
         parts += s["body"]
         # 스펙은 '라벨: 값' 한 줄로 붙여야 짝이 유지된다.
         # 라벨만 제목 스타일로 모으고 값을 아래에 몰아두면 어느 값이 어느 항목인지 알 수 없다.
@@ -435,17 +439,17 @@ def build_from_components(component_data: list, product_title: str = "", origin:
 
 
 def keep_image_only_heroes(built: dict) -> int:
-    """문구 없이 이미지만 있는 히어로(KV)도 컨텐츠로 노출 (F7).
+    """이미지만 있는 섹션도 이미지만으로 컨텐츠에 넣는다 (F7 → 사용자 원칙 2026-10-15: '이미지만 있으면 이미지만').
+    링크·클릭 동작이 걸린 UI 이미지는 파서 단계에서 이미 빠진다.
     텍스트 섹션과의 결합(stitch_orphans) 뒤에 실행해 결합 기회를 먼저 준다."""
     if LEGACY:
         return 0
     n = 0
     for s in built["sections"]:
-        if not s["renderable"] and s["media"] and not (s["headline"] or s["body"]) \
-                and (s["component_id"] in HERO_IDS or s["layout_type"] == "hero_full_width"):
+        if not s["renderable"] and s["media"] and not (s["headline"] or s["body"]) and s["kind"] == "content":
             s["renderable"] = True
             n += 1
-    built["stats"]["image_only_heroes"] = n
+    built["stats"]["image_only_sections"] = n
     built["stats"]["renderable"] = sum(1 for x in built["sections"] if x["renderable"])
     return n
 
