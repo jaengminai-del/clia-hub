@@ -57,7 +57,8 @@
     "skip_disclaimer": true,
     "drop_text_only_sections": true,
     "max_card_columns": 4,
-    "text_alignment": "center"
+    "text_alignment": "center",
+    "legacy_gallery_path_filter": false
   },
   "layouts": {
     "_note": "크롤 컴포넌트의 layout_type → eBay 렌더 패턴. kv(문서 최상단 히어로)·overlay·card_row·spec_table은 별도 처리.",

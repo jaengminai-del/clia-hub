@@ -16,14 +16,19 @@ model.py — [A] 공통 컨텐츠 모델 (1차 컨텐츠 생성)
   skip_disclaimer         디스클레이머 섹션 제외
   drop_text_only_sections 이미지 없는 텍스트-only 섹션 제외 (카드 행·스펙 표는 예외)
   max_card_columns        DOM 컬럼 수가 없을 때 카드 행 최대 열 수
+  legacy_gallery_path_filter  true면 모든 섹션에 예전 규칙(주소에 /gallery/ 가 있으면 제외) — 되돌리기용.
+                          기본(false): 컴포넌트 구조로 만든 섹션(component_id 있음)의 이미지는 LG.com 그 컴포넌트에
+                          실제로 보이는 컨텐츠이므로 모두 쓴다 (독일 등은 기능 이미지도 DAM /gallery/ 폴더에 둠).
+                          예전 Gemini 방식 섹션(component_id 없음)만 예전 규칙 유지 — 갤러리 썸네일 혼입 방지.
 """
 import re
 
 from make_mirror import _section_signature
 
 _VID_EXT = (".mp4", ".webm", ".mov")
-# 제품 갤러리 렌디션·탭 ON/OFF 상태 이미지 — 컨텐츠화 금지
-_GALLERY_RE = re.compile(r"/gallery/|thum-\d+x\d+", re.I)
+# 갤러리 썸네일 렌디션·탭 ON/OFF 상태 이미지 — 컨텐츠화 금지
+_THUMB_RE = re.compile(r"thum-\d+x\d+", re.I)
+_LEGACY_GALLERY_RE = re.compile(r"/gallery/", re.I)
 _ONOFF_RE = re.compile(r"[_-](on|off)\.(png|jpe?g)$", re.I)
 
 
@@ -40,7 +45,7 @@ def usable_media(section: dict) -> list:
         low = u.lower().split("?")[0]
         if not u or m.get("role") == "icon" or low.endswith(_VID_EXT):
             continue
-        if _GALLERY_RE.search(u) or _ONOFF_RE.search(low):
+        if _THUMB_RE.search(u) or _ONOFF_RE.search(low):
             continue
         out.append(m)
     return out
@@ -121,10 +126,21 @@ def _merge_card_rows(sections: list, max_cols: int) -> list:
     return merged
 
 
+def _drop_gallery_media(sections: list, legacy: bool) -> list:
+    """제품 갤러리 이미지 제외 (섹션은 복사본, mirror 원본은 그대로)."""
+    def keep(m, s):
+        if legacy or not s.get("component_id"):
+            return not _LEGACY_GALLERY_RE.search(best_image_url(m))
+        return True
+
+    return [dict(s, media=[m for m in s.get("media", []) if keep(m, s)]) for s in sections]
+
+
 def build_blocks(mirror: dict, rules: dict) -> list:
     """mirror → 블록 목록 (화면 순서)."""
     skip_layouts = set(rules.get("skip_layouts") or [])
     sections = [s for s in mirror.get("sections", []) if s.get("layout_type") not in skip_layouts]
+    sections = _drop_gallery_media(sections, bool(rules.get("legacy_gallery_path_filter")))
     sections = _dedupe(sections)
     sections = _merge_card_rows(sections, int(rules.get("max_card_columns") or 4))
 

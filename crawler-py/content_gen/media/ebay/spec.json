@@ -9,9 +9,7 @@
       "document_html": "document.html — 브라우저 미리보기용 완전한 문서 ({product_title}, {sections})"
     }
   },
-
   "container_px": 800,
-
   "typography": {
     "_note": "261007 법인 피드백: 모바일 가독성 — 모든 제목(h2/h3) 36px, 모든 본문(p) 24px 고정. 고정값을 비우면(null) LG 가이드(ccg_spec) desktop_px를 container_px/1440 비율로 축소 후 min/max로 클램프.",
     "fixed_headline_px": 36,
@@ -30,7 +28,6 @@
       "cell_px": 18
     }
   },
-
   "colors": {
     "headline": "#111111",
     "body": "#2D2D2D",
@@ -40,13 +37,11 @@
     "card_background": "#FFFFFF",
     "card_stroke": "#F0ECE4"
   },
-
   "card": {
     "_note": "가로형 카드(lg-hcard): 이미지 왼쪽 / 텍스트 오른쪽. 텍스트가 없으면 이미지가 100%.",
     "image_width": "40%",
     "text_width": "60%"
   },
-
   "overlay": {
     "_note": "텍스트를 이미지 위에 얹는 컴포넌트(figma 스펙 is_overlay: ST0004/05/14)의 스크림",
     "text_width": "55%",
@@ -54,16 +49,17 @@
     "scrim_right": "linear-gradient(270deg, rgba(0,0,0,0.5), rgba(0,0,0,0))",
     "scrim_center": "linear-gradient(0deg, rgba(0,0,0,0.5), rgba(0,0,0,0.1))"
   },
-
   "rules": {
     "_note": "공통 컨텐츠 모델(model.py)에 넘기는 규칙",
-    "skip_layouts": ["product_gallery"],
+    "skip_layouts": [
+      "product_gallery"
+    ],
     "skip_disclaimer": true,
     "drop_text_only_sections": true,
     "max_card_columns": 4,
-    "text_alignment": "center"
+    "text_alignment": "center",
+    "legacy_gallery_path_filter": false
   },
-
   "layouts": {
     "_note": "크롤 컴포넌트의 layout_type → eBay 렌더 패턴. kv(문서 최상단 히어로)·overlay·card_row·spec_table은 별도 처리.",
     "hero_full_width": "centered_stack",
@@ -80,7 +76,6 @@
     "vertical_stack": "centered_stack",
     "_default": "centered_stack"
   },
-
   "output": {
     "forbid_active_content": true
   }
