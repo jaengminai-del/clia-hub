@@ -161,6 +161,7 @@ class ComponentElement:
     ctas: List[CTAElement] = field(default_factory=list)
     specs: List[SpecPair] = field(default_factory=list)
     items: List[ItemGroup] = field(default_factory=list)   # 항목별 텍스트+이미지 묶음
+    compare: Optional[Dict[str, Any]] = None   # 비교 슬라이더 {before:{src_desktop,src_mobile,label}, after:{…}}
 
 
 @dataclass
@@ -198,7 +199,8 @@ class ParsedComponent:
                           for s in self.elements.specs],
                 "items": [{"texts": [asdict(t) for t in it.texts],
                            "media": [asdict(m) for m in it.media]}
-                          for it in self.elements.items]
+                          for it in self.elements.items],
+                **({"compare": self.elements.compare} if (self.elements.compare and not LEGACY) else {}),
             }
         }
 
@@ -443,12 +445,17 @@ class ComponentParser:
         # 여기서 소비한 요소는 텍스트 목록에서 빼야 라벨·값이 두 번 나오지 않는다.
         elements.specs, spec_consumed = self._parse_spec_pairs(component)
 
+        # 비교 슬라이더 (c-image-compare): As-is(__cover) ↔ To-be(__default) 이미지·라벨 짝
+        compare_consumed = set()
+        if not LEGACY:
+            elements.compare, compare_consumed = self._parse_compare(component)
+
         # 항목 단위 그룹 (캐러셀 슬라이드/카드) — 텍스트와 이미지를 항목별로 묶는다
-        elements.items, item_consumed = self._parse_item_groups(component, spec_consumed)
+        elements.items, item_consumed = self._parse_item_groups(component, spec_consumed | compare_consumed)
 
         # 텍스트 요소 파싱 — 항목에 속한 텍스트는 항목이 이미 갖고 있으므로 제외
         elements.texts = self._parse_text_elements(
-            component, skip_ids=spec_consumed | item_consumed)
+            component, skip_ids=spec_consumed | item_consumed | compare_consumed)
 
         # 미디어 요소 파싱 — 전수 이미지 인벤토리 유지를 위해 항목 이미지도 포함한다
         elements.media = self._parse_media_elements(component)
@@ -545,6 +552,47 @@ class ComponentParser:
     _SPEC_REGION_RE = re.compile(
         r'(^|\s)c-(specs|specs-summary|specs-dimensions|summary-info|compare-selling'
         r'|spec-table|tech-specs|product-spec)(--|__|\s|$)', re.I)
+
+    def _parse_compare(self, component: Tag):
+        """비교 슬라이더 (ST0008 등의 c-image-compare).
+          __cover   (style="width: 50%", 왼쪽에 겹침) = As-is  — 'Conventional', 'ohne …', 'Kontrast 1.000:1'
+          __default (전체)                          = To-be — 'Hyper Mini LED', 'mit …', 'Kontrast 2.000:1'
+          __text = 각 이미지 라벨, __track/__handle = 슬라이더 손잡이(UI)
+        반환: ({before, after} 또는 None, 라벨로 소비한 텍스트 요소 id 집합)"""
+        box = component.find(class_=re.compile(r'(^|\s)c-image-compare(\s|$)'))
+        if box is None:
+            return None, set()
+        consumed = set()
+
+        def side(cls):
+            el = box.find(class_=re.compile(r'(^|\s)c-image-compare__' + cls + r'(\s|$)'))
+            if el is None:
+                return None
+            m = MediaElement(type='image')
+            pic = el.find('picture')
+            if pic is not None:
+                self._picture_sources(m, pic.find_all('source'), pic.find('img'))
+            img = el.find('img')
+            if not m.src_desktop and img is not None:
+                m.src_desktop = _clean_url(img.get('src'))
+            label = ''
+            t = el.find(class_=re.compile(r'c-image-compare__text'))
+            if t is not None:
+                label = self._element_text(t)
+                consumed.add(id(t))
+                for d in t.find_all(True):
+                    consumed.add(id(d))
+            return {"src_desktop": m.src_desktop, "src_mobile": m.src_mobile,
+                    "alt": (img.get('alt') or '').strip() if img is not None else '', "label": label}
+
+        before, after = side('cover'), side('default')
+        if not (before and after and before.get('src_desktop') and after.get('src_desktop')):
+            return None, consumed
+        # 비교 영역 전체를 소비 — 라벨을 감싼 __default/__cover 도 텍스트 슬롯 클래스라 남겨두면 라벨이 본문에 다시 들어간다
+        consumed.add(id(box))
+        consumed.update(id(d) for d in box.find_all(True)
+                        if 'c-image-compare__disclaimer' not in ' '.join(d.get('class') or []))
+        return {"before": before, "after": after}, consumed
 
     def _parse_spec_pairs(self, component: Tag):
         """라벨/값이 한 컨테이너에 짝으로 들어있는 스펙 항목을 추출.

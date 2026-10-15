@@ -52,6 +52,14 @@
     "_note": "여백 없이 이어 붙은 히어로(no-spacing 연속 ST0001): 이미지들을 붙여 한 장처럼, 바깥에만 둥근 모서리",
     "radius_px": 12
   },
+  "compare": {
+    "_note": "비교 슬라이더(c-image-compare): before_after = As-is 위·To-be 아래(라벨 강조) / after_only = To-be만 / off = 일반 이미지 섹션",
+    "mode": "before_after",
+    "before_label_color": "#697072",
+    "after_label_color": "#111111",
+    "after_label_weight": 700,
+    "image_radius_px": 8
+  },
   "overlay": {
     "_note": "텍스트를 이미지 위에 얹는 컴포넌트(figma 스펙 is_overlay: ST0004/05/14)의 스크림",
     "text_width": "55%",

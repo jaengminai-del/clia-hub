@@ -110,6 +110,7 @@ def check(html: str, mirror: dict) -> dict:
     def text_blob(entries):
         return _norm(" ".join(
             (e.get("text") or "") + " " + (e.get("group_heading") or "") + " " +
+            " ".join(v.get("label") or "" for v in (e.get("compare") or {}).values()) + " " +
             " ".join(f"{x.get('label', '')} {x.get('value', '')} {x.get('group') or ''}" for x in e.get("specs") or [])
             for e in entries))
 

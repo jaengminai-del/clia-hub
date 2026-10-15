@@ -49,6 +49,7 @@ class Style:
         self.card = spec.get("card", {})
         self.award = spec.get("award", {})
         self.stacked = spec.get("stacked_image", {})
+        self.compare = spec.get("compare", {})
         self.overlay = spec.get("overlay", {})
         self.layouts = spec.get("layouts", {})
         # LG 가이드 폰트는 1440px 캔버스 기준 → 매체 컨테이너 폭으로 비례 축소
@@ -265,6 +266,34 @@ def stacked_hero(st: Style, media_list: list, html: str) -> str:
 </section>'''
 
 
+def compare_block(st: Style, section: dict, html: str) -> str:
+    """비교 슬라이더(As-is ↔ To-be)를 정적 이미지로: 문구 → As-is 이미지·라벨 → To-be 이미지·라벨(강조).
+    spec compare.mode = "after_only" 이면 To-be 만."""
+    cp = st.compare
+    cmp_ = section["compare"]
+    b_px = st.px(section.get("component_id", ""), "body", 16)
+    r = cp.get("image_radius_px", 8)
+
+    def item(side, emphasize):
+        d = cmp_[side]
+        color = cp.get("after_label_color" if emphasize else "before_label_color", "#111111" if emphasize else "#697072")
+        weight = cp.get("after_label_weight", 700) if emphasize else 400
+        label = (f'<p style="font-family: {st.font_body}; font-size: {b_px}px; line-height: {st.body_lh}; font-weight: {weight}; '
+                 f'color: {color}; text-align: center; margin: 10px 0 0 0;">{escape(d["label"])}</p>') if d.get("label") else ""
+        return (f'<div class="lg-compare-{side}" style="margin-top: 16px;">'
+                f'<img src="{d["pc_url"]}" alt="{escape(d.get("label") or "")}" style="width: 100%; height: auto; display: block; border-radius: {r}px;">'
+                f'{label}</div>')
+
+    parts = [] if cp.get("mode") == "after_only" else [item("before", False)]
+    parts.append(item("after", True))
+    txt = f'<div style="text-align: center; padding: 8px 6% 4px;">{html}</div>' if html else ""
+    return f'''
+<section class="lg-section lg-compare" style="padding: 24px 20px;">
+  {txt}
+  {"".join(parts)}
+</section>'''
+
+
 def text_only(html: str, align: str) -> str:
     return f"""
 <section class="lg-section lg-vertical" style="padding: 40px 20px; text-align: {align};">
@@ -392,6 +421,8 @@ def render_section(st: Style, section: dict, kv: bool, align: str) -> str:
 
     if section.get("stacked"):           # 이어 붙은 히어로 → 한 장으로
         return stacked_hero(st, media_list, html)
+    if section.get("compare") and st.compare.get("mode", "before_after") != "off":
+        return compare_block(st, section, html)   # 비교 슬라이더 → As-is 위, To-be 아래
 
     # 오버레이 컴포넌트: 텍스트를 이미지 위에 (단일 이미지 + 텍스트일 때)
     if cid in st.overlay_ids and html and len(media_list) == 1:

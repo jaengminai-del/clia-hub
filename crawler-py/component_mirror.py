@@ -303,6 +303,15 @@ def build_component_sections(component_data: list, origin: str = _LG_ORIGIN) -> 
         if not has_text and not has_img:
             continue
 
+        # 비교 슬라이더: As-is(before) → To-be(after) 순서로 이미지를 두고 라벨을 짝지어 넘긴다
+        compare = None
+        cp = comp.get("elements", {}).get("compare")
+        if cp and not LEGACY:
+            compare = {k: {"pc_url": _abs_url(v.get("src_desktop"), origin), "mobile_url": _abs_url(v.get("src_mobile"), origin),
+                           "label": v.get("label") or ""} for k, v in cp.items()}
+            order = [compare["before"]["pc_url"], compare["after"]["pc_url"]]
+            content_media = sorted(content_media, key=lambda m: order.index(m["pc_url"]) if m["pc_url"] in order else 9)
+
         sections.append({
             "component_id": cid,
             "component_dom_index": comp.get("dom_index", -1),
@@ -318,6 +327,7 @@ def build_component_sections(component_data: list, origin: str = _LG_ORIGIN) -> 
             "kind": "spec" if cid in SPEC_IDS else "content",
             "item_group": False,
             "group_heading": "",
+            **({"compare": compare} if compare else {}),
             # 3P 노출 조건: 텍스트와 이미지가 둘 다 모여 그룹핑된 섹션만.
             # 단 스펙 표는 라벨/값 짝 자체가 완결된 정보라 이미지가 없어도 노출한다
             # (이미지 요건은 '텍스트 조각만 떠도는 섹션'을 걸러내기 위한 규칙).
@@ -376,6 +386,9 @@ def stitch_orphans(built: dict) -> int:
                 if img_only and abs(t["component_dom_index"] - s["component_dom_index"]) <= 2:
                     s = dict(s)
                     s["media"] = t["media"]
+                    for k in ("compare", "stacked"):      # 비교 슬라이더·이어 붙은 히어로 정보도 함께 옮긴다
+                        if t.get(k):
+                            s[k] = t[k]
                     s["columns"] = max(s["columns"], t["columns"])
                     if t["layout_type"] not in ("unknown", "vertical_stack"):
                         s["layout_type"] = t["layout_type"]
@@ -435,6 +448,7 @@ def to_mirror_format(built: dict, product_title: str = "") -> dict:
             "column_count": s["columns"],
             "text_alignment": s["text_alignment"],
             **({"stacked": True} if s.get("stacked") else {}),
+            **({"compare": s["compare"]} if s.get("compare") else {}),
         }
         if s["renderable"]:
             order += 1
