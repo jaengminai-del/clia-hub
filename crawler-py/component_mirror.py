@@ -434,6 +434,7 @@ def to_mirror_format(built: dict, product_title: str = "") -> dict:
             "columns": s["columns"],
             "column_count": s["columns"],
             "text_alignment": s["text_alignment"],
+            **({"stacked": True} if s.get("stacked") else {}),
         }
         if s["renderable"]:
             order += 1
@@ -459,9 +460,58 @@ def to_mirror_format(built: dict, product_title: str = "") -> dict:
     }
 
 
+STACK_IDS = {"ST0001", "ST0002"}          # 여백 없이 이어 붙는 히어로
+
+
+def merge_stacked_heroes(built: dict, component_data: list) -> int:
+    """여백 없이 이어 붙은 히어로(연속된 ST0001이 모두 no-spacing, 배경·폭 클래스 동일, 뒤쪽은 이미지만)를 한 섹션으로 합친다.
+    LG.com은 이미지 2장(예: 로고 '-01-1-logo' + KV '-01-2-kv')을 위아래로 붙여 한 장처럼 보여준다.
+    합친 섹션은 stacked=True — 1차 컨텐츠 생성이 이미지를 여백 없이 붙이고 바깥에만 둥근 모서리를 준다."""
+    if LEGACY:
+        return 0
+    wc = {c.get("dom_index"): c.get("wrapper_classes") or [] for c in component_data}
+
+    def key(sec):
+        cls = wc.get(sec["component_dom_index"]) or []
+        if sec["component_id"] not in STACK_IDS or "no-spacing" not in cls:
+            return None
+        return tuple(sorted(c for c in cls if c.startswith(("bg-", "width-"))))
+
+    out, merged, i, secs = [], 0, 0, built["sections"]
+    while i < len(secs):
+        s, k = secs[i], key(secs[i])
+        j = i + 1
+        # 뒤에 붙는 히어로는 문구 없이 이미지만 있어야 이어진 한 장이다
+        # (문구가 있으면 no-spacing 이어도 별개 기능 섹션 — 예: OLED C6 Perfect Black → Eyesafe)
+        while k is not None and j < len(secs) and key(secs[j]) == k \
+                and secs[j]["component_dom_index"] == secs[j - 1]["component_dom_index"] + 1 \
+                and secs[j]["media"] and not (secs[j]["headline"] or secs[j]["body"]):
+            j += 1
+        if j - i >= 2:
+            group = secs[i:j]
+            m = dict(group[0])
+            seen = set()
+            m["media"] = [x for g in group for x in g["media"] if not (x["pc_url"] in seen or seen.add(x["pc_url"]))]
+            for f in ("eyebrow", "headline", "body", "disclaimer"):
+                m[f] = [t for g in group for t in g[f]]
+            m["eyebrow"] = m["eyebrow"][:1]
+            m["stacked"] = True
+            m["renderable"] = bool(m["media"])
+            out.append(m)
+            merged += j - i - 1
+            i = j
+            continue
+        out.append(s)
+        i += 1
+    built["sections"] = out
+    built["stats"]["stacked_heroes_merged"] = merged
+    return merged
+
+
 def build_from_components(component_data: list, product_title: str = "", origin: str = _LG_ORIGIN) -> dict:
     """엔드투엔드: components.json → mirror 스키마 (그룹핑·컬럼·노출조건 적용)."""
     built = build_component_sections(component_data, origin)
+    merge_stacked_heroes(built, component_data)
     stitch_orphans(built)
     keep_image_only_heroes(built)
     return to_mirror_format(built, product_title)

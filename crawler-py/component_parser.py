@@ -176,6 +176,7 @@ class ParsedComponent:
     raw_html: Optional[str] = None             # 원본 HTML (디버깅용)
     dom_index: int = -1                        # HTML DOM 등장 순번 (0부터). 섹션 정렬의 진실 기준
     column_count: int = 0                      # DOM이 선언한 컬럼 수(column-N 클래스). 0=미선언
+    wrapper_classes: List[str] = field(default_factory=list)  # c-wrapper 수식 클래스 (no-spacing·bg-*·width-* 등)
 
     def to_dict(self) -> Dict[str, Any]:
         """딕셔너리 변환"""
@@ -185,6 +186,7 @@ class ParsedComponent:
             "component_type": self.component_type,
             "layout_type": self.layout_type.value,
             "column_count": self.column_count,
+            **({} if LEGACY else {"wrapper_classes": self.wrapper_classes}),
             "text_alignment": self.text_alignment.value,
             "background_type": self.background_type,
             "background_value": self.background_value,
@@ -341,6 +343,9 @@ class ComponentParser:
             component_type=component_type,
             layout_type=layout_type,
             column_count=column_count,
+            # 이어 붙은 히어로 판별용 (no-spacing = 다음 컴포넌트와 여백 없이 붙음)
+            wrapper_classes=[c for c in classes if c != component_id and c != 'c-wrapper'
+                             and re.match(r'^(no-spacing|bg-|width-|margin-)', c)],
             text_alignment=text_alignment,
             background_type=bg_type,
             background_value=bg_value,

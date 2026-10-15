@@ -48,6 +48,10 @@
     "logo_max_px": 180,
     "logo_padding_px": 24
   },
+  "stacked_image": {
+    "_note": "여백 없이 이어 붙은 히어로(no-spacing 연속 ST0001): 이미지들을 붙여 한 장처럼, 바깥에만 둥근 모서리",
+    "radius_px": 12
+  },
   "overlay": {
     "_note": "텍스트를 이미지 위에 얹는 컴포넌트(figma 스펙 is_overlay: ST0004/05/14)의 스크림",
     "text_width": "55%",

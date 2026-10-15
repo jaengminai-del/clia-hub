@@ -48,6 +48,7 @@ class Style:
         self.table_cell_px = ty.get("spec_table", {}).get("cell_px", 18)
         self.card = spec.get("card", {})
         self.award = spec.get("award", {})
+        self.stacked = spec.get("stacked_image", {})
         self.overlay = spec.get("overlay", {})
         self.layouts = spec.get("layouts", {})
         # LG 가이드 폰트는 1440px 캔버스 기준 → 매체 컨테이너 폭으로 비례 축소
@@ -250,6 +251,20 @@ def centered_stack(media_list: list, html: str) -> str:
 </section>'''
 
 
+def stacked_hero(st: Style, media_list: list, html: str) -> str:
+    """여백 없이 이어 붙은 히어로 (LG.com이 이미지 2장을 붙여 한 장처럼 보여주는 구성).
+    문구는 위, 이미지들은 틈 없이 위아래로 붙여 한 장처럼 — 둥근 모서리는 합친 이미지의 바깥에만."""
+    r = st.stacked.get("radius_px", 12)
+    imgs = "".join(f'<img src="{best_image_url(m)}" alt="" style="width: 100%; height: auto; display: block; margin: 0; border: 0;">'
+                   for m in media_list)
+    txt = (f'<div style="text-align: center; padding: 8px 6% 20px;">{html}</div>' if html else "")
+    return f'''
+<section class="lg-section lg-stacked" style="padding: 24px 20px;">
+  {txt}
+  <div class="lg-stacked-image" style="border-radius: {r}px; overflow: hidden; line-height: 0; font-size: 0;">{imgs}</div>
+</section>'''
+
+
 def text_only(html: str, align: str) -> str:
     return f"""
 <section class="lg-section lg-vertical" style="padding: 40px 20px; text-align: {align};">
@@ -374,6 +389,9 @@ def render_section(st: Style, section: dict, kv: bool, align: str) -> str:
     if not media_list:
         return text_only(html, align)
     primary = best_image_url(media_list[0])
+
+    if section.get("stacked"):           # 이어 붙은 히어로 → 한 장으로
+        return stacked_hero(st, media_list, html)
 
     # 오버레이 컴포넌트: 텍스트를 이미지 위에 (단일 이미지 + 텍스트일 때)
     if cid in st.overlay_ids and html and len(media_list) == 1:
