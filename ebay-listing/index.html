@@ -531,6 +531,8 @@ function showPreview(html) {
   frame.innerHTML = html;
   // 카드 원본 저장(편집 모드 ↺ 원래대로) + 손잡이(⋮⋮)로 카드 순서 바꾸기 (shared/clia-card-edit.js)
   if (window.CLIACardEdit) { CLIACardEdit.snapshot(frame); CLIACardEdit.enableReorder(frame, { onChange: onCardsReordered }); }
+  // 미리보기를 실제 크기의 80%로 (위아래 카드가 더 많이 보여 옮기기 쉽게 — 결과물 크기는 그대로)
+  if (window.CLIAPreviewScale) CLIAPreviewScale.apply(frame);
   // Update char count
   const cc = document.getElementById('charCount');
   if (cc) cc.textContent = html.length.toLocaleString();
@@ -906,14 +908,15 @@ function makeImageEditable(img) {
     if (!editMode) return;
     ev.preventDefault();
     state.dragging = true;
+    state.k = window.CLIAPreviewScale ? CLIAPreviewScale.factor(wrap) : 1;   // 미리보기 축소 배율
     state.sx = ev.clientX;
     state.sy = ev.clientY;
     wrap.style.cursor = 'grabbing';
   }, { signal: ac.signal });
   document.addEventListener('mousemove', (ev) => {
     if (!state.dragging) return;
-    const dx = (ev.clientX - state.sx) / state.scale;
-    const dy = (ev.clientY - state.sy) / state.scale;
+    const dx = (ev.clientX - state.sx) / (state.scale * (state.k || 1));
+    const dy = (ev.clientY - state.sy) / (state.scale * (state.k || 1));
     state.tx += dx;
     state.ty += dy;
     state.sx = ev.clientX;
@@ -955,7 +958,7 @@ function frameParentWidth(frame) {
 function toCropBox(frame, img) {
   if (parseFloat(frame.style.paddingTop) > 0 && img.style.position === 'absolute') return;   // 이미 비율 상자
   const pw = frameParentWidth(frame);
-  const fw = frame.getBoundingClientRect().width, fh = img.offsetHeight, iw = img.offsetWidth;
+  const fw = frame.offsetWidth, fh = img.offsetHeight, iw = img.offsetWidth;   // 원래 크기 단위 (미리보기 축소와 무관)
   frame.style.width = (fw / pw * 100).toFixed(2) + '%';
   frame.style.height = '0';
   frame.style.paddingTop = (fh / pw * 100).toFixed(2) + '%';
@@ -982,16 +985,16 @@ function addFrameHandles(frame, img, signal) {
       ev.preventDefault(); ev.stopPropagation();          // 이미지 이동(pan)과 분리
       toCropBox(frame, img);
       const pw = frameParentWidth(frame);
-      const r = frame.getBoundingClientRect();
+      const k = window.CLIAPreviewScale ? CLIAPreviewScale.factor(frame) : 1;   // 미리보기 축소 배율
       const fh = parseFloat(frame.style.paddingTop) / 100 * pw;   // 프레임 높이 = padding-top (비율 상자)
-      h._drag = { x: ev.clientX, y: ev.clientY, fw: r.width, fh,
+      h._drag = { x: ev.clientX, y: ev.clientY, k, fw: frame.offsetWidth, fh,
         il: img.offsetLeft, it: img.offsetTop, iw: img.offsetWidth, pw };
       h.style.opacity = '1';
       document.body.style.cursor = cursor;
     }, { signal });
     document.addEventListener('mousemove', (ev) => {
       const d = h._drag; if (!d) return;
-      const dx = ev.clientX - d.x, dy = ev.clientY - d.y;
+      const dx = (ev.clientX - d.x) / d.k, dy = (ev.clientY - d.y) / d.k;   // 화면 거리 → 원래 크기 단위
       let fw = d.fw, fh = d.fh, il = d.il, it = d.it;
       if (side === 'bottom') fh = Math.max(MIN, d.fh + dy);
       if (side === 'top')    { fh = Math.max(MIN, d.fh - dy); it = d.it - (d.fh - fh); }

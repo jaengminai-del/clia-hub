@@ -77,3 +77,44 @@
 
   window.CLIAZoomBar = { create, wheelStep, STEP };
 })();
+
+/**
+ * CLIAPreviewScale — 미리보기를 실제 크기의 80%로 보여 주기 (2026-10-16, 네 빌더 공통)
+ *   위아래 카드·모듈이 한 화면에 더 많이 보여 끌어서 옮기기 쉽게. 결과물(HTML·이미지) 크기는 그대로.
+ *   apply(frame)       : frame 에 CSS zoom 0.8 + 바로 위에 안내 문구 (eBay·Shopee/Lazada)
+ *   note(el, pct)      : el 바로 위에 "실제 크기의 N%로 표시" 문구 (Amazon 은 transform 배율이라 note 만)
+ *   factor(el)         : 화면상 크기 ÷ 원래 크기 — 마우스로 끈 거리를 원래 크기 단위로 바꿀 때 나눈다
+ */
+(function () {
+  const SCALE = 0.8;
+  const TEXT = {
+    en: (p) => `Preview shown at ${p}% of actual size`,
+    de: (p) => `Vorschau in ${p} % der tatsächlichen Größe`,
+    th: (p) => `แสดงตัวอย่างที่ ${p}% ของขนาดจริง`,
+    ar: (p) => `المعاينة بنسبة ${p}% من الحجم الفعلي`,
+    ko: (p) => `실제 크기의 ${p}%로 표시`,
+  };
+  function note(el, pct) {
+    if (!el || !el.parentElement) return;
+    let n = el.previousElementSibling;
+    if (!n || !n.classList.contains('clia-preview-scale-note')) {
+      n = document.createElement('div');
+      n.className = 'clia-preview-scale-note';
+      n.style.cssText = "margin:0 0 8px;padding:6px 10px;border-radius:6px;background:#F4F4F4;color:#555;"
+        + "font:600 12px/1.3 'LGEIText',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;text-align:center;";
+      el.parentElement.insertBefore(n, el);
+    }
+    const lang = (window.CLIA_LANG || document.documentElement.lang || 'en').slice(0, 2);
+    n.textContent = '🔎 ' + (TEXT[lang] || TEXT.en)(pct);
+  }
+  function apply(frame) {
+    if (!frame) return;
+    frame.style.zoom = SCALE;
+    note(frame, Math.round(SCALE * 100));
+  }
+  function factor(el) {
+    if (!el || !el.offsetWidth) return 1;
+    return el.getBoundingClientRect().width / el.offsetWidth || 1;
+  }
+  window.CLIAPreviewScale = { SCALE, apply, note, factor };
+})();

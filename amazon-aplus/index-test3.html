@@ -4651,8 +4651,8 @@ let _imgDrag = null;
 // 전역 mousemove: 자유 드래그 (clamping 없음)
 document.addEventListener('mousemove', e => {
   if (!_imgDrag) return;
-  const { startX, startY, startTx, startTy, update } = _imgDrag;
-  update(startTx + (e.clientX - startX), startTy + (e.clientY - startY));
+  const { startX, startY, startTx, startTy, update, k } = _imgDrag;
+  update(startTx + (e.clientX - startX) / (k || 1), startTy + (e.clientY - startY) / (k || 1));   // 미리보기 축소 배율 보정
 });
 
 document.addEventListener('mouseup', () => {
@@ -4869,6 +4869,7 @@ function applyImageDragMode(page) {
       if (e.target.closest('[contenteditable="true"]')) return;
       _imgDrag = {
         img, clipWrapper,
+        k: clipWrapper.getBoundingClientRect().width / (clipWrapper.offsetWidth || 1),
         startX: e.clientX, startY: e.clientY,
         startTx: tx, startTy: ty,
         update: (newTx, newTy) => {
@@ -6954,7 +6955,8 @@ function applyUserZoom() {
     const availW = scroll.clientWidth - 32;
     const fitScale = availW / 970;
     let scale;
-    if (_zoomMode === 'fit')      scale = fitScale;
+    // 기본: 실제 크기(970px)의 80% — 위아래 모듈이 더 많이 보여 옮기기 쉽게 (패널이 더 좁으면 패널 폭에 맞춤) — 2026-10-16
+    if (_zoomMode === 'fit')      scale = Math.min(fitScale, window.CLIAPreviewScale ? CLIAPreviewScale.SCALE : 0.8);
     else if (_zoomMode === '100') scale = 1;
     else                          scale = fitScale * _userZoom;
     page.style.transform = `scale(${scale})`;
@@ -6973,6 +6975,7 @@ function applyUserZoom() {
                     : Math.round(_userZoom * 100);
       if (slider && _zoomMode !== 'custom') slider.value = display;
       if (val)    val.textContent = display + '%';
+      if (window.CLIAPreviewScale) CLIAPreviewScale.note(page, Math.round(scale * 100));   // "실제 크기의 N%로 표시"
     });
   };
 })();
