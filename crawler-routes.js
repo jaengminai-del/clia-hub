@@ -10,6 +10,8 @@
  *   GET  /api/v1/jobs/:id/ebay-html     → eBay HTML fragment
  *   GET  /api/v1/ebay-html?url=         → URL 직접 지정 렌더
  *   GET  /api/v1/content-html?url=&medium= → 매체별 1차 컨텐츠 HTML (content_gen/media/<medium>, 기본 ebay)
+ *   GET  /api/v1/amazon-features?url=    → Amazon A+ 선택 화면 카드 목록 (content_gen/amazon)
+ *   POST /api/v1/amazon-modules {url, selection, mode, start_id} → 선택 카드 → A+ 모듈 목록
  *   GET  /api/v1/products?country=uk    → 크롤 완료 제품 목록 (허브 Product List 검색용, 크롤러에 계속 누적)
  *   GET  /api/v1/products/:slug         → 제품 1건 (원본 URL + mirror + geo)
  *   POST /api/v1/products/:slug/geo     → GEO Q&A·키워드 생성 (Gemini, out/<slug>/geo.json 캐시, force:true 재생성)
@@ -25,6 +27,7 @@ const CRAWLER_DIR = path.join(__dirname, 'crawler-py');
 const OUT_DIR = path.join(CRAWLER_DIR, 'out');
 const PIPELINE = path.join(CRAWLER_DIR, 'pdp_pipeline.py');
 const RENDER_CONTENT = path.join(CRAWLER_DIR, 'render_content.py');
+const RENDER_AMAZON = path.join(CRAWLER_DIR, 'render_amazon.py');
 
 // 로컬은 crawler-py/.venv, 배포(Docker)는 시스템 python3. CRAWLER_PYTHON 으로 강제 지정 가능.
 function resolvePython() {
@@ -127,6 +130,22 @@ function renderEbayHtml(out, medium = 'ebay') {
     execFile(resolvePython(), [RENDER_CONTENT, out, mediumOf(medium)], { cwd: CRAWLER_DIR, maxBuffer: 64 * 1024 * 1024,
       env: { ...process.env, PYTHONIOENCODING: 'utf-8' } },
       (err, stdout, stderr) => (err ? reject(new Error(stderr || err.message)) : resolve(stdout)));
+  });
+}
+
+// Amazon A+ 카드·모듈 (Python content_gen.amazon) — cmd: features | modules (input → stdin JSON)
+function runAmazon(out, cmd, input) {
+  return new Promise((resolve, reject) => {
+    if (!fs.existsSync(path.join(out, 'mirror.json'))) {
+      return reject(Object.assign(new Error('mirror not ready — crawl first'), { status: 404 }));
+    }
+    const child = execFile(resolvePython(), [RENDER_AMAZON, out, cmd], { cwd: CRAWLER_DIR, maxBuffer: 64 * 1024 * 1024,
+      env: { ...process.env, PYTHONIOENCODING: 'utf-8' } },
+      (err, stdout, stderr) => {
+        if (err) return reject(new Error(stderr || err.message));
+        try { resolve(JSON.parse(stdout)); } catch (e) { reject(new Error('bad amazon output: ' + e.message)); }
+      });
+    child.stdin.end(input ? JSON.stringify(input) : '');
   });
 }
 
@@ -297,6 +316,22 @@ router.get('/api/v1/content-html', auth, async (req, res) => {
   if (typeof req.query.url !== 'string') return res.status(400).json({ detail: 'url required' });
   try { res.type('html').send(await renderEbayHtml(path.join(OUT_DIR, slugify(req.query.url)), req.query.medium)); }
   catch (e) { res.status(e.status || 500).json({ detail: e.message }); }
+});
+
+router.get('/api/v1/amazon-features', auth, async (req, res) => {
+  if (typeof req.query.url !== 'string') return res.status(400).json({ detail: 'url required' });
+  try { res.json(await runAmazon(path.join(OUT_DIR, slugify(req.query.url)), 'features')); }
+  catch (e) { res.status(e.status || 500).json({ detail: e.message.slice(0, 300) }); }
+});
+
+router.post('/api/v1/amazon-modules', auth, async (req, res) => {
+  const { url, selection = [], mode = 'standard', start_id = 1 } = req.body || {};
+  if (typeof url !== 'string') return res.status(400).json({ detail: 'url required' });
+  if (!Array.isArray(selection)) return res.status(400).json({ detail: 'selection must be an array' });
+  try {
+    res.json(await runAmazon(path.join(OUT_DIR, slugify(url)), 'modules',
+      { selection, mode: mode === 'premium' ? 'premium' : 'standard', start_id }));
+  } catch (e) { res.status(e.status || 500).json({ detail: e.message.slice(0, 300) }); }
 });
 
 router.get('/api/v1/jobs/:id/stream', (req, res) => {

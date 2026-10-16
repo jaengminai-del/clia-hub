@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "medium": "amazon_aplus",
+    "note": "Amazon A+ 1차 컨텐츠 생성 규격. 값은 2026-10-16 브라우저 빌더(amazon-aplus/index-test3.html)와 동일하게 옮긴 것.",
+    "code": "content_gen/amazon (features.py: 크롤 결과 → 카드, modules.py: 선택 카드 → 모듈)"
+  },
+  "max_selection": 7,
+  "module_ar": {
+    "lighttext": 3.2333333333333334, "dark-overlay": 3.2333333333333334, "image-header-text": 1.6166666666666667,
+    "sidebar": 1.0869565217391304, "highlights": 1.0, "left-img": 1.0, "right-img": 1.0, "three-img": 1.0, "four-text": 1.0
+  },
+  "module_image_specs": {
+    "sidebar": [[500, 460]], "left-img": [[300, 300]], "right-img": [[300, 300]], "highlights": [[300, 300]],
+    "lighttext": [[970, 300]], "dark-overlay": [[970, 300]], "image-header-text": [[970, 600]],
+    "three-img": [[300, 300], [300, 300], [300, 300]],
+    "four-text": [[220, 220], [220, 220], [220, 220], [220, 220]],
+    "four-hl": [[400, 560], [140, 230], [140, 230], [140, 230]],
+    "quadrant": [[160, 200], [160, 200], [160, 200], [160, 200]],
+    "compare": [[260, 200], [260, 200], [260, 200]],
+    "specs-detail": [[300, 300]]
+  },
+  "award_modules": {"one_or_two": "left-img", "three": "three-img", "four_plus": "four-text"},
+  "row_modules": {"three": "three-img", "four_plus": "four-text"},
+  "default_module": "image-header-text",
+  "std_to_premium": {
+    "four-text": "p-four-images", "three-img": "p-simple-carousel", "text": "p-text", "highlights": "p-single-img-text",
+    "image-header-text": "p-full-image", "left-img": "p-single-img-text", "right-img": "p-single-img-text",
+    "sidebar": "p-single-img-text", "lighttext": "p-bg-text", "dark-overlay": "p-bg-text"
+  },
+  "premium_slot_counts": {
+    "p-dual-images": 2, "p-four-images": 4, "p-simple-carousel": 3, "p-nav-carousel": 4,
+    "p-regimen-carousel": 5, "p-video-carousel": 3, "p-compare-1": 3, "p-compare-2": 3, "p-compare-3": 3
+  },
+  "text_limits": {
+    "split_title": 120, "split_body": 600,
+    "single_title": 80, "single_body": 300,
+    "item_title": 60, "item_body": 150, "item_body_min": 20,
+    "headline_from_body": 80, "subhead": 80, "highlight_body": 300, "highlight_subhead_max": 60,
+    "group_heading_max": 60
+  }
+}
