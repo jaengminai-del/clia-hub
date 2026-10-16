@@ -25,8 +25,8 @@ def load_spec() -> dict:
 
 
 def features_for(mirror: dict) -> list:
-    return build_features(mirror)
+    return build_features(mirror, load_spec())
 
 
 def modules_for(mirror: dict, selection: list, mode: str = "standard", start_id: int = 1) -> list:
-    return build_modules(build_features(mirror), selection, load_spec(), mode, start_id)
+    return build_modules(build_features(mirror, load_spec()), selection, load_spec(), mode, start_id)

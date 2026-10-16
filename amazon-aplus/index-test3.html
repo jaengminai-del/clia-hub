@@ -5508,7 +5508,9 @@ function showKwModal(url) {
           </div>`).join('');
         return `<div style="display:flex;width:100%;height:100%;">${panels}</div>`;
       }
-      return `<img src="${img.url}" loading="lazy" alt="${escHtml(f.headline || '')}"
+      // 텍스트 오버레이 히어로: 생성될 모듈과 같은 이미지(PC·모바일 자동 선택 결과)를 보여 준다
+      const thumb = img.previewUrl ? (img.previewUrl.startsWith('/api/') ? APLUS_API + img.previewUrl : img.previewUrl) : img.url;
+      return `<img src="${thumb}" loading="lazy" alt="${escHtml(f.headline || '')}"
         onerror="this.parentElement.innerHTML='<div class=\\'kw-card-img-empty\\'>🖼</div>'">`;
     })();
 

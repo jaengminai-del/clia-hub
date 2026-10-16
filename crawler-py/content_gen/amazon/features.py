@@ -332,7 +332,18 @@ def sanitize_deep(v):
     return v
 
 
-def build_features(mirror: dict) -> list:
-    """브라우저 analyzePDP 와 같은 순서: 카드 정리 → 필터 → 펼치기 → 기호 제거."""
+def build_features(mirror: dict, spec: dict = None) -> list:
+    """브라우저 analyzePDP 와 같은 순서: 카드 정리 → 필터 → 펼치기 → 기호 제거.
+    이미지 후보(sources)가 있으면 선택 창 썸네일용 previewUrl = 기본 모듈(970×600) 칸 기준 자동 선택 결과."""
     raw = [f for f in mirror_to_features(mirror) if truthy(f.get("headline")) or f.get("images")]
-    return sanitize_deep(expand_for_selection(raw))
+    feats = sanitize_deep(expand_for_selection(raw))
+    if spec:
+        from .modules import pick_source
+        w, h = spec["module_image_specs"][spec["default_module"]][0]
+        for f in feats:
+            for img in f.get("images") or []:
+                if img.get("sources"):
+                    best = pick_source(img, w, h)
+                    if best:
+                        img["previewUrl"] = best[0]
+    return feats
