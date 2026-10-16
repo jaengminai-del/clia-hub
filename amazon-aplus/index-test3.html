@@ -4490,6 +4490,18 @@ function renderPagePreview() {
   // Fix 1: 리렌더 후 편집 내용 복원
   restoreEdits();
 
+  // 잠금 상태에서 다시 그렸을 때(모듈 추가·이동·삭제 등): 이동·확대했던 이미지는 잠금 상태의 틀(프레임 크기로 잘라
+  // 보이는 clip 틀)을 다시 만들어야 편집한 모양 그대로 보인다 — 다운로드는 저장된 값을 쓰므로 미리보기도 맞춘다 (2026-10-16)
+  if (!editModeActive) {
+    page.querySelectorAll('.pv-module-wrap[data-mod-id]').forEach(wrap => {
+      const moved = [...wrap.querySelectorAll('img[data-tx], img[data-ty], img[data-zoom]')].some(img =>
+        +(img.getAttribute('data-tx') || 0) !== 0 || +(img.getAttribute('data-ty') || 0) !== 0 || +(img.getAttribute('data-zoom') || 1) !== 1);
+      if (!moved) return;
+      applyImageDragMode(wrap);
+      removeImageDragMode(wrap);
+    });
+  }
+
   // Fix 1: 편집 모드 중이었다면 contenteditable + 이미지 드래그 재적용
   if (editModeActive) {
     applyEditMode(page);

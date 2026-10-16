@@ -7,8 +7,10 @@ image_crop.py — 이미지 안의 실제 피사체 영역 찾기 (AI 호출 없
 
   find_badge_crop(image) → {"x","y","w","h"} (0~1 비율) + {"iw","ih"} 또는 None
 """
+import os
 from io import BytesIO
 from typing import Optional
+from urllib.parse import quote
 
 import requests
 from PIL import Image
@@ -17,11 +19,35 @@ UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 
 
+def image_proxy() -> Optional[str]:
+    """같은 서버의 이미지 중계 (/api/proxy-image?url=). 배포 서버(데이터센터 IP)에서는 Python 이 LG.com 이미지를
+    직접 요청하면 403 으로 막히고, Node 중계는 통과한다 (2026-10-16 확인). CLIA_IMAGE_PROXY 가 없으면 PORT(서버 포트)로 만든다."""
+    p = os.environ.get("CLIA_IMAGE_PROXY")
+    if p:
+        return p
+    port = os.environ.get("PORT")
+    return f"http://127.0.0.1:{port}/api/proxy-image?url=" if port else None
+
+
+def fetch_bytes(url: str, timeout: int = 20) -> bytes:
+    """LG 이미지 bytes — 직접 받고, 실패하면(403 등) 서버 이미지 중계로 다시 받는다. 둘 다 실패하면 예외."""
+    headers = {"User-Agent": UA, "Referer": "https://www.lg.com/"}
+    try:
+        r = requests.get(url, headers=headers, timeout=timeout)
+        r.raise_for_status()
+        return r.content
+    except Exception:
+        proxy = image_proxy()
+        if not proxy:
+            raise
+        r = requests.get(proxy + quote(url, safe=""), headers=headers, timeout=timeout)
+        r.raise_for_status()
+        return r.content
+
+
 def fetch_image(url: str, timeout: int = 20) -> Optional[Image.Image]:
     try:
-        r = requests.get(url, headers={"User-Agent": UA, "Referer": "https://www.lg.com/"}, timeout=timeout)
-        r.raise_for_status()
-        return Image.open(BytesIO(r.content)).convert("RGB")
+        return Image.open(BytesIO(fetch_bytes(url, timeout))).convert("RGB")
     except Exception:
         return None
 
