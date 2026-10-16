@@ -12,6 +12,8 @@
  *   GET  /api/v1/content-html?url=&medium= → 매체별 1차 컨텐츠 HTML (content_gen/media/<medium>, 기본 ebay)
  *   GET  /api/v1/amazon-features?url=    → Amazon A+ 선택 화면 카드 목록 (content_gen/amazon)
  *   POST /api/v1/amazon-modules {url, selection, mode, start_id} → 선택 카드 → A+ 모듈 목록
+ *   POST /api/v1/amazon-images {modules(+transforms), pdpUrl, date} → A+ 규격 이미지 ZIP (Pillow)
+ *   POST /api/v1/amazon-stack {urls}   → 이어 붙은 히어로 한 장 {url: data URL, bg}
  *   GET  /api/v1/products?country=uk    → 크롤 완료 제품 목록 (허브 Product List 검색용, 크롤러에 계속 누적)
  *   GET  /api/v1/products/:slug         → 제품 1건 (원본 URL + mirror + geo)
  *   POST /api/v1/products/:slug/geo     → GEO Q&A·키워드 생성 (Gemini, out/<slug>/geo.json 캐시, force:true 재생성)
@@ -133,17 +135,20 @@ function renderEbayHtml(out, medium = 'ebay') {
   });
 }
 
-// Amazon A+ 카드·모듈 (Python content_gen.amazon) — cmd: features | modules (input → stdin JSON)
-function runAmazon(out, cmd, input) {
+// Amazon A+ (Python content_gen.amazon) — cmd: features | modules (slug 폴더 필요) · images | stack
+//   input → stdin JSON. raw=true 면 stdout 을 Buffer 로 (ZIP), 아니면 JSON.
+function runAmazon(cmd, { out = null, input = null, raw = false } = {}) {
   return new Promise((resolve, reject) => {
-    if (!fs.existsSync(path.join(out, 'mirror.json'))) {
+    if (out && !fs.existsSync(path.join(out, 'mirror.json'))) {
       return reject(Object.assign(new Error('mirror not ready — crawl first'), { status: 404 }));
     }
-    const child = execFile(resolvePython(), [RENDER_AMAZON, out, cmd], { cwd: CRAWLER_DIR, maxBuffer: 64 * 1024 * 1024,
-      env: { ...process.env, PYTHONIOENCODING: 'utf-8' } },
+    const child = execFile(resolvePython(), [RENDER_AMAZON, cmd, ...(out ? [out] : [])],
+      { cwd: CRAWLER_DIR, maxBuffer: 512 * 1024 * 1024, encoding: 'buffer', timeout: 10 * 60 * 1000,
+        env: { ...process.env, PYTHONIOENCODING: 'utf-8' } },
       (err, stdout, stderr) => {
-        if (err) return reject(new Error(stderr || err.message));
-        try { resolve(JSON.parse(stdout)); } catch (e) { reject(new Error('bad amazon output: ' + e.message)); }
+        if (err) return reject(new Error(String(stderr || '') || err.message));
+        if (raw) return resolve({ data: stdout, info: String(stderr || '').trim().split('\n').pop() });
+        try { resolve(JSON.parse(stdout.toString('utf-8'))); } catch (e) { reject(new Error('bad amazon output: ' + e.message)); }
       });
     child.stdin.end(input ? JSON.stringify(input) : '');
   });
@@ -320,7 +325,7 @@ router.get('/api/v1/content-html', auth, async (req, res) => {
 
 router.get('/api/v1/amazon-features', auth, async (req, res) => {
   if (typeof req.query.url !== 'string') return res.status(400).json({ detail: 'url required' });
-  try { res.json(await runAmazon(path.join(OUT_DIR, slugify(req.query.url)), 'features')); }
+  try { res.json(await runAmazon('features', { out: path.join(OUT_DIR, slugify(req.query.url)) })); }
   catch (e) { res.status(e.status || 500).json({ detail: e.message.slice(0, 300) }); }
 });
 
@@ -329,9 +334,32 @@ router.post('/api/v1/amazon-modules', auth, async (req, res) => {
   if (typeof url !== 'string') return res.status(400).json({ detail: 'url required' });
   if (!Array.isArray(selection)) return res.status(400).json({ detail: 'selection must be an array' });
   try {
-    res.json(await runAmazon(path.join(OUT_DIR, slugify(url)), 'modules',
-      { selection, mode: mode === 'premium' ? 'premium' : 'standard', start_id }));
+    res.json(await runAmazon('modules', { out: path.join(OUT_DIR, slugify(url)),
+      input: { selection, mode: mode === 'premium' ? 'premium' : 'standard', start_id } }));
   } catch (e) { res.status(e.status || 500).json({ detail: e.message.slice(0, 300) }); }
+});
+
+// 모듈(+미리보기 이동·확대 transforms) → A+ 규격 JPEG ZIP + aplus-copy.txt
+router.post('/api/v1/amazon-images', auth, async (req, res) => {
+  const { modules, pdpUrl = '', date = '' } = req.body || {};
+  if (!Array.isArray(modules) || !modules.length) return res.status(400).json({ detail: 'modules required' });
+  try {
+    const { data, info } = await runAmazon('images', { input: { modules, pdpUrl, date }, raw: true });
+    let meta = {}; try { meta = JSON.parse(info); } catch {}
+    if (!meta.count) return res.status(422).json({ detail: 'no images could be processed', fails: meta.fails || [] });
+    res.set({ 'Content-Type': 'application/zip', 'X-Image-Count': String(meta.count),
+      'X-Image-Fails': encodeURIComponent(JSON.stringify(meta.fails || [])),
+      'Access-Control-Expose-Headers': 'X-Image-Count, X-Image-Fails' });
+    res.send(data);
+  } catch (e) { res.status(500).json({ detail: e.message.slice(0, 300) }); }
+});
+
+// 이어 붙은 히어로 이미지들 → 한 장 (data URL) + 가장자리 평균색
+router.post('/api/v1/amazon-stack', auth, async (req, res) => {
+  const { urls } = req.body || {};
+  if (!Array.isArray(urls) || urls.length < 2) return res.status(400).json({ detail: 'urls (2+) required' });
+  try { res.json(await runAmazon('stack', { input: { urls } })); }
+  catch (e) { res.status(500).json({ detail: e.message.slice(0, 300) }); }
 });
 
 router.get('/api/v1/jobs/:id/stream', (req, res) => {
