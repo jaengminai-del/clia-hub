@@ -226,26 +226,38 @@
     function move(ev) {
       const d = st.drag; if (!d) return;
       if (!d.started && Math.abs(ev.clientY - d.y0) < 5) return;     // 5px 넘게 움직여야 끌기 시작 (클릭과 구분)
+      d.y = ev.clientY;
       if (!d.started) {
         d.started = true; d.card.style.opacity = '.45'; d.grip.style.cursor = 'grabbing'; document.body.style.cursor = 'grabbing';
         grips.forEach((g) => { if (g !== d.grip) g.style.display = 'none'; });
+        // 위·아래 끝에 마우스를 대고 있기만 해도 계속 스크롤 (움직일 때만 스크롤되던 문제)
+        const tick = () => {
+          if (st.drag !== d) return;
+          const sc = scroller(), sr = sc === document.scrollingElement ? { top: 0, bottom: innerHeight } : sc.getBoundingClientRect();
+          if (d.y < sr.top + 60) sc.scrollTop -= 16; else if (d.y > sr.bottom - 60) sc.scrollTop += 16;
+          placeLine(d);
+          d.raf = requestAnimationFrame(tick);
+        };
+        d.raf = requestAnimationFrame(tick);
       }
       d.grip.style.top = (ev.clientY - 13) + 'px';
+      placeLine(d);
+    }
+    function placeLine(d) {
       // 마우스보다 세로 중심이 아래인 첫 형제 앞에 넣는다 (없으면 맨 뒤)
       const sib = siblings(d.card).filter((x) => x !== d.card);
       let before = null;
-      for (const x of sib) { const r = x.getBoundingClientRect(); if (ev.clientY < r.top + r.height / 2) { before = x; break; } }
+      for (const x of sib) { const r = x.getBoundingClientRect(); if (d.y < r.top + r.height / 2) { before = x; break; } }
       d.target = before;
       const ref = (before || sib[sib.length - 1] || d.card).getBoundingClientRect();
       line.style.display = 'block'; line.style.left = ref.left + 'px'; line.style.width = ref.width + 'px';
       line.style.top = (before ? ref.top - 6 : ref.bottom + 4) + 'px';
-      const sc = scroller(), sr = sc === document.scrollingElement ? { top: 0, bottom: innerHeight } : sc.getBoundingClientRect();
-      if (ev.clientY < sr.top + 40) sc.scrollTop -= 18; else if (ev.clientY > sr.bottom - 40) sc.scrollTop += 18;   // 위·아래 끝에서 자동 스크롤
     }
     function end() {
       const d = st.drag; st.drag = null;
       line.style.display = 'none'; document.body.style.cursor = '';
       if (!d) return;
+      cancelAnimationFrame(d.raf);
       d.grip.style.cursor = 'grab';
       d.card.style.opacity = ''; d.card.style.outline = ''; d.card.style.outlineOffset = '';
       if (!d.started) return;

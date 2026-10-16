@@ -141,7 +141,7 @@ body {
   flex: 1;
   overflow-y: auto;
   padding: 16px;
-  background: #fff;
+  background: #f0f0f0;   /* 다른 빌더와 같은 회색 바탕 — 미리보기(흰 페이지)는 가운데 (2026-10-16) */
 }
 .preview-page {
   background: #fff;
@@ -6962,6 +6962,7 @@ function applyUserZoom() {
     page.style.transform = `scale(${scale})`;
     page.style.transformOrigin = 'top left';
     page.style.width = '970px';
+    page.style.marginLeft = Math.max(0, Math.round((availW - 970 * scale) / 2)) + 'px';   // 가운데 정렬
     requestAnimationFrame(() => {
       const origH = page.scrollHeight;
       const excess = Math.round(origH * (1 - scale));
@@ -6975,7 +6976,11 @@ function applyUserZoom() {
                     : Math.round(_userZoom * 100);
       if (slider && _zoomMode !== 'custom') slider.value = display;
       if (val)    val.textContent = display + '%';
-      if (window.CLIAPreviewScale) CLIAPreviewScale.note(page, Math.round(scale * 100));   // "실제 크기의 N%로 표시"
+      if (window.CLIAPreviewScale) {   // "실제 크기의 N%로 표시" — 미리보기 폭에 맞춰 가운데
+        CLIAPreviewScale.note(page, Math.round(scale * 100));
+        const n = page.previousElementSibling;
+        if (n && n.classList.contains('clia-preview-scale-note')) { n.style.maxWidth = Math.round(970 * scale) + 'px'; n.style.margin = '0 auto 8px'; }
+      }
     });
   };
 })();
@@ -7003,60 +7008,97 @@ document.addEventListener('DOMContentLoaded', () => {
   if (p100) p100.addEventListener('click', () => { _zoomMode = '100'; applyUserZoom(); });
 });
 
-// ── Drag & drop module reorder ─────────────────────────────
+// ── Drag & drop module reorder (포인터 방식, 2026-10-16) ─────────────────────
+//  예전 HTML5 끌기는 모듈 전체가 실제 크기 반투명 이미지로 따라다녀 위아래 모듈을 가렸다 →
+//  손잡이(⠿)를 끌면 작은 이름표만 마우스를 따라가고, 놓일 위치는 빨간 선, 미리보기 위·아래 끝에서는 자동 스크롤.
 let _dragSrcId = null;
+let _modDrag = null;
 
 function _moduleDragHandlersInit() {
   const page = document.getElementById('previewPage');
   if (!page) return;
-
   page.querySelectorAll('.pv-module-wrap[data-mod-id]').forEach(wrap => {
     if (wrap.dataset.dndInit === '1') return;
     wrap.dataset.dndInit = '1';
-
-    // Insert drag handle button
-    if (!wrap.querySelector('.pv-drag-handle')) {
-      const handle = document.createElement('div');
-      handle.className = 'pv-drag-handle';
-      handle.title = 'Drag to reorder';
-      handle.innerHTML = '⠿';
-      wrap.appendChild(handle);
-
-      handle.addEventListener('mousedown', () => { wrap.setAttribute('draggable', 'true'); });
-      handle.addEventListener('mouseup',   () => { wrap.removeAttribute('draggable'); });
-    }
-
-    wrap.addEventListener('dragstart', e => {
-      _dragSrcId = wrap.dataset.modId;
-      wrap.classList.add('dragging');
-      try { e.dataTransfer.setData('text/plain', _dragSrcId); } catch(_){}
-      e.dataTransfer.effectAllowed = 'move';
+    if (wrap.querySelector('.pv-drag-handle')) return;
+    const handle = document.createElement('div');
+    handle.className = 'pv-drag-handle';
+    handle.title = 'Drag to reorder';
+    handle.innerHTML = '⠿';
+    handle.style.touchAction = 'none';
+    wrap.appendChild(handle);
+    handle.addEventListener('pointerdown', e => {
+      e.preventDefault(); e.stopPropagation();
+      handle.setPointerCapture(e.pointerId);
+      _modDrag = { id: +wrap.dataset.modId, wrap, y0: e.clientY, started: false, before: null, chip: null, line: null, raf: 0, y: e.clientY };
     });
-    wrap.addEventListener('dragend', () => {
-      wrap.classList.remove('dragging');
-      wrap.removeAttribute('draggable');
-      page.querySelectorAll('.drop-above,.drop-below').forEach(el => el.classList.remove('drop-above','drop-below'));
-      _dragSrcId = null;
-    });
-    wrap.addEventListener('dragover', e => {
-      if (!_dragSrcId || wrap.dataset.modId === _dragSrcId) return;
-      e.preventDefault();
-      const rect = wrap.getBoundingClientRect();
-      const before = (e.clientY - rect.top) < rect.height / 2;
-      wrap.classList.toggle('drop-above', before);
-      wrap.classList.toggle('drop-below', !before);
-    });
-    wrap.addEventListener('dragleave', () => {
-      wrap.classList.remove('drop-above','drop-below');
-    });
-    wrap.addEventListener('drop', e => {
-      e.preventDefault();
-      if (!_dragSrcId || wrap.dataset.modId === _dragSrcId) return;
-      const rect = wrap.getBoundingClientRect();
-      const before = (e.clientY - rect.top) < rect.height / 2;
-      _reorderModules(+_dragSrcId, +wrap.dataset.modId, before);
-    });
+    handle.addEventListener('pointermove', e => _modDragMove(e));
+    handle.addEventListener('pointerup', () => _modDragEnd());
+    handle.addEventListener('pointercancel', () => _modDragEnd(true));
   });
+}
+
+function _modDragMove(e) {
+  const d = _modDrag; if (!d) return;
+  d.y = e.clientY;
+  if (!d.started) {
+    if (Math.abs(e.clientY - d.y0) < 5) return;          // 5px 넘게 움직여야 끌기 시작 (클릭과 구분)
+    d.started = true;
+    d.wrap.classList.add('dragging');
+    const m = activeModules().find(x => x.id === d.id) || {};
+    const idx = activeModules().indexOf(m) + 1;
+    d.chip = document.createElement('div');
+    d.chip.textContent = `⠿  ${idx}. ${(m.textData && m.textData.headline) ? m.textData.headline.slice(0, 40) : m.type}`;
+    d.chip.style.cssText = 'position:fixed;z-index:2147483002;pointer-events:none;padding:7px 12px;border-radius:8px;background:#262626;color:#fff;'
+      + "font:600 12px/1.2 'LGEIText',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.3);max-width:360px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;";
+    d.line = document.createElement('div');
+    d.line.style.cssText = 'position:fixed;z-index:2147483001;height:4px;border-radius:2px;background:#EA1917;box-shadow:0 0 8px rgba(234,25,23,.5);pointer-events:none;display:none;';
+    document.body.append(d.chip, d.line);
+    document.body.style.cursor = 'grabbing';
+    const tick = () => {                                   // 위·아래 끝에서 자동 스크롤
+      if (!_modDrag || !_modDrag.started) return;
+      const sc = document.getElementById('previewScroll'), r = sc.getBoundingClientRect();
+      if (_modDrag.y < r.top + 60) sc.scrollTop -= 16; else if (_modDrag.y > r.bottom - 60) sc.scrollTop += 16;
+      _modDragPlace();
+      _modDrag.raf = requestAnimationFrame(tick);
+    };
+    d.raf = requestAnimationFrame(tick);
+  }
+  d.chip.style.left = (e.clientX + 14) + 'px';
+  d.chip.style.top = (e.clientY + 10) + 'px';
+  _modDragPlace();
+}
+
+function _modDragPlace() {
+  const d = _modDrag; if (!d || !d.started) return;
+  const others = [...document.querySelectorAll('#previewPage .pv-module-wrap[data-mod-id]')].filter(w => w !== d.wrap);
+  let before = null;
+  for (const w of others) { const r = w.getBoundingClientRect(); if (d.y < r.top + r.height / 2) { before = w; break; } }
+  d.before = before;
+  const ref = (before || others[others.length - 1] || d.wrap).getBoundingClientRect();
+  d.line.style.display = 'block';
+  d.line.style.left = ref.left + 'px'; d.line.style.width = ref.width + 'px';
+  d.line.style.top = (before ? ref.top - 3 : ref.bottom - 1) + 'px';
+}
+
+function _modDragEnd(cancel) {
+  const d = _modDrag; _modDrag = null;
+  if (!d) return;
+  cancelAnimationFrame(d.raf);
+  document.body.style.cursor = '';
+  if (d.chip) d.chip.remove();
+  if (d.line) d.line.remove();
+  d.wrap.classList.remove('dragging');
+  if (!d.started || cancel) return;
+  const arr = activeModules();
+  const from = arr.findIndex(m => m.id === d.id);
+  if (from < 0) return;
+  const [moved] = arr.splice(from, 1);
+  let to = d.before ? arr.findIndex(m => m.id === +d.before.dataset.modId) : arr.length;
+  if (to < 0) to = arr.length;
+  arr.splice(to, 0, moved);
+  setActiveModules(arr);
+  renderPagePreview();
 }
 
 function _reorderModules(srcId, tgtId, before) {
