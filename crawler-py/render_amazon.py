@@ -6,6 +6,7 @@
                                                      "features":[...] (slug 없을 때)}           → 모듈 JSON
     python render_amazon.py images               < {"modules":[...+transforms], "pdpUrl":"", "date":""}  → ZIP (stdout)
     python render_amazon.py stack                < {"urls":[...]}  → {"url": data URL(JPEG), "bg": "rgb(r,g,b)"}
+    python render_amazon.py crop                 < {"url": 원본, "box": "x,y,w,h"}  → 잘린 JPEG (stdout)
 """
 import base64
 import json
@@ -50,5 +51,10 @@ elif cmd == "stack":
     from content_gen.amazon.images import merge_stacked
     res = merge_stacked(req().get("urls") or [])
     out_json(None if not res else {"url": "data:image/jpeg;base64," + base64.b64encode(res[0]).decode(), "bg": res[1]})
+elif cmd == "crop":
+    from urllib.parse import quote
+    from content_gen.amazon.images import crop_from_url, _jpeg
+    r = req()
+    sys.stdout.buffer.write(_jpeg(crop_from_url(f"/api/v1/image-crop?url={quote(r['url'], safe='')}&box={r['box']}")))
 else:
     raise SystemExit(f"unknown command: {cmd}")

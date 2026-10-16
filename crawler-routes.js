@@ -15,6 +15,7 @@
  *   POST /api/v1/amazon-modules {url | features, selection, mode, start_id} → 선택 카드 → A+ 모듈 목록
  *   POST /api/v1/amazon-images {modules(+transforms), pdpUrl, date} → A+ 규격 이미지 ZIP (Pillow)
  *   POST /api/v1/amazon-stack {urls}   → 이어 붙은 히어로 한 장 {url: data URL, bg}
+ *   GET  /api/v1/image-crop?url=&box=x,y,w,h → 원본의 일부를 잘라 JPEG (Amazon 이미지 자동 선택 결과)
  *   GET  /api/v1/products?country=uk    → 크롤 완료 제품 목록 (허브 Product List 검색용, 크롤러에 계속 누적)
  *   GET  /api/v1/products/:slug         → 제품 1건 (원본 URL + mirror + geo)
  *   POST /api/v1/products/:slug/geo     → GEO Q&A·키워드 생성 (Gemini, out/<slug>/geo.json 캐시, force:true 재생성)
@@ -365,6 +366,19 @@ router.post('/api/v1/amazon-images', auth, async (req, res) => {
       'Access-Control-Expose-Headers': 'X-Image-Count, X-Image-Fails' });
     res.send(data);
   } catch (e) { res.status(500).json({ detail: e.message.slice(0, 300) }); }
+});
+
+// 원본 이미지의 일부(box = x,y,w,h, 0~1 비율)를 잘라 JPEG — Amazon 이미지 자동 선택(PC·모바일) 결과 미리보기용
+router.get('/api/v1/image-crop', async (req, res) => {
+  const { url, box } = req.query;
+  if (typeof url !== 'string' || !/^https?:\/\//.test(url) || typeof box !== 'string' || !/^[\d.]+(,[\d.]+){3}$/.test(box)) {
+    return res.status(400).json({ detail: 'url and box=x,y,w,h required' });
+  }
+  try {
+    const { data } = await runAmazon('crop', { input: { url, box }, raw: true });
+    res.set({ 'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=86400', 'Access-Control-Allow-Origin': '*' });
+    res.send(data);
+  } catch (e) { res.status(502).json({ detail: e.message.slice(0, 300) }); }
 });
 
 // 이어 붙은 히어로 이미지들 → 한 장 (data URL) + 가장자리 평균색

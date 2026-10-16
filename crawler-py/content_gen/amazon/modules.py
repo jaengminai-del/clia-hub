@@ -8,7 +8,34 @@ modules.py — 선택한 카드 → Amazon A+ 모듈 목록
   · 수상·인증 배지: 개수로 결정 (1·2개 → Single Left, 3개 → Three, 4개 이상 → Four)
   · 문구는 PDP 원문만 (없으면 빈 칸 — 문구를 만들어 내지 않는다)
 """
+from urllib.parse import quote
+
 from .jsutil import js_or, jslice, jlen, trim, truthy
+
+CROP_PATH = "/api/v1/image-crop"     # 서버가 원본을 잘라 주는 주소 (미리보기·다운로드 공통)
+
+
+def crop_url(url: str, crop: dict) -> str:
+    if not crop or crop.get("kind") == "full":
+        return url
+    box = ",".join(f"{crop[k]:.4f}" for k in ("x", "y", "w", "h"))
+    return f"{CROP_PATH}?url={quote(url, safe='')}&box={box}"
+
+
+def pick_source(img: dict, w: int, h: int):
+    """후보(PC 빈 영역 자름 · 모바일 빈 띠 자름) 중 w×h 칸을 꽉 채울 때 덜 잘리는 쪽 → (이미지 주소, 남는 비율, 고른 쪽)."""
+    target = w / h
+    best = None
+    for i, src in enumerate(img.get("sources") or []):
+        c = src.get("crop") or {}
+        cw, ch = (c.get("w") or 1) * (c.get("iw") or 0), (c.get("h") or 1) * (c.get("ih") or 0)
+        if cw <= 0 or ch <= 0:
+            continue
+        r = cw / ch
+        keep = min(r / target, target / r)
+        if best is None or keep > best[1] + 1e-9:         # 같으면 앞쪽(PC) 유지
+            best = (crop_url(src["url"], c), keep, "pc" if i == 0 and src["url"] == img.get("url") else "mobile")
+    return best
 
 
 def pick_best_module(feature: dict, spec: dict) -> str:
@@ -78,7 +105,8 @@ def build_modules(features: list, selection: list, spec: dict, mode: str = "stan
                     body = js_or(feature.get("body"), "") if i == 0 else js_or(
                         bullets[i] if bullets and i < len(bullets) else None, "")
                 body = jslice(js_or(body, ""), L["single_body"])
-                mods.append({"type": "image-header-text", "imageUrl": img.get("url"), "videoUrl": None,
+                one = pick_source(img, *spec["module_image_specs"]["image-header-text"][0]) if img.get("sources") else None
+                mods.append({"type": "image-header-text", "imageUrl": one[0] if one else img.get("url"), "videoUrl": None,
                              "slotImages": None, "featureCount": 1,
                              "textData": {"headline": js_or(title, feature.get("headline"), "Feature"),
                                           "subheadline": js_or(feature.get("subheadline"), "") if i == 0 else "",
@@ -197,6 +225,10 @@ def build_modules(features: list, selection: list, spec: dict, mode: str = "stan
             "bulletTitle": js_or(feature.get("subheadline"), feature.get("headline"), ""),
             "subheads": subheads, "bodies": bodies, "items": items,
         })
+        # 텍스트 오버레이 히어로: 칸 비율에 덜 잘리는 이미지(PC·모바일)로 교체 (Standard 모듈만 — 다운로드 규격이 있는 것)
+        if mode != "premium" and not award and not feature.get("stacked"):
+            image_url, slot_images, items = _apply_sources(type_id, fimgs, image_url, slot_images, items, spec)
+            text["items"] = items
         mod = {"type": type_id, "imageUrl": image_url, "videoUrl": None, "slotImages": slot_images,
                "featureCount": min(js_or(len(bullets or []), 4), 8), "textData": text}
         if award:
@@ -205,3 +237,24 @@ def build_modules(features: list, selection: list, spec: dict, mode: str = "stan
         next_id += 1
         mods.append(mod)
     return mods
+
+
+def _apply_sources(type_id, fimgs, image_url, slot_images, items, spec):
+    """모듈의 이미지 칸마다 후보가 있으면 고른 이미지 주소로 바꾼다 (imageUrl · slotImages · items[].imageUrl)."""
+    specs = spec["module_image_specs"].get(type_id)
+    by_url = {i.get("url"): i for i in fimgs if i.get("sources")}
+    if not specs or not by_url:
+        return image_url, slot_images, items
+
+    def swap(url, slot):
+        img = by_url.get(url)
+        if not img:
+            return url
+        w, h = specs[min(slot, len(specs) - 1)]
+        best = pick_source(img, w, h)
+        return best[0] if best else url
+    image_url = swap(image_url, 0)
+    if slot_images:
+        slot_images = {k: swap(v, int(k[1:]) - 1) for k, v in slot_images.items()}
+    items = [dict(it, imageUrl=swap(it.get("imageUrl"), i)) for i, it in enumerate(items)]
+    return image_url, slot_images, items

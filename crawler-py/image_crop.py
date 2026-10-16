@@ -243,7 +243,10 @@ def annotate_overlay_crops(mirror: dict) -> int:
         if not ov:
             continue
         for m in s.get("media", []):
-            if m.get("type") != "image" or m.get("mobile_crop") or (m.get("crop") or {}).get("kind") == "badge":
+            if m.get("type") != "image" or (m.get("crop") or {}).get("kind") == "badge":
+                continue
+            if m.get("mobile_crop"):
+                n += annotate_pc_candidate(m, ov, crop)
                 continue
             mob, pc = m.get("mobile_url"), m.get("pc_url")
             if mob and mob != pc and ov.get("mobile") in ("top", "bottom"):
@@ -251,7 +254,7 @@ def annotate_overlay_crops(mirror: dict) -> int:
                 if c:
                     m["mobile_crop"] = dict(c, kind="overlay_band")
                     m["use_mobile"] = True
-                    n += 1
+                    n += 1 + annotate_pc_candidate(m, ov, crop)
                     continue
             if not mob and pc and ov.get("pc") in ("left", "right"):
                 c = crop(pc, ov["pc"])
@@ -259,3 +262,32 @@ def annotate_overlay_crops(mirror: dict) -> int:
                     m["crop"] = dict(c, kind="overlay_band")
                     n += 1
     return n
+
+
+def annotate_pc_candidate(m: dict, ov: dict, crop=None) -> int:
+    """모바일 이미지를 쓰는 오버레이 히어로에도 PC 원본 쪽 후보를 기록 — media.pc_crop (kind=overlay_band).
+    Amazon A+ 는 모듈 칸 비율에 PC·모바일 중 덜 잘리는 쪽을 고른다 (eBay·Shopee/Lazada 는 쓰지 않음).
+    PC 텍스트 자리(왼쪽·오른쪽) 빈 영역을 자르고, 텍스트 자리 정보가 없으면 가장자리 단색 배경만 자른다.
+    잘라 낼 것이 없으면 pc_crop = 전체 영역 (kind=full — 원본 그대로, 비율 비교용 크기만 기록)."""
+    pc = m.get("pc_url")
+    if not pc or "pc_crop" in m:
+        return 0
+    c = None
+    if ov.get("pc") in ("left", "right"):
+        c = crop(pc, ov["pc"]) if crop else None
+        if crop is None:
+            im = fetch_image(pc)
+            c = find_text_band_crop(im, ov["pc"]) if im is not None else None
+    if not c:
+        im = fetch_image(pc)
+        if im is None:
+            return 0
+        t = trim_background(im)
+        if any(t.values()):
+            c = {"x": round(t["left"], 4), "y": round(t["top"], 4), "w": round(1 - t["left"] - t["right"], 4),
+                 "h": round(1 - t["top"] - t["bottom"], 4), "iw": im.size[0], "ih": im.size[1]}
+        else:
+            m["pc_crop"] = {"x": 0, "y": 0, "w": 1, "h": 1, "iw": im.size[0], "ih": im.size[1], "kind": "full"}
+            return 1
+    m["pc_crop"] = dict(c, kind="overlay_band")
+    return 1

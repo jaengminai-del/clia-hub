@@ -29,6 +29,8 @@ def load_image(url: str, timeout: int = 20) -> Image.Image:
     직접 받고, 실패하면(배포 서버에서는 LG.com 이 403) 같은 서버의 이미지 중계(/api/proxy-image)로 받는다 — image_crop.fetch_bytes."""
     if url.startswith("data:"):
         data = base64.b64decode(url.split(",", 1)[1])
+    elif "/api/v1/image-crop?" in url:            # 서버가 잘라 주는 주소 → 여기서 바로 자른다 (HTTP 왕복 없이)
+        return crop_from_url(url, timeout)
     else:
         from image_crop import fetch_bytes      # 직접 → 실패 시 서버 이미지 중계 (크롤러와 같은 규칙)
         data = fetch_bytes(url, timeout)
@@ -38,6 +40,17 @@ def load_image(url: str, timeout: int = 20) -> Image.Image:
         bg = Image.new("RGBA", im.size, (255, 255, 255, 255))   # 투명 영역은 흰색 (JPEG 저장 대비)
         im = Image.alpha_composite(bg, im)
     return im.convert("RGB")
+
+
+def crop_from_url(url: str, timeout: int = 20) -> Image.Image:
+    """/api/v1/image-crop?url=<원본>&box=x,y,w,h (0~1 비율) → 잘린 이미지."""
+    from urllib.parse import parse_qs, urlsplit
+    q = parse_qs(urlsplit(url).query)
+    src = q["url"][0]
+    x, y, w, h = (float(v) for v in q["box"][0].split(","))
+    im = load_image(src, timeout)
+    W, H = im.size
+    return im.crop((round(x * W), round(y * H), round((x + w) * W), round((y + h) * H)))
 
 
 def _jpeg(im: Image.Image) -> bytes:

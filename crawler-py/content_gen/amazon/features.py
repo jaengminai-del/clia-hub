@@ -75,8 +75,27 @@ def _normalize(s: dict) -> dict:
             "groupHeading": js_or(s.get("group_heading"), ""), "stacked": truthy(s.get("stacked"))}
 
 
+def _sources(m: dict):
+    """텍스트 오버레이 히어로의 이미지 후보 (C 방식 자동 선택, 2026-10-16).
+    PC 원본(빈 영역 자름) · 모바일(빈 띠 자름) — 모듈 칸 비율에 덜 잘리는 쪽을 modules.py 가 고른다."""
+    out = []
+    pc_crop = m.get("pc_crop") or ((m.get("crop") or {}) if (m.get("crop") or {}).get("kind") == "overlay_band" else None)
+    if pc_crop:
+        out.append({"url": _best_url(m), "crop": pc_crop})
+    if m.get("mobile_crop") and m.get("mobile_url"):
+        out.append({"url": m["mobile_url"], "crop": m["mobile_crop"]})
+    return out or None
+
+
 def _to_imgs(media: list) -> list:
-    return [{"url": _best_url(m), "alt": "", "nearText": "", "width": 0, "height": 0, "ar": 0} for m in media]
+    out = []
+    for m in media:
+        img = {"url": _best_url(m), "alt": "", "nearText": "", "width": 0, "height": 0, "ar": 0}
+        src = _sources(m)
+        if src:
+            img["sources"] = src
+        out.append(img)
+    return out
 
 
 def _cardish(lt) -> bool:

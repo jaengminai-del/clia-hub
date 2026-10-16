@@ -5912,6 +5912,13 @@ async function buildModulesViaServer(selectedCards) {
     body: JSON.stringify({ features: _analyzedFeatures, selection, mode: currentMode, start_id: nextId }) });
   if (!r.ok) throw new Error('amazon-modules HTTP ' + r.status);
   const mods = await r.json();
+  // 서버가 잘라 주는 이미지 주소(/api/v1/image-crop — PC·모바일 자동 선택 결과)는 서버 주소를 붙인다
+  const abs = u => (typeof u === 'string' && u.startsWith('/api/')) ? APLUS_API + u : u;
+  mods.forEach(m => {
+    m.imageUrl = abs(m.imageUrl);
+    if (m.slotImages) Object.keys(m.slotImages).forEach(k => { m.slotImages[k] = abs(m.slotImages[k]); });
+    ((m.textData || {}).items || []).forEach(it => { it.imageUrl = abs(it.imageUrl); });
+  });
   mods.forEach(m => { activeModules().push(m); nextId = Math.max(nextId, m.id + 1); });
   // 이어 붙은 히어로: 이미지들을 한 장으로 합쳐 모듈 이미지로 교체 (업로드용 실제 파일)
   selection.forEach(idx => {
