@@ -43,10 +43,12 @@
     "text_width": "60%"
   },
   "award": {
-    "_note": "수상·인증 배지 카드 (ST0053·배지 파일명): 작은 로고 + 텍스트로 통일",
-    "logo_column_width": "30%",
-    "logo_max_px": 180,
-    "logo_padding_px": 24
+    "_note": "수상·인증 배지 카드: 일반 가로형 카드와 같은 칸(이미지 폭 card.image_width · 비율 frame_ratio)으로 통일 (2026-10-16).",
+    "_note2": "배너에서 잘라 낸 배지: 배지가 가운데(칸 높이의 badge_fill) 오게 주변 배경까지 칸을 채움. 배지 파일: 칸 안에 전체 + 여백 frame_bg.",
+    "frame_ratio": 1.5,
+    "badge_fill": 0.85,
+    "frame_bg": "#FFFFFF",
+    "_legacy": {"logo_column_width": "30%", "logo_max_px": 180, "logo_padding_px": 24}
   },
   "stacked_image": {
     "_note": "여백 없이 이어 붙은 히어로(no-spacing 연속 ST0001): 이미지들을 붙여 한 장처럼, 바깥에만 둥근 모서리",

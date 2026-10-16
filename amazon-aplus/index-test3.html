@@ -4675,6 +4675,34 @@ function _showZoomBadge(wrapper, pct) {
   b._t = setTimeout(() => b.classList.remove('show'), 700);
 }
 
+// 이미지 가장자리 평균색 — 축소해서 생긴 빈 곳을 채우는 색 (다운로드도 같은 규칙: Python images.edge_color)
+const _edgeColorCache = new Map();
+function _edgeColor(src) {
+  if (!src) return Promise.resolve(null);
+  if (_edgeColorCache.has(src)) return _edgeColorCache.get(src);
+  const p = new Promise(resolve => {
+    const im = new Image();
+    im.crossOrigin = 'anonymous';
+    im.onload = () => {
+      try {
+        const N = 24, cv = document.createElement('canvas'); cv.width = cv.height = N;
+        const cx = cv.getContext('2d'); cx.drawImage(im, 0, 0, N, N);
+        const d = cx.getImageData(0, 0, N, N).data; let r = 0, g = 0, b = 0, n = 0;
+        for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+          if (x > 1 && x < N - 2 && y > 1 && y < N - 2) continue;   // 바깥 2줄만
+          const i = (y * N + x) * 4; r += d[i]; g += d[i + 1]; b += d[i + 2]; n++;
+        }
+        resolve(`rgb(${Math.round(r / n)},${Math.round(g / n)},${Math.round(b / n)})`);
+      } catch (e) { resolve(null); }
+    };
+    im.onerror = () => resolve(null);
+    // LG 원본은 서버 중계로 받아야 캔버스에서 색을 읽을 수 있다 (같은 출처)
+    im.src = (/^https?:/.test(src) && !src.startsWith(APLUS_API)) ? `${APLUS_API}/api/proxy-image?url=${encodeURIComponent(src)}` : src;
+  });
+  _edgeColorCache.set(src, p);
+  return p;
+}
+
 function applyImageDragMode(page) {
   page.querySelectorAll('.pv-module-wrap img').forEach(img => {
     if (img.closest('.pv-module-actions')) return;
@@ -4788,12 +4816,15 @@ function applyImageDragMode(page) {
     }
     let _cover = null;
     const _coverApplied = applyCoverDims();
+    _edgeColor(img.currentSrc || img.src).then(c => { if (c) clipWrapper.style.background = c; });
 
     let zbar = null;
     function applyTransform() {
       if (_cover) {
-        z = Math.max(1, z);
-        const mx = Math.max(0, (_cover.w * z - cW) / 2), my = Math.max(0, (_cover.h * z - cH) / 2);
+        // 100% 아래로 줄이면 이미지 전체가 칸 안에 들어오고 빈 곳은 가장자리 색으로 채움 (2026-10-16 사용자 결정)
+        //   칸보다 크면 빈 곳이 생기지 않게, 칸보다 작으면 칸 밖으로 나가지 않게
+        z = Math.max(0.2, z);
+        const mx = Math.abs(_cover.w * z - cW) / 2, my = Math.abs(_cover.h * z - cH) / 2;
         tx = Math.max(-mx, Math.min(mx, tx)); ty = Math.max(-my, Math.min(my, ty));
         img.setAttribute('data-tx', tx.toFixed(1)); img.setAttribute('data-ty', ty.toFixed(1)); img.setAttribute('data-zoom', z.toFixed(3));
       }
@@ -6172,6 +6203,16 @@ async function downloadImages() {
         // (JPEG는 알파가 없어 미채움 영역이 검정으로 저장되는 문제 방지)
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, w, h);
+        {   // 축소해서 생긴 빈 곳은 이미지 가장자리 평균색 (미리보기와 같은 규칙)
+          const N = 24, ec = document.createElement('canvas'); ec.width = ec.height = N;
+          const ex = ec.getContext('2d'); ex.drawImage(bm, 0, 0, N, N);
+          const dd = ex.getImageData(0, 0, N, N).data; let r = 0, g = 0, b = 0, n = 0;
+          for (let yy = 0; yy < N; yy++) for (let xx = 0; xx < N; xx++) {
+            if (xx > 1 && xx < N - 2 && yy > 1 && yy < N - 2) continue;
+            const ii = (yy * N + xx) * 4; r += dd[ii]; g += dd[ii + 1]; b += dd[ii + 2]; n++;
+          }
+          ctx.fillStyle = `rgb(${Math.round(r / n)},${Math.round(g / n)},${Math.round(b / n)})`; ctx.fillRect(0, 0, w, h);
+        }
         ctx.save();
         ctx.translate(w / 2 + tx * scaleOut, h / 2 + ty * scaleOut);
         ctx.scale(z * s0 * scaleOut, z * s0 * scaleOut);

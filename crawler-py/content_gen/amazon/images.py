@@ -113,6 +113,20 @@ def merge_stacked(urls: list):
     return _jpeg(out), bg
 
 
+def edge_color(im: Image.Image) -> tuple:
+    """이미지 가장자리 평균색 — 24×24 로 줄여 바깥 2줄 평균 (빌더 미리보기 _edgeColor 와 같은 규칙)."""
+    N = 24
+    px = im.convert("RGB").resize((N, N), Image.BILINEAR).load()
+    tot, n = [0, 0, 0], 0
+    for y in range(N):
+        for x in range(N):
+            if 1 < x < N - 2 and 1 < y < N - 2:
+                continue
+            c = px[x, y]
+            tot[0] += c[0]; tot[1] += c[1]; tot[2] += c[2]; n += 1
+    return tuple(round(t / n) for t in tot)
+
+
 def render_slot(im: Image.Image, mod: dict, url: str, w: int, h: int, transform: Optional[dict]) -> Image.Image:
     fit = mod.get("fit")
     c = ((mod.get("textData") or {}).get("crops") or {}).get(url)
@@ -131,7 +145,7 @@ def render_slot(im: Image.Image, mod: dict, url: str, w: int, h: int, transform:
     s0 = max(cW / im.width, cH / im.height) if cW > 0 else max(w / im.width, h / im.height)
     k = z * s0 * scale_out
     cx, cy = w / 2 + tx * scale_out, h / 2 + ty * scale_out
-    cv = Image.new("RGB", (w, h), (255, 255, 255))   # 프레임을 다 못 채우면 흰색
+    cv = Image.new("RGB", (w, h), edge_color(im))     # 축소해서 생긴 빈 곳은 이미지 가장자리 평균색 (미리보기와 같은 규칙)
     _draw(cv, im, 0, 0, im.width, im.height, cx - im.width / 2 * k, cy - im.height / 2 * k, im.width * k, im.height * k)
     return cv
 

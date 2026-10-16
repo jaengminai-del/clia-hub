@@ -181,8 +181,37 @@ def _cropped_img(image_url: str, crop: dict, alt: str, max_h: int) -> str:
             f'</div></div>')
 
 
+def _badge_window(crop: dict, ratio: float, fill: float) -> dict:
+    """배너에서 잘라 낸 배지(crop) 주변을 ratio(가로/세로) 칸으로 — 배지가 가운데, 칸 높이의 fill 만큼 차지 (배경 포함).
+    원본 밖으로 나가지 않게 맞춘다. 반환: 원본 대비 x·y·w·h 비율 + iw·ih (_frame_img 용)."""
+    iw, ih = crop.get("iw") or 1, crop.get("ih") or 1
+    bh = crop["h"] * ih                                   # 배지 높이 (원본 px)
+    wh = min(ih, bh / fill)                               # 칸 높이
+    ww = wh * ratio
+    if ww > iw:                                           # 원본 폭이 모자라면 폭 기준
+        ww = iw
+        wh = ww / ratio
+    cx = (crop["x"] + crop["w"] / 2) * iw
+    cy = (crop["y"] + crop["h"] / 2) * ih
+    x0 = min(max(0, cx - ww / 2), iw - ww)
+    y0 = min(max(0, cy - wh / 2), ih - wh)
+    return {"x": x0 / iw, "y": y0 / ih, "w": ww / iw, "h": wh / ih, "iw": iw, "ih": ih}
+
+
+def _frame_img(image_url: str, win: dict, alt: str) -> str:
+    """원본의 win 영역을 칸 폭 100%에 꽉 채워 보여 준다 (인라인 CSS — 편집 모드의 잘라 보이는 상자와 같은 구조)."""
+    x, y, w, h = win["x"], win["y"], win["w"], win["h"]
+    ratio = win["ih"] / max(1, win["iw"])
+    box = h * ratio / w
+    return (f'<div style="position: relative; width: 100%; padding-top: {box * 100:.2f}%; overflow: hidden;">'
+            f'<img src="{image_url}" alt="{escape(alt)}" style="position: absolute; top: 0; left: 0; width: {100 / w:.2f}%; '
+            f'max-width: none; height: auto; margin-left: -{x / w * 100:.2f}%; margin-top: -{y * ratio / w * 100:.2f}%;"></div>')
+
+
 def award_card(st: Style, image_url: str, lines: list, component_id: str = "", crop: dict = None) -> str:
-    """수상·인증 배지 카드: 작은 로고(왼쪽, 비율 유지) + 제목·본문(오른쪽). 모든 배지를 같은 모양으로 통일."""
+    """수상·인증 배지 카드 — 일반 가로형 카드와 같은 칸(이미지 폭 card.image_width, 비율 award.frame_ratio).
+    · 배너에서 잘라 낸 배지(crop): 배지가 가운데 오게 주변 배경까지 칸을 채움
+    · 배지 파일: 칸 안에 전체가 보이게 + 여백(award.frame_bg)"""
     aw = st.award
     h_px = st.px(component_id, "headline", 36)
     b_px = st.px(component_id, "body", 16)
@@ -193,16 +222,19 @@ def award_card(st: Style, image_url: str, lines: list, component_id: str = "", c
          f'line-height: {st.head_lh}; margin: 0 0 10px 0; color: {st.headline_color};">{escape(title)}</h3>') if title else ""
     b = (f'<p style="font-family: {st.font_body}; font-size: {b_px}px; line-height: {st.body_lh}; '
          f'margin: 0; color: {st.body_color};">{escape(body)}</p>') if body else ""
-    logo_w = aw.get("logo_column_width", "30%")
-    logo_max = aw.get("logo_max_px", 180)
-    pad = aw.get("logo_padding_px", 24)
-    txt = (f'<div class="lg-award-text" style="flex: 1 1 auto; padding: 20px 24px 20px 0; text-align: left;">{h}{b}</div>'
+    txt = (f'<div class="lg-award-text" style="flex: 1 1 {st.card.get("text_width", "60%")}; padding: 20px 24px 20px 0; text-align: left;">{h}{b}</div>'
            if (h or b) else "")
-    logo = (_cropped_img(image_url, crop, title, logo_max) if crop else
-            f'<img src="{image_url}" alt="{escape(title)}" style="max-width: 100%; max-height: {logo_max}px; width: auto; height: auto; display: inline-block;">')
+    img_w = st.card.get("image_width", "40%") if txt else "100%"
+    ratio = float(aw.get("frame_ratio", 1.5))
+    if crop and crop.get("iw") and crop.get("ih"):
+        logo = _frame_img(image_url, _badge_window(crop, ratio, float(aw.get("badge_fill", 0.85))), title)
+    else:
+        logo = (f'<div style="position: relative; width: 100%; padding-top: {100 / ratio:.2f}%; overflow: hidden; '
+                f'background: {aw.get("frame_bg", "#FFFFFF")};"><img src="{image_url}" alt="{escape(title)}" '
+                f'style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; max-width: none; object-fit: contain;"></div>')
     return f'''
 <div class="lg-hcard lg-award" style="display: flex; align-items: center; gap: 24px; background: #FFFFFF; border: 1px solid {st.stroke}; border-radius: 16px; overflow: hidden;">
-  <div class="lg-award-logo" style="flex: 0 0 {logo_w}; max-width: {logo_w}; padding: {pad}px; text-align: center;">{logo}</div>
+  <div class="lg-award-logo" style="flex: 0 0 {img_w}; max-width: {img_w};">{logo}</div>
   {txt}
 </div>'''
 
