@@ -2937,6 +2937,7 @@ function badgeImg(url, td, px, size) {
     const ty = Math.max(-my, Math.min(my, -((c.y + c.h / 2) - 0.5) * ih * s0 * z));
     const box = px ? `width:${px}px;height:${px}px;` : 'width:100%;aspect-ratio:1/1;height:auto;';
     return `<img class="badge-cover" src="${escHtml(url)}" alt="badge" data-tx="${tx.toFixed(1)}" data-ty="${ty.toFixed(1)}" data-zoom="${z.toFixed(3)}" `
+         + `data-tx0="${tx.toFixed(1)}" data-ty0="${ty.toFixed(1)}" data-zoom0="${z.toFixed(3)}" `
          + `style="${box}object-fit:cover;object-position:center;display:block;flex-shrink:0;background:#fff;">`;
   }
   const box = px ? `width:${px}px;height:${px}px;flex-shrink:0;` : 'width:100%;aspect-ratio:1/1;';
@@ -4788,6 +4789,7 @@ function applyImageDragMode(page) {
     let _cover = null;
     const _coverApplied = applyCoverDims();
 
+    let zbar = null;
     function applyTransform() {
       if (_cover) {
         z = Math.max(1, z);
@@ -4801,6 +4803,7 @@ function applyImageDragMode(page) {
         : `translate(${tx}px, ${ty}px) scale(${z})`;
       img.style.transform = t;
       if (dimImg) dimImg.style.transform = t;
+      if (zbar) zbar.update();
     }
     // naturalWidth 미로딩 시 load 후 재적용
     if (!_coverApplied) {
@@ -4811,23 +4814,18 @@ function applyImageDragMode(page) {
     }
     applyTransform();
 
-    // Reset FAB (top-right corner, hover 시 노출)
-    const fab = document.createElement('button');
-    fab.type = 'button';
-    fab.className = 'img-reset-fab';
-    fab.title = 'Reset position & zoom (↺)';
-    fab.innerHTML = '↺';
-    clipWrapper.appendChild(fab);
-    fab.addEventListener('mousedown', e => e.stopPropagation());
-    fab.addEventListener('click', e => {
-      e.stopPropagation();
-      tx = 0; ty = 0; z = 1;
-      img.setAttribute('data-tx', '0');
-      img.setAttribute('data-ty', '0');
-      img.setAttribute('data-zoom', '1');
-      applyTransform();
-      _showZoomBadge(clipWrapper, 100);
-    });
+    // 확대·축소 막대 [🔍 − 100% + ↺] (shared/clia-zoom-bar.js) — 5% 단위, ↺ = 처음 위치(배너 배지는 배지 중심)
+    const _t0 = { tx: +(img.dataset.tx0 || 0), ty: +(img.dataset.ty0 || 0), z: +(img.dataset.zoom0 || 1) };
+    if (window.CLIAZoomBar) {
+      clipWrapper.querySelectorAll(':scope > .img-zoom-bar').forEach(o => o.remove());
+      zbar = CLIAZoomBar.create({
+        step: d => { z = +(z + d * CLIAZoomBar.STEP).toFixed(2); z = Math.min(5, z); applyTransform(); },
+        reset: () => { tx = _t0.tx; ty = _t0.ty; z = _t0.z; applyTransform(); },
+        value: () => z,
+      });
+      clipWrapper.appendChild(zbar.el);
+      zbar.update();
+    }
 
     // 자동 grab 커서 활성화
     clipWrapper.classList.add('drag-enabled');
@@ -4835,7 +4833,7 @@ function applyImageDragMode(page) {
     // Mousedown → free drag 시작 (Edit 모드에서만)
     clipWrapper.addEventListener('mousedown', e => {
       if (!clipWrapper.classList.contains('drag-enabled')) return; // Lock 상태 차단
-      if (e.target.closest('.img-reset-fab')) return;
+      if (e.target.closest('.img-reset-fab, .img-zoom-bar')) return;
       // 텍스트 contenteditable 클릭은 무시 (드래그하지 않음)
       if (e.target.closest('[contenteditable="true"]')) return;
       _imgDrag = {
@@ -4859,11 +4857,11 @@ function applyImageDragMode(page) {
       if (!clipWrapper.classList.contains('drag-enabled')) return; // Lock → preventDefault 안 함 → 정상 스크롤
       e.preventDefault();
       e.stopPropagation();
-      const factor = e.deltaY < 0 ? 1.05 : (1 / 1.05);
-      z = Math.max(0.2, Math.min(5, z * factor));
+      const d = window.CLIAZoomBar ? CLIAZoomBar.wheelStep(e, clipWrapper) : (e.deltaY < 0 ? 1 : -1);   // 휠도 5% 단위
+      if (!d) return;
+      z = Math.max(0.2, Math.min(5, +(z + d * 0.05).toFixed(2)));
       img.setAttribute('data-zoom', z.toFixed(3));
       applyTransform();
-      _showZoomBadge(clipWrapper, Math.round(z * 100));
     }, { passive: false });
   });
 }
@@ -4871,7 +4869,7 @@ function applyImageDragMode(page) {
 function removeImageDragMode(page) {
   _imgDrag = null;
   // edit 컨트롤만 제거, transform 은 유지 (Lock 상태에서도 위치/줌 보존)
-  page.querySelectorAll('.img-reset-fab, .img-zoom-badge, .img-reposition-overlay, .img-frame-guide').forEach(o => o.remove());
+  page.querySelectorAll('.img-reset-fab, .img-zoom-badge, .img-zoom-bar, .img-reposition-overlay, .img-frame-guide').forEach(o => o.remove());
   // dim 레이어 제거
   page.querySelectorAll('.img-dim-layer').forEach(o => o.remove());
   // bright clip 언래핑 → 원본 img 를 clipWrapper 로 복귀 (transform 유지)
@@ -6483,6 +6481,7 @@ function exportPage() {
   const STRIP_SEL = [
     '.pv-module-actions',
     '.pv-drag-handle',
+    '.img-zoom-bar',
     '.img-reset-fab',
     '.img-zoom-badge',
     '.img-reposition-overlay',
@@ -7075,6 +7074,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 <script src="../shared/clia-i18n.js"></script>
+<script src="../shared/clia-zoom-bar.js"></script>
 <script src="./i18n.js"></script>
 </body>
 </html>

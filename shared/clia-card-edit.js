@@ -16,7 +16,7 @@
  */
 (function () {
   const BTN = 'clia-card-del';
-  const CTRL = '.' + BTN + ', .clia-card-restore, .edit-del-btn, .edit-resize-bar, .edit-reframe-btn, .ebb-del-btn, .ebb-zoom-badge, .img-zoom-badge';
+  const CTRL = '.' + BTN + ', .clia-card-restore, .img-zoom-bar, .edit-del-btn, .edit-resize-bar, .edit-reframe-btn, .ebb-del-btn, .ebb-zoom-badge, .img-zoom-badge';
   const observers = new WeakMap();
 
   const LABELS = {

@@ -897,10 +897,14 @@ function makeImageEditable(img) {
   }
 
   // 줌 힌트 뱃지
-  const badge = document.createElement('div');
-  badge.style.cssText = 'position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;pointer-events:none;z-index:2;';
-  badge.textContent = '🔍 Scroll=Zoom, Drag=Move';
-  wrap.appendChild(badge);
+  // 확대·축소 막대 [🔍 − 100% + ↺] (shared/clia-zoom-bar.js) — 5% 단위
+  const zbar = window.CLIAZoomBar ? CLIAZoomBar.create({
+    step: (d) => { state.scale = +(state.scale + d * CLIAZoomBar.STEP).toFixed(2); applyTransform(); },
+    reset: () => { state.scale = 1; state.tx = 0; state.ty = 0; applyTransform(); },
+    value: () => state.scale,
+    corner: 'top-left',
+  }) : null;
+  if (zbar) wrap.appendChild(zbar.el);
 
   // 삭제 버튼 (우측 상단, 항상 표시)
   const delBtn = document.createElement('button');
@@ -929,7 +933,7 @@ function makeImageEditable(img) {
     const reframeBtn = document.createElement('button');
     reframeBtn.className = 'edit-reframe-btn';
     reframeBtn.textContent = '🎬 Reselect Frame';
-    reframeBtn.style.cssText = `position:absolute;top:6px;left:6px;z-index:20;
+    reframeBtn.style.cssText = `position:absolute;top:44px;left:10px;z-index:20;
       padding:4px 10px;border:none;border-radius:4px;
       background:rgba(229,50,56,.9);color:#fff;font-size:11px;font-weight:600;
       cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.4);`;
@@ -942,18 +946,34 @@ function makeImageEditable(img) {
     wrap.appendChild(reframeBtn);
   }
 
-  function applyTransform() {
-    img.style.transform = `scale(${state.scale}) translate(${state.tx}px, ${state.ty}px)`;
-    badge.textContent = `${Math.round(state.scale * 100)}%`;
+  // 프레임을 항상 꽉 채우게: 이미지가 프레임보다 작아지거나 빈 곳이 생기는 위치로 밀리지 않게 (2026-10-16)
+  //   transform = scale(s) translate(tx,ty), 기준점 = 이미지 중앙 → 화면상 이동량 = tx·s
+  function clampToFrame() {
+    const W = wrap.clientWidth, H = wrap.clientHeight;
+    const ox = img.offsetLeft, oy = img.offsetTop, ow = img.offsetWidth, oh = img.offsetHeight;
+    if (!W || !H || !ow || !oh) return;
+    // 원래부터 틀보다 작은 이미지(가운데 놓인 로고 등)는 틀을 채우는 대상이 아님 → 예전처럼 30%~500% 자유
+    if (ow < W - 1 || oh < H - 1) { state.scale = Math.min(5, Math.max(0.3, state.scale)); return; }
+    state.scale = Math.min(5, Math.max(state.scale, W / ow, H / oh));
+    const s = state.scale, cx = ox + ow / 2, cy = oy + oh / 2;
+    state.tx = Math.min(ow / 2 - cx / s, Math.max((W - cx) / s - ow / 2, state.tx));
+    state.ty = Math.min(oh / 2 - cy / s, Math.max((H - cy) / s - oh / 2, state.ty));
   }
+  function applyTransform() {
+    clampToFrame();
+    img.style.transform = `scale(${state.scale}) translate(${state.tx}px, ${state.ty}px)`;
+    if (zbar) zbar.update();
+  }
+  wrap._editApply = applyTransform;   // 프레임 가장자리를 끌어 크기를 바꾼 뒤 다시 맞춤
 
   // 스크롤 → 줌 (edit 모드에서만)
   wrap.addEventListener('wheel', (ev) => {
     if (!editMode) return;
     ev.preventDefault();
     ev.stopPropagation();
-    const delta = ev.deltaY > 0 ? -0.05 : 0.05;
-    state.scale = Math.max(0.3, Math.min(5, state.scale + delta));
+    const d = window.CLIAZoomBar ? CLIAZoomBar.wheelStep(ev, wrap) : (ev.deltaY > 0 ? -1 : 1);   // 휠도 5% 단위
+    if (!d) return;
+    state.scale = +(state.scale + d * 0.05).toFixed(2);
     applyTransform();
   }, { passive: false, signal: ac.signal });
 
@@ -989,6 +1009,7 @@ function makeImageEditable(img) {
   // 상태 저장
   wrap._editState = state;
   wrap._editImg = img;
+  if (img.complete) applyTransform(); else img.addEventListener('load', applyTransform, { once: true, signal: ac.signal });
 }
 
 // 비율 상자(padding-top + overflow:hidden) 안에 absolute 이미지가 든 구조인가 (1차 컨텐츠 생성의 크롭 이미지)
@@ -1061,6 +1082,7 @@ function addFrameHandles(frame, img, signal) {
     document.addEventListener('mouseup', () => {
       if (!h._drag) return;
       h._drag = null; h.style.opacity = '0'; document.body.style.cursor = '';
+      if (frame._editApply) frame._editApply();   // 프레임이 커져 빈 곳이 생기면 이미지를 다시 맞춤
     }, { signal });
   });
 }
@@ -1073,7 +1095,7 @@ async function bakeAllImageEdits(frame) {
     if (!img) continue;
 
     // 편집 UI 요소 제거 (뱃지, 버튼들)
-    wrap.querySelectorAll('.edit-del-btn, .edit-reframe-btn, .img-frame-handle').forEach(b => b.remove());
+    wrap.querySelectorAll('.edit-del-btn, .edit-reframe-btn, .img-frame-handle, .img-zoom-bar').forEach(b => b.remove());
     wrap.querySelectorAll('div').forEach(d => {
       // 줌 뱃지 제거 (pointer-events:none인 div)
       if (d.style.pointerEvents === 'none') d.remove();
@@ -1193,5 +1215,6 @@ document.addEventListener('DOMContentLoaded', () => {
 <script src="../shared/clia-i18n.js"></script>
 <script src="./i18n.js"></script>
 <script src="../shared/clia-card-edit.js"></script>
+<script src="../shared/clia-zoom-bar.js"></script>
 </body>
 </html>
