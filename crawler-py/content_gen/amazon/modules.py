@@ -190,7 +190,7 @@ def build_modules(features: list, selection: list, spec: dict, mode: str = "stan
         text.update({
             "headline": js_or(feature.get("headline"), "") if award else js_or(
                 feature.get("headline"), feature.get("subheadline"),
-                jslice(js_or(feature.get("body"), ""), L["headline_from_body"]), "Feature Section"),
+                jslice(js_or(feature.get("body"), ""), L["headline_from_body"]), spec["placeholder_headline"]),
             "subheadline": js_or(feature.get("subheadline"), ""),
             "body": body_text,
             "bullets": buls,

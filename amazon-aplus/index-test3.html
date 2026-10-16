@@ -1539,7 +1539,7 @@ body {
 .m-lighttext-bg {
   width: 970px;
   height: 300px;
-  object-fit: contain;
+  object-fit: cover;          /* 실제 모듈 칸 970×300 꽉 채움 — 다운로드와 같은 모양 */
   display: block;
   background: #f2f2f2;
 }
@@ -1593,6 +1593,8 @@ body {
 .m-image-header-text-img {
   width: 100%;
   height: auto;
+  aspect-ratio: 970 / 600;    /* 실제 모듈 칸 970×600 꽉 채움 — 다운로드와 같은 모양 */
+  object-fit: cover;
   display: block;
   background: #f2f2f2;
 }
@@ -2914,8 +2916,8 @@ function imgTag(url, w, h, alt) {
   if (!url) {
     return `<div style="width:${w}px;height:${h}px;background:#f2f2f2;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:12px;flex-shrink:0;">${w}×${h}</div>`;
   }
-  // 가로 꽉 채움 + 세로 비율 유지 → 크롭 없이 이미지 전체 노출
-  return `<img src="${escHtml(src)}" style="width:100%;height:auto;display:block;" alt="${escHtml(alt||'product image')}" onerror="this.style.background='#f2f2f2';this.removeAttribute('src');">`;
+  // 실제 모듈 이미지 칸(w×h) 비율로 꽉 채움(cover) — 다운로드 이미지와 같은 모양 (2026-10-16)
+  return `<img src="${escHtml(src)}" style="width:100%;aspect-ratio:${w}/${h};height:auto;object-fit:cover;object-position:center;display:block;" alt="${escHtml(alt||'product image')}" onerror="this.style.background='#f2f2f2';this.removeAttribute('src');">`;
 }
 
 // 수상·인증 배지 이미지: 정사각 칸 안에 전체가 보이게(contain) + 흰 여백.
@@ -5851,7 +5853,7 @@ function buildModulesFromKeywords() {
     const textData = {
       ...(feature.award ? { award: true, crops: awardCrops } : {}),
       headline:    feature.award ? (feature.headline || '')
-                 : (feature.headline || feature.subheadline || (feature.body || '').slice(0, 80) || 'Feature Section'),
+                 : (feature.headline || feature.subheadline || (feature.body || '').slice(0, 80) || 'Product Feature'),
       subheadline: feature.subheadline || '',
       body:        bodyText,
       bullets:     buls,
