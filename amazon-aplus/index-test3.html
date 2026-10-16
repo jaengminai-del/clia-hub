@@ -2922,20 +2922,25 @@ function imgTag(url, w, h, alt) {
   return `<img src="${escHtml(src)}" style="width:100%;aspect-ratio:${w}/${h};height:auto;object-fit:cover;object-position:center;display:block;" alt="${escHtml(alt||'product image')}" onerror="this.style.background='#f2f2f2';this.removeAttribute('src');">`;
 }
 
-// 수상·인증 배지 이미지: 정사각 칸 안에 전체가 보이게(contain) + 흰 여백.
-// 배너에서 잘라낸 배지(td.crops[url])는 그 영역만 보이게 (인라인 CSS 크롭)
-function badgeImg(url, td, px) {
+// 수상·인증 배지 이미지
+//  · 배너에서 잘라 낸 배지(td.crops[url]): 원래 배너를 칸(F×F)에 꽉 채우고, 처음 위치는 배지가 가운데에 칸의 85% 크기로
+//    오게 맞춘다 (data-tx/ty/zoom) → 편집 모드에서 배지 주변 배경까지 이동·확대로 조절, 다운로드도 같은 모양 (2026-10-16)
+//  · 배지 파일 자체: 정사각 칸 안에 전체가 보이게(contain) + 흰 여백 (이동·확대 대상 아님)
+function badgeImg(url, td, px, size) {
   if (!url) return imgTag(url, px || 300, px || 300, 'badge');
-  const box = px ? `width:${px}px;height:${px}px;flex-shrink:0;` : 'width:100%;aspect-ratio:1/1;';
   const c = td && td.crops && td.crops[url];
-  let inner;
-  if (c) {
-    const ratio = (c.ih || 1) / (c.iw || 1), boxR = c.h * ratio / c.w;
-    inner = `<div style="width:${(Math.min(1, 1 / boxR) * 80).toFixed(1)}%;"><div style="position:relative;width:100%;padding-top:${(boxR * 100).toFixed(2)}%;overflow:hidden;">`
-          + `<img src="${escHtml(url)}" alt="badge" style="position:absolute;top:0;left:0;width:${(100 / c.w).toFixed(2)}%;max-width:none;height:auto;margin-left:-${(c.x / c.w * 100).toFixed(2)}%;margin-top:-${(c.y * ratio / c.w * 100).toFixed(2)}%;"></div></div>`;
-  } else {
-    inner = `<img src="${escHtml(url)}" alt="badge" style="max-width:80%;max-height:80%;width:auto;height:auto;object-fit:contain;display:block;">`;
+  if (c && c.iw && c.ih) {
+    const F = px || size || 300, iw = c.iw, ih = c.ih, s0 = Math.max(F / iw, F / ih);
+    const z = Math.max(1, 0.85 * F / Math.max(c.w * iw * s0, c.h * ih * s0));
+    const mx = Math.max(0, (iw * s0 * z - F) / 2), my = Math.max(0, (ih * s0 * z - F) / 2);
+    const tx = Math.max(-mx, Math.min(mx, -((c.x + c.w / 2) - 0.5) * iw * s0 * z));
+    const ty = Math.max(-my, Math.min(my, -((c.y + c.h / 2) - 0.5) * ih * s0 * z));
+    const box = px ? `width:${px}px;height:${px}px;` : 'width:100%;aspect-ratio:1/1;height:auto;';
+    return `<img class="badge-cover" src="${escHtml(url)}" alt="badge" data-tx="${tx.toFixed(1)}" data-ty="${ty.toFixed(1)}" data-zoom="${z.toFixed(3)}" `
+         + `style="${box}object-fit:cover;object-position:center;display:block;flex-shrink:0;background:#fff;">`;
   }
+  const box = px ? `width:${px}px;height:${px}px;flex-shrink:0;` : 'width:100%;aspect-ratio:1/1;';
+  const inner = `<img src="${escHtml(url)}" alt="badge" style="max-width:80%;max-height:80%;width:auto;height:auto;object-fit:contain;display:block;">`;
   return `<div class="badge-box" style="${box}background:#ffffff;display:flex;align-items:center;justify-content:center;overflow:hidden;">${inner}</div>`;
 }
 
@@ -3082,7 +3087,7 @@ const RENDERERS = {
       ${url
         ? ((td && td.stackBg)
             // 합친 한 장: 970×600 칸 안에 전체가 보이게, 남는 좌우는 이미지 가장자리 색
-            ? `<img class="m-image-header-text-img" src="${url}" alt="" style="height:600px;object-fit:contain;background:${td.stackBg};">`
+            ? `<img class="m-image-header-text-img no-drag" src="${url}" alt="" style="height:600px;object-fit:contain;background:${td.stackBg};">`
             : `<img class="m-image-header-text-img" src="${url}" alt="">`)
         : `<div class="m-image-header-text-placeholder">970 × 600</div>`}
       <div class="m-image-header-text-body">
@@ -3099,7 +3104,7 @@ const RENDERERS = {
       const title = td ? (ti.title || '') : `Heading ${i+1} (25 char)`;
       const desc  = td ? (ti.body  || '') : 'Description text (80 char)';
       return `<div class="m-three-item">
-        ${(td && td.award) ? badgeImg(g(k,i), td) : imgTag(g(k,i),300,300,title)}
+        ${(td && td.award) ? badgeImg(g(k,i), td, 0, 300) : imgTag(g(k,i),300,300,title)}
         <div class="m-three-item-t" data-maxchars="25">${escHtml(title)}</div>
         <div class="m-three-item-d" data-maxchars="80">${escHtml(desc)}</div>
       </div>`;
@@ -3117,7 +3122,7 @@ const RENDERERS = {
       const title = td ? (ti.title || '') : `Item ${i+1}`;
       const desc  = td ? (ti.body  || '') : 'Brief feature description here.';
       return `<div class="m-four-item">
-        ${(td && td.award) ? badgeImg(g(k,i), td) : imgTag(g(k,i),220,220,title)}
+        ${(td && td.award) ? badgeImg(g(k,i), td, 0, 220) : imgTag(g(k,i),220,220,title)}
         <div class="m-four-item-t" data-maxchars="80">${escHtml(title)}</div>
         <div class="m-four-item-d" data-maxchars="300">${escHtml(desc)}</div>
       </div>`;
@@ -4673,6 +4678,9 @@ function applyImageDragMode(page) {
   page.querySelectorAll('.pv-module-wrap img').forEach(img => {
     if (img.closest('.pv-module-actions')) return;
     if (img.classList.contains('img-dim-layer')) return; // dim 복제 레이어 제외
+    // 칸 안에 전체가 보이게 넣는 이미지(배지·합친 히어로)는 이동·확대 대상이 아니다 — 다운로드도 조정값을 쓰지 않음.
+    // (감싸면 배지의 잘라 보이는 배치가 깨져 잠금 후 사라졌음 — 2026-10-16)
+    if (img.closest('.badge-box') || img.classList.contains('no-drag')) return;
     if (img.hasAttribute('data-drag-init')) return;
     img.setAttribute('data-drag-init', '1');
 
@@ -4690,10 +4698,10 @@ function applyImageDragMode(page) {
       const imgCS = getComputedStyle(img);
       clipWrapper = document.createElement('div');
       clipWrapper.className = 'img-clip-wrapper';
-      // overflow:visible로 생성 — 편집 중 이미지 전체 영역 확인 가능
+      // overflow:hidden — 편집 중에도 프레임 밖은 보이지 않게 (위아래 모듈과 겹쳐 보이던 잔상 제거, 2026-10-16)
       clipWrapper.style.cssText = [
         `width:${imgW}px`, `height:${imgH}px`,
-        `overflow:visible`, `position:relative`,
+        `overflow:hidden`, `position:relative`,
         `background:#ffffff`, `display:block`,
         `flex-shrink:${imgCS.flexShrink || '0'}`,
         `flex-grow:${imgCS.flexGrow   || '0'}`,
@@ -4711,22 +4719,7 @@ function applyImageDragMode(page) {
       clipWrapper.style.backgroundRepeat = '';
       clipWrapper.style.backgroundSize = '';
       clipWrapper.style.backgroundPosition = '';
-      // 편집 모드 재진입 시 overflow 다시 열기
-      clipWrapper.style.overflow = 'visible';
-    }
-
-    // 부모 컨테이너 overflow 해제 (편집 중 이미지 전체 보이도록)
-    // .pv-module-wrap 까지 올라가며 overflow:hidden 임시 해제
-    let _overflowAncestor = clipWrapper.parentElement;
-    while (_overflowAncestor && !_overflowAncestor.classList.contains('pv-module-wrap')) {
-      const cs = getComputedStyle(_overflowAncestor);
-      if (cs.overflow !== 'visible') {
-        if (!_overflowAncestor.dataset.overflowBak) {
-          _overflowAncestor.dataset.overflowBak = _overflowAncestor.style.overflow || cs.overflow;
-        }
-        _overflowAncestor.style.overflow = 'visible';
-      }
-      _overflowAncestor = _overflowAncestor.parentElement;
+      clipWrapper.style.overflow = 'hidden';
     }
 
     // 프레임 경계 가이드 (점선 테두리 + 외부 영역 딤처리)
@@ -4768,19 +4761,7 @@ function applyImageDragMode(page) {
       `position:absolute; left:0; top:0; width:${cW}px; height:${cH}px;` +
       `overflow:hidden; z-index:2; pointer-events:none;`;
 
-    // dim 레이어(원본 복제, 어둡게, 프레임 밖까지 노출)
-    let dimImg = clipWrapper.querySelector(':scope > .img-dim-layer');
-    if (!dimImg) {
-      dimImg = document.createElement('img');
-      dimImg.className = 'img-dim-layer';
-      dimImg.alt = '';
-      clipWrapper.insertBefore(dimImg, brightClip); // brightClip 아래(뒤)에
-    }
-    dimImg.src = img.currentSrc || img.src;
-    dimImg.style.zIndex = '1';
-    dimImg.style.pointerEvents = 'none';
-    dimImg.style.filter = 'brightness(.4) saturate(.85)';
-    dimImg.style.transformOrigin = 'center center';
+    const dimImg = null;   // 프레임 밖 원본을 어둡게 보여 주던 층은 쓰지 않는다 (겹쳐 보이는 잔상 — 2026-10-16)
 
     function applyCoverDims() {
       const nW = img.naturalWidth || 0, nH = img.naturalHeight || 0;
@@ -4791,7 +4772,7 @@ function applyImageDragMode(page) {
       else                 { coverW = cW; coverH = cW / imgAR; }
       // bright img: brightClip(프레임) 중앙 기준 / dim img: clipWrapper(프레임) 중앙 기준
       // → 두 컨테이너 모두 프레임 크기·동일 위치이므로 중앙이 일치
-      [img, dimImg].forEach(el => {
+      [img, dimImg].filter(Boolean).forEach(el => {
         el.style.position  = 'absolute';
         el.style.left      = '50%';
         el.style.top       = '50%';
@@ -4801,11 +4782,19 @@ function applyImageDragMode(page) {
         el.style.maxHeight = 'none';
         el.style.objectFit = 'fill'; // box AR == 이미지 AR → 왜곡 없이 전체 표시
       });
+      _cover = { w: coverW, h: coverH };
       return true;
     }
+    let _cover = null;
     const _coverApplied = applyCoverDims();
 
     function applyTransform() {
+      if (_cover) {
+        z = Math.max(1, z);
+        const mx = Math.max(0, (_cover.w * z - cW) / 2), my = Math.max(0, (_cover.h * z - cH) / 2);
+        tx = Math.max(-mx, Math.min(mx, tx)); ty = Math.max(-my, Math.min(my, ty));
+        img.setAttribute('data-tx', tx.toFixed(1)); img.setAttribute('data-ty', ty.toFixed(1)); img.setAttribute('data-zoom', z.toFixed(3));
+      }
       const useCenter = _coverApplied || img.style.position === 'absolute';
       const t = useCenter
         ? `translate(-50%, -50%) translate(${tx}px, ${ty}px) scale(${z})`
@@ -4816,7 +4805,7 @@ function applyImageDragMode(page) {
     // naturalWidth 미로딩 시 load 후 재적용
     if (!_coverApplied) {
       img.addEventListener('load', () => {
-        dimImg.src = img.currentSrc || img.src;
+        if (dimImg) dimImg.src = img.currentSrc || img.src;
         applyCoverDims(); applyTransform();
       }, { once: true });
     }
@@ -6143,8 +6132,9 @@ async function downloadImages() {
       try {
         const bm = await loadProxiedImage(url, w, h);
 
-        if (m.fit === 'contain' || m.fit === 'contain-full') {
-          // 배지: 모듈 규격(w×h) 안에 전체가 들어가게 + 흰 여백, 배너 배지는 배지 영역만 잘라서
+        const _bannerBadge = m.fit === 'contain' && m.textData && m.textData.crops && m.textData.crops[url];
+        if ((m.fit === 'contain' || m.fit === 'contain-full') && !_bannerBadge) {
+          // 배지: 모듈 규격(w×h) 안에 전체가 들어가게 + 흰 여백 (배너에서 잘라 낸 배지는 아래 채우기 + 조정값)
           // 합친 히어로(contain-full): 여백 없이 꽉 맞추고 남는 쪽은 이미지 가장자리 색으로
           const c = m.textData && m.textData.crops && m.textData.crops[url];
           const sx = c ? c.x * bm.width : 0, sy = c ? c.y * bm.height : 0;

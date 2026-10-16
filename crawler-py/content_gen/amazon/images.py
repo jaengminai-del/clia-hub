@@ -5,7 +5,8 @@ images.py — Amazon A+ 업로드용 이미지 (Pillow)
 브라우저 빌더의 canvas 처리를 옮겼다 (2026-10-16):
   merge_stacked   ← mergeStackedImages  이어 붙은 히어로 이미지들을 같은 폭으로 위아래 이어 붙여 한 장 + 가장자리 평균색
   build_zip       ← downloadImages      모듈 규격(spec.module_image_specs)대로 잘라 JPEG ZIP + aplus-copy.txt
-    · fit = contain / contain-full : 배지·합친 히어로 — 칸 안에 전체가 보이게 (배지는 80% + 흰 여백, 배너 배지는 배지 영역만)
+    · fit = contain / contain-full : 배지 파일·합친 히어로 — 칸 안에 전체가 보이게 (배지는 80% + 흰 여백)
+    · 배너에서 잘라 낸 배지(textData.crops[url]) : 원래 배너를 칸에 채우고 미리보기 조정값(처음엔 배지 중심) 반영
     · 그 외                       : cover + 사용자가 미리보기에서 조정한 이동·확대(transforms[i] = {tx, ty, z, clipW, clipH})
 """
 import base64
@@ -114,8 +115,9 @@ def merge_stacked(urls: list):
 
 def render_slot(im: Image.Image, mod: dict, url: str, w: int, h: int, transform: Optional[dict]) -> Image.Image:
     fit = mod.get("fit")
-    if fit in ("contain", "contain-full"):
-        c = ((mod.get("textData") or {}).get("crops") or {}).get(url)
+    c = ((mod.get("textData") or {}).get("crops") or {}).get(url)
+    banner_badge = fit == "contain" and c          # 배너에서 잘라 낸 배지 → 채우기 + 미리보기 조정값 (2026-10-16)
+    if fit in ("contain", "contain-full") and not banner_badge:
         sx, sy = (c["x"] * im.width, c["y"] * im.height) if c else (0, 0)
         sw, sh = (c["w"] * im.width, c["h"] * im.height) if c else (im.width, im.height)
         k = min(w / sw, h / sh) * (1 if fit == "contain-full" else 0.8)
