@@ -529,6 +529,8 @@ function showPreview(html) {
   if (!frame) return;
   frame.style.display = 'block';
   frame.innerHTML = html;
+  // 카드 원본 저장(편집 모드 ↺ 원래대로) + 손잡이(⋮⋮)로 카드 순서 바꾸기 (shared/clia-card-edit.js)
+  if (window.CLIACardEdit) { CLIACardEdit.snapshot(frame); CLIACardEdit.enableReorder(frame, { onChange: onCardsReordered }); }
   // Update char count
   const cc = document.getElementById('charCount');
   if (cc) cc.textContent = html.length.toLocaleString();
@@ -634,7 +636,7 @@ function toggleEdit() {
     // ── 삭제 버튼 + 높이 조절 핸들 추가 ──
     addEditControls(frame);
     // ── 카드 단위 삭제 버튼 + 빈 카드 자동 정리 (shared/clia-card-edit.js) ──
-    if (window.CLIACardEdit) CLIACardEdit.attach(frame);
+    if (window.CLIACardEdit) CLIACardEdit.attach(frame, { onRestore: enableEditIn });   // ↺ 되돌린 카드에 편집 기능 다시
   } else {
     btn.textContent = '✏ Edit';
     btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
@@ -659,7 +661,30 @@ function toggleEdit() {
 // ══════════════════════════════════════════
 // Delete & Resize Controls (Edit Mode)
 // ══════════════════════════════════════════
-function addEditControls(frame) {
+// 카드 순서를 바꿨을 때: 잠금 상태면 결과 HTML 바로 갱신 (편집 중이면 Lock 할 때 반영)
+function onCardsReordered(frame) {
+  if (editMode) return;
+  generatedHTML = frame.innerHTML;
+  const cc = document.getElementById('charCount');
+  if (cc) cc.textContent = generatedHTML.length.toLocaleString();
+  if (typeof updateContentInfo === 'function') updateContentInfo();
+}
+
+// ↺ 원래대로 되돌린 카드(root)에 편집 기능 다시 붙이기 — toggleEdit 편집 진입과 같은 규칙, 카드 안에서만
+function enableEditIn(root) {
+  [root, ...root.querySelectorAll('h1,h2,h3,h4,p,td,th,li,span,div')].forEach(el => {
+    if (!el.matches('h1,h2,h3,h4,p,td,th,li,span,div')) return;
+    if (el.children.length === 0 || el.textContent.trim().length < 200) {
+      el.setAttribute('contenteditable', 'true');
+      el.style.outline = '1px dashed rgba(229,50,56,.3)';
+      el.style.cursor = 'text';
+    }
+  });
+  root.querySelectorAll('img').forEach(img => makeImageEditable(img));
+  addEditControls(root, false);
+}
+
+function addEditControls(frame, withResize = true) {
   // 개별 이미지, 텍스트, 테이블에 삭제 버튼 추가
   const targets = frame.querySelectorAll('img, h1, h2, h3, h4, p, table, ul, ol');
   targets.forEach(el => {
@@ -699,8 +724,8 @@ function addEditControls(frame) {
     wrap.appendChild(delBtn);
   });
 
-  // ── top-level div에 높이 조절 핸들만 ──
-  frame.querySelectorAll(':scope > div').forEach(el => {
+  // ── top-level div에 높이 조절 핸들만 (카드 하나만 다시 붙일 때는 생략) ──
+  if (withResize) frame.querySelectorAll(':scope > div').forEach(el => {
     el.style.position = 'relative';
     const resizeBar = document.createElement('div');
     resizeBar.className = 'edit-resize-bar';

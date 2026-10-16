@@ -195,6 +195,8 @@ body {
 }
 .pv-act-up, .pv-act-dn { background: rgba(0,0,0,0.7); color: #fff; }
 .pv-act-del { background: rgba(234,25,23,0.9); color: #fff; }
+.pv-act-restore { display: none !important; background: #fff; color: #333; border: 1px solid #999 !important; font-size: 15px; }
+.edit-mode .pv-act-restore { display: flex !important; }
 
 /* ── Right Panel : Module Library ───────── */
 .panel-right {
@@ -4423,6 +4425,26 @@ function addModuleWithOpts(typeId, opts) {
   renderPagePreview();
 }
 
+// 모듈 데이터 복사 (원본 보관용 — _orig 자신은 빼고)
+function _moduleCopy(m) {
+  const { _orig, ...rest } = m;
+  return JSON.parse(JSON.stringify(rest));
+}
+
+// ↺ 원래대로: 이 모듈만 처음 만들어진 상태로 (문구·이미지 이동·확대 편집 모두 되돌림)
+function restoreModule(id) {
+  const m = activeModules().find(x => x.id === id);
+  if (!m || !m._orig) return;
+  const orig = JSON.parse(JSON.stringify(m._orig));
+  Object.keys(m).forEach(k => { if (k !== '_orig') delete m[k]; });
+  Object.assign(m, orig, { id });
+  // 다시 그릴 때 지금 화면의 편집 내용이 다시 저장되지 않게 이 모듈 화면을 먼저 치운다
+  const wrap = document.querySelector(`#previewPage .pv-module-wrap[data-mod-id="${id}"]`);
+  if (wrap) wrap.remove();
+  delete _savedEdits[id];
+  renderPagePreview();
+}
+
 function removeModule(id) {
   setActiveModules(activeModules().filter(m => m.id !== id));
   renderPagePreview();
@@ -4472,6 +4494,9 @@ function renderPagePreview() {
   empty.style.display = 'none';
   page.style.display = 'block';
 
+  // 모듈 원본 저장 (편집 모드 ↺ 원래대로 — 처음 만들어진 상태)
+  mods.forEach(m => { if (!m._orig) m._orig = _moduleCopy(m); });
+
   page.innerHTML = mods.map((m) => {
     const renderer = renderers[m.type];
     const renderUrl = isVideoMod(m.type) ? (m.videoUrl || null) : (m.imageUrl || null);
@@ -4480,6 +4505,7 @@ function renderPagePreview() {
       <div class="pv-module-wrap" data-mod-id="${m.id}">
         ${html}
         <div class="pv-module-actions">
+          <button class="pv-act-btn pv-act-restore" onclick="restoreModule(${m.id})" title="Restore original">↺</button>
           <button class="pv-act-btn pv-act-up" onclick="moveModule(${m.id},-1)" title="Move Up">↑</button>
           <button class="pv-act-btn pv-act-dn" onclick="moveModule(${m.id},1)" title="Move Down">↓</button>
           <button class="pv-act-btn pv-act-del" onclick="removeModule(${m.id})" title="Remove">✕</button>
@@ -5892,6 +5918,8 @@ function buildModulesFromKeywords() {
         if (!r) return;
         mod.imageUrl = r.url; mod.fit = 'contain-full'; mod.bgColor = r.bg;
         mod.textData = { ...mod.textData, stackBg: r.bg };
+        if (mod._orig) Object.assign(mod._orig, { imageUrl: r.url, fit: 'contain-full', bgColor: r.bg,
+                                                   textData: { ...mod._orig.textData, stackBg: r.bg } });
         renderPagePreview();
       }).catch(e => console.warn('[stacked] 합치기 실패:', e.message));
     }
@@ -5931,6 +5959,8 @@ async function buildModulesViaServer(selectedCards) {
       if (!res) return;
       mod.imageUrl = res.url; mod.fit = 'contain-full'; mod.bgColor = res.bg;
       mod.textData = { ...mod.textData, stackBg: res.bg };
+      if (mod._orig) Object.assign(mod._orig, { imageUrl: res.url, fit: 'contain-full', bgColor: res.bg,
+                                                 textData: { ...mod._orig.textData, stackBg: res.bg } });
       renderPagePreview();
     }).catch(e => console.warn('[stacked] 합치기 실패:', e.message));
   });
@@ -6239,7 +6269,8 @@ async function downloadImagesViaServer(mods) {
       const slotImages = m.slotImages ? Object.fromEntries(await Promise.all(
         Object.entries(m.slotImages).map(async ([k, v]) => [k, await _toSendableUrl(v)]))) : m.slotImages;
       const items = td.items ? await Promise.all(td.items.map(async it => ({ ...it, imageUrl: await _toSendableUrl(it.imageUrl) }))) : td.items;
-      modules.push({ ...m, imageUrl: await _toSendableUrl(m.imageUrl), slotImages, textData: { ...td, items },
+      const { _orig, ...mm } = m;
+      modules.push({ ...mm, imageUrl: await _toSendableUrl(m.imageUrl), slotImages, textData: { ...td, items },
                      transforms: specs.map((_, i) => getImgTransform(m.id, i)) });
     }
     const r = await fetch(APLUS_API + '/api/v1/amazon-images', {
@@ -7003,14 +7034,14 @@ function _reorderModules(srcId, tgtId, before) {
   if (!before) insertAt += 1;
   arr.splice(insertAt, 0, moved);
   setActiveModules(arr);
-  renderPage();
+  renderPagePreview();
 }
 
-// Re-init drag handlers after every renderPage
+// Re-init drag handlers after every renderPagePreview (2026-10-16: 예전엔 없는 함수 renderPage 에 걸려 있어 동작하지 않았음)
 (function patchRenderForDnd() {
-  const orig = window.renderPage;
+  const orig = window.renderPagePreview;
   if (typeof orig !== 'function') return;
-  window.renderPage = function(...args) {
+  window.renderPagePreview = function(...args) {
     const r = orig.apply(this, args);
     requestAnimationFrame(_moduleDragHandlersInit);
     return r;

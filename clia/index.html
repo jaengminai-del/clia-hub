@@ -7244,6 +7244,8 @@ function ebbShowPreview(html) {
   document.getElementById('ebbPreviewEmpty').style.display = 'none';
   const frame = document.getElementById('ebbPreviewFrame');
   frame.style.display = 'block'; frame.innerHTML = html;
+  // 카드 원본 저장(편집 모드 ↺ 원래대로) + 손잡이(⋮⋮)로 카드 순서 바꾸기 (shared/clia-card-edit.js)
+  if (window.CLIACardEdit) { CLIACardEdit.snapshot(frame); CLIACardEdit.enableReorder(frame, { onChange: ebbOnCardsReordered }); }
   document.getElementById('ebbCharCount').textContent = html.length.toLocaleString();
   ['ebbBtnDownload','ebbBtnDownload2','ebbBtnCopy'].forEach(id => { const b=document.getElementById(id); if(b)b.disabled=false; });
   const bar = document.getElementById('ebbComplianceBar');
@@ -7304,7 +7306,7 @@ function ebbToggleEdit() {
       }
     });
     frame.querySelectorAll('img').forEach(img => ebbMakeImageEditable(img));
-    if (window.CLIACardEdit) CLIACardEdit.attach(frame);   // 카드 단위 삭제 + 빈 카드 자동 정리
+    if (window.CLIACardEdit) CLIACardEdit.attach(frame, { onRestore: ebbEnableEditIn });   // 카드 삭제·↺ 원래대로 + 빈 카드 자동 정리
   } else {
     btn.textContent=t('ebb.edit'); btn.style.background=''; btn.style.color=''; btn.style.borderColor='';
     frame.querySelectorAll('[contenteditable]').forEach(el => {
@@ -7322,6 +7324,25 @@ function ebbToggleEdit() {
     document.getElementById('ebbCharCount').textContent = EBB.generatedHTML.length.toLocaleString();
     ebbUpdateHeight();
   }
+}
+// 카드 순서를 바꿨을 때: 잠금 상태면 결과 HTML 바로 갱신 (편집 중이면 Lock 할 때 반영)
+function ebbOnCardsReordered(frame) {
+  if (EBB.editMode) return;
+  EBB.generatedHTML = frame.innerHTML;
+  document.getElementById('ebbCharCount').textContent = EBB.generatedHTML.length.toLocaleString();
+  ebbUpdateHeight();
+}
+// ↺ 원래대로 되돌린 카드(root)에 편집 기능 다시 붙이기 — ebbToggleEdit 편집 진입과 같은 규칙, 카드 안에서만
+function ebbEnableEditIn(root) {
+  [root, ...root.querySelectorAll('h1,h2,h3,h4,p,li,div')].forEach(el => {
+    if (!el.matches('h1,h2,h3,h4,p,li,div')) return;
+    if (el.children.length===0 && el.textContent.trim().length>0 && el.textContent.trim().length<300) {
+      el.setAttribute('contenteditable','true');
+      el.style.outline='1px dashed rgba(229,50,56,.35)';
+      el.style.cursor='text';
+    }
+  });
+  root.querySelectorAll('img').forEach(img => ebbMakeImageEditable(img));
 }
 function ebbMakeImageEditable(img) {
   if (img.parentElement?._ebbImg === img) return;              // 편집 중이면 스킵 (Lock 후 다시 Edit 하면 기존 래퍼 재사용)
