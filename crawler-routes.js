@@ -11,7 +11,8 @@
  *   GET  /api/v1/ebay-html?url=         → URL 직접 지정 렌더
  *   GET  /api/v1/content-html?url=&medium= → 매체별 1차 컨텐츠 HTML (content_gen/media/<medium>, 기본 ebay)
  *   GET  /api/v1/amazon-features?url=    → Amazon A+ 선택 화면 카드 목록 (content_gen/amazon)
- *   POST /api/v1/amazon-modules {url, selection, mode, start_id} → 선택 카드 → A+ 모듈 목록
+ *   POST /api/v1/amazon-features {mirror} → 같은 결과 (빌더가 받은 크롤 결과로 바로)
+ *   POST /api/v1/amazon-modules {url | features, selection, mode, start_id} → 선택 카드 → A+ 모듈 목록
  *   POST /api/v1/amazon-images {modules(+transforms), pdpUrl, date} → A+ 규격 이미지 ZIP (Pillow)
  *   POST /api/v1/amazon-stack {urls}   → 이어 붙은 히어로 한 장 {url: data URL, bg}
  *   GET  /api/v1/products?country=uk    → 크롤 완료 제품 목록 (허브 Product List 검색용, 크롤러에 계속 누적)
@@ -328,14 +329,24 @@ router.get('/api/v1/amazon-features', auth, async (req, res) => {
   try { res.json(await runAmazon('features', { out: path.join(OUT_DIR, slugify(req.query.url)) })); }
   catch (e) { res.status(e.status || 500).json({ detail: e.message.slice(0, 300) }); }
 });
+// 빌더가 이미 받은 크롤 결과(mirror)로 바로 카드 목록 — URL 표기 차이로 캐시를 못 찾는 일이 없게
+router.post('/api/v1/amazon-features', auth, async (req, res) => {
+  const { mirror } = req.body || {};
+  if (!mirror || !Array.isArray(mirror.sections)) return res.status(400).json({ detail: 'mirror required' });
+  try { res.json(await runAmazon('features', { input: { mirror } })); }
+  catch (e) { res.status(e.status || 500).json({ detail: e.message.slice(0, 300) }); }
+});
 
+// 선택 카드 → 모듈. features(카드 목록)를 주면 그것으로, 아니면 url 의 크롤 캐시로
 router.post('/api/v1/amazon-modules', auth, async (req, res) => {
-  const { url, selection = [], mode = 'standard', start_id = 1 } = req.body || {};
-  if (typeof url !== 'string') return res.status(400).json({ detail: 'url required' });
+  const { url, features, selection = [], mode = 'standard', start_id = 1 } = req.body || {};
+  if (typeof url !== 'string' && !Array.isArray(features)) return res.status(400).json({ detail: 'url or features required' });
   if (!Array.isArray(selection)) return res.status(400).json({ detail: 'selection must be an array' });
+  const input = { selection, mode: mode === 'premium' ? 'premium' : 'standard', start_id };
   try {
-    res.json(await runAmazon('modules', { out: path.join(OUT_DIR, slugify(url)),
-      input: { selection, mode: mode === 'premium' ? 'premium' : 'standard', start_id } }));
+    res.json(Array.isArray(features)
+      ? await runAmazon('modules', { input: { ...input, features } })
+      : await runAmazon('modules', { out: path.join(OUT_DIR, slugify(url)), input }));
   } catch (e) { res.status(e.status || 500).json({ detail: e.message.slice(0, 300) }); }
 });
 

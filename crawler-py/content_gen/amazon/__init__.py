@@ -14,6 +14,8 @@ from pathlib import Path
 from .features import build_features
 from .modules import build_modules
 
+__all__ = ["build_features", "build_modules", "load_spec", "features_for", "modules_for"]
+
 _SPEC = Path(__file__).resolve().parent.parent / "media" / "amazon_aplus" / "spec.json"
 
 

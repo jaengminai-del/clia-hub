@@ -2938,6 +2938,14 @@ function badgeImg(url, td, px) {
 // 이어 붙은 히어로 이미지들을 같은 폭으로 위아래 이어 붙여 한 장(JPEG data URL)으로 만든다.
 // 반환 { url, bg } — bg = 좌우 가장자리 평균색 (970×600 칸에 넣을 때 남는 쪽 채움색)
 async function mergeStackedImages(urls) {
+  if (!AMZ_LEGACY) {
+    try {
+      const r = await fetch(APLUS_API + '/api/v1/amazon-stack', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ urls }) });
+      if (r.ok) return await r.json();
+      console.warn('[stacked] 서버 합치기 HTTP', r.status, '→ 브라우저 처리');
+    } catch (e) { console.warn('[stacked] 서버 합치기 실패 → 브라우저 처리:', e.message); }
+  }
   const bms = [];
   for (const u of urls) bms.push(await loadProxiedImage(u));
   if (bms.length < 2) return null;
@@ -5303,6 +5311,10 @@ function pcgToFeatures(pcg) {
 
 // 서버 주소: 서버를 통해 열었으면 그 서버(클라우드 배포 포함), 파일로 열었으면 로컬 서버(3001)
 const APLUS_API = /^https?:$/.test(location.protocol) ? location.origin : 'http://localhost:3001';
+// 1차 컨텐츠 생성(카드 정리·모듈 배정·문구·이미지)은 서버 Python(content_gen.amazon)이 한다 (2026-10-16).
+//   ?legacy=1 → 예전 브라우저 처리 (mirrorToFeatures · buildModulesFromKeywords · canvas). 서버 호출이 실패해도 자동으로 예전 처리.
+const AMZ_LEGACY = new URLSearchParams(location.search).get('legacy') === '1';
+let _featuresFromServer = false;   // 지금 카드 목록이 서버(Python)에서 온 것인지 (모듈 생성도 서버로)
 
 async function analyzePDP() {
   const urlInput = document.getElementById('pdpUrlInput');
@@ -5325,7 +5337,7 @@ async function analyzePDP() {
     //    → 캐시 있을 때만 즉시 사용 (없으면 404 → 다음 단계로 폴백)
     // ① PCG 크롤 에이전트 (Firecrawl 기반 — 원문 보존·매칭 정확도 ↑)
     // ② 기존 Puppeteer /api/analyze 폴백
-    let rawFeatures = null;
+    let rawFeatures = null, serverFeatures = null;
     try {
       // 크롤러 API(FastAPI) 위임 — 실제 크롤 트리거 (캐시 있으면 즉시).
       // 최대 18분(첫 크롤 45s~3min, 캐시 0s)
@@ -5339,7 +5351,15 @@ async function analyzePDP() {
       if (rv.ok) {
         const mir = await rv.json();
         if (mir.sections && mir.sections[0] && mir.sections[0].media !== undefined) {
-          rawFeatures = mirrorToFeatures(mir).filter(f => f.headline || f.images?.length);
+          if (!AMZ_LEGACY) {
+            try {
+              const fr = await fetch(APLUS_API + '/api/v1/amazon-features', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mirror: mir }) });
+              if (!fr.ok) throw new Error('amazon-features HTTP ' + fr.status);
+              serverFeatures = await fr.json();
+            } catch (fe) { console.warn('[analyzePDP] 서버 카드 정리 실패 → 브라우저 처리:', fe.message); }
+          }
+          rawFeatures = serverFeatures || mirrorToFeatures(mir).filter(f => f.headline || f.images?.length);
           console.log('[analyzePDP] Crawler API mirror 사용:', mir.sections.length, 'sections | 점검',
             mir._qa ? (mir._qa.checks || mir._qa.match_score + '점') : 'n/a', (mir._qa && mir._qa.issues) || []);
           status.textContent = (mir._qa && mir._qa.checks) ? `Crawl loaded (gallery ${mir._qa.checks.gallery_images} images)`
@@ -5392,7 +5412,9 @@ async function analyzePDP() {
     // → 셀렉터의 카드 1개 = 생성될 모듈 1개 (1:1 일치)
     // 아마존 규정: ® ™ * 등 특수부호는 승인 거부 사유 → 수집 단계에서 일괄 제거.
     // (mirrorToFeatures의 '*/※ 시작 = 면책문구 제외' 판정이 끝난 뒤에 적용해야 한다)
-    _analyzedFeatures = sanitizeAmazonDeep(expandFeaturesForSelection(rawFeatures));
+    // (서버 카드 목록은 펼치기·기호 제거까지 끝난 상태)
+    _featuresFromServer = !!serverFeatures;
+    _analyzedFeatures = serverFeatures || sanitizeAmazonDeep(expandFeaturesForSelection(rawFeatures));
 
     if (_analyzedFeatures.length === 0) {
       throw new Error('No sections found. Please check the URL.');
@@ -5631,6 +5653,15 @@ function buildModulesFromKeywords() {
   if (selectedCards.length === 0) return;
   closeKwModal();
 
+  if (_featuresFromServer && !AMZ_LEGACY) {
+    buildModulesViaServer(selectedCards).catch(e => {
+      console.warn('[modules] 서버 모듈 생성 실패 → 브라우저 처리:', e.message);
+      _featuresFromServer = false;
+      buildModulesFromKeywords();
+    });
+    return;
+  }
+
   selectedCards.forEach(card => {
     const idx = +card.dataset.idx;
     const feature = _analyzedFeatures[idx];
@@ -5858,6 +5889,36 @@ function buildModulesFromKeywords() {
   setTimeout(() => status.classList.remove('visible'), 4000);
 }
 
+// 선택 카드 → 모듈 (서버 Python content_gen.amazon.modules — 위 브라우저 처리와 결과 동일 검증)
+async function buildModulesViaServer(selectedCards) {
+  const status = document.getElementById('pdpGenStatus');
+  const selection = selectedCards.map(c => +c.dataset.idx);
+  const r = await fetch(APLUS_API + '/api/v1/amazon-modules', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ features: _analyzedFeatures, selection, mode: currentMode, start_id: nextId }) });
+  if (!r.ok) throw new Error('amazon-modules HTTP ' + r.status);
+  const mods = await r.json();
+  mods.forEach(m => { activeModules().push(m); nextId = Math.max(nextId, m.id + 1); });
+  // 이어 붙은 히어로: 이미지들을 한 장으로 합쳐 모듈 이미지로 교체 (업로드용 실제 파일)
+  selection.forEach(idx => {
+    const f = _analyzedFeatures[idx];
+    if (!f || !f.stacked) return;
+    const urls = (f.images || []).map(i => i.url);
+    const mod = mods.find(m => m.type === 'image-header-text' && m.imageUrl === urls[0]);
+    if (!mod) return;
+    mergeStackedImages(urls).then(res => {
+      if (!res) return;
+      mod.imageUrl = res.url; mod.fit = 'contain-full'; mod.bgColor = res.bg;
+      mod.textData = { ...mod.textData, stackBg: res.bg };
+      renderPagePreview();
+    }).catch(e => console.warn('[stacked] 합치기 실패:', e.message));
+  });
+  renderPagePreview();
+  status.textContent = `✓ ${selectedCards.length} module${selectedCards.length !== 1 ? 's' : ''} added`;
+  status.classList.add('visible');
+  setTimeout(() => status.classList.remove('visible'), 4000);
+}
+
 // ── 모듈 타입별 이미지 스펙 [w, h] ──────────────────────────────────────
 const MODULE_IMAGE_SPECS = {
   'sidebar':       [[500, 460]],
@@ -5974,6 +6035,11 @@ async function downloadImages() {
   if (mods.length === 0) {
     alert('No modules to export. Please add modules first.');
     return;
+  }
+
+  if (!AMZ_LEGACY) {
+    try { await downloadImagesViaServer(mods); return; }
+    catch (e) { if (e.handled) return; console.warn('[download] 서버 이미지 생성 실패 → 브라우저 처리:', e.message); }
   }
 
   // Fix 4: 서버 상태 먼저 확인
@@ -6130,6 +6196,53 @@ async function downloadImages() {
   btn.disabled = false;
   btn.textContent = origText;
   alert(`✅ ${count} image${count !== 1 ? 's' : ''} downloaded as ZIP.\nEach image has been cropped to the Amazon A+ module spec.`);
+}
+
+// blob: URL(브라우저 메모리)은 서버가 못 읽으므로 data URL 로 바꿔 보낸다
+async function _toSendableUrl(u) {
+  if (!u || !u.startsWith('blob:')) return u;
+  const b = await (await fetch(u)).blob();
+  return await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(b); });
+}
+
+// 이미지 다운로드 (서버 Python content_gen.amazon.images — Pillow): 모듈 + 미리보기에서 조정한 이동·확대 → ZIP
+async function downloadImagesViaServer(mods) {
+  const btn = document.querySelector('.btn-export');
+  const origText = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳ Building images...';
+  try {
+    const modules = [];
+    for (const m of mods) {
+      const specs = MODULE_IMAGE_SPECS[m.type] || [];
+      const td = m.textData || {};
+      const slotImages = m.slotImages ? Object.fromEntries(await Promise.all(
+        Object.entries(m.slotImages).map(async ([k, v]) => [k, await _toSendableUrl(v)]))) : m.slotImages;
+      const items = td.items ? await Promise.all(td.items.map(async it => ({ ...it, imageUrl: await _toSendableUrl(it.imageUrl) }))) : td.items;
+      modules.push({ ...m, imageUrl: await _toSendableUrl(m.imageUrl), slotImages, textData: { ...td, items },
+                     transforms: specs.map((_, i) => getImgTransform(m.id, i)) });
+    }
+    const r = await fetch(APLUS_API + '/api/v1/amazon-images', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ modules, pdpUrl: document.getElementById('pdpUrlInput')?.value?.trim() || '',
+                             date: new Date().toLocaleDateString('ko-KR') }) });
+    if (r.status === 422) {
+      alert('No images to process.\nPlease make sure the CLIA server is running (' + APLUS_API + ')');
+      throw Object.assign(new Error('no images'), { handled: true });
+    }
+    if (!r.ok) throw new Error('amazon-images HTTP ' + r.status);
+    const fails = JSON.parse(decodeURIComponent(r.headers.get('X-Image-Fails') || '%5B%5D'));
+    if (fails.length) console.warn('이미지 처리 실패:', fails);
+    const count = +(r.headers.get('X-Image-Count') || 0);
+    const zipBlob = await r.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(zipBlob);
+    a.download = `aplus-${Date.now()}.zip`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    alert(`✅ ${count} image${count !== 1 ? 's' : ''} downloaded as ZIP.\nEach image has been cropped to the Amazon A+ module spec.`);
+  } finally {
+    btn.disabled = false; btn.textContent = origText;
+  }
 }
 
 // ── 재선택 버튼 표시 ──────────────────────────────────────────
