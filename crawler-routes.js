@@ -145,7 +145,9 @@ function runAmazon(cmd, { out = null, input = null, raw = false } = {}) {
     }
     const child = execFile(resolvePython(), [RENDER_AMAZON, cmd, ...(out ? [out] : [])],
       { cwd: CRAWLER_DIR, maxBuffer: 512 * 1024 * 1024, encoding: 'buffer', timeout: 10 * 60 * 1000,
-        env: { ...process.env, PYTHONIOENCODING: 'utf-8' } },
+        // 이미지는 같은 서버의 /api/proxy-image 중계로 받는다 (배포 서버에서 Python 직접 요청은 LG.com 이 403)
+        env: { ...process.env, PYTHONIOENCODING: 'utf-8',
+               CLIA_IMAGE_PROXY: `http://127.0.0.1:${process.env.PORT || 3001}/api/proxy-image?url=` } },
       (err, stdout, stderr) => {
         if (err) return reject(new Error(String(stderr || '') || err.message));
         if (raw) return resolve({ data: stdout, info: String(stderr || '').trim().split('\n').pop() });

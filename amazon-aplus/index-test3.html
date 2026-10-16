@@ -6225,11 +6225,8 @@ async function downloadImagesViaServer(mods) {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ modules, pdpUrl: document.getElementById('pdpUrlInput')?.value?.trim() || '',
                              date: new Date().toLocaleDateString('ko-KR') }) });
-    if (r.status === 422) {
-      alert('No images to process.\nPlease make sure the CLIA server is running (' + APLUS_API + ')');
-      throw Object.assign(new Error('no images'), { handled: true });
-    }
-    if (!r.ok) throw new Error('amazon-images HTTP ' + r.status);
+    // 서버가 한 장도 못 만들면(422 — 이미지 받기 실패 등) 예외 → downloadImages 가 예전 브라우저 처리로 다시 시도
+    if (!r.ok) throw new Error('amazon-images HTTP ' + r.status + ' ' + (await r.text()).slice(0, 200));
     const fails = JSON.parse(decodeURIComponent(r.headers.get('X-Image-Fails') || '%5B%5D'));
     if (fails.length) console.warn('이미지 처리 실패:', fails);
     const count = +(r.headers.get('X-Image-Count') || 0);

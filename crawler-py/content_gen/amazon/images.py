@@ -10,7 +10,9 @@ images.py — Amazon A+ 업로드용 이미지 (Pillow)
 """
 import base64
 import io
+import os
 import zipfile
+from urllib.parse import quote
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
 
@@ -23,11 +25,15 @@ JPEG_QUALITY = 92          # 브라우저 canvas.toBlob('image/jpeg', 0.92)
 
 
 def load_image(url: str, timeout: int = 20) -> Image.Image:
-    """http(s) URL 또는 data URL → RGB 이미지 (실패 시 예외)."""
+    """http(s) URL 또는 data URL → RGB 이미지 (실패 시 예외).
+    CLIA_IMAGE_PROXY(서버가 넘겨줌 — 같은 서버의 /api/proxy-image) 가 있으면 그 중계로 받는다:
+    배포 서버(데이터센터 IP)에서 Python 이 LG.com 이미지를 직접 요청하면 403 으로 막히고, 브라우저 빌더도 이 중계를 쓴다."""
     if url.startswith("data:"):
         data = base64.b64decode(url.split(",", 1)[1])
     else:
-        r = requests.get(url, headers={"User-Agent": UA, "Referer": "https://www.lg.com/"}, timeout=timeout)
+        proxy = os.environ.get("CLIA_IMAGE_PROXY")
+        target = proxy + quote(url, safe="") if proxy else url
+        r = requests.get(target, headers={"User-Agent": UA, "Referer": "https://www.lg.com/"}, timeout=timeout)
         r.raise_for_status()
         data = r.content
     im = Image.open(io.BytesIO(data))
