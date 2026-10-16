@@ -7311,10 +7311,11 @@ function ebbToggleEdit() {
       el.removeAttribute('contenteditable'); el.style.outline=''; el.style.cursor='';
     });
     frame.querySelectorAll('.ebb-img-wrap').forEach(w => {
-      w.querySelectorAll('.ebb-del-btn,.ebb-zoom-badge').forEach(b=>b.remove());
-      w.style.border='none'; w.style.cursor='';
+      w.querySelectorAll('.ebb-del-btn,.ebb-zoom-badge,.ebb-frame-handle').forEach(b=>b.remove());
+      w.style.border='none'; w.style.outline=''; w.style.cursor='';
       const img=w.querySelector('img'); if(img)img.style.pointerEvents='';
-      delete w._ebbState;
+      if (w._ebbAbort) { w._ebbAbort.abort(); delete w._ebbAbort; }
+      delete w._ebbState; delete w._ebbImg;
     });
     if (window.CLIACardEdit) CLIACardEdit.detach(frame);
     EBB.generatedHTML = frame.innerHTML;
@@ -7323,12 +7324,24 @@ function ebbToggleEdit() {
   }
 }
 function ebbMakeImageEditable(img) {
-  if (img.parentElement?.classList?.contains('ebb-img-wrap')) return;
-  const state={scale:1,tx:0,ty:0,dragging:false,sx:0,sy:0};
-  const wrap=document.createElement('div');
-  wrap.className='ebb-img-wrap';
-  wrap.style.cssText='position:relative;overflow:hidden;cursor:grab;border:2px dashed rgba(229,50,56,.4);border-radius:4px;display:block;';
-  img.parentElement.insertBefore(wrap,img); wrap.appendChild(img);
+  if (img.parentElement?._ebbImg === img) return;              // 편집 중이면 스킵 (Lock 후 다시 Edit 하면 기존 래퍼 재사용)
+  const prev=/scale\(([\d.]+)\)\s*translate\(([-\d.]+)px,\s*([-\d.]+)px\)/.exec(img.style.transform||'');   // 이전 확대·이동 값 이어받기
+  const state={scale:prev?+prev[1]:1,tx:prev?+prev[2]:0,ty:prev?+prev[3]:0,dragging:false,sx:0,sy:0};
+  const parent=img.parentElement;
+  let wrap;
+  if (ebbIsCropBox(parent,img) || parent.classList.contains('ebb-img-wrap')) {
+    // 이미 잘린 이미지(비율 상자 안의 absolute 이미지)는 그 상자를 프레임으로 사용 (새 래퍼를 끼우면 높이 0 → 이미지가 사라짐)
+    wrap=parent; wrap.classList.add('ebb-img-wrap');
+    wrap.style.cursor='grab'; wrap.style.outline='2px dashed rgba(229,50,56,.4)';
+  } else {
+    wrap=document.createElement('div');
+    wrap.className='ebb-img-wrap';
+    wrap.style.cssText='position:relative;overflow:hidden;cursor:grab;outline:2px dashed rgba(229,50,56,.4);border-radius:4px;display:block;';
+    parent.insertBefore(wrap,img); wrap.appendChild(img);
+  }
+  wrap.removeAttribute('contenteditable');                     // 프레임은 글자 편집 대상 아님 (빈 줄 높이가 더해지지 않게)
+  if (wrap._ebbAbort) wrap._ebbAbort.abort();                  // 이전 편집의 리스너 정리 (중복 방지)
+  const ac=new AbortController(); wrap._ebbAbort=ac; const signal=ac.signal;
   img.style.transformOrigin='center center'; img.style.pointerEvents='none'; img.draggable=false;
   const badge=document.createElement('div');
   badge.className='ebb-zoom-badge';
@@ -7337,16 +7350,78 @@ function ebbMakeImageEditable(img) {
   const delBtn=document.createElement('button');
   delBtn.className='ebb-del-btn';
   delBtn.innerHTML='✕';
-  delBtn.style.cssText='position:absolute;top:4px;left:4px;z-index:10;width:20px;height:20px;border-radius:50%;border:none;background:#e53238;color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;';
+  delBtn.style.cssText='position:absolute;top:4px;left:4px;z-index:20;width:20px;height:20px;border-radius:50%;border:none;background:#e53238;color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;';
   delBtn.onmousedown=ev=>ev.stopPropagation();
   delBtn.onclick=ev=>{ev.stopPropagation();wrap.style.opacity='0';setTimeout(()=>wrap.remove(),200);};
   wrap.appendChild(delBtn);
   function applyT(){img.style.transform=`scale(${state.scale}) translate(${state.tx}px,${state.ty}px)`;}
-  wrap.addEventListener('wheel',ev=>{if(!EBB.editMode)return;ev.preventDefault();state.scale=Math.max(0.3,Math.min(5,state.scale+(ev.deltaY>0?-0.05:0.05)));applyT();},{passive:false});
-  wrap.addEventListener('mousedown',ev=>{if(!EBB.editMode)return;ev.preventDefault();state.dragging=true;state.sx=ev.clientX;state.sy=ev.clientY;wrap.style.cursor='grabbing';});
-  document.addEventListener('mousemove',ev=>{if(!state.dragging)return;state.tx+=(ev.clientX-state.sx)/state.scale;state.ty+=(ev.clientY-state.sy)/state.scale;state.sx=ev.clientX;state.sy=ev.clientY;applyT();});
-  document.addEventListener('mouseup',()=>{if(state.dragging){state.dragging=false;wrap.style.cursor='';}});
-  wrap._ebbState=state;
+  wrap.addEventListener('wheel',ev=>{if(!EBB.editMode)return;ev.preventDefault();state.scale=Math.max(0.3,Math.min(5,state.scale+(ev.deltaY>0?-0.05:0.05)));applyT();},{passive:false,signal});
+  wrap.addEventListener('mousedown',ev=>{if(!EBB.editMode)return;ev.preventDefault();state.dragging=true;state.sx=ev.clientX;state.sy=ev.clientY;wrap.style.cursor='grabbing';},{signal});
+  document.addEventListener('mousemove',ev=>{if(!state.dragging)return;state.tx+=(ev.clientX-state.sx)/state.scale;state.ty+=(ev.clientY-state.sy)/state.scale;state.sx=ev.clientX;state.sy=ev.clientY;applyT();},{signal});
+  document.addEventListener('mouseup',()=>{if(state.dragging){state.dragging=false;wrap.style.cursor='';}},{signal});
+  if (!parent.closest('td')) ebbAddFrameHandles(wrap,img,signal);
+  wrap._ebbState=state; wrap._ebbImg=img;
+}
+// 비율 상자(padding-top + overflow:hidden) 안에 absolute 이미지가 든 구조인가 (1차 컨텐츠 생성의 크롭 이미지)
+function ebbIsCropBox(box,img){
+  return !!box&&box.tagName==='DIV'&&box.children.length===1&&box.firstElementChild===img
+    &&parseFloat(box.style.paddingTop)>0&&img.style.position==='absolute';
+}
+// 프레임 가장자리(위·아래·왼쪽·오른쪽)를 끌어 빈 배경을 잘라 냄 — 결과는 비율 상자(%)로 저장
+function ebbFrameParentWidth(frame){
+  const p=frame.parentElement,cs=getComputedStyle(p);
+  return p.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+}
+function ebbToCropBox(frame,img){
+  if (parseFloat(frame.style.paddingTop)>0&&img.style.position==='absolute') return;   // 이미 비율 상자
+  const pw=ebbFrameParentWidth(frame);
+  const fw=frame.getBoundingClientRect().width,fh=img.offsetHeight,iw=img.offsetWidth;
+  frame.style.width=(fw/pw*100).toFixed(2)+'%'; frame.style.height='0';
+  frame.style.paddingTop=(fh/pw*100).toFixed(2)+'%';
+  frame.style.marginLeft=frame.style.marginRight='auto';
+  Object.assign(img.style,{position:'absolute',top:'0',left:'0',maxWidth:'none',height:'auto',
+    width:(iw/fw*100).toFixed(2)+'%',marginLeft:'0%',marginTop:'0%'});
+}
+function ebbAddFrameHandles(frame,img,signal){
+  const MIN=24;
+  const sides={top:'ns-resize',bottom:'ns-resize',left:'ew-resize',right:'ew-resize'};
+  Object.entries(sides).forEach(([side,cursor])=>{
+    const h=document.createElement('div');
+    h.className='ebb-frame-handle'; h.title='Drag to crop the frame';
+    const pos={top:'top:0;left:0;right:0;height:8px;',bottom:'bottom:0;left:0;right:0;height:8px;',
+               left:'left:0;top:0;bottom:0;width:8px;',right:'right:0;top:0;bottom:0;width:8px;'}[side];
+    h.style.cssText=`position:absolute;${pos}z-index:15;cursor:${cursor};background:rgba(229,50,56,.55);opacity:0;transition:opacity .15s;`;
+    frame.appendChild(h);
+    frame.addEventListener('mouseenter',()=>{h.style.opacity='.6';},{signal});
+    frame.addEventListener('mouseleave',()=>{if(!h._drag)h.style.opacity='0';},{signal});
+    h.addEventListener('mousedown',ev=>{
+      if(!EBB.editMode)return;
+      ev.preventDefault(); ev.stopPropagation();             // 이미지 이동(pan)과 분리
+      ebbToCropBox(frame,img);
+      const pw=ebbFrameParentWidth(frame),r=frame.getBoundingClientRect();
+      h._drag={x:ev.clientX,y:ev.clientY,fw:r.width,fh:parseFloat(frame.style.paddingTop)/100*pw,
+        il:img.offsetLeft,it:img.offsetTop,iw:img.offsetWidth,pw};
+      h.style.opacity='1'; document.body.style.cursor=cursor;
+    },{signal});
+    document.addEventListener('mousemove',ev=>{
+      const d=h._drag; if(!d)return;
+      const dx=ev.clientX-d.x,dy=ev.clientY-d.y;
+      let fw=d.fw,fh=d.fh,il=d.il,it=d.it;
+      if(side==='bottom')fh=Math.max(MIN,d.fh+dy);
+      if(side==='top'){fh=Math.max(MIN,d.fh-dy);it=d.it-(d.fh-fh);}
+      if(side==='right')fw=Math.min(d.pw,Math.max(MIN,d.fw+dx));
+      if(side==='left'){fw=Math.min(d.pw,Math.max(MIN,d.fw-dx));il=d.il-(d.fw-fw);}
+      frame.style.width=(fw/d.pw*100).toFixed(2)+'%';
+      frame.style.paddingTop=(fh/d.pw*100).toFixed(2)+'%';
+      img.style.width=(d.iw/fw*100).toFixed(2)+'%';
+      img.style.marginLeft=(il/fw*100).toFixed(2)+'%';
+      img.style.marginTop=(it/fw*100).toFixed(2)+'%';
+    },{signal});
+    document.addEventListener('mouseup',()=>{
+      if(!h._drag)return;
+      h._drag=null; h.style.opacity='0'; document.body.style.cursor='';
+    },{signal});
+  });
 }
 function ebbReset() {
   if(!confirm('Reset eBay builder?'))return;
