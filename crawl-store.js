@@ -200,7 +200,23 @@ function pushCrawlerOut(slug) {
   return pushPaths(names.map((f) => path.join(dir, f)));
 }
 
-module.exports = { enabled, pullAll, pushAll, pushPaths, pushProduct, pushCrawlerOut };
+/** 임의 키에 바이트 올리기 / 읽기 (이미지형 HTML 슬라이스 — media-slices/ 접두사, 시작 시 pull 대상 아님) */
+async function putBuffer(key, buf, contentType) {
+  if (!enabled()) return false;
+  const { PutObjectCommand } = require('@aws-sdk/client-s3');
+  await client().send(new PutObjectCommand({ Bucket: config().bucket, Key: key, Body: buf, ContentType: contentType }));
+  return true;
+}
+async function getBuffer(key) {
+  if (!enabled()) return null;
+  const { GetObjectCommand } = require('@aws-sdk/client-s3');
+  try {
+    const r = await client().send(new GetObjectCommand({ Bucket: config().bucket, Key: key }));
+    return Buffer.from(await r.Body.transformToByteArray());
+  } catch (e) { return null; }
+}
+
+module.exports = { enabled, pullAll, pushAll, pushPaths, pushProduct, pushCrawlerOut, putBuffer, getBuffer };
 
 if (require.main === module) {
   require('dotenv').config({ path: path.join(__dirname, '.env') });

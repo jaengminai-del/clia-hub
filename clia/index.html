@@ -833,6 +833,7 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 <link rel="stylesheet" href="../shared/clia-ui.css">
 <script src="../shared/clia-card-edit.js"></script>
 <script src="../shared/clia-zoom-bar.js"></script>
+<script src="../shared/clia-image-html.js"></script>
 </head>
 <body class="clia-hub">
 <div class="clia-login" id="loginView">
@@ -7064,6 +7065,7 @@ window.addEventListener('load',()=>{
           <button class="ebb-btn" id="ebbBtnEdit" onclick="ebbToggleEdit()">Edit</button>
           <button class="ebb-btn primary" id="ebbBtnDownload" onclick="ebbDownload()" disabled>Download .txt</button>
           <button class="ebb-btn" id="ebbBtnCopy" onclick="ebbCopyHTML()" disabled>Copy HTML</button>
+          <button class="ebb-btn" id="ebbBtnCopyImg" onclick="ebbCopyImageHTML()" disabled title="Images of the preview (1000px wide) + HTML that shows them — looks the same on eBay">🖼 Copy image HTML</button>
           <button class="ebb-btn danger" onclick="ebbReset()">Reset</button>
         </div>
       </div>
@@ -7250,7 +7252,7 @@ function ebbShowPreview(html) {
   // 미리보기를 실제 크기의 80%로 (위아래 카드가 더 많이 보여 옮기기 쉽게 — 결과물 크기는 그대로)
   if (window.CLIAPreviewScale) CLIAPreviewScale.apply(frame);
   document.getElementById('ebbCharCount').textContent = html.length.toLocaleString();
-  ['ebbBtnDownload','ebbBtnDownload2','ebbBtnCopy'].forEach(id => { const b=document.getElementById(id); if(b)b.disabled=false; });
+  ['ebbBtnDownload','ebbBtnDownload2','ebbBtnCopy','ebbBtnCopyImg'].forEach(id => { const b=document.getElementById(id); if(b)b.disabled=false; });
   const bar = document.getElementById('ebbComplianceBar');
   const hasJS = /<script|onclick|onmouse|onload/i.test(html);
   const over = html.length > 500000;
@@ -7287,6 +7289,12 @@ function ebbDownload() {
   fname = fname.replace(/[^a-zA-Z0-9_-]/g,'-').substring(0,60);
   a.href = URL.createObjectURL(blob); a.download = fname+'-'+Date.now()+'.txt'; a.click();
   URL.revokeObjectURL(a.href);
+}
+// 이미지형 HTML: 미리보기를 업로드 규격 이미지로 만들어 올리고 그 이미지들을 쌓은 HTML 복사 (shared/clia-image-html.js)
+function ebbCopyImageHTML() {
+  if (!window.CLIAImageHTML) return;
+  CLIAImageHTML.copy({ html: () => EBB.generatedHTML, apiBase: CRAWLER_API,
+                       button: document.getElementById('ebbBtnCopyImg'), isEditing: () => EBB.editMode });
 }
 function ebbCopyHTML() {
   if (!EBB.generatedHTML) return;

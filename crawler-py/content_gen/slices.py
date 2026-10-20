@@ -225,6 +225,9 @@ def render(req: dict, zip_path: Path) -> dict:
     o = options(req)
     n, vw, ow, fmt, q, name = o["n"], o["vw"], o["ow"], o["fmt"], o["q"], o["name"]
     doc = _document(html, vw, req.get("fontsCss") or "")
+    images_dir = Path(req["imagesDir"]) if req.get("imagesDir") else None   # 이미지형 HTML 용 (선택)
+    if images_dir:
+        images_dir.mkdir(parents=True, exist_ok=True)
 
     from playwright.sync_api import sync_playwright
     with sync_playwright() as p:
@@ -276,6 +279,8 @@ def render(req: dict, zip_path: Path) -> dict:
                     tname = re.sub(r"\.(jpg|png)$", ".txt", fname)
                     zf.writestr(fname, shot)
                     zf.writestr(tname, ("\n".join(slice_texts[i]) or "(no text)") + "\n")
+                    if images_dir:                      # 이미지형 HTML 용: 슬라이스를 폴더에도 저장 (ZIP 은 그대로)
+                        (images_dir / fname).write_bytes(shot)
                     manifest.append({
                         "file": fname,
                         "width": _jsround(layout["contentWidth"] * scale),
@@ -306,6 +311,12 @@ def render(req: dict, zip_path: Path) -> dict:
         finally:
             browser.close()
 
+    if images_dir:      # 슬라이스 목록 + 슬라이스별 글자 (이미지 alt 용)
+        (images_dir / "manifest.json").write_text(json.dumps({
+            "images_loaded": images_loaded,
+            "images": [dict(m, text=" ".join(t.split(": ", 1)[-1] for t in slice_texts[m["slice"] - 1]))
+                       for m in manifest],
+        }, ensure_ascii=False, indent=1), encoding="utf-8")
     data = buf.getvalue()
     zip_path.write_bytes(data)
     log = (f'{name}: 콘텐츠 {layout["contentWidth"]}x{H}css (여백 좌 {layout["contentLeft"]}px 제외) x{scale} → '

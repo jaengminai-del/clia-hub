@@ -150,6 +150,7 @@ body{font-family:'LGEIText',Arial,sans-serif;background:#F6F3EB;height:100vh;ove
         <button class="btn-sm" id="btnEditMode" onclick="toggleEdit()">✏ Edit</button>
         <button class="btn-sm primary" id="btnDownload" onclick="downloadHTML()" disabled>⬇ Download .txt</button>
         <button class="btn-sm" id="btnCopyHtml" onclick="copyHTML()" disabled>📋 Copy HTML</button>
+        <button class="btn-sm" id="btnCopyImgHtml" onclick="copyImageHTML()" disabled title="Images of the preview (1000px wide) + HTML that shows them — looks the same on Lazada/eBay">🖼 Copy image HTML</button>
         <button class="btn-sm danger" onclick="resetAll()">✕ Reset</button>
       </div>
     </div>
@@ -537,7 +538,7 @@ function showPreview(html) {
   const cc = document.getElementById('charCount');
   if (cc) cc.textContent = html.length.toLocaleString();
   // Enable buttons
-  ['btnDownload', 'btnDownload2', 'btnCopyHtml'].forEach(id => {
+  ['btnDownload', 'btnDownload2', 'btnCopyHtml', 'btnCopyImgHtml'].forEach(id => {
     const b = document.getElementById(id);
     if (b) b.disabled = false;
   });
@@ -602,6 +603,13 @@ function sanitizeForEbay(html) {
   // 빈 태그 정리
   s = s.replace(/<(\w+)[^>]*>\s*<\/\1>/g, '');
   return s;
+}
+
+// 이미지형 HTML: 미리보기를 업로드 규격 이미지로 만들어 올리고 그 이미지들을 쌓은 HTML 복사 (shared/clia-image-html.js)
+function copyImageHTML() {
+  if (!window.CLIAImageHTML) return;
+  CLIAImageHTML.copy({ html: () => generatedHTML, apiBase: typeof API_BASE !== 'undefined' ? API_BASE : '',
+                       button: document.getElementById('btnCopyImgHtml'), isEditing: () => editMode });
 }
 
 function copyHTML() {
@@ -1126,11 +1134,13 @@ function resetAll() {
   document.getElementById('btnDownload').disabled = true;
   document.getElementById('btnDownload2').disabled = true;
   document.getElementById('btnCopyHtml').disabled = true;
+  if (document.getElementById('btnCopyImgHtml')) document.getElementById('btnCopyImgHtml').disabled = true;
   document.getElementById('sectionsList').innerHTML = '';
   document.getElementById('statusArea').innerHTML = '';
 }
 </script>
 <script src="../shared/clia-card-edit.js"></script>
 <script src="../shared/clia-zoom-bar.js"></script>
+<script src="../shared/clia-image-html.js"></script>
 </body>
 </html>

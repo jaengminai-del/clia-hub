@@ -2489,6 +2489,66 @@ function renderSlicesPy(body) {
   });
 }
 
+/* ──────────────────────────────────────────
+   이미지형 HTML (2026-10-20): 미리보기를 업로드 규격 슬라이스 이미지로 만들어 공개 주소에 올리고,
+   <img> 를 차례로 쌓은 HTML 을 돌려준다 → 라자다·eBay 설명란에 붙여도 미리보기와 같은 모양
+   (글자·폰트·레이아웃·크롭이 이미지에 들어감). 크기는 매체 spec slices(Shopee/Lazada: 폭 1000px · ≤3000px · ≤1MB).
+   같은 HTML·규격이면 같은 해시 → 다시 만들지 않음. 저장: 로컬 media-cache/slices/<hash>/ + 버킷 media-slices/<hash>/
+────────────────────────────────────────── */
+const SLICE_CACHE = require('path').join(__dirname, 'media-cache', 'slices');
+const sliceStore = require('./crawl-store');
+
+app.post('/api/v1/slice-html', async (req, res) => {
+  const path = require('path'), fs = require('fs'), crypto = require('crypto');
+  const { html, medium = 'shopee_lazada', name = 'pdp' } = req.body || {};
+  if (typeof html !== 'string' || !html) return res.status(400).json({ error: 'html required' });
+  const med = /^[a-z_]+$/.test(medium) ? medium : 'shopee_lazada';
+  const hash = crypto.createHash('sha1').update(`v1|${med}|${html}`).digest('hex').slice(0, 20);
+  const dir = path.join(SLICE_CACHE, hash);
+  try {
+    let man = null;
+    try { man = JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8')); } catch (_) {}
+    if (!man) {
+      const { meta } = await renderSlicesPy({ html, medium: med, name: 'slice', imagesDir: dir });
+      console.log(`[slice-html] ${meta.log}`);
+      man = JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8'));
+      // 버킷에도 올림 (재배포·재시작 후에도 주소 유지)
+      for (const im of man.images) {
+        await sliceStore.putBuffer(`media-slices/${hash}/${im.file}`, fs.readFileSync(path.join(dir, im.file)), 'image/jpeg').catch((e) =>
+          console.warn('[slice-html] 버킷 업로드 실패', im.file, e.message));
+      }
+      await sliceStore.putBuffer(`media-slices/${hash}/manifest.json`, fs.readFileSync(path.join(dir, 'manifest.json')), 'application/json').catch(() => {});
+    }
+    const base = (process.env.PUBLIC_BASE_URL || `${req.get('x-forwarded-proto') || req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    const esc = (t) => String(t || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const imgs = man.images.map((im) =>
+      `<img src="${base}/media/slices/${hash}/${im.file}" alt="${esc((im.text || '').slice(0, 250))}" width="${im.width}" `
+      + `style="width:100%;max-width:100%;height:auto;display:block;border:0;margin:0;padding:0;">`);
+    const out = `<div style="max-width:${man.images[0] ? man.images[0].width : 1000}px;margin:0 auto;">\n${imgs.join('\n')}\n</div>`;
+    res.json({ html: out, hash, count: man.images.length, width: man.images[0] && man.images[0].width,
+               images_loaded: man.images_loaded, urls: man.images.map((im) => `${base}/media/slices/${hash}/${im.file}`) });
+  } catch (e) {
+    console.error('/api/v1/slice-html error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// 이미지형 HTML 슬라이스 이미지 (공개 주소 — 마켓이 이 주소로 이미지를 불러감)
+app.get('/media/slices/:hash/:file', async (req, res) => {
+  const path = require('path'), fs = require('fs');
+  const { hash, file } = req.params;
+  if (!/^[0-9a-f]{20}$/.test(hash) || !/^[\w-]+\.(jpg|png)$/.test(file)) return res.status(400).end();
+  const abs = path.join(SLICE_CACHE, hash, file);
+  if (!fs.existsSync(abs)) {   // 재배포 후 로컬에 없으면 버킷에서
+    const buf = await sliceStore.getBuffer(`media-slices/${hash}/${file}`);
+    if (!buf) return res.status(404).end();
+    fs.mkdirSync(path.dirname(abs), { recursive: true });
+    fs.writeFileSync(abs, buf);
+  }
+  res.set({ 'Cache-Control': 'public, max-age=31536000, immutable', 'Access-Control-Allow-Origin': '*' });
+  res.type(file.endsWith('.png') ? 'png' : 'jpeg').sendFile(abs);
+});
+
 app.post('/api/render-slices', async (req, res) => {
   if (process.env.SLICES_LEGACY !== '1') {
     if (!req.body || typeof req.body.html !== 'string' || !req.body.html) {
