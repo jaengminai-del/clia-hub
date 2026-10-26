@@ -2564,9 +2564,11 @@ const isLgUrl = (u) => typeof u === 'string' && /^https:\/\/(www\.)?lg\.com\//i.
 async function fullshotReady(key) {
   const fs = require('fs'), path = require('path');
   const abs = path.join(FULLSHOT_DIR, `${key}.jpg`);
-  if (fs.existsSync(abs)) return true;
+  // 80KB 미만은 lg.com 보안 장치의 "Access Denied" 화면을 찍은 것 → 없는 것으로 보고 다시 캡처
+  const MIN = 80 * 1024;
+  if (fs.existsSync(abs)) { if (fs.statSync(abs).size >= MIN) return true; fs.rmSync(abs, { force: true }); }
   const buf = await sliceStore.getBuffer(`media-fullshot/${key}.jpg`);
-  if (!buf) return false;
+  if (!buf || buf.length < MIN) return false;
   fs.mkdirSync(FULLSHOT_DIR, { recursive: true });
   fs.writeFileSync(abs, buf);
   return true;
