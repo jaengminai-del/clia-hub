@@ -218,20 +218,31 @@
   function onDown(st, item, e) {
     if (e.button !== 0) return;
     st.moved = false;
+    document.querySelectorAll('[data-clia-drop-line]').forEach((x) => x.remove());   // 이전 끌기에서 남은 위치 표시
     st.drag = { item, y0: e.clientY, started: false, before: null, line: null };
-    const move = (ev) => onMove(st, ev);
-    const up = (ev) => { document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up); onUp(st, ev); };
+    const move = (ev) => (ev.buttons === 0 ? end(ev, true) : onMove(st, ev));   // 버튼을 놓친 경우(창 밖에서 뗌) → 취소
+    const end = (ev, cancel) => {
+      document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up);
+      document.removeEventListener('pointercancel', cancelFn); window.removeEventListener('blur', cancelFn);
+      onUp(st, ev, cancel);
+    };
+    const up = (ev) => end(ev, false);
+    const cancelFn = (ev) => end(ev, true);
     document.addEventListener('pointermove', move);
     document.addEventListener('pointerup', up);
+    document.addEventListener('pointercancel', cancelFn);
+    window.addEventListener('blur', cancelFn);
   }
   function onMove(st, e) {
     const d = st.drag; if (!d) return;
     if (!d.started) {
       if (Math.abs(e.clientY - d.y0) < 5) return;
       d.started = true; st.moved = true;
+      try { d.item.setPointerCapture(e.pointerId); } catch (_) {}   // 끌기 시작 후: 커서가 목록·창 밖으로 나가도 놓기 이벤트를 받는다
       d.item.style.opacity = '.45';
       document.body.style.cursor = 'grabbing';
       d.line = document.createElement('div');
+      d.line.setAttribute('data-clia-drop-line', '');
       d.line.style.cssText = 'position:fixed;z-index:2147483001;height:3px;border-radius:2px;background:#E53238;pointer-events:none;';
       document.body.appendChild(d.line);
     }
@@ -245,12 +256,13 @@
     const r = sc.getBoundingClientRect ? sc.getBoundingClientRect() : { top: 0, bottom: innerHeight };
     if (e.clientY < r.top + 40) sc.scrollTop -= 14; else if (e.clientY > r.bottom - 40) sc.scrollTop += 14;
   }
-  function onUp(st, e) {
+  function onUp(st, e, cancel) {
     const d = st.drag; st.drag = null;
     document.body.style.cursor = '';
     if (!d) return;
     if (d.line) d.line.remove();
     d.item.style.opacity = '';
+    if (cancel) { if (d.started) render(st); return; }
     if (!d.started) {                       // 클릭 → 미리보기의 그 카드로
       if (!e.target.closest('[data-thumb]')) focusCard(d.item._card);
       return;

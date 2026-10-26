@@ -2911,7 +2911,7 @@ app.listen(PORT, () => {
   if (store.enabled()) {
     console.log('[crawl-store] 버킷 → 로컬 동기화 시작');
     store.pullAll()
-      .then((s) => console.log(`[crawl-store] 동기화 완료: 다운로드 ${s.downloaded}, 같음 ${s.unchanged}, 실패 ${s.failed}`))
+      .then((s) => { console.log(`[crawl-store] 동기화 완료: 다운로드 ${s.downloaded}, 같음 ${s.unchanged}, 실패 ${s.failed}`); require('./crawler-routes').stripNonContent(); })
       .catch((e) => console.error('[crawl-store] 동기화 실패:', e.message));
   }
 });

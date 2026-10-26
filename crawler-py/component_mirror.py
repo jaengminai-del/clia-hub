@@ -530,7 +530,18 @@ def build_from_components(component_data: list, product_title: str = "", origin:
     merge_stacked_heroes(built, component_data)
     stitch_orphans(built)
     keep_image_only_heroes(built)
-    return to_mirror_format(built, product_title)
+    return drop_non_content(to_mirror_format(built, product_title))
+
+
+# 컨텐츠가 아닌 컴포넌트 — 수집 결과에서 제외 (2026-10-26 사용자 지정)
+#   ST0018 Centered Image Block: 원래 링크가 걸리는 앵커(바로가기) 컴포넌트 — 사용 설명서·색상 바로가기 등 UI 요소, feature 카드 아님
+NON_CONTENT_COMPONENTS = {"ST0018"}
+
+
+def drop_non_content(mirror: dict) -> dict:
+    secs = mirror.get("sections") or []
+    mirror["sections"] = [s for s in secs if s.get("component_id") not in NON_CONTENT_COMPONENTS]
+    return mirror
 
 
 def keep_image_only_heroes(built: dict) -> int:
