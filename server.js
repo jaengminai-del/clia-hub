@@ -9,6 +9,7 @@ const app = express();
 app.use(cors({ origin: (origin, cb) => cb(null, true), credentials: false }));
 app.use(express.json({ limit: '50mb' }));
 app.use(require('./crawler-routes')); // 내장 PDP 크롤러 (/api/v1/*) — 별도 FastAPI·터널 불필요
+app.use(require('./listing-routes').router); // 제품별 리스팅 문구 (프로모션·제품 상세·배송·사후 케어·반품) 버전 저장
 app.use('/crawler-py', (req, res) => res.sendStatus(404)); // 크롤러 소스·산출물은 정적 노출 금지
 app.use(express.static('.'));
 
@@ -2054,10 +2055,18 @@ app.post('/api/ebay-generate', async (req, res) => {
           const script = path.join(__dirname, 'crawler-py', 'ebay_builder.py');
           const { execFileSync } = require('child_process');
           const outName = `${medium}_content.html`;   // ebay → ebay_content.html (기존 파일명 유지)
-          execFileSync(py, [script, slugDir, '--fragment', '--medium', medium, '-o', outName], { timeout: 60 * 1000 });
+          const args = [script, slugDir, '--fragment', '--medium', medium, '-o', outName];
+          // 리스팅 문구: 프로모션은 맨 위, 제품 상세·배송·사후 케어·반품은 맨 아래 (Shopee 는 listing:false → 텍스트 복사만)
+          const listing = req.body.listing === false ? null : await require('./listing-routes').currentFor(url);
+          if (listing) {
+            const lf = path.join(slugDir, 'listing.json');
+            fs.writeFileSync(lf, JSON.stringify(listing));
+            args.push('--listing', lf);
+          }
+          execFileSync(py, args, { timeout: 60 * 1000 });
           const html = fs.readFileSync(path.join(slugDir, outName), 'utf8');
           console.log(`[ebay-generate] CCG 빌더 렌더 완료 (${medium}, ${html.length} chars)`);
-          return res.json({ success: true, html, charCount: html.length, engine: 'ccg', medium });
+          return res.json({ success: true, html, charCount: html.length, engine: 'ccg', medium, listingVersion: listing ? listing.v : null });
         }
       }
     } catch (ccgErr) {

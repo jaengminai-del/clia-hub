@@ -155,6 +155,19 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 .ptag{display:inline-block;background:#f0f0f0;padding:1px 6px;border-radius:10px;font-size:8px;color:#555;margin:1px;}
 .ai-tag{background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;padding:1px 7px;border-radius:10px;font-size:8px;font-weight:700;}
 /* GEO Section */
+.lt-sec{margin:4px 0 18px;border:1px solid #eee;border-radius:8px;background:#fff;overflow:hidden;}
+.lt-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:#FAFAFA;border-bottom:1px solid #eee;cursor:pointer;}
+.lt-hd h3{margin:0;font-size:12px;font-weight:700;color:#333;}.lt-hd small{font-size:10px;color:#888;font-weight:400;margin-left:6px;}
+.lt-bd{padding:10px 12px;}.lt-sec.closed .lt-bd{display:none;}
+.lt-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;font-size:11px;}
+.lt-bar select,.lt-bar input{font-size:11px;padding:4px 6px;border:1px solid #ddd;border-radius:5px;background:#fff;max-width:260px;}
+.lt-btn{font-size:11px;padding:4px 9px;border:1px solid #ccc;border-radius:5px;background:#fff;cursor:pointer;white-space:nowrap;}
+.lt-btn.pri{background:#262626;color:#fff;border-color:#262626;}.lt-btn:disabled{opacity:.45;cursor:default;}
+.lt-f{margin-bottom:8px;}.lt-f-hd{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+.lt-f-hd b{font-size:10px;color:#fff;background:#888;border-radius:3px;padding:1px 5px;white-space:nowrap;}.lt-f-hd b.top{background:#A50034;}
+.lt-f-hd input{flex:1;font-size:11px;font-weight:600;padding:3px 6px;border:1px solid #e3e3e3;border-radius:4px;}
+.lt-f textarea{width:100%;box-sizing:border-box;min-height:64px;font:11px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;padding:6px 8px;border:1px solid #e3e3e3;border-radius:5px;resize:vertical;}
+.lt-msg{font-size:10px;color:#666;min-height:14px;margin-top:2px;}.lt-msg.ok{color:#15803D;}.lt-msg.err{color:#B91C1C;}
 .geo-sec{margin-top:20px;border:1px solid #eee;border-radius:8px;overflow:hidden;background:#fff;}
 .geo-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:linear-gradient(135deg,#0F172A,#1E293B);color:#fff;}
 .geo-hd h3{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
@@ -2311,6 +2324,182 @@ function showPending(p){
 <div style="margin-top:16px;font-size:11px;color:#999;">카테고리: ${p.cat} &gt; ${p.sub} | ${p.dv} | ${p.pr}</div>
 </div>`;
 }
+// ═══ 리스팅 문구 (2026-10-26) — 제품별 5종 문구 · 버전 저장 · 템플릿(법인+제품군) · 다른 제품에서 가져오기 ═══
+//   ① 프로모션 → eBay·Lazada HTML 맨 위 / ②~⑤ 제품 상세·배송·사후 케어·반품 → 맨 아래 (빈 칸은 붙지 않음)
+//   Shopee 는 빌더의 "설명 텍스트 복사" 버튼. 저장소·API: listing-routes.js
+Object.assign(I18N.en,{
+  'lt.title':'LISTING TEXT','lt.where':'① on top · ②–⑤ at the bottom of eBay / Lazada content · Shopee: copy as description text',
+  'lt.version':'Version','lt.none':'No saved version yet','lt.inUse':'in use','lt.latest':'latest','lt.useThis':'Use this version','lt.useLatest':'Always use latest',
+  'lt.import':'Import from…','lt.tpl':'Templates','lt.prods':'Other products','lt.draft':'② Draft from LG.com',
+  'lt.note':'Version note (optional)','lt.save':'Save as new version','lt.saveTpl':'Save as template ({c})',
+  'lt.f.promotion':'Promotion','lt.f.details':'Product details','lt.f.delivery':'Delivery','lt.f.aftercare':'After care','lt.f.returns':'Return policy',
+  'lt.saved':'Saved as v{v} — applied to eBay / Lazada content and Shopee text.','lt.tplSaved':'Template saved: {c} v{v}','lt.loadedTpl':'Template "{c}" loaded — save to apply to this product.',
+  'lt.imported':'Imported from {s} — edit and save as a new version.','lt.drafted':'Product details drafted from LG.com — edit and save.','lt.pinned':'Now using v{v}.','lt.unpinned':'Now using the latest version.',
+  'lt.empty':'All fields are empty.','lt.fail':'Failed: ','lt.hint':'Lines starting with ● are bold headings, lines starting with - are indented. Empty fields are not added.','lt.dirty':'Unsaved changes',
+});
+Object.assign(I18N.de,{
+  'lt.title':'LISTING-TEXTE','lt.where':'① oben · ②–⑤ unten im eBay-/Lazada-Inhalt · Shopee: als Beschreibungstext kopieren',
+  'lt.version':'Version','lt.none':'Noch keine gespeicherte Version','lt.inUse':'aktiv','lt.latest':'neueste','lt.useThis':'Diese Version verwenden','lt.useLatest':'Immer neueste verwenden',
+  'lt.import':'Importieren aus…','lt.tpl':'Vorlagen','lt.prods':'Andere Produkte','lt.draft':'② Entwurf von LG.com',
+  'lt.note':'Versionshinweis (optional)','lt.save':'Als neue Version speichern','lt.saveTpl':'Als Vorlage speichern ({c})',
+  'lt.f.promotion':'Aktion','lt.f.details':'Produktdetails','lt.f.delivery':'Lieferung','lt.f.aftercare':'Kundendienst','lt.f.returns':'Rückgabe',
+  'lt.saved':'Als v{v} gespeichert — gilt für eBay-/Lazada-Inhalt und Shopee-Text.','lt.tplSaved':'Vorlage gespeichert: {c} v{v}','lt.loadedTpl':'Vorlage „{c}“ geladen — zum Übernehmen speichern.',
+  'lt.imported':'Importiert aus {s} — bearbeiten und als neue Version speichern.','lt.drafted':'Produktdetails aus LG.com entworfen — bearbeiten und speichern.','lt.pinned':'v{v} wird verwendet.','lt.unpinned':'Neueste Version wird verwendet.',
+  'lt.empty':'Alle Felder sind leer.','lt.fail':'Fehler: ','lt.hint':'Zeilen mit ● sind fette Überschriften, Zeilen mit - werden eingerückt. Leere Felder werden nicht eingefügt.','lt.dirty':'Nicht gespeichert',
+});
+Object.assign(I18N.th,{
+  'lt.title':'ข้อความลิสติ้ง','lt.where':'① ด้านบน · ②–⑤ ด้านล่างของคอนเทนต์ eBay / Lazada · Shopee: คัดลอกเป็นข้อความคำอธิบาย',
+  'lt.version':'เวอร์ชัน','lt.none':'ยังไม่มีเวอร์ชันที่บันทึก','lt.inUse':'ใช้งานอยู่','lt.latest':'ล่าสุด','lt.useThis':'ใช้เวอร์ชันนี้','lt.useLatest':'ใช้เวอร์ชันล่าสุดเสมอ',
+  'lt.import':'นำเข้าจาก…','lt.tpl':'เทมเพลต','lt.prods':'สินค้าอื่น','lt.draft':'② ร่างจาก LG.com',
+  'lt.note':'หมายเหตุเวอร์ชัน (ไม่บังคับ)','lt.save':'บันทึกเป็นเวอร์ชันใหม่','lt.saveTpl':'บันทึกเป็นเทมเพลต ({c})',
+  'lt.f.promotion':'โปรโมชัน','lt.f.details':'รายละเอียดสินค้า','lt.f.delivery':'การจัดส่ง','lt.f.aftercare':'บริการหลังการขาย','lt.f.returns':'นโยบายการคืนสินค้า',
+  'lt.saved':'บันทึกเป็น v{v} แล้ว — ใช้กับคอนเทนต์ eBay / Lazada และข้อความ Shopee','lt.tplSaved':'บันทึกเทมเพลตแล้ว: {c} v{v}','lt.loadedTpl':'โหลดเทมเพลต "{c}" แล้ว — กดบันทึกเพื่อใช้กับสินค้านี้',
+  'lt.imported':'นำเข้าจาก {s} — แก้ไขแล้วบันทึกเป็นเวอร์ชันใหม่','lt.drafted':'ร่างรายละเอียดสินค้าจาก LG.com แล้ว — แก้ไขแล้วบันทึก','lt.pinned':'กำลังใช้ v{v}','lt.unpinned':'กำลังใช้เวอร์ชันล่าสุด',
+  'lt.empty':'ทุกช่องว่างเปล่า','lt.fail':'ล้มเหลว: ','lt.hint':'บรรทัดที่ขึ้นต้นด้วย ● เป็นหัวข้อตัวหนา บรรทัดที่ขึ้นต้นด้วย - จะเยื้อง ช่องว่างจะไม่ถูกเพิ่ม','lt.dirty':'ยังไม่ได้บันทึก',
+});
+Object.assign(I18N.ar,{
+  'lt.title':'نصوص القائمة','lt.where':'① في الأعلى · ②–⑤ في أسفل محتوى eBay / Lazada · Shopee: نسخ كنص وصف',
+  'lt.version':'الإصدار','lt.none':'لا يوجد إصدار محفوظ بعد','lt.inUse':'مستخدم','lt.latest':'الأحدث','lt.useThis':'استخدم هذا الإصدار','lt.useLatest':'استخدم الأحدث دائمًا',
+  'lt.import':'استيراد من…','lt.tpl':'القوالب','lt.prods':'منتجات أخرى','lt.draft':'② مسودة من LG.com',
+  'lt.note':'ملاحظة الإصدار (اختياري)','lt.save':'حفظ كإصدار جديد','lt.saveTpl':'حفظ كقالب ({c})',
+  'lt.f.promotion':'العرض','lt.f.details':'تفاصيل المنتج','lt.f.delivery':'التوصيل','lt.f.aftercare':'خدمة ما بعد البيع','lt.f.returns':'سياسة الإرجاع',
+  'lt.saved':'تم الحفظ كـ v{v} — يُطبّق على محتوى eBay / Lazada ونص Shopee.','lt.tplSaved':'تم حفظ القالب: {c} v{v}','lt.loadedTpl':'تم تحميل القالب "{c}" — احفظ لتطبيقه على هذا المنتج.',
+  'lt.imported':'تم الاستيراد من {s} — عدّل واحفظ كإصدار جديد.','lt.drafted':'تمت صياغة تفاصيل المنتج من LG.com — عدّل واحفظ.','lt.pinned':'يتم استخدام v{v}.','lt.unpinned':'يتم استخدام أحدث إصدار.',
+  'lt.empty':'جميع الحقول فارغة.','lt.fail':'فشل: ','lt.hint':'الأسطر التي تبدأ بـ ● عناوين عريضة، والأسطر التي تبدأ بـ - تُزاح. الحقول الفارغة لا تُضاف.','lt.dirty':'تغييرات غير محفوظة',
+});
+const LT_FIELDS=['promotion','details','delivery','aftercare','returns'];
+const LT_TITLES={promotion:'Promotion Details',details:'Product Details',delivery:'Delivery & Installation Notice',aftercare:'After Care Service Information',returns:'Terms & Conditions for Return Policy'};
+let _lt=null;   // {p, url, corp, rec, from}
+const _ltEsc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const _ltApi=(path,body)=>fetch(CRAWLER_API+path,body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{}).then(async r=>{const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||d.detail||('HTTP '+r.status));return d;});
+function _ltMsg(text,cls){const m=document.getElementById('ltMsg');if(m){m.textContent=text||'';m.className='lt-msg'+(cls?' '+cls:'');}}
+function _ltGet(){
+  const fields={},titles={};
+  LT_FIELDS.forEach(k=>{fields[k]=document.getElementById('ltF_'+k).value;const tv=document.getElementById('ltT_'+k).value.trim();if(tv&&tv!==LT_TITLES[k])titles[k]=tv;});
+  return{fields,titles};
+}
+function _ltSet(ver){
+  LT_FIELDS.forEach(k=>{
+    document.getElementById('ltF_'+k).value=((ver&&ver.fields)||{})[k]||'';
+    document.getElementById('ltT_'+k).value=((ver&&ver.titles)||{})[k]||LT_TITLES[k];
+  });
+}
+function _ltCur(rec){if(!rec||!rec.versions||!rec.versions.length)return null;return rec.versions.find(v=>v.v===rec.pinned)||rec.versions[rec.versions.length-1];}
+function _ltVerLabel(v,rec){
+  const cur=_ltCur(rec),last=rec.versions[rec.versions.length-1];
+  const tags=[v===cur?'★ '+t('lt.inUse'):'',v===last?t('lt.latest'):''].filter(Boolean).join(', ');
+  return 'v'+v.v+' · '+String(v.at||'').slice(0,16).replace('T',' ')+(v.by?' · '+v.by:'')+(v.note?' · '+v.note:'')+(tags?'  ('+tags+')':'');
+}
+function _ltRenderVersions(selV){
+  const sel=document.getElementById('ltVer'),rec=_lt.rec;
+  if(!rec||!rec.versions||!rec.versions.length){sel.innerHTML=`<option value="">${_ltEsc(t('lt.none'))}</option>`;sel.disabled=true;document.getElementById('ltPin').disabled=true;return;}
+  sel.disabled=false;
+  sel.innerHTML=rec.versions.slice().reverse().map(v=>`<option value="${v.v}">${_ltEsc(_ltVerLabel(v,rec))}</option>`).join('');
+  sel.value=String(selV||(_ltCur(rec)||{}).v);
+  _ltPinBtn();
+}
+function _ltPinBtn(){
+  const b=document.getElementById('ltPin'),rec=_lt.rec,sv=Number(document.getElementById('ltVer').value);
+  if(!rec||!rec.versions.length){b.disabled=true;return;}
+  const last=rec.versions[rec.versions.length-1].v;
+  if(rec.pinned&&rec.pinned===sv){b.textContent=t('lt.useLatest');b.dataset.v='';b.disabled=false;}
+  else{b.textContent=t('lt.useThis');b.dataset.v=String(sv);b.disabled=(!rec.pinned&&sv===last);}
+}
+async function listingForDetail(p){
+  const box=document.getElementById('ltSec');if(!box)return;
+  const url=p.crawler_url||p.url,corp=productCorp(p),cat=p.cat||'General';
+  _lt={p,url,corp,cat,rec:null,from:null};
+  const closed=sessionStorage.getItem('clia_lt_closed')==='1';
+  box.className='lt-sec'+(closed?' closed':'');
+  box.innerHTML=`<div class="lt-hd" onclick="ltToggle()"><h3>📝 ${_ltEsc(t('lt.title'))}<small>${_ltEsc(t('lt.where'))}</small></h3><span id="ltDirty" style="font-size:10px;color:#B45309;"></span><span id="ltCaret">${closed?'▸':'▾'}</span></div>
+<div class="lt-bd">
+  <div class="lt-bar">${_ltEsc(t('lt.version'))} <select id="ltVer" onchange="ltPickVersion()"></select><button class="lt-btn" id="ltPin" onclick="ltPin()"></button>
+    <select id="ltImport" onchange="ltImport(this)"><option value="">${_ltEsc(t('lt.import'))}</option></select>
+    <button class="lt-btn" onclick="ltDraft(this)" ${url?'':'disabled'}>${_ltEsc(t('lt.draft'))}</button></div>
+  ${LT_FIELDS.map((k,i)=>`<div class="lt-f"><div class="lt-f-hd"><b class="${i?'':'top'}">${'①②③④⑤'[i]} ${_ltEsc(t('lt.f.'+k))}</b><input id="ltT_${k}" oninput="ltDirty()"></div><textarea id="ltF_${k}" oninput="ltDirty()" rows="${k==='details'?6:3}"></textarea></div>`).join('')}
+  <div style="font-size:10px;color:#999;margin:-2px 0 8px;">${_ltEsc(t('lt.hint'))}</div>
+  <div class="lt-bar"><input id="ltNote" placeholder="${_ltEsc(t('lt.note'))}" style="flex:1;max-width:none;">
+    <button class="lt-btn pri" onclick="ltSave(this)">${_ltEsc(t('lt.save'))}</button>
+    <button class="lt-btn" onclick="ltSaveTpl(this)">${_ltEsc(t('lt.saveTpl',{c:corp.toUpperCase()+' · '+cat}))}</button></div>
+  <div class="lt-msg" id="ltMsg"></div>
+</div>`;
+  _ltSet(null);
+  try{
+    const d=await _ltApi('/api/v1/listing?url='+encodeURIComponent(url));
+    if(!_lt||_lt.p!==p)return;
+    _lt.rec=d.record;_ltRenderVersions();
+    if(d.current)_ltSet(d.current);
+    else{   // 저장된 문구가 없으면 같은 법인·제품군 템플릿을 기본으로 채워 둔다 (저장해야 적용)
+      const tp=await _ltApi('/api/v1/listing-template?corp='+corp+'&category='+encodeURIComponent(cat)).catch(()=>({}));
+      if(_lt&&_lt.p===p&&tp.current){_ltSet(tp.current);_lt.from='template:'+corp+'/'+cat+'#v'+tp.current.v;_ltMsg(t('lt.loadedTpl',{c:cat}));ltDirty();}
+    }
+  }catch(e){_ltMsg(t('lt.fail')+e.message,'err');}
+  _ltFillImport();
+}
+function ltToggle(){const b=document.getElementById('ltSec');b.classList.toggle('closed');const c=b.classList.contains('closed');sessionStorage.setItem('clia_lt_closed',c?'1':'0');document.getElementById('ltCaret').textContent=c?'▸':'▾';}
+function ltDirty(){const d=document.getElementById('ltDirty');if(d)d.textContent='● '+t('lt.dirty');}
+function _ltClean(){const d=document.getElementById('ltDirty');if(d)d.textContent='';}
+async function _ltFillImport(){
+  if(!_lt)return;const {corp,url}=_lt,mine=_lt;
+  const [tpls,prods]=await Promise.all([_ltApi('/api/v1/listing-templates?corp='+corp).catch(()=>({})),_ltApi('/api/v1/listing/index?corp='+corp).catch(()=>({}))]);
+  if(_lt!==mine)return;
+  const sel=document.getElementById('ltImport');if(!sel)return;
+  const tOpts=Object.entries(tpls).map(([k,x])=>`<option value="tpl:${_ltEsc(x.category)}">${_ltEsc(x.category)} · v${x.v}</option>`).join('');
+  const mySlug=Object.keys(prods).find(k=>prods[k].url===url);
+  const pOpts=Object.entries(prods).filter(([k])=>k!==mySlug).map(([k,x])=>`<option value="prd:${_ltEsc(x.url)}">${_ltEsc(x.title||k)}${x.category?' · '+_ltEsc(x.category):''} · v${x.v}</option>`).join('');
+  sel.innerHTML=`<option value="">${_ltEsc(t('lt.import'))}</option>`+(tOpts?`<optgroup label="${_ltEsc(t('lt.tpl'))} (${corp.toUpperCase()})">${tOpts}</optgroup>`:'')+(pOpts?`<optgroup label="${_ltEsc(t('lt.prods'))}">${pOpts}</optgroup>`:'');
+}
+function ltPickVersion(){
+  const v=Number(document.getElementById('ltVer').value),ver=(_lt.rec.versions||[]).find(x=>x.v===v);
+  if(ver){_ltSet(ver);_lt.from='v'+v;_ltClean();}
+  _ltPinBtn();
+}
+async function ltImport(sel){
+  const val=sel.value;sel.value='';if(!val)return;
+  try{
+    let d,src;
+    if(val.startsWith('tpl:')){src=val.slice(4);d=await _ltApi('/api/v1/listing-template?corp='+_lt.corp+'&category='+encodeURIComponent(src));_lt.from='template:'+_lt.corp+'/'+src+(d.current?'#v'+d.current.v:'');}
+    else{const u=val.slice(4);d=await _ltApi('/api/v1/listing?url='+encodeURIComponent(u));src=(d.record&&d.record.title)||u;_lt.from='product:'+(d.record?d.record.slug:u)+(d.current?'#v'+d.current.v:'');}
+    if(!d.current)throw new Error('empty');
+    // ② 제품 상세는 제품마다 다르므로 지금 칸에 내용이 있으면 유지 (템플릿에는 ②가 비어 있음)
+    const curDetails=document.getElementById('ltF_details').value;
+    _ltSet(d.current);if(curDetails.trim())document.getElementById('ltF_details').value=curDetails;
+    ltDirty();_ltMsg(t('lt.imported',{s:src}));
+  }catch(e){_ltMsg(t('lt.fail')+e.message,'err');}
+}
+async function ltDraft(btn){
+  btn.disabled=true;
+  try{const d=await _ltApi('/api/v1/listing/draft?url='+encodeURIComponent(_lt.url));document.getElementById('ltF_details').value=d.details||'';ltDirty();_ltMsg(t('lt.drafted'),'ok');}
+  catch(e){_ltMsg(t('lt.fail')+e.message,'err');}
+  finally{btn.disabled=false;}
+}
+async function ltSave(btn){
+  const {fields,titles}=_ltGet();
+  if(!LT_FIELDS.some(k=>fields[k].trim())){_ltMsg(t('lt.empty'),'err');return;}
+  btn.disabled=true;
+  try{
+    const d=await _ltApi('/api/v1/listing',{url:_lt.url,corp:_lt.corp,category:_lt.cat,title:(_lt.p.id||'')+(_lt.p.nm?' — '+_lt.p.nm:''),fields,titles,note:document.getElementById('ltNote').value.trim(),by:CORP,from:_lt.from});
+    _lt.rec=d.record;_lt.from='v'+d.v;_ltRenderVersions(d.current&&d.current.v);
+    document.getElementById('ltNote').value='';_ltClean();_ltMsg(t('lt.saved',{v:d.v}),'ok');_ltFillImport();
+  }catch(e){_ltMsg(t('lt.fail')+e.message,'err');}
+  finally{btn.disabled=false;}
+}
+async function ltSaveTpl(btn){
+  const {fields,titles}=_ltGet();
+  if(!LT_FIELDS.some(k=>fields[k].trim())){_ltMsg(t('lt.empty'),'err');return;}
+  btn.disabled=true;
+  try{
+    // 템플릿에는 제품마다 다른 ② 제품 상세는 넣지 않는다
+    const d=await _ltApi('/api/v1/listing-template',{corp:_lt.corp,category:_lt.cat,fields:{...fields,details:''},titles,note:document.getElementById('ltNote').value.trim(),by:CORP,from:'product:'+_lt.url});
+    _ltMsg(t('lt.tplSaved',{c:_lt.corp.toUpperCase()+' · '+_lt.cat,v:d.v}),'ok');_ltFillImport();
+  }catch(e){_ltMsg(t('lt.fail')+e.message,'err');}
+  finally{btn.disabled=false;}
+}
+async function ltPin(){
+  const b=document.getElementById('ltPin'),v=b.dataset.v?Number(b.dataset.v):null;
+  try{const d=await _ltApi('/api/v1/listing/pin',{url:_lt.url,v});_lt.rec=d.record;_ltRenderVersions(v||undefined);_ltMsg(v?t('lt.pinned',{v}):t('lt.unpinned'),'ok');}
+  catch(e){_ltMsg(t('lt.fail')+e.message,'err');}
+}
 function showDetail(p){
   // 좌측 대표 이미지·썸네일 = LG.com 제품 갤러리 영역 (갤러리가 없을 때만 피처 이미지)
   const all=p.gal.length?p.gal:p.feat;
@@ -2343,6 +2532,7 @@ function showDetail(p){
     </div>
   </div>
 </div>
+<div class="lt-sec" id="ltSec" data-no-i18n></div>
 <div class="feat-header">${t('dp.feat',{n:p.feat.length})} <span class="ai-tag">${t('dp.aiExtracted')}</span> <span style="font-size:9px;color:#888;font-weight:400;margin-left:4px;">${t('dp.hover')}</span></div>
 <div class="feat-grid" data-no-i18n>${p.feat.map((f,i)=>{if(f.layout==='split'&&f.imgs&&f.imgs.length>=2){return`<div class="feat-thumb" onclick="openLB('${p.id}',${i})" style="grid-column:span 2;"><div style="display:flex;gap:2px;"><img src="${I(f.imgs[0].p,400)}" style="width:50%;display:block;" onerror="this.style.display='none'"><img src="${I(f.imgs[1].p,400)}" style="width:50%;display:block;" onerror="this.style.display='none'"></div><div class="ft-overlay"><b>${f.t}</b>${f.d.substring(0,50)}...</div></div>`;}else if(f.layout==='puzzle'&&f.imgs&&f.imgs.length>=3){return`<div class="feat-thumb" onclick="openLB('${p.id}',${i})" style="grid-column:span 2;"><div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;"><img src="${I(f.imgs[0].p,400)}" style="grid-row:1/3;width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"><img src="${I(f.imgs[1].p,300)}" style="width:100%;object-fit:cover;" onerror="this.style.display='none'"><img src="${I(f.imgs[2].p,300)}" style="width:100%;object-fit:cover;" onerror="this.style.display='none'"></div><div class="ft-overlay"><b>${f.t}</b>${f.d.substring(0,50)}...</div></div>`;}else{return`<div class="feat-thumb" onclick="openLB('${p.id}',${i})"><img src="${I(f.p,400)}" onerror="this.parentElement.style.display='none'"><div class="ft-overlay"><b>${f.t}</b>${f.d.substring(0,50)}...</div></div>`;}}).join('')}</div>
 <div class="feat-header">${t('dp.specs')}</div>
@@ -2352,6 +2542,7 @@ ${geoHTML(p)}
 </div>`;
   rp.scrollTop=0;
   geoForDetail(p);
+  listingForDetail(p);
 }
 function dpTh(el,src){document.querySelectorAll('.dp-th').forEach(t=>t.classList.remove('act'));el.classList.add('act');document.querySelector('#dp-main img').src=src;}
 

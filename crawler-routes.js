@@ -126,12 +126,20 @@ function snapshot(jobId) {
 
 const mediumOf = (m) => (/^[a-z_]{2,32}$/.test(m || '') ? m : 'ebay');
 
-function renderEbayHtml(out, medium = 'ebay') {
+// listingUrl 이 있으면 그 제품의 리스팅 문구(현재 버전)를 맨 위·맨 아래 카드로 붙인다 (listing-routes.js)
+async function renderEbayHtml(out, medium = 'ebay', listingUrl = null) {
+  if (!fs.existsSync(path.join(out, 'mirror.json'))) {
+    throw Object.assign(new Error('mirror not ready — crawl first'), { status: 404 });
+  }
+  const args = [RENDER_CONTENT, out, mediumOf(medium)];
+  const listing = listingUrl ? await require('./listing-routes').currentFor(listingUrl) : null;
+  if (listing) {
+    const lf = path.join(out, 'listing.json');
+    fs.writeFileSync(lf, JSON.stringify(listing));
+    args.push(lf);
+  }
   return new Promise((resolve, reject) => {
-    if (!fs.existsSync(path.join(out, 'mirror.json'))) {
-      return reject(Object.assign(new Error('mirror not ready — crawl first'), { status: 404 }));
-    }
-    execFile(resolvePython(), [RENDER_CONTENT, out, mediumOf(medium)], { cwd: CRAWLER_DIR, maxBuffer: 64 * 1024 * 1024,
+    execFile(resolvePython(), args, { cwd: CRAWLER_DIR, maxBuffer: 64 * 1024 * 1024,
       env: { ...process.env, PYTHONIOENCODING: 'utf-8' } },
       (err, stdout, stderr) => (err ? reject(new Error(stderr || err.message)) : resolve(stdout)));
   });
@@ -311,19 +319,20 @@ router.get('/api/v1/jobs/:id/ebay-html', auth, async (req, res) => {
   if (snap.status !== 'completed') {
     return res.status(409).json({ detail: `job status=${snap.status} — 완료 후 호출하세요` });
   }
-  try { res.type('html').send(await renderEbayHtml(jobs.get(req.params.id).out)); }
+  const job = jobs.get(req.params.id);
+  try { res.type('html').send(await renderEbayHtml(job.out, 'ebay', req.query.listing === '0' ? null : job.url)); }
   catch (e) { res.status(e.status || 500).json({ detail: e.message }); }
 });
 
 router.get('/api/v1/ebay-html', auth, async (req, res) => {
   if (typeof req.query.url !== 'string') return res.status(400).json({ detail: 'url required' });
-  try { res.type('html').send(await renderEbayHtml(path.join(OUT_DIR, slugify(req.query.url)))); }
+  try { res.type('html').send(await renderEbayHtml(path.join(OUT_DIR, slugify(req.query.url)), 'ebay', req.query.listing === '0' ? null : req.query.url)); }
   catch (e) { res.status(e.status || 500).json({ detail: e.message }); }
 });
 
 router.get('/api/v1/content-html', auth, async (req, res) => {
   if (typeof req.query.url !== 'string') return res.status(400).json({ detail: 'url required' });
-  try { res.type('html').send(await renderEbayHtml(path.join(OUT_DIR, slugify(req.query.url)), req.query.medium)); }
+  try { res.type('html').send(await renderEbayHtml(path.join(OUT_DIR, slugify(req.query.url)), req.query.medium, req.query.listing === '0' ? null : req.query.url)); }
   catch (e) { res.status(e.status || 500).json({ detail: e.message }); }
 });
 

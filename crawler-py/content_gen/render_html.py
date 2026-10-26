@@ -48,6 +48,7 @@ class Style:
         self.table_cell_px = ty.get("spec_table", {}).get("cell_px", 18)
         self.card = spec.get("card", {})
         self.award = spec.get("award", {})
+        self.listing = spec.get("listing", {})          # 리스팅 문구 카드 (content_gen/listing.py)
         self.stacked = spec.get("stacked_image", {})
         self.compare = spec.get("compare", {})
         self.overlay_image = spec.get("overlay_image", {})

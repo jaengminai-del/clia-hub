@@ -15,6 +15,7 @@ CLIA_I18N.init({
   '⬇ Download Images (ZIP)': { de: '⬇ Bilder herunterladen (ZIP)', th: '⬇ ดาวน์โหลดภาพ (ZIP)', ar: '⬇ تنزيل الصور (ZIP)' },
   'Download Images (ZIP)': { de: 'Bilder herunterladen (ZIP)', th: 'ดาวน์โหลดภาพ (ZIP)', ar: 'تنزيل الصور (ZIP)' },
   '📋 Copy HTML': { de: '📋 HTML kopieren', th: '📋 คัดลอก HTML', ar: '📋 نسخ HTML' },
+  '📝 Copy description text': { de: '📝 Beschreibungstext kopieren', th: '📝 คัดลอกข้อความคำอธิบาย', ar: '📝 نسخ نص الوصف' },
   '✓ Copied!': { de: '✓ Kopiert!', th: '✓ คัดลอกแล้ว!', ar: '✓ تم النسخ!' },
   '✕ Reset': { de: '✕ Zurücksetzen', th: '✕ รีเซ็ต', ar: '✕ إعادة تعيين' },
   '📏 Total content height: {h}px · {n} slices · Use Edit to delete unnecessary content or modify the text. When you finish editing, be sure to Lock.': {

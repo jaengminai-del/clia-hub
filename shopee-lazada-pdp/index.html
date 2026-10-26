@@ -150,6 +150,7 @@ body{font-family:'LGEIText',Arial,sans-serif;background:#F6F3EB;height:100vh;ove
         <button class="btn-sm" id="btnEditMode" onclick="toggleEdit()">✏ Edit</button>
         <button class="btn-sm primary" id="btnDownload" onclick="downloadImages()" disabled>⬇ Download Images (ZIP)</button>
         <button class="btn-sm" id="btnCopyHtml" onclick="copyHTML()" disabled>📋 Copy HTML</button>
+        <button class="btn-sm" id="btnCopyListing" onclick="copyListingText()" style="display:none" title="Promotion · Product details · Delivery · After care · Return policy written in the CLIA hub product page — paste into the Shopee description">📝 Copy description text</button>
         <button class="btn-sm" id="btnCopyImgHtml" onclick="copyImageHTML()" disabled title="Images of the preview (1000px wide) + HTML that shows them — looks the same on Lazada/eBay">🖼 Copy image HTML</button>
         <button class="btn-sm danger" onclick="resetAll()">✕ Reset</button>
       </div>
@@ -222,6 +223,9 @@ const API_BASE = (location.protocol === 'file:' || !location.origin || location.
   : location.origin;
 // 1차 컨텐츠 생성 매체 규격 (crawler-py/content_gen/media/shopee_lazada — Shopee·Lazada 공통)
 const MEDIUM = 'shopee_lazada';
+// 허브가 연 채널 (?channel=shopee|lazada). 리스팅 문구(허브 제품 상세에서 작성): Lazada 는 HTML 맨 위·맨 아래 카드,
+// Shopee 는 설명란이 일반 텍스트라 이미지에 넣지 않고 "설명 텍스트 복사" 버튼으로 제공
+const CHANNEL = new URLSearchParams(location.search).get('channel') || '';
 
 // ══════════════════════════════════════════
 // Intro
@@ -393,7 +397,7 @@ async function analyzePDP() {
         crawledFeatures = mirrorToEbayFeatures(mir);
         const gen = await fetch(API_BASE + '/api/ebay-generate', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ features: crawledFeatures, url, medium: MEDIUM }),
+          body: JSON.stringify({ features: crawledFeatures, url, medium: MEDIUM, listing: CHANNEL !== 'shopee' }),
         });
         const gd = await gen.json();
         if (!gen.ok) throw new Error(gd.error || `generate ${gen.status}`);
@@ -521,7 +525,8 @@ async function generateEbay() {
       body: JSON.stringify({
         features: crawledFeatures,
         url: document.getElementById('pdpUrl').value.trim(),
-        medium: MEDIUM
+        medium: MEDIUM,
+        listing: CHANNEL !== 'shopee'
       })
     });
     if (!resp.ok) {
@@ -568,6 +573,7 @@ function showPreview(html) {
     const b = document.getElementById(id);
     if (b) b.disabled = false;
   });
+  refreshListingButton();
   // Compliance check
   const bar = document.getElementById('complianceBar');
   const hasJS = /<script|onclick|onmouse|onload|onerror/i.test(html);
@@ -698,6 +704,28 @@ function copyImageHTML() {
   if (!window.CLIAImageHTML) return;
   CLIAImageHTML.copy({ html: () => generatedHTML, apiBase: typeof API_BASE !== 'undefined' ? API_BASE : '',
                        button: document.getElementById('btnCopyImgHtml'), isEditing: () => editMode });
+}
+
+// Shopee 설명란 텍스트: 허브 제품 상세에서 작성한 리스팅 문구(현재 버전)를 Shopee 형식 일반 텍스트로 복사
+async function refreshListingButton() {
+  const btn = document.getElementById('btnCopyListing');
+  if (!btn || CHANNEL !== 'shopee') return;
+  const url = document.getElementById('pdpUrl').value.trim();
+  try {
+    const d = await (await fetch(API_BASE + '/api/v1/listing/text?url=' + encodeURIComponent(url))).json();
+    btn.dataset.text = d.text || '';
+    btn.style.display = d.text ? '' : 'none';
+  } catch (_) { btn.style.display = 'none'; }
+}
+function copyListingText() {
+  const btn = document.getElementById('btnCopyListing');
+  const text = btn && btn.dataset.text;
+  if (!text) return;
+  const done = () => { const o = btn.textContent; btn.textContent = '✓ Copied!'; setTimeout(() => btn.textContent = o, 1500); };
+  navigator.clipboard.writeText(text).then(done).catch(() => {
+    const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); ta.remove(); done();
+  });
 }
 
 function copyHTML() {
