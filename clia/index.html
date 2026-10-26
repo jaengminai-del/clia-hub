@@ -834,6 +834,7 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 <script src="../shared/clia-card-edit.js"></script>
 <script src="../shared/clia-zoom-bar.js"></script>
 <script src="../shared/clia-image-html.js"></script>
+<script src="../shared/clia-card-list.js"></script>
 </head>
 <body class="clia-hub">
 <div class="clia-login" id="loginView">
@@ -7251,6 +7252,12 @@ function ebbShowPreview(html) {
   if (window.CLIACardEdit) { CLIACardEdit.snapshot(frame); CLIACardEdit.enableReorder(frame, { onChange: ebbOnCardsReordered }); }
   // 미리보기를 실제 크기의 80%로 (위아래 카드가 더 많이 보여 옮기기 쉽게 — 결과물 크기는 그대로)
   if (window.CLIAPreviewScale) CLIAPreviewScale.apply(frame);
+  // 오른쪽 컨텐츠 카드 목록 (미리보기 순서 · 끌어서 순서 변경 · 원본 이미지 · 전체 lg.com 캡처) + 전체 캡처 미리 시작
+  if (window.CLIACardList) {
+    CLIACardList.mount({ container: document.getElementById('ebbSectionsList'), frame, apiBase: CRAWLER_API,
+                         getUrl: () => document.getElementById('ebbUrlInput').value.trim(), onChange: ebbOnCardsReordered });
+    setTimeout(() => CLIACardList.prefetch(document.getElementById('ebbUrlInput').value.trim(), CRAWLER_API), 0);
+  }
   document.getElementById('ebbCharCount').textContent = html.length.toLocaleString();
   ['ebbBtnDownload','ebbBtnDownload2','ebbBtnCopy','ebbBtnCopyImg'].forEach(id => { const b=document.getElementById(id); if(b)b.disabled=false; });
   const bar = document.getElementById('ebbComplianceBar');

@@ -449,7 +449,17 @@ function setStatus(html, cls) {
 // ══════════════════════════════════════════
 // Render crawled sections
 // ══════════════════════════════════════════
+// 오른쪽 컨텐츠 카드 목록 (shared/clia-card-list.js) — 미리보기의 섹션 카드 순서 그대로
+function mountCardList() {
+  const frame = document.getElementById('previewFrame');
+  if (!window.CLIACardList || !frame || !frame.innerHTML) return false;
+  CLIACardList.mount({ container: document.getElementById('sectionsList'), frame, apiBase: API_BASE,
+                       getUrl: () => document.getElementById('pdpUrl').value.trim(), onChange: onCardsReordered });
+  return true;
+}
+
 function renderSections() {
+  if (mountCardList()) return;   // 미리보기가 있으면 크롤 섹션 대신 미리보기 카드 목록
   const list = document.getElementById('sectionsList');
   if (!crawledFeatures.length) {
     list.innerHTML = '<div style="color:#999;font-size:12px;text-align:center;padding:40px 0">No sections found</div>';
@@ -534,6 +544,9 @@ function showPreview(html) {
   if (window.CLIACardEdit) { CLIACardEdit.snapshot(frame); CLIACardEdit.enableReorder(frame, { onChange: onCardsReordered }); }
   // 미리보기를 실제 크기의 80%로 (위아래 카드가 더 많이 보여 옮기기 쉽게 — 결과물 크기는 그대로)
   if (window.CLIAPreviewScale) CLIAPreviewScale.apply(frame);
+  // 오른쪽 컨텐츠 카드 목록 (미리보기 순서 · 끌어서 순서 변경 · 원본 이미지 · 전체 lg.com 캡처) + 전체 캡처 미리 시작
+  mountCardList();
+  setTimeout(() => { if (window.CLIACardList) CLIACardList.prefetch(document.getElementById('pdpUrl').value.trim(), API_BASE); }, 0);
   // Update char count
   const cc = document.getElementById('charCount');
   if (cc) cc.textContent = html.length.toLocaleString();
@@ -1142,5 +1155,6 @@ function resetAll() {
 <script src="../shared/clia-card-edit.js"></script>
 <script src="../shared/clia-zoom-bar.js"></script>
 <script src="../shared/clia-image-html.js"></script>
+<script src="../shared/clia-card-list.js"></script>
 </body>
 </html>

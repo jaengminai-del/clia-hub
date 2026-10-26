@@ -2549,6 +2549,88 @@ app.get('/media/slices/:hash/:file', async (req, res) => {
   res.type(file.endsWith('.png') ? 'png' : 'jpeg').sendFile(abs);
 });
 
+/* ──────────────────────────────────────────
+   전체 lg.com 화면 캡처 (빌더 "전체 lg.com 컨텐츠 확인하기" 팝업, 2026-10-26)
+   POST /api/v1/fullshot {url} → 캡처 시작(미리 캡처 포함, 이미 있으면 바로 ready)
+   GET  /api/v1/fullshot?url=  → {status: ready|pending|none|error, src}
+   GET  /media/fullshot/<key>.jpg → 캡처본 (로컬 media-cache/fullshot, 없으면 버킷 media-fullshot/)
+   캡처: crawler-py/fullshot.py (PC 1920px 를 배율 0.5 → 폭 960px JPEG, 보통 10~15초)
+────────────────────────────────────────── */
+const FULLSHOT_DIR = require('path').join(__dirname, 'media-cache', 'fullshot');
+const fullshotJobs = new Map();   // key → { status, error }
+const fullshotKey = (url) => require('crypto').createHash('sha1').update(String(url).trim().replace(/\/+$/, '').toLowerCase()).digest('hex').slice(0, 20);
+const isLgUrl = (u) => typeof u === 'string' && /^https:\/\/(www\.)?lg\.com\//i.test(u.trim());
+
+async function fullshotReady(key) {
+  const fs = require('fs'), path = require('path');
+  const abs = path.join(FULLSHOT_DIR, `${key}.jpg`);
+  if (fs.existsSync(abs)) return true;
+  const buf = await sliceStore.getBuffer(`media-fullshot/${key}.jpg`);
+  if (!buf) return false;
+  fs.mkdirSync(FULLSHOT_DIR, { recursive: true });
+  fs.writeFileSync(abs, buf);
+  return true;
+}
+
+function startFullshot(url, key) {
+  const fs = require('fs'), path = require('path');
+  const { spawn } = require('child_process');
+  const crawlerDir = path.join(__dirname, 'crawler-py');
+  const venvPy = path.join(crawlerDir, '.venv', 'bin', 'python');
+  const py = process.env.CRAWLER_PYTHON || (fs.existsSync(venvPy) ? venvPy : 'python3');
+  const abs = path.join(FULLSHOT_DIR, `${key}.jpg`), tmp = `${abs}.part.jpg`;
+  fs.mkdirSync(FULLSHOT_DIR, { recursive: true });
+  fullshotJobs.set(key, { status: 'pending' });
+  const proc = spawn(py, ['fullshot.py', url.trim(), tmp], { cwd: crawlerDir, env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
+  let out = '';
+  const timer = setTimeout(() => proc.kill('SIGKILL'), 3 * 60 * 1000);
+  proc.stdout.on('data', (d) => { out += d; });
+  proc.on('close', async (code) => {
+    clearTimeout(timer);
+    let meta = {};
+    try { meta = JSON.parse(out); } catch (_) {}
+    if (code !== 0 || meta.error || !fs.existsSync(tmp)) {
+      fullshotJobs.set(key, { status: 'error', error: meta.error || `exit ${code}` });
+      console.warn('[fullshot] 실패', url, meta.error || code);
+      return;
+    }
+    fs.renameSync(tmp, abs);
+    fullshotJobs.set(key, { status: 'ready' });
+    console.log(`[fullshot] ${url} → ${meta.width}x${meta.height} ${Math.round(meta.bytes / 1024)}KB ${meta.seconds}s`);
+    await sliceStore.putBuffer(`media-fullshot/${key}.jpg`, fs.readFileSync(abs), 'image/jpeg').catch((e) => console.warn('[fullshot] 버킷 업로드 실패', e.message));
+  });
+}
+
+async function fullshotStatus(url) {
+  const key = fullshotKey(url);
+  const job = fullshotJobs.get(key);
+  if (job && job.status === 'pending') return { status: 'pending', key };
+  if (await fullshotReady(key)) return { status: 'ready', key, src: `/media/fullshot/${key}.jpg` };
+  if (job && job.status === 'error') return { status: 'error', key, error: job.error };
+  return { status: 'none', key };
+}
+
+app.post('/api/v1/fullshot', async (req, res) => {
+  const { url, retry = false } = req.body || {};
+  if (!isLgUrl(url)) return res.status(400).json({ error: 'lg.com url required' });
+  const st = await fullshotStatus(url);
+  if (st.status === 'none' || (st.status === 'error' && retry)) { startFullshot(url, st.key); return res.json({ status: 'pending', key: st.key }); }
+  res.json(st);
+});
+
+app.get('/api/v1/fullshot', async (req, res) => {
+  if (!isLgUrl(req.query.url)) return res.status(400).json({ error: 'lg.com url required' });
+  res.json(await fullshotStatus(req.query.url));
+});
+
+app.get('/media/fullshot/:file', async (req, res) => {
+  const path = require('path');
+  const m = /^([0-9a-f]{20})\.jpg$/.exec(req.params.file);
+  if (!m || !(await fullshotReady(m[1]))) return res.status(404).end();
+  res.set({ 'Cache-Control': 'public, max-age=86400', 'Access-Control-Allow-Origin': '*' });
+  res.type('jpeg').sendFile(path.join(FULLSHOT_DIR, req.params.file));
+});
+
 app.post('/api/render-slices', async (req, res) => {
   if (process.env.SLICES_LEGACY !== '1') {
     if (!req.body || typeof req.body.html !== 'string' || !req.body.html) {
