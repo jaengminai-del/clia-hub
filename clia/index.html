@@ -155,19 +155,60 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 .ptag{display:inline-block;background:#f0f0f0;padding:1px 6px;border-radius:10px;font-size:8px;color:#555;margin:1px;}
 .ai-tag{background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;padding:1px 7px;border-radius:10px;font-size:8px;font-weight:700;}
 /* GEO Section */
-.lt-sec{margin:4px 0 18px;border:1px solid #eee;border-radius:8px;background:#fff;overflow:hidden;}
-.lt-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:#FAFAFA;border-bottom:1px solid #eee;cursor:pointer;}
-.lt-hd h3{margin:0;font-size:12px;font-weight:700;color:#333;}.lt-hd small{font-size:10px;color:#888;font-weight:400;margin-left:6px;}
-.lt-bd{padding:10px 12px;}.lt-sec.closed .lt-bd{display:none;}
-.lt-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;font-size:11px;}
-.lt-bar select,.lt-bar input{font-size:11px;padding:4px 6px;border:1px solid #ddd;border-radius:5px;background:#fff;max-width:260px;}
-.lt-btn{font-size:11px;padding:4px 9px;border:1px solid #ccc;border-radius:5px;background:#fff;cursor:pointer;white-space:nowrap;}
-.lt-btn.pri{background:#262626;color:#fff;border-color:#262626;}.lt-btn:disabled{opacity:.45;cursor:default;}
-.lt-f{margin-bottom:8px;}.lt-f-hd{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
-.lt-f-hd b{font-size:10px;color:#fff;background:#888;border-radius:3px;padding:1px 5px;white-space:nowrap;}.lt-f-hd b.top{background:#A50034;}
-.lt-f-hd input{flex:1;font-size:11px;font-weight:600;padding:3px 6px;border:1px solid #e3e3e3;border-radius:4px;}
-.lt-f textarea{width:100%;box-sizing:border-box;min-height:64px;font:11px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;padding:6px 8px;border:1px solid #e3e3e3;border-radius:5px;resize:vertical;}
-.lt-msg{font-size:10px;color:#666;min-height:14px;margin-top:2px;}.lt-msg.ok{color:#15803D;}.lt-msg.err{color:#B91C1C;}
+.lx-row{border-top:1px solid var(--clia-gray-200);padding-top:20px;margin-top:4px;}
+.lx-row-in{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.lx-open{height:44px;padding:0 20px;border-radius:999px;border:1px solid var(--clia-gray-300);background:#fff;color:var(--clia-gray-900);font:600 14px/1 var(--clia-font);display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:border-color .15s,color .15s,box-shadow .15s;}
+.lx-open:hover{border-color:var(--clia-brand);color:var(--clia-brand);box-shadow:0 0 0 3px var(--clia-brand-soft);}
+.lx-status{font-size:12px;color:var(--clia-gray-500);display:inline-flex;align-items:center;gap:6px;}
+.lx-status::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--clia-gray-300);}
+.lx-status.on{color:var(--clia-gray-700);}.lx-status.on::before{background:#22A06B;}
+.lx-ov{position:fixed;inset:0;z-index:9700;background:rgba(38,38,38,.45);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;padding:24px;}
+.lx-ov.show{display:flex;}
+.lx-modal{width:min(1120px,100%);height:min(860px,100%);background:#fff;border-radius:var(--clia-radius-lg);box-shadow:0 24px 64px rgba(38,38,38,.22);display:flex;flex-direction:column;overflow:hidden;font-family:var(--clia-font);color:var(--clia-gray-900);}
+.lx-hd{display:flex;align-items:center;gap:14px;padding:18px 24px;border-bottom:1px solid var(--clia-gray-200);flex-shrink:0;}
+.lx-hd-ic{width:40px;height:40px;border-radius:12px;background:var(--clia-brand-soft);color:var(--clia-brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.lx-hd-tx{min-width:0;flex:1;}.lx-hd h3{font-size:18px;font-weight:700;margin:0 0 3px;}
+.lx-sub{font-size:12px;color:var(--clia-gray-500);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lx-sub code{background:var(--clia-gray-100);color:var(--clia-gray-700);border-radius:6px;padding:1px 6px;font-size:11px;}
+.lx-dirty{font-size:12px;color:#B26B00;white-space:nowrap;}
+.lx-x{width:36px;height:36px;border-radius:50%;border:1px solid var(--clia-gray-200);background:#fff;color:var(--clia-gray-700);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.lx-x:hover{border-color:var(--clia-gray-700);color:var(--clia-gray-900);}
+.lx-body{flex:1;display:flex;min-height:0;}
+.lx-side{width:264px;flex-shrink:0;background:var(--clia-gray-50);border-right:1px solid var(--clia-gray-200);padding:18px 16px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
+.lx-side-t{font-size:11px;font-weight:600;color:var(--clia-gray-500);letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:6px;}
+.lx-vers{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto;}
+.lx-ver{text-align:left;width:100%;padding:10px 12px;border-radius:var(--clia-radius-sm);border:1px solid var(--clia-gray-200);background:#fff;cursor:pointer;font-family:var(--clia-font);transition:border-color .15s;}
+.lx-ver:hover{border-color:var(--clia-gray-400);}
+.lx-ver.act{border-color:var(--clia-brand);box-shadow:0 0 0 3px var(--clia-brand-soft);}
+.lx-ver.draft{border-style:dashed;cursor:default;}
+.lx-ver-t{display:flex;align-items:center;gap:6px;font-size:13px;}.lx-ver-t b{font-weight:700;}
+.lx-ver-m{font-size:11px;color:var(--clia-gray-500);margin-top:3px;}
+.lx-ver-n{font-size:11px;color:var(--clia-gray-700);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lx-tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--clia-gray-100);color:var(--clia-gray-600);}
+.lx-tag.use{background:#E3F5EC;color:#1B7A4E;}.lx-tag.edit{background:#FFF3DC;color:#9A5B00;}
+.lx-empty{font-size:12px;color:var(--clia-gray-400);padding:6px 2px;}
+.lx-sm{height:32px;padding:0 14px;font-size:12px;width:100%;}
+.lx-sel{height:36px;font-size:12px;width:100%;border-radius:var(--clia-radius-sm);}
+.lx-where{margin-top:auto;font-size:11px;line-height:1.55;color:var(--clia-gray-500);background:#fff;border:1px solid var(--clia-gray-200);border-radius:var(--clia-radius-sm);padding:10px 12px;}
+.lx-main{flex:1;overflow-y:auto;padding:20px 24px;background:var(--clia-page);}
+.lx-f{background:#fff;border:1px solid var(--clia-gray-200);border-radius:var(--clia-radius);padding:14px 16px;margin-bottom:12px;}
+.lx-f:focus-within{border-color:var(--clia-gray-400);}
+.lx-f-hd{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.lx-num{width:22px;height:22px;border-radius:50%;background:var(--clia-gray-900);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.lx-num.top{background:var(--clia-brand);}
+.lx-f-name{font-size:14px;font-weight:700;white-space:nowrap;}
+.lx-pos{font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--clia-gray-100);color:var(--clia-gray-600);white-space:nowrap;}
+.lx-pos.top{background:var(--clia-brand-soft);color:var(--clia-brand);}
+.lx-f-title{flex:1;min-width:0;height:30px;border:1px solid transparent;border-radius:var(--clia-radius-sm);padding:0 10px;font:500 13px var(--clia-font);color:var(--clia-gray-700);background:var(--clia-gray-50);text-align:right;}
+.lx-f-title:hover{border-color:var(--clia-gray-200);}.lx-f-title:focus{outline:none;border-color:var(--clia-brand);background:#fff;text-align:left;}
+.lx-ta{width:100%;box-sizing:border-box;border:1px solid var(--clia-gray-200);border-radius:var(--clia-radius-sm);padding:10px 12px;font:13px/1.6 var(--clia-font);color:var(--clia-gray-900);resize:vertical;background:#fff;}
+.lx-ta:focus{outline:none;border-color:var(--clia-brand);box-shadow:0 0 0 3px var(--clia-brand-soft);}
+.lx-hint{font-size:11px;color:var(--clia-gray-500);padding:2px 4px 8px;}
+.lx-ft{display:flex;align-items:center;gap:10px;padding:14px 24px;border-top:1px solid var(--clia-gray-200);background:#fff;flex-shrink:0;}
+.lx-msg{flex:1;min-width:0;font-size:12px;color:var(--clia-gray-500);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lx-msg.ok{color:#1B7A4E;}.lx-msg.err{color:#C4281F;}
+.lx-note{width:240px;height:36px;font-size:13px;}
+.lx-ft .clia-btn svg,.lx-side .clia-btn svg{flex-shrink:0;}
 .geo-sec{margin-top:20px;border:1px solid #eee;border-radius:8px;overflow:hidden;background:#fff;}
 .geo-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:linear-gradient(135deg,#0F172A,#1E293B);color:#fff;}
 .geo-hd h3{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
@@ -2324,55 +2365,167 @@ function showPending(p){
 <div style="margin-top:16px;font-size:11px;color:#999;">카테고리: ${p.cat} &gt; ${p.sub} | ${p.dv} | ${p.pr}</div>
 </div>`;
 }
-// ═══ 리스팅 문구 (2026-10-26) — 제품별 5종 문구 · 버전 저장 · 템플릿(법인+제품군) · 다른 제품에서 가져오기 ═══
+// ═══ 제품 정보 텍스트 (리스팅 문구, 2026-10-26) — 제품별 5종 문구 · 버전 저장 · 템플릿(법인+제품군) · 다른 제품에서 가져오기 ═══
+//   제품 상세의 [제품 정보 텍스트 작성] 버튼 → 팝업 편집 패널 (CLIA 디자인: shared/clia-ui.css 변수·알약 버튼·선 아이콘)
 //   ① 프로모션 → eBay·Lazada HTML 맨 위 / ②~⑤ 제품 상세·배송·사후 케어·반품 → 맨 아래 (빈 칸은 붙지 않음)
 //   Shopee 는 빌더의 "설명 텍스트 복사" 버튼. 저장소·API: listing-routes.js
 Object.assign(I18N.en,{
-  'lt.title':'LISTING TEXT','lt.where':'① on top · ②–⑤ at the bottom of eBay / Lazada content · Shopee: copy as description text',
-  'lt.version':'Version','lt.none':'No saved version yet','lt.inUse':'in use','lt.latest':'latest','lt.useThis':'Use this version','lt.useLatest':'Always use latest',
-  'lt.import':'Import from…','lt.tpl':'Templates','lt.prods':'Other products','lt.draft':'② Draft from LG.com',
-  'lt.note':'Version note (optional)','lt.save':'Save as new version','lt.saveTpl':'Save as template ({c})',
+  'lt.label':'PRODUCT INFO TEXT','lt.open':'Write product info text','lt.title':'Product info text',
+  'lt.where':'① is added at the top, ②–⑤ at the bottom of eBay / Lazada content. Shopee: copied as description text.',
+  'lt.stNone':'Not written yet','lt.stUse':'v{v} in use · {n}/5 filled',
+  'lt.versions':'Versions','lt.none':'No saved version yet','lt.inUse':'In use','lt.latest':'Latest','lt.useThis':'Use this version','lt.useLatest':'Always use latest',
+  'lt.import':'Import from…','lt.tpl':'Templates','lt.prods':'Other products','lt.draft':'Draft from LG.com',
+  'lt.note':'Version note (optional)','lt.save':'Save as new version','lt.saveTpl':'Save as template ({c})','lt.close':'Close',
   'lt.f.promotion':'Promotion','lt.f.details':'Product details','lt.f.delivery':'Delivery','lt.f.aftercare':'After care','lt.f.returns':'Return policy',
+  'lt.top':'Top','lt.bottom':'Bottom','lt.editing':'Editing','lt.new':'New (unsaved)',
   'lt.saved':'Saved as v{v} — applied to eBay / Lazada content and Shopee text.','lt.tplSaved':'Template saved: {c} v{v}','lt.loadedTpl':'Template "{c}" loaded — save to apply to this product.',
   'lt.imported':'Imported from {s} — edit and save as a new version.','lt.drafted':'Product details drafted from LG.com — edit and save.','lt.pinned':'Now using v{v}.','lt.unpinned':'Now using the latest version.',
-  'lt.empty':'All fields are empty.','lt.fail':'Failed: ','lt.hint':'Lines starting with ● are bold headings, lines starting with - are indented. Empty fields are not added.','lt.dirty':'Unsaved changes',
+  'lt.empty':'All fields are empty.','lt.fail':'Failed: ','lt.hint':'Lines starting with ● become bold headings, lines starting with - are indented. Empty fields are not added.','lt.dirty':'Unsaved changes','lt.discard':'Discard unsaved changes?',
 });
 Object.assign(I18N.de,{
-  'lt.title':'LISTING-TEXTE','lt.where':'① oben · ②–⑤ unten im eBay-/Lazada-Inhalt · Shopee: als Beschreibungstext kopieren',
-  'lt.version':'Version','lt.none':'Noch keine gespeicherte Version','lt.inUse':'aktiv','lt.latest':'neueste','lt.useThis':'Diese Version verwenden','lt.useLatest':'Immer neueste verwenden',
-  'lt.import':'Importieren aus…','lt.tpl':'Vorlagen','lt.prods':'Andere Produkte','lt.draft':'② Entwurf von LG.com',
-  'lt.note':'Versionshinweis (optional)','lt.save':'Als neue Version speichern','lt.saveTpl':'Als Vorlage speichern ({c})',
+  'lt.label':'PRODUKTINFO-TEXT','lt.open':'Produktinfo-Text schreiben','lt.title':'Produktinfo-Text',
+  'lt.where':'① wird oben, ②–⑤ unten im eBay-/Lazada-Inhalt eingefügt. Shopee: als Beschreibungstext kopieren.',
+  'lt.stNone':'Noch nicht erstellt','lt.stUse':'v{v} aktiv · {n}/5 ausgefüllt',
+  'lt.versions':'Versionen','lt.none':'Noch keine gespeicherte Version','lt.inUse':'Aktiv','lt.latest':'Neueste','lt.useThis':'Diese Version verwenden','lt.useLatest':'Immer neueste verwenden',
+  'lt.import':'Importieren aus…','lt.tpl':'Vorlagen','lt.prods':'Andere Produkte','lt.draft':'Entwurf von LG.com',
+  'lt.note':'Versionshinweis (optional)','lt.save':'Als neue Version speichern','lt.saveTpl':'Als Vorlage speichern ({c})','lt.close':'Schließen',
   'lt.f.promotion':'Aktion','lt.f.details':'Produktdetails','lt.f.delivery':'Lieferung','lt.f.aftercare':'Kundendienst','lt.f.returns':'Rückgabe',
+  'lt.top':'Oben','lt.bottom':'Unten','lt.editing':'In Bearbeitung','lt.new':'Neu (nicht gespeichert)',
   'lt.saved':'Als v{v} gespeichert — gilt für eBay-/Lazada-Inhalt und Shopee-Text.','lt.tplSaved':'Vorlage gespeichert: {c} v{v}','lt.loadedTpl':'Vorlage „{c}“ geladen — zum Übernehmen speichern.',
   'lt.imported':'Importiert aus {s} — bearbeiten und als neue Version speichern.','lt.drafted':'Produktdetails aus LG.com entworfen — bearbeiten und speichern.','lt.pinned':'v{v} wird verwendet.','lt.unpinned':'Neueste Version wird verwendet.',
-  'lt.empty':'Alle Felder sind leer.','lt.fail':'Fehler: ','lt.hint':'Zeilen mit ● sind fette Überschriften, Zeilen mit - werden eingerückt. Leere Felder werden nicht eingefügt.','lt.dirty':'Nicht gespeichert',
+  'lt.empty':'Alle Felder sind leer.','lt.fail':'Fehler: ','lt.hint':'Zeilen mit ● werden fette Überschriften, Zeilen mit - werden eingerückt. Leere Felder werden nicht eingefügt.','lt.dirty':'Nicht gespeichert','lt.discard':'Nicht gespeicherte Änderungen verwerfen?',
 });
 Object.assign(I18N.th,{
-  'lt.title':'ข้อความลิสติ้ง','lt.where':'① ด้านบน · ②–⑤ ด้านล่างของคอนเทนต์ eBay / Lazada · Shopee: คัดลอกเป็นข้อความคำอธิบาย',
-  'lt.version':'เวอร์ชัน','lt.none':'ยังไม่มีเวอร์ชันที่บันทึก','lt.inUse':'ใช้งานอยู่','lt.latest':'ล่าสุด','lt.useThis':'ใช้เวอร์ชันนี้','lt.useLatest':'ใช้เวอร์ชันล่าสุดเสมอ',
-  'lt.import':'นำเข้าจาก…','lt.tpl':'เทมเพลต','lt.prods':'สินค้าอื่น','lt.draft':'② ร่างจาก LG.com',
-  'lt.note':'หมายเหตุเวอร์ชัน (ไม่บังคับ)','lt.save':'บันทึกเป็นเวอร์ชันใหม่','lt.saveTpl':'บันทึกเป็นเทมเพลต ({c})',
+  'lt.label':'ข้อความข้อมูลสินค้า','lt.open':'เขียนข้อความข้อมูลสินค้า','lt.title':'ข้อความข้อมูลสินค้า',
+  'lt.where':'① จะถูกเพิ่มด้านบน ②–⑤ ด้านล่างของคอนเทนต์ eBay / Lazada · Shopee: คัดลอกเป็นข้อความคำอธิบาย',
+  'lt.stNone':'ยังไม่ได้เขียน','lt.stUse':'ใช้ v{v} · กรอกแล้ว {n}/5',
+  'lt.versions':'เวอร์ชัน','lt.none':'ยังไม่มีเวอร์ชันที่บันทึก','lt.inUse':'ใช้งานอยู่','lt.latest':'ล่าสุด','lt.useThis':'ใช้เวอร์ชันนี้','lt.useLatest':'ใช้เวอร์ชันล่าสุดเสมอ',
+  'lt.import':'นำเข้าจาก…','lt.tpl':'เทมเพลต','lt.prods':'สินค้าอื่น','lt.draft':'ร่างจาก LG.com',
+  'lt.note':'หมายเหตุเวอร์ชัน (ไม่บังคับ)','lt.save':'บันทึกเป็นเวอร์ชันใหม่','lt.saveTpl':'บันทึกเป็นเทมเพลต ({c})','lt.close':'ปิด',
   'lt.f.promotion':'โปรโมชัน','lt.f.details':'รายละเอียดสินค้า','lt.f.delivery':'การจัดส่ง','lt.f.aftercare':'บริการหลังการขาย','lt.f.returns':'นโยบายการคืนสินค้า',
+  'lt.top':'ด้านบน','lt.bottom':'ด้านล่าง','lt.editing':'กำลังแก้ไข','lt.new':'ใหม่ (ยังไม่บันทึก)',
   'lt.saved':'บันทึกเป็น v{v} แล้ว — ใช้กับคอนเทนต์ eBay / Lazada และข้อความ Shopee','lt.tplSaved':'บันทึกเทมเพลตแล้ว: {c} v{v}','lt.loadedTpl':'โหลดเทมเพลต "{c}" แล้ว — กดบันทึกเพื่อใช้กับสินค้านี้',
   'lt.imported':'นำเข้าจาก {s} — แก้ไขแล้วบันทึกเป็นเวอร์ชันใหม่','lt.drafted':'ร่างรายละเอียดสินค้าจาก LG.com แล้ว — แก้ไขแล้วบันทึก','lt.pinned':'กำลังใช้ v{v}','lt.unpinned':'กำลังใช้เวอร์ชันล่าสุด',
-  'lt.empty':'ทุกช่องว่างเปล่า','lt.fail':'ล้มเหลว: ','lt.hint':'บรรทัดที่ขึ้นต้นด้วย ● เป็นหัวข้อตัวหนา บรรทัดที่ขึ้นต้นด้วย - จะเยื้อง ช่องว่างจะไม่ถูกเพิ่ม','lt.dirty':'ยังไม่ได้บันทึก',
+  'lt.empty':'ทุกช่องว่างเปล่า','lt.fail':'ล้มเหลว: ','lt.hint':'บรรทัดที่ขึ้นต้นด้วย ● เป็นหัวข้อตัวหนา บรรทัดที่ขึ้นต้นด้วย - จะเยื้อง ช่องว่างจะไม่ถูกเพิ่ม','lt.dirty':'ยังไม่ได้บันทึก','lt.discard':'ยกเลิกการเปลี่ยนแปลงที่ยังไม่ได้บันทึก?',
 });
 Object.assign(I18N.ar,{
-  'lt.title':'نصوص القائمة','lt.where':'① في الأعلى · ②–⑤ في أسفل محتوى eBay / Lazada · Shopee: نسخ كنص وصف',
-  'lt.version':'الإصدار','lt.none':'لا يوجد إصدار محفوظ بعد','lt.inUse':'مستخدم','lt.latest':'الأحدث','lt.useThis':'استخدم هذا الإصدار','lt.useLatest':'استخدم الأحدث دائمًا',
-  'lt.import':'استيراد من…','lt.tpl':'القوالب','lt.prods':'منتجات أخرى','lt.draft':'② مسودة من LG.com',
-  'lt.note':'ملاحظة الإصدار (اختياري)','lt.save':'حفظ كإصدار جديد','lt.saveTpl':'حفظ كقالب ({c})',
+  'lt.label':'نص معلومات المنتج','lt.open':'كتابة نص معلومات المنتج','lt.title':'نص معلومات المنتج',
+  'lt.where':'① يُضاف في الأعلى، و②–⑤ في أسفل محتوى eBay / Lazada · Shopee: يُنسخ كنص وصف.',
+  'lt.stNone':'لم يُكتب بعد','lt.stUse':'v{v} مستخدم · {n}/5 مكتمل',
+  'lt.versions':'الإصدارات','lt.none':'لا يوجد إصدار محفوظ بعد','lt.inUse':'مستخدم','lt.latest':'الأحدث','lt.useThis':'استخدم هذا الإصدار','lt.useLatest':'استخدم الأحدث دائمًا',
+  'lt.import':'استيراد من…','lt.tpl':'القوالب','lt.prods':'منتجات أخرى','lt.draft':'مسودة من LG.com',
+  'lt.note':'ملاحظة الإصدار (اختياري)','lt.save':'حفظ كإصدار جديد','lt.saveTpl':'حفظ كقالب ({c})','lt.close':'إغلاق',
   'lt.f.promotion':'العرض','lt.f.details':'تفاصيل المنتج','lt.f.delivery':'التوصيل','lt.f.aftercare':'خدمة ما بعد البيع','lt.f.returns':'سياسة الإرجاع',
+  'lt.top':'أعلى','lt.bottom':'أسفل','lt.editing':'قيد التعديل','lt.new':'جديد (غير محفوظ)',
   'lt.saved':'تم الحفظ كـ v{v} — يُطبّق على محتوى eBay / Lazada ونص Shopee.','lt.tplSaved':'تم حفظ القالب: {c} v{v}','lt.loadedTpl':'تم تحميل القالب "{c}" — احفظ لتطبيقه على هذا المنتج.',
   'lt.imported':'تم الاستيراد من {s} — عدّل واحفظ كإصدار جديد.','lt.drafted':'تمت صياغة تفاصيل المنتج من LG.com — عدّل واحفظ.','lt.pinned':'يتم استخدام v{v}.','lt.unpinned':'يتم استخدام أحدث إصدار.',
-  'lt.empty':'جميع الحقول فارغة.','lt.fail':'فشل: ','lt.hint':'الأسطر التي تبدأ بـ ● عناوين عريضة، والأسطر التي تبدأ بـ - تُزاح. الحقول الفارغة لا تُضاف.','lt.dirty':'تغييرات غير محفوظة',
+  'lt.empty':'جميع الحقول فارغة.','lt.fail':'فشل: ','lt.hint':'الأسطر التي تبدأ بـ ● تصبح عناوين عريضة، والأسطر التي تبدأ بـ - تُزاح. الحقول الفارغة لا تُضاف.','lt.dirty':'تغييرات غير محفوظة','lt.discard':'تجاهل التغييرات غير المحفوظة؟',
 });
 const LT_FIELDS=['promotion','details','delivery','aftercare','returns'];
 const LT_TITLES={promotion:'Promotion Details',details:'Product Details',delivery:'Delivery & Installation Notice',aftercare:'After Care Service Information',returns:'Terms & Conditions for Return Policy'};
-let _lt=null;   // {p, url, corp, rec, from}
+// 선 아이콘 (허브 아이콘 레일과 같은 24px · stroke 1.75)
+const LX_IC={
+  doc:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+  close:'<path d="M6 6l12 12M18 6 6 18"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  pin:'<path d="M12 17v4M8 3h8l-1 6 3 3v2H6v-2l3-3z"/>',
+  dl:'<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>',
+  spark:'<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
+  save:'<path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/>',
+  layers:'<path d="M12 3 2 8l10 5 10-5z"/><path d="M2 13l10 5 10-5"/>',
+};
+const lxIc=(k,s=16)=>`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${LX_IC[k]}</svg>`;
+let _lt=null;   // {p, url, corp, cat, rec, from, sel, dirty}
 const _ltEsc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const _ltApi=(path,body)=>fetch(CRAWLER_API+path,body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{}).then(async r=>{const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||d.detail||('HTTP '+r.status));return d;});
-function _ltMsg(text,cls){const m=document.getElementById('ltMsg');if(m){m.textContent=text||'';m.className='lt-msg'+(cls?' '+cls:'');}}
+const _ltCur=rec=>(!rec||!rec.versions||!rec.versions.length)?null:(rec.versions.find(v=>v.v===rec.pinned)||rec.versions[rec.versions.length-1]);
+const _ltFilled=ver=>ver?LT_FIELDS.filter(k=>((ver.fields||{})[k]||'').trim()).length:0;
+function _ltMsg(text,cls){const m=document.getElementById('lxMsg');if(m){m.textContent=text||'';m.className='lx-msg'+(cls?' '+cls:'');}}
+
+// 제품 상세: 버튼 옆 상태 (v3 사용 중 · 4/5 작성)
+async function listingForDetail(p){
+  const url=p.crawler_url||p.url;
+  _lt={p,url,corp:productCorp(p),cat:p.cat||'General',rec:null,from:null,sel:null,dirty:false};
+  const st=document.getElementById('lxStatus');
+  try{
+    const d=await _ltApi('/api/v1/listing?url='+encodeURIComponent(url));
+    if(!_lt||_lt.p!==p)return;
+    _lt.rec=d.record;_ltStatus();
+  }catch(e){if(st)st.textContent='';}
+}
+function _ltStatus(){
+  const st=document.getElementById('lxStatus');if(!st||!_lt)return;
+  const cur=_ltCur(_lt.rec);
+  st.className='lx-status'+(cur?' on':'');
+  st.textContent=cur?t('lt.stUse',{v:cur.v,n:_ltFilled(cur)}):t('lt.stNone');
+}
+
+// 팝업 열기 / 닫기
+function openListingModal(){
+  if(!_lt)return;
+  let ov=document.getElementById('lxOv');
+  if(!ov){ov=document.createElement('div');ov.id='lxOv';ov.className='lx-ov';ov.setAttribute('data-no-i18n','');document.body.appendChild(ov);
+    ov.addEventListener('mousedown',e=>{if(e.target===ov)closeListingModal();});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&ov.classList.contains('show'))closeListingModal();});}
+  const {p,corp,cat}=_lt;
+  ov.innerHTML=`<div class="lx-modal" role="dialog" aria-modal="true">
+  <div class="lx-hd">
+    <div class="lx-hd-ic">${lxIc('doc',22)}</div>
+    <div class="lx-hd-tx"><h3>${_ltEsc(t('lt.title'))}</h3><div class="lx-sub">${_ltEsc(p.nm||'')} · <code>${_ltEsc(p.id)}</code> · ${_ltEsc(corp.toUpperCase())} · ${_ltEsc(cat)}</div></div>
+    <span class="lx-dirty" id="lxDirty"></span>
+    <button class="lx-x" onclick="closeListingModal()" title="${_ltEsc(t('lt.close'))}">${lxIc('close',18)}</button>
+  </div>
+  <div class="lx-body">
+    <aside class="lx-side">
+      <div class="lx-side-t">${lxIc('clock',14)} ${_ltEsc(t('lt.versions'))}</div>
+      <div class="lx-vers" id="lxVers"></div>
+      <button class="clia-btn lx-sm" id="lxPin" onclick="ltPin()">${lxIc('pin',14)}<span></span></button>
+      <div class="lx-side-t" style="margin-top:18px;">${lxIc('layers',14)} ${_ltEsc(t('lt.import'))}</div>
+      <select class="clia-input lx-sel" id="lxImport" onchange="ltImport(this)"><option value="">${_ltEsc(t('lt.import'))}</option></select>
+      <button class="clia-btn lx-sm" onclick="ltDraft(this)">${lxIc('spark',14)}${_ltEsc(t('lt.draft'))}</button>
+      <div class="lx-where">${_ltEsc(t('lt.where'))}</div>
+    </aside>
+    <main class="lx-main">
+      ${LT_FIELDS.map((k,i)=>`<section class="lx-f">
+        <div class="lx-f-hd"><span class="lx-num${i?'':' top'}">${i+1}</span><span class="lx-f-name">${_ltEsc(t('lt.f.'+k))}</span>
+          <span class="lx-pos${i?'':' top'}">${_ltEsc(t(i?'lt.bottom':'lt.top'))}</span>
+          <input class="lx-f-title" id="ltT_${k}" oninput="ltDirty()" placeholder="${_ltEsc(LT_TITLES[k])}"></div>
+        <textarea class="lx-ta" id="ltF_${k}" oninput="ltDirty()" rows="${k==='details'?8:4}"></textarea></section>`).join('')}
+      <div class="lx-hint">${_ltEsc(t('lt.hint'))}</div>
+    </main>
+  </div>
+  <div class="lx-ft">
+    <div class="lx-msg" id="lxMsg"></div>
+    <input class="clia-input lx-note" id="ltNote" placeholder="${_ltEsc(t('lt.note'))}">
+    <button class="clia-btn" onclick="ltSaveTpl(this)">${lxIc('layers',15)}${_ltEsc(t('lt.saveTpl',{c:corp.toUpperCase()+' · '+cat}))}</button>
+    <button class="clia-btn primary" onclick="ltSave(this)">${lxIc('save',15)}${_ltEsc(t('lt.save'))}</button>
+  </div>
+</div>`;
+  ov.classList.add('show');document.body.style.overflow='hidden';
+  _ltLoad();
+}
+function closeListingModal(){
+  const ov=document.getElementById('lxOv');if(!ov)return;
+  if(_lt&&_lt.dirty&&!confirm(t('lt.discard')))return;
+  ov.classList.remove('show');document.body.style.overflow='';
+  if(_lt)_lt.dirty=false;
+}
+async function _ltLoad(){
+  const mine=_lt;_ltSet(null);_ltClean();
+  try{
+    const d=await _ltApi('/api/v1/listing?url='+encodeURIComponent(mine.url));
+    if(_lt!==mine)return;
+    mine.rec=d.record;
+    if(d.current){_ltSet(d.current);mine.sel=d.current.v;mine.from='v'+d.current.v;}
+    else{   // 저장된 문구가 없으면 같은 법인·제품군 템플릿을 기본으로 채워 둔다 (저장해야 적용)
+      mine.sel=null;
+      const tp=await _ltApi('/api/v1/listing-template?corp='+mine.corp+'&category='+encodeURIComponent(mine.cat)).catch(()=>({}));
+      if(_lt===mine&&tp.current){_ltSet(tp.current);mine.from='template:'+mine.corp+'/'+mine.cat+'#v'+tp.current.v;_ltMsg(t('lt.loadedTpl',{c:mine.cat}));ltDirty();}
+    }
+    _ltRenderVersions();_ltStatus();
+  }catch(e){_ltMsg(t('lt.fail')+e.message,'err');}
+  _ltFillImport();
+}
 function _ltGet(){
   const fields={},titles={};
   LT_FIELDS.forEach(k=>{fields[k]=document.getElementById('ltF_'+k).value;const tv=document.getElementById('ltT_'+k).value.trim();if(tv&&tv!==LT_TITLES[k])titles[k]=tv;});
@@ -2384,75 +2537,39 @@ function _ltSet(ver){
     document.getElementById('ltT_'+k).value=((ver&&ver.titles)||{})[k]||LT_TITLES[k];
   });
 }
-function _ltCur(rec){if(!rec||!rec.versions||!rec.versions.length)return null;return rec.versions.find(v=>v.v===rec.pinned)||rec.versions[rec.versions.length-1];}
-function _ltVerLabel(v,rec){
-  const cur=_ltCur(rec),last=rec.versions[rec.versions.length-1];
-  const tags=[v===cur?'★ '+t('lt.inUse'):'',v===last?t('lt.latest'):''].filter(Boolean).join(', ');
-  return 'v'+v.v+' · '+String(v.at||'').slice(0,16).replace('T',' ')+(v.by?' · '+v.by:'')+(v.note?' · '+v.note:'')+(tags?'  ('+tags+')':'');
+function ltDirty(){if(_lt)_lt.dirty=true;const d=document.getElementById('lxDirty');if(d)d.textContent='● '+t('lt.dirty');_ltRenderVersions();}
+function _ltClean(){if(_lt)_lt.dirty=false;const d=document.getElementById('lxDirty');if(d)d.textContent='';}
+function _ltRenderVersions(){
+  const box=document.getElementById('lxVers');if(!box||!_lt)return;
+  const rec=_lt.rec,cur=_ltCur(rec),pin=document.getElementById('lxPin');
+  const vs=(rec&&rec.versions)||[];
+  const draft=(_lt.dirty||!vs.length)?`<div class="lx-ver act draft"><div class="lx-ver-t"><b>${_ltEsc(t('lt.new'))}</b><span class="lx-tag edit">${_ltEsc(t('lt.editing'))}</span></div></div>`:'';
+  box.innerHTML=draft+(vs.length?vs.slice().reverse().map(v=>{
+    const last=v===vs[vs.length-1];
+    return `<button class="lx-ver${(!_lt.dirty&&v.v===_lt.sel)?' act':''}" onclick="ltPickVersion(${v.v})">
+      <div class="lx-ver-t"><b>v${v.v}</b>${v===cur?`<span class="lx-tag use">${_ltEsc(t('lt.inUse'))}</span>`:''}${last?`<span class="lx-tag">${_ltEsc(t('lt.latest'))}</span>`:''}</div>
+      <div class="lx-ver-m">${_ltEsc(String(v.at||'').slice(0,16).replace('T',' '))}${v.by?' · '+_ltEsc(v.by.toUpperCase()):''}</div>
+      ${v.note?`<div class="lx-ver-n">${_ltEsc(v.note)}</div>`:''}</button>`;}).join(''):`<div class="lx-empty">${_ltEsc(t('lt.none'))}</div>`);
+  // 사용 버전 버튼: 고정된 버전을 보고 있으면 "항상 최신 사용", 아니면 "이 버전 사용"
+  if(!vs.length||_lt.sel==null||_lt.dirty){pin.style.display='none';return;}
+  pin.style.display='';
+  const lastV=vs[vs.length-1].v,label=pin.querySelector('span');
+  if(rec.pinned&&rec.pinned===_lt.sel){label.textContent=t('lt.useLatest');pin.dataset.v='';pin.disabled=false;}
+  else{label.textContent=t('lt.useThis');pin.dataset.v=String(_lt.sel);pin.disabled=(!rec.pinned&&_lt.sel===lastV)||(cur&&cur.v===_lt.sel);}
 }
-function _ltRenderVersions(selV){
-  const sel=document.getElementById('ltVer'),rec=_lt.rec;
-  if(!rec||!rec.versions||!rec.versions.length){sel.innerHTML=`<option value="">${_ltEsc(t('lt.none'))}</option>`;sel.disabled=true;document.getElementById('ltPin').disabled=true;return;}
-  sel.disabled=false;
-  sel.innerHTML=rec.versions.slice().reverse().map(v=>`<option value="${v.v}">${_ltEsc(_ltVerLabel(v,rec))}</option>`).join('');
-  sel.value=String(selV||(_ltCur(rec)||{}).v);
-  _ltPinBtn();
+function ltPickVersion(v){
+  if(_lt.dirty&&!confirm(t('lt.discard')))return;
+  const ver=((_lt.rec&&_lt.rec.versions)||[]).find(x=>x.v===v);if(!ver)return;
+  _ltSet(ver);_lt.sel=v;_lt.from='v'+v;_ltClean();_ltMsg('');_ltRenderVersions();
 }
-function _ltPinBtn(){
-  const b=document.getElementById('ltPin'),rec=_lt.rec,sv=Number(document.getElementById('ltVer').value);
-  if(!rec||!rec.versions.length){b.disabled=true;return;}
-  const last=rec.versions[rec.versions.length-1].v;
-  if(rec.pinned&&rec.pinned===sv){b.textContent=t('lt.useLatest');b.dataset.v='';b.disabled=false;}
-  else{b.textContent=t('lt.useThis');b.dataset.v=String(sv);b.disabled=(!rec.pinned&&sv===last);}
-}
-async function listingForDetail(p){
-  const box=document.getElementById('ltSec');if(!box)return;
-  const url=p.crawler_url||p.url,corp=productCorp(p),cat=p.cat||'General';
-  _lt={p,url,corp,cat,rec:null,from:null};
-  const closed=sessionStorage.getItem('clia_lt_closed')==='1';
-  box.className='lt-sec'+(closed?' closed':'');
-  box.innerHTML=`<div class="lt-hd" onclick="ltToggle()"><h3>📝 ${_ltEsc(t('lt.title'))}<small>${_ltEsc(t('lt.where'))}</small></h3><span id="ltDirty" style="font-size:10px;color:#B45309;"></span><span id="ltCaret">${closed?'▸':'▾'}</span></div>
-<div class="lt-bd">
-  <div class="lt-bar">${_ltEsc(t('lt.version'))} <select id="ltVer" onchange="ltPickVersion()"></select><button class="lt-btn" id="ltPin" onclick="ltPin()"></button>
-    <select id="ltImport" onchange="ltImport(this)"><option value="">${_ltEsc(t('lt.import'))}</option></select>
-    <button class="lt-btn" onclick="ltDraft(this)" ${url?'':'disabled'}>${_ltEsc(t('lt.draft'))}</button></div>
-  ${LT_FIELDS.map((k,i)=>`<div class="lt-f"><div class="lt-f-hd"><b class="${i?'':'top'}">${'①②③④⑤'[i]} ${_ltEsc(t('lt.f.'+k))}</b><input id="ltT_${k}" oninput="ltDirty()"></div><textarea id="ltF_${k}" oninput="ltDirty()" rows="${k==='details'?6:3}"></textarea></div>`).join('')}
-  <div style="font-size:10px;color:#999;margin:-2px 0 8px;">${_ltEsc(t('lt.hint'))}</div>
-  <div class="lt-bar"><input id="ltNote" placeholder="${_ltEsc(t('lt.note'))}" style="flex:1;max-width:none;">
-    <button class="lt-btn pri" onclick="ltSave(this)">${_ltEsc(t('lt.save'))}</button>
-    <button class="lt-btn" onclick="ltSaveTpl(this)">${_ltEsc(t('lt.saveTpl',{c:corp.toUpperCase()+' · '+cat}))}</button></div>
-  <div class="lt-msg" id="ltMsg"></div>
-</div>`;
-  _ltSet(null);
-  try{
-    const d=await _ltApi('/api/v1/listing?url='+encodeURIComponent(url));
-    if(!_lt||_lt.p!==p)return;
-    _lt.rec=d.record;_ltRenderVersions();
-    if(d.current)_ltSet(d.current);
-    else{   // 저장된 문구가 없으면 같은 법인·제품군 템플릿을 기본으로 채워 둔다 (저장해야 적용)
-      const tp=await _ltApi('/api/v1/listing-template?corp='+corp+'&category='+encodeURIComponent(cat)).catch(()=>({}));
-      if(_lt&&_lt.p===p&&tp.current){_ltSet(tp.current);_lt.from='template:'+corp+'/'+cat+'#v'+tp.current.v;_ltMsg(t('lt.loadedTpl',{c:cat}));ltDirty();}
-    }
-  }catch(e){_ltMsg(t('lt.fail')+e.message,'err');}
-  _ltFillImport();
-}
-function ltToggle(){const b=document.getElementById('ltSec');b.classList.toggle('closed');const c=b.classList.contains('closed');sessionStorage.setItem('clia_lt_closed',c?'1':'0');document.getElementById('ltCaret').textContent=c?'▸':'▾';}
-function ltDirty(){const d=document.getElementById('ltDirty');if(d)d.textContent='● '+t('lt.dirty');}
-function _ltClean(){const d=document.getElementById('ltDirty');if(d)d.textContent='';}
 async function _ltFillImport(){
   if(!_lt)return;const {corp,url}=_lt,mine=_lt;
   const [tpls,prods]=await Promise.all([_ltApi('/api/v1/listing-templates?corp='+corp).catch(()=>({})),_ltApi('/api/v1/listing/index?corp='+corp).catch(()=>({}))]);
   if(_lt!==mine)return;
-  const sel=document.getElementById('ltImport');if(!sel)return;
-  const tOpts=Object.entries(tpls).map(([k,x])=>`<option value="tpl:${_ltEsc(x.category)}">${_ltEsc(x.category)} · v${x.v}</option>`).join('');
-  const mySlug=Object.keys(prods).find(k=>prods[k].url===url);
-  const pOpts=Object.entries(prods).filter(([k])=>k!==mySlug).map(([k,x])=>`<option value="prd:${_ltEsc(x.url)}">${_ltEsc(x.title||k)}${x.category?' · '+_ltEsc(x.category):''} · v${x.v}</option>`).join('');
+  const sel=document.getElementById('lxImport');if(!sel)return;
+  const tOpts=Object.values(tpls).map(x=>`<option value="tpl:${_ltEsc(x.category)}">${_ltEsc(x.category)} · v${x.v}</option>`).join('');
+  const pOpts=Object.entries(prods).filter(([,x])=>x.url!==url).map(([k,x])=>`<option value="prd:${_ltEsc(x.url)}">${_ltEsc(x.title||k)} · v${x.v}</option>`).join('');
   sel.innerHTML=`<option value="">${_ltEsc(t('lt.import'))}</option>`+(tOpts?`<optgroup label="${_ltEsc(t('lt.tpl'))} (${corp.toUpperCase()})">${tOpts}</optgroup>`:'')+(pOpts?`<optgroup label="${_ltEsc(t('lt.prods'))}">${pOpts}</optgroup>`:'');
-}
-function ltPickVersion(){
-  const v=Number(document.getElementById('ltVer').value),ver=(_lt.rec.versions||[]).find(x=>x.v===v);
-  if(ver){_ltSet(ver);_lt.from='v'+v;_ltClean();}
-  _ltPinBtn();
 }
 async function ltImport(sel){
   const val=sel.value;sel.value='';if(!val)return;
@@ -2479,8 +2596,8 @@ async function ltSave(btn){
   btn.disabled=true;
   try{
     const d=await _ltApi('/api/v1/listing',{url:_lt.url,corp:_lt.corp,category:_lt.cat,title:(_lt.p.id||'')+(_lt.p.nm?' — '+_lt.p.nm:''),fields,titles,note:document.getElementById('ltNote').value.trim(),by:CORP,from:_lt.from});
-    _lt.rec=d.record;_lt.from='v'+d.v;_ltRenderVersions(d.current&&d.current.v);
-    document.getElementById('ltNote').value='';_ltClean();_ltMsg(t('lt.saved',{v:d.v}),'ok');_ltFillImport();
+    _lt.rec=d.record;_lt.sel=d.v;_lt.from='v'+d.v;
+    document.getElementById('ltNote').value='';_ltClean();_ltRenderVersions();_ltStatus();_ltMsg(t('lt.saved',{v:d.v}),'ok');_ltFillImport();
   }catch(e){_ltMsg(t('lt.fail')+e.message,'err');}
   finally{btn.disabled=false;}
 }
@@ -2496,8 +2613,8 @@ async function ltSaveTpl(btn){
   finally{btn.disabled=false;}
 }
 async function ltPin(){
-  const b=document.getElementById('ltPin'),v=b.dataset.v?Number(b.dataset.v):null;
-  try{const d=await _ltApi('/api/v1/listing/pin',{url:_lt.url,v});_lt.rec=d.record;_ltRenderVersions(v||undefined);_ltMsg(v?t('lt.pinned',{v}):t('lt.unpinned'),'ok');}
+  const b=document.getElementById('lxPin'),v=b.dataset.v?Number(b.dataset.v):null;
+  try{const d=await _ltApi('/api/v1/listing/pin',{url:_lt.url,v});_lt.rec=d.record;_ltRenderVersions();_ltStatus();_ltMsg(v?t('lt.pinned',{v}):t('lt.unpinned'),'ok');}
   catch(e){_ltMsg(t('lt.fail')+e.message,'err');}
 }
 function showDetail(p){
@@ -2530,9 +2647,12 @@ function showDetail(p){
         ${[['ch-lgcom',t('ch.lgcom')],['ch-meli','Mercado Libre'],['ch-md',t('ch.md')],['ch-ig','Instagram'],['ch-fb','Facebook'],['ch-shorts','Shorts']].map(([c,l])=>`<button class="ch-btn ${c} ch-disabled" data-tip="${t('ch.comingSoon')}" aria-disabled="true">${l}</button>`).join('')}
       </div>
     </div>
+    <div class="lx-row">
+      <div class="ch-label">${t('lt.label')}</div>
+      <div class="lx-row-in"><button class="lx-open" onclick="openListingModal()">${lxIc('doc',18)}${t('lt.open')}</button><span class="lx-status" id="lxStatus"></span></div>
+    </div>
   </div>
 </div>
-<div class="lt-sec" id="ltSec" data-no-i18n></div>
 <div class="feat-header">${t('dp.feat',{n:p.feat.length})} <span class="ai-tag">${t('dp.aiExtracted')}</span> <span style="font-size:9px;color:#888;font-weight:400;margin-left:4px;">${t('dp.hover')}</span></div>
 <div class="feat-grid" data-no-i18n>${p.feat.map((f,i)=>{if(f.layout==='split'&&f.imgs&&f.imgs.length>=2){return`<div class="feat-thumb" onclick="openLB('${p.id}',${i})" style="grid-column:span 2;"><div style="display:flex;gap:2px;"><img src="${I(f.imgs[0].p,400)}" style="width:50%;display:block;" onerror="this.style.display='none'"><img src="${I(f.imgs[1].p,400)}" style="width:50%;display:block;" onerror="this.style.display='none'"></div><div class="ft-overlay"><b>${f.t}</b>${f.d.substring(0,50)}...</div></div>`;}else if(f.layout==='puzzle'&&f.imgs&&f.imgs.length>=3){return`<div class="feat-thumb" onclick="openLB('${p.id}',${i})" style="grid-column:span 2;"><div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;"><img src="${I(f.imgs[0].p,400)}" style="grid-row:1/3;width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"><img src="${I(f.imgs[1].p,300)}" style="width:100%;object-fit:cover;" onerror="this.style.display='none'"><img src="${I(f.imgs[2].p,300)}" style="width:100%;object-fit:cover;" onerror="this.style.display='none'"></div><div class="ft-overlay"><b>${f.t}</b>${f.d.substring(0,50)}...</div></div>`;}else{return`<div class="feat-thumb" onclick="openLB('${p.id}',${i})"><img src="${I(f.p,400)}" onerror="this.parentElement.style.display='none'"><div class="ft-overlay"><b>${f.t}</b>${f.d.substring(0,50)}...</div></div>`;}}).join('')}</div>
 <div class="feat-header">${t('dp.specs')}</div>
