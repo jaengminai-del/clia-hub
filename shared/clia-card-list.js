@@ -106,11 +106,11 @@
     head.style.cssText = 'padding:14px 56px 12px 18px;border-bottom:1px solid #EEE;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
     head.textContent = url;
     const body = document.createElement('div');
-    body.style.cssText = 'flex:1;overflow:auto;background:#F4F4F4;display:flex;justify-content:center;';
+    body.style.cssText = 'flex:1;overflow:auto;background:#F4F4F4;display:block;';   // flex 이면 긴 캡처가 팝업 높이로 눌려 보임
     wrap.append(head, body);
     let timer = null, stopped = false;
     modal(wrap, () => { stopped = true; clearTimeout(timer); });
-    const msg = (html) => { body.innerHTML = `<div style="margin:auto;text-align:center;padding:40px;color:#444;">${html}</div>`; };
+    const msg = (html) => { body.innerHTML = `<div style="text-align:center;padding:80px 40px;color:#444;">${html}</div>`; };
     const api = (method, retry) => fetch(`${apiBase || ''}/api/v1/fullshot${method === 'GET' ? `?url=${encodeURIComponent(url)}` : ''}`,
       method === 'GET' ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url, retry: !!retry }) }).then((r) => r.json());
     const handle = (st) => {
@@ -120,7 +120,7 @@
         const img = document.createElement('img');
         img.src = `${apiBase || ''}${st.src}`;
         img.alt = url;
-        img.style.cssText = 'width:100%;max-width:960px;height:auto;display:block;';
+        img.style.cssText = 'width:100%;max-width:960px;height:auto;display:block;margin:0 auto;flex:none;';
         body.appendChild(img);
       } else if (st.status === 'pending') {
         msg(`<div style="font-size:28px;margin-bottom:10px;">⏳</div>${t.capturing}`);
