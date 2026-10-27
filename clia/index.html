@@ -177,11 +177,20 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 .lx-side{width:264px;flex-shrink:0;background:var(--clia-gray-50);border-right:1px solid var(--clia-gray-200);padding:18px 16px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
 .lx-side-t{font-size:11px;font-weight:600;color:var(--clia-gray-500);letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:6px;}
 .lx-vers{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto;}
-.lx-ver{text-align:left;width:100%;padding:10px 12px;border-radius:var(--clia-radius-sm);border:1px solid var(--clia-gray-200);background:#fff;cursor:pointer;font-family:var(--clia-font);transition:border-color .15s;}
+.lx-ver{position:relative;text-align:left;width:100%;box-sizing:border-box;padding:10px 12px;border-radius:var(--clia-radius-sm);border:1px solid var(--clia-gray-200);background:#fff;cursor:pointer;font-family:var(--clia-font);transition:border-color .15s;}
 .lx-ver:hover{border-color:var(--clia-gray-400);}
 .lx-ver.act{border-color:var(--clia-brand);box-shadow:0 0 0 3px var(--clia-brand-soft);}
 .lx-ver.draft{border-style:dashed;cursor:default;}
-.lx-ver-t{display:flex;align-items:center;gap:6px;font-size:13px;}.lx-ver-t b{font-weight:700;}
+.lx-ver-t{display:flex;align-items:center;gap:6px;font-size:13px;padding-right:28px;}
+.lx-ver-del{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;border:none;background:transparent;color:var(--clia-gray-400);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s,color .15s;}
+.lx-ver-del:hover,.lx-ver-del:focus-visible{background:var(--clia-brand-soft);color:var(--clia-brand);outline:none;}
+.lx-cf-ov{position:absolute;inset:0;z-index:5;background:rgba(38,38,38,.35);display:flex;align-items:center;justify-content:center;padding:24px;animation:lx-cf-fade .15s ease-out;}
+.lx-cf{width:min(380px,100%);background:#fff;border-radius:var(--clia-radius-lg);box-shadow:0 24px 64px rgba(38,38,38,.25);padding:28px 28px 22px;text-align:center;font-family:var(--clia-font);color:var(--clia-gray-900);animation:lx-cf-pop .18s ease-out;}
+.lx-cf-ic{width:52px;height:52px;border-radius:50%;margin:0 auto 14px;background:var(--clia-brand-soft);color:var(--clia-brand);display:flex;align-items:center;justify-content:center;}
+.lx-cf h4{margin:0 0 8px;font-size:18px;font-weight:700;}
+.lx-cf p{margin:0 0 20px;font-size:13px;line-height:1.6;color:var(--clia-gray-600);}
+.lx-cf-btns{display:flex;gap:8px;}.lx-cf-btns .clia-btn{flex:1;justify-content:center;}
+@keyframes lx-cf-fade{from{opacity:0;}}@keyframes lx-cf-pop{from{opacity:0;transform:scale(.96) translateY(6px);}}.lx-ver-t b{font-weight:700;}
 .lx-ver-m{font-size:11px;color:var(--clia-gray-500);margin-top:3px;}
 .lx-ver-n{font-size:11px;color:var(--clia-gray-700);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .lx-tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--clia-gray-100);color:var(--clia-gray-600);}
@@ -2370,6 +2379,7 @@ function showPending(p){
 //   ① 프로모션 → eBay·Lazada HTML 맨 위 / ②~⑤ 제품 상세·배송·사후 케어·반품 → 맨 아래 (빈 칸은 붙지 않음)
 //   Shopee 는 빌더의 "설명 텍스트 복사" 버튼. 저장소·API: listing-routes.js
 Object.assign(I18N.en,{
+  'lt.del':'Delete this version','lt.delQ':'Delete v{v}?','lt.delMsg':'Are you sure? A deleted version can\'t be restored.','lt.delInUse':'v{v} is in use now — after deleting, the latest remaining version will be used.','lt.delOk':'Delete','lt.cancel':'Cancel','lt.deleted':'v{v} deleted.',
   'lt.label':'PRODUCT INFO TEXT','lt.open':'Write product info text','lt.title':'Product info text',
   'lt.where':'① is added at the top, ②–⑤ at the bottom of eBay / Lazada content. Shopee: copied as description text.',
   'lt.stNone':'Not written yet','lt.stUse':'v{v} in use · {n}/5 filled',
@@ -2383,6 +2393,7 @@ Object.assign(I18N.en,{
   'lt.empty':'All fields are empty.','lt.fail':'Failed: ','lt.hint':'Lines starting with ● become bold headings, lines starting with - are indented. Empty fields are not added.','lt.dirty':'Unsaved changes','lt.discard':'Discard unsaved changes?',
 });
 Object.assign(I18N.de,{
+  'lt.del':'Diese Version löschen','lt.delQ':'v{v} löschen?','lt.delMsg':'Wirklich löschen? Eine gelöschte Version kann nicht wiederhergestellt werden.','lt.delInUse':'v{v} ist gerade aktiv — nach dem Löschen wird die neueste verbleibende Version verwendet.','lt.delOk':'Löschen','lt.cancel':'Abbrechen','lt.deleted':'v{v} gelöscht.',
   'lt.label':'PRODUKTINFO-TEXT','lt.open':'Produktinfo-Text schreiben','lt.title':'Produktinfo-Text',
   'lt.where':'① wird oben, ②–⑤ unten im eBay-/Lazada-Inhalt eingefügt. Shopee: als Beschreibungstext kopieren.',
   'lt.stNone':'Noch nicht erstellt','lt.stUse':'v{v} aktiv · {n}/5 ausgefüllt',
@@ -2396,6 +2407,7 @@ Object.assign(I18N.de,{
   'lt.empty':'Alle Felder sind leer.','lt.fail':'Fehler: ','lt.hint':'Zeilen mit ● werden fette Überschriften, Zeilen mit - werden eingerückt. Leere Felder werden nicht eingefügt.','lt.dirty':'Nicht gespeichert','lt.discard':'Nicht gespeicherte Änderungen verwerfen?',
 });
 Object.assign(I18N.th,{
+  'lt.del':'ลบเวอร์ชันนี้','lt.delQ':'ลบ v{v} ใช่ไหม?','lt.delMsg':'แน่ใจหรือไม่? เวอร์ชันที่ลบแล้วจะกู้คืนไม่ได้','lt.delInUse':'v{v} กำลังใช้งานอยู่ — หลังลบ จะใช้เวอร์ชันล่าสุดที่เหลืออยู่แทน','lt.delOk':'ลบ','lt.cancel':'ยกเลิก','lt.deleted':'ลบ v{v} แล้ว',
   'lt.label':'ข้อความข้อมูลสินค้า','lt.open':'เขียนข้อความข้อมูลสินค้า','lt.title':'ข้อความข้อมูลสินค้า',
   'lt.where':'① จะถูกเพิ่มด้านบน ②–⑤ ด้านล่างของคอนเทนต์ eBay / Lazada · Shopee: คัดลอกเป็นข้อความคำอธิบาย',
   'lt.stNone':'ยังไม่ได้เขียน','lt.stUse':'ใช้ v{v} · กรอกแล้ว {n}/5',
@@ -2409,6 +2421,7 @@ Object.assign(I18N.th,{
   'lt.empty':'ทุกช่องว่างเปล่า','lt.fail':'ล้มเหลว: ','lt.hint':'บรรทัดที่ขึ้นต้นด้วย ● เป็นหัวข้อตัวหนา บรรทัดที่ขึ้นต้นด้วย - จะเยื้อง ช่องว่างจะไม่ถูกเพิ่ม','lt.dirty':'ยังไม่ได้บันทึก','lt.discard':'ยกเลิกการเปลี่ยนแปลงที่ยังไม่ได้บันทึก?',
 });
 Object.assign(I18N.ar,{
+  'lt.del':'حذف هذا الإصدار','lt.delQ':'حذف v{v}؟','lt.delMsg':'هل أنت متأكد؟ لا يمكن استعادة الإصدار المحذوف.','lt.delInUse':'v{v} مستخدم حاليًا — بعد الحذف سيُستخدم أحدث إصدار متبقٍ.','lt.delOk':'حذف','lt.cancel':'إلغاء','lt.deleted':'تم حذف v{v}.',
   'lt.label':'نص معلومات المنتج','lt.open':'كتابة نص معلومات المنتج','lt.title':'نص معلومات المنتج',
   'lt.where':'① يُضاف في الأعلى، و②–⑤ في أسفل محتوى eBay / Lazada · Shopee: يُنسخ كنص وصف.',
   'lt.stNone':'لم يُكتب بعد','lt.stUse':'v{v} مستخدم · {n}/5 مكتمل',
@@ -2427,6 +2440,7 @@ const LT_TITLES={promotion:'Promotion Details',details:'Product Details',deliver
 const LX_IC={
   doc:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
   close:'<path d="M6 6l12 12M18 6 6 18"/>',
+  trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>',
   clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   pin:'<path d="M12 17v4M8 3h8l-1 6 3 3v2H6v-2l3-3z"/>',
   dl:'<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>',
@@ -2546,10 +2560,11 @@ function _ltRenderVersions(){
   const draft=(_lt.dirty||!vs.length)?`<div class="lx-ver act draft"><div class="lx-ver-t"><b>${_ltEsc(t('lt.new'))}</b><span class="lx-tag edit">${_ltEsc(t('lt.editing'))}</span></div></div>`:'';
   box.innerHTML=draft+(vs.length?vs.slice().reverse().map(v=>{
     const last=v===vs[vs.length-1];
-    return `<button class="lx-ver${(!_lt.dirty&&v.v===_lt.sel)?' act':''}" onclick="ltPickVersion(${v.v})">
+    return `<div class="lx-ver${(!_lt.dirty&&v.v===_lt.sel)?' act':''}" role="button" tabindex="0" onclick="ltPickVersion(${v.v})" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();ltPickVersion(${v.v});}">
+      <button type="button" class="lx-ver-del" title="${_ltEsc(t('lt.del'))}" aria-label="${_ltEsc(t('lt.del'))}" onclick="ltDelVersion(event,${v.v})">${lxIc('close',14)}</button>
       <div class="lx-ver-t"><b>v${v.v}</b>${v===cur?`<span class="lx-tag use">${_ltEsc(t('lt.inUse'))}</span>`:''}${last?`<span class="lx-tag">${_ltEsc(t('lt.latest'))}</span>`:''}</div>
       <div class="lx-ver-m">${_ltEsc(String(v.at||'').slice(0,16).replace('T',' '))}${v.by?' · '+_ltEsc(v.by.toUpperCase()):''}</div>
-      ${v.note?`<div class="lx-ver-n">${_ltEsc(v.note)}</div>`:''}</button>`;}).join(''):`<div class="lx-empty">${_ltEsc(t('lt.none'))}</div>`);
+      ${v.note?`<div class="lx-ver-n">${_ltEsc(v.note)}</div>`:''}</div>`;}).join(''):`<div class="lx-empty">${_ltEsc(t('lt.none'))}</div>`);
   // 사용 버전 버튼: 고정된 버전을 보고 있으면 "항상 최신 사용", 아니면 "이 버전 사용"
   if(!vs.length||_lt.sel==null||_lt.dirty){pin.style.display='none';return;}
   pin.style.display='';
@@ -2561,6 +2576,38 @@ function ltPickVersion(v){
   if(_lt.dirty&&!confirm(t('lt.discard')))return;
   const ver=((_lt.rec&&_lt.rec.versions)||[]).find(x=>x.v===v);if(!ver)return;
   _ltSet(ver);_lt.sel=v;_lt.from='v'+v;_ltClean();_ltMsg('');_ltRenderVersions();
+}
+// 버전 삭제 — X → "정말 지우시겠어요?" 확인 팝업 (기본 포커스는 취소 → 실수로 Enter 눌러도 안 지워짐)
+function ltConfirm({title,msg,ok}){
+  return new Promise(resolve=>{
+    const ov=document.getElementById('lxOv');
+    const cf=document.createElement('div');cf.className='lx-cf-ov';
+    cf.innerHTML=`<div class="lx-cf" role="alertdialog" aria-modal="true"><div class="lx-cf-ic">${lxIc('trash',24)}</div>
+      <h4>${_ltEsc(title)}</h4><p>${_ltEsc(msg)}</p>
+      <div class="lx-cf-btns"><button type="button" class="clia-btn" data-a="0">${_ltEsc(t('lt.cancel'))}</button><button type="button" class="clia-btn primary" data-a="1">${_ltEsc(ok)}</button></div></div>`;
+    const done=v=>{cf.remove();window.removeEventListener('keydown',key,true);resolve(v);};
+    const key=e=>{if(e.key==='Escape'){e.stopImmediatePropagation();e.preventDefault();done(false);}};   // 팝업만 닫고 편집 창은 유지
+    cf.addEventListener('mousedown',e=>{e.stopPropagation();if(e.target===cf)done(false);});
+    cf.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>done(b.dataset.a==='1'));
+    window.addEventListener('keydown',key,true);
+    ov.appendChild(cf);cf.querySelector('[data-a="0"]').focus();
+  });
+}
+async function ltDelVersion(e,v){
+  e.stopPropagation();
+  const cur=_ltCur(_lt.rec),inUse=cur&&cur.v===v;
+  if(!await ltConfirm({title:t('lt.delQ',{v}),msg:t('lt.delMsg')+(inUse?' '+t('lt.delInUse',{v}):''),ok:t('lt.delOk')}))return;
+  try{
+    const d=await _ltApi('/api/v1/listing/delete',{url:_lt.url,v});
+    _lt.rec=d.record;
+    // 보고 있던 버전을 지웠으면: 편집 중이면 내용은 그대로 두고, 아니면 지금 사용 버전(없으면 빈 칸)을 보여 준다
+    if(_lt.sel===v){
+      if(_lt.dirty)_lt.sel=null;
+      else if(d.current){_ltSet(d.current);_lt.sel=d.current.v;_lt.from='v'+d.current.v;}
+      else{_ltSet(null);_lt.sel=null;_lt.from=null;}
+    }
+    _ltRenderVersions();_ltStatus();_ltFillImport();_ltMsg(t('lt.deleted',{v}),'ok');
+  }catch(err){_ltMsg(t('lt.fail')+err.message,'err');}
 }
 async function _ltFillImport(){
   if(!_lt)return;const {corp,url}=_lt,mine=_lt;

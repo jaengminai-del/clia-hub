@@ -3,11 +3,12 @@
  *
  * 문구 5종: promotion(맨 위) · details · delivery · aftercare · returns(맨 아래) — eBay·Lazada HTML 에 자동 부착,
  * Shopee 는 설명란 텍스트 복사. 제품당 1세트(세 마켓 공통), 템플릿은 법인 + 제품군 단위.
- * 저장: 버킷 listing-texts/ (+ 로컬 data/listing-texts 캐시). 버전은 지우지 않고 쌓는다.
+ * 저장: 버킷 listing-texts/ (+ 로컬 data/listing-texts 캐시). 버전은 쌓이고, 사용자가 직접 지울 때만 삭제.
  *
  *   GET  /api/v1/listing?url=                    → { record, current }         (제품 문구 · 현재 버전)
  *   POST /api/v1/listing {url, corp, category, title, fields, titles, note, by, from}  → 새 버전
  *   POST /api/v1/listing/pin {url, v|null}       → 특정 버전 고정 (null = 최신 버전 사용)
+ *   POST /api/v1/listing/delete {url, v}         → 버전 삭제 (고정된 버전이면 최신 버전 사용으로 돌아감)
  *   GET  /api/v1/listing/draft?url=              → { details } 제품 상세 초안 (LG.com 원문)
  *   GET  /api/v1/listing/text?url=               → Shopee 설명란용 일반 텍스트
  *   GET  /api/v1/listing/index?corp=             → 문구가 저장된 제품 목록 (다른 제품에서 가져오기)
@@ -53,7 +54,9 @@ const current = (rec) => (rec && rec.versions && rec.versions.length)
   ? (rec.versions.find((v) => v.v === rec.pinned) || rec.versions[rec.versions.length - 1]) : null;
 
 function addVersion(rec, body) {
-  const v = (rec.versions.length ? rec.versions[rec.versions.length - 1].v : 0) + 1;
+  // 지운 번호는 다시 쓰지 않는다 (maxV = 지금까지 발급한 가장 큰 번호)
+  const v = Math.max(rec.maxV || 0, rec.versions.length ? rec.versions[rec.versions.length - 1].v : 0) + 1;
+  rec.maxV = v;
   rec.versions.push({ v, at: new Date().toISOString(), by: String(body.by || '').slice(0, 40), note: String(body.note || '').slice(0, 200),
                       from: body.from ? String(body.from).slice(0, 200) : undefined, fields: clean(body.fields), titles: cleanTitles(body.titles) });
   return v;
@@ -104,6 +107,27 @@ router.post('/api/v1/listing/pin', async (req, res) => {
   if (!rec) return res.status(404).json({ error: 'no listing' });
   rec.pinned = v == null ? null : Number(v);
   await writeJson(`products/${slug}.json`, rec);
+  res.json({ ok: true, record: rec, current: current(rec) });
+});
+
+router.post('/api/v1/listing/delete', async (req, res) => {
+  const { url, v } = req.body || {};
+  const slug = slugify(url || '');
+  const rec = await readJson(`products/${slug}.json`);
+  if (!rec) return res.status(404).json({ error: 'no listing' });
+  const i = rec.versions.findIndex((x) => x.v === Number(v));
+  if (i < 0) return res.status(404).json({ error: 'no such version' });
+  rec.maxV = Math.max(rec.maxV || 0, ...rec.versions.map((x) => x.v));
+  rec.versions.splice(i, 1);
+  if (rec.pinned === Number(v)) rec.pinned = null;
+  await writeJson(`products/${slug}.json`, rec);
+  // 다른 제품에서 가져오기 목록: 남은 최신 버전으로 갱신, 다 지웠으면 빼기
+  const idxKey = `index-${rec.corp || 'all'}.json`;
+  const idx = (await readJson(idxKey)) || {};
+  const last = rec.versions[rec.versions.length - 1];
+  if (last) idx[slug] = { url: rec.url, title: rec.title, category: rec.category, v: last.v, at: last.at };
+  else delete idx[slug];
+  await writeJson(idxKey, idx);
   res.json({ ok: true, record: rec, current: current(rec) });
 });
 
