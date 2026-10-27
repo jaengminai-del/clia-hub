@@ -104,6 +104,8 @@ body{font-family:'LGEIText',Arial,sans-serif;background:#F6F3EB;height:100vh;ove
 .compliance-bar{padding:8px 16px;background:#FFF8E1;border-bottom:1px solid #FFE082;font-size:10px;color:#7A5800;display:flex;align-items:center;gap:6px;flex-shrink:0}
 .compliance-bar.ok{background:#E8F5E9;border-color:#C8E6C9;color:#2E7D32}
 .compliance-bar.warn{background:#FFF3E0;border-color:#FFE0B2;color:#E65100}
+.compliance-bar .shp-count{font-weight:700;white-space:nowrap}
+.compliance-bar.shp-over,.clia-skin-pdp .compliance-bar.ok.shp-over{background:#FFEBEE;border-color:#FFCDD2;color:#C62828}
 
 /* Edit mode */
 .edit-banner{display:none;padding:6px 14px;background:#FFF3CD;border-bottom:1px solid #F5C842;font-size:10px;color:#7A5800;flex-shrink:0;align-items:center;gap:6px}
@@ -171,8 +173,8 @@ body{font-family:'LGEIText',Arial,sans-serif;background:#F6F3EB;height:100vh;ove
     </div>
     <div class="bottom-bar">
       <div class="char-count">
-        Slices <input type="number" id="sliceCount" placeholder="auto" min="1" max="40" title="Leave empty: automatic (each image at most 3000px tall)" oninput="updateContentInfo()" style="width:46px;padding:3px 5px;border:1px solid #E1E2E5;border-radius:4px;font-size:11px">
-        &nbsp;Output width <input type="number" id="sliceWidth" placeholder="1000" min="400" max="3000" step="20" title="Leave empty: 1000px (Shopee seller centre description image width)" style="width:64px;padding:3px 5px;border:1px solid #E1E2E5;border-radius:4px;font-size:11px">px
+        Slices <input type="number" id="sliceCount" placeholder="auto" min="1" max="40" title="Leave empty: automatic (each image at most 2× its width tall — Shopee rule)" oninput="updateContentInfo()" style="width:46px;padding:3px 5px;border:1px solid #E1E2E5;border-radius:4px;font-size:11px">
+        &nbsp;Output width <input type="number" id="sliceWidth" placeholder="1000" min="700" max="3000" step="20" title="Leave empty: 1000px (Shopee needs at least 700px)" style="width:64px;padding:3px 5px;border:1px solid #E1E2E5;border-radius:4px;font-size:11px">px
         &nbsp;<select id="sliceFormat" style="padding:3px 5px;border:1px solid #E1E2E5;border-radius:4px;font-size:11px"><option value="jpeg">JPG</option><option value="png">PNG</option></select>
         &nbsp;<span id="sliceInfo" style="color:#697072"></span>
         <span id="charCount" style="display:none">0</span>
@@ -226,6 +228,9 @@ const MEDIUM = 'shopee_lazada';
 // 허브가 연 채널 (?channel=shopee|lazada). 리스팅 문구(허브 제품 상세에서 작성): Lazada 는 HTML 맨 위·맨 아래 카드,
 // Shopee 는 설명란이 일반 텍스트라 이미지에 넣지 않고 "설명 텍스트 복사" 버튼으로 제공
 const CHANNEL = new URLSearchParams(location.search).get('channel') || '';
+// Shopee 상세 설명 이미지는 최대 12장 (Lazada 는 제한 표시 안 함)
+const SHOPEE_MAX_IMAGES = 12;
+const shopeeLimit = () => CHANNEL !== 'lazada';
 
 // ══════════════════════════════════════════
 // Intro
@@ -602,13 +607,27 @@ function updateContentInfo() {
   const bar = document.getElementById('complianceBar');
   if (!frame || !bar || bar.classList.contains('warn')) return;
   const show = () => {
-    // 장수를 비우면 자동: 출력 폭 1000px 기준으로 한 장 높이 ≤ 3000px (서버 규격과 같은 계산)
+    // 장수를 비우면 자동: 한 장 높이 ≤ min(3000px, 출력 폭 × 2) (서버 규격과 같은 계산 — Shopee 비율 0.5 이상)
     const typed = parseInt(document.getElementById('sliceCount').value, 10);
     const outW = parseInt(document.getElementById('sliceWidth').value, 10) || 1000;
     const cw = (frame.querySelector('.lg-container') || frame).offsetWidth || 832;
-    const n = typed || Math.max(1, Math.ceil(frame.scrollHeight * (outW / cw) / 3000));
+    const capCss = Math.min(3000, outW * 1.95) * (cw / outW);   // 한 장에 담기는 미리보기 높이 (CSS px)
+    const n = typed || Math.max(1, Math.ceil(frame.scrollHeight / capCss));
     bar.textContent = '📏 Total content height: ' + Math.round(frame.scrollHeight).toLocaleString() + 'px · '
       + n + ' slices' + (typed ? '' : ' (auto)') + ' · Use Edit to delete unnecessary content or modify the text. When you finish editing, be sure to Lock.';
+    // Shopee: 12장 제한 — 넘으면 얼마나 줄여야 하는지 빨간 경고 (자동 장수는 섹션 경계에 맞춰 자르므로 실제로는 1~2장 더 나올 수 있음)
+    bar.classList.remove('shp-over');
+    if (shopeeLimit()) {
+      const auto = Math.max(1, Math.ceil(frame.scrollHeight / capCss));
+      const over = Math.ceil(frame.scrollHeight - SHOPEE_MAX_IMAGES * capCss);
+      const tag = document.createElement('span');
+      tag.className = 'shp-count';
+      if (over > 0) {
+        bar.classList.add('shp-over');
+        tag.textContent = '⚠ Shopee: ' + auto + '/' + SHOPEE_MAX_IMAGES + ' images — about ' + over.toLocaleString() + 'px too long. Delete sections with Edit until it fits.';
+      } else tag.textContent = 'Shopee: ~' + auto + '/' + SHOPEE_MAX_IMAGES + ' images';
+      bar.prepend(tag);
+    }
   };
   show();
   frame.querySelectorAll('img').forEach(img => { if (!img.complete) img.addEventListener('load', show, { once: true }); });
@@ -652,7 +671,7 @@ async function downloadImages() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         html,
-        // 비우면 서버 규격(shopee_lazada spec.slices): 폭 1000px, 장수 자동(한 장 ≤ 3000px), 1MB 이하
+        // 비우면 서버 규격(shopee_lazada spec.slices): 폭 1000px, 장수 자동(한 장 ≤ 폭 × 2, ≤ 3000px), 1MB 이하
         slices: parseInt(document.getElementById('sliceCount').value, 10) || undefined,
         // 비우면 서버가 콘텐츠 실측 폭(좌우 여백 제외)의 2배로 저장한다
         outputWidth: parseInt(document.getElementById('sliceWidth').value, 10) || undefined,
@@ -682,6 +701,13 @@ async function downloadImages() {
         const maxH = Math.max(...man.map(m => m.height));
         const maxKb = Math.round(Math.max(...man.map(m => m.bytes)) / 1024);
         summary = `${man.length} images · ${man[0].width}px wide · tallest ${maxH}px · largest ${maxKb}KB · ${summary}`;
+        if (shopeeLimit() && man.length > SHOPEE_MAX_IMAGES) {
+          const msg = `Shopee accepts up to ${SHOPEE_MAX_IMAGES} images, but this export has ${man.length}. Delete some sections with Edit, then download again.`;
+          if (info) info.textContent = '⚠ ' + summary;
+          setStatus('⚠ ' + msg, 'err');
+          alert(msg);
+          return;
+        }
       }
     } catch (_) {}
     if (info) info.textContent = '✓ ' + summary;
@@ -984,7 +1010,7 @@ function makeImageEditable(img) {
     const reframeBtn = document.createElement('button');
     reframeBtn.className = 'edit-reframe-btn';
     reframeBtn.textContent = '🎬 Reselect Frame';
-    reframeBtn.style.cssText = `position:absolute;top:44px;left:10px;z-index:20;
+    reframeBtn.style.cssText = `position:absolute;top:76px;left:10px;z-index:20;
       padding:4px 10px;border:none;border-radius:4px;
       background:rgba(229,50,56,.9);color:#fff;font-size:11px;font-weight:600;
       cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.4);`;
@@ -1004,15 +1030,32 @@ function makeImageEditable(img) {
     const ox = img.offsetLeft, oy = img.offsetTop, ow = img.offsetWidth, oh = img.offsetHeight;
     if (!W || !H || !ow || !oh) return;
     // 원래부터 틀보다 작은 이미지(가운데 놓인 로고 등)는 틀을 채우는 대상이 아님 → 예전처럼 30%~500% 자유
-    if (ow < W - 1 || oh < H - 1) { state.scale = Math.min(5, Math.max(0.3, state.scale)); return; }
-    state.scale = Math.min(5, Math.max(state.scale, W / ow, H / oh));
+    if (ow < W - 1 || oh < H - 1) { state.scale = Math.min(5, Math.max(0.3, state.scale)); state.gap = false; return; }
+    // 틀을 채우는 이미지도 30%까지 줄일 수 있다 (Amazon 과 같게) — 줄여서 생긴 빈 곳은 가장자리 평균색으로 채움
+    state.scale = Math.min(5, Math.max(0.3, state.scale));
     const s = state.scale, cx = ox + ow / 2, cy = oy + oh / 2;
-    state.tx = Math.min(ow / 2 - cx / s, Math.max((W - cx) / s - ow / 2, state.tx));
-    state.ty = Math.min(oh / 2 - cy / s, Math.max((H - cy) / s - oh / 2, state.ty));
+    // 축마다: 이미지가 틀보다 크면 빈 곳이 안 생기게, 작으면 틀 밖으로 나가지 않게 (두 경계식이 서로 자리만 바뀜)
+    const ax = (ow * s / 2 - cx) / s, bx = (W - ow * s / 2 - cx) / s;
+    const ay = (oh * s / 2 - cy) / s, by = (H - oh * s / 2 - cy) / s;
+    state.tx = Math.min(Math.max(ax, bx), Math.max(Math.min(ax, bx), state.tx));
+    state.ty = Math.min(Math.max(ay, by), Math.max(Math.min(ay, by), state.ty));
+    state.gap = ow * s < W - 1 || oh * s < H - 1;
+  }
+  // 빈 곳이 생기면 틀 배경 = 이미지 가장자리 평균색, 다시 꽉 차면 원래 배경 (래퍼 인라인 스타일이라 잠금 후 HTML·슬라이스에도 남음)
+  if (wrap._bg0 === undefined) wrap._bg0 = wrap.style.backgroundColor;
+  function gapFill() {
+    if (!state.gap) { wrap.style.backgroundColor = wrap._bg0; return; }
+    if (wrap._edgeBg) { wrap.style.backgroundColor = wrap._edgeBg; return; }
+    if (window.CLIAZoomBar && CLIAZoomBar.edgeColor) CLIAZoomBar.edgeColor(img.currentSrc || img.src, API_BASE).then((c) => {
+      if (!c) return;
+      wrap._edgeBg = c;
+      if (state.gap) wrap.style.backgroundColor = c;
+    });
   }
   function applyTransform() {
     clampToFrame();
     img.style.transform = `scale(${state.scale}) translate(${state.tx}px, ${state.ty}px)`;
+    gapFill();
     if (zbar) zbar.update();
   }
   wrap._editApply = applyTransform;   // 프레임 가장자리를 끌어 크기를 바꾼 뒤 다시 맞춤

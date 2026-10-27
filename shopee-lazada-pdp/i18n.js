@@ -27,6 +27,15 @@ CLIA_I18N.init({
   'and click': { de: 'und klicken Sie auf', th: 'แล้วคลิก', ar: 'وانقر على' },
   'Generate': { de: 'Erstellen', th: 'สร้าง', ar: 'إنشاء' },
   'to build the PDP content': { de: ', um die PDP-Inhalte zu erstellen', th: 'เพื่อสร้างคอนเทนต์ PDP', ar: 'لإنشاء محتوى صفحة المنتج' },
+  'Shopee: ~{n}/{m} images': { de: 'Shopee: ~{n}/{m} Bilder', th: 'Shopee: ~{n}/{m} รูป', ar: 'Shopee: ~{n}/{m} صور' },
+  '⚠ Shopee: {n}/{m} images — about {h}px too long. Delete sections with Edit until it fits.': {
+    de: '⚠ Shopee: {n}/{m} Bilder — etwa {h}px zu lang. Löschen Sie mit „Bearbeiten“ Abschnitte, bis es passt.',
+    th: '⚠ Shopee: {n}/{m} รูป — ยาวเกินประมาณ {h}px ใช้ "แก้ไข" ลบบางส่วนจนกว่าจะพอดี',
+    ar: '⚠ Shopee: {n}/{m} صور — أطول بنحو {h}px. احذف بعض الأقسام باستخدام "تعديل" حتى يتناسب.' },
+  'Shopee accepts up to {m} images, but this export has {n}. Delete some sections with Edit, then download again.': {
+    de: 'Shopee akzeptiert bis zu {m} Bilder, dieser Export hat {n}. Löschen Sie mit „Bearbeiten“ einige Abschnitte und laden Sie erneut herunter.',
+    th: 'Shopee รับได้สูงสุด {m} รูป แต่ไฟล์นี้มี {n} รูป ใช้ "แก้ไข" ลบบางส่วนแล้วดาวน์โหลดอีกครั้ง',
+    ar: 'يقبل Shopee حتى {m} صور، لكن هذا التصدير يحتوي على {n}. احذف بعض الأقسام باستخدام "تعديل" ثم نزّل مرة أخرى.' },
   'Slices': { de: 'Abschnitte', th: 'จำนวนส่วน', ar: 'الأجزاء' },
   'Output width': { de: 'Ausgabebreite', th: 'ความกว้างไฟล์', ar: 'عرض الإخراج' },
   'LG.com Product Page URL': { de: 'URL der LG.com-Produktseite', th: 'URL หน้าสินค้า LG.com', ar: 'رابط صفحة المنتج على LG.com' },

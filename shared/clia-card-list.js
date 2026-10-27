@@ -15,19 +15,23 @@
     en: { title: (n) => `Content cards (${n})`, full: 'View full lg.com page', hint: 'Drag cards to reorder — the preview on the left follows the same order. Click a thumbnail to see the original image(s).',
           imgs: (n) => `${n} image${n === 1 ? '' : 's'}`, untitled: '(no title)', capturing: 'Capturing the lg.com page… (usually 10–40 s)',
           capTitle: 'Snap, snap!', capTips: ['Working hard to capture the lg.com product page…', 'Scrolling down the page, one screen at a time', 'Waiting for every product image to load', 'Long pages take a little longer — almost there!'], capNote: 'Usually 10–40 s',
-          failed: 'Could not capture the page.', retry: 'Try again', open: 'Open lg.com', empty: 'No cards yet.', close: 'Close' },
+          failed: 'Could not capture the page.', retry: 'Try again', open: 'Open lg.com', empty: 'No cards yet.', close: 'Close',
+          del: 'Delete card', delQ: (n) => `Delete card ${n}?`, delMsg: 'Are you sure? It will also be removed from the preview on the left. To get it back, generate the content again.', cancel: 'Cancel', delOk: 'Delete' },
     ko: { title: (n) => `컨텐츠 카드 (${n})`, full: '전체 lg.com 컨텐츠 확인하기', hint: '카드를 끌어서 순서를 바꾸면 왼쪽 미리보기에도 같은 순서로 반영됩니다. 썸네일을 누르면 원본 이미지를 볼 수 있습니다.',
           imgs: (n) => `이미지 ${n}장`, untitled: '(제목 없음)', capturing: 'lg.com 페이지 캡처 중… (보통 10~40초)',
           capTitle: '찰칵, 찰칵!', capTips: ['lg.com 제품 페이지를 열심히 캡처하고 있어요…', '페이지를 위에서 아래로 한 화면씩 훑는 중이에요', '제품 이미지가 모두 뜰 때까지 기다리는 중이에요', '긴 페이지는 조금 더 걸려요. 거의 다 왔어요!'], capNote: '보통 10~40초 걸려요',
-          failed: '페이지를 캡처하지 못했습니다.', retry: '다시 시도', open: 'lg.com 열기', empty: '아직 카드가 없습니다.', close: '닫기' },
+          failed: '페이지를 캡처하지 못했습니다.', retry: '다시 시도', open: 'lg.com 열기', empty: '아직 카드가 없습니다.', close: '닫기',
+          del: '카드 삭제', delQ: (n) => `${n}번 카드를 지울까요?`, delMsg: '정말 지우시겠어요? 왼쪽 미리보기에서도 함께 사라지며, 되살리려면 컨텐츠를 다시 생성해야 합니다.', cancel: '취소', delOk: '삭제' },
     de: { title: (n) => `Inhaltskarten (${n})`, full: 'Gesamte lg.com-Seite ansehen', hint: 'Karten ziehen, um die Reihenfolge zu ändern — die Vorschau links folgt. Vorschaubild anklicken für das Originalbild.',
           imgs: (n) => `${n} Bild${n === 1 ? '' : 'er'}`, untitled: '(ohne Titel)', capturing: 'lg.com-Seite wird erfasst… (meist 10–40 s)',
           capTitle: 'Klick, klick!', capTips: ['Wir erfassen fleißig die lg.com-Produktseite…', 'Die Seite wird Bildschirm für Bildschirm gescrollt', 'Warten, bis alle Produktbilder geladen sind', 'Lange Seiten dauern etwas länger — fast geschafft!'], capNote: 'Meist 10–40 s',
-          failed: 'Seite konnte nicht erfasst werden.', retry: 'Erneut versuchen', open: 'lg.com öffnen', empty: 'Noch keine Karten.', close: 'Schließen' },
+          failed: 'Seite konnte nicht erfasst werden.', retry: 'Erneut versuchen', open: 'lg.com öffnen', empty: 'Noch keine Karten.', close: 'Schließen',
+          del: 'Karte löschen', delQ: (n) => `Karte ${n} löschen?`, delMsg: 'Wirklich löschen? Sie wird auch aus der Vorschau links entfernt. Um sie zurückzuholen, Inhalte neu erstellen.', cancel: 'Abbrechen', delOk: 'Löschen' },
     th: { title: (n) => `การ์ดคอนเทนต์ (${n})`, full: 'ดูหน้า lg.com ทั้งหมด', hint: 'ลากการ์ดเพื่อจัดลำดับใหม่ — ตัวอย่างด้านซ้ายจะเรียงตามลำดับเดียวกัน คลิกภาพย่อเพื่อดูรูปต้นฉบับ',
           imgs: (n) => `${n} รูป`, untitled: '(ไม่มีหัวข้อ)', capturing: 'กำลังจับภาพหน้า lg.com… (ปกติ 10–40 วินาที)',
           capTitle: 'แชะ แชะ!', capTips: ['กำลังตั้งใจจับภาพหน้าสินค้า lg.com…', 'กำลังเลื่อนหน้าลงทีละหน้าจอ', 'รอให้รูปสินค้าโหลดครบทุกรูป', 'หน้ายาวอาจใช้เวลานานขึ้นนิดหน่อย — ใกล้เสร็จแล้ว!'], capNote: 'ปกติ 10–40 วินาที',
-          failed: 'จับภาพหน้าไม่สำเร็จ', retry: 'ลองอีกครั้ง', open: 'เปิด lg.com', empty: 'ยังไม่มีการ์ด', close: 'ปิด' },
+          failed: 'จับภาพหน้าไม่สำเร็จ', retry: 'ลองอีกครั้ง', open: 'เปิด lg.com', empty: 'ยังไม่มีการ์ด', close: 'ปิด',
+          del: 'ลบการ์ด', delQ: (n) => `ลบการ์ดที่ ${n} ใช่ไหม?`, delMsg: 'แน่ใจหรือไม่? การ์ดจะถูกลบออกจากตัวอย่างด้านซ้ายด้วย หากต้องการคืน ต้องสร้างคอนเทนต์ใหม่', cancel: 'ยกเลิก', delOk: 'ลบ' },
   };
   const tr = () => T[(window.CLIA_LANG || document.documentElement.lang || 'en').slice(0, 2)] || T.en;
   const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -68,6 +72,31 @@
     document.addEventListener('keydown', key);
     document.body.appendChild(ov);
     return ov;
+  }
+
+  // 카드 삭제 확인 — "정말 지우시겠어요?" (되돌리기가 없으므로 실수 방지, 기본 포커스는 취소)
+  function confirmDelete(title, msg) {
+    const t = tr();
+    return new Promise((resolve) => {
+      const ov = document.createElement('div');
+      ov.style.cssText = 'position:fixed;inset:0;z-index:2147483500;background:rgba(38,38,38,.45);display:flex;align-items:center;justify-content:center;padding:24px;';
+      ov.innerHTML = `<div role="alertdialog" aria-modal="true" style="width:min(380px,100%);background:#fff;border-radius:24px;padding:28px 28px 22px;text-align:center;box-shadow:0 24px 64px rgba(38,38,38,.25);font:14px/1.4 ${FONT};color:#111;">
+        <div style="width:52px;height:52px;border-radius:50%;margin:0 auto 14px;background:#FFECEB;color:#FD312E;display:flex;align-items:center;justify-content:center;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></div>
+        <div style="font-size:18px;font-weight:700;margin-bottom:8px;">${esc(title)}</div>
+        <div style="font-size:13px;line-height:1.6;color:#6B6B6B;margin-bottom:20px;">${esc(msg)}</div>
+        <div style="display:flex;gap:8px;">
+          <button type="button" data-a="0" style="flex:1;height:40px;border-radius:999px;border:1px solid #CFCAC0;background:#fff;color:#262626;font:600 14px/1 ${FONT};cursor:pointer;">${esc(t.cancel)}</button>
+          <button type="button" data-a="1" style="flex:1;height:40px;border-radius:999px;border:1px solid #FD312E;background:#FD312E;color:#fff;font:600 14px/1 ${FONT};cursor:pointer;">${esc(t.delOk)}</button>
+        </div></div>`;
+      const done = (v) => { ov.remove(); window.removeEventListener('keydown', key, true); resolve(v); };
+      const key = (e) => { if (e.key === 'Escape') { e.stopImmediatePropagation(); e.preventDefault(); done(false); } };
+      ov.addEventListener('mousedown', (e) => { if (e.target === ov) done(false); });
+      ov.querySelectorAll('[data-a]').forEach((b) => { b.onclick = () => done(b.dataset.a === '1'); });
+      window.addEventListener('keydown', key, true);
+      document.body.appendChild(ov);
+      ov.querySelector('[data-a="0"]').focus();
+    });
   }
 
   // 원본 이미지 (여러 장이면 하단 ‹ 1/3 ›)
@@ -261,7 +290,7 @@
       const item = document.createElement('div');
       item.className = 'clia-card-item';
       item._card = card;
-      item.style.cssText = `display:flex;gap:12px;align-items:center;padding:10px;margin-bottom:8px;background:#fff;border:1px solid #E6E1D6;border-radius:12px;cursor:grab;user-select:none;touch-action:none;font:13px/1.35 ${FONT};`;
+      item.style.cssText = `position:relative;display:flex;gap:12px;align-items:center;padding:10px 40px 10px 10px;margin-bottom:8px;background:#fff;border:1px solid #E6E1D6;border-radius:12px;cursor:grab;user-select:none;touch-action:none;font:13px/1.35 ${FONT};`;
       const thumb = info.imgs[0]
         ? `<img src="${esc(info.imgs[0])}" alt="" data-thumb style="width:88px;height:66px;object-fit:cover;border-radius:8px;flex-shrink:0;cursor:zoom-in;background:#F2F2F2;">`
         : `<div style="width:88px;height:66px;border-radius:8px;flex-shrink:0;background:#F2F2F2;display:flex;align-items:center;justify-content:center;color:#BBB;font-size:11px;">Text</div>`;
@@ -271,6 +300,23 @@
           ${info.body ? `<div style="color:#666;font-size:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${esc(info.body)}</div>` : ''}
           <div style="color:#999;font-size:11px;margin-top:2px;">${t.imgs(info.imgs.length)}</div>
         </div>`;
+      // 오른쪽 위 ✕ → 확인 후 미리보기에서 카드 삭제 (목록은 MutationObserver 로 다시 그려짐)
+      const x = document.createElement('button');
+      x.type = 'button'; x.title = t.del; x.setAttribute('aria-label', t.del);
+      x.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+      x.style.cssText = 'position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;border:none;background:transparent;color:#A8A49C;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;transition:background .15s,color .15s;';
+      x.onmouseenter = () => { x.style.background = '#FFECEB'; x.style.color = '#FD312E'; item.style.borderColor = '#FD312E'; };
+      x.onmouseleave = () => { x.style.background = 'transparent'; x.style.color = '#A8A49C'; item.style.borderColor = '#E6E1D6'; };
+      x.addEventListener('pointerdown', (e) => e.stopPropagation());   // 끌기 시작 방지
+      x.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (!(await confirmDelete(t.delQ(idx + 1), t.delMsg))) return;
+        if (!card.isConnected) return;
+        card.remove();
+        if (st.opts.onChange) st.opts.onChange(st.opts.frame);   // 잠금 상태면 결과 HTML 갱신
+        render(st);
+      });
+      item.appendChild(x);
       const th = item.querySelector('[data-thumb]');
       if (th) th.addEventListener('click', (e) => { e.stopPropagation(); if (!st.moved) imagePopup(info.imgs, 0); });
       item.addEventListener('pointerdown', (e) => onDown(st, item, e));

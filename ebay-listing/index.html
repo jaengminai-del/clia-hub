@@ -880,7 +880,7 @@ function makeImageEditable(img) {
     const reframeBtn = document.createElement('button');
     reframeBtn.className = 'edit-reframe-btn';
     reframeBtn.textContent = '🎬 Reselect Frame';
-    reframeBtn.style.cssText = `position:absolute;top:44px;left:10px;z-index:20;
+    reframeBtn.style.cssText = `position:absolute;top:76px;left:10px;z-index:20;
       padding:4px 10px;border:none;border-radius:4px;
       background:rgba(229,50,56,.9);color:#fff;font-size:11px;font-weight:600;
       cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.4);`;
@@ -900,15 +900,32 @@ function makeImageEditable(img) {
     const ox = img.offsetLeft, oy = img.offsetTop, ow = img.offsetWidth, oh = img.offsetHeight;
     if (!W || !H || !ow || !oh) return;
     // 원래부터 틀보다 작은 이미지(가운데 놓인 로고 등)는 틀을 채우는 대상이 아님 → 예전처럼 30%~500% 자유
-    if (ow < W - 1 || oh < H - 1) { state.scale = Math.min(5, Math.max(0.3, state.scale)); return; }
-    state.scale = Math.min(5, Math.max(state.scale, W / ow, H / oh));
+    if (ow < W - 1 || oh < H - 1) { state.scale = Math.min(5, Math.max(0.3, state.scale)); state.gap = false; return; }
+    // 틀을 채우는 이미지도 30%까지 줄일 수 있다 (Amazon 과 같게) — 줄여서 생긴 빈 곳은 가장자리 평균색으로 채움
+    state.scale = Math.min(5, Math.max(0.3, state.scale));
     const s = state.scale, cx = ox + ow / 2, cy = oy + oh / 2;
-    state.tx = Math.min(ow / 2 - cx / s, Math.max((W - cx) / s - ow / 2, state.tx));
-    state.ty = Math.min(oh / 2 - cy / s, Math.max((H - cy) / s - oh / 2, state.ty));
+    // 축마다: 이미지가 틀보다 크면 빈 곳이 안 생기게, 작으면 틀 밖으로 나가지 않게 (두 경계식이 서로 자리만 바뀜)
+    const ax = (ow * s / 2 - cx) / s, bx = (W - ow * s / 2 - cx) / s;
+    const ay = (oh * s / 2 - cy) / s, by = (H - oh * s / 2 - cy) / s;
+    state.tx = Math.min(Math.max(ax, bx), Math.max(Math.min(ax, bx), state.tx));
+    state.ty = Math.min(Math.max(ay, by), Math.max(Math.min(ay, by), state.ty));
+    state.gap = ow * s < W - 1 || oh * s < H - 1;
+  }
+  // 빈 곳이 생기면 틀 배경 = 이미지 가장자리 평균색, 다시 꽉 차면 원래 배경 (래퍼 인라인 스타일이라 잠금 후 HTML·슬라이스에도 남음)
+  if (wrap._bg0 === undefined) wrap._bg0 = wrap.style.backgroundColor;
+  function gapFill() {
+    if (!state.gap) { wrap.style.backgroundColor = wrap._bg0; return; }
+    if (wrap._edgeBg) { wrap.style.backgroundColor = wrap._edgeBg; return; }
+    if (window.CLIAZoomBar && CLIAZoomBar.edgeColor) CLIAZoomBar.edgeColor(img.currentSrc || img.src, API_BASE).then((c) => {
+      if (!c) return;
+      wrap._edgeBg = c;
+      if (state.gap) wrap.style.backgroundColor = c;
+    });
   }
   function applyTransform() {
     clampToFrame();
     img.style.transform = `scale(${state.scale}) translate(${state.tx}px, ${state.ty}px)`;
+    gapFill();
     if (zbar) zbar.update();
   }
   wrap._editApply = applyTransform;   // 프레임 가장자리를 끌어 크기를 바꾼 뒤 다시 맞춤

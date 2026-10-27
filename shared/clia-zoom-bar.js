@@ -6,6 +6,7 @@
  *     corner: 'bottom-right'(기본, Amazon — 모듈 높이 고정) | 'top-left'(eBay·Shopee — 세로로 긴 이미지도 바로 보이게)
  *   wrap.appendChild(bar.el); 값이 바뀔 때마다 bar.update()
  *   CLIAZoomBar.wheelStep(ev, el) → +1 / -1 / 0 : 휠·트랙패드도 5% 단위 (움직인 양을 모아 한 단계씩)
+ *   CLIAZoomBar.edgeColor(src, apiBase) → Promise<'rgb(..)'|null> : 축소로 생긴 빈 곳을 채울 이미지 가장자리 평균색
  *
  * 막대는 편집 UI 다 — 잠글 때 각 빌더가 '.img-zoom-bar' 를 지운다 (결과 HTML·다운로드에 남지 않음).
  */
@@ -31,7 +32,8 @@
   function create(opts) {
     const bar = document.createElement('div');
     bar.className = 'img-zoom-bar';
-    const pos = opts.corner === 'top-left' ? 'left:10px;top:10px;' : 'right:14px;bottom:14px;';
+    // top-left: 카드 왼쪽 위의 "Delete card"·↺ 버튼(top 8px, 높이 26px)을 가리지 않게 그 아래 줄에 둔다
+    const pos = opts.corner === 'top-left' ? 'left:10px;top:42px;' : 'right:14px;bottom:14px;';
     bar.style.cssText = 'position:absolute;' + pos + 'z-index:70;display:inline-flex;align-items:center;gap:2px;'
       + 'padding:3px 6px;border-radius:8px;background:rgba(20,20,20,.78);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.25);'
       + "font:600 12px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;user-select:none;pointer-events:auto;";
@@ -75,7 +77,40 @@
     return d;
   }
 
-  window.CLIAZoomBar = { create, wheelStep, STEP };
+  // 이미지 가장자리 평균색 — 100% 아래로 줄여 생긴 빈 곳을 채우는 색 (Amazon _edgeColor 와 같은 규칙: 24×24 로 줄여 바깥 2줄 평균)
+  //   직접 읽기(CORS 허용 이미지) → 안 되면 서버 중계(/api/proxy-image) → 그래도 안 되면 null
+  const edgeCache = new Map();
+  function sample(url) {
+    return new Promise((resolve) => {
+      const im = new Image();
+      im.crossOrigin = 'anonymous';
+      im.onload = () => {
+        try {
+          const N = 24, cv = document.createElement('canvas'); cv.width = cv.height = N;
+          const cx = cv.getContext('2d'); cx.drawImage(im, 0, 0, N, N);
+          const d = cx.getImageData(0, 0, N, N).data; let r = 0, g = 0, b = 0, n = 0;
+          for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+            if (x > 1 && x < N - 2 && y > 1 && y < N - 2) continue;   // 바깥 2줄만
+            const i = (y * N + x) * 4; r += d[i]; g += d[i + 1]; b += d[i + 2]; n++;
+          }
+          resolve(`rgb(${Math.round(r / n)},${Math.round(g / n)},${Math.round(b / n)})`);
+        } catch (e) { resolve(null); }   // 캔버스 오염(CORS 미허용)
+      };
+      im.onerror = () => resolve(null);
+      im.src = url;
+    });
+  }
+  function edgeColor(src, apiBase) {
+    if (!src) return Promise.resolve(null);
+    if (!edgeCache.has(src)) {
+      const remote = /^https?:/.test(src) && !src.startsWith(location.origin);
+      edgeCache.set(src, sample(src).then((c) => c || (remote
+        ? sample(`${apiBase || ''}/api/proxy-image?url=${encodeURIComponent(src)}`) : null)));
+    }
+    return edgeCache.get(src);
+  }
+
+  window.CLIAZoomBar = { create, wheelStep, edgeColor, STEP };
 })();
 
 /**

@@ -116,7 +116,8 @@ def _int(v, default):
 def options(req: dict) -> dict:
     """요청 값 정리. medium 이 있으면 매체 spec.json 의 slices 를 기본값으로 쓴다."""
     defaults = {"count": 6, "output_width": None, "format": "jpeg", "quality": 88, "viewport_px": 1600,
-                "max_slice_height": None, "max_bytes": None, "min_quality": 60}
+                "max_slice_height": None, "max_height_ratio": None, "min_slice_height": None,
+                "max_bytes": None, "min_quality": 60}
     medium = req.get("medium")
     if isinstance(medium, str) and re.fullmatch(r"[a-z_]{2,32}", medium):
         try:
@@ -135,6 +136,8 @@ def options(req: dict) -> dict:
     name = re.sub(r"[^a-zA-Z0-9_-]", "-", str(req.get("name") or "pdp"))[:60] or "pdp"
     return {"n": n, "vw": vw, "ow": ow, "fmt": fmt, "q": q, "name": name,
             "max_h": _int(defaults.get("max_slice_height"), 0) or 0,
+            "max_ratio": float(defaults.get("max_height_ratio") or 0),     # 한 장 높이 ≤ 폭 × 이 값 (Shopee 비율 0.5 → spec 1.95)
+            "min_h": _int(defaults.get("min_slice_height"), 0) or 0,
             "max_bytes": _int(defaults.get("max_bytes"), 0) or 0,
             "min_q": _int(defaults.get("min_quality"), 60) or 60}
 
@@ -241,15 +244,27 @@ def render(req: dict, zip_path: Path) -> dict:
                 raise ValueError("렌더 높이가 0 — HTML이 비어있는지 확인하세요")
             # 2) 선명도: 콘텐츠 폭이 좁으면 배율을 올려 촬영 (outputWidth 지정 시 그 폭, 없으면 ×2)
             scale = max(0.5, min(ow / layout["contentWidth"], 4)) if ow else 2
-            span = o["max_h"] / scale if o["max_h"] else 0          # 한 장 최대 높이 (CSS px)
+            # 한 장 최대 출력 높이: max_h 와 (폭 × max_ratio) 중 작은 값 — Shopee 는 세로가 가로의 2배를 넘으면 업로드 거부
+            max_out_h = o["max_h"]
+            if o["max_ratio"]:
+                ratio_h = int(layout["contentWidth"] * scale * o["max_ratio"])
+                max_out_h = min(max_out_h, ratio_h) if max_out_h else ratio_h
+            span = max_out_h / scale if max_out_h else 0           # 한 장 최대 높이 (CSS px)
             auto = not n
             if auto:
-                # 자동 장수: 출력 이미지 한 장의 높이가 max_h(px)를 넘지 않게 (규격 없으면 6장)
-                n = max(1, min(math.ceil(H * scale / o["max_h"]), 40)) if o["max_h"] else 6
-            cuts = _cuts(layout, n, span if auto else 0)
-            while auto and span and n < 40 and any(b - a > span + 1 for a, b in zip(cuts, cuts[1:])):
+                # 자동 장수: 출력 이미지 한 장의 높이가 max_out_h(px)를 넘지 않게 (규격 없으면 6장)
+                n = max(1, min(math.ceil(H * scale / max_out_h), 40)) if max_out_h else 6
+            # 비율 규칙이 있으면 장수를 직접 정해도 지킨다 (입력한 장수는 최소값, 넘치면 늘림)
+            enforce = auto or bool(o["max_ratio"])
+            cuts = _cuts(layout, n, span if enforce else 0)
+            while enforce and span and n < 40 and any(b - a > span + 1 for a, b in zip(cuts, cuts[1:])):
                 n += 1                                              # 경계 맞춤으로 넘친 장이 있으면 한 장 더
                 cuts = _cuts(layout, n, span)
+            # 마지막 장이 너무 얇으면(Shopee 최소 높이 32px) 앞 장에 합친다 — 합쳐도 최대 높이를 넘지 않을 때만
+            if o["min_h"] and n > 1 and (cuts[-1] - cuts[-2]) * scale < o["min_h"] \
+                    and (not span or cuts[-1] - cuts[-3] <= span + 1):
+                del cuts[-2]
+                n -= 1
             blocks = page.evaluate(_JS_TEXTS)
             if scale != 1:
                 ctx.close()

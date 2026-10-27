@@ -103,10 +103,12 @@
     "_default": "centered_stack"
   },
   "slices": {
-    "_note": "세로 슬라이스 이미지(Shopee·Lazada 업로드용). output_width 1000 = Shopee 셀러센터 상세 이미지 최소 폭. count null = 자동(한 장 높이 ≤ max_slice_height). max_bytes 넘으면 JPEG 화질을 min_quality 까지 낮춤 (Lazada 설명 이미지 1MB 권장, Shopee 2MB 제한).",
+    "_note": "세로 슬라이스 이미지(Shopee·Lazada 업로드용). output_width 1000 = Shopee 셀러센터 상세 이미지 최소 폭. count null = 자동(한 장 높이 ≤ max_slice_height, 그리고 ≤ 폭 × max_height_ratio). Shopee 설명 이미지 규칙: 폭 ≥ 700px, 높이 ≥ 32px, 가로÷세로 0.5~32 (= 세로가 가로의 2배 이하 — 경계값을 피해 1.95배로 자름), 2MB 이하. max_bytes 넘으면 JPEG 화질을 min_quality 까지 낮춤 (Lazada 설명 이미지 1MB 권장, Shopee 2MB 제한).",
     "count": null,
     "output_width": 1000,
     "max_slice_height": 3000,
+    "max_height_ratio": 1.95,
+    "min_slice_height": 40,
     "max_bytes": 1000000,
     "min_quality": 60,
     "format": "jpeg",
