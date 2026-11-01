@@ -34,23 +34,36 @@ def _save(d: dict) -> None:
         pass
 
 
-def _compute(url: str):
+def _compute(url: str, logo: bool = False):
     from image_crop import fetch_image, find_edge_frame_crop
     im = fetch_image(url)
     if im is None:
         return "fail"                     # 받기 실패는 캐시하지 않는다 (다음에 다시 시도)
+    if logo:   # 로고: 둘레 여백만 정확히 (모서리 추가 자르기 없음) — 로고 실제 크기를 알기 위해 원본 크기는 항상 기록
+        c = find_edge_frame_crop(im, corner_inset=0.0, min_band=0.004, min_keep=0.2)
+        return dict(c or {"x": 0, "y": 0, "w": 1, "h": 1, "iw": im.width, "ih": im.height}, kind="logo")
     c = find_edge_frame_crop(im)
     return dict(c, kind="edge_trim") if c else None
 
 
-def edge_trims(urls: list) -> dict:
-    """{url: crop | None}. 캐시에 없는 URL 은 병렬로 받아 계산."""
+def _trims(urls: list, logo: bool) -> dict:
     cache = _load()
-    todo = [u for u in dict.fromkeys(urls) if u and u not in cache]
+    key = (lambda u: "logo:" + u) if logo else (lambda u: u)
+    todo = [u for u in dict.fromkeys(urls) if u and key(u) not in cache]
     if todo:
         with ThreadPoolExecutor(max_workers=8) as ex:
-            for u, c in zip(todo, ex.map(_compute, todo)):
+            for u, c in zip(todo, ex.map(lambda x: _compute(x, logo), todo)):
                 if c != "fail":
-                    cache[u] = c
+                    cache[key(u)] = c
         _save(cache)
-    return {u: cache.get(u) for u in urls}
+    return {u: cache.get(key(u)) for u in urls}
+
+
+def edge_trims(urls: list) -> dict:
+    """{url: crop | None}. 캐시에 없는 URL 은 병렬로 받아 계산."""
+    return _trims(urls, False)
+
+
+def logo_trims(urls: list) -> dict:
+    """수상·인증 로고 파일의 실제 로고 영역 {url: {x,y,w,h,iw,ih} | None(받기 실패)} — 로고 카드 크기 통일용."""
+    return _trims(urls, True)

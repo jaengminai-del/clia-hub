@@ -209,6 +209,25 @@ def _frame_img(image_url: str, win: dict, alt: str) -> str:
             f'max-width: none; height: auto; margin-left: -{x / w * 100:.2f}%; margin-top: -{y * ratio / w * 100:.2f}%;"></div>')
 
 
+def _logo_fit(image_url: str, alt: str, ratio: float, fill: float, bg: str, trim: dict = None) -> str:
+    """수상·인증 로고 파일을 칸(가로/세로 = ratio) 가운데에 — 둘레 여백을 뺀 실제 로고가 칸의 fill 안에 꼭 맞게.
+    로고마다 파일 여백·비율이 달라도 같은 크기로 보인다 (2026-11-01). trim 이 없으면(이미지 받기 실패) 여백 포함 contain."""
+    if not (trim and trim.get("iw") and trim.get("ih")):
+        pad = (1 - fill) / 2 * 100
+        return (f'<div style="position: relative; width: 100%; padding-top: {100 / ratio:.2f}%; overflow: hidden; background: {bg};">'
+                f'<img src="{image_url}" alt="{escape(alt)}" style="position: absolute; top: {pad:.2f}%; left: {pad:.2f}%; '
+                f'width: {fill * 100:.2f}%; height: {fill * 100:.2f}%; max-width: none; object-fit: contain;"></div>')
+    iw, ih = trim["iw"], trim["ih"]
+    cw, ch = trim["w"] * iw, trim["h"] * ih                 # 실제 로고 크기 (px)
+    W, H = 1.0, 1.0 / ratio                                 # 칸 크기 (칸 폭 = 1)
+    s = min(fill * W / cw, fill * H / ch)                   # 로고가 칸의 fill 안에 맞는 배율
+    left = W / 2 - (trim["x"] * iw + cw / 2) * s
+    top = H / 2 - (trim["y"] * ih + ch / 2) * s
+    return (f'<div style="position: relative; width: 100%; padding-top: {H * 100:.2f}%; overflow: hidden; background: {bg};">'
+            f'<img src="{image_url}" alt="{escape(alt)}" style="position: absolute; left: {left * 100:.2f}%; top: {top / H * 100:.2f}%; '
+            f'width: {iw * s * 100:.2f}%; height: auto; max-width: none;"></div>')
+
+
 def award_card(st: Style, image_url: str, lines: list, component_id: str = "", crop: dict = None) -> str:
     """수상·인증 배지 카드 — 일반 가로형 카드와 같은 칸(이미지 폭 card.image_width, 비율 award.frame_ratio).
     · 배너에서 잘라 낸 배지(crop): 배지가 가운데 오게 주변 배경까지 칸을 채움
@@ -230,9 +249,9 @@ def award_card(st: Style, image_url: str, lines: list, component_id: str = "", c
     if crop and crop.get("iw") and crop.get("ih"):
         logo = _frame_img(image_url, _badge_window(crop, ratio, float(aw.get("badge_fill", 0.85))), title)
     else:
-        logo = (f'<div style="position: relative; width: 100%; padding-top: {100 / ratio:.2f}%; overflow: hidden; '
-                f'background: {aw.get("frame_bg", "#FFFFFF")};"><img src="{image_url}" alt="{escape(title)}" '
-                f'style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; max-width: none; object-fit: contain;"></div>')
+        from .edge_trim import logo_trims
+        trim = logo_trims([image_url]).get(image_url) if aw.get("logo_fit", True) else None
+        logo = _logo_fit(image_url, title, ratio, float(aw.get("logo_fill", 0.8)), aw.get("frame_bg", "#FFFFFF"), trim)
     return f'''
 <div class="lg-hcard lg-award" style="display: flex; align-items: center; gap: 24px; background: #FFFFFF; border: 1px solid {st.stroke}; border-radius: 16px; overflow: hidden;">
   <div class="lg-award-logo" style="flex: 0 0 {img_w}; max-width: {img_w};">{logo}</div>

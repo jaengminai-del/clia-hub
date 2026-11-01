@@ -35,8 +35,13 @@ except Exception:                       # 파서 구버전 폴백
 AWARD_IDS = {"ST0053"}                  # Award 컴포넌트 (수상·인증·보증 배지 슬라이드)
 
 
+# 언론 시험·평가 인증(테스트 씰) 파일명 — 독일 등 매체 시험 결과 로고 (Testsiegel·Testurteil·Testsieger·Best Picks)
+TEST_SEAL_RE = re.compile(r"test[-_ %20]*(siegel|urteil|sieger)|best[-_ %20]*picks?", re.I)
+
+
 def _is_award_url(u: str) -> bool:
-    return bool(AWARD_FILE_RE.search((u or "").split("?")[0].rsplit("/", 1)[-1]))
+    name = (u or "").split("?")[0].rsplit("/", 1)[-1]
+    return bool(AWARD_FILE_RE.search(name) or TEST_SEAL_RE.search(name))
 
 
 def _is_award_media(m: dict) -> bool:
@@ -199,4 +204,27 @@ def build_blocks(mirror: dict, rules: dict) -> list:
         award = bool(rules.get("unify_awards")) and bool(um) and (
             s.get("component_id") in AWARD_IDS or all(_is_award_media(m) for m in um))
         blocks.append({"kind": "section", "section": s, "kv": kv and not award, "award": award})
+    if rules.get("unify_awards"):
+        _spread_award_rows(blocks)
     return blocks
+
+
+def _spread_award_rows(blocks: list) -> None:
+    """같은 컴포넌트가 연달아 놓인 '이미지 1장 + 텍스트' 섹션 묶음에 수상·시험 인증 로고가 하나라도 있으면
+    묶음 전체를 같은 로고 카드 양식으로 (매체 로고 목록: 파일명에 award 가 없는 로고도 같은 양식·크기로, 2026-11-01)."""
+    def one_logo(b):
+        s = b.get("section") or {}
+        return (b["kind"] == "section" and len(usable_media(s)) == 1 and not s.get("text_overlay")
+                and s.get("layout_type") in ("image_text_left", "image_text_right", "image_text", "card"))
+    i = 0
+    while i < len(blocks):
+        j = i
+        if one_logo(blocks[i]):
+            cid = blocks[i]["section"].get("component_id")
+            while j + 1 < len(blocks) and one_logo(blocks[j + 1]) and blocks[j + 1]["section"].get("component_id") == cid:
+                j += 1
+            run = blocks[i:j + 1]
+            if len(run) >= 2 and any(b["award"] for b in run):
+                for b in run:
+                    b["award"], b["kv"] = True, False
+        i = j + 1

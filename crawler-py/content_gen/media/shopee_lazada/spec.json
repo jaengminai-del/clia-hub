@@ -47,6 +47,9 @@
     "_note2": "배너에서 잘라 낸 배지: 배지가 가운데(칸 높이의 badge_fill) 오게 주변 배경까지 칸을 채움. 배지 파일: 칸 안에 전체 + 여백 frame_bg.",
     "frame_ratio": 1.5,
     "badge_fill": 0.85,
+    "_note3": "로고 파일(배지 파일): 둘레 여백을 뺀 실제 로고가 칸의 logo_fill 안에 꼭 맞게 — 로고마다 같은 크기 (logo_fit=false 면 예전처럼 칸 전체 contain)",
+    "logo_fit": true,
+    "logo_fill": 0.8,
     "frame_bg": "#FFFFFF",
     "_legacy": {"logo_column_width": "30%", "logo_max_px": 180, "logo_padding_px": 24}
   },
