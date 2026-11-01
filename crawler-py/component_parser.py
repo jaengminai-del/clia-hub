@@ -179,6 +179,7 @@ class ParsedComponent:
     column_count: int = 0                      # DOM이 선언한 컬럼 수(column-N 클래스). 0=미선언
     wrapper_classes: List[str] = field(default_factory=list)  # c-wrapper 수식 클래스 (no-spacing·bg-*·width-* 등)
     text_overlay: Optional[Dict[str, str]] = None  # 텍스트가 이미지 위 div 로 떠 있음 {pc: left|right|center, mobile: top|bottom|middle}
+    award_list: bool = False                   # 수상·매체 평가 로고 목록 캐러셀(ST0049 안의 ST0013 슬라이드)의 한 장
 
     def to_dict(self) -> Dict[str, Any]:
         """딕셔너리 변환"""
@@ -190,6 +191,7 @@ class ParsedComponent:
             "column_count": self.column_count,
             **({} if LEGACY else {"wrapper_classes": self.wrapper_classes}),
             **({"text_overlay": self.text_overlay} if (self.text_overlay and not LEGACY) else {}),
+            **({"award_list": True} if (self.award_list and not LEGACY) else {}),
             "text_alignment": self.text_alignment.value,
             "background_type": self.background_type,
             "background_value": self.background_value,
@@ -351,11 +353,33 @@ class ComponentParser:
             wrapper_classes=[c for c in classes if c != component_id and c != 'c-wrapper'
                              and re.match(r'^(no-spacing|bg-|width-|margin-)', c)],
             text_overlay=None if LEGACY else self._text_overlay(element),
+            award_list=False if LEGACY else self._award_list(element, component_id),
             text_alignment=text_alignment,
             background_type=bg_type,
             background_value=bg_value,
             elements=elements
         )
+
+    @staticmethod
+    def _award_list(element: Tag, component_id: str) -> bool:
+        """수상·매체 평가 로고를 나열하는 캐러셀의 슬라이드인가 (2026-11-01 사용자 지정).
+        lg.com 구조: ST0049(캐러셀 컨테이너) > 슬라이드마다 ST0013(Side Image: 로고 + 매체명·인용·'Zum Test' 링크).
+        같은 구조가 일반 기능 소개 캐러셀에도 쓰이므로(예: 영국 건조기) 캐러셀 안 어느 슬라이드에든 수상 근거가 있어야 한다:
+          · 로고 이미지가 DAM 수상 폴더(/awards/)에 있음 · 수상 로고 파일명 · 매체 기사(외부 사이트)로 가는 링크"""
+        if component_id != "ST0013":
+            return False
+        box = element.find_parent(class_=re.compile(r"(^|\s)ST0049(\s|$)"))
+        if box is None or not box.select(".cmp-carousel__item, .c-carousel__item"):
+            return False
+        for img in box.find_all(["img", "source"]):
+            src = img.get("src") or img.get("data-src") or (img.get("srcset") or "").split(",")[0]
+            if re.search(r"/awards?/", src or "", re.I) or is_award_media(img):
+                return True
+        for a in box.find_all("a", href=True):
+            host = re.match(r"https?://([^/]+)", a["href"])
+            if host and not re.search(r"(^|\.)(lg\.com|lge\.com)$", host.group(1), re.I):
+                return True
+        return False
 
     @staticmethod
     def _text_overlay(element: Tag) -> Optional[Dict[str, str]]:

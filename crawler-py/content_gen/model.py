@@ -40,8 +40,10 @@ TEST_SEAL_RE = re.compile(r"test[-_ %20]*(siegel|urteil|sieger)|best[-_ %20]*pic
 
 
 def _is_award_url(u: str) -> bool:
-    name = (u or "").split("?")[0].rsplit("/", 1)[-1]
-    return bool(AWARD_FILE_RE.search(name) or TEST_SEAL_RE.search(name))
+    path = (u or "").split("?")[0]
+    name = path.rsplit("/", 1)[-1]
+    # LG DAM 의 수상 폴더(…/awards/…) 이미지 = 수상·매체 평가 로고 (이미 크롤된 제품에도 적용)
+    return bool(AWARD_FILE_RE.search(name) or TEST_SEAL_RE.search(name) or re.search(r"/awards?/", path, re.I))
 
 
 def _is_award_media(m: dict) -> bool:
@@ -202,7 +204,7 @@ def build_blocks(mirror: dict, rules: dict) -> list:
             kv = kv_seen = True
         um = usable_media(s)
         award = bool(rules.get("unify_awards")) and bool(um) and (
-            s.get("component_id") in AWARD_IDS or all(_is_award_media(m) for m in um))
+            s.get("component_id") in AWARD_IDS or s.get("award_list") or all(_is_award_media(m) for m in um))
         blocks.append({"kind": "section", "section": s, "kv": kv and not award, "award": award})
     if rules.get("unify_awards"):
         _spread_award_rows(blocks)
