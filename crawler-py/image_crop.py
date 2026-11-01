@@ -218,6 +218,27 @@ def trim_background(im: Image.Image, skip: str = "", tol: int = 8, content_ratio
     return out
 
 
+def find_edge_frame_crop(im: Image.Image, tol: int = 8, content_ratio: float = 0.03, min_band: float = 0.012,
+                         corner_inset: float = 0.01, min_keep: float = 0.6) -> Optional[dict]:
+    """이미지 둘레의 단색 테두리(모바일 이미지에 들어 있는 베이지 여백 + 둥근 모서리)를 잘라 낸 영역.
+    테두리가 있는 쪽은 테두리 끝에서 corner_inset 만큼 더 안쪽까지 잘라 둥근 모서리 틈의 배경도 없앤다.
+    테두리가 없으면 None."""
+    iw, ih = im.size
+    sw, sh = max(1, iw // 4), max(1, ih // 4)
+    px = im.resize((sw, sh)).load()
+    cut = {}
+    for side in ("top", "bottom", "left", "right"):
+        v = _edge_band(px, sw, sh, side, tol, content_ratio)
+        cut[side] = v + corner_inset if v >= min_band else 0.0
+    for a, z in (("top", "bottom"), ("left", "right")):
+        if 1 - cut[a] - cut[z] < min_keep:
+            cut[a] = cut[z] = 0.0
+    if not any(cut.values()):
+        return None
+    return {"x": round(cut["left"], 4), "y": round(cut["top"], 4), "w": round(1 - cut["left"] - cut["right"], 4),
+            "h": round(1 - cut["top"] - cut["bottom"], 4), "iw": iw, "ih": ih}
+
+
 def annotate_overlay_crops(mirror: dict) -> int:
     """텍스트가 이미지 위에 떠 있던 히어로(section.text_overlay)의 이미지에서 텍스트 자리 빈 배경을 잘라 낼 영역 기록.
       · 모바일 이미지가 있으면: 모바일 텍스트 위치(위·아래) 쪽 빈 띠 → media.mobile_crop (+ use_mobile)

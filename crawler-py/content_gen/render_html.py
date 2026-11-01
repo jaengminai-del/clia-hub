@@ -522,13 +522,20 @@ def prefer_mobile_media(st: Style, section: dict) -> dict:
     ov = section.get("text_overlay") or {}
     if st.overlay_image.get("mode", "mobile_crop") == "pc" or ov.get("pc") not in ("left", "right"):
         return section
+    swap = lambda m: (m.get("type", "image") == "image" and m.get("mobile_url") and m.get("mobile_url") != m.get("pc_url")
+                      and (m.get("crop") or {}).get("kind") != "badge")
+    # 빈 띠 자르기(mobile_crop)가 없는 모바일 이미지는 둘레의 단색 테두리(베이지 여백·둥근 모서리)를 잘라 낸다
+    trims = {}
+    if st.overlay_image.get("edge_trim", True):
+        from .edge_trim import edge_trims
+        trims = edge_trims([m["mobile_url"] for m in section.get("media", []) if swap(m) and not m.get("mobile_crop")])
     media = []
     for m in section.get("media", []):
-        mob = m.get("mobile_url")
-        if (m.get("type", "image") == "image" and mob and mob != m.get("pc_url")
-                and (m.get("crop") or {}).get("kind") != "badge"):
+        if swap(m):
+            mob = m["mobile_url"]
+            crop = m.get("mobile_crop") or trims.get(mob)
             m = {k: v for k, v in m.items() if k != "width"}          # PC 픽셀 폭은 모바일 이미지에 맞지 않음
-            m.update(pc_url=mob, unified_url="", use_mobile=True, crop=m.get("mobile_crop"))
+            m.update(pc_url=mob, unified_url="", use_mobile=True, crop=crop, mobile_crop=crop)
         media.append(m)
     return dict(section, media=media)
 
