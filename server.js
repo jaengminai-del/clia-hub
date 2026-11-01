@@ -2063,7 +2063,7 @@ app.post('/api/ebay-generate', async (req, res) => {
             fs.writeFileSync(lf, JSON.stringify(listing));
             args.push('--listing', lf);
           }
-          execFileSync(py, args, { timeout: 60 * 1000 });
+          execFileSync(py, args, { timeout: 120 * 1000 });   // 첫 생성은 로고·테두리 계산용 이미지 받기 포함
           const html = fs.readFileSync(path.join(slugDir, outName), 'utf8');
           console.log(`[ebay-generate] CCG 빌더 렌더 완료 (${medium}, ${html.length} chars)`);
           return res.json({ success: true, html, charCount: html.length, engine: 'ccg', medium, listingVersion: listing ? listing.v : null });

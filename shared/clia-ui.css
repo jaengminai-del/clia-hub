@@ -267,6 +267,20 @@ body.clia-hub button, body.clia-hub input, body.clia-hub select, body.clia-hub t
 .clia-hub .geo-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
 .clia-hub .lh h2 { display: flex; align-items: baseline; gap: 6px; }
 
+/* 2026-11-02: 제품 목록 — 화면 폭에 맞춰 반응형, 좌우 스크롤 없음 (열 폭 고정 · 카테고리는 모델명 아래 줄) */
+.clia-hub .left { width: clamp(420px, 32vw, 600px); min-width: 420px; }
+.clia-hub .lt-wrap { overflow-x: hidden; }
+.clia-hub .lt { width: 100%; table-layout: fixed; }
+.clia-hub .lt th:nth-child(1), .clia-hub .lt td:nth-child(1) { width: 68px; padding-left: 20px; }
+.clia-hub .lt th:nth-child(2), .clia-hub .lt td:nth-child(2) { width: 46px; }
+.clia-hub .lt th:nth-child(4), .clia-hub .lt td:nth-child(4) { width: 80px; }
+.clia-hub .lt th:nth-child(5), .clia-hub .lt td:nth-child(5) { width: 104px; text-align: right; padding-right: 20px; }
+.clia-hub .lt td { overflow-wrap: anywhere; line-height: 1.35; }
+.clia-hub .lt th { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.clia-hub .lt .lt-sub { font-size: 12px; color: var(--clia-gray-500); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.clia-hub .det-btn { height: 32px; padding: 0 14px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.clia-hub .lt tr { cursor: pointer; }
+
 /* ═══════════════════ 빌더 공통: 허브 안(iframe)에서 열리면 빌더 자체 헤더 숨김 ═══════════════ */
 .clia-embedded .header, .clia-embedded header.header { display: none !important; }
 

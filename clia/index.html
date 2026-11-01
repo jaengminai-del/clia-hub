@@ -945,7 +945,7 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 <div class="crawl-url-row"><input class="sbox" id="newCrawlUrl" placeholder="🔗 LG.com product URL" onkeydown="if(event.key==='Enter')crawlNewUrl()"><button class="crawl-url-btn" id="newCrawlBtn" onclick="crawlNewUrl()">Crawl</button></div>
 <div class="list-warn" id="listWarn"></div>
 </div>
-<div class="lt-wrap"><table class="lt"><thead><tr><th>IMG</th><th>DIV</th><th>CAT</th><th>MODEL</th><th>STATUS</th><th></th></tr></thead><tbody id="pl"></tbody></table></div>
+<div class="lt-wrap"><table class="lt"><thead><tr><th>IMG</th><th>DIV</th><th>MODEL</th><th>STATUS</th><th></th></tr></thead><tbody id="pl"></tbody></table></div>
 </div>
 <div class="coffee-ov" id="coffeeOv"><div class="coffee-card">
   <div class="coffee-cup">
@@ -989,7 +989,7 @@ const I18N={en:{
   'st.ready':'✓ Ready','st.md':'✓ MD','st.pend':'○ Pending',
   'dp.images':'{n} gallery images from LG.com',
   'dp.model':'Model',
-  'dp.view':'View on LG.com →',
+  'dp.view':'View on LG.com →','dp.open':'Details',
   'dp.recrawl':'Re-Crawl',
   'dp.channel':'AI CONTENT GENERATION — SELECT CHANNEL',
   'ch.lgcom':'LG.com Official','ch.md':'MD Source',
@@ -1040,7 +1040,7 @@ I18N.de={
   'geo.pscores':'Bewertung je KI-Plattform','geo.why.pp':'Zitiert Quellen — gewichtet belegte Q&A, technische Daten und Feature-Details','geo.why.gp':'Shopping-Attribute — gewichtet technische Daten, Bilder, Features und Preis','geo.why.go':'Antwort-Snippets — gewichtet FAQ, Strukturdaten und Features','geo.why.bi':'Suchanfragen-Abgleich — gewichtet Keywords, technische Daten und Bilder','geo.generating':'KI-Q&A und Keywords werden aus der gecrawlten Seite erstellt…','geo.genFail':'KI-Q&A-Erstellung fehlgeschlagen: ','geo.retry':'Erneut versuchen','geo.md':'Optimierte MD-Datei erstellen','coffee.geo':'GEO-Q&A und Keywords werden erstellt…','md.features':'Wichtigste Merkmale','md.specs':'Technische Daten','md.faq':'Häufig gestellte Fragen','md.keywords':'Keywords',
   'tb.logout':'Abmelden','list.title':'Produktliste — {c}','list.count':'{n} Produkte',
   'st.ready':'✓ Bereit','st.md':'✓ MD','st.pend':'○ Ausstehend',
-  'dp.images':'{n} Galeriebilder von LG.com','dp.model':'Modell','dp.view':'Auf LG.com ansehen →','dp.recrawl':'Neu crawlen',
+  'dp.images':'{n} Galeriebilder von LG.com','dp.model':'Modell','dp.view':'Auf LG.com ansehen →','dp.open':'Details','dp.recrawl':'Neu crawlen',
   'dp.channel':'KI-CONTENT-ERSTELLUNG — KANAL WÄHLEN','ch.lgcom':'LG.com Offiziell','ch.md':'MD-Quelle','ch.comingSoon':'Demnächst verfügbar',
   'dp.feat':'Feature-Inhalte ({n})','dp.aiExtracted':'KI-extrahiert','dp.hover':'Zum Ansehen darüberfahren · Zum Vergrößern klicken','dp.specs':'Technische Daten',
   'geo.title':'GEO — Generative Engine Optimization','geo.ai':'KI-analysiert','geo.plats':'KI-Zielplattformen',
@@ -1065,7 +1065,7 @@ I18N.th={
   'geo.pscores':'คะแนนตามแพลตฟอร์ม AI','geo.why.pp':'อ้างอิงแหล่งที่มา — ให้น้ำหนักกับถาม-ตอบที่มีแหล่งอ้างอิง ข้อมูลจำเพาะ และรายละเอียดฟีเจอร์','geo.why.gp':'คุณสมบัติสำหรับช้อปปิ้ง — ให้น้ำหนักกับข้อมูลจำเพาะ ภาพ ฟีเจอร์ และราคา','geo.why.go':'สนิปเป็ตคำตอบ — ให้น้ำหนักกับ FAQ ข้อมูลโครงสร้าง และฟีเจอร์','geo.why.bi':'การจับคู่คำค้น — ให้น้ำหนักกับคีย์เวิร์ด ข้อมูลจำเพาะ และภาพ','geo.generating':'กำลังสร้างถาม-ตอบและคีย์เวิร์ดด้วย AI จากหน้าที่ครอว์ล…','geo.genFail':'สร้างถาม-ตอบด้วย AI ไม่สำเร็จ: ','geo.retry':'ลองอีกครั้ง','geo.md':'สร้างไฟล์ MD ที่ปรับแต่งแล้ว','coffee.geo':'กำลังสร้างถาม-ตอบและคีย์เวิร์ด GEO…','md.features':'ฟีเจอร์หลัก','md.specs':'ข้อมูลจำเพาะ','md.faq':'คำถามที่พบบ่อย','md.keywords':'คีย์เวิร์ด',
   'tb.logout':'ออกจากระบบ','list.title':'รายการสินค้า — {c}','list.count':'{n} สินค้า',
   'st.ready':'✓ พร้อม','st.md':'✓ MD','st.pend':'○ รอดำเนินการ',
-  'dp.images':'{n} ภาพแกลเลอรีจาก LG.com','dp.model':'รุ่น','dp.view':'ดูบน LG.com →','dp.recrawl':'ครอว์ลใหม่',
+  'dp.images':'{n} ภาพแกลเลอรีจาก LG.com','dp.model':'รุ่น','dp.view':'ดูบน LG.com →','dp.open':'รายละเอียด','dp.recrawl':'ครอว์ลใหม่',
   'dp.channel':'สร้างคอนเทนต์ด้วย AI — เลือกช่องทาง','ch.lgcom':'LG.com อย่างเป็นทางการ','ch.md':'แหล่ง MD','ch.comingSoon':'เร็ว ๆ นี้',
   'dp.feat':'คอนเทนต์ฟีเจอร์ ({n})','dp.aiExtracted':'ดึงข้อมูลด้วย AI','dp.hover':'วางเมาส์เพื่อดูตัวอย่าง · คลิกเพื่อขยาย','dp.specs':'ข้อมูลจำเพาะ',
   'geo.title':'GEO — Generative Engine Optimization','geo.ai':'วิเคราะห์ด้วย AI','geo.plats':'แพลตฟอร์ม AI เป้าหมาย',
@@ -1090,7 +1090,7 @@ I18N.ar={
   'geo.pscores':'تقييم كل منصة ذكاء اصطناعي','geo.why.pp':'يستشهد بالمصادر — يركز على الأسئلة والأجوبة الموثقة والمواصفات وتفاصيل الميزات','geo.why.gp':'سمات التسوق — يركز على المواصفات والصور والميزات والسعر','geo.why.go':'مقتطفات الإجابات — يركز على الأسئلة الشائعة والبيانات المنظمة والميزات','geo.why.bi':'مطابقة الاستعلامات — يركز على الكلمات المفتاحية والمواصفات والصور','geo.generating':'جارٍ إنشاء الأسئلة والأجوبة والكلمات المفتاحية بالذكاء الاصطناعي من الصفحة…','geo.genFail':'فشل إنشاء الأسئلة والأجوبة بالذكاء الاصطناعي: ','geo.retry':'إعادة المحاولة','geo.md':'إنشاء ملف MD محسّن','coffee.geo':'جارٍ إنشاء أسئلة وأجوبة وكلمات GEO المفتاحية…','md.features':'الميزات الرئيسية','md.specs':'المواصفات','md.faq':'الأسئلة الشائعة','md.keywords':'الكلمات المفتاحية',
   'tb.logout':'تسجيل الخروج','list.title':'قائمة المنتجات — {c}','list.count':'{n} منتج',
   'st.ready':'✓ جاهز','st.md':'✓ MD','st.pend':'○ قيد الانتظار',
-  'dp.images':'{n} صورة من معرض LG.com','dp.model':'الطراز','dp.view':'عرض على LG.com ←','dp.recrawl':'إعادة الزحف',
+  'dp.images':'{n} صورة من معرض LG.com','dp.model':'الطراز','dp.view':'عرض على LG.com ←','dp.open':'التفاصيل','dp.recrawl':'إعادة الزحف',
   'dp.channel':'إنشاء المحتوى بالذكاء الاصطناعي — اختر القناة','ch.lgcom':'موقع LG.com الرسمي','ch.md':'مصدر MD','ch.comingSoon':'قريبًا',
   'dp.feat':'محتوى الميزات ({n})','dp.aiExtracted':'مستخرج بالذكاء الاصطناعي','dp.hover':'مرّر للمعاينة · انقر للتكبير','dp.specs':'المواصفات',
   'geo.title':'GEO — تحسين محركات البحث التوليدية','geo.ai':'محلل بالذكاء الاصطناعي','geo.plats':'منصات الذكاء الاصطناعي المستهدفة',
@@ -2233,7 +2233,7 @@ function renderList(){
     const s=curSearch;
     return p.id.toLowerCase().includes(s)||p.nm.toLowerCase().includes(s)||p.cat.toLowerCase().includes(s)||p.sub.toLowerCase().includes(s);
   });
-  tb.innerHTML=fp.map(p=>{const th=p.gal.length?I(p.gal[0].p,80):'';return`<tr class="${p.id===selId?'sel':''}" onclick="sel('${p.id}')"><td>${th?`<img class="thumb" src="${th}" onerror="this.outerHTML='<div class=thumb-ph>${p.ico}</div>'">`:`<div class="thumb-ph">${p.ico}</div>`}</td><td><span class="dt ${p.dv==='MS'?'dt-ms':'dt-ha'}">${p.dv}</span></td><td>${p.sub}</td><td><b>${p.id}</b></td><td><span class="st ${p.crawled?'st-ok':p.md?'st-md':'st-pend'}">${p.crawled?t('st.ready'):p.md?t('st.md'):t('st.pend')}</span></td><td><button class="det-btn" onclick="event.stopPropagation();sel('${p.id}')">Detail →</button></td></tr>`;}).join('');
+  tb.innerHTML=fp.map(p=>{const th=p.gal.length?I(p.gal[0].p,80):'';return`<tr class="${p.id===selId?'sel':''}" onclick="sel('${p.id}')"><td>${th?`<img class="thumb" src="${th}" onerror="this.outerHTML='<div class=thumb-ph>${p.ico}</div>'">`:`<div class="thumb-ph">${p.ico}</div>`}</td><td><span class="dt ${p.dv==='MS'?'dt-ms':'dt-ha'}">${p.dv}</span></td><td><b>${p.id}</b><div class="lt-sub">${p.sub}</div></td><td><span class="st ${p.crawled?'st-ok':p.md?'st-md':'st-pend'}">${p.crawled?t('st.ready'):p.md?t('st.md'):t('st.pend')}</span></td><td><button class="det-btn" onclick="event.stopPropagation();sel('${p.id}')">${t('dp.open')}</button></td></tr>`;}).join('');
   document.getElementById('countLabel').textContent=t('list.count',{n:fp.length});
   const pc=document.getElementById('prodCount');if(pc)pc.textContent=P.filter(x=>productCorp(x)===CORP).length;   // 상단 배지 = 법인 전체 제품 수
 }

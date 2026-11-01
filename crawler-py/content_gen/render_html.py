@@ -559,11 +559,26 @@ def prefer_mobile_media(st: Style, section: dict) -> dict:
     return dict(section, media=media)
 
 
+def _warm_logo_trims(st: Style, blocks: list) -> None:
+    """로고 카드에 쓸 로고 파일들의 실제 영역을 한 번에(병렬로) 계산해 둔다 — 카드마다 따로 받으면 첫 생성이 느리다."""
+    if not st.award.get("logo_fit", True):
+        return
+    urls = []
+    for b in blocks:
+        if b["kind"] == "card_row" and b.get("award"):
+            urls += [c.get("img") for c in b.get("cards", []) if c.get("img") and not c.get("crop")]
+        elif b.get("award") and b.get("section"):
+            urls += [best_image_url(m) for m in usable_media(b["section"]) if not m.get("crop")]
+    if urls:
+        from .edge_trim import logo_trims
+        logo_trims(urls)
+
+
 def render_blocks(st: Style, blocks: list, align: str) -> list:
     out = []
+    blocks = [dict(b, section=prefer_mobile_media(st, b["section"])) if "section" in b else b for b in blocks]
+    _warm_logo_trims(st, blocks)
     for b in blocks:
-        if "section" in b:
-            b = dict(b, section=prefer_mobile_media(st, b["section"]))
         if b["kind"] == "spec_table":
             h = render_spec_table(st, b["section"])
         elif b["kind"] == "card_row":
