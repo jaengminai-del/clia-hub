@@ -2053,7 +2053,6 @@ app.post('/api/ebay-generate', async (req, res) => {
           const venvPy = path.join(__dirname, 'crawler-py', '.venv', 'bin', 'python');
           const py = fs.existsSync(venvPy) ? venvPy : 'python3';
           const script = path.join(__dirname, 'crawler-py', 'ebay_builder.py');
-          const { execFileSync } = require('child_process');
           const outName = `${medium}_content.html`;   // ebay → ebay_content.html (기존 파일명 유지)
           const args = [script, slugDir, '--fragment', '--medium', medium, '-o', outName];
           // 리스팅 문구: 프로모션은 맨 위, 제품 상세·배송·사후 케어·반품은 맨 아래 (Shopee 는 listing:false → 텍스트 복사만)
@@ -2063,7 +2062,9 @@ app.post('/api/ebay-generate', async (req, res) => {
             fs.writeFileSync(lf, JSON.stringify(listing));
             args.push('--listing', lf);
           }
-          execFileSync(py, args, { timeout: 120 * 1000 });   // 첫 생성은 로고·테두리 계산용 이미지 받기 포함
+          // 비동기 실행 필수: 렌더러가 같은 서버의 /api/proxy-image 로 이미지를 받는다 (동기 실행이면 서버가 멈춰 응답 못 함)
+          await new Promise((resolve, reject) => require('child_process').execFile(py, args, { timeout: 120 * 1000 },
+            (err, _o, stderr) => (err ? reject(new Error(String(stderr || err.message))) : resolve())));
           const html = fs.readFileSync(path.join(slugDir, outName), 'utf8');
           console.log(`[ebay-generate] CCG 빌더 렌더 완료 (${medium}, ${html.length} chars)`);
           return res.json({ success: true, html, charCount: html.length, engine: 'ccg', medium, listingVersion: listing ? listing.v : null });
