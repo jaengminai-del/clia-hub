@@ -514,9 +514,30 @@ def render_award_section(st: Style, section: dict) -> str:
     return hcard_list(cards)
 
 
+def prefer_mobile_media(st: Style, section: dict) -> dict:
+    """텍스트 div 가 PC 화면에서 이미지 왼쪽·오른쪽 위에 떠 있던 섹션(c-floating-contents, main-pos-left|right)의
+    PC 이미지는 텍스트 자리가 빈 배경으로 비어 있다 → 모바일 이미지가 따로 있으면 항상 모바일 이미지로 (2026-11-01).
+    모바일 이미지에 텍스트 자리 빈 띠가 있으면 잘라 내고(mobile_crop), 없으면 그대로. 수상 카드·KV·일반 카드 모두 적용.
+    spec overlay_image.mode = "pc" 이면 예전처럼 PC 원본 (되돌리기)."""
+    ov = section.get("text_overlay") or {}
+    if st.overlay_image.get("mode", "mobile_crop") == "pc" or ov.get("pc") not in ("left", "right"):
+        return section
+    media = []
+    for m in section.get("media", []):
+        mob = m.get("mobile_url")
+        if (m.get("type", "image") == "image" and mob and mob != m.get("pc_url")
+                and (m.get("crop") or {}).get("kind") != "badge"):
+            m = {k: v for k, v in m.items() if k != "width"}          # PC 픽셀 폭은 모바일 이미지에 맞지 않음
+            m.update(pc_url=mob, unified_url="", use_mobile=True, crop=m.get("mobile_crop"))
+        media.append(m)
+    return dict(section, media=media)
+
+
 def render_blocks(st: Style, blocks: list, align: str) -> list:
     out = []
     for b in blocks:
+        if "section" in b:
+            b = dict(b, section=prefer_mobile_media(st, b["section"]))
         if b["kind"] == "spec_table":
             h = render_spec_table(st, b["section"])
         elif b["kind"] == "card_row":
