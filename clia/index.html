@@ -1025,7 +1025,7 @@ const I18N={en:{
   'crawl.btn':'Crawl',
   'crawl.invalid':'Please enter an LG.com product page URL.',
   'crawl.otherCorp':'This URL belongs to another country site ({c}). It will be saved under that country and will not appear in this list. Continue?',
-  'crawl.failed':'Crawling failed: ',
+  'crawl.failed':'Crawling failed: ','list.delete':'Delete crawled data','list.deleteConfirm':'Delete the crawled data of {m}?\n{u}\n\nYou can crawl this URL again afterwards.','list.deleteFail':'Delete failed: ',
   'crawl.done':'Crawling complete',
   // 크롤 진행 단계 (progress.json step 코드)
   'crawl.step.queued':'Queued…','crawl.step.init':'Preparing…','crawl.step.fetch':'Collecting the LG.com product page…','crawl.step.fetched':'Product page collected','crawl.step.parse':'Reading page components and layout…','crawl.step.build':'Building content data…','crawl.step.done':'Analysis complete','crawl.step.screenshot':'Capturing page screenshots…','crawl.step.prepare':'Preparing AI analysis…','crawl.step.ai':'AI is analysing the page layout…','crawl.step.qa':'Checking the analysis result…','crawl.step.working':'Crawling…','ebb.crawling':'Running CLIA Crawler… (new URL about 1 minute, cached URL instant)','ebb.crawlPct':'Crawling {pct}% — {step}','ebb.rendering':'Rendering CCG design…','ebb.serverFail':'Cannot connect to the server. Start server.js first.',
@@ -1055,12 +1055,13 @@ I18N.de={
   'coffee.queued':'In Warteschlange…','crawl.placeholder':'🔗 LG.com-Produkt-URL','crawl.btn':'Crawlen',
   'crawl.invalid':'Bitte geben Sie die URL einer LG.com-Produktseite ein.',
   'crawl.otherCorp':'Diese URL gehört zu einer anderen Länderseite ({c}). Sie wird unter diesem Land gespeichert und erscheint nicht in dieser Liste. Fortfahren?',
-  'crawl.failed':'Crawlen fehlgeschlagen: ','crawl.done':'Crawlen abgeschlossen',
+  'crawl.failed':'Crawlen fehlgeschlagen: ','list.delete':'Crawl-Daten löschen','list.deleteConfirm':'Crawl-Daten von {m} löschen?\n{u}\n\nDanach kannst du diese URL erneut crawlen.','list.deleteFail':'Löschen fehlgeschlagen: ','crawl.done':'Crawlen abgeschlossen',
   // 크롤 진행 단계 (progress.json step 코드)
   'crawl.step.queued':'In Warteschlange…','crawl.step.init':'Wird vorbereitet…','crawl.step.fetch':'LG.com-Produktseite wird abgerufen…','crawl.step.fetched':'Produktseite abgerufen','crawl.step.parse':'Seitenkomponenten und Layout werden gelesen…','crawl.step.build':'Content-Daten werden erstellt…','crawl.step.done':'Analyse abgeschlossen','crawl.step.screenshot':'Screenshots der Seite werden erstellt…','crawl.step.prepare':'KI-Analyse wird vorbereitet…','crawl.step.ai':'KI analysiert das Seitenlayout…','crawl.step.qa':'Analyseergebnis wird geprüft…','crawl.step.working':'Crawlen läuft…','ebb.crawling':'CLIA Crawler läuft… (neue URL ca. 1 Minute, gespeicherte URL sofort)','ebb.crawlPct':'Crawlen {pct}% — {step}','ebb.rendering':'CCG-Design wird gerendert…','ebb.serverFail':'Keine Verbindung zum Server. Starten Sie zuerst server.js.',
   'list.serverDown':'Der Crawler-Server (localhost:3001) antwortet nicht — gecrawlte Produkte können nicht geladen werden.',
 };
 I18N.th={
+  'list.delete':'ลบข้อมูลที่ครอว์ล','list.deleteConfirm':'ลบข้อมูลที่ครอว์ลของ {m}?\n{u}\n\nหลังจากนั้นสามารถครอว์ล URL นี้ใหม่ได้','list.deleteFail':'ลบไม่สำเร็จ: ',
   'rail.products':'สินค้า','rail.guide':'คู่มือคอนเทนต์',
   'geo.pscores':'คะแนนตามแพลตฟอร์ม AI','geo.why.pp':'อ้างอิงแหล่งที่มา — ให้น้ำหนักกับถาม-ตอบที่มีแหล่งอ้างอิง ข้อมูลจำเพาะ และรายละเอียดฟีเจอร์','geo.why.gp':'คุณสมบัติสำหรับช้อปปิ้ง — ให้น้ำหนักกับข้อมูลจำเพาะ ภาพ ฟีเจอร์ และราคา','geo.why.go':'สนิปเป็ตคำตอบ — ให้น้ำหนักกับ FAQ ข้อมูลโครงสร้าง และฟีเจอร์','geo.why.bi':'การจับคู่คำค้น — ให้น้ำหนักกับคีย์เวิร์ด ข้อมูลจำเพาะ และภาพ','geo.generating':'กำลังสร้างถาม-ตอบและคีย์เวิร์ดด้วย AI จากหน้าที่ครอว์ล…','geo.genFail':'สร้างถาม-ตอบด้วย AI ไม่สำเร็จ: ','geo.retry':'ลองอีกครั้ง','geo.md':'สร้างไฟล์ MD ที่ปรับแต่งแล้ว','coffee.geo':'กำลังสร้างถาม-ตอบและคีย์เวิร์ด GEO…','md.features':'ฟีเจอร์หลัก','md.specs':'ข้อมูลจำเพาะ','md.faq':'คำถามที่พบบ่อย','md.keywords':'คีย์เวิร์ด',
   'tb.logout':'ออกจากระบบ','list.title':'รายการสินค้า — {c}','list.count':'{n} สินค้า',
@@ -1086,6 +1087,7 @@ I18N.th={
   'list.serverDown':'เซิร์ฟเวอร์ครอว์เลอร์ (localhost:3001) ไม่ตอบสนอง — ไม่สามารถโหลดสินค้าที่ครอว์ลไว้ได้',
 };
 I18N.ar={
+  'list.delete':'حذف البيانات المزحوفة','list.deleteConfirm':'حذف البيانات المزحوفة لـ {m}؟\n{u}\n\nيمكنك زحف هذا الرابط مرة أخرى بعد ذلك.','list.deleteFail':'فشل الحذف: ',
   'rail.products':'المنتجات','rail.guide':'دليل المحتوى',
   'geo.pscores':'تقييم كل منصة ذكاء اصطناعي','geo.why.pp':'يستشهد بالمصادر — يركز على الأسئلة والأجوبة الموثقة والمواصفات وتفاصيل الميزات','geo.why.gp':'سمات التسوق — يركز على المواصفات والصور والميزات والسعر','geo.why.go':'مقتطفات الإجابات — يركز على الأسئلة الشائعة والبيانات المنظمة والميزات','geo.why.bi':'مطابقة الاستعلامات — يركز على الكلمات المفتاحية والمواصفات والصور','geo.generating':'جارٍ إنشاء الأسئلة والأجوبة والكلمات المفتاحية بالذكاء الاصطناعي من الصفحة…','geo.genFail':'فشل إنشاء الأسئلة والأجوبة بالذكاء الاصطناعي: ','geo.retry':'إعادة المحاولة','geo.md':'إنشاء ملف MD محسّن','coffee.geo':'جارٍ إنشاء أسئلة وأجوبة وكلمات GEO المفتاحية…','md.features':'الميزات الرئيسية','md.specs':'المواصفات','md.faq':'الأسئلة الشائعة','md.keywords':'الكلمات المفتاحية',
   'tb.logout':'تسجيل الخروج','list.title':'قائمة المنتجات — {c}','list.count':'{n} منتج',
@@ -1240,6 +1242,20 @@ function cliaGoHome(){
   ['ebbOverlay','chbOverlay'].forEach(id=>{const o=document.getElementById(id);if(o)o.classList.remove('show');});
   document.getElementById('rp').innerHTML=`<div class="empty"><div class="ico">📋</div><div style="font-size:16px;font-weight:600;color:#4A4946;">Select a product</div><div style="font-size:13px;">Click "Detail →" to view</div></div>`;
   if(typeof renderList==='function')renderList();
+}
+// 크롤 제품 삭제 → 다시 크롤할 수 있게 (2026-11-05). 서버는 지운 결과를 보관함(trash)에 남겨 되돌릴 수 있다.
+async function deleteCrawled(id,btn){
+  const p=P.find(x=>x.id===id);if(!p||!p._slug)return;
+  if(!confirm(t('list.deleteConfirm',{m:p.id,u:p.crawler_url||p.url})))return;
+  btn.disabled=true;
+  try{
+    const r=await fetch(CRAWLER_API+'/api/v1/products/'+encodeURIComponent(p._slug),{method:'DELETE'});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(d.detail||('HTTP '+r.status));
+    if(!p._crawledEntry){delete p._slug;delete p.crawler_url;p._lazy=false;}   // 기존(수동 등록) 제품은 목록에 남기고 크롤 연결만 해제
+    if(selId===id)cliaGoHome();
+    await loadCrawledProducts();
+  }catch(e){alert(t('list.deleteFail')+e.message);btn.disabled=false;}
 }
 function cliaLogout(){
   sessionStorage.removeItem('clia_corp');sessionStorage.removeItem('clia_user');
@@ -2233,7 +2249,7 @@ function renderList(){
     const s=curSearch;
     return p.id.toLowerCase().includes(s)||p.nm.toLowerCase().includes(s)||p.cat.toLowerCase().includes(s)||p.sub.toLowerCase().includes(s);
   });
-  tb.innerHTML=fp.map(p=>{const th=p.gal.length?I(p.gal[0].p,80):'';return`<tr class="${p.id===selId?'sel':''}" onclick="sel('${p.id}')"><td>${th?`<img class="thumb" src="${th}" onerror="this.outerHTML='<div class=thumb-ph>${p.ico}</div>'">`:`<div class="thumb-ph">${p.ico}</div>`}</td><td><span class="dt ${p.dv==='MS'?'dt-ms':'dt-ha'}">${p.dv}</span></td><td><b>${p.id}</b><div class="lt-sub">${p.sub}</div></td><td><span class="st ${p.crawled?'st-ok':p.md?'st-md':'st-pend'}">${p.crawled?t('st.ready'):p.md?t('st.md'):t('st.pend')}</span></td><td><button class="det-btn" onclick="event.stopPropagation();sel('${p.id}')">${t('dp.open')}</button></td></tr>`;}).join('');
+  tb.innerHTML=fp.map(p=>{const th=p.gal.length?I(p.gal[0].p,80):'';return`<tr class="${p.id===selId?'sel':''}" onclick="sel('${p.id}')"><td>${th?`<img class="thumb" src="${th}" onerror="this.outerHTML='<div class=thumb-ph>${p.ico}</div>'">`:`<div class="thumb-ph">${p.ico}</div>`}</td><td><span class="dt ${p.dv==='MS'?'dt-ms':'dt-ha'}">${p.dv}</span></td><td><b>${p.id}</b><div class="lt-sub">${p.sub}</div></td><td><span class="st ${p.crawled?'st-ok':p.md?'st-md':'st-pend'}">${p.crawled?t('st.ready'):p.md?t('st.md'):t('st.pend')}</span></td><td><div class="lt-act"><button class="det-btn" onclick="event.stopPropagation();sel('${p.id}')">${t('dp.open')}</button>${p._slug?`<button class="del-btn" title="${t('list.delete')}" aria-label="${t('list.delete')}" onclick="event.stopPropagation();deleteCrawled('${p.id}',this)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/></svg></button>`:''}</div></td></tr>`;}).join('');
   document.getElementById('countLabel').textContent=t('list.count',{n:fp.length});
   const pc=document.getElementById('prodCount');if(pc)pc.textContent=P.filter(x=>productCorp(x)===CORP).length;   // 상단 배지 = 법인 전체 제품 수
 }

@@ -268,6 +268,36 @@ router.get('/api/v1/products', auth, (req, res) => {
   res.json({ count: list.length, products: list });
 });
 
+// 크롤 제품 삭제 → 다시 크롤할 수 있게 (허브 목록의 삭제 버튼, 2026-11-05)
+//   로컬 crawler-py/out/<slug>/ 는 out/_trash/<slug>-<stamp>/ 로 옮기고, 버킷은 trash/<stamp>/ 에 복사 후 삭제 (되돌리기 가능).
+//   제품별 리스팅 문구(listing-texts/)는 URL 기준이라 지우지 않는다 → 다시 크롤하면 그대로 이어진다.
+router.delete('/api/v1/products/:slug', auth, async (req, res) => {
+  const slug = path.basename(req.params.slug);
+  const dir = path.join(OUT_DIR, slug);
+  if (!slug || slug.startsWith('_') || !fs.existsSync(path.join(dir, 'mirror.json'))) return res.status(404).json({ detail: 'product not found' });
+  for (const [id, j] of jobs) {
+    if (j.slug === slug && j.proc && !j.exited) return res.status(409).json({ detail: 'crawl in progress' });
+  }
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const trash = path.join(OUT_DIR, '_trash', `${slug}-${stamp}`);
+  try {
+    fs.mkdirSync(path.dirname(trash), { recursive: true });
+    fs.renameSync(dir, trash);
+    const aux = path.join(__dirname, 'crawler', 'out');
+    for (const f of fs.existsSync(aux) ? fs.readdirSync(aux).filter((n) => n.startsWith(`${slug}.`)) : []) {
+      fs.renameSync(path.join(aux, f), path.join(trash, `crawler-out.${f}`));
+    }
+    for (const [id, j] of jobs) if (j.slug === slug) jobs.delete(id);   // 캐시된 작업이 지운 결과를 돌려주지 않게
+    let remote = 0;
+    try { remote = await store.deleteProduct(slug, stamp); }
+    catch (e) { console.warn('[crawl] 버킷 삭제 실패', slug, e.message); return res.status(502).json({ detail: 'local removed, bucket delete failed: ' + e.message }); }
+    console.log(`[crawl] 제품 삭제: ${slug} (로컬 → ${path.relative(OUT_DIR, trash)}, 버킷 ${remote}개 → trash/${stamp}/)`);
+    res.json({ ok: true, slug, trash: path.relative(OUT_DIR, trash), remote });
+  } catch (e) {
+    res.status(500).json({ detail: e.message });
+  }
+});
+
 router.get('/api/v1/products/:slug', auth, (req, res) => {
   const slug = path.basename(req.params.slug); // 경로 탈출 방지
   const sum = productSummary(slug);

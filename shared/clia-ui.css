@@ -271,15 +271,20 @@ body.clia-hub button, body.clia-hub input, body.clia-hub select, body.clia-hub t
 .clia-hub .left { width: clamp(420px, 32vw, 600px); min-width: 420px; }
 .clia-hub .lt-wrap { overflow-x: hidden; }
 .clia-hub .lt { width: 100%; table-layout: fixed; }
-.clia-hub .lt th:nth-child(1), .clia-hub .lt td:nth-child(1) { width: 68px; padding-left: 20px; }
+.clia-hub .lt th:nth-child(1), .clia-hub .lt td:nth-child(1) { width: 64px; padding-left: 16px; }
 .clia-hub .lt th:nth-child(2), .clia-hub .lt td:nth-child(2) { width: 46px; }
 .clia-hub .lt th:nth-child(4), .clia-hub .lt td:nth-child(4) { width: 80px; }
-.clia-hub .lt th:nth-child(5), .clia-hub .lt td:nth-child(5) { width: 104px; text-align: right; padding-right: 20px; }
+.clia-hub .lt th:nth-child(5), .clia-hub .lt td:nth-child(5) { width: 128px; text-align: right; padding-right: 16px; }
 .clia-hub .lt td { overflow-wrap: anywhere; line-height: 1.35; }
 .clia-hub .lt th { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .clia-hub .lt .lt-sub { font-size: 12px; color: var(--clia-gray-500); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .clia-hub .det-btn { height: 32px; padding: 0 14px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .clia-hub .lt tr { cursor: pointer; }
+.clia-hub .lt-act { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+.clia-hub .lt-act .det-btn { min-width: 0; flex: 0 1 auto; }
+.clia-hub .del-btn { flex: 0 0 32px; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--clia-gray-200); background: #fff; color: var(--clia-gray-500); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+.clia-hub .del-btn:hover { border-color: var(--clia-brand); color: var(--clia-brand); background: var(--clia-brand-soft); }
+.clia-hub .del-btn:disabled { opacity: .4; cursor: default; }
 
 /* ═══════════════════ 빌더 공통: 허브 안(iframe)에서 열리면 빌더 자체 헤더 숨김 ═══════════════ */
 .clia-embedded .header, .clia-embedded header.header { display: none !important; }

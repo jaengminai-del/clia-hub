@@ -32,6 +32,7 @@ const EXCLUDE = [
   /(^|\/)[a-z_]+_content\.html$/,  // 매체별 1차 컨텐츠(ebay_content.html 등) — 생성 때마다 새로 렌더
   /(^|\/)\.DS_Store$/,
   /(^|\/)\.imgdims-cache\.json$/,
+  /^_trash\//,                      // 삭제한 제품 보관함 (deleteProduct) — 버킷은 trash/ 접두사로 따로 보관
 ];
 const shouldSync = (rel) => !EXCLUDE.some((re) => re.test(rel));
 
@@ -200,6 +201,25 @@ function pushCrawlerOut(slug) {
   return pushPaths(names.map((f) => path.join(dir, f)));
 }
 
+/** 크롤 제품 삭제 (허브 목록의 삭제 버튼, 2026-11-05) — 버킷의 crawler-py-out/<slug>/ · crawler-out/<slug>.* 를
+ *  trash/<stamp>/<원래 키> 로 복사해 둔 뒤 지운다 (되돌리기: trash 에서 원래 키로 복사). 반환: 지운 객체 수. */
+async function deleteProduct(slug, stamp) {
+  if (!enabled()) return 0;
+  const { CopyObjectCommand, DeleteObjectsCommand } = require('@aws-sdk/client-s3');
+  const bucket = config().bucket;
+  const keys = [
+    ...(await listRemote(`${ROOTS[0].prefix}${slug}/`)).keys(),
+    ...[...(await listRemote(`${ROOTS[1].prefix}${slug}.`)).keys()],
+  ];
+  await pool(keys, 8, (key) => client().send(new CopyObjectCommand({
+    Bucket: bucket, Key: `trash/${stamp}/${key}`, CopySource: `${bucket}/${encodeURIComponent(key).replace(/%2F/g, '/')}`,
+  })));
+  for (let i = 0; i < keys.length; i += 1000) {
+    await client().send(new DeleteObjectsCommand({ Bucket: bucket, Delete: { Objects: keys.slice(i, i + 1000).map((Key) => ({ Key })) } }));
+  }
+  return keys.length;
+}
+
 /** 임의 키에 바이트 올리기 / 읽기 (이미지형 HTML 슬라이스 — media-slices/ 접두사, 시작 시 pull 대상 아님) */
 async function putBuffer(key, buf, contentType) {
   if (!enabled()) return false;
@@ -216,7 +236,7 @@ async function getBuffer(key) {
   } catch (e) { return null; }
 }
 
-module.exports = { enabled, pullAll, pushAll, pushPaths, pushProduct, pushCrawlerOut, putBuffer, getBuffer };
+module.exports = { enabled, pullAll, pushAll, pushPaths, pushProduct, pushCrawlerOut, putBuffer, getBuffer, deleteProduct };
 
 if (require.main === module) {
   require('dotenv').config({ path: path.join(__dirname, '.env') });
