@@ -36,6 +36,7 @@ from make_mirror import to_mirror, order_by_document, tag_media_roles, ensure_pr
 from component_parser import ComponentParser, parse_html_components, LayoutType
 from text_filters import is_image_description
 from component_mirror import build_from_components
+import llm_claude  # ANTHROPIC_API_KEY 가 있으면 Gemini 대신 Claude 로 시각 분석
 
 
 class _CFSkip(Exception):
@@ -484,6 +485,12 @@ def _html_product_title(html: str) -> str:
 
 
 def run_gemini(md: str, pc_tiles: List[Path]) -> dict:
+    if llm_claude.available():
+        print(f"→ [Step4] Claude({llm_claude.CLAUDE_MODEL}) 멀티모달 분석... (PC 타일 {len(pc_tiles)}장)")
+        return llm_claude.vision_json(
+            [ANALYSIS_PROMPT, "\n\n=== [PC 스크린샷 타일] (상단→하단) ===", *pc_tiles,
+             "\n\n=== [전처리된 마크다운] ===\n" + md],
+            FinalPDPData, label="analysis")
     from google import genai
     from google.genai import types
     import time
@@ -579,6 +586,13 @@ def run_qa(result: dict, pc_tiles: List[Path]) -> dict:
             lines.append(f"[{s['sequence']}] MEDIA {u.split('/')[-1][:80]}")
         else:
             lines.append(f"[{s['sequence']}] TEXT {(s.get('text_content') or '')[:80]!r}")
+    if llm_claude.available():
+        qa = llm_claude.vision_json(
+            [QA_PROMPT, "\n=== [PC 스크린샷 타일] (상단→하단) ===", *pc_tiles,
+             "\n=== [크롤 결과 flow] ===\n" + "\n".join(lines)],
+            QAReport, label="qa", max_tokens=32000)
+        print(f"   ✓ QA 점수 {qa.get('match_score')}점 | 이슈 {len(qa.get('issues', []))}건")
+        return qa
     client = genai.Client(api_key=GEMINI_KEY)
     contents = [QA_PROMPT, "\n=== [PC 스크린샷 타일] (상단→하단) ==="]
     for fp in pc_tiles:
@@ -648,6 +662,13 @@ def run_correction(result: dict, qa: dict, md: str, pc_tiles: List[Path]) -> dic
     import time
     n_issues = len(qa.get("issues", []))
     print(f"→ [Step6.5] QA 자동 보정... (이슈 {n_issues}건 교정 요청)")
+    if llm_claude.available():
+        return llm_claude.vision_json(
+            [CORRECTION_PROMPT, "\n=== [PC 스크린샷 타일] (상단→하단) ===", *pc_tiles,
+             "\n=== [기존 layout_flow] ===\n" + json.dumps(result, ensure_ascii=False),
+             "\n=== [QA 이슈 목록] ===\n" + json.dumps(qa.get("issues", []), ensure_ascii=False),
+             "\n=== [참고: 전처리 마크다운 (URL/원문 소스)] ===\n" + md],
+            FinalPDPData, label="correction")
     client = genai.Client(api_key=GEMINI_KEY)
     contents = [CORRECTION_PROMPT, "\n=== [PC 스크린샷 타일] (상단→하단) ==="]
     for fp in pc_tiles:
@@ -737,6 +758,11 @@ def run_mirror_qa(mirror: dict, pc_tiles: List[Path]) -> dict:
     from google.genai import types
     import time
     print(f"→ [Step7.5] mirror 시각 QA... (PC 타일 {len(pc_tiles)}장 대조)")
+    if llm_claude.available():
+        return llm_claude.vision_json(
+            [MIRROR_QA_PROMPT, "\n=== [PC 스크린샷 타일] (상단→하단) ===", *pc_tiles,
+             "\n=== [mirror 섹션 레이아웃] ===\n" + _mirror_qa_view(mirror)],
+            MirrorQAReport, label="mirror_qa", max_tokens=32000)
     client = genai.Client(api_key=GEMINI_KEY)
     contents = [MIRROR_QA_PROMPT, "\n=== [PC 스크린샷 타일] (상단→하단) ==="]
     for fp in pc_tiles:
@@ -1235,11 +1261,11 @@ def main():
         write_progress(100, "분석 완료 (AI 분석 스킵)", "done")
         print(f"\n✓ Step1~3 완료 (--skip-ai). 산출물: {out}")
         return
-    if not GEMINI_KEY:
-        sys.exit("✗ GEMINI_API_KEY 없음 (.env) — --skip-ai 로 1~3단계만 실행 가능")
+    if not GEMINI_KEY and not llm_claude.available():
+        sys.exit("✗ AI 키 없음: ANTHROPIC_API_KEY 또는 GEMINI_API_KEY (.env) — --skip-ai 로 1~3단계만 실행 가능")
 
     # Step 4 — Gemini 융합 분석 (PC 단일 뷰포트 분석)
-    write_progress(65, f"4단계: Gemini {GEMINI_MODEL} 멀티모달 시각 구조 대조 분석 중 (20~40초 소요)...", "ai")
+    write_progress(65, f"4단계: {('Claude ' + llm_claude.CLAUDE_MODEL) if llm_claude.available() else ('Gemini ' + GEMINI_MODEL)} 멀티모달 시각 구조 대조 분석 중 (20~40초 소요)...", "ai")
     gemini_ok = True
     try:
         result = run_gemini(pre_md, tiles["pc"])

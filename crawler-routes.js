@@ -131,7 +131,8 @@ function snapshot(jobId) {
         error = last.replace(/^[\w.]+(Error|Exception):\s*/, (m) => m.split('.').pop()).slice(0, 300);
         // 자주 나는 원인은 사용자 문장으로
         if (/JSONDecodeError/.test(error)) error = 'The AI analysis returned an incomplete response (this page is very long). Please try again.';
-        else if (/GEMINI_API_KEY/.test(error)) error = 'GEMINI_API_KEY is not set on the server.';
+        else if (/GEMINI_API_KEY|ANTHROPIC_API_KEY/.test(error)) error = 'No AI key is set on the server (ANTHROPIC_API_KEY or GEMINI_API_KEY).';
+        else if (/Claude declined|refusal/i.test(error)) error = 'The AI declined to analyze this page. ' + error.slice(0, 120);
         else if (/FIRECRAWL|402|Payment Required/i.test(error)) error = 'Page collection failed (Firecrawl key or credits). ' + error.slice(0, 120);
         else if (/429|RESOURCE_EXHAUSTED|quota/i.test(error)) error = 'The AI service quota was exceeded. Please try again later.';
       } catch {}
@@ -189,7 +190,8 @@ const router = express.Router();
 
 router.get('/healthz', (req, res) => res.json({
   ok: true,
-  master_key: !!process.env.GEMINI_API_KEY,
+  master_key: !!(process.env.ANTHROPIC_API_KEY || process.env.GEMINI_API_KEY),
+  ai: process.env.ANTHROPIC_API_KEY ? 'claude' : (process.env.GEMINI_API_KEY ? 'gemini' : null),
   firecrawl: !!process.env.FIRECRAWL_API_KEY,
 }));
 
