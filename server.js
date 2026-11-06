@@ -2952,6 +2952,28 @@ app.post('/api/render-slices', async (req, res) => {
   }
 });
 
+/* ──────────────────────────────────────────
+   고아 프로세스 정리: 시간 초과로 죽은 크롤러/렌더러가 남긴 Chromium·Python 이 PID 1(tini) 밑으로
+   붙어 계속 쌓이면 프로세스 한도에 걸려 'spawn python3 EAGAIN' 으로 모든 생성이 실패한다.
+   5분마다 부모가 PID 1 인(=주인 없는) 10분 넘은 프로세스를 정리한다. 서버가 띄운 작업은 부모가 node 라 해당 없음.
+────────────────────────────────────────── */
+function reapOrphans() {
+  if (process.platform !== 'linux' || process.pid === 1) return;
+  require('child_process').execFile('ps', ['-eo', 'pid=,ppid=,etimes=,stat=,comm='], (err, out) => {
+    if (err) return;
+    let killed = 0, procs = 0;
+    for (const ln of out.trim().split('\n')) {
+      procs++;
+      const [pid, ppid, et, stat, comm] = ln.trim().split(/\s+/);
+      if (+ppid !== 1 || +pid === process.pid || stat.startsWith('Z')) continue;
+      if (+et < 600 || !/chrom|headless|python/i.test(comm || '')) continue;
+      try { process.kill(+pid, 'SIGKILL'); killed++; } catch {}
+    }
+    if (killed) console.log(`[reaper] 고아 프로세스 ${killed}개 정리 (전체 ${procs})`);
+  });
+}
+setInterval(reapOrphans, 5 * 60 * 1000).unref();
+
 app.listen(PORT, () => {
   console.log(`\n✅ A+ Content Generator Server`);
   console.log(`   http://localhost:${PORT}`);
