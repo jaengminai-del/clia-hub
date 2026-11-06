@@ -2560,6 +2560,55 @@ app.get('/media/slices/:hash/:file', async (req, res) => {
 });
 
 /* ──────────────────────────────────────────
+   산출물 파일 공개 주소 (2026-11-06): 배치가 만든 HTML 을 Airtable 첨부 등 외부에서 받아갈 수 있게 보관.
+   POST /api/v1/export-file {content, name}  (헤더 x-export-token = EXPORT_TOKEN 필수) → {url}
+   GET  /media/exports/<hash>/<name>          → 파일 (다운로드 전용: text/plain + attachment)
+   저장: 로컬 media-cache/exports/<hash>/ + 버킷 media-exports/<hash>/  (내용 해시 주소 — 같은 내용은 같은 주소)
+────────────────────────────────────────── */
+const EXPORT_DIR = require('path').join(__dirname, 'media-cache', 'exports');
+app.post('/api/v1/export-file', async (req, res) => {
+  const path = require('path'), fs = require('fs'), crypto = require('crypto');
+  const token = (process.env.EXPORT_TOKEN || '').trim();
+  if (!token || req.get('x-export-token') !== token) return res.status(401).json({ error: 'unauthorized' });
+  const { content, name = 'file.html' } = req.body || {};
+  if (typeof content !== 'string' || !content) return res.status(400).json({ error: 'content required' });
+  if (Buffer.byteLength(content) > 5 * 1024 * 1024) return res.status(413).json({ error: 'too large' });
+  const file = String(name).replace(/[^\w.-]+/g, '-').slice(0, 120);
+  if (!/^[\w.-]+\.(html|txt)$/.test(file)) return res.status(400).json({ error: 'name must end with .html or .txt' });
+  const hash = crypto.createHash('sha1').update(content).digest('hex').slice(0, 20);
+  const abs = path.join(EXPORT_DIR, hash, file);
+  try {
+    if (!fs.existsSync(abs)) {
+      fs.mkdirSync(path.dirname(abs), { recursive: true });
+      fs.writeFileSync(abs, content, 'utf8');
+      await sliceStore.putBuffer(`media-exports/${hash}/${file}`, Buffer.from(content, 'utf8'), 'text/plain; charset=utf-8')
+        .catch((e) => console.warn('[export-file] 버킷 업로드 실패', file, e.message));
+    }
+    const base = (process.env.PUBLIC_BASE_URL || `${req.get('x-forwarded-proto') || req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    res.json({ url: `${base}/media/exports/${hash}/${file}`, hash, bytes: Buffer.byteLength(content) });
+  } catch (e) {
+    console.error('/api/v1/export-file error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+app.get('/media/exports/:hash/:file', async (req, res) => {
+  const path = require('path'), fs = require('fs');
+  const { hash, file } = req.params;
+  if (!/^[0-9a-f]{20}$/.test(hash) || !/^[\w.-]+\.(html|txt)$/.test(file)) return res.status(400).end();
+  const abs = path.join(EXPORT_DIR, hash, file);
+  if (!fs.existsSync(abs)) {   // 재배포 후 로컬에 없으면 버킷에서
+    const buf = await sliceStore.getBuffer(`media-exports/${hash}/${file}`);
+    if (!buf) return res.status(404).end();
+    fs.mkdirSync(path.dirname(abs), { recursive: true });
+    fs.writeFileSync(abs, buf);
+  }
+  // 브라우저에서 실행되지 않게 텍스트·첨부로만 내려준다
+  res.set({ 'Content-Type': 'text/plain; charset=utf-8', 'Content-Disposition': `attachment; filename="${file}"`,
+            'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'public, max-age=31536000, immutable' });
+  res.sendFile(abs);
+});
+
+/* ──────────────────────────────────────────
    전체 lg.com 화면 캡처 (빌더 "전체 lg.com 컨텐츠 확인하기" 팝업, 2026-10-26)
    POST /api/v1/fullshot {url} → 캡처 시작(미리 캡처 포함, 이미 있으면 바로 ready)
    GET  /api/v1/fullshot?url=  → {status: ready|pending|none|error, src}
