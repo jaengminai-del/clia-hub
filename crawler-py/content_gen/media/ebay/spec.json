@@ -111,7 +111,7 @@
     "forbid_active_content": true,
     "inline_css": true,
     "font_face": {
-      "base_url": "https://clia-hub-production.up.railway.app/fonts/",
+      "base_url": "https://clia-hub-production-699d.up.railway.app/fonts/",
       "faces": [
         {
           "family": "LGEIText",
