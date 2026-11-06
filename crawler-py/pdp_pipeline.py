@@ -472,16 +472,23 @@ LG PDP 구조 및 그룹핑 규칙 (필수 준수):
 
 
 def _html_product_title(html: str) -> str:
-    """Gemini 없이 HTML에서 제품명 추출 (og:title → h1 → <title>)."""
+    """Gemini 없이 HTML에서 제품명 추출 (og:title → 제품명 컴포넌트 PD0012 의 h1 → <title> → 다른 h1).
+    'LG' 처럼 브랜드만 있는 짧은 값은 제품명이 아니므로 건너뛴다 (2026-11-06: TH 번들 페이지에서
+    Firecrawl HTML 의 첫 h1 이 'LG' 로 잡혀 제품명이 'LG' 로 저장되던 문제)."""
     from bs4 import BeautifulSoup
     soup = BeautifulSoup(html or "", "html.parser")
+    ok = lambda t: bool(t) and len(t) >= 5 and t.strip().upper() not in ("LG", "LG ELECTRONICS", "LG THAILAND")
+    cands = []
     og = soup.find("meta", attrs={"property": "og:title"})
     if og and og.get("content"):
-        return og["content"].split("|")[0].strip()
-    h1 = soup.find("h1")
-    if h1 and h1.get_text(strip=True):
-        return h1.get_text(" ", strip=True)
-    return (soup.title.get_text(strip=True).split("|")[0].strip() if soup.title else "")
+        cands.append(og["content"].split("|")[0].strip())
+    pd = soup.select_one(".PD0012 h1, [class*='PD0012'] h1")
+    if pd:
+        cands.append(pd.get_text(" ", strip=True))
+    if soup.title:
+        cands.append(soup.title.get_text(strip=True).split("|")[0].strip())
+    cands += [h.get_text(" ", strip=True) for h in soup.find_all("h1")]
+    return next((c for c in cands if ok(c)), next((c for c in cands if c), ""))
 
 
 def run_gemini(md: str, pc_tiles: List[Path]) -> dict:
