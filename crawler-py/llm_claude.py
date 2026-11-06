@@ -24,8 +24,10 @@ from pydantic import BaseModel
 
 CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-opus-5-5").strip() or "claude-opus-5-5"
 CLAUDE_EFFORT = os.getenv("CLAUDE_EFFORT", "medium").strip() or "medium"
-# 거절(refusal) 시 서버가 같은 요청을 다른 모델로 자동 재시도 (Opus 5.5 권장 설정)
+# 거절(refusal) 시 서버가 같은 요청을 다른 모델로 자동 재시도 — 이 기능을 받는 모델에만 보낸다
+# (Haiku 5.5 등은 fallbacks 를 받지 않으므로 보내면 400)
 _FALLBACK_BETA = "server-side-fallback-2026-07-01"
+_FALLBACK_MODELS = {"claude-opus-5-5", "claude-opus-5", "claude-fable-5-1", "claude-sonnet-5-5"}
 # 스트리밍 + 큰 max_tokens: 긴 PDP 의 layout_flow 가 잘리지 않도록 (thinking 토큰 포함)
 DEFAULT_MAX_TOKENS = 64000
 
@@ -81,14 +83,14 @@ def vision_json(parts: List[Part], schema: Type[BaseModel], *, label: str = "",
     kwargs = dict(
         model=CLAUDE_MODEL,
         max_tokens=max_tokens,
-        betas=[_FALLBACK_BETA],
-        fallbacks="default",
         output_config={"effort": CLAUDE_EFFORT},
         output_format=schema,
         messages=[{"role": "user", "content": _content(parts)}],
     )
     if system:
         kwargs["system"] = system
+    if CLAUDE_MODEL in _FALLBACK_MODELS:
+        kwargs.update(betas=[_FALLBACK_BETA], fallbacks="default")
     with _client().beta.messages.stream(**kwargs) as stream:
         msg = stream.get_final_message()
     _log_usage(label, msg)
