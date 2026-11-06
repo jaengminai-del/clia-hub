@@ -1070,8 +1070,33 @@ def _attach_gallery(mirror: dict, html: str, origin: str):
         print(f"   ✓ 제품 갤러리 {len(gal)}장 (LG.com 갤러리 영역 순서)")
 
 
+_BLOCK_PAGE = re.compile(r"Access Denied|You don't have permission to access|Reference\s*#\s*[\d.a-f]+|errors\.edgesuite\.net",
+                         re.I)
+
+
+def _drop_block_page_text(mirror: dict) -> int:
+    """LG.com 봇 차단(Akamai 'Access Denied') 화면에서 온 글을 지운다. 서버 스크린샷이 차단 화면으로 찍히면
+    AI 분석이 그 글을 섹션으로 만들기도 한다 (2026-11-06 TH 배치: 242개 중 20개). 그 줄만 지우고,
+    남는 글·이미지가 없는 섹션은 통째로 뺀다."""
+    removed, keep = 0, []
+    for s in mirror.get("sections") or []:
+        text = s.get("text") or ""
+        if _BLOCK_PAGE.search(text):
+            lines = [ln for ln in text.split("\n") if not _BLOCK_PAGE.search(ln)]
+            s["text"] = "\n".join(lines).strip()
+            removed += 1
+            if not s["text"] and not s.get("media") and not s.get("specs"):
+                continue
+        keep.append(s)
+    mirror["sections"] = keep
+    return removed
+
+
 def _polish_mirror(mirror: dict, html: str):
     """미러 최종 정리 — 빠른 경로·기존 경로 공통."""
+    _blk = _drop_block_page_text(mirror)
+    if _blk:
+        print(f"   ✓ 봇 차단 화면 글 제거: {_blk}건 (Access Denied)")
     # 이미지·텍스트가 모두 같은 섹션 제거 (캐러셀 루프 복제 슬라이드 등)
     _dup = drop_duplicate_sections(mirror)
     if _dup:
