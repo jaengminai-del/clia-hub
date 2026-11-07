@@ -201,37 +201,66 @@ def _abs(origin: str, p: str) -> str:
     return p if p.startswith("http") else origin + p
 
 
-def _media_of(d: dict, origin: str) -> list:
-    """한 항목(dict)의 대표 이미지(PC/모바일)와 동영상."""
-    out = []
-    pc = next((d[k] for k in IMG_DESK if isinstance(d.get(k), str) and d[k].startswith("/content/dam")
-               and not SKIP_PATH.search(d[k])), "")
-    mo = next((d[k] for k in IMG_MOB if isinstance(d.get(k), str) and d[k].startswith("/content/dam")
-               and not SKIP_PATH.search(d[k])), "")
-    if pc or mo:
-        role = "icon" if (pc and pc == d.get("iconImageRef")) else "content"
-        out.append({"pc_url": _abs(origin, pc or mo), "mobile_url": _abs(origin, mo), "unified_url": "",
-                    "type": "image", "role": role, "alt": _clean(d.get("imageAltText") or d.get("keyBenefitsFileRefAlt")
-                                                                 or d.get("animationThumbnailAltText") or "")[:250]})
-    for k in VIDEO:
-        v = d.get(k)
-        if isinstance(v, str) and v.startswith("/content/dam") and not SKIP_PATH.search(v):
-            out.append({"pc_url": _abs(origin, v), "mobile_url": _abs(origin, d.get(k + "Mobile") or ""),
-                        "unified_url": "", "type": "video", "role": "content"})
-    return out
+_IMG_EXT = re.compile(r"\.(jpe?g|png|webp|gif)$", re.I)
+_VID_EXT = re.compile(r"\.(mp4|webm|mov)$", re.I)
+_ONOFF = re.compile(r"[_-](on|off)(\.[a-z]+)$", re.I)
 
 
-def _all_media(o, origin, out=None, depth=0):
+def _fold(p: str) -> str:
+    """데스크톱/모바일/태블릿·크기 변형을 한 그림으로."""
+    n = p.rsplit("/", 1)[-1].lower()
+    n = re.sub(r"\.(jpe?g|png|webp|gif|mp4|webm|mov)$", "", n)
+    n = re.sub(r"\((thumbnail)\)", "", n)
+    return re.sub(r"([-_ ](desktop|mobile|tablet|pc|mo|d|m|t|v\d+|\d{3,4}(x\d{3,4})?))+$", "", n)
+
+
+def _all_media(o, origin, out=None, seen=None, depth=0):
+    """컴포넌트 안의 모든 DAM 이미지·동영상 (키 이름과 무관). 아이콘·태블릿·탭 ON/OFF·샘플은 제외,
+    데스크톱/모바일은 한 장으로 묶는다 (모바일 주소는 mobile_url 로)."""
     out = [] if out is None else out
-    if depth > 8: return out
+    seen = {} if seen is None else seen
+    if depth > 10: return out
     if isinstance(o, dict):
-        for m in _media_of(o, origin):
-            if all(m["pc_url"] != x["pc_url"] for x in out): out.append(m)
+        mobiles = {}
         for k, v in o.items():
+            if not (isinstance(v, str) and v.startswith("/content/dam") and not SKIP_PATH.search(v)):
+                continue
+            kl = k.lower()
+            if "icon" in kl or "tablet" in kl or _ONOFF.search(v):
+                continue
+            if "mob" in kl:
+                mobiles[_fold(v)] = v; continue
+            if _VID_EXT.search(v):
+                key = "vid:" + _fold(v)
+                if key not in seen:
+                    seen[key] = True
+                    out.append({"pc_url": _abs(origin, v), "mobile_url": "", "unified_url": "", "type": "video", "role": "content"})
+                continue
+            if not _IMG_EXT.search(v):
+                continue
+            key = _fold(v)
+            if key in seen: continue
+            m = {"pc_url": _abs(origin, v), "mobile_url": "", "unified_url": "", "type": "image", "role": "content",
+                 "alt": _clean(o.get("imageAltText") or o.get("keyBenefitsFileRefAlt") or o.get("animationThumbnailAltText") or "")[:250]}
+            seen[key] = m; out.append(m)
+        for fk, mv in mobiles.items():           # 모바일 짝 붙이기 (짝 없는 모바일 전용 이미지는 그 자체로)
+            if fk in seen and isinstance(seen[fk], dict):
+                seen[fk]["mobile_url"] = seen[fk]["mobile_url"] or _abs(origin, mv)
+            elif fk not in seen and _IMG_EXT.search(mv) and not _ONOFF.search(mv):
+                m = {"pc_url": _abs(origin, mv), "mobile_url": _abs(origin, mv), "unified_url": "", "type": "image", "role": "content", "alt": ""}
+                seen[fk] = m; out.append(m)
+        order = o.get(":itemsOrder") or []
+        keys = [k for k in o if k != ":items"] + ([":items"] if ":items" in o else [])
+        for k in keys:
+            v = o[k]
             if k in ("dataLayer", "ctaModel", "scheduleUsabilityModel"): continue
-            if isinstance(v, (dict, list)): _all_media(v, origin, out, depth + 1)
+            if k == ":items" and isinstance(v, dict):
+                for ik in order or list(v):
+                    if ik in v: _all_media(v[ik], origin, out, seen, depth + 1)
+            elif isinstance(v, (dict, list)):
+                _all_media(v, origin, out, seen, depth + 1)
     elif isinstance(o, list):
-        for v in o: _all_media(v, origin, out, depth + 1)
+        for v in o: _all_media(v, origin, out, seen, depth + 1)
     return out
 
 
@@ -311,7 +340,7 @@ def extract(html: str, url: str):
         order += 1
         disclaimer = name == "textblock" and (c.get("blockType") == "disclaimer")
         sections.append({"order": f"disclaimer-{order}" if disclaimer else order, "text": text, "specs": [],
-                         "item_group": False, "group_heading": "", "media": imgs[:1] + [m for m in media if m["type"] == "video"][:1],
+                         "item_group": False, "group_heading": "", "media": imgs + [m for m in media if m["type"] == "video"][:1],
                          "component_id": cid, "component_dom_index": idx,
                          "layout_type": _layout(ty, imgs), "columns": 1, "column_count": 1,
                          "_aem_path": rp.rsplit("/jcr:content/", 1)[-1][:120]})

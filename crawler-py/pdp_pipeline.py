@@ -1223,10 +1223,14 @@ def aem_mirror_if_better(html: str, url: str, cf: Optional[dict]):
         return None
     if not am or not am["sections"]:
         return None
-    cf_media = sum(len([m for m in (s.get("media") or []) if m.get("type") != "video"]) for s in (cf or {}).get("sections", []))
+    def names(sections):
+        return {aem_model._fold(m.get("pc_url") or m.get("mobile_url") or "") for s in sections
+                for m in (s.get("media") or []) if m.get("type") != "video"} - {""}
+    cf_names, am_names = names((cf or {}).get("sections", [])), names(am["sections"])
+    cf_media, am_media = len(cf_names), len(am_names)
     cf_ok = (cf or {}).get("_cf_stats", {}).get("renderable", 0) >= 3
-    am_media = am["_aem_stats"]["media"]
-    if cf_ok and am_media <= cf_media * 1.2 + 1:
+    # 컴포넌트 경로가 충분하고, 모델 쪽이 그 경로에 없는 이미지를 2장 이상 더 찾지 못하면 컴포넌트 경로 유지
+    if cf_ok and (len(am_names - cf_names) < 2 or am_media < cf_media):
         return None
     print(f"→ [AEM] 페이지 컴포넌트 모델: 섹션 {len(am['sections'])} · 이미지 {am_media}장 "
           f"(컴포넌트 경로 {'노출 ' + str((cf or {}).get('_cf_stats', {}).get('renderable', 0)) if cf else '없음'} · 이미지 {cf_media}장) — 이쪽을 씀")
@@ -1307,6 +1311,11 @@ def main():
         if _am:
             write_progress(90, "3단계: 페이지 컴포넌트 모델로 컨텐츠 데이터 생성 중...", "build")
             mirror = _am
+            # 스펙 표(PD0008 등)는 컴포넌트 파서가 읽은 것을 그대로 붙인다 — 모델 경로에도 스펙이 빠지지 않게
+            _specs = [s for s in (_cf or {}).get("sections", []) if s.get("specs")]
+            for i, s in enumerate(_specs):
+                s = dict(s); s["order"] = len(mirror["sections"]) + i + 1
+                mirror["sections"].append(s)
             mirror["product_title"] = aem_model.product_title(raw or html) or _html_product_title(html)
             _attach_gallery(mirror, html, _cf_origin)
             _polish_mirror(mirror, html)
