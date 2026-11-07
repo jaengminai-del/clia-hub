@@ -97,6 +97,18 @@ def _canonical(html: str) -> str:
     return ""
 
 
+def _product_and_overview(html: str, url: str):
+    """(제품 컨테이너, 그 안의 기능 영역 키) — 기능 영역 앞뒤에 직접 놓인 히어로·텍스트도 컨텐츠라서."""
+    want = _page_path(_canonical(html) or url)
+    for row in _flight_rows(_flight_text(html)):
+        for d in _walk(row, lambda d: isinstance(d.get("resourcePath"), str) and ":items" in d
+                       and d["resourcePath"].lower().startswith(want)
+                       and re.search(r"/container/container/product[^/]*$", d["resourcePath"])
+                       and "overview-section" in (d.get(":items") or {})):
+            return d, "overview-section"
+    return None, None
+
+
 def _overview(html: str, url: str):
     want = _page_path(_canonical(html) or url)   # 옮겨진 제품은 새 주소의 컴포넌트 경로
     for row in _flight_rows(_flight_text(html)):
@@ -247,7 +259,10 @@ def _all_media(o, origin, out=None, seen=None, depth=0):
             kl = k.lower()
             # 아이콘 블록 그림(iconBlockImageRef: 테두리 없는 디자인·틸트 등 기능 픽토그램+설명)은 컨텐츠,
             # 탭 버튼 아이콘(iconImageRef/offIconImageRef)·태블릿·탭 ON/OFF 상태는 화면 조작용이라 제외
-            if ("icon" in kl and kl != "iconblockimageref") or "tablet" in kl or _ONOFF.search(v):
+            # 수상 배지(awardList 의 iconImageRef — OFF 짝 없음)도 컨텐츠. 탭 버튼(iconImageRef + offIconImageRef 짝)은 제외
+            tab_icon = "icon" in kl and kl != "iconblockimageref" and (
+                kl != "iconimageref" or any("officon" in str(x).lower() for x in o))
+            if tab_icon or "tablet" in kl or _ONOFF.search(v):
                 continue
             if "mob" in kl:
                 mobiles[_fold(v)] = v; continue
@@ -324,8 +339,23 @@ def extract(html: str, url: str):
     if not ov:
         return None
     origin = "https://" + (urlparse(url).netloc or "www.lg.com")
+    # 제품 컨테이너에 기능 영역과 나란히 놓인 컴포넌트(맨 위 인트로 히어로 등)도 화면 순서대로.
+    # 기능 영역 사본(overview_section_cop… — 예약/A·B 변형)과 지원 영역(pdp-support)은 제외
+    comps = _flatten(ov)
+    prod, ok_key = _product_and_overview(html, url)
+    if prod is not None:
+        comps, items = [], prod.get(":items") or {}
+        for k in prod.get(":itemsOrder") or list(items):
+            c = items.get(k)
+            if not isinstance(c, dict): continue
+            if k == ok_key:
+                comps.extend(_flatten(c)); continue
+            ty = c.get(":type") or ""
+            if "overview" in k.lower() or k.startswith("pdp-") or SKIP_TYPES.search(ty) or not ty.startswith("lge/"):
+                continue
+            comps.extend(_flatten(c) if CONTAINER_TYPES.search(ty) else [c])
     sections, order = [], 0
-    for idx, c in enumerate(_flatten(ov)):
+    for idx, c in enumerate(comps):
         ty = c.get(":type") or ""
         name = ty.rsplit("/", 1)[-1]
         rp = (c.get("resourcePath") or "")
@@ -375,4 +405,4 @@ def extract(html: str, url: str):
                          "_aem_path": rp.rsplit("/jcr:content/", 1)[-1][:120]})
     feats = sum(len(s["media"]) for s in sections)
     return {"sections": sections, "note": "lg.com 원문 미러 (페이지 컴포넌트 모델) — 모든 텍스트/URL은 원본 그대로, AI 생성 서술 없음",
-            "_aem_stats": {"components": len(_flatten(ov)), "sections": len(sections), "media": feats}}
+            "_aem_stats": {"components": len(comps), "sections": len(sections), "media": feats}}
