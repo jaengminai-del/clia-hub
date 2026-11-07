@@ -314,11 +314,19 @@ def extract(html: str, url: str):
         cid = "AEM:" + name
         if items:
             head = _texts({":itemsOrder": c.get(":itemsOrder") or [], ":items": c.get(":items") or {}})
-            if head:
+            # 목록 밖에 있는 컴포넌트 자체의 이미지(대표 그림) — 목록 항목 이미지와 겹치지 않는 것만
+            item_keys = {_fold(m["pc_url"]) for it in items for m in _all_media(it, origin)}
+            own = [m for m in _all_media({k: v for k, v in c.items() if k != lk}, origin)
+                   if _fold(m["pc_url"]) not in item_keys]
+            own_imgs = [m for m in own if m["type"] == "image"]
+            if head or own_imgs:
                 order += 1
                 sections.append({"order": order, "text": "\n".join(head), "specs": [], "item_group": False,
-                                 "group_heading": "", "media": [], "component_id": cid, "component_dom_index": idx,
-                                 "layout_type": "text_block", "columns": 1, "column_count": 1})
+                                 "group_heading": "", "media": own_imgs + [m for m in own if m["type"] == "video"][:1],
+                                 # 대표 그림이 있으면 별도 섹션(카드 행에 섞이지 않게), 글만이면 카드 행 대제목으로 쓰이게 같은 묶음
+                                 "component_id": cid, "component_dom_index": (-1 - idx) if own_imgs else idx,
+                                 "layout_type": _layout(ty, own_imgs) if own_imgs else "text_block",
+                                 "columns": 1, "column_count": 1})
             n = len(items)
             cols = n if n <= 4 else (3 if n % 3 == 0 else 4 if n % 4 == 0 else 3)
             for it in items:
