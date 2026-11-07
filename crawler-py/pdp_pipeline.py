@@ -1301,7 +1301,7 @@ def main():
     if not full_ai and not args.skip_ai:
         write_progress(60, "2단계: CCG 컴포넌트 ID 및 레이아웃 구조 파싱 중...", "parse")
         component_data = parse_html_components(html)
-        _cf = build_from_components(component_data, _html_product_title(html), _cf_origin)
+        _cf = build_from_components(component_data, _html_product_title(raw or html), _cf_origin)
         _st = _cf.get("_cf_stats", {})
         _am = aem_mirror_if_better(raw or html, args.url, _cf)
         if _am:
@@ -1318,7 +1318,13 @@ def main():
             write_progress(100, "분석 완료!", "done")
             print(f"\n✓ 완료 (페이지 컴포넌트 모델 경로). 산출물: {out}/mirror.json")
             return
-        if _st.get("renderable", 0) >= 3:          # Step7-CF 와 같은 최소 품질 게이트
+        # 기능 소개 영역 자체가 없는 페이지(필터 등 액세서리): 페이지에 있는 것(제품명·요약·갤러리)이 전부다.
+        # AI 스크린샷 경로로 보내지 않고 컴포넌트 결과를 그대로 쓴다 (서버 스크린샷은 봇 차단에 막혀 결과가 더 나빠짐)
+        _no_features = _st.get("renderable", 0) < 3 and not aem_model.has_overview(raw or html, args.url)
+        if _no_features:
+            print("→ [Fast] 이 페이지에는 기능 소개 영역이 없음 — 페이지의 제품명·요약·갤러리로 완성")
+            _cf["_no_feature_area"] = True   # 검수: 기능 섹션이 없는 게 정상인 페이지
+        if _st.get("renderable", 0) >= 3 or _no_features:          # Step7-CF 와 같은 최소 품질 게이트
             (out / "components.json").write_text(
                 json.dumps(component_data, ensure_ascii=False, indent=2), encoding="utf-8")
             print(f"→ [Fast] 컴포넌트 {len(component_data)}개 → 노출섹션 {_st['renderable']} "

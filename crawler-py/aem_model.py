@@ -22,7 +22,7 @@ from urllib.parse import urlparse
 BLOCK_RE = re.compile(r"Access Denied|You don't have permission to access|errors\.edgesuite\.net", re.I)
 
 # 컨테이너(안의 컴포넌트를 순서대로 펼침)
-CONTAINER_TYPES = re.compile(r"/(parsys|container|responsivegrid|xfpage|experiencefragment|tabs?|productoverview)$")
+CONTAINER_TYPES = re.compile(r"/(parsys|container|responsivegrid|xfpage|experiencefragment|tabs?|productoverview|carousel)$")
 # 제품 컨텐츠가 아닌 것: FAQ · 멤버 가입 · 공유 · 구매 버튼 · 분할결제 팝업 · 쇼룸 · 빵부스러기
 SKIP_TYPES = re.compile(r"/(faq|joinmembers|socialshare|productcardbuttons|klarnapopup|businessshowroom|breadcrumb|"
                         r"reviews?|buyingguide|countdown|cookie|productpage|wheretobuy)$")
@@ -111,6 +111,15 @@ def product_title(html: str) -> str:
         t = m.group(1)
     t = re.sub(r"\s+", " ", _html.unescape(t)).strip()
     return "" if re.search(r"\bnull\b", t, re.I) else t
+
+
+def has_overview(html: str, url: str) -> bool:
+    """이 페이지에 기능 컨텐츠 영역(overview-section)이 있는가 — 없으면 액세서리 등 기능 소개가 없는 페이지."""
+    try:
+        ov = _overview(html, url)
+        return ov is not None and len(_flatten(ov)) > 0
+    except Exception:
+        return True
 
 
 # ── 페이지 확인 ──────────────────────────────────────────────────────
