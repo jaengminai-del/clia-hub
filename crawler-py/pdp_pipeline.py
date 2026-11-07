@@ -472,7 +472,7 @@ LG PDP 구조 및 그룹핑 규칙 (필수 준수):
 """
 
 
-def _html_product_title(html: str) -> str:
+def _html_product_title(html: str, url: str = "") -> str:
     """Gemini 없이 HTML에서 제품명 추출 (og:title → 제품명 컴포넌트 PD0012 의 h1 → <title> → 다른 h1).
     'LG' 처럼 브랜드만 있는 짧은 값은 제품명이 아니므로 건너뛴다 (2026-11-06: TH 번들 페이지에서
     Firecrawl HTML 의 첫 h1 이 'LG' 로 잡혀 제품명이 'LG' 로 저장되던 문제)."""
@@ -482,7 +482,7 @@ def _html_product_title(html: str) -> str:
         and not re.search(r"\bnull\b|access denied", t, re.I)
     cands = []
     # 2026-11-07: 페이지 제품 데이터의 userFriendlyName(= 화면 h1) 이 가장 정확하다 — og:title 이 'null' 인 페이지(TH 모니터)
-    _uf = aem_model.product_title(html)
+    _uf = aem_model.product_title(html, url)
     if _uf:
         cands.append(_uf)
     og = soup.find("meta", attrs={"property": "og:title"})
@@ -1305,7 +1305,7 @@ def main():
     if not full_ai and not args.skip_ai:
         write_progress(60, "2단계: CCG 컴포넌트 ID 및 레이아웃 구조 파싱 중...", "parse")
         component_data = parse_html_components(html)
-        _cf = build_from_components(component_data, _html_product_title(raw or html), _cf_origin)
+        _cf = build_from_components(component_data, _html_product_title(raw or html, args.url), _cf_origin)
         _st = _cf.get("_cf_stats", {})
         _am = aem_mirror_if_better(raw or html, args.url, _cf)
         if _am:
@@ -1316,7 +1316,7 @@ def main():
             for i, s in enumerate(_specs):
                 s = dict(s); s["order"] = len(mirror["sections"]) + i + 1
                 mirror["sections"].append(s)
-            mirror["product_title"] = aem_model.product_title(raw or html) or _html_product_title(html)
+            mirror["product_title"] = aem_model.product_title(raw or html, args.url) or _html_product_title(html, args.url)
             _attach_gallery(mirror, html, _cf_origin)
             _polish_mirror(mirror, html)
             for f in ("final.json", "verify_report.json", "mirror_qa_report.json", "components.json"):

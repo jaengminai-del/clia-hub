@@ -100,17 +100,24 @@ def _overview(html: str, url: str):
     return None
 
 
-def product_title(html: str) -> str:
-    """페이지 제품 데이터의 userFriendlyName (화면 h1 과 같은 제품명). 없으면 ''."""
-    m = re.search(r'\\?"userFriendlyName\\?":\\?"((?:[^"\\]|\\.){3,200}?)\\?"', html or "")
-    if not m:
-        return ""
+def product_title(html: str, url: str = "") -> str:
+    """페이지 제품 데이터의 userFriendlyName (화면 h1 과 같은 제품명). 없으면 ''.
+    flight 데이터를 JSON 으로 풀어 읽는다 (제품명 안의 따옴표 — 24" 모니터 등 — 때문에 정규식은 잘림).
+    url 이 있으면 modelUrlPath 가 그 페이지인 항목을 우선한다 (관련 제품 목록의 다른 이름이 아니라)."""
+    want = urlparse(url).path.rstrip("/").lower() if url else ""
+    first = ""
     try:
-        t = json.loads('"' + m.group(1).replace('\\"', '"').replace('"', '\\"') + '"')
+        for row in _flight_rows(_flight_text(html or "")):
+            for d in _walk(row, lambda d: isinstance(d.get("userFriendlyName"), str) and d["userFriendlyName"].strip()):
+                t = re.sub(r"\s+", " ", _html.unescape(d["userFriendlyName"])).strip()
+                if re.search(r"\bnull\b", t, re.I):
+                    continue
+                if want and str(d.get("modelUrlPath") or "").rstrip("/").lower() == want:
+                    return t
+                first = first or t
     except Exception:
-        t = m.group(1)
-    t = re.sub(r"\s+", " ", _html.unescape(t)).strip()
-    return "" if re.search(r"\bnull\b", t, re.I) else t
+        pass
+    return first
 
 
 def has_overview(html: str, url: str) -> bool:
