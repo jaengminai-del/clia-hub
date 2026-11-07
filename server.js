@@ -2359,8 +2359,10 @@ app.get('/api/proxy-image', async (req, res) => {
       res.set('Access-Control-Allow-Origin', '*');
       res.set('Content-Type', imgRes.headers['content-type'] || 'image/jpeg');
       res.set('Cache-Control', 'public, max-age=3600');
+      imgRes.on('error', (e) => { console.warn('Proxy stream error:', e.message); res.destroy(); });
       imgRes.pipe(res);
     });
+    request.on('socket', (sock) => sock.on('error', () => {}));   // 소켓 오류는 아래 request 'error' 로 처리
     request.on('error', (e) => {
       console.error('Proxy error:', e.message);
       res.status(500).send(e.message);
@@ -3017,6 +3019,18 @@ function reapOrphans() {
   });
 }
 setInterval(reapOrphans, 5 * 60 * 1000).unref();
+
+// 네트워크 연결이 끊겨 생기는 소켓 오류(EPIPE·ECONNRESET 등)가 처리기 없이 올라와 서버 전체가 죽지 않게 (2026-11-07:
+// TH 복구 중 TLSSocket 'write EPIPE' 로 프로세스가 재시작됨). 그 밖의 예외는 기록하고 종료 → Railway 가 재시작.
+const NET_ERR = new Set(['EPIPE', 'ECONNRESET', 'ECONNABORTED', 'ETIMEDOUT', 'ENOTCONN', 'ERR_STREAM_DESTROYED', 'ERR_STREAM_WRITE_AFTER_END']);
+process.on('uncaughtException', (e) => {
+  if (e && NET_ERR.has(e.code)) { console.warn(`[net] 처리되지 않은 소켓 오류 무시: ${e.code} ${e.syscall || ''}`); return; }
+  console.error('uncaughtException:', e && e.stack || e);
+  process.exit(1);
+});
+process.on('unhandledRejection', (e) => {
+  console.error('unhandledRejection:', e && e.stack || e);
+});
 
 app.listen(PORT, () => {
   console.log(`\n✅ A+ Content Generator Server`);
