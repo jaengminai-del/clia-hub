@@ -24,7 +24,7 @@ BLOCK_RE = re.compile(r"Access Denied|You don't have permission to access|errors
 # 컨테이너(안의 컴포넌트를 순서대로 펼침)
 CONTAINER_TYPES = re.compile(r"/(parsys|container|responsivegrid|xfpage|experiencefragment|tabs?|productoverview|carousel)$")
 # 제품 컨텐츠가 아닌 것: FAQ · 멤버 가입 · 공유 · 구매 버튼 · 분할결제 팝업 · 쇼룸 · 빵부스러기
-SKIP_TYPES = re.compile(r"/(faq|joinmembers|socialshare|productcardbuttons|klarnapopup|businessshowroom|breadcrumb|"
+SKIP_TYPES = re.compile(r"/(faq|joinmembers|socialshare|productcardbuttons|klarnapopup|breadcrumb|"
                         r"reviews?|buyingguide|countdown|cookie|productpage|wheretobuy)$")
 # 구독(LG Subscribe) 등 판매 안내 블록 — 제품 기능이 아님
 SKIP_PATH = re.compile(r"/subscribe/|/promotion/|/sample/", re.I)
