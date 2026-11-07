@@ -1224,13 +1224,18 @@ def aem_mirror_if_better(html: str, url: str, cf: Optional[dict]):
     if not am or not am["sections"]:
         return None
     def names(sections):
+        # 제품 이미지만 비교 — 구독(LG Subscribe)·프로모션 안내 그림은 제품 기능이 아니므로 세지 않는다
         return {aem_model._fold(m.get("pc_url") or m.get("mobile_url") or "") for s in sections
-                for m in (s.get("media") or []) if m.get("type") != "video"} - {""}
+                for m in (s.get("media") or []) if m.get("type") != "video"
+                and not aem_model.SKIP_PATH.search(m.get("pc_url") or "")
+                and not re.search(r"subscribe|card_img|img_washing_machine", (m.get("pc_url") or ""), re.I)} - {""}
     cf_names, am_names = names((cf or {}).get("sections", [])), names(am["sections"])
     cf_media, am_media = len(cf_names), len(am_names)
     cf_ok = (cf or {}).get("_cf_stats", {}).get("renderable", 0) >= 3
-    # 컴포넌트 경로가 충분하고, 모델 쪽이 그 경로에 없는 이미지를 2장 이상 더 찾지 못하면 컴포넌트 경로 유지
-    if cf_ok and (len(am_names - cf_names) < 2 or am_media < cf_media):
+    gain, loss = len(am_names - cf_names), len(cf_names - am_names)
+    # 컴포넌트 경로가 충분하고, 모델 쪽이 그 경로에 없는 제품 이미지를 더 찾지 못하거나(gain 0)
+    # 잃는 것이 더 많으면 컴포넌트 경로 유지
+    if cf_ok and (gain == 0 or loss > gain):
         return None
     print(f"→ [AEM] 페이지 컴포넌트 모델: 섹션 {len(am['sections'])} · 이미지 {am_media}장 "
           f"(컴포넌트 경로 {'노출 ' + str((cf or {}).get('_cf_stats', {}).get('renderable', 0)) if cf else '없음'} · 이미지 {cf_media}장) — 이쪽을 씀")

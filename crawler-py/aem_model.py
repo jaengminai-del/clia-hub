@@ -245,7 +245,9 @@ def _all_media(o, origin, out=None, seen=None, depth=0):
             if not (isinstance(v, str) and v.startswith("/content/dam") and not SKIP_PATH.search(v)):
                 continue
             kl = k.lower()
-            if "icon" in kl or "tablet" in kl or _ONOFF.search(v):
+            # 아이콘 블록 그림(iconBlockImageRef: 테두리 없는 디자인·틸트 등 기능 픽토그램+설명)은 컨텐츠,
+            # 탭 버튼 아이콘(iconImageRef/offIconImageRef)·태블릿·탭 ON/OFF 상태는 화면 조작용이라 제외
+            if ("icon" in kl and kl != "iconblockimageref") or "tablet" in kl or _ONOFF.search(v):
                 continue
             if "mob" in kl:
                 mobiles[_fold(v)] = v; continue
@@ -349,8 +351,8 @@ def extract(html: str, url: str):
             n = len(items)
             cols = n if n <= 4 else (3 if n % 3 == 0 else 4 if n % 4 == 0 else 3)
             for it in items:
-                media = [m for m in _all_media(it, origin) if m["type"] == "image"][:1] + \
-                        [m for m in _all_media(it, origin) if m["type"] == "video"][:1]
+                _im = _all_media(it, origin)
+                media = [m for m in _im if m["type"] == "image"] + [m for m in _im if m["type"] == "video"][:1]
                 text = "\n".join(_texts(it))
                 if not media and not text: continue
                 order += 1
