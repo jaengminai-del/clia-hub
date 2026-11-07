@@ -974,7 +974,7 @@ def ui_control_asset_keys(html: str) -> set:
     soup = BeautifulSoup(html or "", "html.parser")
     inside, outside = set(), set()
     for el in soup.find_all(["img", "source"]):
-        src = el.get("src") or el.get("data-src") or (el.get("srcset") or "").split(",")[0].strip().split(" ")[0]
+        src = el.get("src") or el.get("data-src") or re.sub(r"\s+\d+(\.\d+)?[wx]$", "", (el.get("srcset") or "").split(",")[0].strip())
         if not src or src.startswith("data:"):
             continue
         (inside if ComponentParser._is_ui_control_media(el) else outside).add(_dam_path_key(src))
@@ -1018,7 +1018,8 @@ def extract_gallery(html: str, origin: str = "https://www.lg.com") -> list:
         return []
 
     def abs_url(u: str) -> str:
-        u = (u or "").strip().split(" ")[0]
+        # srcset 의 크기 설명자(" 1600w", " 2x")만 떼고, 파일명 안의 공백은 유지 (예: "01_Glory2_Beige_Front 2010.jpg")
+        u = re.sub(r"\s+\d+(\.\d+)?[wx]\s*$", "", (u or "").strip())
         if not u or u.startswith("data:"):
             return ""
         if u.startswith("//"):

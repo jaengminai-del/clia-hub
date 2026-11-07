@@ -311,7 +311,7 @@ def extract_media(html: str, base_url: str, device: str) -> List[dict]:
             anchor = (img.get("alt") or "").strip() or near_heading(pic)
         for s in pic.find_all("source"):
             ss = s.get("srcset") or ""
-            u = ss.split(",")[0].strip().split(" ")[0]
+            u = re.sub(r"\s+\d+(\.\d+)?[wx]$", "", ss.split(",")[0].strip())
             media = s.get("media") or ""
             dev = "mobile" if "max-width" in media else ("pc" if "min-width" in media else device)
             add("IMAGE", u, anchor, dev)

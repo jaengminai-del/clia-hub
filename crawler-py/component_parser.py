@@ -946,7 +946,7 @@ class ComponentParser:
             media_query = source.get('media', '')
             srcset = source.get('srcset', '')
             if srcset:
-                src = srcset.split(',')[0].strip().split()[0]
+                src = re.sub(r"\s+\d+(\.\d+)?[wx]$", "", srcset.split(',')[0].strip())
                 if 'min-width: 769' in media_query or 'min-width:769' in media_query:
                     media.src_desktop = src
                 elif 'max-width: 768' in media_query or 'max-width:768' in media_query:
