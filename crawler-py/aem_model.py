@@ -90,8 +90,15 @@ def _page_path(url: str) -> str:
     return f"/content/lge/{cc}/{cc}/" + "/".join(parts[1:]).lower() + "/"
 
 
+def _canonical(html: str) -> str:
+    for pat in (r'<link[^>]+rel="canonical"[^>]*href="([^"]+)"', r'<link[^>]+href="([^"]+)"[^>]*rel="canonical"'):
+        m = re.search(pat, (html or "")[:300000])
+        if m: return _html.unescape(m.group(1))
+    return ""
+
+
 def _overview(html: str, url: str):
-    want = _page_path(url)
+    want = _page_path(_canonical(html) or url)   # 옮겨진 제품은 새 주소의 컴포넌트 경로
     for row in _flight_rows(_flight_text(html)):
         for d in _walk(row, lambda d: isinstance(d.get("resourcePath"), str) and ":items" in d
                        and d["resourcePath"].lower().startswith(want)
@@ -104,7 +111,7 @@ def product_title(html: str, url: str = "") -> str:
     """페이지 제품 데이터의 userFriendlyName (화면 h1 과 같은 제품명). 없으면 ''.
     flight 데이터를 JSON 으로 풀어 읽는다 (제품명 안의 따옴표 — 24" 모니터 등 — 때문에 정규식은 잘림).
     url 이 있으면 modelUrlPath 가 그 페이지인 항목을 우선한다 (관련 제품 목록의 다른 이름이 아니라)."""
-    want = urlparse(url).path.rstrip("/").lower() if url else ""
+    want = urlparse(_canonical(html) or url).path.rstrip("/").lower() if url else ""
     first = ""
     try:
         for row in _flight_rows(_flight_text(html or "")):
@@ -143,7 +150,12 @@ def page_check(html: str, url: str):
         m = re.search(pat, html[:300000])
         if m and urlparse(_html.unescape(m.group(1))).path:
             got = urlparse(_html.unescape(m.group(1))).path.rstrip("/").lower()
-            return (True, "") if got == want else (False, f"different page (canonical {got} ≠ requested {want})")
+            if got == want:
+                return True, ""
+            # LG 가 제품을 다른 카테고리 주소로 옮긴 경우(같은 모델 조각, 리다이렉트) — 같은 제품
+            if got.rsplit("/", 1)[-1] == want.rsplit("/", 1)[-1] and got.split("/")[1:2] == want.split("/")[1:2]:
+                return True, ""
+            return False, f"different page (canonical {got} ≠ requested {want})"
     low = html.lower().replace("\\/", "/")
     if _page_path(url) in low:
         return True, ""
