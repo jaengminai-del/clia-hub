@@ -37,6 +37,7 @@ from component_parser import ComponentParser, parse_html_components, LayoutType
 from text_filters import is_image_description
 from component_mirror import build_from_components
 import llm_claude  # ANTHROPIC_API_KEY 가 있으면 Gemini 대신 Claude 로 시각 분석
+import aem_model  # 페이지에 실린 AEM 컴포넌트 모델 → 섹션 (예전 형식 PDP) + 받은 페이지 확인
 
 
 class _CFSkip(Exception):
@@ -92,7 +93,7 @@ def firecrawl_scrape(url: str, mobile: bool) -> dict:
 
     body = {
         "url": url,
-        "formats": ["markdown", "html"],
+        "formats": ["markdown", "html", "rawHtml"],   # rawHtml: 페이지 컴포넌트 모델(스크립트) 포함 — aem_model 용
         "onlyMainContent": False,
         "waitFor": 3000,                              # 대기 시간 최적화 (8000ms -> 3000ms)
         "timeout": 120000,
@@ -477,8 +478,13 @@ def _html_product_title(html: str) -> str:
     Firecrawl HTML 의 첫 h1 이 'LG' 로 잡혀 제품명이 'LG' 로 저장되던 문제)."""
     from bs4 import BeautifulSoup
     soup = BeautifulSoup(html or "", "html.parser")
-    ok = lambda t: bool(t) and len(t) >= 5 and t.strip().upper() not in ("LG", "LG ELECTRONICS", "LG THAILAND")
+    ok = lambda t: bool(t) and len(t) >= 5 and t.strip().upper() not in ("LG", "LG ELECTRONICS", "LG THAILAND") \
+        and not re.search(r"\bnull\b|access denied", t, re.I)
     cands = []
+    # 2026-11-07: 페이지 제품 데이터의 userFriendlyName(= 화면 h1) 이 가장 정확하다 — og:title 이 'null' 인 페이지(TH 모니터)
+    _uf = aem_model.product_title(html)
+    if _uf:
+        cands.append(_uf)
     og = soup.find("meta", attrs={"property": "og:title"})
     if og and og.get("content"):
         cands.append(og["content"].split("|")[0].strip())
@@ -1169,6 +1175,64 @@ def content_checks(mirror: dict, html: str = "") -> dict:
     return report
 
 
+def direct_fetch(url: str) -> str:
+    """Firecrawl 대체: 일반 Chrome 처럼 직접 받기 (봇 차단되면 차단 화면이 와서 page_check 에서 걸러짐)."""
+    r = requests.get(url, timeout=60, headers={
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/130.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml", "Accept-Language": "th-TH,th;q=0.9,en;q=0.8"})
+    return r.text if r.ok else ""
+
+
+def fetch_product_html(url: str):
+    """요청한 제품 페이지 HTML 을 확실히 받는다 → (md, html, raw).
+    Firecrawl 이 차단 화면이나 LG 홈/프로모션 페이지를 돌려주는 경우가 있어(TH 배치), 받을 때마다
+    aem_model.page_check 로 확인하고 Firecrawl 재시도 → 직접 받기 순으로. 끝내 아니면 실패로 끝낸다
+    (엉뚱한 페이지를 그 제품의 미러로 저장하지 않는다)."""
+    reasons = []
+    for attempt in range(3):
+        try:
+            d = firecrawl_scrape(url, mobile=False)
+            md, html, raw = d.get("markdown", ""), d.get("html", ""), d.get("rawHtml", "")
+            ok, why = aem_model.page_check(raw or html, url)
+            if ok:
+                return md, html or raw, raw
+            reasons.append(f"firecrawl#{attempt + 1}: {why}")
+        except Exception as e:
+            reasons.append(f"firecrawl#{attempt + 1}: {str(e)[:120]}")
+        print(f"   ! {reasons[-1]} — 다시 시도")
+        time.sleep(5 * (attempt + 1))
+    try:
+        html = direct_fetch(url)
+        ok, why = aem_model.page_check(html, url)
+        if ok:
+            print("   ✓ 직접 받기로 제품 페이지 확보")
+            return "", html, html
+        reasons.append(f"direct: {why}")
+    except Exception as e:
+        reasons.append(f"direct: {str(e)[:120]}")
+    raise RuntimeError("제품 페이지를 받지 못함 — " + " | ".join(reasons))
+
+
+def aem_mirror_if_better(html: str, url: str, cf: Optional[dict]):
+    """AEM 모델 미러가 컴포넌트 경로보다 컨텐츠(이미지)가 확실히 많으면 그것을 쓴다."""
+    try:
+        am = aem_model.extract(html, url)
+    except Exception as e:
+        print(f"   ! AEM 모델 읽기 실패: {str(e)[:150]}")
+        return None
+    if not am or not am["sections"]:
+        return None
+    cf_media = sum(len([m for m in (s.get("media") or []) if m.get("type") != "video"]) for s in (cf or {}).get("sections", []))
+    cf_ok = (cf or {}).get("_cf_stats", {}).get("renderable", 0) >= 3
+    am_media = am["_aem_stats"]["media"]
+    if cf_ok and am_media <= cf_media * 1.2 + 1:
+        return None
+    print(f"→ [AEM] 페이지 컴포넌트 모델: 섹션 {len(am['sections'])} · 이미지 {am_media}장 "
+          f"(컴포넌트 경로 {'노출 ' + str((cf or {}).get('_cf_stats', {}).get('renderable', 0)) if cf else '없음'} · 이미지 {cf_media}장) — 이쪽을 씀")
+    return am
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("url")
@@ -1178,10 +1242,11 @@ def main():
     ap.add_argument("--full-ai", action="store_true",
                     help="빠른 컴포넌트 경로를 쓰지 않고 기존 방식(스크린샷 + Gemini 분석·시각 QA)으로 실행. "
                          "환경 변수 CRAWLER_FULL_AI=1 로 전체 적용")
+    ap.add_argument("--html-file", help="이미 받은 제품 페이지 HTML 로 크롤 (Firecrawl 생략, page_check 는 함)")
     args = ap.parse_args()
     full_ai = args.full_ai or os.getenv("CRAWLER_FULL_AI", "").strip() == "1"
 
-    if not FIRECRAWL_KEY:
+    if not FIRECRAWL_KEY and not args.html_file:
         sys.exit("✗ FIRECRAWL_API_KEY 없음 (.env)")
     out = ROOT / "out" / slugify(args.url)
     out.mkdir(parents=True, exist_ok=True)
@@ -1202,11 +1267,22 @@ def main():
     # Step 1 — PC 단일 기기 수집 (시간 단축 극대화)
     datasets = {}
     md_cached, html_cached = cached("pc.md"), cached("pc.html")
-    if md_cached is None or html_cached is None:
+    if args.html_file:
+        html = Path(args.html_file).read_text(encoding="utf-8", errors="replace")
+        ok, why = aem_model.page_check(html, args.url)
+        if not ok:
+            sys.exit(f"✗ 받은 HTML 이 제품 페이지가 아님: {why}")
+        md, raw = "", html
+        (out / "pc.md").write_text(md, encoding="utf-8")
+        (out / "pc.html").write_text(html, encoding="utf-8")
+        print("✓ [Step1] 받은 HTML 사용 (제품 페이지 확인됨)")
+        write_progress(35, "1단계: 받은 HTML 사용", "fetched")
+    elif md_cached is None or html_cached is None:
         write_progress(15, "1단계: Firecrawl 웹 스크래핑 및 HTML/DOM 트리 분석 중...", "fetch")
         print("→ [Step1] PC 크롤링 시작 (모바일 스킵으로 극단적 최적화)...")
-        d = firecrawl_scrape(args.url, mobile=False)
-        md, html = d.get("markdown", ""), d.get("html", "")
+        md, html, raw = fetch_product_html(args.url)
+        if raw:
+            (out / "pc_raw.html").write_text(raw, encoding="utf-8")
         (out / "pc.md").write_text(md, encoding="utf-8")
         (out / "pc.html").write_text(html, encoding="utf-8")
         write_progress(35, "1단계 완료: 원본 웹페이지 마크다운 수집 성공", "fetched")
@@ -1214,6 +1290,7 @@ def main():
         print("✓ [Step1] PC 크롤 캐시 사용")
         write_progress(35, "1단계 (캐시): 웹 텍스트 수집 완료", "fetched")
         md, html = md_cached, html_cached
+        raw = cached("pc_raw.html") or html
         
     datasets["pc"] = {"md": md, "html": html}
     _cf_origin = "https://" + (args.url.split("//", 1)[-1].split("/", 1)[0] or "www.lg.com")
@@ -1226,6 +1303,21 @@ def main():
         component_data = parse_html_components(html)
         _cf = build_from_components(component_data, _html_product_title(html), _cf_origin)
         _st = _cf.get("_cf_stats", {})
+        _am = aem_mirror_if_better(raw or html, args.url, _cf)
+        if _am:
+            write_progress(90, "3단계: 페이지 컴포넌트 모델로 컨텐츠 데이터 생성 중...", "build")
+            mirror = _am
+            mirror["product_title"] = aem_model.product_title(raw or html) or _html_product_title(html)
+            _attach_gallery(mirror, html, _cf_origin)
+            _polish_mirror(mirror, html)
+            for f in ("final.json", "verify_report.json", "mirror_qa_report.json", "components.json"):
+                (out / f).unlink(missing_ok=True)
+            (out / "qa_report.json").write_text(
+                json.dumps(content_checks(mirror, html), ensure_ascii=False, indent=2), encoding="utf-8")
+            (out / "mirror.json").write_text(json.dumps(mirror, ensure_ascii=False, indent=2), encoding="utf-8")
+            write_progress(100, "분석 완료!", "done")
+            print(f"\n✓ 완료 (페이지 컴포넌트 모델 경로). 산출물: {out}/mirror.json")
+            return
         if _st.get("renderable", 0) >= 3:          # Step7-CF 와 같은 최소 품질 게이트
             (out / "components.json").write_text(
                 json.dumps(component_data, ensure_ascii=False, indent=2), encoding="utf-8")

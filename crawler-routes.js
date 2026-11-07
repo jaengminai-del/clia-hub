@@ -57,7 +57,7 @@ function auth(req, res, next) {
   next();
 }
 
-function launchPipeline(jobId, url, usePro, geminiKey, fullAi) {
+function launchPipeline(jobId, url, usePro, geminiKey, fullAi, html = null) {
   const slug = slugify(url);
   const out = path.join(OUT_DIR, slug);
   fs.mkdirSync(out, { recursive: true });
@@ -68,6 +68,11 @@ function launchPipeline(jobId, url, usePro, geminiKey, fullAi) {
     JSON.stringify({ percent: 0, message: '작업 대기열 등록됨', step: 'queued', updated_at: Date.now() / 1000 }));
 
   const args = [PIPELINE, url, '--cache'];
+  if (html) {   // 미리 받은 제품 페이지 HTML (Firecrawl 생략 — 파이프라인이 요청 페이지인지 다시 확인)
+    const hf = path.join(out, '_input.html');
+    fs.writeFileSync(hf, html);
+    args.push('--html-file', hf);
+  }
   if (usePro) args.push('--pro');
   if (fullAi) args.push('--full-ai'); // 기존 방식(스크린샷 + Gemini 분석·시각 QA) 강제
   const env = { ...process.env, PYTHONIOENCODING: 'utf-8' };
@@ -196,22 +201,23 @@ router.get('/healthz', (req, res) => res.json({
 }));
 
 // 크롤 작업 등록 → { jobId, cached }. 캐시(mirror.json)가 있으면 파이프라인 없이 즉시 완료.
-function startCrawl(url, { force = false, pro = false, geminiKey = null, fullAi = false } = {}) {
+function startCrawl(url, { force = false, pro = false, geminiKey = null, fullAi = false, html = null } = {}) {
   const slug = slugify(url);
   const out = path.join(OUT_DIR, slug);
+  if (html) force = true;
   if (fs.existsSync(path.join(out, 'mirror.json')) && !force) {
     const jobId = 'cached_' + crypto.randomBytes(6).toString('hex');
     jobs.set(jobId, { url, slug, out, startedAt: 0, proc: null, exited: true });
     return { jobId, cached: true };
   }
   if (force && fs.existsSync(out)) {
-    for (const f of ['mirror.json', 'final.json', 'pc.md', 'pc.html', 'pc_full.png', 'progress.json']) {
+    for (const f of ['mirror.json', 'final.json', 'pc.md', 'pc.html', 'pc_raw.html', 'pc_full.png', 'progress.json']) {
       try { fs.unlinkSync(path.join(out, f)); } catch {}
     }
   }
   const jobId = 'job_' + crypto.randomBytes(6).toString('hex');
   jobs.set(jobId, { url, slug, startedAt: Date.now() / 1000 });
-  launchPipeline(jobId, url, pro, geminiKey, fullAi);
+  launchPipeline(jobId, url, pro, geminiKey, fullAi, html);
   return { jobId, cached: false };
 }
 
@@ -342,12 +348,19 @@ router.post('/api/v1/products/:slug/geo', auth, async (req, res) => {
 });
 
 router.post('/api/v1/crawl', auth, (req, res) => {
-  const { url, force_refresh = false, use_pro_model = false, full_ai = false } = req.body || {};
+  const { url, force_refresh = false, use_pro_model = false, full_ai = false, html = null } = req.body || {};
   if (typeof url !== 'string' || !url.startsWith('http')) {
     return res.status(400).json({ detail: 'valid url required' });
   }
+  // html(미리 받은 제품 페이지)은 저장 컨텐츠를 정하므로 EXPORT_TOKEN 이 있어야 받는다
+  if (html != null) {
+    const tok = (process.env.EXPORT_TOKEN || '').trim();
+    if (!tok || req.get('x-export-token') !== tok) return res.status(401).json({ detail: 'html requires x-export-token' });
+    if (typeof html !== 'string' || html.length < 5000) return res.status(400).json({ detail: 'html too short' });
+  }
   const { jobId, cached } = startCrawl(url, {
     force: !!force_refresh, pro: !!use_pro_model, fullAi: !!full_ai, geminiKey: req.get('x-gemini-api-key') || null,
+    html: html || null,
   });
   if (cached) {
     return res.status(202).json({ job_id: jobId, status: 'completed', cached: true,
