@@ -2048,7 +2048,9 @@ app.post('/api/ebay-generate', async (req, res) => {
       const mirrorFp = path.join(slugDir, 'mirror.json');
       if (fs.existsSync(mirrorFp)) {
         const mir = JSON.parse(fs.readFileSync(mirrorFp, 'utf8'));
-        const hasCcg = (mir.sections || []).some(s => s.component_id);
+        // 기능 소개 영역이 없는 페이지(_no_feature_area: 액세서리 등)도 빌더로 — 제품명·갤러리로 만든다
+        const hasCcg = (mir.sections || []).some(s => s.component_id)
+          || (mir._no_feature_area && (mir._gallery || []).length > 0);
         if (hasCcg) {
           const venvPy = path.join(__dirname, 'crawler-py', '.venv', 'bin', 'python');
           const py = fs.existsSync(venvPy) ? venvPy : 'python3';
