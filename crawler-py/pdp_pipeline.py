@@ -1235,7 +1235,23 @@ def aem_mirror_if_better(html: str, url: str, cf: Optional[dict]):
     gain, loss = len(am_names - cf_names), len(cf_names - am_names)
     # 컴포넌트 경로가 충분하고, 모델 쪽이 그 경로에 없는 제품 이미지를 더 찾지 못하거나(gain 0)
     # 잃는 것이 더 많으면 컴포넌트 경로 유지
-    if cf_ok and (gain == 0 or loss > gain):
+    if cf_ok and gain == 0:
+        return None
+    if cf_ok and loss > gain:
+        # 두 경로가 서로 다른 이미지를 가짐 — 컴포넌트 경로를 쓰되, 그 경로에 없는 제품 이미지를 가진
+        # 모델 섹션을 뒤에 붙여 빠지는 것이 없게 한다 (스펙 표는 맨 뒤 유지)
+        missing = am_names - cf_names
+        extra = [dict(s) for s in am["sections"]
+                 if any(aem_model._fold(m.get("pc_url") or "") in missing for m in (s.get("media") or []))]
+        if extra:
+            secs = cf["sections"]
+            tail = [s for s in secs if s.get("specs")]
+            body = [s for s in secs if not s.get("specs")]
+            n0 = max([s.get("order") for s in body if isinstance(s.get("order"), int)] or [0])
+            for i, s in enumerate(extra):
+                s["order"] = n0 + i + 1
+            cf["sections"] = body + extra + tail
+            print(f"→ [Fast+AEM] 컴포넌트 경로 + 그 경로에 없는 모델 이미지 섹션 {len(extra)}개 추가 (이미지 {len(missing)}장)")
         return None
     print(f"→ [AEM] 페이지 컴포넌트 모델: 섹션 {len(am['sections'])} · 이미지 {am_media}장 "
           f"(컴포넌트 경로 {'노출 ' + str((cf or {}).get('_cf_stats', {}).get('renderable', 0)) if cf else '없음'} · 이미지 {cf_media}장) — 이쪽을 씀")
