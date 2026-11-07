@@ -1214,6 +1214,56 @@ def fetch_product_html(url: str):
     raise RuntimeError("제품 페이지를 받지 못함 — " + " | ".join(reasons))
 
 
+def _clean_media(mirror: dict) -> None:
+    """미러의 모든 이미지 주소를 URL 인코딩(공백·괄호 등)하고, LG 가 실제로 내주지 않는 이미지
+    (404/410, 또는 300바이트 미만 자리표시 그림)는 뺀다. 네트워크 오류 등 확실하지 않으면 그대로 둔다.
+    (2026-11-07 TH 검수: LG 페이지 자체가 404 이미지·1x1 자리표시를 참조 — 산출물에 빈 그림으로 나왔다)"""
+    from urllib.parse import quote
+    def enc(u):
+        return quote(u, safe=":/%?=&,~+-_.()#@!$'*;") if u else u
+    items = []
+    for s in mirror.get("sections") or []:
+        for m in s.get("media") or []:
+            items.append(m)
+    items += list(mirror.get("_gallery") or [])
+    for m in items:
+        for k in ("pc_url", "mobile_url", "unified_url"):
+            if m.get(k): m[k] = enc(m[k])
+    urls = sorted({m.get(k) for m in items for k in ("pc_url", "mobile_url") if m.get(k) and m.get("type") != "video"})
+    ua = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"}
+    def dead(u):
+        # curl: LG 봇 차단은 파이썬 requests/urllib 에 403 을 주지만 curl 에는 실제 상태를 준다. 403 등은 '불확실'로 둔다
+        import subprocess
+        try:
+            r = subprocess.run(["curl", "-s", "-L", "-m", "30", "-A", ua["User-Agent"], "-H", "Referer: https://www.lg.com/",
+                                "-r", "0-1023", "-o", "/dev/null", "-w", "%{http_code} %{size_download}", u],
+                               capture_output=True, text=True, timeout=40)
+            code, size = (r.stdout.split() + ["0", "0"])[:2]
+            code, size = int(code or 0), int(float(size or 0))
+            if code in (404, 410): return u, f"HTTP {code}"
+            if code in (200, 206) and size < 300: return u, f"placeholder ({size} bytes)"
+        except Exception:
+            pass
+        return u, None
+    with ThreadPoolExecutor(8) as ex:
+        bad = {u: why for u, why in ex.map(dead, urls) if why}
+    if not bad:
+        return
+    for s in mirror.get("sections") or []:
+        keep = []
+        for m in s.get("media") or []:
+            if m.get("pc_url") in bad:
+                if m.get("mobile_url") and m["mobile_url"] not in bad and m["mobile_url"] != m["pc_url"]:
+                    m["pc_url"] = m["mobile_url"]; keep.append(m)
+                continue
+            if m.get("mobile_url") in bad: m["mobile_url"] = ""
+            keep.append(m)
+        s["media"] = keep
+    mirror["_gallery"] = [g for g in mirror.get("_gallery") or [] if g.get("pc_url") not in bad]
+    mirror["_dead_media_dropped"] = [{"url": u, "why": w} for u, w in sorted(bad.items())]
+    print(f"   ✓ LG 가 내주지 않는 이미지 {len(bad)}장 제외 (404·자리표시)")
+
+
 def aem_mirror_if_better(html: str, url: str, cf: Optional[dict]):
     """AEM 모델 미러가 컴포넌트 경로보다 컨텐츠(이미지)가 확실히 많으면 그것을 쓴다."""
     try:
@@ -1342,6 +1392,7 @@ def main():
             _polish_mirror(mirror, html)
             for f in ("final.json", "verify_report.json", "mirror_qa_report.json", "components.json"):
                 (out / f).unlink(missing_ok=True)
+            _clean_media(mirror)
             (out / "qa_report.json").write_text(
                 json.dumps(content_checks(mirror, html), ensure_ascii=False, indent=2), encoding="utf-8")
             (out / "mirror.json").write_text(json.dumps(mirror, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -1367,6 +1418,7 @@ def main():
             # 예전 실행의 Gemini 산출물은 이번 결과와 무관하므로 정리
             for f in ("final.json", "verify_report.json", "mirror_qa_report.json"):
                 (out / f).unlink(missing_ok=True)
+            _clean_media(mirror)
             (out / "qa_report.json").write_text(
                 json.dumps(content_checks(mirror, html), ensure_ascii=False, indent=2), encoding="utf-8")
             (out / "mirror.json").write_text(json.dumps(mirror, ensure_ascii=False, indent=2), encoding="utf-8")
