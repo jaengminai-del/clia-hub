@@ -2543,6 +2543,48 @@ app.post('/api/v1/slice-html', async (req, res) => {
   }
 });
 
+// 이미지형 HTML 슬라이스 묶음 ZIP (2026-11-07): 그 해시에 저장된 슬라이스 이미지 그대로 → 이미지형 HTML 과 같은 이미지.
+// 주소의 파일명은 내려받을 때 이름일 뿐이고, ZIP 은 해시마다 한 번 만들어 로컬·버킷에 둔다.
+app.get(/^\/media\/slices\/([0-9a-f]{20})\/([\w.-]{1,120}\.zip)$/, async (req, res) => {
+  const path = require('path'), fs = require('fs');
+  const hash = req.params[0], name = req.params[1];
+  const dir = path.join(SLICE_CACHE, hash), zipAbs = path.join(dir, '_images.zip');
+  const read = async (file) => {
+    const abs = path.join(dir, file);
+    if (fs.existsSync(abs)) return fs.readFileSync(abs);
+    const buf = await sliceStore.getBuffer(`media-slices/${hash}/${file}`);
+    if (buf) { fs.mkdirSync(dir, { recursive: true }); fs.writeFileSync(abs, buf); }
+    return buf;
+  };
+  try {
+    if (!fs.existsSync(zipAbs)) {
+      let buf = await sliceStore.getBuffer(`media-slices/${hash}/_images.zip`);
+      if (!buf) {
+        const manBuf = await read('manifest.json');
+        if (!manBuf) return res.status(404).end();
+        const man = JSON.parse(manBuf.toString('utf8'));
+        const zip = new (require('jszip'))();
+        for (const im of man.images || []) {
+          const b = await read(im.file);
+          if (!b) return res.status(404).json({ error: `slice missing: ${im.file}` });
+          zip.file(im.file, b);
+        }
+        buf = await zip.generateAsync({ type: 'nodebuffer', compression: 'STORE' });
+        await sliceStore.putBuffer(`media-slices/${hash}/_images.zip`, buf, 'application/zip').catch((e) =>
+          console.warn('[slice-zip] 버킷 업로드 실패', hash, e.message));
+      }
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(zipAbs, buf);
+    }
+    res.set({ 'Content-Type': 'application/zip', 'Content-Disposition': `attachment; filename="${name}"`,
+              'Cache-Control': 'public, max-age=31536000, immutable', 'Access-Control-Allow-Origin': '*' });
+    res.sendFile(zipAbs);
+  } catch (e) {
+    console.error('/media/slices zip error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // 이미지형 HTML 슬라이스 이미지 (공개 주소 — 마켓이 이 주소로 이미지를 불러감)
 app.get('/media/slices/:hash/:file', async (req, res) => {
   const path = require('path'), fs = require('fs');
