@@ -1265,7 +1265,7 @@ def _clean_media(mirror: dict) -> None:
 
 
 def aem_mirror_if_better(html: str, url: str, cf: Optional[dict]):
-    """AEM 모델 미러가 컴포넌트 경로보다 컨텐츠(이미지)가 확실히 많으면 그것을 쓴다."""
+    """컴포넌트 경로(원본 CLIA)가 페이지를 못 읽었을 때만 AEM 모델 미러를 쓴다."""
     try:
         am = aem_model.extract(html, url)
     except Exception as e:
@@ -1281,27 +1281,10 @@ def aem_mirror_if_better(html: str, url: str, cf: Optional[dict]):
                 and not re.search(r"subscribe|card_img|img_washing_machine", (m.get("pc_url") or ""), re.I)} - {""}
     cf_names, am_names = names((cf or {}).get("sections", [])), names(am["sections"])
     cf_media, am_media = len(cf_names), len(am_names)
-    cf_ok = (cf or {}).get("_cf_stats", {}).get("renderable", 0) >= 3
-    gain, loss = len(am_names - cf_names), len(cf_names - am_names)
-    # 컴포넌트 경로가 충분하고, 모델 쪽이 그 경로에 없는 제품 이미지를 더 찾지 못하거나(gain 0)
-    # 잃는 것이 더 많으면 컴포넌트 경로 유지
-    if cf_ok and gain == 0:
-        return None
-    if cf_ok and loss > gain:
-        # 두 경로가 서로 다른 이미지를 가짐 — 컴포넌트 경로를 쓰되, 그 경로에 없는 제품 이미지를 가진
-        # 모델 섹션을 뒤에 붙여 빠지는 것이 없게 한다 (스펙 표는 맨 뒤 유지)
-        missing = am_names - cf_names
-        extra = [dict(s) for s in am["sections"]
-                 if any(aem_model._fold(m.get("pc_url") or "") in missing for m in (s.get("media") or []))]
-        if extra:
-            secs = cf["sections"]
-            tail = [s for s in secs if s.get("specs")]
-            body = [s for s in secs if not s.get("specs")]
-            n0 = max([s.get("order") for s in body if isinstance(s.get("order"), int)] or [0])
-            for i, s in enumerate(extra):
-                s["order"] = n0 + i + 1
-            cf["sections"] = body + extra + tail
-            print(f"→ [Fast+AEM] 컴포넌트 경로 + 그 경로에 없는 모델 이미지 섹션 {len(extra)}개 추가 (이미지 {len(missing)}장)")
+    # 원본 CLIA 와 같게: 컴포넌트 경로가 페이지를 읽었으면(노출 섹션 3개 이상) 그 결과를 그대로 쓴다.
+    # 모델 경로는 컴포넌트 경로가 실패한 페이지(예전 형식 PDP 등)에서만. (2026-11-09: 모델 쪽이 이미지를 더 찾았다고
+    # 컴포넌트 결과를 바꾸거나 섹션을 덧붙이면, 홍보 배너·각주·탭 제목만 남은 섹션이 들어가고 기능명·탭 본문이 빠졌음)
+    if (cf or {}).get("_cf_stats", {}).get("renderable", 0) >= 3:
         return None
     print(f"→ [AEM] 페이지 컴포넌트 모델: 섹션 {len(am['sections'])} · 이미지 {am_media}장 "
           f"(컴포넌트 경로 {'노출 ' + str((cf or {}).get('_cf_stats', {}).get('renderable', 0)) if cf else '없음'} · 이미지 {cf_media}장) — 이쪽을 씀")

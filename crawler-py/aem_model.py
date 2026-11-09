@@ -25,7 +25,7 @@ BLOCK_RE = re.compile(r"Access Denied|You don't have permission to access|errors
 CONTAINER_TYPES = re.compile(r"/(parsys|container|responsivegrid|xfpage|experiencefragment|tabs?|productoverview|carousel)$")
 # 제품 컨텐츠가 아닌 것: FAQ · 멤버 가입 · 공유 · 구매 버튼 · 분할결제 팝업 · 쇼룸 · 빵부스러기
 SKIP_TYPES = re.compile(r"/(faq|joinmembers|socialshare|productcardbuttons|klarnapopup|breadcrumb|"
-                        r"reviews?|buyingguide|countdown|cookie|productpage|wheretobuy)$")
+                        r"reviews?|buyingguide|countdown|cookie|productpage|wheretobuy|personalizationbanner)$")
 # 구독(LG Subscribe) 등 판매 안내 블록 — 제품 기능이 아님
 SKIP_PATH = re.compile(r"/subscribe/|/promotion/|/sample/", re.I)
 TEXT_KEYS = ("eyebrow", "keyBenefitsTitleText", "imageText", "jcrTitle", "title", "headline", "subTitle", "subtitle",
@@ -392,6 +392,8 @@ def extract(html: str, url: str):
                                  "layout_type": f"grid_{cols}_column", "columns": cols, "column_count": cols})
             continue
         text = "\n".join(_texts(c))
+        if re.search(r"lorem ipsum", text, re.I):   # 작성 중 자리표시 블록 (페이지에 보이지 않음)
+            continue
         media = _all_media(c, origin)
         imgs = [m for m in media if m["type"] == "image" and m["role"] != "icon"]
         if not text and not imgs:
