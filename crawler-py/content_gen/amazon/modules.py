@@ -79,6 +79,16 @@ def build_modules(features: list, selection: list, spec: dict, mode: str = "stan
         if not (0 <= idx < len(features)):
             continue
         feature = features[idx]
+        if feature.get("divider"):             # 번들 PTO 구분 헤더 → 띠배너 (Amazon: Standard Text 모듈로 등록)
+            bi = feature.get("bundleItem") or {}
+            mods.append({"type": "divider-band", "imageUrl": None, "videoUrl": None, "slotImages": None,
+                         "featureCount": 0,
+                         "textData": {"headline": js_or(feature.get("headline"), ""),
+                                      "subheadline": "",
+                                      "body": js_or(feature.get("body"), ""), **_empty_text()},
+                         "id": next_id})
+            next_id += 1
+            continue
         card_items = feature.get("cardItems")
         fimgs = feature.get("images") or []
         bullets = feature.get("bullets")

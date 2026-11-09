@@ -449,7 +449,7 @@ def render_spec_table(st: Style, section: dict) -> str:
         url = best_image_url(m)
         if not url:
             continue
-        w = m.get("width") or 0
+        w = (m.get("width") or 0) if url == m.get("pc_url") else 0     # width 는 PC 이미지 픽셀 폭
         cap = f'max-width: {min(int(w), 800)}px;' if w else 'max-width: 100%;'
         img_html = (f'<div style="text-align: center; margin-bottom: 20px;">'
                     f'<img src="{url}" alt="{escape(m.get("alt") or "")}" '
@@ -574,12 +574,28 @@ def _warm_logo_trims(st: Style, blocks: list) -> None:
         logo_trims(urls)
 
 
+def render_divider(st: Style, section: dict) -> str:
+    """번들 PTO 구분 헤더 띠배너: 가운데 정렬 구분 라인 + 모델명 + UFN(모델 suffix 없는 전체 제품명).
+    카드 외곽선 없음 (lg-section 기본 테두리를 섹션 자체 style 로 덮음 — 인라인 변환 시 뒤에 오는 값이 우선).
+    Amazon 빌더 divider-band 모듈과 같은 디자인 (2026-11-09)."""
+    bi = section.get("bundle_item") or {}
+    model, ufn = escape(bi.get("model") or ""), escape(bi.get("ufn") or "")
+    return f'''
+<section class="lg-section lg-divider" style="padding: 40px 40px 32px; background: #FFFFFF; border: none; border-radius: 0; text-align: center;">
+  <div style="height: 2px; background: {st.headline_color}; margin: 0 auto 22px;"></div>
+  <div style="font-family: {st.font_headline}; font-size: 32px; font-weight: 700; line-height: {st.head_lh}; color: {st.headline_color}; margin: 0; text-align: center;">{model}</div>
+  <div style="font-family: {st.font_body}; font-size: 18px; line-height: {st.body_lh}; color: #555555; margin: 10px 0 0; text-align: center;">{ufn}</div>
+</section>'''
+
+
 def render_blocks(st: Style, blocks: list, align: str) -> list:
     out = []
     blocks = [dict(b, section=prefer_mobile_media(st, b["section"])) if "section" in b else b for b in blocks]
     _warm_logo_trims(st, blocks)
     for b in blocks:
-        if b["kind"] == "spec_table":
+        if b["kind"] == "divider":
+            h = render_divider(st, b["section"])
+        elif b["kind"] == "spec_table":
             h = render_spec_table(st, b["section"])
         elif b["kind"] == "card_row":
             h = render_card_row(st, b)

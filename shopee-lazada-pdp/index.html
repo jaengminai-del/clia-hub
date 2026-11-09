@@ -278,7 +278,8 @@ function mirrorToEbayFeatures(mirror) {
   // 독일 등은 기능 이미지도 /gallery/ 폴더에 두므로 경로 규칙을 쓰면 컨텐츠가 통째로 빠진다 (crawler F1과 같은 규칙)
   const isGallery = (u, s) => /renditions\/thum|[-_]thum[-_]|thum-\d+x\d+/i.test(u || '')
     || (!(s && s.component_id) && /\/gallery\//i.test(u || ''));
-  const bestUrl = m => m.pc_url || m.unified_url || m.mobile_url || '';
+  // 모바일 우선 (2026-11-09) — PC 기준 자르기(crop)가 붙은 이미지만 PC (서버 content_gen/model.best_image_url 과 같은 규칙)
+  const bestUrl = m => (m.crop && !m.use_mobile) ? (m.pc_url || m.unified_url || m.mobile_url || '') : (m.mobile_url || m.pc_url || m.unified_url || '');
 
   // 1) 섹션 정규화 (텍스트 분리 + 유효 미디어 + 가로 그룹 정보)
   const norm = (mirror.sections || []).map(s => {

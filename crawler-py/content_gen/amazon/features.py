@@ -68,7 +68,8 @@ def _normalize(s: dict) -> dict:
     badge_title = _HASH_RE.sub("", raw[h_idx] if h_idx >= 0 else (raw[0] if raw else ""), count=1)
     skip = h_idx if h_idx >= 0 else 0
     badge_body = " ".join(_HASH_RE.sub("", l, count=1) for k, l in enumerate(raw) if k != skip)
-    return {"eyebrow": eyebrow, "headline": headline, "body": body, "media": media,
+    return {"bundleItem": s.get("bundle_item"),
+            "eyebrow": eyebrow, "headline": headline, "body": body, "media": media,
             "cc": js_or(s.get("column_count"), 0), "domIdx": s.get("component_dom_index", _UNDEF),
             "lt": js_or(s.get("layout_type"), ""), "isHead": is_head, "award": award,
             "badgeTitle": badge_title, "badgeBody": badge_body,
@@ -105,7 +106,7 @@ def _cardish(lt) -> bool:
 def _promote_heading(feats: list) -> str:
     """직전 텍스트 단독(대제목)을 그룹 헤딩으로 승격 — 디스클레이머/각주는 제외."""
     prev = feats[-1] if feats else None
-    if (prev and len(prev["images"]) == 0 and truthy(prev["headline"])
+    if (prev and not prev.get("divider") and len(prev["images"]) == 0 and truthy(prev["headline"])
             and not _FOOTNOTE_RE.search(prev["headline"]) and jlen(prev["headline"]) < 60):
         feats.pop()
         return prev["headline"]
@@ -121,6 +122,18 @@ def mirror_to_features(mirror: dict) -> list:
     while i < len(secs):
         s = secs[i]
         rg, cols = _media0(s, "row_group"), js_or(_media0(s, "columns"), 0)
+
+        # ★ 번들 PTO 구분 헤더 (2026-11-09): 이미지 없는 띠배너 카드 — 구분 라인 + 모델명 + UFN
+        if s.get("bundleItem"):
+            bi = s["bundleItem"]
+            feats.append({
+                "headline": bi.get("model") or s["headline"], "subheadline": "", "body": bi.get("ufn") or "",
+                "bullets": [], "images": [], "divider": True,
+                "bundleItem": {k: bi.get(k) for k in ("index", "total", "model", "ufn")},
+                "layout": {"imgsPerRow": 0, "fullWidth": True},
+            })
+            i += 1
+            continue
 
         # ★ 수상·인증 배지: 같은 컴포넌트의 배지를 한 카드로 → 개수에 따라 모듈 자동 배정
         if s["award"]:
@@ -235,7 +248,7 @@ def mirror_to_features(mirror: dict) -> list:
         feats.append(f)
         i += 1
     # 텍스트만 있는 섹션(이미지 없음) 제외
-    return [f for f in feats if f.get("images") or f.get("cardItems")]
+    return [f for f in feats if f.get("images") or f.get("cardItems") or f.get("divider")]
 
 
 def expand_for_selection(features: list) -> list:

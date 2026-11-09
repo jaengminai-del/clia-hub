@@ -1651,6 +1651,17 @@ body {
 
 /* ─ 6. Standard Text ─ */
 .m-text { padding: 30px 50px; background: #fff; width: 970px; }
+/* ─ 번들 PTO 구분 헤더 띠배너 (2026-11-09): 구분 라인 + 모델명 + UFN — Amazon 에는 Standard Text 모듈로 등록 ─ */
+.m-divider-band { width: 970px; background: #fff; padding: 28px 50px 24px; box-sizing: border-box; }
+.m-divider-band .db-line { height: 2px; background: #111; margin: 0 auto 18px; }
+.m-divider-band { text-align: center; }
+.m-divider-band h2 { font-family: 'LGEIHeadline', 'LG EI Headline', Arial, sans-serif; font-size: 26px; font-weight: 700; color: #111; margin: 0; letter-spacing: .01em; }
+.m-divider-band p { font-size: 15px; color: #555; line-height: 1.5; margin: 8px 0 0; }
+.kw-card-band { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 18px; box-sizing: border-box; background: #fff; }
+.kw-card-band .db-line { align-self: stretch; }
+.kw-card-band .db-line { height: 2px; background: #111; margin-bottom: 10px; }
+.kw-card-band b { font-size: 16px; color: #111; }
+.kw-card-band span { font-size: 11px; color: #666; margin-top: 4px; line-height: 1.35; }
 .m-text h2 { font-size: 20px; font-weight: 700; margin-bottom: 15px; color: #333; }
 .m-text p { font-size: 14px; color: #555; line-height: 1.7; max-width: 870px; }
 
@@ -3198,6 +3209,15 @@ const RENDERERS = {
     return `<div class="aplus-root m-text">
       <h2>${escHtml(hl)}</h2>
       <p>${escHtml(body)}</p>
+    </div>`;
+  },
+  'divider-band'(url, si, fc, td) {
+    const model = (td && td.headline) || 'MODEL';
+    const ufn   = (td && td.body) || 'User Friendly Name';
+    return `<div class="aplus-root m-divider-band">
+      <div class="db-line"></div>
+      <h2 data-maxchars="160">${escHtml(model)}</h2>
+      <p data-maxchars="5000">${escHtml(ufn)}</p>
     </div>`;
   },
   'tech-specs'(url, si, fc, td) {
@@ -5522,6 +5542,9 @@ function showKwModal(url) {
 
     // 콜라주는 가로 행(3/4)일 때만. 그 외는 단일 이미지.
     const imgHtml = (() => {
+      if (f.divider) {          // 번들 PTO 구분 헤더 → 띠배너 미리보기
+        return `<div class="kw-card-band"><div class="db-line"></div><b>${escHtml(f.headline || '')}</b><span>${escHtml(f.body || '')}</span></div>`;
+      }
       if (!hasImage) {
         return `<div class="kw-card-img-empty" style="flex-direction:column;gap:6px;">
            <span style="font-size:22px">📝</span>
@@ -5552,7 +5575,7 @@ function showKwModal(url) {
       : '';
     const arLabel = img && img.ar > 0
       ? `${img.width > 0 ? img.width+'×'+img.height : ''}  ${img.ar > 2 ? '📐 Banner' : img.ar > 1.2 ? '📐 Landscape' : img.ar > 0.85 ? '📐 Square' : '📐 Portrait'}${countNote}${cardCount}`
-      : hasImage ? `Image (size unknown)${cardCount}` : 'No image';
+      : f.divider ? '▬ Divider band (text)' : hasImage ? `Image (size unknown)${cardCount}` : 'No image';
 
     // desc: body → bullets 요약 순 폴백 (alt는 사용 안 함 — 이미지 설명 텍스트)
     const descText = f.body ||
@@ -6448,6 +6471,7 @@ function exportToWord() {
     'three-img':         '3분할 이미지',
     'four-text':         '4-Image + Text',
     'text':              'Text Only',
+    'divider-band':      '구분 헤더 띠배너 (Standard Text)',
   };
 
   let wordHtml = `

@@ -1160,6 +1160,26 @@ def main():
     datasets["pc"] = {"md": md, "html": html}
     _cf_origin = "https://" + (args.url.split("//", 1)[-1].split("/", 1)[0] or "www.lg.com")
 
+    # ★ 번들 PTO (2026-11-09~): 페이지 자체엔 피처가 없고 구성품 단품 PDP 에 있다 →
+    #   구성품을 각각 크롤해 위→아래로 결합 (bundle_pto.py). 번들이 아니면 아래 기존 흐름 그대로.
+    if not args.skip_ai and os.getenv("CRAWLER_BUNDLE_LEGACY", "").strip() != "1":
+        from bundle_pto import is_bundle_pto, run_bundle
+        if is_bundle_pto(args.url, html):
+            extra = (["--pro"] if args.pro else []) + (["--full-ai"] if args.full_ai else [])
+            mirror = run_bundle(args.url, html, out, slugify, write_progress, extra)
+            (out / "qa_report.json").write_text(json.dumps({
+                "mode": "bundle_pto", "match_score": None,
+                "checks": {"gallery_images": len(mirror.get("_gallery") or []),
+                           "components": len(mirror["bundle_pto"]["components"]),
+                           "crawled": sum(c["slug_ok"] for c in mirror["bundle_pto"]["components"])},
+                "issues": [f"구성품 #{c['index']} {c['model'] or c['name'][:40]}: 단품 PDP 없음/실패"
+                           for c in mirror["bundle_pto"]["components"] if not c["slug_ok"]],
+            }, ensure_ascii=False, indent=2), encoding="utf-8")
+            (out / "mirror.json").write_text(json.dumps(mirror, ensure_ascii=False, indent=2), encoding="utf-8")
+            write_progress(100, "분석 완료! (번들 PTO)", "done")
+            print(f"\n✓ 완료 (번들 PTO). 산출물: {out}/mirror.json")
+            return
+
     # ★ 빠른 경로 (2026-10-10~): 최종 미러는 컴포넌트-우선(Step7-CF)으로 만들어지고 Gemini 결과는
     #   제품명만 쓰였다. 컴포넌트 근거가 충분하면 스크린샷·Gemini 분석·시각 QA(기존 10분+)를 건너뛰고
     #   HTML 컴포넌트만으로 바로 완성한다. 품질이 떨어지면 --full-ai / CRAWLER_FULL_AI=1 로 기존 방식 복귀.
@@ -1168,6 +1188,27 @@ def main():
         component_data = parse_html_components(html)
         _cf = build_from_components(component_data, _html_product_title(html), _cf_origin)
         _st = _cf.get("_cf_stats", {})
+        # ★ 구형 PDP (2026-11-09~): 피처가 HTML 컴포넌트가 아니라 페이지 안 AEM 데이터(heroimage 등)에만
+        #   있으면 그걸로 섹션을 만든다 (Gemini 경로 대신). CRAWLER_AEM_MODEL=0 이면 끔.
+        if _st.get("renderable", 0) < 3 and os.getenv("CRAWLER_AEM_MODEL", "1").strip() != "0":
+            try:
+                from aem_model import build_sections, fetch_raw_html
+                raw = cached("pc.raw.html") or fetch_raw_html(args.url, FIRECRAWL_KEY)
+                if raw:
+                    (out / "pc.raw.html").write_text(raw, encoding="utf-8")
+                aem = build_sections(args.url, raw=raw) if raw else []
+                if sum(1 for s in aem if s.get("media")) >= 3:
+                    _cf["sections"] = aem + _cf.get("sections", [])
+                    for _i, _s in enumerate(_cf["sections"], 1):
+                        _s["order"] = _i
+                    _st["renderable"] = _st.get("renderable", 0) + len(aem)
+                    _st["aem_model"] = len(aem)
+                    _cf["note"] = "lg.com 원문 미러 (구형 PDP: 페이지 내 AEM 데이터 + component-first)"
+                    print(f"→ [AEM] 구형 PDP — 페이지 데이터에서 피처 섹션 {len(aem)}개 추출")
+                else:
+                    print(f"→ [AEM] 페이지 데이터 피처 없음 ({len(aem)})")
+            except Exception as _ae:
+                print(f"   ⚠️ AEM 데이터 추출 실패 → 기존 흐름: {str(_ae)[:120]}")
         if _st.get("renderable", 0) >= 3:          # Step7-CF 와 같은 최소 품질 게이트
             (out / "components.json").write_text(
                 json.dumps(component_data, ensure_ascii=False, indent=2), encoding="utf-8")

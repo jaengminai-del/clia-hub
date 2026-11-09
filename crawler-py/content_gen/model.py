@@ -8,6 +8,7 @@ model.py — [A] 공통 컨텐츠 모델 (1차 컨텐츠 생성)
 블록 종류
   {"kind": "spec_table", "section": s}                      라벨/값 스펙 표
   {"kind": "card_row", "component_id", "cols", "heading", "cards": [{"img", "text"}]}
+  {"kind": "divider", "section": s}                          번들 PTO 구분 헤더 띠배너 (section.bundle_item)
                                                              같은 컴포넌트의 N열 카드 행 (닷컴 한 행 복원)
   {"kind": "section", "section": s, "kv": bool}             일반 섹션 (kv = 문서 최상단 히어로)
 
@@ -58,8 +59,13 @@ _ONOFF_RE = re.compile(r"[_-](on|off)\.(png|jpe?g)$", re.I)
 
 
 def best_image_url(media: dict) -> str:
-    """미디어 객체에서 최적 이미지 URL."""
-    return media.get("pc_url") or media.get("unified_url") or media.get("mobile_url") or ""
+    """미디어 객체에서 최적 이미지 URL — 모바일 우선 (2026-11-09, 사용자 결정: eBay·Shopee/Lazada 는 모바일 환경 기준).
+    예외: PC 이미지 기준으로 계산된 자르기(crop: 수상 배지·PC 빈 영역)가 붙어 있고 모바일로 바꾸지 않은 이미지는 PC 유지
+    (자르기 좌표가 PC 이미지 픽셀 기준). Amazon 은 별도 선택(content_gen/amazon/features._best_url, PC·모바일 자동 선택)."""
+    pc, mob = media.get("pc_url") or "", media.get("mobile_url") or ""
+    if media.get("crop") and not media.get("use_mobile"):
+        return pc or media.get("unified_url") or mob
+    return mob or pc or media.get("unified_url") or ""
 
 
 def usable_media(section: dict) -> list:
@@ -181,6 +187,10 @@ def build_blocks(mirror: dict, rules: dict) -> list:
     blocks, kv_seen = [], False
     for s in sections:
         if rules.get("skip_disclaimer", True) and is_disclaimer(s):
+            continue
+        # 번들 PTO 구분 헤더 → 띠배너 (구분 라인 + 모델명 + UFN), Amazon divider-band 와 같은 디자인 (2026-11-09)
+        if s.get("bundle_item"):
+            blocks.append({"kind": "divider", "section": s})
             continue
         # 스펙 짝(라벨/값)이 있으면 표 — 이미지가 없어도 완결된 정보이므로 텍스트-only 제외보다 먼저
         if s.get("specs"):
