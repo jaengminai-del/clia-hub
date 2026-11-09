@@ -1226,6 +1226,8 @@ def _clean_media(mirror: dict) -> None:
         for m in s.get("media") or []:
             items.append(m)
     items += list(mirror.get("_gallery") or [])
+    # 비교 슬라이더(전/후) 이미지도 같은 검사 — 깨진 그림이면 슬라이더를 빼고 섹션 그림으로 보인다 (2026-11-09)
+    items += [side for s in mirror.get("sections") or [] for side in (s.get("compare") or {}).values() if isinstance(side, dict)]
     for m in items:
         for k in ("pc_url", "mobile_url", "unified_url"):
             if m.get(k): m[k] = enc(m[k])
@@ -1260,6 +1262,10 @@ def _clean_media(mirror: dict) -> None:
             keep.append(m)
         s["media"] = keep
     mirror["_gallery"] = [g for g in mirror.get("_gallery") or [] if g.get("pc_url") not in bad]
+    for s in mirror.get("sections") or []:
+        cp = s.get("compare") or {}
+        if any(isinstance(v, dict) and v.get("pc_url") in bad for v in cp.values()):
+            s.pop("compare", None)
     mirror["_dead_media_dropped"] = [{"url": u, "why": w} for u, w in sorted(bad.items())]
     print(f"   ✓ LG 가 내주지 않는 이미지 {len(bad)}장 제외 (404·자리표시)")
 

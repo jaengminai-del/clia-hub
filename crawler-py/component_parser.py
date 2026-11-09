@@ -34,9 +34,15 @@ def _clean_url(u: Optional[str]) -> Optional[str]:
     return quote(u.strip(), safe=":/?#[]@!$&'()*+,;=%~")
 
 
+def _srcset_head(srcset: str) -> str:
+    """srcset 첫 후보 (설명자 포함). 후보 구분은 '쉼표 + 공백' — LG 는 폴더 이름에 쉼표를 쓴다
+    (…/75nano81tsa-75,65,55,43/…) 그래서 쉼표마다 자르면 주소가 잘린다 (2026-11-09)."""
+    return re.split(r",\s+", (srcset or "").strip())[0].strip()
+
+
 def _srcset_first(srcset: str) -> str:
     """srcset 첫 후보의 URL. 끝의 '1x'·'800w' 설명자만 떼고, 파일명의 공백은 URL 일부로 본다."""
-    first = (srcset or "").split(",")[0].strip()
+    first = _srcset_head(srcset)
     if LEGACY:
         return first.split()[0] if first else ""
     return _clean_url(re.sub(r"\s+\d+(\.\d+)?[wx]$", "", first)) or ""
@@ -56,7 +62,7 @@ def is_award_media(el) -> bool:
             break
         if re.search(r"award", " ".join(p.get("class") or []), re.I):
             return True
-    src = el.get("src") or el.get("data-src") or (el.get("srcset") or "").split(",")[0]
+    src = el.get("src") or el.get("data-src") or _srcset_head(el.get("srcset") or "")
     if not src and el.name == "picture":
         img = el.find("img")
         src = (img.get("src") if img else "") or ""
@@ -372,7 +378,7 @@ class ComponentParser:
         if box is None or not box.select(".cmp-carousel__item, .c-carousel__item"):
             return False
         for img in box.find_all(["img", "source"]):
-            src = img.get("src") or img.get("data-src") or (img.get("srcset") or "").split(",")[0]
+            src = img.get("src") or img.get("data-src") or _srcset_head(img.get("srcset") or "")
             if re.search(r"/awards?/", src or "", re.I) or is_award_media(img):
                 return True
         for a in box.find_all("a", href=True):
@@ -946,7 +952,7 @@ class ComponentParser:
             media_query = source.get('media', '')
             srcset = source.get('srcset', '')
             if srcset:
-                src = re.sub(r"\s+\d+(\.\d+)?[wx]$", "", srcset.split(',')[0].strip())
+                src = re.sub(r"\s+\d+(\.\d+)?[wx]$", "", _srcset_head(srcset))
                 if 'min-width: 769' in media_query or 'min-width:769' in media_query:
                     media.src_desktop = src
                 elif 'max-width: 768' in media_query or 'max-width:768' in media_query:
