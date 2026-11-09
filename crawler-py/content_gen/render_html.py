@@ -36,8 +36,8 @@ class Style:
         self.spec = spec
         self.guide = guide
         self.overlay_ids = overlay_ids
-        self.font_headline = gp1_fonts.get("headline", "'LGEIHeadline', Arial, sans-serif")
-        self.font_body = gp1_fonts.get("body", "'LGEIText', Arial, sans-serif")
+        self.font_headline = gp1_fonts.get("headline", "'LGEIHeadline', 'LINESeedSansTH', Arial, sans-serif")
+        self.font_body = gp1_fonts.get("body", "'LGEIText', 'LINESeedSansTH', Arial, sans-serif")
         self.head_lh = ty.get("headline_line_height", 1.25)
         self.body_lh = ty.get("body_line_height", 1.6)
         self.headline_color = co.get("headline", "#111111")

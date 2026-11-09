@@ -145,7 +145,7 @@
 @keyframes clia-cap-flash{0%,62%{opacity:0;transform:scale(.4);}68%{opacity:1;transform:scale(1.15);}80%,100%{opacity:0;transform:scale(1.4);}}
 .clia-cap-eye{transform-box:fill-box;transform-origin:50% 50%;animation:clia-cap-blink 3s infinite;}
 @keyframes clia-cap-blink{0%,64%,72%,100%{transform:scaleY(1);}67%,69%{transform:scaleY(.1);}}
-.clia-cap-title{font-family:'LGEIHeadline',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:22px;font-weight:700;color:#111;margin-bottom:8px;}
+.clia-cap-title{font-family:'LGEIHeadline', 'LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:22px;font-weight:700;color:#111;margin-bottom:8px;}
 .clia-cap-msg{font-size:14px;line-height:1.6;color:#4A4946;min-height:46px;margin-bottom:14px;transition:opacity .35s ease,transform .35s ease;}
 .clia-cap-msg.out{opacity:0;transform:translateY(6px);}
 .clia-cap-bar{height:6px;background:#F0ECE4;border-radius:6px;overflow:hidden;margin-bottom:8px;}

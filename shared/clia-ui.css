@@ -10,7 +10,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 :root {
-  --clia-font: 'LGEIHeadline', 'LG EI Headline', 'LGEIText', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+  --clia-font: 'LGEIHeadline', 'LG EI Headline', 'LGEIText', 'LINESeedSansTH', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
   --clia-gray-50: #FAF9F5;
   --clia-gray-100: #F6F3EB;
   --clia-gray-200: #E6E1D6;

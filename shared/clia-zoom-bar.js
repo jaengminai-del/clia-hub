@@ -136,7 +136,7 @@
       n = document.createElement('div');
       n.className = 'clia-preview-scale-note';
       n.style.cssText = "margin:0 0 8px;padding:6px 10px;border-radius:6px;background:#F4F4F4;color:#555;"
-        + "font:600 12px/1.3 'LGEIText',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;text-align:center;";
+        + "font:600 12px/1.3 'LGEIText', 'LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;text-align:center;";
       el.parentElement.insertBefore(n, el);
     }
     const lang = (window.CLIA_LANG || document.documentElement.lang || 'en').slice(0, 2);

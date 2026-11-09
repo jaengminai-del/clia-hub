@@ -75,7 +75,7 @@
     b.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg><span>' + label(kind) + '</span>';
     b.style.cssText = 'position:absolute;top:8px;' + (group ? 'right:8px;' : 'left:8px;') + 'z-index:30;display:inline-flex;align-items:center;gap:5px;'
       + 'height:26px;padding:0 10px;border-radius:999px;border:1px solid #FD312E;background:#fff;color:#FD312E;'
-      + "font:600 11px/1 'LGEIHeadline',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;"
+      + "font:600 11px/1 'LGEIHeadline', 'LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;"
       + 'cursor:pointer;opacity:.55;box-shadow:0 1px 4px rgba(0,0,0,.12);transition:opacity .15s,background .15s,color .15s;';
     b.onmouseenter = () => { b.style.opacity = '1'; b.style.background = '#FD312E'; b.style.color = '#fff'; card.style.outline = '2px solid rgba(253,49,46,.55)'; card.style.outlineOffset = '-2px'; };
     b.onmouseleave = () => { b.style.opacity = '.55'; b.style.background = '#fff'; b.style.color = '#FD312E'; card.style.outline = ''; card.style.outlineOffset = ''; };

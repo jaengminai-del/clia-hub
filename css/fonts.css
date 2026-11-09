@@ -75,3 +75,62 @@
     font-style: normal;
     font-display: swap;
 }
+
+/* ============================================
+   LINE Seed Sans TH — 태국어 글자 (SIL OFL 1.1, seed.line.me)
+   글꼴 순서에서 LG EI 바로 뒤: 영문은 LG EI, LG EI 에 없는 태국어 글자는 이 글꼴로 (2026-11-09)
+   ============================================ */
+@font-face {
+    font-family: 'LINESeedSansTH';
+    src: url('../fonts/LINESeedSansTH-Thin.woff2') format('woff2'),
+         url('../fonts/LINESeedSansTH-Thin.ttf') format('truetype');
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'LINESeedSansTH';
+    src: url('../fonts/LINESeedSansTH-Regular.woff2') format('woff2'),
+         url('../fonts/LINESeedSansTH-Regular.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'LINESeedSansTH';
+    src: url('../fonts/LINESeedSansTH-Regular.woff2') format('woff2'),
+         url('../fonts/LINESeedSansTH-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'LINESeedSansTH';
+    src: url('../fonts/LINESeedSansTH-Bold.woff2') format('woff2'),
+         url('../fonts/LINESeedSansTH-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'LINESeedSansTH';
+    src: url('../fonts/LINESeedSansTH-ExtraBold.woff2') format('woff2'),
+         url('../fonts/LINESeedSansTH-ExtraBold.ttf') format('truetype');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'LINESeedSansTH';
+    src: url('../fonts/LINESeedSansTH-Heavy.woff2') format('woff2'),
+         url('../fonts/LINESeedSansTH-Heavy.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+

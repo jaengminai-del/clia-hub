@@ -7,14 +7,14 @@
 <link rel="stylesheet" href="../css/fonts.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'LGEIText',Arial,sans-serif;background:#F6F3EB;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+body{font-family:'LGEIText', 'LINESeedSansTH',Arial,sans-serif;background:#F6F3EB;height:100vh;overflow:hidden;display:flex;flex-direction:column}
 
 /* Header */
 .header{background:#F6F3EB;height:54px;padding:0 28px;display:flex;align-items:center;gap:16px;flex-shrink:0;border-bottom:1px solid #CBC8C2;z-index:100}
 .header-logo{height:22px;display:block;flex-shrink:0}
 .header-sep{width:1px;height:20px;background:#CBC8C2;flex-shrink:0}
-.header-title{font-family:'LGEIHeadline',sans-serif;font-size:14px;font-weight:600;color:#1A1A1A}
-.btn-home{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:#fff;color:#262626;border:1px solid #CBC8C2;border-radius:6px;font-family:'LGEIHeadline',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.header-title{font-family:'LGEIHeadline', 'LINESeedSansTH',sans-serif;font-size:14px;font-weight:600;color:#1A1A1A}
+.btn-home{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:#fff;color:#262626;border:1px solid #CBC8C2;border-radius:6px;font-family:'LGEIHeadline', 'LINESeedSansTH',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
 .btn-home:hover{background:#1A1A1A;color:#fff;border-color:#1A1A1A}
 
 /* Workspace */
@@ -23,10 +23,10 @@ body{font-family:'LGEIText',Arial,sans-serif;background:#F6F3EB;height:100vh;ove
 /* Left Panel */
 .panel-left{width:55%;display:flex;flex-direction:column;border-right:1px solid #CBC8C2;background:#fff;min-width:0}
 .panel-head{height:46px;padding:0 16px;border-bottom:1px solid #CBC8C2;background:#F0ECE4;flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
-.panel-head-title{font-family:'LGEIHeadline',sans-serif;font-size:13px;font-weight:600;color:#1A1A1A;display:flex;align-items:center;gap:8px}
+.panel-head-title{font-family:'LGEIHeadline', 'LINESeedSansTH',sans-serif;font-size:13px;font-weight:600;color:#1A1A1A;display:flex;align-items:center;gap:8px}
 .badge-ebay{background:#EE4D2D;color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:100px;letter-spacing:.05em}
 
-.btn-sm{height:32px;padding:0 13px;border:1px solid #CBC8C2;border-radius:6px;font-size:11.5px;font-weight:600;font-family:'LGEIText',sans-serif;cursor:pointer;background:#fff;color:#333;transition:all .15s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-sm{height:32px;padding:0 13px;border:1px solid #CBC8C2;border-radius:6px;font-size:11.5px;font-weight:600;font-family:'LGEIText', 'LINESeedSansTH',sans-serif;cursor:pointer;background:#fff;color:#333;transition:all .15s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .btn-sm:hover{background:#F5F5F5;border-color:#ADADAD}
 .btn-sm.primary{background:#E53238;color:#fff;border-color:#E53238}
 .btn-sm.primary:hover{background:#c42a2f}
@@ -52,9 +52,9 @@ body{font-family:'LGEIText',Arial,sans-serif;background:#F6F3EB;height:100vh;ove
 .input-section{padding:20px 16px;background:#fff;border-bottom:1px solid #E6E1D6;flex-shrink:0}
 .input-label{font-size:11px;font-weight:700;color:#7E7C77;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em}
 .input-row{display:flex;gap:8px}
-.url-input{flex:1;height:40px;border:1.5px solid #CBC8C2;border-radius:12px;padding:0 14px;font-size:13px;color:#262626;outline:none;transition:border-color .2s;background:#FDFCFA;font-family:'LGEIText',sans-serif}
+.url-input{flex:1;height:40px;border:1.5px solid #CBC8C2;border-radius:12px;padding:0 14px;font-size:13px;color:#262626;outline:none;transition:border-color .2s;background:#FDFCFA;font-family:'LGEIText', 'LINESeedSansTH',sans-serif}
 .url-input:focus{border-color:#E53238;background:#fff}
-.btn-analyze{height:40px;padding:0 20px;background:#E53238;color:#fff;border:none;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s;font-family:'LGEIText',sans-serif}
+.btn-analyze{height:40px;padding:0 20px;background:#E53238;color:#fff;border:none;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s;font-family:'LGEIText', 'LINESeedSansTH',sans-serif}
 .btn-analyze:hover{background:#c42a2f}
 .btn-analyze:disabled{background:#CBC8C2;cursor:not-allowed}
 
@@ -85,13 +85,13 @@ body{font-family:'LGEIText',Arial,sans-serif;background:#F6F3EB;height:100vh;ove
 .intro-view.fading{animation:fadeOut .4s ease forwards}
 @keyframes fadeOut{to{opacity:0;transform:scale(1.03)}}
 .intro-stack{display:flex;flex-direction:column;align-items:center;gap:24px;text-align:center;max-width:700px;padding:0 24px}
-.intro-title{font-family:'LGEIHeadline',sans-serif;font-weight:600;font-size:clamp(36px,5vw,72px);line-height:1.1;color:#262626}
-.intro-subtitle{font-family:'LGEIHeadline',sans-serif;font-weight:300;font-size:clamp(16px,2vw,24px);color:#555;line-height:1.5}
+.intro-title{font-family:'LGEIHeadline', 'LINESeedSansTH',sans-serif;font-weight:600;font-size:clamp(36px,5vw,72px);line-height:1.1;color:#262626}
+.intro-subtitle{font-family:'LGEIHeadline', 'LINESeedSansTH',sans-serif;font-weight:300;font-size:clamp(16px,2vw,24px);color:#555;line-height:1.5}
 .intro-input-shell{display:flex;align-items:center;width:min(680px,100%);background:#fff;border-radius:10px;padding:8px 16px;box-shadow:0 4px 12px rgba(230,225,214,.8);transition:box-shadow .25s}
 .intro-input-shell:focus-within{box-shadow:0 8px 24px rgba(230,225,214,1),0 0 0 2px rgba(229,50,56,.2)}
-.intro-input{flex:1;border:none;outline:none;background:transparent;font-size:18px;line-height:44px;color:#262626;font-family:'LGEIText',sans-serif}
+.intro-input{flex:1;border:none;outline:none;background:transparent;font-size:18px;line-height:44px;color:#262626;font-family:'LGEIText', 'LINESeedSansTH',sans-serif}
 .intro-input::placeholder{color:#999}
-.btn-intro-go{flex-shrink:0;width:88px;height:38px;background:#E53238;color:#fff;border:none;border-radius:6px;font-family:'LGEIHeadline',sans-serif;font-weight:600;font-size:16px;cursor:pointer;transition:background .15s}
+.btn-intro-go{flex-shrink:0;width:88px;height:38px;background:#E53238;color:#fff;border:none;border-radius:6px;font-family:'LGEIHeadline', 'LINESeedSansTH',sans-serif;font-weight:600;font-size:16px;cursor:pointer;transition:background .15s}
 .btn-intro-go:hover:not(:disabled){background:#c42a2f}
 .btn-intro-go:disabled{opacity:.5;cursor:wait}
 .intro-status{min-height:20px;font-size:13px;color:#666;display:flex;align-items:center;gap:8px}

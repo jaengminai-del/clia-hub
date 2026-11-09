@@ -2086,8 +2086,8 @@ app.post('/api/ebay-generate', async (req, res) => {
     // ── LG GP1 Design System 토큰 (claude.ai/design "LG GP1 Design System" 소싱) ──
     // active_red_50이 GP1의 실제 브랜드 액센트. heritage_red(#A50034)는 GP1 readme상
     // LG 로고 마크 내부에만 쓰이는 색이라 일반 UI 액센트로는 쓰지 않는다.
-    const GP1_FONT_HEAD = "'LGEIHeadline','LG EI Headline','LGEIText',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif";
-    const GP1_FONT_BODY = "'LGEIText','LG EI Text',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif";
+    const GP1_FONT_HEAD = "'LGEIHeadline','LG EI Headline','LGEIText','LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif";
+    const GP1_FONT_BODY = "'LGEIText','LG EI Text','LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif";
     const GP1 = { headline: '#111111', body: '#2D2D2D', sub: '#697072', accentRed: '#EA1917', stroke: '#F0ECE4', pageBg: '#FFFFFF' };
 
     // ── Helper: ensure HTTPS ──

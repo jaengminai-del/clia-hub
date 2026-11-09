@@ -51,7 +51,11 @@
     "logo_fit": true,
     "logo_fill": 0.8,
     "frame_bg": "#FFFFFF",
-    "_legacy": {"logo_column_width": "30%", "logo_max_px": 180, "logo_padding_px": 24}
+    "_legacy": {
+      "logo_column_width": "30%",
+      "logo_max_px": 180,
+      "logo_padding_px": 24
+    }
   },
   "stacked_image": {
     "_note": "여백 없이 이어 붙은 히어로(no-spacing 연속 ST0001): 이미지들을 붙여 한 장처럼, 바깥에만 둥근 모서리",
@@ -107,7 +111,7 @@
     "_default": "centered_stack"
   },
   "output": {
-    "_note": "inline_css: <style> 규칙을 각 요소에 인라인으로 복사(편집기가 <style> 을 지워도 유지). font_face: LG 글꼴 @font-face — base_url 서버의 /fonts/ 를 쓴다(<style> 허용 편집기에서만 적용).",
+    "_note": "inline_css: <style> 규칙을 각 요소에 인라인으로 복사(편집기가 <style> 을 지워도 유지). font_face: LG 글꼴 @font-face — base_url 서버의 /fonts/ 를 쓴다(<style> 허용 편집기에서만 적용). LINESeedSansTH: 태국어 글자용 (LG EI 뒤 순서, 2026-11-09).",
     "forbid_active_content": true,
     "inline_css": true,
     "font_face": {
@@ -157,6 +161,36 @@
           "family": "LGEIHeadline",
           "weight": 700,
           "file": "LGEIHeadlineTTF-Bold"
+        },
+        {
+          "family": "LINESeedSansTH",
+          "weight": 100,
+          "file": "LINESeedSansTH-Thin"
+        },
+        {
+          "family": "LINESeedSansTH",
+          "weight": 300,
+          "file": "LINESeedSansTH-Regular"
+        },
+        {
+          "family": "LINESeedSansTH",
+          "weight": 400,
+          "file": "LINESeedSansTH-Regular"
+        },
+        {
+          "family": "LINESeedSansTH",
+          "weight": 700,
+          "file": "LINESeedSansTH-Bold"
+        },
+        {
+          "family": "LINESeedSansTH",
+          "weight": 800,
+          "file": "LINESeedSansTH-ExtraBold"
+        },
+        {
+          "family": "LINESeedSansTH",
+          "weight": 900,
+          "file": "LINESeedSansTH-Heavy"
         }
       ]
     }
