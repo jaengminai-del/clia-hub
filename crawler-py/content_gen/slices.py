@@ -25,6 +25,10 @@ from pathlib import Path
 
 from . import load_medium
 
+# 장수 상한: 아주 긴 페이지(QNED TV 등 7만px)는 40장으로는 한 장 높이 제한(폭 × 1.95)을 못 지켜 마지막 장이
+# 수만 px 이 됐음 (Shopee 업로드 거부) → 80장 (2026-11-09)
+MAX_SLICES = 80
+
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 
@@ -147,7 +151,7 @@ def options(req: dict) -> dict:
     pick = lambda *keys: next((req[k] for k in keys if req.get(k) not in (None, "")), None)
     # 장수: 요청 값 > 규격 count > (count 가 null 이면) 자동 — 한 장 높이가 max_slice_height 를 넘지 않게 (render 에서 계산)
     n_req = _int(pick("slices"), defaults["count"])
-    n = max(1, min(n_req, 40)) if n_req else 0
+    n = max(1, min(n_req, MAX_SLICES)) if n_req else 0
     vw = max(600, min(_int(pick("viewportWidth", "width"), defaults["viewport_px"]) or defaults["viewport_px"], 3000))
     ow = _int(pick("outputWidth"), defaults["output_width"] or 0) or 0
     fmt = "png" if (pick("format") or defaults["format"]) == "png" else "jpeg"
@@ -288,11 +292,11 @@ def render(req: dict, zip_path: Path) -> dict:
             auto = not n
             if auto:
                 # 자동 장수: 출력 이미지 한 장의 높이가 max_out_h(px)를 넘지 않게 (규격 없으면 6장)
-                n = max(1, min(math.ceil(H * scale / max_out_h), 40)) if max_out_h else 6
+                n = max(1, min(math.ceil(H * scale / max_out_h), MAX_SLICES)) if max_out_h else 6
             # 비율 규칙이 있으면 장수를 직접 정해도 지킨다 (입력한 장수는 최소값, 넘치면 늘림)
             enforce = auto or bool(o["max_ratio"])
             cuts = _cuts(layout, n, span if enforce else 0)
-            while enforce and span and n < 40 and any(b - a > span + 1 for a, b in zip(cuts, cuts[1:])):
+            while enforce and span and n < MAX_SLICES and any(b - a > span + 1 for a, b in zip(cuts, cuts[1:])):
                 n += 1                                              # 경계 맞춤으로 넘친 장이 있으면 한 장 더
                 cuts = _cuts(layout, n, span)
             # 마지막 장이 너무 얇으면(Shopee 최소 높이 32px) 앞 장에 합친다 — 합쳐도 최대 높이를 넘지 않을 때만

@@ -2514,10 +2514,12 @@ const sliceStore = require('./crawl-store');
 
 app.post('/api/v1/slice-html', async (req, res) => {
   const path = require('path'), fs = require('fs'), crypto = require('crypto');
-  const { html, medium = 'shopee_lazada', name = 'pdp' } = req.body || {};
+  const { html, medium = 'shopee_lazada', name = 'pdp', rev = '' } = req.body || {};
   if (typeof html !== 'string' || !html) return res.status(400).json({ error: 'html required' });
   const med = /^[a-z_]+$/.test(medium) ? medium : 'shopee_lazada';
-  const hash = crypto.createHash('sha1').update(`v2|${med}|${html}`).digest('hex').slice(0, 20);
+  // rev: 같은 HTML 이라도 자르기 규칙이 바뀐 것만 새로 그리게 하는 선택 값 (없으면 기존 해시 그대로)
+  const rv = /^[\w.-]{1,20}$/.test(String(rev)) ? `|${rev}` : '';
+  const hash = crypto.createHash('sha1').update(`v2|${med}|${html}${rv}`).digest('hex').slice(0, 20);
   const dir = path.join(SLICE_CACHE, hash);
   try {
     let man = null;
