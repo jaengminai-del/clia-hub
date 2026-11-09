@@ -2655,6 +2655,93 @@ app.get('/media/exports/:hash/:file', async (req, res) => {
 });
 
 /* ──────────────────────────────────────────
+   슬라이스 이미지 묶음 ZIP (2026-11-09): 여러 제품의 슬라이스 이미지를 ZIP 하나로 → 링크 하나로 한 번에 내려받기.
+   POST /api/v1/bundle {name: "x.zip", entries: [{hash, file, path}], extra: {"index.csv": "..."}}  (x-export-token 필수)
+        → {id, status, url}  같은 내용이면 같은 id (이미 만들었으면 바로 ready)
+   GET  /api/v1/bundle/:id                → {status: building|ready|failed, images, bytes, error}
+   GET  /media/bundles/:id/:name.zip      → ZIP (로컬 media-cache/bundles, 없으면 버킷 media-bundles/)
+   ZIP 은 crawler-py/bundle_zip.py 가 디스크에 차례로 씀 (메모리에 올리지 않음), 완성 후 버킷에 스트림 업로드.
+────────────────────────────────────────── */
+const BUNDLE_DIR = require('path').join(__dirname, 'media-cache', 'bundles');
+const bundleJobs = new Map();   // id → { status, error, images, bytes }
+const cleanZipPath = (p) => String(p || '').replace(/[\x00-\x1f\\:*?"<>|]+/g, '_').split('/')
+  .map((x) => x.trim()).filter((x) => x && x !== '.' && x !== '..').join('/').slice(0, 240);
+
+app.post('/api/v1/bundle', async (req, res) => {
+  const path = require('path'), fs = require('fs'), crypto = require('crypto');
+  const token = (process.env.EXPORT_TOKEN || '').trim();
+  if (!token || req.get('x-export-token') !== token) return res.status(401).json({ error: 'unauthorized' });
+  const { name = 'images.zip', entries, extra = {} } = req.body || {};
+  const file = String(name).replace(/[^\w.+-]+/g, '-').slice(0, 120);
+  if (!/^[\w.+-]+\.zip$/.test(file)) return res.status(400).json({ error: 'name must end with .zip' });
+  if (!Array.isArray(entries) || !entries.length || entries.length > 50000) return res.status(400).json({ error: 'entries required' });
+  const ents = [], seen = new Set();
+  for (const e of entries) {
+    const p = cleanZipPath(e && e.path);
+    if (!/^[0-9a-f]{20}$/.test(e && e.hash) || !/^[\w-]+\.(jpg|png)$/.test(e && e.file) || !p) return res.status(400).json({ error: 'bad entry', entry: e });
+    if (seen.has(p)) return res.status(400).json({ error: `duplicate path ${p}` });
+    seen.add(p); ents.push({ hash: e.hash, file: e.file, path: p });
+  }
+  const ext = {};
+  for (const [k, v] of Object.entries(extra || {})) {
+    const p = cleanZipPath(k);
+    if (!p || typeof v !== 'string' || seen.has(p)) return res.status(400).json({ error: `bad extra file ${k}` });
+    ext[p] = v;
+  }
+  const id = crypto.createHash('sha1').update(JSON.stringify({ v: 1, ents, ext })).digest('hex').slice(0, 20);
+  const abs = path.join(BUNDLE_DIR, id, file);
+  const base = (process.env.PUBLIC_BASE_URL || `${req.get('x-forwarded-proto') || req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+  const url = `${base}/media/bundles/${id}/${file}`;
+  const job = bundleJobs.get(id);
+  if (job && job.status === 'building') return res.json({ id, status: 'building', url });
+  if (fs.existsSync(abs) || (await sliceStore.getToFile(`media-bundles/${id}/${file}`, abs))) {
+    bundleJobs.set(id, { status: 'ready', bytes: fs.statSync(abs).size });
+    return res.json({ id, status: 'ready', url, bytes: fs.statSync(abs).size });
+  }
+  bundleJobs.set(id, { status: 'building', started: Date.now() });
+  res.json({ id, status: 'building', url });
+  const { spawn } = require('child_process');
+  const crawlerDir = path.join(__dirname, 'crawler-py');
+  const venvPy = path.join(crawlerDir, '.venv', 'bin', 'python');
+  const py = process.env.CRAWLER_PYTHON || (fs.existsSync(venvPy) ? venvPy : 'python3');
+  const proc = spawn(py, ['bundle_zip.py'], { cwd: crawlerDir, env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
+  let out = '', err = '';
+  const timer = setTimeout(() => proc.kill('SIGKILL'), 60 * 60 * 1000);
+  proc.stdout.on('data', (d) => { out += d; });
+  proc.stderr.on('data', (d) => { err += d; });
+  proc.on('error', (e) => { clearTimeout(timer); bundleJobs.set(id, { status: 'failed', error: e.message }); });
+  proc.on('close', async (code) => {
+    clearTimeout(timer);
+    let meta = {};
+    try { meta = JSON.parse(out.trim().split('\n').pop()); } catch (_) {}
+    if (code !== 0 || meta.error) {
+      const error = meta.error || err.trim().split('\n').pop() || `bundle exited ${code}`;
+      console.error('[bundle] failed', id, error);
+      return bundleJobs.set(id, { status: 'failed', error });
+    }
+    try { await sliceStore.putFile(`media-bundles/${id}/${file}`, abs, 'application/zip'); }
+    catch (e) { console.warn('[bundle] 버킷 업로드 실패', id, e.message); }
+    console.log(`[bundle] ${id}/${file}: ${meta.images} images, ${(meta.bytes / 1e6).toFixed(1)} MB`);
+    bundleJobs.set(id, { status: 'ready', images: meta.images, bytes: meta.bytes });
+  });
+  proc.stdin.end(JSON.stringify({ out: abs, cache: SLICE_CACHE, base: `http://127.0.0.1:${PORT}`, entries: ents, extra: ext }));
+});
+app.get('/api/v1/bundle/:id', (req, res) => {
+  const j = bundleJobs.get(req.params.id);
+  res.json(j ? { id: req.params.id, ...j } : { id: req.params.id, status: 'unknown' });
+});
+app.get('/media/bundles/:id/:file', async (req, res) => {
+  const path = require('path'), fs = require('fs');
+  const { id, file } = req.params;
+  if (!/^[0-9a-f]{20}$/.test(id) || !/^[\w.+-]+\.zip$/.test(file)) return res.status(400).end();
+  const abs = path.join(BUNDLE_DIR, id, file);
+  if (!fs.existsSync(abs) && !(await sliceStore.getToFile(`media-bundles/${id}/${file}`, abs))) return res.status(404).end();
+  res.set({ 'Content-Type': 'application/zip', 'Content-Disposition': `attachment; filename="${file}"`,
+            'Cache-Control': 'public, max-age=31536000, immutable' });
+  res.sendFile(abs);
+});
+
+/* ──────────────────────────────────────────
    전체 lg.com 화면 캡처 (빌더 "전체 lg.com 컨텐츠 확인하기" 팝업, 2026-10-26)
    POST /api/v1/fullshot {url} → 캡처 시작(미리 캡처 포함, 이미 있으면 바로 ready)
    GET  /api/v1/fullshot?url=  → {status: ready|pending|none|error, src}
