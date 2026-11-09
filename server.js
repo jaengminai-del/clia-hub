@@ -2507,7 +2507,7 @@ function renderSlicesPy(body) {
    이미지형 HTML (2026-10-20): 미리보기를 업로드 규격 슬라이스 이미지로 만들어 공개 주소에 올리고,
    <img> 를 차례로 쌓은 HTML 을 돌려준다 → 라자다·eBay 설명란에 붙여도 미리보기와 같은 모양
    (글자·폰트·레이아웃·크롭이 이미지에 들어감). 크기는 매체 spec slices(Shopee/Lazada: 폭 1000px · ≤3000px · ≤1MB).
-   같은 HTML·규격이면 같은 해시 → 다시 만들지 않음. 저장: 로컬 media-cache/slices/<hash>/ + 버킷 media-slices/<hash>/
+   같은 HTML·규격이면 같은 해시 → 다시 만들지 않음 (v2 2026-11-09: 이미지 중간을 자르지 않는 자르기 규칙으로 새로 그림). 저장: 로컬 media-cache/slices/<hash>/ + 버킷 media-slices/<hash>/
 ────────────────────────────────────────── */
 const SLICE_CACHE = require('path').join(__dirname, 'media-cache', 'slices');
 const sliceStore = require('./crawl-store');
@@ -2517,7 +2517,7 @@ app.post('/api/v1/slice-html', async (req, res) => {
   const { html, medium = 'shopee_lazada', name = 'pdp' } = req.body || {};
   if (typeof html !== 'string' || !html) return res.status(400).json({ error: 'html required' });
   const med = /^[a-z_]+$/.test(medium) ? medium : 'shopee_lazada';
-  const hash = crypto.createHash('sha1').update(`v1|${med}|${html}`).digest('hex').slice(0, 20);
+  const hash = crypto.createHash('sha1').update(`v2|${med}|${html}`).digest('hex').slice(0, 20);
   const dir = path.join(SLICE_CACHE, hash);
   try {
     let man = null;

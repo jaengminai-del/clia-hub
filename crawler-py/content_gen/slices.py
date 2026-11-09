@@ -5,7 +5,8 @@ slices.py — 1차 컨텐츠 HTML → 세로 슬라이스 이미지 ZIP (Shopee/
 server.js /api/render-slices(Node·Puppeteer)를 Python·Playwright로 옮긴 것. 요청·결과 형식은 같다.
   - 이미지는 개별 타임아웃으로 기다리고(느린 DAM 이미지는 포기하고 진행) 폰트 로드까지 대기
   - 가운데 정렬 컨테이너 밖 여백은 잘라내고 콘텐츠 실측 폭만 촬영
-  - 자르는 위치: 이상적 등분점에서 가장 가까운 섹션 경계 → 표 행/문단 경계 → 등분점 (글자 중간 절단 방지)
+  - 자르는 위치: 이상적 등분점에서 가장 가까운 섹션 경계 → 표 행/문단 경계 → 한 장 높이 안의 안전한 위치 →
+    등분점 (글자·이미지 중간 절단 방지 — 보이는 이미지 안쪽은 후보에서 제외)
   - 배율: output_width / 콘텐츠 폭 (없으면 ×2)
   - ZIP: 슬라이스 이미지 + 슬라이스별 텍스트(.txt) + 전체 텍스트 + manifest.json
 
@@ -80,6 +81,24 @@ _JS_LAYOUT = """() => {
     contentWidth: Math.max(1, Math.ceil(right - left)),
     edges: collect(':scope > *, :scope > * > section, :scope > section'),
     fineEdges: collect('tr, li, p, h1, h2, h3, h4, img, .lg-grid-item'),
+    // 보이는 이미지가 차지하는 세로 구간 (넘침을 가리는 상위 요소 기준으로 잘라 냄) — 이 안쪽에서는 자르지 않는다
+    imgSpans: (() => {
+      const shown = el => { for (let e = el; e && e !== document.body; e = e.parentElement) {
+        const c = getComputedStyle(e); if (c.display === 'none' || c.visibility === 'hidden' || +c.opacity === 0) return false; }
+        return true; };
+      const out = [];
+      root.querySelectorAll('img, video, [style*="background-image"]').forEach(el => {
+        if (!shown(el)) return;
+        const r = el.getBoundingClientRect(); let top = r.top, bot = r.bottom;
+        for (let e = el.parentElement; e && e !== document.body; e = e.parentElement) {
+          const c = getComputedStyle(e);
+          if (c.overflowY !== 'visible' || c.overflow !== 'visible') { const q = e.getBoundingClientRect(); top = Math.max(top, q.top); bot = Math.min(bot, q.bottom); }
+        }
+        const a = Math.round(top + window.scrollY - rootTop), b = Math.round(bot + window.scrollY - rootTop);
+        if (b - a > 20) out.push([a, b]);
+      });
+      return out;
+    })(),
   };
 }"""
 
@@ -158,15 +177,26 @@ def _shrink_jpeg(data: bytes, q: int, min_q: int, max_bytes: int) -> bytes:
 
 def _cuts(layout: dict, n: int, max_span: float = 0) -> list:
     """자를 위치: 이상적인 등분점에서 가장 가까운 섹션 경계로 스냅.
-    경계가 너무 멀면(등분 높이의 45% 초과) 표 행/문단 경계, 그래도 없으면 등분점."""
+    경계가 너무 멀면(등분 높이의 45% 초과) 표 행/문단 경계. 보이는 이미지 안쪽은 후보에서 뺀다(2026-11-09).
+    그래도 없으면 한 장 최대 높이 안에서 등분점에 가장 가까운 안전한 위치(보통 그 이미지 바로 위) —
+    한 장보다 긴 이미지처럼 안전한 위치가 아예 없을 때만 등분점/최대 높이에서 자른다."""
     H = layout["height"]
     ideal = H / n
     cuts = [0]
+    spans = [(a, b) for a, b in (layout.get("imgSpans") or []) if b - a > 4]
+
+    def inside(y):          # 보이는 이미지의 안쪽 (위·아래 끝 2px 은 경계로 본다)
+        return any(a + 2 < y < b - 2 for a, b in spans)
+
+    safe = sorted({e for e in list(layout["edges"]) + list(layout["fineEdges"]) + [a for a, _ in spans]
+                   if 0 < e < H and not inside(e)})
 
     def nearest(lst, target, min_y, tol):
         best = None
         for e in lst:
             if e <= min_y + 8 or (max_span and e - min_y > max_span):   # 한 장 최대 높이 넘는 경계는 제외
+                continue
+            if inside(e):
                 continue
             d = abs(e - target)
             if d <= tol and (best is None or d < abs(best - target)):
@@ -180,7 +210,12 @@ def _cuts(layout: dict, n: int, max_span: float = 0) -> list:
         if cut is None:
             cut = nearest(layout["fineEdges"], target, prev, ideal * 0.45)
         if cut is None:
-            cut = min(target, prev + max_span) if max_span else target
+            lim = prev + max_span if max_span else H
+            cand = [e for e in safe if prev + 8 < e <= lim]
+            if cand:
+                cut = min(cand, key=lambda e: abs(e - target))
+            else:
+                cut = min(target, prev + max_span) if max_span else target
         cuts.append(max(cut, prev + 8))
     cuts.append(H)
     return cuts
