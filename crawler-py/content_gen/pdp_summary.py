@@ -23,6 +23,9 @@ from pydantic import BaseModel, Field
 
 PROMPT_FILE = Path(__file__).parent / "prompts" / "pdp_summary_th.md"
 MIN_CHARS = 600          # 지시문: 600자 초과
+import os as _os
+MAX_CHARS = int(_os.getenv("SUMMARY_MAX_CHARS", "2000"))   # 사용자 결정(2026-11-10): 복사용 글 전체 2,000자 이내 (Shopee 설명 3,000자 제한보다 여유)
+NAME_MAX = 120           # Shopee 상품명 최대 120자
 FONT_H = "'LGEIHeadline','LG EI Headline','LGEIText','LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"
 FONT_B = "'LGEIText','LG EI Text','LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"
 
@@ -95,7 +98,10 @@ def build_prompt(url: str, src: str, checked: str) -> str:
             f"<lg_product_page url=\"{url}\">\n{src}\n</lg_product_page>\n\n"
             "ส่งผลลัพธ์ตามโครงสร้างที่กำหนด: product_name, intro, highlights, product_info, conflicts "
             "(conflicts คือข้อขัดแย้งที่ต้องแจ้งไว้นอกเนื้อหาพร้อมคัดลอก ถ้าไม่มีให้เป็นรายการว่าง) "
-            "ไม่ต้องใส่ลิงก์อ้างอิงหรือวันที่ในเนื้อหา — ระบบจะวางไว้นอกกรอบเอง")
+            "ไม่ต้องใส่ลิงก์อ้างอิงหรือวันที่ในเนื้อหา — ระบบจะวางไว้นอกกรอบเอง\n\n"
+            f"ข้อกำหนดความยาว: เนื้อหาพร้อมคัดลอกทั้งหมด (ชื่อสินค้า บทนำ จุดเด่นสินค้า และข้อมูลสินค้า รวมหัวข้อ) "
+            f"ต้องยาวมากกว่า {MIN_CHARS} แต่ไม่เกิน {MAX_CHARS:,} ตัวอักษร และชื่อสินค้าไม่เกิน {NAME_MAX} ตัวอักษร "
+            "ให้เลือกเฉพาะจุดขายและข้อมูลที่สำคัญที่สุด")
 
 
 def body_chars(d: dict) -> int:
@@ -127,13 +133,19 @@ def generate(slug_dir: Path, url: str, model: str = "") -> dict:
     mirror = json.loads(mp.read_text(encoding="utf-8"))
     checked = checked_date(mp)
     prompt = build_prompt(url, source_text(mirror, url, slug_dir), checked)
-    d = llm_claude.vision_json([prompt], PdpSummary, label="pdp-summary", max_tokens=32000, model=model)
-    if body_chars(d) <= MIN_CHARS:          # 지시문의 길이 조건 — 한 번만 다시 요청
-        d = llm_claude.vision_json([prompt + f"\n\nเนื้อหาครั้งก่อนสั้นเกินไป ({body_chars(d)} ตัวอักษร) "
-                                    f"ต้องยาวมากกว่า {MIN_CHARS} ตัวอักษร โดยยังใช้เฉพาะข้อมูลที่ยืนยันได้"],
-                                   PdpSummary, label="pdp-summary-retry", max_tokens=32000, model=model)
+    ask, d = prompt, None
+    for attempt in range(4):                # 길이 조건: 600 초과 · 2,000 이하 · 상품명 120 이하 — 벗어나면 다시 쓰게
+        d = _fix(llm_claude.vision_json([ask], PdpSummary, label=f"pdp-summary-{attempt}", max_tokens=32000, model=model), url)
+        n, nn = len(plain_text(d)), len(d["product_name"])
+        if MIN_CHARS < n <= MAX_CHARS and nn <= NAME_MAX:
+            break
+        ask = (prompt + f"\n\nผลครั้งก่อน: เนื้อหาพร้อมคัดลอกยาว {n:,} ตัวอักษร ชื่อสินค้ายาว {nn} ตัวอักษร "
+               f"— ต้องยาวมากกว่า {MIN_CHARS} และไม่เกิน {MAX_CHARS:,} ตัวอักษร ชื่อสินค้าไม่เกิน {NAME_MAX} ตัวอักษร "
+               "เขียนใหม่ให้อยู่ในเกณฑ์ โดยยังใช้เฉพาะข้อมูลที่ยืนยันได้")
+    else:
+        raise RuntimeError(f"length rule not met after retries: {n} chars, name {nn}")
     d = _fix(d, url)
-    return {**d, "chars": body_chars(d), "ref_url": url, "checked_at": checked, "model": model,
+    return {**d, "chars": len(plain_text(d)), "ref_url": url, "checked_at": checked, "model": model,
             "prompt_file": PROMPT_FILE.name}
 
 
