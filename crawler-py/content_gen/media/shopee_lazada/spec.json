@@ -20,13 +20,14 @@
       "body_min_px": 13,
       "body_max_px": 16
     },
-    "headline_line_height": 1.0,
-    "body_line_height": 1.28,
+    "headline_line_height": 1.4,
+    "body_line_height": 1.6,
     "spec_table": {
       "_note": "261007 — 본문 24px보다 작게 해 표 길이 유지",
       "group_px": 20,
       "cell_px": 18
-    }
+    },
+    "_note_line_height": "261110 — 태국어는 성조 기호·아래 모음 때문에 글자 높이가 최대 1.39em (Live 155개 실측). 헤드라인 1.0·본문 1.28 이면 두 줄이 겹쳐 헤드라인 1.4·본문 1.6"
   },
   "colors": {
     "headline": "#111111",

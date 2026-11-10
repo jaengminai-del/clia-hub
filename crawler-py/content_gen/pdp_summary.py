@@ -161,7 +161,7 @@ def to_html(d: dict) -> str:
     """PDP 이미지 위에 붙는 글 블록 — 인라인 스타일만 (마켓 편집기가 <style> 을 지워도 유지)."""
     e = _html.escape
     h = lambda t, size, mt: (f'<h{2 if size > 20 else 3} style="font-family:{FONT_H};font-weight:600;font-size:{size}px;'
-                             f'line-height:1.3;color:#111111;margin:{mt}px 0 8px 0;">{e(t)}</h{2 if size > 20 else 3}>')
+                             f'line-height:1.4;color:#111111;margin:{mt}px 0 8px 0;">{e(t)}</h{2 if size > 20 else 3}>')
     p = lambda t: f'<p style="font-family:{FONT_B};font-size:16px;line-height:1.6;color:#333333;margin:0 0 8px 0;">{e(t)}</p>'
     li = lambda t: f'<li style="font-family:{FONT_B};font-size:16px;line-height:1.6;color:#333333;margin:0 0 6px 0;">{t}</li>'
     parts = [h(d["product_name"], 24, 0), p(d["intro"]), h("จุดเด่นสินค้า", 18, 16),
