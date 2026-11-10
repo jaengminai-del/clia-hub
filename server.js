@@ -14,7 +14,7 @@ app.use('/crawler-py', (req, res) => res.sendStatus(404)); // 크롤러 소스·
 app.use(express.static('.'));
 
 // Health check
-app.get('/api/health', (req, res) => res.json({ ok: true }));
+app.get('/api/health', (req, res) => res.json({ ok: true, rev: (process.env.RAILWAY_GIT_COMMIT_SHA || '').slice(0, 7) }));   // 배포 확인용 커밋
 
 /* ──────────────────────────────────────────
    /api/analyze  — LG.com PDP 섹션 추출
