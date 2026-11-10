@@ -231,6 +231,12 @@ const CHANNEL = new URLSearchParams(location.search).get('channel') || '';
 // Shopee 상세 설명 이미지는 최대 12장 (Lazada 는 제한 표시 안 함)
 const SHOPEE_MAX_IMAGES = 12;
 const shopeeLimit = () => CHANNEL !== 'lazada';
+// Shopee 로 열면 '이미지 HTML 복사' = 이미지 주소만 앞 12장 (설명에 글·alt 를 못 넣음) — 버튼 이름도 그에 맞게
+if (CHANNEL === 'shopee') {
+  const b = document.getElementById('btnCopyImgHtml');
+  if (b) { b.textContent = '🖼 Copy image URLs (max ' + SHOPEE_MAX_IMAGES + ')';
+           b.title = 'Image URLs only (first ' + SHOPEE_MAX_IMAGES + ' images, one per line) — no summary, no alt text. Paste into the Shopee description.'; }
+}
 
 // ══════════════════════════════════════════
 // Intro
@@ -731,7 +737,9 @@ function copyImageHTML() {
   CLIAImageHTML.copy({ html: () => generatedHTML, apiBase: typeof API_BASE !== 'undefined' ? API_BASE : '',
                        button: document.getElementById('btnCopyImgHtml'), isEditing: () => editMode,
                        // PDP 이미지 위에 그 제품의 요약 설명(태국어)을 붙인다 (2026-11-10)
-                       summaryUrl: () => (document.getElementById('pdpUrl').value || '').trim() });
+                       summaryUrl: () => (document.getElementById('pdpUrl').value || '').trim(),
+                       // Shopee: 설명에 글·alt 를 못 넣으므로 이미지 주소만, 앞 12장 (2026-11-10)
+                       urlsOnly: CHANNEL === 'shopee' ? SHOPEE_MAX_IMAGES : 0 });
 }
 
 // Shopee 설명란 텍스트: 허브 제품 상세에서 작성한 리스팅 문구(현재 버전)를 Shopee 형식 일반 텍스트로 복사
