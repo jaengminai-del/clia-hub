@@ -179,12 +179,12 @@ def page_check(html: str, url: str):
 
 # ── 글 ──────────────────────────────────────────────────────────────
 def _clean(s: str) -> str:
-    s = re.sub(r"(?i)<br\s*/?>", "\n", s or "")
+    s = re.sub(r"(?i)<br\s*/?>", "\u2028", s or "")   # LG 원문 줄바꿈 — 같은 요소 안의 줄바꿈 (렌더러가 <br>)
     s = re.sub(r"(?i)</(p|div|li|h\d)>", "\n", s)
     s = re.sub(r"(?i)<li[^>]*>", "• ", s)
     s = re.sub(r"<[^>]+>", "", s)
     s = _html.unescape(s).replace("\xa0", " ")
-    s = "\n".join(re.sub(r"[ \t\r]+", " ", ln).strip() for ln in s.split("\n"))
+    s = "\n".join(re.sub(r" *\u2028[ \u2028]*", "\u2028", re.sub(r"[ \t\r]+", " ", ln)).strip(" \u2028") for ln in s.split("\n"))
     return re.sub(r"\n{2,}", "\n", s).strip()
 
 

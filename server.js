@@ -2657,6 +2657,52 @@ app.get('/media/exports/:hash/:file', async (req, res) => {
 });
 
 /* ──────────────────────────────────────────
+   PDP 요약 설명(태국어, 2026-11-10): Shopee/Lazada 상세 설명에서 PDP 이미지 위에 붙는 글
+   POST /api/v1/pdp-summary {url, refresh?} → {product_name, intro, highlights, product_info, conflicts,
+        ref_url, checked_at, model, html, text}
+   만드는 곳: crawler-py/content_gen/pdp_summary.py (지시문 content_gen/prompts/pdp_summary_th.md + 그 제품의 크롤 결과)
+   제품 폴더의 summary.json 에 보관 (버킷에도) — 다시 부르면 그대로, refresh:true 면 새로 만든다
+────────────────────────────────────────── */
+const summaryJobs = new Map();   // slug → Promise (같은 제품 동시 요청은 한 번만 만든다)
+app.post('/api/v1/pdp-summary', async (req, res) => {
+  const path = require('path'), fs = require('fs');
+  const { url, refresh = false } = req.body || {};
+  if (!isLgUrl(url)) return res.status(400).json({ error: 'LG.com url required' });
+  const slug = url.replace(/https?:\/\//, '').replace(/[^\w]+/g, '-').replace(/-+$/, '');
+  const slugDir = path.join(__dirname, 'crawler-py', 'out', slug);
+  if (!fs.existsSync(path.join(slugDir, 'mirror.json'))) return res.status(404).json({ error: 'no crawl for this URL — crawl it first' });
+  const key = slug + (refresh ? '|refresh' : '');
+  let job = summaryJobs.get(key);
+  if (!job) {
+    job = new Promise((resolve, reject) => {
+      const crawlerDir = path.join(__dirname, 'crawler-py');
+      const venvPy = path.join(crawlerDir, '.venv', 'bin', 'python');
+      const py = process.env.CRAWLER_PYTHON || (fs.existsSync(venvPy) ? venvPy : 'python3');
+      const args = ['-m', 'content_gen.pdp_summary', slugDir, url].concat(refresh ? ['--refresh'] : []);
+      require('child_process').execFile(py, args, { cwd: crawlerDir, timeout: 6 * 60 * 1000, maxBuffer: 8 * 1024 * 1024,
+        env: { ...process.env, PYTHONIOENCODING: 'utf-8' } }, (err, stdout, stderr) => {
+        let d = {};
+        try { d = JSON.parse(String(stdout || '').trim().split('\n').pop()); } catch (_) {}
+        if (err || d.error) return reject(new Error(d.error || String(stderr || err.message).trim().split('\n').pop()));
+        resolve(d);
+      });
+    }).then(async (d) => {
+      await sliceStore.pushPaths([path.join(slugDir, 'summary.json')]).catch((e) => console.warn('[pdp-summary] 버킷 업로드 실패', e.message));
+      return d;
+    }).finally(() => summaryJobs.delete(key));
+    summaryJobs.set(key, job);
+  }
+  try {
+    const d = await job;
+    console.log(`[pdp-summary] ${slug}: ${d.chars} chars (${d.model})${(d.conflicts || []).length ? ' · conflicts ' + d.conflicts.length : ''}`);
+    res.json(d);
+  } catch (e) {
+    console.error('[pdp-summary] failed', slug, e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+/* ──────────────────────────────────────────
    슬라이스 이미지 묶음 ZIP (2026-11-09): 여러 제품의 슬라이스 이미지를 ZIP 하나로 → 링크 하나로 한 번에 내려받기.
    POST /api/v1/bundle {name: "x.zip", entries: [{hash, file, path}], extra: {"index.csv": "..."}}  (x-export-token 필수)
         → {id, status, url}  같은 내용이면 같은 id (이미 만들었으면 바로 ready)

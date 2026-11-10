@@ -169,6 +169,25 @@ def _drop_gallery_media(sections: list, legacy: bool) -> list:
     return [dict(s, media=[m for m in s.get("media", []) if keep(m, s)]) for s in sections]
 
 
+def _carry_section_titles(sections: list) -> list:
+    """예전 형식 PDP(AEM 모델)의 섹션 제목(sectiontitle)은 글만 있는 별도 섹션이라 '글만 있는 섹션 제외'
+    규칙에 걸려 빠졌다 — 바로 다음 섹션의 맨 위 제목으로 붙인다 (LG 원문 글을 빠짐없이, 2026-11-10)."""
+    out, pending = [], []
+    for s in sections:
+        if s.get("component_id") == "AEM:sectiontitle" and not usable_media(s) and not s.get("specs"):
+            pending.append((s.get("text") or "").strip())
+            continue
+        if pending and not (usable_media(s) or s.get("specs") or s.get("layout_type") == "card_row"):
+            out.append(s)          # 각주·글만 있는 섹션은 건너뛰고 다음 그림 있는 섹션에 붙인다
+            continue
+        if pending:
+            s = dict(s)
+            s["text"] = "\n".join([t for t in pending if t] + [s.get("text") or ""]).strip()
+            pending = []
+        out.append(s)
+    return out
+
+
 def build_blocks(mirror: dict, rules: dict) -> list:
     """mirror → 블록 목록 (화면 순서)."""
     skip_layouts = set(rules.get("skip_layouts") or [])
@@ -178,6 +197,7 @@ def build_blocks(mirror: dict, rules: dict) -> list:
     sections = _merge_card_rows(sections, int(rules.get("max_card_columns") or 4),
                                 bool(rules.get("use_group_heading")))
 
+    sections = _carry_section_titles(sections)
     blocks, kv_seen = [], False
     for s in sections:
         if rules.get("skip_disclaimer", True) and is_disclaimer(s):
