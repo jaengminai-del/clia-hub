@@ -25,10 +25,8 @@ PROMPT_FILE = Path(__file__).parent / "prompts" / "pdp_summary_th.md"
 MIN_CHARS = 600          # 지시문: 600자 초과
 import os as _os
 MAX_CHARS = int(_os.getenv("SUMMARY_MAX_CHARS", "2000"))   # 사용자 결정(2026-11-10): 복사용 글 전체 2,000자 이내 (Shopee 설명 3,000자 제한보다 여유)
-# 사용자 결정(2026-11-10): USP 가 적은 제품은 1,000자까지 — LG 페이지 기능 글(스펙 표·각주 빼고, 중복 빼고)이
-# USP_LONG_CHARS 이상인 제품만 MAX_CHARS. Live 155 실측: 3,000자 이상 53개(TV 전부·모니터 대부분·스피커 등).
-SHORT_MAX_CHARS = int(_os.getenv("SUMMARY_SHORT_MAX_CHARS", "1000"))
-USP_LONG_CHARS = int(_os.getenv("SUMMARY_USP_LONG_CHARS", "3000"))
+# 사용자 결정(2026-11-10): 길이 한도는 모든 제품 2,000자로 통일. 대신 PDP 의 USP 는 하나도 빼지 않는다 —
+# 줄이는 건 각 USP 의 설명 글뿐 (usp_list → 지시문에 번호 목록, 장점 bullet 수 = USP 수 검사).
 NAME_MAX = 120           # Shopee 상품명 최대 120자
 FONT_H = "'LGEIHeadline','LG EI Headline','LGEIText','LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"
 FONT_B = "'LGEIText','LG EI Text','LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"
@@ -90,21 +88,62 @@ def _mirror_text(mirror: dict, url: str) -> str:
     return "\n".join(lines).strip()
 
 
-def usp_chars(mirror: dict) -> int:
-    """LG 페이지의 기능(USP) 글 분량 — 제목·설명 줄 글자 수 합. 스펙 표·각주(*)·같은 줄 반복은 뺀다."""
-    seen, n = set(), 0
-    for s in mirror.get("sections") or []:
-        if s.get("layout_type") == "spec_table" or str(s.get("order", "")).startswith("disclaimer"):
+def _usp_key(t: str) -> str:
+    return re.sub(r"[\s™®\-–—:]+", " ", t).strip().lower()
+
+
+def usp_list(mirror: dict) -> list:
+    """PDP 이미지와 같은 블록(content_gen.model.build_blocks)에서 USP 목록 [{title, desc}] — 페이지 순서.
+    섹션 하나 = USP 하나 (제목: 눈썹 글이 있으면 그것, 없으면 첫 ## 제목), 카드 줄은 카드 하나 = USP 하나.
+    스펙 표·각주(*) 제외. 같은 기능이 두 번 나오면(제목이 같거나 한쪽 제목이 다른 쪽에 통째로 들어 있으면) 하나로."""
+    from . import load_medium
+    from .model import build_blocks
+    blocks = build_blocks(mirror, load_medium("shopee_lazada")["spec"].get("rules", {}))
+    texts = []
+    for bl in blocks:
+        if bl["kind"] == "section":
+            sec = bl["section"]
+            if not str(sec.get("order", "")).startswith("disclaimer"):
+                texts.append(sec.get("text") or "")
+        elif bl["kind"] == "card_row":
+            texts += [c.get("text") or "" for c in bl.get("cards") or []]
+    out = []
+    for t in texts:
+        lines = [ln.replace("\u2028", " ").replace("\xa0", " ").strip() for ln in t.split("\n")]
+        lines = [ln for ln in lines if ln and not ln.startswith("*")]
+        if not lines:
             continue
-        for ln in (s.get("text") or "").replace("\u2028", " ").split("\n"):
-            t = re.sub(r"^[#>\-\s•]+", "", ln).replace("\xa0", " ").strip()
-            if t and not t.startswith("*") and t not in seen:
-                seen.add(t); n += len(t)
-    return n
+        heads = [i for i, ln in enumerate(lines) if ln.startswith("#")]
+        clean = lambda ln: re.sub(r"^[#>\-\s•]+", "", ln).strip()
+        if heads and heads[0] > 0:                 # 눈썹 글(기능명) + ## 제목
+            title, rest = clean(lines[0]), lines[1:]
+        elif heads:
+            title, rest = clean(lines[heads[0]]), lines[:heads[0]] + lines[heads[0] + 1:]
+        elif out:                                  # 제목 없는 글만 있는 섹션 = 앞 USP 의 이어지는 설명
+            out[-1]["desc"] = (out[-1]["desc"] + " " + " ".join(clean(ln) for ln in lines)).strip()
+            continue
+        else:
+            title, rest = clean(lines[0])[:80], lines[1:]
+        desc = " ".join(clean(ln) for ln in rest if clean(ln))
+        k = _usp_key(title)
+        if not k:
+            continue
+        dup = next((u for u in out if u["key"] == k or (min(len(k), len(u["key"])) >= 6 and (k in u["key"] or u["key"] in k))), None)
+        if dup:
+            if desc and desc not in dup["desc"]:
+                dup["desc"] = (dup["desc"] + " " + desc).strip()
+            continue
+        out.append({"key": k, "title": title, "desc": desc})
+    return [{"title": u["title"], "desc": u["desc"]} for u in out]
 
 
-def max_chars_for(usp: int) -> int:
-    return MAX_CHARS if usp >= USP_LONG_CHARS else min(SHORT_MAX_CHARS, MAX_CHARS)
+def usp_prompt(usps: list) -> str:
+    rows = "\n".join(f"{i}. {u['title']}" + (f" — {u['desc'][:400]}" if u["desc"] else "") for i, u in enumerate(usps, 1))
+    return (f"\n\nจุดขาย (USP) ทั้งหมดบนหน้าสินค้านี้มี {len(usps)} ข้อ ตามรายการด้านล่าง:\n{rows}\n\n"
+            f"ข้อกำหนดจุดเด่นสินค้า: highlights ต้องมี {len(usps)} ข้อพอดี — 1 ข้อต่อ 1 USP เรียงตามลำดับเลขด้านบน "
+            "ห้ามตัด ห้ามรวม ห้ามเพิ่มข้ออื่น แต่ละข้อขึ้นต้นด้วยชื่อ USP นั้น แล้วตามด้วยคำอธิบายที่ย่อให้สั้นที่สุด "
+            "(ย่อเฉพาะคำอธิบาย ไม่ตัด USP) ถ้าความยาวไม่พอ ให้เหลือเพียงชื่อ USP กับประโยชน์สั้นๆ "
+            "และให้บทนำกับข้อมูลสินค้ากระชับ")
 
 
 def checked_date(mirror_path: Path) -> str:
@@ -153,22 +192,24 @@ def generate(slug_dir: Path, url: str, model: str = "") -> dict:
     mp = slug_dir / "mirror.json"
     mirror = json.loads(mp.read_text(encoding="utf-8"))
     checked = checked_date(mp)
-    usp = usp_chars(mirror)
-    limit = max_chars_for(usp)
-    prompt = build_prompt(url, source_text(mirror, url, slug_dir), checked, limit)
+    usps = usp_list(mirror)
+    limit = MAX_CHARS
+    prompt = build_prompt(url, source_text(mirror, url, slug_dir), checked, limit) + (usp_prompt(usps) if usps else "")
     ask, d = prompt, None
-    for attempt in range(4):                # 길이 조건: 600 초과 · limit(1,000 또는 2,000) 이하 · 상품명 120 이하 — 벗어나면 다시 쓰게
+    for attempt in range(4):                # 조건: 600 초과 · 2,000 이하 · 상품명 120 이하 · 장점 수 = USP 수 — 벗어나면 다시 쓰게
         d = _fix(llm_claude.vision_json([ask], PdpSummary, label=f"pdp-summary-{attempt}", max_tokens=32000, model=model), url)
         n, nn = len(plain_text(d)), len(d["product_name"])
-        if MIN_CHARS < n <= limit and nn <= NAME_MAX:
+        nh = len(d["highlights"])
+        if MIN_CHARS < n <= limit and nn <= NAME_MAX and (not usps or nh == len(usps)):
             break
-        ask = (prompt + f"\n\nผลครั้งก่อน: เนื้อหาพร้อมคัดลอกยาว {n:,} ตัวอักษร ชื่อสินค้ายาว {nn} ตัวอักษร "
+        ask = (prompt + f"\n\nผลครั้งก่อน: เนื้อหาพร้อมคัดลอกยาว {n:,} ตัวอักษร ชื่อสินค้ายาว {nn} ตัวอักษร จุดเด่นสินค้า {nh} ข้อ "
                f"— ต้องยาวมากกว่า {MIN_CHARS} และไม่เกิน {limit:,} ตัวอักษร ชื่อสินค้าไม่เกิน {NAME_MAX} ตัวอักษร "
-               "เขียนใหม่ให้อยู่ในเกณฑ์ โดยยังใช้เฉพาะข้อมูลที่ยืนยันได้")
+               + (f"และจุดเด่นสินค้าต้องมี {len(usps)} ข้อพอดี (1 ข้อต่อ 1 USP) " if usps else "")
+               + "เขียนใหม่ให้อยู่ในเกณฑ์ โดยย่อเฉพาะคำอธิบาย และยังใช้เฉพาะข้อมูลที่ยืนยันได้")
     else:
-        raise RuntimeError(f"length rule not met after retries: {n} chars, name {nn}")
+        raise RuntimeError(f"rule not met after retries: {n} chars, name {nn}, highlights {nh}/{len(usps)} USPs")
     d = _fix(d, url)
-    return {**d, "chars": len(plain_text(d)), "max_chars": limit, "usp_chars": usp, "ref_url": url, "checked_at": checked, "model": model,
+    return {**d, "chars": len(plain_text(d)), "max_chars": limit, "usps": [u["title"] for u in usps], "ref_url": url, "checked_at": checked, "model": model,
             "prompt_file": PROMPT_FILE.name}
 
 
