@@ -25,6 +25,10 @@ PROMPT_FILE = Path(__file__).parent / "prompts" / "pdp_summary_th.md"
 MIN_CHARS = 600          # 지시문: 600자 초과
 import os as _os
 MAX_CHARS = int(_os.getenv("SUMMARY_MAX_CHARS", "2000"))   # 사용자 결정(2026-11-10): 복사용 글 전체 2,000자 이내 (Shopee 설명 3,000자 제한보다 여유)
+# 사용자 결정(2026-11-10): USP 가 적은 제품은 1,000자까지 — LG 페이지 기능 글(스펙 표·각주 빼고, 중복 빼고)이
+# USP_LONG_CHARS 이상인 제품만 MAX_CHARS. Live 155 실측: 3,000자 이상 53개(TV 전부·모니터 대부분·스피커 등).
+SHORT_MAX_CHARS = int(_os.getenv("SUMMARY_SHORT_MAX_CHARS", "1000"))
+USP_LONG_CHARS = int(_os.getenv("SUMMARY_USP_LONG_CHARS", "3000"))
 NAME_MAX = 120           # Shopee 상품명 최대 120자
 FONT_H = "'LGEIHeadline','LG EI Headline','LGEIText','LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"
 FONT_B = "'LGEIText','LG EI Text','LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"
@@ -86,11 +90,28 @@ def _mirror_text(mirror: dict, url: str) -> str:
     return "\n".join(lines).strip()
 
 
+def usp_chars(mirror: dict) -> int:
+    """LG 페이지의 기능(USP) 글 분량 — 제목·설명 줄 글자 수 합. 스펙 표·각주(*)·같은 줄 반복은 뺀다."""
+    seen, n = set(), 0
+    for s in mirror.get("sections") or []:
+        if s.get("layout_type") == "spec_table" or str(s.get("order", "")).startswith("disclaimer"):
+            continue
+        for ln in (s.get("text") or "").replace("\u2028", " ").split("\n"):
+            t = re.sub(r"^[#>\-\s•]+", "", ln).replace("\xa0", " ").strip()
+            if t and not t.startswith("*") and t not in seen:
+                seen.add(t); n += len(t)
+    return n
+
+
+def max_chars_for(usp: int) -> int:
+    return MAX_CHARS if usp >= USP_LONG_CHARS else min(SHORT_MAX_CHARS, MAX_CHARS)
+
+
 def checked_date(mirror_path: Path) -> str:
     return _dt.datetime.fromtimestamp(mirror_path.stat().st_mtime, _dt.timezone(_dt.timedelta(hours=7))).strftime("%Y-%m-%d")
 
 
-def build_prompt(url: str, src: str, checked: str) -> str:
+def build_prompt(url: str, src: str, checked: str, max_chars: int = MAX_CHARS) -> str:
     base = PROMPT_FILE.read_text(encoding="utf-8").replace("[ใส่ชื่อรุ่น]", model_code(url))
     return (base.rstrip() + "\n\n"
             f"ข้อมูลล่าสุดจาก LG.com Thailand ของรุ่นนี้ (ดึงจากหน้าสินค้าโดยตรงเมื่อ {checked}) อยู่ระหว่างแท็กด้านล่าง "
@@ -100,7 +121,7 @@ def build_prompt(url: str, src: str, checked: str) -> str:
             "(conflicts คือข้อขัดแย้งที่ต้องแจ้งไว้นอกเนื้อหาพร้อมคัดลอก ถ้าไม่มีให้เป็นรายการว่าง) "
             "ไม่ต้องใส่ลิงก์อ้างอิงหรือวันที่ในเนื้อหา — ระบบจะวางไว้นอกกรอบเอง\n\n"
             f"ข้อกำหนดความยาว: เนื้อหาพร้อมคัดลอกทั้งหมด (ชื่อสินค้า บทนำ จุดเด่นสินค้า และข้อมูลสินค้า รวมหัวข้อ) "
-            f"ต้องยาวมากกว่า {MIN_CHARS} แต่ไม่เกิน {MAX_CHARS:,} ตัวอักษร และชื่อสินค้าไม่เกิน {NAME_MAX} ตัวอักษร "
+            f"ต้องยาวมากกว่า {MIN_CHARS} แต่ไม่เกิน {max_chars:,} ตัวอักษร และชื่อสินค้าไม่เกิน {NAME_MAX} ตัวอักษร "
             "ให้เลือกเฉพาะจุดขายและข้อมูลที่สำคัญที่สุด")
 
 
@@ -132,20 +153,22 @@ def generate(slug_dir: Path, url: str, model: str = "") -> dict:
     mp = slug_dir / "mirror.json"
     mirror = json.loads(mp.read_text(encoding="utf-8"))
     checked = checked_date(mp)
-    prompt = build_prompt(url, source_text(mirror, url, slug_dir), checked)
+    usp = usp_chars(mirror)
+    limit = max_chars_for(usp)
+    prompt = build_prompt(url, source_text(mirror, url, slug_dir), checked, limit)
     ask, d = prompt, None
-    for attempt in range(4):                # 길이 조건: 600 초과 · 2,000 이하 · 상품명 120 이하 — 벗어나면 다시 쓰게
+    for attempt in range(4):                # 길이 조건: 600 초과 · limit(1,000 또는 2,000) 이하 · 상품명 120 이하 — 벗어나면 다시 쓰게
         d = _fix(llm_claude.vision_json([ask], PdpSummary, label=f"pdp-summary-{attempt}", max_tokens=32000, model=model), url)
         n, nn = len(plain_text(d)), len(d["product_name"])
-        if MIN_CHARS < n <= MAX_CHARS and nn <= NAME_MAX:
+        if MIN_CHARS < n <= limit and nn <= NAME_MAX:
             break
         ask = (prompt + f"\n\nผลครั้งก่อน: เนื้อหาพร้อมคัดลอกยาว {n:,} ตัวอักษร ชื่อสินค้ายาว {nn} ตัวอักษร "
-               f"— ต้องยาวมากกว่า {MIN_CHARS} และไม่เกิน {MAX_CHARS:,} ตัวอักษร ชื่อสินค้าไม่เกิน {NAME_MAX} ตัวอักษร "
+               f"— ต้องยาวมากกว่า {MIN_CHARS} และไม่เกิน {limit:,} ตัวอักษร ชื่อสินค้าไม่เกิน {NAME_MAX} ตัวอักษร "
                "เขียนใหม่ให้อยู่ในเกณฑ์ โดยยังใช้เฉพาะข้อมูลที่ยืนยันได้")
     else:
         raise RuntimeError(f"length rule not met after retries: {n} chars, name {nn}")
     d = _fix(d, url)
-    return {**d, "chars": len(plain_text(d)), "ref_url": url, "checked_at": checked, "model": model,
+    return {**d, "chars": len(plain_text(d)), "max_chars": limit, "usp_chars": usp, "ref_url": url, "checked_at": checked, "model": model,
             "prompt_file": PROMPT_FILE.name}
 
 
