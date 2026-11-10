@@ -45,8 +45,35 @@ def model_code(url: str) -> str:
     return seg.upper()
 
 
-def source_text(mirror: dict, url: str) -> str:
-    """크롤 결과 → 모델에 줄 원문 (LG 페이지 순서 그대로, 각주·스펙 포함)."""
+def page_footnotes(slug_dir: Path, url: str, have: str) -> list:
+    """제품 페이지의 각주(* 로 시작하는 조건·근거 글). 컴포넌트 경로 크롤에는 빠져 있어서, 받아 둔 페이지(pc.html)의
+    컴포넌트 모델에서 읽는다 — 이미 원문에 있는 것은 빼고."""
+    fp = slug_dir / "pc.html"
+    if not fp.exists():
+        return []
+    try:
+        import aem_model
+        am = aem_model.extract(fp.read_text(encoding="utf-8", errors="replace"), url) or {}
+    except Exception:
+        return []
+    out = []
+    for s in am.get("sections") or []:
+        t = (s.get("text") or "").replace(" ", " ").strip()
+        if (str(s.get("order", "")).startswith("disclaimer") or t.startswith("*")) and t[:60] not in have and t not in out:
+            out.append(t)
+    return out
+
+
+def source_text(mirror: dict, url: str, slug_dir: Path = None) -> str:
+    """크롤 결과 → 모델에 줄 원문 (LG 페이지 순서 그대로, 스펙 표 포함) + 페이지 각주."""
+    body = _mirror_text(mirror, url)
+    notes = page_footnotes(slug_dir, url, body) if slug_dir else []
+    if notes:
+        body += "\n\nหมายเหตุใต้หน้าสินค้า:\n" + "\n".join(notes)
+    return body
+
+
+def _mirror_text(mirror: dict, url: str) -> str:
     lines = [f"URL: {url}", f"ชื่อสินค้าบนหน้า LG.com: {mirror.get('product_title') or ''}", ""]
     for s in mirror.get("sections") or []:
         t = (s.get("text") or "").replace(" ", " ").strip()
@@ -76,25 +103,37 @@ def body_chars(d: dict) -> int:
         + sum(len(r["label"]) + len(r["value"]) for r in d["product_info"])
 
 
-def _fix_name(d: dict, url: str) -> dict:
+_ABSENT = re.compile(r"^\s*(ไม่|ไม่มี|no|none|-)\s*$", re.I)
+
+
+def _fix(d: dict, url: str) -> dict:
     if "/refrigerators/" in url:            # 지시문: 냉장고는 "คิว" 대신 Q
         d["product_name"] = re.sub(r"\s*คิว", " Q", d["product_name"]).replace("  ", " ")
+    # 지시문: 없는 기능은 쓰지 않는다 — 값이 '없음'인 정보 행, '(ไม่มี…)' 같은 괄호 설명은 뺀다
+    rows = []
+    for r in d["product_info"]:
+        v = re.sub(r"\s*\((?:ไม่มี|ไม่)[^)]*\)", "", r["value"]).strip()
+        if v and not _ABSENT.match(v):
+            rows.append({"label": r["label"], "value": v})
+    d["product_info"] = rows
     return d
 
 
-def generate(slug_dir: Path, url: str) -> dict:
+def generate(slug_dir: Path, url: str, model: str = "") -> dict:
+    import os
     import llm_claude
+    model = model or os.getenv("SUMMARY_MODEL", "").strip() or llm_claude.CLAUDE_MODEL
     mp = slug_dir / "mirror.json"
     mirror = json.loads(mp.read_text(encoding="utf-8"))
     checked = checked_date(mp)
-    prompt = build_prompt(url, source_text(mirror, url), checked)
-    d = llm_claude.vision_json([prompt], PdpSummary, label="pdp-summary", max_tokens=32000)
+    prompt = build_prompt(url, source_text(mirror, url, slug_dir), checked)
+    d = llm_claude.vision_json([prompt], PdpSummary, label="pdp-summary", max_tokens=32000, model=model)
     if body_chars(d) <= MIN_CHARS:          # 지시문의 길이 조건 — 한 번만 다시 요청
         d = llm_claude.vision_json([prompt + f"\n\nเนื้อหาครั้งก่อนสั้นเกินไป ({body_chars(d)} ตัวอักษร) "
                                     f"ต้องยาวมากกว่า {MIN_CHARS} ตัวอักษร โดยยังใช้เฉพาะข้อมูลที่ยืนยันได้"],
-                                   PdpSummary, label="pdp-summary-retry", max_tokens=32000)
-    d = _fix_name(d, url)
-    return {**d, "chars": body_chars(d), "ref_url": url, "checked_at": checked, "model": llm_claude.CLAUDE_MODEL,
+                                   PdpSummary, label="pdp-summary-retry", max_tokens=32000, model=model)
+    d = _fix(d, url)
+    return {**d, "chars": body_chars(d), "ref_url": url, "checked_at": checked, "model": model,
             "prompt_file": PROMPT_FILE.name}
 
 
@@ -126,13 +165,14 @@ if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
     try:
         slug_dir = Path(sys.argv[1]); refresh = "--refresh" in sys.argv[2:]
+        model = next((a.split("=", 1)[1] for a in sys.argv[2:] if a.startswith("--model=")), "")
         url = next((a for a in sys.argv[2:] if a.startswith("http")), "")
         out = slug_dir / "summary.json"
         if out.exists() and not refresh:
             d = json.loads(out.read_text(encoding="utf-8"))
         else:
             if not url: raise ValueError("url required")
-            d = generate(slug_dir, url)
+            d = generate(slug_dir, url, model)
             out.write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
         sys.stdout.write(json.dumps({**d, "html": to_html(d), "text": plain_text(d)}, ensure_ascii=False))
     except Exception as ex:

@@ -78,10 +78,11 @@ def _log_usage(label: str, msg) -> None:
 
 
 def vision_json(parts: List[Part], schema: Type[BaseModel], *, label: str = "",
-                system: Optional[str] = None, max_tokens: int = DEFAULT_MAX_TOKENS) -> dict:
-    """텍스트·이미지 parts → schema 로 검증된 dict. 실패 시 RuntimeError."""
+                system: Optional[str] = None, max_tokens: int = DEFAULT_MAX_TOKENS, model: Optional[str] = None) -> dict:
+    """텍스트·이미지 parts → schema 로 검증된 dict. 실패 시 RuntimeError. model: 이 호출만 다른 모델 (기본 CLAUDE_MODEL)"""
+    model = model or CLAUDE_MODEL
     kwargs = dict(
-        model=CLAUDE_MODEL,
+        model=model,
         max_tokens=max_tokens,
         output_config={"effort": CLAUDE_EFFORT},
         output_format=schema,
@@ -89,7 +90,7 @@ def vision_json(parts: List[Part], schema: Type[BaseModel], *, label: str = "",
     )
     if system:
         kwargs["system"] = system
-    if CLAUDE_MODEL in _FALLBACK_MODELS:
+    if model in _FALLBACK_MODELS:
         kwargs.update(betas=[_FALLBACK_BETA], fallbacks="default")
     with _client().beta.messages.stream(**kwargs) as stream:
         msg = stream.get_final_message()

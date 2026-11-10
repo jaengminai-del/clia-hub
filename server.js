@@ -2668,17 +2668,20 @@ app.post('/api/v1/pdp-summary', async (req, res) => {
   const path = require('path'), fs = require('fs');
   const { url, refresh = false } = req.body || {};
   if (!isLgUrl(url)) return res.status(400).json({ error: 'LG.com url required' });
+  // 모델 지정은 배치(내보내기 토큰)만 — 화면 요청은 서버 기본(SUMMARY_MODEL → CLAUDE_MODEL)
+  const tok = (process.env.EXPORT_TOKEN || '').trim();
+  const model = (tok && req.get('x-export-token') === tok && /^claude-(opus|sonnet|haiku)-5-5$/.test(req.body.model || '')) ? req.body.model : '';
   const slug = url.replace(/https?:\/\//, '').replace(/[^\w]+/g, '-').replace(/-+$/, '');
   const slugDir = path.join(__dirname, 'crawler-py', 'out', slug);
   if (!fs.existsSync(path.join(slugDir, 'mirror.json'))) return res.status(404).json({ error: 'no crawl for this URL — crawl it first' });
-  const key = slug + (refresh ? '|refresh' : '');
+  const key = slug + (refresh ? '|refresh' : '') + (model ? '|' + model : '');
   let job = summaryJobs.get(key);
   if (!job) {
     job = new Promise((resolve, reject) => {
       const crawlerDir = path.join(__dirname, 'crawler-py');
       const venvPy = path.join(crawlerDir, '.venv', 'bin', 'python');
       const py = process.env.CRAWLER_PYTHON || (fs.existsSync(venvPy) ? venvPy : 'python3');
-      const args = ['-m', 'content_gen.pdp_summary', slugDir, url].concat(refresh ? ['--refresh'] : []);
+      const args = ['-m', 'content_gen.pdp_summary', slugDir, url].concat(refresh ? ['--refresh'] : [], model ? ['--model=' + model] : []);
       require('child_process').execFile(py, args, { cwd: crawlerDir, timeout: 6 * 60 * 1000, maxBuffer: 8 * 1024 * 1024,
         env: { ...process.env, PYTHONIOENCODING: 'utf-8' } }, (err, stdout, stderr) => {
         let d = {};
