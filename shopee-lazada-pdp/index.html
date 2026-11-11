@@ -680,6 +680,7 @@ async function downloadImages(maxImages) {
   // 이미지와 같이: 전체 HTML + 이미지 HTML(Shopee 는 이미지 주소 목록) — 이미지 렌더와 동시에 만든다 (2026-11-11)
   const imgHtmlP = window.CLIAImageHTML ? CLIAImageHTML.build(imageHtmlOpts(html)).catch((e) => ({ error: e.message }))
                                         : Promise.resolve({ error: 'image HTML not available' });
+  const summaryP = pdpSummaryHtml().catch((e) => ({ error: e.message }));   // 전체 HTML 맨 위 PDP 요약
   try {
     const resp = await fetch(API_BASE + '/api/render-slices', {
       method: 'POST',
@@ -705,15 +706,17 @@ async function downloadImages(maxImages) {
     let blob = await resp.blob(), htmlNote = '';
     try {
       if (info) info.textContent = 'adding HTML files…';
-      const [JSZip, ih] = await Promise.all([loadJSZip(), imgHtmlP]);
+      const [JSZip, ih, top] = await Promise.all([loadJSZip(), imgHtmlP, summaryP]);
       const zip = await JSZip.loadAsync(blob), base = slugFromUrl();
       // 내려받는 HTML 은 맨 위에 UTF-8 표시 — 조각 HTML 을 브라우저가 다른 인코딩으로 읽어 태국어가 깨지지 않게 (2026-11-11)
       const U8 = '<meta charset="utf-8">\n';
-      zip.file(base + '.html', U8 + html);                                  // 전체 HTML (미리보기 그대로)
+      const topHtml = typeof top === 'string' ? top : '';
+      if (top && top.error) htmlNote += ' (HTML without summary: ' + top.error + ')';
+      zip.file(base + '.html', U8 + (topHtml ? topHtml + '\n' : '') + html);   // 전체 HTML = 맨 위 PDP 요약 + 미리보기 그대로
       if (ih && !ih.error) {
         zip.file(ih.kind === 'urls' ? base + '-image-urls.txt' : base + '-image.html', (ih.kind === 'urls' ? '' : U8) + ih.text + '\n');
-        if (ih.summaryErr) htmlNote = ' (image HTML without summary: ' + ih.summaryErr + ')';
-      } else htmlNote = ' (image HTML failed: ' + ((ih && ih.error) || '?') + ')';
+        if (ih.summaryErr) htmlNote += ' (image HTML without summary: ' + ih.summaryErr + ')';
+      } else htmlNote += ' (image HTML failed: ' + ((ih && ih.error) || '?') + ')';
       blob = await zip.generateAsync({ type: 'blob' });
     } catch (e) { htmlNote = ' (HTML files not added: ' + e.message + ')'; }
     const a = document.createElement('a');
@@ -807,14 +810,28 @@ function copyListingText() {
   });
 }
 
-function copyHTML() {
+// 전체 HTML 맨 위의 PDP 요약(태국어) — 제품 URL 마다 한 번만 받아 둔다 (2026-11-11)
+const _summaryCache = {};
+function pdpSummaryHtml() {
+  const u = (document.getElementById('pdpUrl').value || '').trim();
+  if (!u) return Promise.resolve('');
+  return _summaryCache[u] || (_summaryCache[u] = fetch(API_BASE + '/api/v1/pdp-summary', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: u }),
+  }).then(async (x) => { const j = await x.json().catch(() => ({})); if (!x.ok || !j.html) throw new Error(j.error || 'HTTP ' + x.status); return j.html; })
+    .catch((e) => { delete _summaryCache[u]; throw e; }));
+}
+async function copyHTML() {
   if (!generatedHTML) return;
-  navigator.clipboard.writeText(generatedHTML).then(() => {
-    const btn = document.getElementById('btnCopyHtml');
-    const orig = btn.textContent;
-    btn.textContent = '✓ Copied!';
-    setTimeout(() => btn.textContent = orig, 1500);
-  });
+  const btn = document.getElementById('btnCopyHtml'), orig = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳';
+  let out = generatedHTML, note = '';
+  try { const top = await pdpSummaryHtml(); if (top) out = top + '\n' + generatedHTML; }
+  catch (e) { note = e.message; }
+  try { await navigator.clipboard.writeText(out); btn.textContent = note ? '✓ Copied (no summary)' : '✓ Copied!'; }
+  catch (_) { btn.textContent = orig; alert('Copy failed'); }
+  if (note) setStatus('⚠ HTML copied without the product summary: ' + note, 'err');
+  btn.disabled = false;
+  setTimeout(() => btn.textContent = orig, 2000);
 }
 
 // ══════════════════════════════════════════
