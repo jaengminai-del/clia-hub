@@ -2554,7 +2554,10 @@ app.post('/api/v1/slice-html', async (req, res) => {
 app.get(/^\/media\/slices\/([0-9a-f]{20})\/([\w.-]{1,120}\.zip)$/, async (req, res) => {
   const path = require('path'), fs = require('fs');
   const hash = req.params[0], name = req.params[1];
-  const dir = path.join(SLICE_CACHE, hash), zipAbs = path.join(dir, '_images.zip');
+  // 파일명이 …-images-<N>.zip 이면 앞에서부터 N장만 (Shopee 12장 버전, 2026-11-11)
+  const lim = parseInt((name.match(/-images-(\d{1,2})\.zip$/) || [])[1], 10) || 0;
+  const zkey = lim ? `_images_${lim}.zip` : '_images.zip';
+  const dir = path.join(SLICE_CACHE, hash), zipAbs = path.join(dir, zkey);
   const read = async (file) => {
     const abs = path.join(dir, file);
     if (fs.existsSync(abs)) return fs.readFileSync(abs);
@@ -2564,19 +2567,19 @@ app.get(/^\/media\/slices\/([0-9a-f]{20})\/([\w.-]{1,120}\.zip)$/, async (req, r
   };
   try {
     if (!fs.existsSync(zipAbs)) {
-      let buf = await sliceStore.getBuffer(`media-slices/${hash}/_images.zip`);
+      let buf = await sliceStore.getBuffer(`media-slices/${hash}/${zkey}`);
       if (!buf) {
         const manBuf = await read('manifest.json');
         if (!manBuf) return res.status(404).end();
         const man = JSON.parse(manBuf.toString('utf8'));
         const zip = new (require('jszip'))();
-        for (const im of man.images || []) {
+        for (const im of (lim ? (man.images || []).slice(0, lim) : (man.images || []))) {
           const b = await read(im.file);
           if (!b) return res.status(404).json({ error: `slice missing: ${im.file}` });
           zip.file(im.file, b);
         }
         buf = await zip.generateAsync({ type: 'nodebuffer', compression: 'STORE' });
-        await sliceStore.putBuffer(`media-slices/${hash}/_images.zip`, buf, 'application/zip').catch((e) =>
+        await sliceStore.putBuffer(`media-slices/${hash}/${zkey}`, buf, 'application/zip').catch((e) =>
           console.warn('[slice-zip] 버킷 업로드 실패', hash, e.message));
       }
       fs.mkdirSync(dir, { recursive: true });
@@ -2882,13 +2885,25 @@ app.post('/api/render-slices', async (req, res) => {
       return res.status(400).json({ error: 'html required' });
     }
     try {
-      const { meta, buf } = await renderSlicesPy(req.body);
+      const r = await renderSlicesPy(req.body), meta = r.meta;
+      let buf = r.buf;
       console.log(`[render-slices] ${meta.log}`);
+      // maxImages (Shopee 12장 버전, 2026-11-11): 앞에서부터 N장(+ 같은 번호의 글 파일)만 ZIP 에 남긴다
+      const maxImages = parseInt(req.body.maxImages, 10) || 0;
+      let manifest = meta.manifest, suffix = '';
+      if (maxImages > 0 && manifest.length > maxImages) {
+        const keep = new Set(manifest.slice(0, maxImages).flatMap((m) => [m.file, m.text_file]));
+        const src = await (require('jszip')).loadAsync(buf), zip = new (require('jszip'))();
+        for (const f of Object.keys(src.files)) if (keep.has(f)) zip.file(f, await src.files[f].async('nodebuffer'));
+        buf = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
+        res.set('X-Slice-Total', String(manifest.length));
+        manifest = manifest.slice(0, maxImages); suffix = `-${maxImages}`;
+      }
       res.set('Content-Type', 'application/zip');
-      res.set('Content-Disposition', `attachment; filename="${meta.name}-images.zip"`);
-      res.set('X-Slice-Manifest', encodeURIComponent(JSON.stringify(meta.manifest)));
+      res.set('Content-Disposition', `attachment; filename="${meta.name}-images${suffix}.zip"`);
+      res.set('X-Slice-Manifest', encodeURIComponent(JSON.stringify(manifest)));
       res.set('X-Images-Loaded', meta.images_loaded);
-      res.set('Access-Control-Expose-Headers', 'X-Slice-Manifest, X-Images-Loaded, Content-Disposition');
+      res.set('Access-Control-Expose-Headers', 'X-Slice-Manifest, X-Slice-Total, X-Images-Loaded, Content-Disposition');
       return res.send(buf);
     } catch (e) {
       console.error('/api/render-slices error:', e.message);
@@ -3126,7 +3141,7 @@ app.post('/api/render-slices', async (req, res) => {
     res.set('Content-Disposition', `attachment; filename="${safeName}-images.zip"`);
     res.set('X-Slice-Manifest', encodeURIComponent(JSON.stringify(manifest)));
     res.set('X-Images-Loaded', `${loadStat.loaded}/${loadStat.total}`);
-    res.set('Access-Control-Expose-Headers', 'X-Slice-Manifest, X-Images-Loaded, Content-Disposition');
+    res.set('Access-Control-Expose-Headers', 'X-Slice-Manifest, X-Slice-Total, X-Images-Loaded, Content-Disposition');
     return res.send(buf);
   } catch (e) {
     console.error('/api/render-slices error:', e.message);
