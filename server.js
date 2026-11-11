@@ -10,6 +10,7 @@ app.use(cors({ origin: (origin, cb) => cb(null, true), credentials: false }));
 app.use(express.json({ limit: '50mb' }));
 app.use(require('./crawler-routes')); // 내장 PDP 크롤러 (/api/v1/*) — 별도 FastAPI·터널 불필요
 app.use(require('./listing-routes').router); // 제품별 리스팅 문구 (프로모션·제품 상세·배송·사후 케어·반품) 버전 저장
+app.use(require('./video-frames').router); // 동영상 카드 장면 고르기 (빌더 카드 목록 팝업 → ffmpeg 장면 추출)
 app.use('/crawler-py', (req, res) => res.sendStatus(404)); // 크롤러 소스·산출물은 정적 노출 금지
 app.use(express.static('.'));
 

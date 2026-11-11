@@ -7692,7 +7692,7 @@ function ebbToggleEdit() {
     btn.textContent=t('ebb.lock'); btn.style.background='#E53238'; btn.style.color='#fff'; btn.style.borderColor='#E53238';
     ebbMakeTextEditable(frame);
     frame.querySelectorAll('img').forEach(img => ebbMakeImageEditable(img));
-    ebbAddEditControls(frame);   // 제목·문단·표·목록 ✕ 삭제 + 카드 높이 조절 (Shopee/Lazada 와 같게)
+    ebbAddEditControls(frame);   // 제목·문단·표·목록 ✕ 삭제 (Shopee/Lazada 와 같게)
     if (window.CLIACardEdit) CLIACardEdit.attach(frame, { onRestore: ebbEnableEditIn });   // 카드 삭제·↺ 원래대로 + 빈 카드 자동 정리
   } else {
     btn.textContent=t('ebb.edit'); btn.style.background=''; btn.style.color=''; btn.style.borderColor='';
@@ -7740,7 +7740,7 @@ function ebbMakeTextEditable(root) {
   });
 }
 
-// 제목·문단·표·목록마다 ✕ 삭제 + 카드(최상위 블록) 아래 가장자리를 끌어 높이 조절 — Shopee/Lazada addEditControls 와 같은 동작
+// 제목·문단·표·목록마다 ✕ 삭제 — Shopee/Lazada addEditControls 와 같은 동작
 //   (이미지 삭제는 ebbMakeImageEditable 의 ✕)
 function ebbAddEditControls(frame, withResize = true) {
   frame.querySelectorAll('h1, h2, h3, h4, p, table, ul, ol').forEach(el => {
@@ -7765,32 +7765,8 @@ function ebbAddEditControls(frame, withResize = true) {
     el.style.position = 'relative';
     el.appendChild(delBtn);
   });
-  if (!withResize) return;
-  if (frame._ebbResizeAbort) frame._ebbResizeAbort.abort();   // 다시 Edit 할 때 리스너 중복 방지
-  const ac = new AbortController(); frame._ebbResizeAbort = ac;
-  let cur = null, startY = 0, startH = 0;
-  frame.querySelectorAll(':scope > div').forEach(el => {
-    el.style.position = 'relative';
-    const bar = document.createElement('div');
-    bar.className = 'edit-resize-bar';
-    bar.title = 'Drag to resize';
-    bar.style.cssText = 'position:absolute;bottom:0;left:0;right:0;height:5px;background:linear-gradient(to bottom, transparent, rgba(229,50,56,.4));'
-      + 'cursor:ns-resize;opacity:0;transition:opacity .15s;z-index:10;';
-    el.appendChild(bar);
-    el.addEventListener('mouseenter', () => { bar.style.opacity = '1'; }, { signal: ac.signal });
-    el.addEventListener('mouseleave', () => { bar.style.opacity = '0'; }, { signal: ac.signal });
-    bar.addEventListener('mousedown', (ev) => {
-      ev.preventDefault(); ev.stopPropagation();
-      cur = el; startY = ev.clientY; startH = el.offsetHeight;
-      el.style.overflow = 'hidden'; document.body.style.cursor = 'ns-resize';
-    }, { signal: ac.signal });
-  });
-  document.addEventListener('mousemove', (ev) => {
-    if (!cur) return;
-    const k = window.CLIAPreviewScale ? CLIAPreviewScale.factor(frame) : 1;   // 미리보기 축소 배율 보정
-    cur.style.height = Math.max(20, startH + (ev.clientY - startY) / k) + 'px';
-  }, { signal: ac.signal });
-  document.addEventListener('mouseup', () => { if (cur) { cur = null; document.body.style.cursor = ''; } }, { signal: ac.signal });
+  // 전체 컨텐츠 높이 막대는 두지 않는다 — 높이 조절은 이미지 프레임 가장자리 핸들로 이미지 단위로 (2026-11-11)
+
 }
 
 function ebbRemoveEditControls(frame) {

@@ -588,6 +588,30 @@ def render_divider(st: Style, section: dict) -> str:
 </section>'''
 
 
+_VIDEO_EXT = (".mp4", ".webm", ".mov")
+
+
+def _section_video(section: dict) -> str:
+    """lg.com 에서 동영상이 있던 섹션(포스터 이미지 + mp4)의 동영상 주소 — PC 용 우선. 없으면 ""."""
+    vids = [m.get("pc_url") or m.get("unified_url") or "" for m in section.get("media", [])
+            if m.get("type") == "video" or (m.get("pc_url") or "").lower().split("?")[0].endswith(_VIDEO_EXT)]
+    vids = [v for v in vids if v.lower().split("?")[0].endswith(_VIDEO_EXT)]
+    if not vids:
+        return ""
+    pc = [v for v in vids if not re.search(r"(/mobile/|[-_]m\.\w+$|[-_]mobile)", v, re.I)]
+    return (pc or vids)[0]
+
+
+def _mark_video(section: dict, html: str) -> str:
+    """동영상 섹션의 포스터 이미지에 data-video-src 표시 — 빌더 카드 목록이 '▶ Video' 로 보여 주고 장면을 고르게 한다 (2026-11-11)."""
+    vid = _section_video(section)
+    imgs = usable_media(section)
+    if not vid or len(imgs) != 1:
+        return html
+    url = best_image_url(imgs[0])
+    return html.replace(f'src="{url}"', f'src="{url}" data-video-src="{escape(vid)}"')
+
+
 def render_blocks(st: Style, blocks: list, align: str) -> list:
     out = []
     blocks = [dict(b, section=prefer_mobile_media(st, b["section"])) if "section" in b else b for b in blocks]
@@ -603,6 +627,8 @@ def render_blocks(st: Style, blocks: list, align: str) -> list:
             h = render_award_section(st, b["section"])
         else:
             h = render_section(st, b["section"], b.get("kv", False), align)
+        if h and b.get("section"):
+            h = _mark_video(b["section"], h)
         if h:
             out.append(h)
     return out

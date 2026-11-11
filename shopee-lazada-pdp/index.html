@@ -878,35 +878,9 @@ function addEditControls(frame, withResize = true) {
     wrap.appendChild(delBtn);
   });
 
-  // ── top-level div에 높이 조절 핸들만 (카드 하나만 다시 붙일 때는 생략) ──
-  if (withResize) frame.querySelectorAll(':scope > div').forEach(el => {
-    el.style.position = 'relative';
-    const resizeBar = document.createElement('div');
-    resizeBar.className = 'edit-resize-bar';
-    resizeBar.title = 'Drag to resize';
-    resizeBar.style.cssText = `position:absolute;bottom:0;left:0;right:0;height:5px;
-      background:linear-gradient(to bottom, transparent, rgba(229,50,56,.4));
-      cursor:ns-resize;opacity:0;transition:opacity .15s;z-index:10;`;
-    el.appendChild(resizeBar);
+  // (2026-11-11) 전체 컨텐츠 높이 막대는 없앰 — 컨텐츠가 한 상자(lg-container)라 끌면 아래쪽 전체가 잘렸다.
+  //   높이 조절은 이미지 프레임 가장자리 핸들(addFrameHandles)로 이미지 단위로 한다.
 
-    el.addEventListener('mouseenter', () => { resizeBar.style.opacity = '1'; });
-    el.addEventListener('mouseleave', () => { resizeBar.style.opacity = '0'; });
-
-    let resizing = false, startY = 0, startH = 0;
-    resizeBar.addEventListener('mousedown', (ev) => {
-      ev.preventDefault(); ev.stopPropagation();
-      resizing = true; startY = ev.clientY; startH = el.offsetHeight;
-      el.style.overflow = 'hidden';
-      document.body.style.cursor = 'ns-resize';
-    });
-    document.addEventListener('mousemove', (ev) => {
-      if (!resizing) return;
-      el.style.height = Math.max(20, startH + ev.clientY - startY) + 'px';
-    });
-    document.addEventListener('mouseup', () => {
-      if (resizing) { resizing = false; document.body.style.cursor = ''; }
-    });
-  });
 }
 
 function removeEditControls(frame) {
