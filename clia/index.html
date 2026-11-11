@@ -7690,14 +7690,9 @@ function ebbToggleEdit() {
   const frame = document.getElementById('ebbPreviewFrame');
   if (EBB.editMode) {
     btn.textContent=t('ebb.lock'); btn.style.background='#E53238'; btn.style.color='#fff'; btn.style.borderColor='#E53238';
-    frame.querySelectorAll('h1,h2,h3,h4,p,li,div').forEach(el => {
-      if (el.children.length===0 && el.textContent.trim().length>0 && el.textContent.trim().length<300) {
-        el.setAttribute('contenteditable','true');
-        el.style.outline='1px dashed rgba(229,50,56,.35)';
-        el.style.cursor='text';
-      }
-    });
+    ebbMakeTextEditable(frame);
     frame.querySelectorAll('img').forEach(img => ebbMakeImageEditable(img));
+    ebbAddEditControls(frame);   // 제목·문단·표·목록 ✕ 삭제 + 카드 높이 조절 (Shopee/Lazada 와 같게)
     if (window.CLIACardEdit) CLIACardEdit.attach(frame, { onRestore: ebbEnableEditIn });   // 카드 삭제·↺ 원래대로 + 빈 카드 자동 정리
   } else {
     btn.textContent=t('ebb.edit'); btn.style.background=''; btn.style.color=''; btn.style.borderColor='';
@@ -7711,6 +7706,7 @@ function ebbToggleEdit() {
       if (w._ebbAbort) { w._ebbAbort.abort(); delete w._ebbAbort; }
       delete w._ebbState; delete w._ebbImg;
     });
+    ebbRemoveEditControls(frame);
     if (window.CLIACardEdit) CLIACardEdit.detach(frame);
     EBB.generatedHTML = frame.innerHTML;
     document.getElementById('ebbCharCount').textContent = EBB.generatedHTML.length.toLocaleString();
@@ -7726,15 +7722,81 @@ function ebbOnCardsReordered(frame) {
 }
 // ↺ 원래대로 되돌린 카드(root)에 편집 기능 다시 붙이기 — ebbToggleEdit 편집 진입과 같은 규칙, 카드 안에서만
 function ebbEnableEditIn(root) {
-  [root, ...root.querySelectorAll('h1,h2,h3,h4,p,li,div')].forEach(el => {
-    if (!el.matches('h1,h2,h3,h4,p,li,div')) return;
-    if (el.children.length===0 && el.textContent.trim().length>0 && el.textContent.trim().length<300) {
+  ebbMakeTextEditable(root);
+  root.querySelectorAll('img').forEach(img => ebbMakeImageEditable(img));
+  ebbAddEditControls(root, false);
+}
+
+// 글자 편집 범위 — Shopee/Lazada 빌더와 같게: 표 칸(스펙 표)·굵은 글씨/줄바꿈이 섞인 짧은 문단도 편집 (2026-11-11)
+function ebbMakeTextEditable(root) {
+  const SEL='h1,h2,h3,h4,p,td,th,li,span,div';
+  [root, ...root.querySelectorAll(SEL)].forEach(el => {
+    if (!el.matches(SEL) || el.closest('.ebb-img-wrap')) return;
+    if (el.children.length===0 || el.textContent.trim().length<200) {
       el.setAttribute('contenteditable','true');
-      el.style.outline='1px dashed rgba(229,50,56,.35)';
+      el.style.outline='1px dashed rgba(229,50,56,.3)';
       el.style.cursor='text';
     }
   });
-  root.querySelectorAll('img').forEach(img => ebbMakeImageEditable(img));
+}
+
+// 제목·문단·표·목록마다 ✕ 삭제 + 카드(최상위 블록) 아래 가장자리를 끌어 높이 조절 — Shopee/Lazada addEditControls 와 같은 동작
+//   (이미지 삭제는 ebbMakeImageEditable 의 ✕)
+function ebbAddEditControls(frame, withResize = true) {
+  frame.querySelectorAll('h1, h2, h3, h4, p, table, ul, ol').forEach(el => {
+    if (el.closest('.ebb-img-wrap') || !el.parentElement || el.querySelector(':scope > .edit-del-btn')) return;
+    if (getComputedStyle(el.parentElement).position === 'static') el.parentElement.style.position = 'relative';
+    const delBtn = document.createElement('button');
+    delBtn.className = 'edit-del-btn';
+    delBtn.innerHTML = '✕';
+    delBtn.title = 'Delete';
+    delBtn.setAttribute('contenteditable', 'false');
+    delBtn.style.cssText = 'position:absolute;top:-8px;right:-8px;z-index:20;width:20px;height:20px;border-radius:50%;border:none;'
+      + 'background:#e53238;color:#fff;font-size:11px;font-weight:700;cursor:pointer;opacity:0.5;transition:opacity .15s;'
+      + 'display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,.3);';
+    delBtn.onmouseenter = () => { delBtn.style.opacity = '1'; };
+    delBtn.onmouseleave = () => { delBtn.style.opacity = '0.5'; };
+    delBtn.onmousedown = (ev) => ev.stopPropagation();
+    delBtn.onclick = (ev) => {
+      ev.stopPropagation(); ev.preventDefault();
+      el.style.transition = 'opacity .2s'; el.style.opacity = '0';
+      setTimeout(() => el.remove(), 250);
+    };
+    el.style.position = 'relative';
+    el.appendChild(delBtn);
+  });
+  if (!withResize) return;
+  if (frame._ebbResizeAbort) frame._ebbResizeAbort.abort();   // 다시 Edit 할 때 리스너 중복 방지
+  const ac = new AbortController(); frame._ebbResizeAbort = ac;
+  let cur = null, startY = 0, startH = 0;
+  frame.querySelectorAll(':scope > div').forEach(el => {
+    el.style.position = 'relative';
+    const bar = document.createElement('div');
+    bar.className = 'edit-resize-bar';
+    bar.title = 'Drag to resize';
+    bar.style.cssText = 'position:absolute;bottom:0;left:0;right:0;height:5px;background:linear-gradient(to bottom, transparent, rgba(229,50,56,.4));'
+      + 'cursor:ns-resize;opacity:0;transition:opacity .15s;z-index:10;';
+    el.appendChild(bar);
+    el.addEventListener('mouseenter', () => { bar.style.opacity = '1'; }, { signal: ac.signal });
+    el.addEventListener('mouseleave', () => { bar.style.opacity = '0'; }, { signal: ac.signal });
+    bar.addEventListener('mousedown', (ev) => {
+      ev.preventDefault(); ev.stopPropagation();
+      cur = el; startY = ev.clientY; startH = el.offsetHeight;
+      el.style.overflow = 'hidden'; document.body.style.cursor = 'ns-resize';
+    }, { signal: ac.signal });
+  });
+  document.addEventListener('mousemove', (ev) => {
+    if (!cur) return;
+    const k = window.CLIAPreviewScale ? CLIAPreviewScale.factor(frame) : 1;   // 미리보기 축소 배율 보정
+    cur.style.height = Math.max(20, startH + (ev.clientY - startY) / k) + 'px';
+  }, { signal: ac.signal });
+  document.addEventListener('mouseup', () => { if (cur) { cur = null; document.body.style.cursor = ''; } }, { signal: ac.signal });
+}
+
+function ebbRemoveEditControls(frame) {
+  frame.querySelectorAll('.edit-del-btn, .edit-resize-bar').forEach(b => b.remove());
+  if (frame._ebbResizeAbort) { frame._ebbResizeAbort.abort(); delete frame._ebbResizeAbort; }
+  frame.querySelectorAll(':scope > div, :scope > table, :scope > img').forEach(el => { el.style.position = ''; el.style.outline = ''; });
 }
 function ebbMakeImageEditable(img) {
   if (img.parentElement?._ebbImg === img) return;              // 편집 중이면 스킵 (Lock 후 다시 Edit 하면 기존 래퍼 재사용)
@@ -7775,13 +7837,24 @@ function ebbMakeImageEditable(img) {
   function clampToFrame(){
     const W=wrap.clientWidth,H=wrap.clientHeight,ox=img.offsetLeft,oy=img.offsetTop,ow=img.offsetWidth,oh=img.offsetHeight;
     if(!W||!H||!ow||!oh)return;
-    if(ow<W-1||oh<H-1){state.scale=Math.min(5,Math.max(0.3,state.scale));return;}
-    state.scale=Math.min(5,Math.max(state.scale,W/ow,H/oh));
+    if(ow<W-1||oh<H-1){state.scale=Math.min(5,Math.max(0.3,state.scale));state.gap=false;return;}
+    // 틀을 채우는 이미지도 30%까지 줄일 수 있다 (Shopee/Lazada·Amazon 과 같게) — 줄여서 생긴 빈 곳은 가장자리 평균색으로 채움
+    state.scale=Math.min(5,Math.max(0.3,state.scale));
     const s=state.scale,cx=ox+ow/2,cy=oy+oh/2;
-    state.tx=Math.min(ow/2-cx/s,Math.max((W-cx)/s-ow/2,state.tx));
-    state.ty=Math.min(oh/2-cy/s,Math.max((H-cy)/s-oh/2,state.ty));
+    // 축마다: 이미지가 틀보다 크면 빈 곳이 안 생기게, 작으면 틀 밖으로 나가지 않게
+    const ax=(ow*s/2-cx)/s,bx=(W-ow*s/2-cx)/s,ay=(oh*s/2-cy)/s,by=(H-oh*s/2-cy)/s;
+    state.tx=Math.min(Math.max(ax,bx),Math.max(Math.min(ax,bx),state.tx));
+    state.ty=Math.min(Math.max(ay,by),Math.max(Math.min(ay,by),state.ty));
+    state.gap=ow*s<W-1||oh*s<H-1;
   }
-  function applyT(){clampToFrame();img.style.transform=`scale(${state.scale}) translate(${state.tx}px,${state.ty}px)`;if(zbar)zbar.update();}
+  // 빈 곳이 생기면 틀 배경 = 이미지 가장자리 평균색 (래퍼 인라인 스타일이라 잠금 후 HTML·슬라이스에도 남음)
+  if(wrap._bg0===undefined)wrap._bg0=wrap.style.backgroundColor;
+  function gapFill(){
+    if(!state.gap){wrap.style.backgroundColor=wrap._bg0;return;}
+    if(wrap._edgeBg){wrap.style.backgroundColor=wrap._edgeBg;return;}
+    if(window.CLIAZoomBar&&CLIAZoomBar.edgeColor)CLIAZoomBar.edgeColor(img.currentSrc||img.src,CRAWLER_API).then(c=>{if(!c)return;wrap._edgeBg=c;if(state.gap)wrap.style.backgroundColor=c;});
+  }
+  function applyT(){clampToFrame();img.style.transform=`scale(${state.scale}) translate(${state.tx}px,${state.ty}px)`;gapFill();if(zbar)zbar.update();}
   wrap._editApply=applyT;
   wrap.addEventListener('wheel',ev=>{if(!EBB.editMode)return;ev.preventDefault();
     const d=window.CLIAZoomBar?CLIAZoomBar.wheelStep(ev,wrap):(ev.deltaY>0?-1:1);if(!d)return;   // 휠도 5% 단위
