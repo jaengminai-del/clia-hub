@@ -840,11 +840,6 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 .ebb-compliance-bar{padding:8px 16px;background:#FFF8E1;border-bottom:1px solid #FFE082;font-size:10px;color:#7A5800;display:none;flex-shrink:0;}
 .ebb-compliance-bar.ok{background:#E8F5E9;border-color:#C8E6C9;color:#2E7D32;}
 .ebb-compliance-bar.warn{background:#FFF3E0;border-color:#FFE0B2;color:#E65100;}
-.ebb-lib-section{background:#fff;border:1px solid #E6E1D6;border-radius:12px;padding:12px;margin-bottom:10px;}
-.ebb-lib-title{font-size:11px;font-weight:700;color:#7E7C77;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
-.ebb-lib-list{display:flex;flex-wrap:wrap;gap:6px;max-height:300px;overflow-y:auto;}
-.ebb-lib-chip{padding:4px 10px;border:1px solid #D0CBC1;border-radius:100px;font-size:11px;cursor:pointer;background:#fff;color:#333;transition:all .15s;}
-.ebb-lib-chip:hover{background:#E53238;color:#fff;border-color:#E53238;}
 /* Topbar eBay button */
 .tb-ebay-live{background:#E53238;color:#fff;padding:4px 12px;border-radius:4px;font-size:11px;font-weight:700;border:none;cursor:pointer;transition:background .15s;}
 .tb-ebay-live:hover{background:#c42a2f;}
@@ -1146,12 +1141,9 @@ const UI_TX={
  'Analyze':{de:'Analysieren',th:'วิเคราะห์',ar:'تحليل'},
  '사용 방법:':{en:'How to use:',de:'So funktioniert es:',th:'วิธีใช้:',ar:'طريقة الاستخدام:'},
  '1. URL 입력 → Analyze (CLIA Crawler · server.js 필요)':{en:'1. Enter a URL → Analyze (CLIA Crawler)',de:'1. URL eingeben → Analysieren (CLIA Crawler)',th:'1. กรอก URL → วิเคราะห์ (CLIA Crawler)',ar:'1. أدخل الرابط ← تحليل (CLIA Crawler)'},
- '2. 또는 아래 CLIA 라이브러리에서 제품 선택 (즉시 생성)':{en:'2. Or pick a product from the CLIA library below (instant)',de:'2. Oder ein Produkt aus der CLIA-Bibliothek unten wählen (sofort)',th:'2. หรือเลือกสินค้าจากคลัง CLIA ด้านล่าง (สร้างทันที)',ar:'2. أو اختر منتجًا من مكتبة CLIA أدناه (فوري)'},
- '3. 편집 모드로 이미지/텍스트 수정':{en:'3. Edit images/text in Edit mode',de:'3. Bilder/Texte im Bearbeitungsmodus ändern',th:'3. แก้ไขภาพ/ข้อความในโหมดแก้ไข',ar:'3. عدّل الصور/النصوص في وضع التعديل'},
- '4. .txt 다운로드 → eBay HTML 탭에 붙여넣기':{en:'4. Download .txt → paste into the eBay HTML tab',de:'4. .txt herunterladen → in den eBay-HTML-Tab einfügen',th:'4. ดาวน์โหลด .txt → วางในแท็บ HTML ของ eBay',ar:'4. نزّل ملف ‎.txt ← الصقه في تبويب HTML في eBay'},
- 'CLIA Library — 즉시 생성 (서버 불필요)':{en:'CLIA Library — instant generation',de:'CLIA-Bibliothek — sofortige Erstellung',th:'คลัง CLIA — สร้างทันที',ar:'مكتبة CLIA — إنشاء فوري'},
- 'Right panel에서 LG.com URL을 입력하거나':{en:'Enter an LG.com URL in the right panel',de:'Geben Sie rechts eine LG.com-URL ein',th:'กรอก URL ของ LG.com ที่แผงด้านขวา',ar:'أدخل رابط LG.com في اللوحة اليمنى'},
- '아래 라이브러리에서 제품을 선택하세요':{en:'or choose a product from the library',de:'oder wählen Sie ein Produkt aus der Bibliothek',th:'หรือเลือกสินค้าจากคลัง',ar:'أو اختر منتجًا من المكتبة'},
+ '2. 편집 모드로 이미지/텍스트 수정':{en:'2. Edit images/text in Edit mode',de:'2. Bilder/Texte im Bearbeitungsmodus ändern',th:'2. แก้ไขภาพ/ข้อความในโหมดแก้ไข',ar:'2. عدّل الصور/النصوص في وضع التعديل'},
+ '3. .txt 다운로드 → eBay HTML 탭에 붙여넣기':{en:'3. Download .txt → paste into the eBay HTML tab',de:'3. .txt herunterladen → in den eBay-HTML-Tab einfügen',th:'3. ดาวน์โหลด .txt → วางในแท็บ HTML ของ eBay',ar:'3. نزّل ملف ‎.txt ← الصقه في تبويب HTML في eBay'},
+ '오른쪽에 LG.com 제품 URL을 입력하고 Analyze 를 누르세요':{en:'Enter an LG.com product URL on the right and press Analyze',de:'Rechts eine LG.com-Produkt-URL eingeben und „Analysieren“ drücken',th:'กรอก URL สินค้า LG.com ทางขวาแล้วกด Analyze',ar:'أدخل رابط منتج LG.com على اليمين واضغط Analyze'},
  'Coming soon':{de:'Demnächst verfügbar',th:'เร็ว ๆ นี้',ar:'قريبًا'},
  '🔍 LG.com PDP Crawler':{de:'🔍 LG.com-PDP-Crawler',th:'🔍 ครอว์เลอร์ PDP ของ LG.com',ar:'🔍 زاحف صفحات منتجات LG.com'},
  'CLIA Crawler — URL 자동 크롤 (또는 page source 붙여넣기)':{en:'CLIA Crawler — automatic URL crawl (or paste the page source)',de:'CLIA Crawler — automatisches URL-Crawling (oder Seitenquelltext einfügen)',th:'CLIA Crawler — ครอว์ล URL อัตโนมัติ (หรือวางซอร์สของหน้า)',ar:'CLIA Crawler — زحف تلقائي للرابط (أو الصق مصدر الصفحة)'},
@@ -7449,8 +7441,7 @@ window.addEventListener('load',()=>{
         <div class="ebb-preview-empty" id="ebbPreviewEmpty">
           <div class="ebb-preview-empty-icon">🛒</div>
           <div style="font-size:12px;color:#999;text-align:center;line-height:1.7">
-            Right panel에서 LG.com URL을 입력하거나<br>
-            아래 라이브러리에서 제품을 선택하세요
+            오른쪽에 LG.com 제품 URL을 입력하고 Analyze 를 누르세요
           </div>
         </div>
         <div class="ebb-preview-frame" id="ebbPreviewFrame" style="display:none" data-no-i18n></div>
@@ -7472,7 +7463,7 @@ window.addEventListener('load',()=>{
         <div class="ebb-server-warn" id="ebbServerWarn">
           ⚠️ <strong>서버 연결 필요:</strong> eBay Live Builder는 LG.com을 실시간 크롤합니다.<br>
           터미널에서 <code style="background:#f0f0f0;padding:1px 6px;border-radius:3px">node server.js</code> 실행 후 재시도 하거나,<br>
-          아래 라이브러리에서 이미 크롤된 제품을 선택하세요.
+          허브 제품 목록에서 이미 크롤된 제품의 eBay 버튼으로 여세요.
         </div>
         <div class="ebb-status" id="ebbStatus"></div>
       </div>
@@ -7480,14 +7471,8 @@ window.addEventListener('load',()=>{
         <div class="ebb-hint">
           💡 <strong>사용 방법:</strong><br>
           1. URL 입력 → Analyze (CLIA Crawler · server.js 필요)<br>
-          2. 또는 아래 CLIA 라이브러리에서 제품 선택 (즉시 생성)<br>
-          3. 편집 모드로 이미지/텍스트 수정<br>
-          4. .txt 다운로드 → eBay HTML 탭에 붙여넣기
-        </div>
-        <!-- Library products -->
-        <div class="ebb-lib-section">
-          <div class="ebb-lib-title">CLIA Library — 즉시 생성 (서버 불필요)</div>
-          <div class="ebb-lib-list" id="ebbLibList" data-no-i18n></div>
+          2. 편집 모드로 이미지/텍스트 수정<br>
+          3. .txt 다운로드 → eBay HTML 탭에 붙여넣기
         </div>
         <div id="ebbSectionsList"></div>
       </div>
@@ -7504,21 +7489,12 @@ const EBB = { generatedHTML: '', editMode: false };
 
 function openEbayBuilder() {
   document.getElementById('ebbOverlay').classList.add('show');
-  ebbInitLibrary();
 }
 function closeEbayBuilder() {
   document.getElementById('ebbOverlay').classList.remove('show');
 }
-function ebbInitLibrary() {
-  const list = document.getElementById('ebbLibList');
-  if (!list) return;
-  const products = (typeof P !== 'undefined' && Array.isArray(P)) ? P : [];
-  if (!products.length) { list.innerHTML = '<span style="color:#aaa;font-size:11px">제품 데이터 로드 중...</span>'; return; }
-  const crawled = products.filter(p => p.crawled && p.gal && p.gal.length > 0 && productCorp(p) === CORP);   // 로그인 법인 제품만
-  list.innerHTML = crawled.map(p =>
-    `<button class="ebb-lib-chip" onclick="ebbFromLibrary('${p.id}')">${p.id}</button>`
-  ).join('');
-}
+// (2026-11-11) 빌더 안 'CLIA Library — 즉시 생성' 목록은 없앰 — 제품은 허브 목록·상세의 eBay 버튼으로 고른다.
+//   ebbFromLibrary 는 상세의 eBay 버튼(openChannel)이 그대로 쓴다.
 function ebbFromLibrary(pid) {
   const products = (typeof P !== 'undefined' && Array.isArray(P)) ? P : [];
   const p = products.find(x => x.id === pid);
@@ -7918,7 +7894,6 @@ function ebbReset() {
   const btn=document.getElementById('ebbBtnEdit');
   if(btn){btn.textContent='✏ Edit';btn.style.background='';btn.style.color='';btn.style.borderColor='';}
 }
-setTimeout(ebbInitLibrary, 800);
 </script>
 
 </body>
