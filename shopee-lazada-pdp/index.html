@@ -707,9 +707,11 @@ async function downloadImages(maxImages) {
       if (info) info.textContent = 'adding HTML files…';
       const [JSZip, ih] = await Promise.all([loadJSZip(), imgHtmlP]);
       const zip = await JSZip.loadAsync(blob), base = slugFromUrl();
-      zip.file(base + '.html', html);                                       // 전체 HTML (미리보기 그대로)
+      // 내려받는 HTML 은 맨 위에 UTF-8 표시 — 조각 HTML 을 브라우저가 다른 인코딩으로 읽어 태국어가 깨지지 않게 (2026-11-11)
+      const U8 = '<meta charset="utf-8">\n';
+      zip.file(base + '.html', U8 + html);                                  // 전체 HTML (미리보기 그대로)
       if (ih && !ih.error) {
-        zip.file(ih.kind === 'urls' ? base + '-image-urls.txt' : base + '-image.html', ih.text + '\n');
+        zip.file(ih.kind === 'urls' ? base + '-image-urls.txt' : base + '-image.html', (ih.kind === 'urls' ? '' : U8) + ih.text + '\n');
         if (ih.summaryErr) htmlNote = ' (image HTML without summary: ' + ih.summaryErr + ')';
       } else htmlNote = ' (image HTML failed: ' + ((ih && ih.error) || '?') + ')';
       blob = await zip.generateAsync({ type: 'blob' });
