@@ -677,6 +677,9 @@ async function downloadImages(maxImages) {
   const frame = document.getElementById('previewFrame');
   const html = (frame && frame.innerHTML.trim()) ? frame.innerHTML : generatedHTML;
 
+  // 이미지와 같이: 전체 HTML + 이미지 HTML(Shopee 는 이미지 주소 목록) — 이미지 렌더와 동시에 만든다 (2026-11-11)
+  const imgHtmlP = window.CLIAImageHTML ? CLIAImageHTML.build(imageHtmlOpts(html)).catch((e) => ({ error: e.message }))
+                                        : Promise.resolve({ error: 'image HTML not available' });
   try {
     const resp = await fetch(API_BASE + '/api/render-slices', {
       method: 'POST',
@@ -699,7 +702,18 @@ async function downloadImages(maxImages) {
       try { msg = (await resp.json()).error || msg; } catch (_) {}
       throw new Error(msg);
     }
-    const blob = await resp.blob();
+    let blob = await resp.blob(), htmlNote = '';
+    try {
+      if (info) info.textContent = 'adding HTML files…';
+      const [JSZip, ih] = await Promise.all([loadJSZip(), imgHtmlP]);
+      const zip = await JSZip.loadAsync(blob), base = slugFromUrl();
+      zip.file(base + '.html', html);                                       // 전체 HTML (미리보기 그대로)
+      if (ih && !ih.error) {
+        zip.file(ih.kind === 'urls' ? base + '-image-urls.txt' : base + '-image.html', ih.text + '\n');
+        if (ih.summaryErr) htmlNote = ' (image HTML without summary: ' + ih.summaryErr + ')';
+      } else htmlNote = ' (image HTML failed: ' + ((ih && ih.error) || '?') + ')';
+      blob = await zip.generateAsync({ type: 'blob' });
+    } catch (e) { htmlNote = ' (HTML files not added: ' + e.message + ')'; }
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = slugFromUrl() + '-images' + (maxImages ? '-' + maxImages : '') + '-' + Date.now() + '.zip';
@@ -717,7 +731,7 @@ async function downloadImages(maxImages) {
         summary = `${man.length}${total > man.length ? ' of ' + total : ''} images · ${man[0].width}px wide · tallest ${maxH}px · largest ${maxKb}KB · ${summary}`;
         if (CHANNEL === 'shopee' && man.length > SHOPEE_MAX_IMAGES) {      // 전체 ZIP: 12장 버전도 있으니 알림만
           if (info) info.textContent = '✓ ' + summary;
-          setStatus(`✓ Downloaded ${summary} — Shopee takes up to ${SHOPEE_MAX_IMAGES}; use “12 images (ZIP)” for the first ${SHOPEE_MAX_IMAGES}.`, 'ok');
+          setStatus(`✓ Downloaded ${summary} — Shopee takes up to ${SHOPEE_MAX_IMAGES}; use “12 images (ZIP)” for the first ${SHOPEE_MAX_IMAGES}.${htmlNote}`, 'ok');
           return;
         }
         if (shopeeLimit() && man.length > SHOPEE_MAX_IMAGES) {
@@ -730,7 +744,7 @@ async function downloadImages(maxImages) {
       }
     } catch (_) {}
     if (info) info.textContent = '✓ ' + summary;
-    setStatus('✓ Downloaded ' + summary, 'ok');
+    setStatus('✓ Downloaded ' + summary + ' + HTML' + htmlNote, htmlNote ? 'err' : 'ok');
   } catch (e) {
     const hint = /Failed to fetch|NetworkError|abort/i.test(e.message)
       ? 'Cannot reach the render server. Run node server.js first.'
@@ -745,14 +759,28 @@ async function downloadImages(maxImages) {
 }
 
 // 이미지형 HTML: 미리보기를 업로드 규격 이미지로 만들어 올리고 그 이미지들을 쌓은 HTML 복사 (shared/clia-image-html.js)
+function imageHtmlOpts(html) {
+  return { html, apiBase: typeof API_BASE !== 'undefined' ? API_BASE : '',
+           // PDP 이미지 위에 그 제품의 요약 설명(태국어)을 붙인다 (2026-11-10)
+           summaryUrl: () => (document.getElementById('pdpUrl').value || '').trim(),
+           // Shopee: 설명에 글·alt 를 못 넣으므로 이미지 주소만, 앞 12장 (2026-11-10)
+           urlsOnly: CHANNEL === 'shopee' ? SHOPEE_MAX_IMAGES : 0 };
+}
 function copyImageHTML() {
   if (!window.CLIAImageHTML) return;
-  CLIAImageHTML.copy({ html: () => generatedHTML, apiBase: typeof API_BASE !== 'undefined' ? API_BASE : '',
-                       button: document.getElementById('btnCopyImgHtml'), isEditing: () => editMode,
-                       // PDP 이미지 위에 그 제품의 요약 설명(태국어)을 붙인다 (2026-11-10)
-                       summaryUrl: () => (document.getElementById('pdpUrl').value || '').trim(),
-                       // Shopee: 설명에 글·alt 를 못 넣으므로 이미지 주소만, 앞 12장 (2026-11-10)
-                       urlsOnly: CHANNEL === 'shopee' ? SHOPEE_MAX_IMAGES : 0 });
+  CLIAImageHTML.copy({ ...imageHtmlOpts(() => generatedHTML),
+                       button: document.getElementById('btnCopyImgHtml'), isEditing: () => editMode });
+}
+// ZIP 에 HTML 도 같이 넣기 (2026-11-11): 같은 서버의 jszip 을 처음 한 번만 불러온다
+let _jszipP = null;
+function loadJSZip() {
+  if (window.JSZip) return Promise.resolve(window.JSZip);
+  return _jszipP || (_jszipP = new Promise((ok, no) => {
+    const sc = document.createElement('script');
+    sc.src = (typeof API_BASE !== 'undefined' && API_BASE ? API_BASE : '..') + '/node_modules/jszip/dist/jszip.min.js';
+    sc.onload = () => ok(window.JSZip); sc.onerror = () => { _jszipP = null; no(new Error('jszip load failed')); };
+    document.head.appendChild(sc);
+  }));
 }
 
 // Shopee 설명란 텍스트: 허브 제품 상세에서 작성한 리스팅 문구(현재 버전)를 Shopee 형식 일반 텍스트로 복사
