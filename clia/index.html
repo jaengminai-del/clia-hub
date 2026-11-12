@@ -933,10 +933,7 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 <button class="fbtn" onclick="flt('MS',this)">MS</button>
 <button class="fbtn" onclick="flt('HS',this)">HS</button>
 <button class="fbtn" onclick="flt('ES',this)">ES</button>
-<button class="fbtn" onclick="flt('TV',this)">TV</button>
-<button class="fbtn" onclick="flt('Audio',this)">Audio</button>
-<button class="fbtn" onclick="flt('Fridge',this)">냉장고</button>
-<button class="fbtn" onclick="flt('Washer',this)">세탁기</button>
+<div class="sub-flt" id="subFlt" data-no-i18n></div>
 <input class="sbox" id="prodSearch" placeholder="🔍 Search product name..." oninput="sch(this.value)">
 <div class="crawl-url-row"><input class="sbox" id="newCrawlUrl" placeholder="🔗 LG.com product URL" onkeydown="if(event.key==='Enter')crawlNewUrl()"><button class="crawl-url-btn" id="newCrawlBtn" onclick="crawlNewUrl()">Crawl</button></div>
 <div class="list-warn" id="listWarn"></div>
@@ -2230,7 +2227,7 @@ Each H3 is designed to maximize LLM adoption of specific phrasing:
 // 사업부 구분 (2026-11-12): MS = TV·오디오·모니터·노트북 등 IT / HS = 냉장고·세탁기·건조기·청소기·식기세척기·조리 등 생활가전
 //   (예전 'HA' = 지금의 HS) / ES = 에어컨·공기청정기·제습기 등 에어솔루션. 제품 데이터의 dv 값과 관계없이 카테고리·URL 로 다시 정한다.
 const DIV_ES=/(^|[^a-z])(aircon|air[-_ ]?condition\w*|air[-_ ]?purif\w*|puricare|dehumid\w*|air[-_ ]?solution\w*|air[-_ ]?care|klima\w*|luftreiniger|luftentfeuchter|condicionado|purificador)([^a-z]|$)/i;
-const DIV_MS=/(^|[^a-z])(tvs?|oled|qned|nanocell|stanbyme|lifestyle[-_ ]?(tvs|screens|ekranlar)|audio|soundbars?|sound[-_ ]?suite|speakers?|lautsprecher|xboom|tone[-_ ]?free|monitors?|monitore|laptops?|gram|notebooks?|it[-_ ]?products?|projectors?|beamer|cinebeam)([^a-z]|$)/i;
+const DIV_MS=/(^|[^a-z])(tvs?|oled|qned|nanocell|stanbyme|lifestyle[-_ ]?(tvs|screens|ekranlar)|audio|soundbars?|sound[-_ ]?suite|speakers?|lautsprecher|xboom|xboombuds|earbuds|kopfhoerer|headphones?|tone[-_ ]?free|monitors?|monitore|laptops?|gram|notebooks?|it[-_ ]?products?|projectors?|beamer|cinebeam)([^a-z]|$)/i;
 function divOf(p){
   const k=[p.cat,p.sub,(p.url||'').replace(/^https?:\/\/[^/]+/,'')].join(' ');
   if(p.cat==='Air'||DIV_ES.test(k))return 'ES';
@@ -2238,15 +2235,60 @@ function divOf(p){
   return 'HS';
 }
 P.forEach(p=>{p.dv=divOf(p);});
+// 2단계 필터 (2026-11-12): 1줄 사업부(All·MS·HS·ES) → 2줄 그 사업부에 실제로 있는 제품군만 (제품 수 표시)
+const GRP_ORDER={MS:['TV','Audio','Monitor','Laptop','Projector','Other'],HS:['Fridge','Washer','Dryer','Vacuum','Dishwasher','Cooking','Styler','Other'],ES:['AC','Purifier','Dehumidifier']};
+function grpOf(p){
+  const k=[p.cat,p.sub,(p.url||'').replace(/^https?:\/\/[^/]+/,'')].join(' ').toLowerCase();
+  if(p.dv==='ES'){
+    if(/dehumid|entfeuchter/.test(k))return 'Dehumidifier';
+    if(/air[-_ ]?condition|aircon|klima|condicionado|split|heat[-_ ]?pump|waermepumpe|heizung/.test(k))return 'AC';
+    if(/purif|puricare|luftreiniger|purificador/.test(k))return 'Purifier';
+    return 'AC';
+  }
+  if(p.dv==='MS'){
+    if(/monitor/.test(k))return 'Monitor';
+    if(/laptop|gram|notebook/.test(k))return 'Laptop';
+    if(/projector|beamer|cinebeam/.test(k))return 'Projector';
+    if(/audio|soundbar|sound[-_ ]?suite|speaker|lautsprecher|xboom|earbuds|kopfhoerer|headphone|tone[-_ ]?free/.test(k)&&!/tvs?[-_ ]?(und|and|&)?[-_ ]?soundbar|tvs?-soundbars/.test(k))return 'Audio';
+    return 'TV';
+  }
+  if(/styler/.test(k))return 'Styler';
+  if(/dishwasher|geschirr|\bdw\b/.test(k))return 'Dishwasher';
+  if(/vacuum|cordzero|staubsauger/.test(k))return 'Vacuum';
+  if(/micro|mikrowell|cook|oven|backofen|range|hob|kochfeld/.test(k))return 'Cooking';
+  if(/fridge|refrigerator|kuehl|kühl|freezer|kimchi/.test(k))return 'Fridge';
+  const path=[p.sub,(p.url||'').replace(/^https?:\/\/[^/]+/,'')].join(' ').toLowerCase();   // 크롤 제품의 cat 은 세탁·건조를 모두 'Washer' 로 묶으므로 경로로 본다
+  if(/dryer|trockner/.test(path)&&!/washtower|waschtrockner|washers?[-_ ]?dryers?|wash[-_ ]?combo|washcombo/.test(path))return 'Dryer';
+  if(/wash|wasch|waesche|laundry/.test(k))return 'Washer';
+  return 'Other';
+}
+Object.assign(I18N.en,{'grp.Other':'Other','grp.TV':'TV','grp.Audio':'Audio','grp.Monitor':'Monitor','grp.Laptop':'Laptop','grp.Projector':'Projector','grp.Fridge':'Fridge','grp.Washer':'Washer','grp.Dryer':'Dryer','grp.Vacuum':'Vacuum','grp.Dishwasher':'Dishwasher','grp.Cooking':'Cooking','grp.Styler':'Styler','grp.AC':'Air conditioner','grp.Purifier':'Air purifier','grp.Dehumidifier':'Dehumidifier','grp.all':'All'});
+Object.assign(I18N.de,{'grp.Other':'Sonstiges','grp.TV':'TV','grp.Audio':'Audio','grp.Monitor':'Monitor','grp.Laptop':'Laptop','grp.Projector':'Beamer','grp.Fridge':'Kühlschrank','grp.Washer':'Waschmaschine','grp.Dryer':'Trockner','grp.Vacuum':'Staubsauger','grp.Dishwasher':'Geschirrspüler','grp.Cooking':'Kochen','grp.Styler':'Styler','grp.AC':'Klimaanlage','grp.Purifier':'Luftreiniger','grp.Dehumidifier':'Luftentfeuchter','grp.all':'Alle'});
+Object.assign(I18N.th,{'grp.Other':'อื่น ๆ','grp.TV':'ทีวี','grp.Audio':'เครื่องเสียง','grp.Monitor':'จอมอนิเตอร์','grp.Laptop':'แล็ปท็อป','grp.Projector':'โปรเจกเตอร์','grp.Fridge':'ตู้เย็น','grp.Washer':'เครื่องซักผ้า','grp.Dryer':'เครื่องอบผ้า','grp.Vacuum':'เครื่องดูดฝุ่น','grp.Dishwasher':'เครื่องล้างจาน','grp.Cooking':'เครื่องครัว','grp.Styler':'สไตเลอร์','grp.AC':'เครื่องปรับอากาศ','grp.Purifier':'เครื่องฟอกอากาศ','grp.Dehumidifier':'เครื่องลดความชื้น','grp.all':'ทั้งหมด'});
+Object.assign(I18N.ar,{'grp.Other':'أخرى','grp.TV':'تلفزيون','grp.Audio':'الصوتيات','grp.Monitor':'شاشة','grp.Laptop':'لابتوب','grp.Projector':'بروجكتور','grp.Fridge':'ثلاجة','grp.Washer':'غسالة','grp.Dryer':'مجفف','grp.Vacuum':'مكنسة','grp.Dishwasher':'غسالة صحون','grp.Cooking':'الطهي','grp.Styler':'ستايلر','grp.AC':'مكيف','grp.Purifier':'منقي هواء','grp.Dehumidifier':'مزيل رطوبة','grp.all':'الكل'});
+let curSub='all';
+function renderSubFilter(){
+  const box=document.getElementById('subFlt');if(!box)return;
+  if(!['MS','HS','ES'].includes(curFilter)){box.innerHTML='';box.style.display='none';return;}
+  const cnt={};
+  P.filter(p=>productCorp(p)===CORP&&p.dv===curFilter&&(curView!=='md-only'||p.md)).forEach(p=>{const g=grpOf(p);cnt[g]=(cnt[g]||0)+1;});
+  const keys=(GRP_ORDER[curFilter]||[]).filter(k=>cnt[k]);
+  if(curSub!=='all'&&!cnt[curSub])curSub='all';
+  box.style.display=keys.length>1?'flex':'none';
+  box.innerHTML=[`<button class="sfbtn${curSub==='all'?' act':''}" onclick="subFlt('all')">${t('grp.all')}</button>`]
+    .concat(keys.map(k=>`<button class="sfbtn${curSub===k?' act':''}" onclick="subFlt('${k}')">${t('grp.'+k)} <span>${cnt[k]}</span></button>`)).join('');
+}
+function subFlt(k){curSub=k;renderList();}
 let curFilter='all',curSearch='',curView='all',selId=null;
 function renderList(){
   const tb=document.getElementById('pl');
+  renderSubFilter();
   let fp=P.filter(p=>productCorp(p)===CORP).filter(p=>{
     if(curView==='md-only')return p.md;
     return true;
   }).filter(p=>{
     if(curFilter==='all')return true;
-    if(curFilter==='MS'||curFilter==='HS'||curFilter==='ES')return p.dv===curFilter;
+    if(curFilter==='MS'||curFilter==='HS'||curFilter==='ES')return p.dv===curFilter&&(curSub==='all'||grpOf(p)===curSub);
     return p.cat===curFilter;
   }).filter(p=>{
     if(!curSearch)return true;
@@ -2257,9 +2299,9 @@ function renderList(){
   document.getElementById('countLabel').textContent=t('list.count',{n:fp.length});
   const pc=document.getElementById('prodCount');if(pc)pc.textContent=P.filter(x=>productCorp(x)===CORP).length;   // 상단 배지 = 법인 전체 제품 수
 }
-function flt(f,el){curFilter=f;document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('act'));el.classList.add('act');renderList();}
+function flt(f,el){curFilter=f;curSub='all';document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('act'));el.classList.add('act');renderList();}
 function sch(v){curSearch=v.toLowerCase();renderList();}
-function switchView(v,el){curView=v;curFilter='all';document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('act',b===el));document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('act'));document.querySelector('.fbtn').classList.add('act');renderList();}
+function switchView(v,el){curView=v;curFilter='all';curSub='all';document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('act',b===el));document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('act'));document.querySelector('.fbtn').classList.add('act');renderList();}
 
 function sel(id){
   selId=id;renderList();

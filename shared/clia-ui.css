@@ -85,6 +85,12 @@ body.clia-hub button, body.clia-hub input, body.clia-hub select, body.clia-hub t
 .clia-hub .seg button.act { background: #fff; color: var(--clia-gray-900); box-shadow: 0 1px 3px rgba(38, 38, 38, .12); }
 .clia-hub .fbtn { height: 30px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--clia-gray-300); background: #fff; color: var(--clia-gray-700); font-size: 12px; font-weight: 500; }
 .clia-hub .fbtn:hover { border-color: var(--clia-gray-700); }
+.clia-hub .sub-flt { display: none; width: 100%; flex-wrap: wrap; gap: 6px; padding: 8px 10px; background: var(--clia-gray-50); border: 1px solid var(--clia-gray-200); border-radius: var(--clia-radius); }
+.clia-hub .sfbtn { height: 26px; padding: 0 11px; border-radius: 999px; border: 1px solid transparent; background: transparent; color: var(--clia-gray-600); font-size: 12px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+.clia-hub .sfbtn span { font-size: 11px; color: var(--clia-gray-400); }
+.clia-hub .sfbtn:hover { background: #fff; border-color: var(--clia-gray-200); }
+.clia-hub .sfbtn.act { background: #fff; border-color: var(--clia-gray-700); color: var(--clia-gray-900); font-weight: 600; }
+.clia-hub .sfbtn.act span { color: var(--clia-gray-500); }
 .clia-hub .fbtn.act { background: var(--clia-brand-soft); border-color: var(--clia-brand); color: var(--clia-brand); }
 .clia-hub .sbox { height: 40px; padding: 0 14px; border: 1px solid var(--clia-gray-300); border-radius: 10px; font-size: 13px; color: var(--clia-gray-900); background: #fff; transition: border-color .15s, box-shadow .15s; }
 .clia-hub .sbox:focus { border-color: var(--clia-brand); box-shadow: 0 0 0 3px var(--clia-brand-soft); }
