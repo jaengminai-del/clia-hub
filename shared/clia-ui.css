@@ -106,7 +106,8 @@ body.clia-hub button, body.clia-hub input, body.clia-hub select, body.clia-hub t
 .clia-hub .lt .thumb, .clia-hub .lt .thumb-ph { width: 44px; height: 44px; border-radius: 10px; background: var(--clia-gray-100); }
 .clia-hub .dt { padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; }
 .clia-hub .dt-ms { background: #EEF0F6; color: #3B4A6B; }
-.clia-hub .dt-ha { background: var(--clia-gray-100); color: var(--clia-gray-700); }
+.clia-hub .dt-hs { background: var(--clia-gray-100); color: var(--clia-gray-700); }
+.clia-hub .dt-es { background: #E6F3EE; color: #2F6B57; }
 .clia-hub .st { padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; }
 .clia-hub .st-ok { background: #EAF6EF; color: #23784A; }
 .clia-hub .st-pend { background: var(--clia-gray-100); color: var(--clia-gray-500); }
