@@ -39,7 +39,8 @@
   };
   const tr = () => T[(window.CLIA_LANG || document.documentElement.lang || 'en').slice(0, 2)] || T.en;
   const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  const FONT = "'LGEIText',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif";
+  // 화면이 window.CLIA_UI_FONT 로 글꼴을 정하면 그것을 쓴다 (Shopee·Lazada 빌더: 태국어 LINE Seed). 없으면 원래 값.
+  const FONT = window.CLIA_UI_FONT || "'LGEIText',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif";
   const EDIT_UI = '.img-zoom-bar, .edit-del-btn, .clia-card-del, .clia-card-restore, .img-frame-handle, .ebb-frame-handle, .ebb-del-btn, .edit-reframe-btn';
 
   // 미리보기의 섹션 카드 (최상위)
