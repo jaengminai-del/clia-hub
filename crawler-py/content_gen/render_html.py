@@ -36,8 +36,10 @@ class Style:
         self.spec = spec
         self.guide = guide
         self.overlay_ids = overlay_ids
-        self.font_headline = gp1_fonts.get("headline", "'LGEIHeadline', 'LINESeedSansTH', Arial, sans-serif")
-        self.font_body = gp1_fonts.get("body", "'LGEIText', 'LINESeedSansTH', Arial, sans-serif")
+        # 매체 규격 typography.fonts 가 있으면 그 글꼴 (Shopee·Lazada: 태국어 LINE Seed Sans TH 포함), 없으면 LG 가이드 값
+        med_fonts = ty.get("fonts") or {}
+        self.font_headline = med_fonts.get("headline") or gp1_fonts.get("headline", "'LGEIHeadline', Arial, sans-serif")
+        self.font_body = med_fonts.get("body") or gp1_fonts.get("body", "'LGEIText', Arial, sans-serif")
         self.head_lh = ty.get("headline_line_height", 1.25)
         self.body_lh = ty.get("body_line_height", 1.6)
         self.headline_color = co.get("headline", "#111111")

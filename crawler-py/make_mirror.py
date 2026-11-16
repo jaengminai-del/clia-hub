@@ -18,6 +18,9 @@ ROOT = Path(__file__).resolve().parent
 
 import re
 
+# True 면 공백 든 이미지 파일명을 자르지 않는다 (TH 배치 수정) — pdp_pipeline_sl.py 만 켠다. 기본은 원본 규칙 그대로.
+SRCSET_FIX = False
+
 # 3P 공통 텍스트 필터 — 이미지 alt 장면 묘사문을 소스(mirror) 단계에서 제거해
 # eBay·Amazon 등 모든 소비처에서 묘사문이 카피로 새지 않게 한다.
 try:
@@ -974,7 +977,9 @@ def ui_control_asset_keys(html: str) -> set:
     soup = BeautifulSoup(html or "", "html.parser")
     inside, outside = set(), set()
     for el in soup.find_all(["img", "source"]):
-        src = el.get("src") or el.get("data-src") or re.sub(r"\s+\d+(\.\d+)?[wx]$", "", (el.get("srcset") or "").split(",")[0].strip())
+        src = el.get("src") or el.get("data-src") or (
+            re.sub(r"\s+\d+(\.\d+)?[wx]$", "", (el.get("srcset") or "").split(",")[0].strip()) if SRCSET_FIX
+            else (el.get("srcset") or "").split(",")[0].strip().split(" ")[0])          # 원본 규칙
         if not src or src.startswith("data:"):
             continue
         (inside if ComponentParser._is_ui_control_media(el) else outside).add(_dam_path_key(src))
@@ -1019,7 +1024,8 @@ def extract_gallery(html: str, origin: str = "https://www.lg.com") -> list:
 
     def abs_url(u: str) -> str:
         # srcset 의 크기 설명자(" 1600w", " 2x")만 떼고, 파일명 안의 공백은 유지 (예: "01_Glory2_Beige_Front 2010.jpg")
-        u = re.sub(r"\s+\d+(\.\d+)?[wx]\s*$", "", (u or "").strip())
+        u = re.sub(r"\s+\d+(\.\d+)?[wx]\s*$", "", (u or "").strip()) if SRCSET_FIX \
+            else (u or "").strip().split(" ")[0]          # 원본 규칙
         if not u or u.startswith("data:"):
             return ""
         if u.startswith("//"):

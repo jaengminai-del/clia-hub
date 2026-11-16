@@ -11,6 +11,11 @@
   },
   "container_px": 800,
   "typography": {
+    "fonts": {
+      "_note": "이 매체에서 쓰는 글꼴 (태국어 LINE Seed Sans TH 포함). 없으면 LG 가이드(ccg_spec.json) 값",
+      "headline": "'LGEIHeadline','LG EI Headline','LGEIText', 'LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif",
+      "body": "'LGEIText','LG EI Text', 'LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"
+    },
     "_note": "261007 법인 피드백: 모바일 가독성 — 모든 제목(h2/h3) 36px, 모든 본문(p) 24px 고정. 고정값을 비우면(null) LG 가이드(ccg_spec) desktop_px를 container_px/1440 비율로 축소 후 min/max로 클램프.",
     "fixed_headline_px": 36,
     "fixed_body_px": 24,
@@ -94,6 +99,8 @@
     "legacy_gallery_path_filter": false,
     "use_group_heading": true,
     "unify_awards": true,
+    "gallery_fallback_max": 8,
+    "_gallery_fallback_note": "이미지가 2장 미만인 페이지는 제품 갤러리 사진(최대 8장)으로 채운다 — 이 매체만",
     "image_prefer": "pc",
     "_image_prefer_note": "Shopee·Lazada 는 PC 우선 (TH 배치 Live 결과와 같게 — 모바일 우선으로 바꾸려면 mobile)"
   },
@@ -116,6 +123,8 @@
   "slices": {
     "_note": "세로 슬라이스 이미지(Shopee·Lazada 업로드용). output_width 1000 = Shopee 셀러센터 상세 이미지 최소 폭. count null = 자동(한 장 높이 ≤ max_slice_height, 그리고 ≤ 폭 × max_height_ratio). Shopee 설명 이미지 규칙: 폭 ≥ 700px, 높이 ≥ 32px, 가로÷세로 0.5~32 (= 세로가 가로의 2배 이하 — 경계값을 피해 1.95배로 자름), 2MB 이하. max_bytes 넘으면 JPEG 화질을 min_quality 까지 낮춤 (Lazada 설명 이미지 1MB 권장, Shopee 2MB 제한).",
     "count": null,
+    "max_slices": 80,
+    "avoid_image_cuts": true,
     "output_width": 1000,
     "max_slice_height": 3000,
     "max_height_ratio": 1.95,

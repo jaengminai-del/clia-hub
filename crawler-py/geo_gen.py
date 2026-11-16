@@ -75,7 +75,8 @@ def main():
         "grounded in the page, with the heading of the supporting section as `source`, "
         "and 10-15 target keywords (short phrases, most important first)."
     )
-    if llm_claude.available():
+    # Gemini 키가 있으면 원본과 같이 Gemini 로 만든다 — Claude 는 Gemini 키가 없는 서버에서만
+    if not key and llm_claude.available():
         data = llm_claude.vision_json([prompt], GeoAssets, label="geo", system=SYSTEM, max_tokens=16000)
         data["model"] = llm_claude.CLAUDE_MODEL
         sys.stdout.reconfigure(encoding="utf-8")

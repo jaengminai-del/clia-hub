@@ -37,17 +37,24 @@ def _clean_url(u: Optional[str]) -> Optional[str]:
 # LG 원문 줄바꿈: 텍스트 안에서는 U+2028, HTML 로 낼 때 <br> (get_text(strip=True) 가 지우지 않게 처음엔 사용자 영역 문자로 둔다)
 LINE_BREAK = "\u2028"
 BR_MARK = "\ue000"
+# True 면 <br> 을 U+2028 로 남긴다 — Shopee·Lazada 파이프라인(pdp_pipeline_sl.py)만 켠다. 기본(False)은 원본과 같이 공백.
+KEEP_LINE_BREAKS = False
+# True 면 srcset 의 쉼표·공백 든 주소를 자르지 않는다 (TH 배치 수정, 2026-11-09) — 이것도 pdp_pipeline_sl.py 만 켠다.
+# 기본(False)은 원본 규칙 그대로: 원본 파이프라인의 결과가 한 글자도 달라지지 않게 한다.
+SRCSET_FIX = False
 
 
 def _srcset_head(srcset: str) -> str:
     """srcset 첫 후보 (설명자 포함). 후보 구분은 '쉼표 + 공백' — LG 는 폴더 이름에 쉼표를 쓴다
     (…/75nano81tsa-75,65,55,43/…) 그래서 쉼표마다 자르면 주소가 잘린다 (2026-11-09)."""
+    if not SRCSET_FIX:
+        return (srcset or "").split(",")[0]          # 원본 규칙
     return re.split(r",\s+", (srcset or "").strip())[0].strip()
 
 
 def _srcset_first(srcset: str) -> str:
     """srcset 첫 후보의 URL. 끝의 '1x'·'800w' 설명자만 떼고, 파일명의 공백은 URL 일부로 본다."""
-    first = _srcset_head(srcset)
+    first = _srcset_head(srcset).strip()
     if LEGACY:
         return first.split()[0] if first else ""
     return _clean_url(re.sub(r"\s+\d+(\.\d+)?[wx]$", "", first)) or ""
@@ -813,14 +820,17 @@ class ComponentParser:
             for t in frag.find_all(class_=cls._BUTTON_CLASS_RE):
                 t.decompose()
             # LG 원문의 줄바꿈(<br>)은 같은 요소 안의 줄바꿈(U+2028)으로 남긴다 — 렌더러가 <br> 로 되돌린다 (2026-11-10)
-            for t in frag.find_all('br'):
-                t.replace_with(BR_MARK)
+            if KEEP_LINE_BREAKS:
+                for t in frag.find_all('br'):
+                    t.replace_with(BR_MARK)
             for t in frag.find_all(cls._INLINE_TAGS):
                 t.unwrap()
             frag.smooth()
             text = frag.get_text(' ', strip=True)
         except Exception:
             text = el.get_text(' ', strip=True)
+        if not KEEP_LINE_BREAKS:
+            return re.sub(r'\s+', ' ', text).strip()
         text = re.sub(r'[^\S\u2028\ue000]+', ' ', text).replace(BR_MARK, LINE_BREAK)
         text = re.sub(r' *\u2028[ \u2028]*', LINE_BREAK, text)     # 줄바꿈 앞뒤 공백·연속 줄바꿈 정리
         return text.strip(' \u2028')
@@ -962,7 +972,8 @@ class ComponentParser:
             media_query = source.get('media', '')
             srcset = source.get('srcset', '')
             if srcset:
-                src = re.sub(r"\s+\d+(\.\d+)?[wx]$", "", _srcset_head(srcset))
+                src = re.sub(r"\s+\d+(\.\d+)?[wx]$", "", _srcset_head(srcset)) if SRCSET_FIX \
+                    else srcset.split(',')[0].strip().split()[0]          # 원본 규칙
                 if 'min-width: 769' in media_query or 'min-width:769' in media_query:
                     media.src_desktop = src
                 elif 'max-width: 768' in media_query or 'max-width:768' in media_query:

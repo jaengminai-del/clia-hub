@@ -57,7 +57,7 @@ def page_footnotes(slug_dir: Path, url: str, have: str) -> list:
     if not fp.exists():
         return []
     try:
-        import aem_model
+        import aem_model_sl as aem_model
         am = aem_model.extract(fp.read_text(encoding="utf-8", errors="replace"), url) or {}
     except Exception:
         return []

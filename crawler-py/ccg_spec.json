@@ -21,8 +21,8 @@
     "colors_note": "active_red_50은 GP1의 실제 브랜드 액센트(CTA/세일/링크). heritage_red_35(#A50034)는 GP1 readme상 LG 로고 마크 내부에만 쓰이는 색으로, 일반 UI 액센트로는 쓰지 않음.",
     "radius": {"card_l": 28, "card_xl": 20, "card_m": 12, "card_s": 8},
     "font_family": {
-      "headline": "'LGEIHeadline','LG EI Headline','LGEIText', 'LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif",
-      "body": "'LGEIText','LG EI Text', 'LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"
+      "headline": "'LGEIHeadline','LG EI Headline','LGEIText',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif",
+      "body": "'LGEIText','LG EI Text',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"
     }
   },
   "text_colors": ["#FFFFFF", "#000000"],

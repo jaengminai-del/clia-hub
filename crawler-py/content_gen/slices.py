@@ -27,7 +27,8 @@ from . import load_medium
 
 # 장수 상한: 아주 긴 페이지(QNED TV 등 7만px)는 40장으로는 한 장 높이 제한(폭 × 1.95)을 못 지켜 마지막 장이
 # 수만 px 이 됐음 (Shopee 업로드 거부) → 80장 (2026-11-09)
-MAX_SLICES = 80
+MAX_SLICES = 80   # 규격 slices.max_slices 로 켠 매체(Shopee·Lazada)의 상한. 규격에 없으면 원본 값 40
+DEFAULT_MAX_SLICES = 40
 
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
@@ -140,7 +141,7 @@ def options(req: dict) -> dict:
     """요청 값 정리. medium 이 있으면 매체 spec.json 의 slices 를 기본값으로 쓴다."""
     defaults = {"count": 6, "output_width": None, "format": "jpeg", "quality": 88, "viewport_px": 1600,
                 "max_slice_height": None, "max_height_ratio": None, "min_slice_height": None,
-                "max_bytes": None, "min_quality": 60}
+                "max_bytes": None, "min_quality": 60, "max_slices": DEFAULT_MAX_SLICES, "avoid_image_cuts": False}
     medium = req.get("medium")
     if isinstance(medium, str) and re.fullmatch(r"[a-z_]{2,32}", medium):
         try:
@@ -151,13 +152,15 @@ def options(req: dict) -> dict:
     pick = lambda *keys: next((req[k] for k in keys if req.get(k) not in (None, "")), None)
     # 장수: 요청 값 > 규격 count > (count 가 null 이면) 자동 — 한 장 높이가 max_slice_height 를 넘지 않게 (render 에서 계산)
     n_req = _int(pick("slices"), defaults["count"])
-    n = max(1, min(n_req, MAX_SLICES)) if n_req else 0
+    max_n = max(1, min(_int(defaults.get("max_slices"), DEFAULT_MAX_SLICES) or DEFAULT_MAX_SLICES, MAX_SLICES))
+    n = max(1, min(n_req, max_n)) if n_req else 0
     vw = max(600, min(_int(pick("viewportWidth", "width"), defaults["viewport_px"]) or defaults["viewport_px"], 3000))
     ow = _int(pick("outputWidth"), defaults["output_width"] or 0) or 0
     fmt = "png" if (pick("format") or defaults["format"]) == "png" else "jpeg"
     q = max(40, min(_int(pick("quality"), defaults["quality"]) or defaults["quality"], 100))
     name = re.sub(r"[^a-zA-Z0-9_-]", "-", str(req.get("name") or "pdp"))[:60] or "pdp"
     return {"n": n, "vw": vw, "ow": ow, "fmt": fmt, "q": q, "name": name,
+            "max_n": max_n, "avoid_img": bool(defaults.get("avoid_image_cuts")),
             "max_h": _int(defaults.get("max_slice_height"), 0) or 0,
             "max_ratio": float(defaults.get("max_height_ratio") or 0),     # 한 장 높이 ≤ 폭 × 이 값 (Shopee 비율 0.5 → spec 1.95)
             "min_h": _int(defaults.get("min_slice_height"), 0) or 0,
@@ -179,7 +182,7 @@ def _shrink_jpeg(data: bytes, q: int, min_q: int, max_bytes: int) -> bytes:
     return best
 
 
-def _cuts(layout: dict, n: int, max_span: float = 0) -> list:
+def _cuts(layout: dict, n: int, max_span: float = 0, avoid_img: bool = False) -> list:
     """자를 위치: 이상적인 등분점에서 가장 가까운 섹션 경계로 스냅.
     경계가 너무 멀면(등분 높이의 45% 초과) 표 행/문단 경계. 보이는 이미지 안쪽은 후보에서 뺀다(2026-11-09).
     그래도 없으면 한 장 최대 높이 안에서 등분점에 가장 가까운 안전한 위치(보통 그 이미지 바로 위) —
@@ -187,7 +190,8 @@ def _cuts(layout: dict, n: int, max_span: float = 0) -> list:
     H = layout["height"]
     ideal = H / n
     cuts = [0]
-    spans = [(a, b) for a, b in (layout.get("imgSpans") or []) if b - a > 4]
+    # avoid_img(규격 slices.avoid_image_cuts): 보이는 이미지 안쪽에서는 자르지 않는다. 끄면 원본 규칙 그대로
+    spans = [(a, b) for a, b in (layout.get("imgSpans") or []) if b - a > 4] if avoid_img else []
 
     def inside(y):          # 보이는 이미지의 안쪽 (위·아래 끝 2px 은 경계로 본다)
         return any(a + 2 < y < b - 2 for a, b in spans)
@@ -215,7 +219,7 @@ def _cuts(layout: dict, n: int, max_span: float = 0) -> list:
             cut = nearest(layout["fineEdges"], target, prev, ideal * 0.45)
         if cut is None:
             lim = prev + max_span if max_span else H
-            cand = [e for e in safe if prev + 8 < e <= lim]
+            cand = [e for e in safe if prev + 8 < e <= lim] if avoid_img else []
             if cand:
                 cut = min(cand, key=lambda e: abs(e - target))
             else:
@@ -292,13 +296,13 @@ def render(req: dict, zip_path: Path) -> dict:
             auto = not n
             if auto:
                 # 자동 장수: 출력 이미지 한 장의 높이가 max_out_h(px)를 넘지 않게 (규격 없으면 6장)
-                n = max(1, min(math.ceil(H * scale / max_out_h), MAX_SLICES)) if max_out_h else 6
+                n = max(1, min(math.ceil(H * scale / max_out_h), o["max_n"])) if max_out_h else 6
             # 비율 규칙이 있으면 장수를 직접 정해도 지킨다 (입력한 장수는 최소값, 넘치면 늘림)
             enforce = auto or bool(o["max_ratio"])
-            cuts = _cuts(layout, n, span if enforce else 0)
-            while enforce and span and n < MAX_SLICES and any(b - a > span + 1 for a, b in zip(cuts, cuts[1:])):
+            cuts = _cuts(layout, n, span if enforce else 0, o["avoid_img"])
+            while enforce and span and n < o["max_n"] and any(b - a > span + 1 for a, b in zip(cuts, cuts[1:])):
                 n += 1                                              # 경계 맞춤으로 넘친 장이 있으면 한 장 더
-                cuts = _cuts(layout, n, span)
+                cuts = _cuts(layout, n, span, o["avoid_img"])
             # 마지막 장이 너무 얇으면(Shopee 최소 높이 32px) 앞 장에 합친다 — 합쳐도 최대 높이를 넘지 않을 때만
             if o["min_h"] and n > 1 and (cuts[-1] - cuts[-2]) * scale < o["min_h"] \
                     and (not span or cuts[-1] - cuts[-3] <= span + 1):

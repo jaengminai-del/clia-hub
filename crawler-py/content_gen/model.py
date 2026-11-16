@@ -261,7 +261,7 @@ def _gallery_fallback(mirror: dict, sections: list, rules: dict) -> list:
     """이미지가 2장 미만일 때(rules.gallery_fallback_min_images; 예전 형식·번들 페이지: 기능 이미지 없이 제품 갤러리만 있음) 빈 컨텐츠가
     되지 않도록 제품 갤러리 사진과 핵심 특징 글로 채운다 (2026-11-06 TH 배치: 145개 중 다수가 빈 HTML).
     이미지가 하나라도 있는 일반 페이지는 건드리지 않는다. rules.gallery_fallback_max 로 장수 조절(기본 8, 0=끄기)."""
-    limit = int(rules.get("gallery_fallback_max", 8) or 0)
+    limit = int(rules.get("gallery_fallback_max", 0) or 0)   # 규격에서 켠 매체만 (Shopee·Lazada 8장) — 기본 0 = 끔
     def original(g):   # DAM 렌디션(.../jcr:content/renditions/thum-WxH.jpeg) → 원본 — usable_media 의 썸네일 제외를 피함
         u = re.sub(r"/jcr:content/renditions/[^?]*", "", best_image_url(g)).split("?")[0]
         return {"pc_url": u, "mobile_url": "", "unified_url": "", "type": "image", "role": "gallery_fallback"}

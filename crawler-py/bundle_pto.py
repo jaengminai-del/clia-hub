@@ -124,7 +124,7 @@ def _sitemap_urls(cc: str) -> List[str]:
         print(f"   ⚠️ sitemap 직접 요청 실패: {str(e)[:100]}")
     if not urls:     # 배포 서버(Railway)는 lg.com 직접 요청이 403 → Firecrawl rawHtml (하루 캐시라 국가당 1회)
         try:
-            from aem_overview import fetch_raw_html
+            from aem_model import fetch_raw_html
             urls = re.findall(r"<loc>([^<]+)</loc>", fetch_raw_html(sm, os.getenv("FIRECRAWL_API_KEY", "")))
         except Exception as e:
             print(f"   ⚠️ sitemap Firecrawl 실패: {str(e)[:100]}")

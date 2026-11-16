@@ -36,8 +36,6 @@ from make_mirror import to_mirror, order_by_document, tag_media_roles, ensure_pr
 from component_parser import ComponentParser, parse_html_components, LayoutType
 from text_filters import is_image_description
 from component_mirror import build_from_components
-import llm_claude  # ANTHROPIC_API_KEY 가 있으면 Gemini 대신 Claude 로 시각 분석
-import aem_model  # 페이지에 실린 AEM 컴포넌트 모델 → 섹션 (예전 형식 PDP) + 받은 페이지 확인
 
 
 class _CFSkip(Exception):
@@ -93,7 +91,7 @@ def firecrawl_scrape(url: str, mobile: bool) -> dict:
 
     body = {
         "url": url,
-        "formats": ["markdown", "html", "rawHtml"],   # rawHtml: 페이지 컴포넌트 모델(스크립트) 포함 — aem_model 용
+        "formats": ["markdown", "html"],
         "onlyMainContent": False,
         "waitFor": 3000,                              # 대기 시간 최적화 (8000ms -> 3000ms)
         "timeout": 120000,
@@ -311,7 +309,7 @@ def extract_media(html: str, base_url: str, device: str) -> List[dict]:
             anchor = (img.get("alt") or "").strip() or near_heading(pic)
         for s in pic.find_all("source"):
             ss = s.get("srcset") or ""
-            u = re.sub(r"\s+\d+(\.\d+)?[wx]$", "", ss.split(",")[0].strip())
+            u = ss.split(",")[0].strip().split(" ")[0]
             media = s.get("media") or ""
             dev = "mobile" if "max-width" in media else ("pc" if "min-width" in media else device)
             add("IMAGE", u, anchor, dev)
@@ -472,38 +470,20 @@ LG PDP 구조 및 그룹핑 규칙 (필수 준수):
 """
 
 
-def _html_product_title(html: str, url: str = "") -> str:
-    """Gemini 없이 HTML에서 제품명 추출 (og:title → 제품명 컴포넌트 PD0012 의 h1 → <title> → 다른 h1).
-    'LG' 처럼 브랜드만 있는 짧은 값은 제품명이 아니므로 건너뛴다 (2026-11-06: TH 번들 페이지에서
-    Firecrawl HTML 의 첫 h1 이 'LG' 로 잡혀 제품명이 'LG' 로 저장되던 문제)."""
+def _html_product_title(html: str) -> str:
+    """Gemini 없이 HTML에서 제품명 추출 (og:title → h1 → <title>)."""
     from bs4 import BeautifulSoup
     soup = BeautifulSoup(html or "", "html.parser")
-    ok = lambda t: bool(t) and len(t) >= 5 and t.strip().upper() not in ("LG", "LG ELECTRONICS", "LG THAILAND") \
-        and not re.search(r"\bnull\b|access denied", t, re.I)
-    cands = []
-    # 2026-11-07: 페이지 제품 데이터의 userFriendlyName(= 화면 h1) 이 가장 정확하다 — og:title 이 'null' 인 페이지(TH 모니터)
-    _uf = aem_model.product_title(html, url)
-    if _uf:
-        cands.append(_uf)
     og = soup.find("meta", attrs={"property": "og:title"})
     if og and og.get("content"):
-        cands.append(og["content"].split("|")[0].strip())
-    pd = soup.select_one(".PD0012 h1, [class*='PD0012'] h1")
-    if pd:
-        cands.append(pd.get_text(" ", strip=True))
-    if soup.title:
-        cands.append(soup.title.get_text(strip=True).split("|")[0].strip())
-    cands += [h.get_text(" ", strip=True) for h in soup.find_all("h1")]
-    return next((c for c in cands if ok(c)), next((c for c in cands if c), ""))
+        return og["content"].split("|")[0].strip()
+    h1 = soup.find("h1")
+    if h1 and h1.get_text(strip=True):
+        return h1.get_text(" ", strip=True)
+    return (soup.title.get_text(strip=True).split("|")[0].strip() if soup.title else "")
 
 
 def run_gemini(md: str, pc_tiles: List[Path]) -> dict:
-    if llm_claude.available():
-        print(f"→ [Step4] Claude({llm_claude.CLAUDE_MODEL}) 멀티모달 분석... (PC 타일 {len(pc_tiles)}장)")
-        return llm_claude.vision_json(
-            [ANALYSIS_PROMPT, "\n\n=== [PC 스크린샷 타일] (상단→하단) ===", *pc_tiles,
-             "\n\n=== [전처리된 마크다운] ===\n" + md],
-            FinalPDPData, label="analysis")
     from google import genai
     from google.genai import types
     import time
@@ -599,13 +579,6 @@ def run_qa(result: dict, pc_tiles: List[Path]) -> dict:
             lines.append(f"[{s['sequence']}] MEDIA {u.split('/')[-1][:80]}")
         else:
             lines.append(f"[{s['sequence']}] TEXT {(s.get('text_content') or '')[:80]!r}")
-    if llm_claude.available():
-        qa = llm_claude.vision_json(
-            [QA_PROMPT, "\n=== [PC 스크린샷 타일] (상단→하단) ===", *pc_tiles,
-             "\n=== [크롤 결과 flow] ===\n" + "\n".join(lines)],
-            QAReport, label="qa", max_tokens=32000)
-        print(f"   ✓ QA 점수 {qa.get('match_score')}점 | 이슈 {len(qa.get('issues', []))}건")
-        return qa
     client = genai.Client(api_key=GEMINI_KEY)
     contents = [QA_PROMPT, "\n=== [PC 스크린샷 타일] (상단→하단) ==="]
     for fp in pc_tiles:
@@ -675,13 +648,6 @@ def run_correction(result: dict, qa: dict, md: str, pc_tiles: List[Path]) -> dic
     import time
     n_issues = len(qa.get("issues", []))
     print(f"→ [Step6.5] QA 자동 보정... (이슈 {n_issues}건 교정 요청)")
-    if llm_claude.available():
-        return llm_claude.vision_json(
-            [CORRECTION_PROMPT, "\n=== [PC 스크린샷 타일] (상단→하단) ===", *pc_tiles,
-             "\n=== [기존 layout_flow] ===\n" + json.dumps(result, ensure_ascii=False),
-             "\n=== [QA 이슈 목록] ===\n" + json.dumps(qa.get("issues", []), ensure_ascii=False),
-             "\n=== [참고: 전처리 마크다운 (URL/원문 소스)] ===\n" + md],
-            FinalPDPData, label="correction")
     client = genai.Client(api_key=GEMINI_KEY)
     contents = [CORRECTION_PROMPT, "\n=== [PC 스크린샷 타일] (상단→하단) ==="]
     for fp in pc_tiles:
@@ -771,11 +737,6 @@ def run_mirror_qa(mirror: dict, pc_tiles: List[Path]) -> dict:
     from google.genai import types
     import time
     print(f"→ [Step7.5] mirror 시각 QA... (PC 타일 {len(pc_tiles)}장 대조)")
-    if llm_claude.available():
-        return llm_claude.vision_json(
-            [MIRROR_QA_PROMPT, "\n=== [PC 스크린샷 타일] (상단→하단) ===", *pc_tiles,
-             "\n=== [mirror 섹션 레이아웃] ===\n" + _mirror_qa_view(mirror)],
-            MirrorQAReport, label="mirror_qa", max_tokens=32000)
     client = genai.Client(api_key=GEMINI_KEY)
     contents = [MIRROR_QA_PROMPT, "\n=== [PC 스크린샷 타일] (상단→하단) ==="]
     for fp in pc_tiles:
@@ -1076,33 +1037,8 @@ def _attach_gallery(mirror: dict, html: str, origin: str):
         print(f"   ✓ 제품 갤러리 {len(gal)}장 (LG.com 갤러리 영역 순서)")
 
 
-_BLOCK_PAGE = re.compile(r"Access Denied|You don't have permission to access|Reference\s*#\s*[\d.a-f]+|errors\.edgesuite\.net",
-                         re.I)
-
-
-def _drop_block_page_text(mirror: dict) -> int:
-    """LG.com 봇 차단(Akamai 'Access Denied') 화면에서 온 글을 지운다. 서버 스크린샷이 차단 화면으로 찍히면
-    AI 분석이 그 글을 섹션으로 만들기도 한다 (2026-11-06 TH 배치: 242개 중 20개). 그 줄만 지우고,
-    남는 글·이미지가 없는 섹션은 통째로 뺀다."""
-    removed, keep = 0, []
-    for s in mirror.get("sections") or []:
-        text = s.get("text") or ""
-        if _BLOCK_PAGE.search(text):
-            lines = [ln for ln in text.split("\n") if not _BLOCK_PAGE.search(ln)]
-            s["text"] = "\n".join(lines).strip()
-            removed += 1
-            if not s["text"] and not s.get("media") and not s.get("specs"):
-                continue
-        keep.append(s)
-    mirror["sections"] = keep
-    return removed
-
-
 def _polish_mirror(mirror: dict, html: str):
     """미러 최종 정리 — 빠른 경로·기존 경로 공통."""
-    _blk = _drop_block_page_text(mirror)
-    if _blk:
-        print(f"   ✓ 봇 차단 화면 글 제거: {_blk}건 (Access Denied)")
     # 이미지·텍스트가 모두 같은 섹션 제거 (캐러셀 루프 복제 슬라이드 등)
     _dup = drop_duplicate_sections(mirror)
     if _dup:
@@ -1175,128 +1111,6 @@ def content_checks(mirror: dict, html: str = "") -> dict:
     return report
 
 
-def direct_fetch(url: str) -> str:
-    """Firecrawl 대체: 일반 Chrome 처럼 직접 받기 (봇 차단되면 차단 화면이 와서 page_check 에서 걸러짐)."""
-    r = requests.get(url, timeout=60, headers={
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
-                      "Chrome/130.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml", "Accept-Language": "th-TH,th;q=0.9,en;q=0.8"})
-    return r.text if r.ok else ""
-
-
-def fetch_product_html(url: str):
-    """요청한 제품 페이지 HTML 을 확실히 받는다 → (md, html, raw).
-    Firecrawl 이 차단 화면이나 LG 홈/프로모션 페이지를 돌려주는 경우가 있어(TH 배치), 받을 때마다
-    aem_model.page_check 로 확인하고 Firecrawl 재시도 → 직접 받기 순으로. 끝내 아니면 실패로 끝낸다
-    (엉뚱한 페이지를 그 제품의 미러로 저장하지 않는다)."""
-    reasons = []
-    for attempt in range(3):
-        try:
-            d = firecrawl_scrape(url, mobile=False)
-            md, html, raw = d.get("markdown", ""), d.get("html", ""), d.get("rawHtml", "")
-            ok, why = aem_model.page_check(raw or html, url)
-            if ok:
-                return md, html or raw, raw
-            reasons.append(f"firecrawl#{attempt + 1}: {why}")
-        except Exception as e:
-            reasons.append(f"firecrawl#{attempt + 1}: {str(e)[:120]}")
-        print(f"   ! {reasons[-1]} — 다시 시도")
-        time.sleep(5 * (attempt + 1))
-    try:
-        html = direct_fetch(url)
-        ok, why = aem_model.page_check(html, url)
-        if ok:
-            print("   ✓ 직접 받기로 제품 페이지 확보")
-            return "", html, html
-        reasons.append(f"direct: {why}")
-    except Exception as e:
-        reasons.append(f"direct: {str(e)[:120]}")
-    raise RuntimeError("제품 페이지를 받지 못함 — " + " | ".join(reasons))
-
-
-def _clean_media(mirror: dict) -> None:
-    """미러의 모든 이미지 주소를 URL 인코딩(공백·괄호 등)하고, LG 가 실제로 내주지 않는 이미지
-    (404/410, 또는 300바이트 미만 자리표시 그림)는 뺀다. 네트워크 오류 등 확실하지 않으면 그대로 둔다.
-    (2026-11-07 TH 검수: LG 페이지 자체가 404 이미지·1x1 자리표시를 참조 — 산출물에 빈 그림으로 나왔다)"""
-    from urllib.parse import quote
-    def enc(u):
-        return quote(u, safe=":/%?=&,~+-_.()#@!$'*;") if u else u
-    items = []
-    for s in mirror.get("sections") or []:
-        for m in s.get("media") or []:
-            items.append(m)
-    items += list(mirror.get("_gallery") or [])
-    # 비교 슬라이더(전/후) 이미지도 같은 검사 — 깨진 그림이면 슬라이더를 빼고 섹션 그림으로 보인다 (2026-11-09)
-    items += [side for s in mirror.get("sections") or [] for side in (s.get("compare") or {}).values() if isinstance(side, dict)]
-    for m in items:
-        for k in ("pc_url", "mobile_url", "unified_url"):
-            if m.get(k): m[k] = enc(m[k])
-    urls = sorted({m.get(k) for m in items for k in ("pc_url", "mobile_url") if m.get(k) and m.get("type") != "video"})
-    ua = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"}
-    def dead(u):
-        # curl: LG 봇 차단은 파이썬 requests/urllib 에 403 을 주지만 curl 에는 실제 상태를 준다. 403 등은 '불확실'로 둔다
-        import subprocess
-        try:
-            r = subprocess.run(["curl", "-s", "-L", "-m", "30", "-A", ua["User-Agent"], "-H", "Referer: https://www.lg.com/",
-                                "-r", "0-1023", "-o", "/dev/null", "-w", "%{http_code} %{size_download}", u],
-                               capture_output=True, text=True, timeout=40)
-            code, size = (r.stdout.split() + ["0", "0"])[:2]
-            code, size = int(code or 0), int(float(size or 0))
-            if code in (404, 410): return u, f"HTTP {code}"
-            if code in (200, 206) and size < 300: return u, f"placeholder ({size} bytes)"
-        except Exception:
-            pass
-        return u, None
-    with ThreadPoolExecutor(8) as ex:
-        bad = {u: why for u, why in ex.map(dead, urls) if why}
-    if not bad:
-        return
-    for s in mirror.get("sections") or []:
-        keep = []
-        for m in s.get("media") or []:
-            if m.get("pc_url") in bad:
-                if m.get("mobile_url") and m["mobile_url"] not in bad and m["mobile_url"] != m["pc_url"]:
-                    m["pc_url"] = m["mobile_url"]; keep.append(m)
-                continue
-            if m.get("mobile_url") in bad: m["mobile_url"] = ""
-            keep.append(m)
-        s["media"] = keep
-    mirror["_gallery"] = [g for g in mirror.get("_gallery") or [] if g.get("pc_url") not in bad]
-    for s in mirror.get("sections") or []:
-        cp = s.get("compare") or {}
-        if any(isinstance(v, dict) and v.get("pc_url") in bad for v in cp.values()):
-            s.pop("compare", None)
-    mirror["_dead_media_dropped"] = [{"url": u, "why": w} for u, w in sorted(bad.items())]
-    print(f"   ✓ LG 가 내주지 않는 이미지 {len(bad)}장 제외 (404·자리표시)")
-
-
-def aem_mirror_if_better(html: str, url: str, cf: Optional[dict]):
-    """컴포넌트 경로(원본 CLIA)가 페이지를 못 읽었을 때만 AEM 모델 미러를 쓴다."""
-    try:
-        am = aem_model.extract(html, url)
-    except Exception as e:
-        print(f"   ! AEM 모델 읽기 실패: {str(e)[:150]}")
-        return None
-    if not am or not am["sections"]:
-        return None
-    def names(sections):
-        # 제품 이미지만 비교 — 구독(LG Subscribe)·프로모션 안내 그림은 제품 기능이 아니므로 세지 않는다
-        return {aem_model._fold(m.get("pc_url") or m.get("mobile_url") or "") for s in sections
-                for m in (s.get("media") or []) if m.get("type") != "video"
-                and not aem_model.SKIP_PATH.search(m.get("pc_url") or "")
-                and not re.search(r"subscribe|card_img|img_washing_machine", (m.get("pc_url") or ""), re.I)} - {""}
-    cf_names, am_names = names((cf or {}).get("sections", [])), names(am["sections"])
-    cf_media, am_media = len(cf_names), len(am_names)
-    # 원본 CLIA 와 같게: 컴포넌트 경로가 페이지를 읽었으면(노출 섹션 3개 이상) 그 결과를 그대로 쓴다.
-    # 모델 경로는 컴포넌트 경로가 실패한 페이지(예전 형식 PDP 등)에서만. (2026-11-09: 모델 쪽이 이미지를 더 찾았다고
-    # 컴포넌트 결과를 바꾸거나 섹션을 덧붙이면, 홍보 배너·각주·탭 제목만 남은 섹션이 들어가고 기능명·탭 본문이 빠졌음)
-    if (cf or {}).get("_cf_stats", {}).get("renderable", 0) >= 3:
-        return None
-    print(f"→ [AEM] 페이지 컴포넌트 모델: 섹션 {len(am['sections'])} · 이미지 {am_media}장 "
-          f"(컴포넌트 경로 {'노출 ' + str((cf or {}).get('_cf_stats', {}).get('renderable', 0)) if cf else '없음'} · 이미지 {cf_media}장) — 이쪽을 씀")
-    return am
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("url")
@@ -1306,11 +1120,10 @@ def main():
     ap.add_argument("--full-ai", action="store_true",
                     help="빠른 컴포넌트 경로를 쓰지 않고 기존 방식(스크린샷 + Gemini 분석·시각 QA)으로 실행. "
                          "환경 변수 CRAWLER_FULL_AI=1 로 전체 적용")
-    ap.add_argument("--html-file", help="이미 받은 제품 페이지 HTML 로 크롤 (Firecrawl 생략, page_check 는 함)")
     args = ap.parse_args()
     full_ai = args.full_ai or os.getenv("CRAWLER_FULL_AI", "").strip() == "1"
 
-    if not FIRECRAWL_KEY and not args.html_file:
+    if not FIRECRAWL_KEY:
         sys.exit("✗ FIRECRAWL_API_KEY 없음 (.env)")
     out = ROOT / "out" / slugify(args.url)
     out.mkdir(parents=True, exist_ok=True)
@@ -1331,22 +1144,11 @@ def main():
     # Step 1 — PC 단일 기기 수집 (시간 단축 극대화)
     datasets = {}
     md_cached, html_cached = cached("pc.md"), cached("pc.html")
-    if args.html_file:
-        html = Path(args.html_file).read_text(encoding="utf-8", errors="replace")
-        ok, why = aem_model.page_check(html, args.url)
-        if not ok:
-            sys.exit(f"✗ 받은 HTML 이 제품 페이지가 아님: {why}")
-        md, raw = "", html
-        (out / "pc.md").write_text(md, encoding="utf-8")
-        (out / "pc.html").write_text(html, encoding="utf-8")
-        print("✓ [Step1] 받은 HTML 사용 (제품 페이지 확인됨)")
-        write_progress(35, "1단계: 받은 HTML 사용", "fetched")
-    elif md_cached is None or html_cached is None:
+    if md_cached is None or html_cached is None:
         write_progress(15, "1단계: Firecrawl 웹 스크래핑 및 HTML/DOM 트리 분석 중...", "fetch")
         print("→ [Step1] PC 크롤링 시작 (모바일 스킵으로 극단적 최적화)...")
-        md, html, raw = fetch_product_html(args.url)
-        if raw:
-            (out / "pc_raw.html").write_text(raw, encoding="utf-8")
+        d = firecrawl_scrape(args.url, mobile=False)
+        md, html = d.get("markdown", ""), d.get("html", "")
         (out / "pc.md").write_text(md, encoding="utf-8")
         (out / "pc.html").write_text(html, encoding="utf-8")
         write_progress(35, "1단계 완료: 원본 웹페이지 마크다운 수집 성공", "fetched")
@@ -1354,7 +1156,6 @@ def main():
         print("✓ [Step1] PC 크롤 캐시 사용")
         write_progress(35, "1단계 (캐시): 웹 텍스트 수집 완료", "fetched")
         md, html = md_cached, html_cached
-        raw = cached("pc_raw.html") or html
         
     datasets["pc"] = {"md": md, "html": html}
     _cf_origin = "https://" + (args.url.split("//", 1)[-1].split("/", 1)[0] or "www.lg.com")
@@ -1385,38 +1186,17 @@ def main():
     if not full_ai and not args.skip_ai:
         write_progress(60, "2단계: CCG 컴포넌트 ID 및 레이아웃 구조 파싱 중...", "parse")
         component_data = parse_html_components(html)
-        _cf = build_from_components(component_data, _html_product_title(raw or html, args.url), _cf_origin)
+        _cf = build_from_components(component_data, _html_product_title(html), _cf_origin)
         _st = _cf.get("_cf_stats", {})
-        # CRAWLER_AEM_MODEL=0 이면 페이지 데이터(AEM 모델) 경로를 모두 끈다 (원본 CLIA 의 끄기 스위치를 두 경로에 같이 적용)
-        _aem_on = os.getenv("CRAWLER_AEM_MODEL", "1").strip() != "0"
-        _am = aem_mirror_if_better(raw or html, args.url, _cf) if _aem_on else None
-        if _am:
-            write_progress(90, "3단계: 페이지 컴포넌트 모델로 컨텐츠 데이터 생성 중...", "build")
-            mirror = _am
-            # 스펙 표(PD0008 등)는 컴포넌트 파서가 읽은 것을 그대로 붙인다 — 모델 경로에도 스펙이 빠지지 않게
-            _specs = [s for s in (_cf or {}).get("sections", []) if s.get("specs")]
-            for i, s in enumerate(_specs):
-                s = dict(s); s["order"] = len(mirror["sections"]) + i + 1
-                mirror["sections"].append(s)
-            mirror["product_title"] = aem_model.product_title(raw or html, args.url) or _html_product_title(html, args.url)
-            _attach_gallery(mirror, html, _cf_origin)
-            _polish_mirror(mirror, html)
-            for f in ("final.json", "verify_report.json", "mirror_qa_report.json", "components.json"):
-                (out / f).unlink(missing_ok=True)
-            _clean_media(mirror)
-            (out / "qa_report.json").write_text(
-                json.dumps(content_checks(mirror, html), ensure_ascii=False, indent=2), encoding="utf-8")
-            (out / "mirror.json").write_text(json.dumps(mirror, ensure_ascii=False, indent=2), encoding="utf-8")
-            write_progress(100, "분석 완료!", "done")
-            print(f"\n✓ 완료 (페이지 컴포넌트 모델 경로). 산출물: {out}/mirror.json")
-            return
-        # ★ 구형 PDP 보조 경로 (원본 CLIA 2026-11-09, aem_overview.py): 위 모델 경로가 섹션을 못 만든 페이지에서
-        #   overview-section 의 heroimage·carousel 등으로 피처 섹션을 만들어 컴포넌트 결과 앞에 붙인다.
-        if _aem_on and _st.get("renderable", 0) < 3:
+        # ★ 구형 PDP (2026-11-09~): 피처가 HTML 컴포넌트가 아니라 페이지 안 AEM 데이터(heroimage 등)에만
+        #   있으면 그걸로 섹션을 만든다 (Gemini 경로 대신). CRAWLER_AEM_MODEL=0 이면 끔.
+        if _st.get("renderable", 0) < 3 and os.getenv("CRAWLER_AEM_MODEL", "1").strip() != "0":
             try:
-                from aem_overview import build_sections, fetch_raw_html
-                _raw = raw if "__next_f" in (raw or "") else fetch_raw_html(args.url, FIRECRAWL_KEY)
-                aem = build_sections(args.url, raw=_raw) if _raw else []
+                from aem_model import build_sections, fetch_raw_html
+                raw = cached("pc.raw.html") or fetch_raw_html(args.url, FIRECRAWL_KEY)
+                if raw:
+                    (out / "pc.raw.html").write_text(raw, encoding="utf-8")
+                aem = build_sections(args.url, raw=raw) if raw else []
                 if sum(1 for s in aem if s.get("media")) >= 3:
                     _cf["sections"] = aem + _cf.get("sections", [])
                     for _i, _s in enumerate(_cf["sections"], 1):
@@ -1429,13 +1209,7 @@ def main():
                     print(f"→ [AEM] 페이지 데이터 피처 없음 ({len(aem)})")
             except Exception as _ae:
                 print(f"   ⚠️ AEM 데이터 추출 실패 → 기존 흐름: {str(_ae)[:120]}")
-        # 기능 소개 영역 자체가 없는 페이지(필터 등 액세서리): 페이지에 있는 것(제품명·요약·갤러리)이 전부다.
-        # AI 스크린샷 경로로 보내지 않고 컴포넌트 결과를 그대로 쓴다 (서버 스크린샷은 봇 차단에 막혀 결과가 더 나빠짐)
-        _no_features = _st.get("renderable", 0) < 3 and not aem_model.has_overview(raw or html, args.url)
-        if _no_features:
-            print("→ [Fast] 이 페이지에는 기능 소개 영역이 없음 — 페이지의 제품명·요약·갤러리로 완성")
-            _cf["_no_feature_area"] = True   # 검수: 기능 섹션이 없는 게 정상인 페이지
-        if _st.get("renderable", 0) >= 3 or _no_features:          # Step7-CF 와 같은 최소 품질 게이트
+        if _st.get("renderable", 0) >= 3:          # Step7-CF 와 같은 최소 품질 게이트
             (out / "components.json").write_text(
                 json.dumps(component_data, ensure_ascii=False, indent=2), encoding="utf-8")
             print(f"→ [Fast] 컴포넌트 {len(component_data)}개 → 노출섹션 {_st['renderable']} "
@@ -1448,7 +1222,6 @@ def main():
             # 예전 실행의 Gemini 산출물은 이번 결과와 무관하므로 정리
             for f in ("final.json", "verify_report.json", "mirror_qa_report.json"):
                 (out / f).unlink(missing_ok=True)
-            _clean_media(mirror)
             (out / "qa_report.json").write_text(
                 json.dumps(content_checks(mirror, html), ensure_ascii=False, indent=2), encoding="utf-8")
             (out / "mirror.json").write_text(json.dumps(mirror, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -1503,11 +1276,11 @@ def main():
         write_progress(100, "분석 완료 (AI 분석 스킵)", "done")
         print(f"\n✓ Step1~3 완료 (--skip-ai). 산출물: {out}")
         return
-    if not GEMINI_KEY and not llm_claude.available():
-        sys.exit("✗ AI 키 없음: ANTHROPIC_API_KEY 또는 GEMINI_API_KEY (.env) — --skip-ai 로 1~3단계만 실행 가능")
+    if not GEMINI_KEY:
+        sys.exit("✗ GEMINI_API_KEY 없음 (.env) — --skip-ai 로 1~3단계만 실행 가능")
 
     # Step 4 — Gemini 융합 분석 (PC 단일 뷰포트 분석)
-    write_progress(65, f"4단계: {('Claude ' + llm_claude.CLAUDE_MODEL) if llm_claude.available() else ('Gemini ' + GEMINI_MODEL)} 멀티모달 시각 구조 대조 분석 중 (20~40초 소요)...", "ai")
+    write_progress(65, f"4단계: Gemini {GEMINI_MODEL} 멀티모달 시각 구조 대조 분석 중 (20~40초 소요)...", "ai")
     gemini_ok = True
     try:
         result = run_gemini(pre_md, tiles["pc"])
@@ -1672,5 +1445,21 @@ def main():
     print(f"\n✓ 완료. 산출물: {out}/mirror.json (활용) + final.json / verify_report.json / qa_report.json")
 
 
+def _use_sl_pipeline(argv: list) -> bool:
+    """Shopee·Lazada 용 파이프라인(pdp_pipeline_sl.py)으로 넘길지.
+    - 대상 국가: CRAWLER_SL_COUNTRIES (쉼표 구분, 기본 "th") — lg.com/<국가>/… 의 국가 코드로 판단
+    - --html-file (미리 받은 페이지 HTML) 은 그 파이프라인에만 있는 기능
+    그 밖의 국가(Amazon·eBay 대상)는 이 파일의 원본 흐름 그대로다."""
+    if "--html-file" in argv:
+        return True
+    url = next((a for a in argv[1:] if a.startswith("http")), "")
+    cc = (url.split("//", 1)[-1].split("/", 2) + ["", ""])[1].lower()
+    return cc in {c.strip().lower() for c in os.getenv("CRAWLER_SL_COUNTRIES", "th").split(",") if c.strip()}
+
+
 if __name__ == "__main__":
-    main()
+    if _use_sl_pipeline(sys.argv):
+        import runpy
+        runpy.run_path(str(ROOT / "pdp_pipeline_sl.py"), run_name="__main__")
+    else:
+        main()

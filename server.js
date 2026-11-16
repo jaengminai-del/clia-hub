@@ -2087,8 +2087,10 @@ app.post('/api/ebay-generate', async (req, res) => {
     // ── LG GP1 Design System 토큰 (claude.ai/design "LG GP1 Design System" 소싱) ──
     // active_red_50이 GP1의 실제 브랜드 액센트. heritage_red(#A50034)는 GP1 readme상
     // LG 로고 마크 내부에만 쓰이는 색이라 일반 UI 액센트로는 쓰지 않는다.
-    const GP1_FONT_HEAD = "'LGEIHeadline','LG EI Headline','LGEIText','LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif";
-    const GP1_FONT_BODY = "'LGEIText','LG EI Text','LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif";
+    // 태국어 글꼴(LINE Seed Sans TH)은 Shopee·Lazada 에만 — eBay 등은 원본 글꼴 그대로
+    const TH_FONT = medium === 'shopee_lazada' ? "'LINESeedSansTH'," : '';
+    const GP1_FONT_HEAD = `'LGEIHeadline','LG EI Headline','LGEIText',${TH_FONT}-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif`;
+    const GP1_FONT_BODY = `'LGEIText','LG EI Text',${TH_FONT}-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif`;
     const GP1 = { headline: '#111111', body: '#2D2D2D', sub: '#697072', accentRed: '#EA1917', stroke: '#F0ECE4', pageBg: '#FFFFFF' };
 
     // ── Helper: ensure HTTPS ──
@@ -2523,7 +2525,9 @@ app.post('/api/v1/slice-html', async (req, res) => {
   const med = /^[a-z_]+$/.test(medium) ? medium : 'shopee_lazada';
   // rev: 같은 HTML 이라도 자르기 규칙이 바뀐 것만 새로 그리게 하는 선택 값 (없으면 기존 해시 그대로)
   const rv = /^[\w.-]{1,20}$/.test(String(rev)) ? `|${rev}` : '';
-  const hash = crypto.createHash('sha1').update(`v2|${med}|${html}${rv}`).digest('hex').slice(0, 20);
+  // 해시 판(v): Shopee·Lazada 는 자르기 규칙이 바뀐 v2, 그 밖의 매체는 원본과 같은 v1 (원본 서버가 만든 슬라이스 주소 그대로)
+  const ver = med === 'shopee_lazada' ? 'v2' : 'v1';
+  const hash = crypto.createHash('sha1').update(`${ver}|${med}|${html}${rv}`).digest('hex').slice(0, 20);
   const dir = path.join(SLICE_CACHE, hash);
   try {
     let man = null;
