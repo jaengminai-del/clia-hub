@@ -196,7 +196,7 @@ const router = express.Router();
 router.get('/healthz', (req, res) => res.json({
   ok: true,
   master_key: !!(process.env.ANTHROPIC_API_KEY || process.env.GEMINI_API_KEY),
-  ai: process.env.ANTHROPIC_API_KEY ? 'claude' : (process.env.GEMINI_API_KEY ? 'gemini' : null),
+  ai: process.env.GEMINI_API_KEY ? 'gemini' : (process.env.ANTHROPIC_API_KEY ? 'claude' : null),   // Gemini 키가 있으면 Gemini
   firecrawl: !!process.env.FIRECRAWL_API_KEY,
 }));
 

@@ -2681,7 +2681,7 @@ app.post('/api/v1/pdp-summary', async (req, res) => {
   if (!isLgUrl(url)) return res.status(400).json({ error: 'LG.com url required' });
   // 모델 지정은 배치(내보내기 토큰)만 — 화면 요청은 서버 기본(SUMMARY_MODEL → CLAUDE_MODEL)
   const tok = (process.env.EXPORT_TOKEN || '').trim();
-  const model = (tok && req.get('x-export-token') === tok && /^claude-(opus|sonnet|haiku)-5-5$/.test(req.body.model || '')) ? req.body.model : '';
+  const model = (tok && req.get('x-export-token') === tok && /^(claude-(opus|sonnet|haiku)-5-5|gemini-[\w.-]{3,40})$/.test(req.body.model || '')) ? req.body.model : '';
   const slug = url.replace(/https?:\/\//, '').replace(/[^\w]+/g, '-').replace(/-+$/, '');
   const slugDir = path.join(__dirname, 'crawler-py', 'out', slug);
   if (!fs.existsSync(path.join(slugDir, 'mirror.json'))) return res.status(404).json({ error: 'no crawl for this URL — crawl it first' });

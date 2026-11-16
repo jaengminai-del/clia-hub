@@ -35,6 +35,10 @@ Part = Union[str, Path]
 
 
 def available() -> bool:
+    """Claude 로 분석할지. GEMINI_API_KEY 가 있으면 모든 AI 단계(크롤 분석·GEO·PDP 요약)는 Gemini 를 쓴다
+    (2026-11-16 결정: 통합 서버의 AI 는 Gemini). Claude 는 Gemini 키가 없는 서버에서만."""
+    if os.getenv("GEMINI_API_KEY", "").strip():
+        return False
     return bool(os.getenv("ANTHROPIC_API_KEY", "").strip())
 
 

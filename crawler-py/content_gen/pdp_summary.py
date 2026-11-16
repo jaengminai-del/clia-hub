@@ -187,10 +187,40 @@ def _fix(d: dict, url: str) -> dict:
     return d
 
 
+GEMINI_SUMMARY_MODEL = "gemini-2.5-pro"   # 요약은 길이·USP 수 조건이 까다로워 Pro 기본 (SUMMARY_GEMINI_MODEL 로 바꿈)
+
+
+def _ask_gemini(ask: str, model: str, key: str) -> dict:
+    """Gemini 로 요약 (geo_gen.py 와 같은 호출 방식: JSON 응답 + 스키마). 일시 오류는 3번까지 다시 시도."""
+    import time
+    from google import genai
+    from google.genai import types
+    client = genai.Client(api_key=key)
+    for attempt in range(1, 4):
+        try:
+            resp = client.models.generate_content(
+                model=model, contents=ask,
+                config=types.GenerateContentConfig(response_mime_type="application/json", response_schema=PdpSummary,
+                                                   temperature=0.2))
+            return PdpSummary.model_validate(json.loads(resp.text)).model_dump()
+        except Exception:
+            if attempt == 3:
+                raise
+            time.sleep(2 ** attempt)
+
+
 def generate(slug_dir: Path, url: str, model: str = "") -> dict:
     import os
     import llm_claude
-    model = model or os.getenv("SUMMARY_MODEL", "").strip() or llm_claude.CLAUDE_MODEL
+    gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
+    if gemini_key:      # Gemini 키가 있으면 Gemini (통합 서버). Claude 모델 이름(SUMMARY_MODEL 등)이 넘어오면 무시한다
+        asked = model or os.getenv("SUMMARY_GEMINI_MODEL", "").strip()
+        model = asked if asked.startswith("gemini") else GEMINI_SUMMARY_MODEL
+        ask_llm = lambda ask, attempt: _ask_gemini(ask, model, gemini_key)
+    else:
+        model = model or os.getenv("SUMMARY_MODEL", "").strip() or llm_claude.CLAUDE_MODEL
+        ask_llm = lambda ask, attempt: llm_claude.vision_json([ask], PdpSummary, label=f"pdp-summary-{attempt}",
+                                                              max_tokens=32000, model=model)
     mp = slug_dir / "mirror.json"
     mirror = json.loads(mp.read_text(encoding="utf-8"))
     checked = checked_date(mp)
@@ -199,7 +229,7 @@ def generate(slug_dir: Path, url: str, model: str = "") -> dict:
     prompt = build_prompt(url, source_text(mirror, url, slug_dir), checked, limit) + (usp_prompt(usps) if usps else "")
     ask, d = prompt, None
     for attempt in range(4):                # 조건: 600 초과 · 2,000 이하 · 상품명 120 이하 · 장점 수 = USP 수 — 벗어나면 다시 쓰게
-        d = _fix(llm_claude.vision_json([ask], PdpSummary, label=f"pdp-summary-{attempt}", max_tokens=32000, model=model), url)
+        d = _fix(ask_llm(ask, attempt), url)
         n, nn = len(plain_text(d)), len(d["product_name"])
         nh = len(d["highlights"])
         if MIN_CHARS < n <= limit and nn <= NAME_MAX and (not usps or nh == len(usps)):
