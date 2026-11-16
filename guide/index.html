@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>콘텐츠 이미지 가이드</title>
+<meta name="description" content="글로벌 콘텐츠 이미지 가이드라인 — Amazon · Shopee · Lazada · Instagram · eBay 모듈별 이미지 사이즈 · 레이아웃 구조 · 제작 가이드">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/svg+xml" href="../shared/assets/clia-icon.svg">
+<link rel="apple-touch-icon" href="../shared/assets/clia-icon-180.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="LG CLIA">
+<meta property="og:title" content="콘텐츠 이미지 가이드 — CLIA">
+<meta property="og:description" content="Amazon · Shopee · Lazada · Instagram · eBay 모듈별 이미지 사이즈 · 레이아웃 구조 · 제작 가이드">
+<meta property="og:url" content="https://clia.lge-d2c.com/guide/">
+<meta property="og:image" content="https://clia.lge-d2c.com/shared/assets/clia-og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" as="font" type="font/woff2" href="../fonts/LGEIHeadlineTTF-Bold.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="../fonts/LGEITextTTF-Regular.woff2" crossorigin>
+<link rel="stylesheet" href="guide.css">
+</head>
+<body>
+<button class="menu-btn" id="menuBtn" aria-label="목차 열기" aria-expanded="false">
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+</button>
+<nav class="side" id="side" aria-label="가이드 목차">
+  <div class="brand">
+    <div class="brand-title">Content Image Guide</div>
+    <div class="brand-sub">Amazon · Shopee · Lazada · Instagram · eBay</div>
+    <div class="lang" role="group" aria-label="Language"><button type="button" data-lang="ko">한국어</button><button type="button" data-lang="en">English</button></div>
+  </div>
+  <div class="nav" id="nav"></div>
+  <div class="side-foot">
+    <a class="btn-light" id="openBtn" href="../clia/" target="_blank" rel="noopener">CLIA 열기</a>
+    <button class="btn-ghost" id="pdfBtn" type="button">PDF로 저장</button>
+  </div>
+</nav>
+<main class="stage" id="stage">
+  <div class="frame-box" id="frameBox">
+    <div class="frame" id="frame" role="region" aria-live="polite"></div>
+    <button class="arrow prev" id="prevBtn" aria-label="이전 쪽"><svg viewBox="0 0 24 24" width="28" height="28"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+    <button class="arrow next" id="nextBtn" aria-label="다음 쪽"><svg viewBox="0 0 24 24" width="28" height="28"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+  </div>
+  <div class="pager">
+    <div class="pager-num"><input id="pageInput" type="text" inputmode="numeric" aria-label="쪽 번호"><span id="pageTotal"></span></div>
+    <div class="pager-hint" id="hint">← → 키로 넘길 수 있습니다</div>
+  </div>
+</main>
+<div class="print-pages" id="printPages" aria-hidden="true"></div>
+<script src="guide-data.js"></script>
+<script src="guide-data.en.js"></script>
+<script src="guide.js"></script>
+</body>
+</html>
