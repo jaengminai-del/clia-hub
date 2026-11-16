@@ -234,6 +234,8 @@ const API_BASE = (location.protocol === 'file:' || !location.origin || location.
 const MEDIUM = 'shopee_lazada';
 // 이미지 우선순위 — 서버 규격(media/shopee_lazada/spec.json rules.image_prefer)과 같은 값으로 둔다: 'pc' | 'mobile'
 const IMAGE_PREFER = 'pc';
+// 공용 카드 목록(shared/clia-card-list.js)의 글꼴 — 태국어 제목이 LINE Seed 로 보이게 (Amazon·eBay 화면은 원래 글꼴 그대로)
+window.CLIA_UI_FONT = "'LGEIText','LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif";
 // 내보내는 HTML(Copy HTML · ZIP · 이미지 HTML · 슬라이스)에는 편집 화면용 동영상 표시(data-video-src)를 넣지 않는다
 const exportHtml = h => String(h || '').replace(/\s+data-video-src="[^"]*"/gi, '');
 // 허브가 연 채널 (?channel=shopee|lazada). 리스팅 문구(허브 제품 상세에서 작성): Lazada 는 HTML 맨 위·맨 아래 카드,
