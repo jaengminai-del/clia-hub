@@ -22,7 +22,7 @@ from functools import lru_cache
 from html import escape
 from pathlib import Path
 
-from .model import build_blocks
+from .model import build_blocks, set_image_prefer
 from .render_html import Style, render_blocks
 
 _HERE = Path(__file__).resolve().parent
@@ -85,6 +85,7 @@ def generate(mirror: dict, medium: str = "ebay", fragment: bool = False, listing
     m = load_medium(medium)
     spec, st = m["spec"], _style(medium)
     rules = spec.get("rules", {})
+    set_image_prefer(rules.get("image_prefer", "mobile"))   # 매체별 이미지 우선순위 (모바일 | PC)
     blocks = build_blocks(mirror, rules)
     body_cards = render_blocks(st, blocks, rules.get("text_alignment", "center"))
     if listing:

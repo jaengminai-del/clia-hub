@@ -7,14 +7,14 @@
 <link rel="stylesheet" href="../css/fonts.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'LGEIText',Arial,sans-serif;background:#F6F3EB;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+body{font-family:'LGEIText', 'LINESeedSansTH',Arial,sans-serif;background:#F6F3EB;height:100vh;overflow:hidden;display:flex;flex-direction:column}
 
 /* Header */
 .header{background:#F6F3EB;height:54px;padding:0 28px;display:flex;align-items:center;gap:16px;flex-shrink:0;border-bottom:1px solid #CBC8C2;z-index:100}
 .header-logo{height:22px;display:block;flex-shrink:0}
 .header-sep{width:1px;height:20px;background:#CBC8C2;flex-shrink:0}
-.header-title{font-family:'LGEIHeadline',sans-serif;font-size:14px;font-weight:600;color:#1A1A1A}
-.btn-home{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:#fff;color:#262626;border:1px solid #CBC8C2;border-radius:6px;font-family:'LGEIHeadline',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.header-title{font-family:'LGEIHeadline', 'LINESeedSansTH',sans-serif;font-size:14px;font-weight:600;color:#1A1A1A}
+.btn-home{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:#fff;color:#262626;border:1px solid #CBC8C2;border-radius:6px;font-family:'LGEIHeadline', 'LINESeedSansTH',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
 .btn-home:hover{background:#1A1A1A;color:#fff;border-color:#1A1A1A}
 
 /* Workspace */
@@ -23,10 +23,10 @@ body{font-family:'LGEIText',Arial,sans-serif;background:#F6F3EB;height:100vh;ove
 /* Left Panel */
 .panel-left{width:55%;display:flex;flex-direction:column;border-right:1px solid #CBC8C2;background:#fff;min-width:0}
 .panel-head{height:46px;padding:0 16px;border-bottom:1px solid #CBC8C2;background:#F0ECE4;flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
-.panel-head-title{font-family:'LGEIHeadline',sans-serif;font-size:13px;font-weight:600;color:#1A1A1A;display:flex;align-items:center;gap:8px}
+.panel-head-title{font-family:'LGEIHeadline', 'LINESeedSansTH',sans-serif;font-size:13px;font-weight:600;color:#1A1A1A;display:flex;align-items:center;gap:8px}
 .badge-ebay{background:#EE4D2D;color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:100px;letter-spacing:.05em}
 
-.btn-sm{height:32px;padding:0 13px;border:1px solid #CBC8C2;border-radius:6px;font-size:11.5px;font-weight:600;font-family:'LGEIText',sans-serif;cursor:pointer;background:#fff;color:#333;transition:all .15s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-sm{height:32px;padding:0 13px;border:1px solid #CBC8C2;border-radius:6px;font-size:11.5px;font-weight:600;font-family:'LGEIText', 'LINESeedSansTH',sans-serif;cursor:pointer;background:#fff;color:#333;transition:all .15s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .btn-sm:hover{background:#F5F5F5;border-color:#ADADAD}
 .btn-sm.primary{background:#E53238;color:#fff;border-color:#E53238}
 .btn-sm.primary:hover{background:#c42a2f}
@@ -52,9 +52,9 @@ body{font-family:'LGEIText',Arial,sans-serif;background:#F6F3EB;height:100vh;ove
 .input-section{padding:20px 16px;background:#fff;border-bottom:1px solid #E6E1D6;flex-shrink:0}
 .input-label{font-size:11px;font-weight:700;color:#7E7C77;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em}
 .input-row{display:flex;gap:8px}
-.url-input{flex:1;height:40px;border:1.5px solid #CBC8C2;border-radius:12px;padding:0 14px;font-size:13px;color:#262626;outline:none;transition:border-color .2s;background:#FDFCFA;font-family:'LGEIText',sans-serif}
+.url-input{flex:1;height:40px;border:1.5px solid #CBC8C2;border-radius:12px;padding:0 14px;font-size:13px;color:#262626;outline:none;transition:border-color .2s;background:#FDFCFA;font-family:'LGEIText', 'LINESeedSansTH',sans-serif}
 .url-input:focus{border-color:#E53238;background:#fff}
-.btn-analyze{height:40px;padding:0 20px;background:#E53238;color:#fff;border:none;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s;font-family:'LGEIText',sans-serif}
+.btn-analyze{height:40px;padding:0 20px;background:#E53238;color:#fff;border:none;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s;font-family:'LGEIText', 'LINESeedSansTH',sans-serif}
 .btn-analyze:hover{background:#c42a2f}
 .btn-analyze:disabled{background:#CBC8C2;cursor:not-allowed}
 
@@ -85,13 +85,13 @@ body{font-family:'LGEIText',Arial,sans-serif;background:#F6F3EB;height:100vh;ove
 .intro-view.fading{animation:fadeOut .4s ease forwards}
 @keyframes fadeOut{to{opacity:0;transform:scale(1.03)}}
 .intro-stack{display:flex;flex-direction:column;align-items:center;gap:24px;text-align:center;max-width:700px;padding:0 24px}
-.intro-title{font-family:'LGEIHeadline',sans-serif;font-weight:600;font-size:clamp(36px,5vw,72px);line-height:1.1;color:#262626}
-.intro-subtitle{font-family:'LGEIHeadline',sans-serif;font-weight:300;font-size:clamp(16px,2vw,24px);color:#555;line-height:1.5}
+.intro-title{font-family:'LGEIHeadline', 'LINESeedSansTH',sans-serif;font-weight:600;font-size:clamp(36px,5vw,72px);line-height:1.1;color:#262626}
+.intro-subtitle{font-family:'LGEIHeadline', 'LINESeedSansTH',sans-serif;font-weight:300;font-size:clamp(16px,2vw,24px);color:#555;line-height:1.5}
 .intro-input-shell{display:flex;align-items:center;width:min(680px,100%);background:#fff;border-radius:10px;padding:8px 16px;box-shadow:0 4px 12px rgba(230,225,214,.8);transition:box-shadow .25s}
 .intro-input-shell:focus-within{box-shadow:0 8px 24px rgba(230,225,214,1),0 0 0 2px rgba(229,50,56,.2)}
-.intro-input{flex:1;border:none;outline:none;background:transparent;font-size:18px;line-height:44px;color:#262626;font-family:'LGEIText',sans-serif}
+.intro-input{flex:1;border:none;outline:none;background:transparent;font-size:18px;line-height:44px;color:#262626;font-family:'LGEIText', 'LINESeedSansTH',sans-serif}
 .intro-input::placeholder{color:#999}
-.btn-intro-go{flex-shrink:0;width:88px;height:38px;background:#E53238;color:#fff;border:none;border-radius:6px;font-family:'LGEIHeadline',sans-serif;font-weight:600;font-size:16px;cursor:pointer;transition:background .15s}
+.btn-intro-go{flex-shrink:0;width:88px;height:38px;background:#E53238;color:#fff;border:none;border-radius:6px;font-family:'LGEIHeadline', 'LINESeedSansTH',sans-serif;font-weight:600;font-size:16px;cursor:pointer;transition:background .15s}
 .btn-intro-go:hover:not(:disabled){background:#c42a2f}
 .btn-intro-go:disabled{opacity:.5;cursor:wait}
 .intro-status{min-height:20px;font-size:13px;color:#666;display:flex;align-items:center;gap:8px}
@@ -112,6 +112,11 @@ body{font-family:'LGEIText',Arial,sans-serif;background:#F6F3EB;height:100vh;ove
 .edit-banner.show{display:flex}
 </style>
 <link rel="stylesheet" href="../shared/clia-ui.css">
+<style>
+/* 태국어 글꼴(LINE Seed Sans TH)은 이 화면에서만 — 공용 파일(shared/clia-ui.css · clia-card-list.js)은 원본 그대로 둔다 */
+:root{ --clia-font: 'LGEIHeadline', 'LG EI Headline', 'LGEIText', 'LINESeedSansTH', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif; }
+.clia-cap-title{ font-family:'LGEIHeadline', 'LINESeedSansTH', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif !important; }
+</style>
 </head>
 <body class="clia-skin-pdp">
 <script>if(window.self!==window.top)document.body.classList.add('clia-embedded');</script>
@@ -151,6 +156,7 @@ body{font-family:'LGEIText',Arial,sans-serif;background:#F6F3EB;height:100vh;ove
       <div style="display:flex;gap:6px">
         <button class="btn-sm" id="btnEditMode" onclick="toggleEdit()">✏ Edit</button>
         <button class="btn-sm primary" id="btnDownload" onclick="downloadImages()" disabled>⬇ Download Images (ZIP)</button>
+        <button class="btn-sm primary" id="btnDownload12" onclick="downloadImages(SHOPEE_MAX_IMAGES)" disabled style="display:none" title="Shopee: only the first 12 images (Shopee description limit)">⬇ 12 images (ZIP)</button>
         <button class="btn-sm" id="btnCopyHtml" onclick="copyHTML()" disabled>📋 Copy HTML</button>
         <button class="btn-sm" id="btnCopyListing" onclick="copyListingText()" style="display:none" title="Promotion · Product details · Delivery · After care · Return policy written in the CLIA hub product page — paste into the Shopee description">📝 Copy description text</button>
         <button class="btn-sm" id="btnCopyImgHtml" onclick="copyImageHTML()" disabled title="Images of the preview (1000px wide) + HTML that shows them — looks the same on Lazada/eBay">🖼 Copy image HTML</button>
@@ -181,6 +187,7 @@ body{font-family:'LGEIText',Arial,sans-serif;background:#F6F3EB;height:100vh;ove
       </div>
       <div class="spacer"></div>
       <button class="btn-sm primary" id="btnDownload2" onclick="downloadImages()" disabled>⬇ Download Images (ZIP)</button>
+      <button class="btn-sm primary" id="btnDownload12b" onclick="downloadImages(SHOPEE_MAX_IMAGES)" disabled style="display:none" title="Shopee: only the first 12 images (Shopee description limit)">⬇ 12 images (ZIP)</button>
     </div>
   </div>
 
@@ -225,12 +232,25 @@ const API_BASE = (location.protocol === 'file:' || !location.origin || location.
   : location.origin;
 // 1차 컨텐츠 생성 매체 규격 (crawler-py/content_gen/media/shopee_lazada — Shopee·Lazada 공통)
 const MEDIUM = 'shopee_lazada';
+// 이미지 우선순위 — 서버 규격(media/shopee_lazada/spec.json rules.image_prefer)과 같은 값으로 둔다: 'pc' | 'mobile'
+const IMAGE_PREFER = 'pc';
+// 내보내는 HTML(Copy HTML · ZIP · 이미지 HTML · 슬라이스)에는 편집 화면용 동영상 표시(data-video-src)를 넣지 않는다
+const exportHtml = h => String(h || '').replace(/\s+data-video-src="[^"]*"/gi, '');
 // 허브가 연 채널 (?channel=shopee|lazada). 리스팅 문구(허브 제품 상세에서 작성): Lazada 는 HTML 맨 위·맨 아래 카드,
 // Shopee 는 설명란이 일반 텍스트라 이미지에 넣지 않고 "설명 텍스트 복사" 버튼으로 제공
 const CHANNEL = new URLSearchParams(location.search).get('channel') || '';
 // Shopee 상세 설명 이미지는 최대 12장 (Lazada 는 제한 표시 안 함)
 const SHOPEE_MAX_IMAGES = 12;
 const shopeeLimit = () => CHANNEL !== 'lazada';
+// Shopee 로 열면 '이미지 HTML 복사' = 이미지 주소만 앞 12장 (설명에 글·alt 를 못 넣음) — 버튼 이름도 그에 맞게
+if (CHANNEL === 'shopee') {
+  // ZIP 은 전체 / 앞 12장 두 가지 (2026-11-11)
+  ['btnDownload12', 'btnDownload12b'].forEach(id => { const x = document.getElementById(id); if (x) x.style.display = ''; });
+  ['btnDownload', 'btnDownload2'].forEach(id => { const x = document.getElementById(id); if (x) x.textContent = '⬇ All images (ZIP)'; });
+  const b = document.getElementById('btnCopyImgHtml');
+  if (b) { b.textContent = '🖼 Copy image URLs (max ' + SHOPEE_MAX_IMAGES + ')';
+           b.title = 'Image URLs only (first ' + SHOPEE_MAX_IMAGES + ' images, one per line) — no summary, no alt text. Paste into the Shopee description.'; }
+}
 
 // ══════════════════════════════════════════
 // Intro
@@ -279,7 +299,8 @@ function mirrorToEbayFeatures(mirror) {
   const isGallery = (u, s) => /renditions\/thum|[-_]thum[-_]|thum-\d+x\d+/i.test(u || '')
     || (!(s && s.component_id) && /\/gallery\//i.test(u || ''));
   // 모바일 우선 (2026-11-09) — PC 기준 자르기(crop)가 붙은 이미지만 PC (서버 content_gen/model.best_image_url 과 같은 규칙)
-  const bestUrl = m => (m.crop && !m.use_mobile) ? (m.pc_url || m.unified_url || m.mobile_url || '') : (m.mobile_url || m.pc_url || m.unified_url || '');
+  //   Shopee·Lazada 는 PC 우선 — 서버 규격 media/shopee_lazada/spec.json rules.image_prefer 와 같게 (IMAGE_PREFER)
+  const bestUrl = m => (IMAGE_PREFER === 'pc' || (m.crop && !m.use_mobile)) ? (m.pc_url || m.unified_url || m.mobile_url || '') : (m.mobile_url || m.pc_url || m.unified_url || '');
 
   // 1) 섹션 정규화 (텍스트 분리 + 유효 미디어 + 가로 그룹 정보)
   const norm = (mirror.sections || []).map(s => {
@@ -575,7 +596,7 @@ function showPreview(html) {
   const cc = document.getElementById('charCount');
   if (cc) cc.textContent = html.length.toLocaleString();
   // Enable buttons
-  ['btnDownload', 'btnDownload2', 'btnCopyHtml', 'btnCopyImgHtml'].forEach(id => {
+  ['btnDownload', 'btnDownload2', 'btnDownload12', 'btnDownload12b', 'btnCopyHtml', 'btnCopyImgHtml'].forEach(id => {
     const b = document.getElementById(id);
     if (b) b.disabled = false;
   });
@@ -653,9 +674,10 @@ function slugFromUrl() {
   return name.replace(/[^a-zA-Z0-9_-]/g, '-').substring(0, 60);
 }
 
-async function downloadImages() {
+async function downloadImages(maxImages) {
   if (!generatedHTML || _downloading) return;
-  const btns = ['btnDownload', 'btnDownload2'].map(id => document.getElementById(id));
+  maxImages = parseInt(maxImages, 10) || 0;   // Shopee 12장 버전: 앞에서부터 N장만 (2026-11-11)
+  const btns = ['btnDownload', 'btnDownload2', 'btnDownload12', 'btnDownload12b'].map(id => document.getElementById(id));
   const info = document.getElementById('sliceInfo');
   const origLabels = btns.map(b => b && b.textContent);
   _downloading = true;
@@ -664,8 +686,12 @@ async function downloadImages() {
 
   // 미리보기에서 사용자가 편집한 내용을 그대로 반영 (편집 모드 저장 누락 대비)
   const frame = document.getElementById('previewFrame');
-  const html = (frame && frame.innerHTML.trim()) ? frame.innerHTML : generatedHTML;
+  const html = exportHtml((frame && frame.innerHTML.trim()) ? frame.innerHTML : generatedHTML);
 
+  // 이미지와 같이: 전체 HTML + 이미지 HTML(Shopee 는 이미지 주소 목록) — 이미지 렌더와 동시에 만든다 (2026-11-11)
+  const imgHtmlP = window.CLIAImageHTML ? CLIAImageHTML.build(imageHtmlOpts(html)).catch((e) => ({ error: e.message }))
+                                        : Promise.resolve({ error: 'image HTML not available' });
+  const summaryP = pdpSummaryHtml().catch((e) => ({ error: e.message }));   // 전체 HTML 맨 위 PDP 요약
   try {
     const resp = await fetch(API_BASE + '/api/render-slices', {
       method: 'POST',
@@ -679,6 +705,7 @@ async function downloadImages() {
         format: document.getElementById('sliceFormat').value || 'jpeg',
         name: slugFromUrl(),
         medium: MEDIUM,
+        ...(maxImages ? { maxImages } : {}),
       }),
       signal: AbortSignal.timeout(10 * 60 * 1000),
     });
@@ -687,10 +714,25 @@ async function downloadImages() {
       try { msg = (await resp.json()).error || msg; } catch (_) {}
       throw new Error(msg);
     }
-    const blob = await resp.blob();
+    let blob = await resp.blob(), htmlNote = '';
+    try {
+      if (info) info.textContent = 'adding HTML files…';
+      const [JSZip, ih, top] = await Promise.all([loadJSZip(), imgHtmlP, summaryP]);
+      const zip = await JSZip.loadAsync(blob), base = slugFromUrl();
+      // 내려받는 HTML 은 맨 위에 UTF-8 표시 — 조각 HTML 을 브라우저가 다른 인코딩으로 읽어 태국어가 깨지지 않게 (2026-11-11)
+      const U8 = '<meta charset="utf-8">\n';
+      const topHtml = typeof top === 'string' ? top : '';
+      if (top && top.error) htmlNote += ' (HTML without summary: ' + top.error + ')';
+      zip.file(base + '.html', U8 + (topHtml ? topHtml + '\n' : '') + html);   // 전체 HTML = 맨 위 PDP 요약 + 미리보기 그대로
+      if (ih && !ih.error) {
+        zip.file(ih.kind === 'urls' ? base + '-image-urls.txt' : base + '-image.html', (ih.kind === 'urls' ? '' : U8) + ih.text + '\n');
+        if (ih.summaryErr) htmlNote += ' (image HTML without summary: ' + ih.summaryErr + ')';
+      } else htmlNote += ' (image HTML failed: ' + ((ih && ih.error) || '?') + ')';
+      blob = await zip.generateAsync({ type: 'blob' });
+    } catch (e) { htmlNote = ' (HTML files not added: ' + e.message + ')'; }
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = slugFromUrl() + '-images-' + Date.now() + '.zip';
+    a.download = slugFromUrl() + '-images' + (maxImages ? '-' + maxImages : '') + '-' + Date.now() + '.zip';
     a.click();
     URL.revokeObjectURL(a.href);
 
@@ -701,7 +743,13 @@ async function downloadImages() {
       if (man.length) {
         const maxH = Math.max(...man.map(m => m.height));
         const maxKb = Math.round(Math.max(...man.map(m => m.bytes)) / 1024);
-        summary = `${man.length} images · ${man[0].width}px wide · tallest ${maxH}px · largest ${maxKb}KB · ${summary}`;
+        const total = parseInt(resp.headers.get('X-Slice-Total'), 10) || man.length;
+        summary = `${man.length}${total > man.length ? ' of ' + total : ''} images · ${man[0].width}px wide · tallest ${maxH}px · largest ${maxKb}KB · ${summary}`;
+        if (CHANNEL === 'shopee' && man.length > SHOPEE_MAX_IMAGES) {      // 전체 ZIP: 12장 버전도 있으니 알림만
+          if (info) info.textContent = '✓ ' + summary;
+          setStatus(`✓ Downloaded ${summary} — Shopee takes up to ${SHOPEE_MAX_IMAGES}; use “12 images (ZIP)” for the first ${SHOPEE_MAX_IMAGES}.${htmlNote}`, 'ok');
+          return;
+        }
         if (shopeeLimit() && man.length > SHOPEE_MAX_IMAGES) {
           const msg = `Shopee accepts up to ${SHOPEE_MAX_IMAGES} images, but this export has ${man.length}. Delete some sections with Edit, then download again.`;
           if (info) info.textContent = '⚠ ' + summary;
@@ -712,7 +760,7 @@ async function downloadImages() {
       }
     } catch (_) {}
     if (info) info.textContent = '✓ ' + summary;
-    setStatus('✓ Downloaded ' + summary, 'ok');
+    setStatus('✓ Downloaded ' + summary + ' + HTML' + htmlNote, htmlNote ? 'err' : 'ok');
   } catch (e) {
     const hint = /Failed to fetch|NetworkError|abort/i.test(e.message)
       ? 'Cannot reach the render server. Run node server.js first.'
@@ -727,10 +775,28 @@ async function downloadImages() {
 }
 
 // 이미지형 HTML: 미리보기를 업로드 규격 이미지로 만들어 올리고 그 이미지들을 쌓은 HTML 복사 (shared/clia-image-html.js)
+function imageHtmlOpts(html) {
+  return { html, apiBase: typeof API_BASE !== 'undefined' ? API_BASE : '',
+           // PDP 이미지 위에 그 제품의 요약 설명(태국어)을 붙인다 (2026-11-10)
+           summaryUrl: () => (document.getElementById('pdpUrl').value || '').trim(),
+           // Shopee: 설명에 글·alt 를 못 넣으므로 이미지 주소만, 앞 12장 (2026-11-10)
+           urlsOnly: CHANNEL === 'shopee' ? SHOPEE_MAX_IMAGES : 0 };
+}
 function copyImageHTML() {
   if (!window.CLIAImageHTML) return;
-  CLIAImageHTML.copy({ html: () => generatedHTML, apiBase: typeof API_BASE !== 'undefined' ? API_BASE : '',
+  CLIAImageHTML.copy({ ...imageHtmlOpts(() => exportHtml(generatedHTML)),
                        button: document.getElementById('btnCopyImgHtml'), isEditing: () => editMode });
+}
+// ZIP 에 HTML 도 같이 넣기 (2026-11-11): 같은 서버의 jszip 을 처음 한 번만 불러온다
+let _jszipP = null;
+function loadJSZip() {
+  if (window.JSZip) return Promise.resolve(window.JSZip);
+  return _jszipP || (_jszipP = new Promise((ok, no) => {
+    const sc = document.createElement('script');
+    sc.src = (typeof API_BASE !== 'undefined' && API_BASE ? API_BASE : '..') + '/node_modules/jszip/dist/jszip.min.js';
+    sc.onload = () => ok(window.JSZip); sc.onerror = () => { _jszipP = null; no(new Error('jszip load failed')); };
+    document.head.appendChild(sc);
+  }));
 }
 
 // Shopee 설명란 텍스트: 허브 제품 상세에서 작성한 리스팅 문구(현재 버전)를 Shopee 형식 일반 텍스트로 복사
@@ -755,14 +821,28 @@ function copyListingText() {
   });
 }
 
-function copyHTML() {
+// 전체 HTML 맨 위의 PDP 요약(태국어) — 제품 URL 마다 한 번만 받아 둔다 (2026-11-11)
+const _summaryCache = {};
+function pdpSummaryHtml() {
+  const u = (document.getElementById('pdpUrl').value || '').trim();
+  if (!u) return Promise.resolve('');
+  return _summaryCache[u] || (_summaryCache[u] = fetch(API_BASE + '/api/v1/pdp-summary', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: u }),
+  }).then(async (x) => { const j = await x.json().catch(() => ({})); if (!x.ok || !j.html) throw new Error(j.error || 'HTTP ' + x.status); return j.html; })
+    .catch((e) => { delete _summaryCache[u]; throw e; }));
+}
+async function copyHTML() {
   if (!generatedHTML) return;
-  navigator.clipboard.writeText(generatedHTML).then(() => {
-    const btn = document.getElementById('btnCopyHtml');
-    const orig = btn.textContent;
-    btn.textContent = '✓ Copied!';
-    setTimeout(() => btn.textContent = orig, 1500);
-  });
+  const btn = document.getElementById('btnCopyHtml'), orig = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳';
+  let out = exportHtml(generatedHTML), note = '';
+  try { const top = await pdpSummaryHtml(); if (top) out = top + '\n' + out; }
+  catch (e) { note = e.message; }
+  try { await navigator.clipboard.writeText(out); btn.textContent = note ? '✓ Copied (no summary)' : '✓ Copied!'; }
+  catch (_) { btn.textContent = orig; alert('Copy failed'); }
+  if (note) setStatus('⚠ HTML copied without the product summary: ' + note, 'err');
+  btn.disabled = false;
+  setTimeout(() => btn.textContent = orig, 2000);
 }
 
 // ══════════════════════════════════════════
@@ -1268,6 +1348,7 @@ function resetAll() {
   document.getElementById('charCount').textContent = '0';
   document.getElementById('btnDownload').disabled = true;
   document.getElementById('btnDownload2').disabled = true;
+  ['btnDownload12', 'btnDownload12b'].forEach(id => { const x = document.getElementById(id); if (x) x.disabled = true; });
   document.getElementById('btnCopyHtml').disabled = true;
   if (document.getElementById('btnCopyImgHtml')) document.getElementById('btnCopyImgHtml').disabled = true;
   document.getElementById('sectionsList').innerHTML = '';

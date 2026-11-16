@@ -7,7 +7,7 @@ FROM mcr.microsoft.com/playwright/python:v1.55.0-noble
 RUN apt-get update \
  && apt-get install -y --no-install-recommends curl ca-certificates gnupg \
  && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
- && apt-get install -y --no-install-recommends nodejs ffmpeg \
+ && apt-get install -y --no-install-recommends nodejs ffmpeg tini \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -25,11 +25,15 @@ RUN pip install --no-cache-dir --break-system-packages -r crawler-py/requirement
 COPY . .
 RUN chmod +x docker-entrypoint.sh
 
+# GOOGLE_GENAI_API_VERSION=beta: google-genai 3.x 는 기본 API 판이 v1 로 바뀌어 gemini-2.5 모델의 시스템 지시문·JSON 스키마 호출이
+#   거절된다(400 "Developer instruction is not enabled for api version v1") → 예전처럼 v1beta 를 쓰게 한다
 ENV NODE_ENV=production \
     PORT=3001 \
     CRAWLER_PYTHON=python3 \
-    PYTHONIOENCODING=utf-8
+    PYTHONIOENCODING=utf-8 \
+    GOOGLE_GENAI_API_VERSION=beta
 EXPOSE 3001
 
-ENTRYPOINT ["./docker-entrypoint.sh"]
+# tini 를 PID 1 로: node 는 PID 1 일 때 고아 자식(Chromium 등)을 거두지 않아 좀비가 쌓인다
+ENTRYPOINT ["/usr/bin/tini", "--", "./docker-entrypoint.sh"]
 CMD ["node", "server.js"]

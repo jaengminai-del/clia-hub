@@ -63,12 +63,10 @@ def main():
     src = {}
     if (out / "source.json").exists():
         src = json.loads((out / "source.json").read_text(encoding="utf-8"))
+    import llm_claude
     key = os.getenv("GEMINI_API_KEY", "")
-    if not key:
-        sys.exit("GEMINI_API_KEY is not set")
-
-    from google import genai
-    from google.genai import types
+    if not key and not llm_claude.available():
+        sys.exit("AI key is not set: ANTHROPIC_API_KEY or GEMINI_API_KEY")
 
     prompt = (
         f"Product page text (crawled from {src.get('url', 'LG.com')}):\n\n"
@@ -77,6 +75,16 @@ def main():
         "grounded in the page, with the heading of the supporting section as `source`, "
         "and 10-15 target keywords (short phrases, most important first)."
     )
+    # Gemini 키가 있으면 Gemini 로 만든다 — Claude 는 Gemini 키가 없는 서버에서만 (llm_claude.available)
+    if llm_claude.available():
+        data = llm_claude.vision_json([prompt], GeoAssets, label="geo", system=SYSTEM, max_tokens=16000)
+        data["model"] = llm_claude.CLAUDE_MODEL
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stdout.write(json.dumps(data, ensure_ascii=False))
+        return
+
+    from google import genai
+    from google.genai import types
     client = genai.Client(api_key=key)
     model = GEMINI_MODEL
     for attempt in range(1, 4):
