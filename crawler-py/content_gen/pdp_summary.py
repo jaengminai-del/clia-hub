@@ -97,8 +97,10 @@ def usp_list(mirror: dict) -> list:
     섹션 하나 = USP 하나 (제목: 눈썹 글이 있으면 그것, 없으면 첫 ## 제목), 카드 줄은 카드 하나 = USP 하나.
     스펙 표·각주(*) 제외. 같은 기능이 두 번 나오면(제목이 같거나 한쪽 제목이 다른 쪽에 통째로 들어 있으면) 하나로."""
     from . import load_medium
-    from .model import build_blocks
-    blocks = build_blocks(mirror, load_medium("shopee_lazada")["spec"].get("rules", {}))
+    from .model import build_blocks, set_image_prefer
+    rules = load_medium("shopee_lazada")["spec"].get("rules", {})
+    set_image_prefer(rules.get("image_prefer", "mobile"))
+    blocks = build_blocks(mirror, rules)
     texts = []
     for bl in blocks:
         if bl["kind"] == "section":

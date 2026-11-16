@@ -93,7 +93,9 @@
     "text_alignment": "center",
     "legacy_gallery_path_filter": false,
     "use_group_heading": true,
-    "unify_awards": true
+    "unify_awards": true,
+    "image_prefer": "pc",
+    "_image_prefer_note": "Shopee·Lazada 는 PC 우선 (TH 배치 Live 결과와 같게 — 모바일 우선으로 바꾸려면 mobile)"
   },
   "layouts": {
     "_note": "크롤 컴포넌트의 layout_type → eBay 렌더 패턴. kv(문서 최상단 히어로)·overlay·card_row·spec_table은 별도 처리.",

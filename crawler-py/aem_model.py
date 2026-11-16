@@ -333,6 +333,16 @@ def _layout(ty: str, media: list) -> str:
     return "hero_full_width"
 
 
+def _overlay(node: dict) -> dict:
+    """heroimage 의 텍스트 위치(텍스트가 이미지 위에 얹힘) → component_parser._text_overlay 와 같은 형식.
+    원본 CLIA(aem_overview._overlay, 2026-11-09)와 같은 규칙 — 새 형식 페이지와 똑같이 모바일 이미지·빈 띠 자르기가 적용된다.
+    PC: textBlockHorizontalAlign (…pos-left|right|center) · 모바일: textBlockVertical(IconBlock)MobileAlign."""
+    h = str(node.get("textBlockHorizontalAlign") or "")
+    pc = next((x for x in ("left", "right", "center") if h.endswith("pos-" + x)), "center")
+    mv = " ".join(str(node.get(k) or "") for k in ("textBlockVerticalMobileAlign", "textBlockVerticalIconBlockMobileAlign"))
+    return {"pc": pc, "mobile": next((x for x in ("top", "bottom", "middle") if x in mv), "top")}
+
+
 def extract(html: str, url: str):
     """→ mirror dict (product_title 은 호출 쪽에서 채움) 또는 None."""
     ov = _overview(html, url)
@@ -404,6 +414,7 @@ def extract(html: str, url: str):
                          "item_group": False, "group_heading": "", "media": imgs + [m for m in media if m["type"] == "video"][:1],
                          "component_id": cid, "component_dom_index": idx,
                          "layout_type": _layout(ty, imgs), "columns": 1, "column_count": 1,
+                         **({"text_overlay": _overlay(c)} if (name == "heroimage" and text and imgs) else {}),
                          "_aem_path": rp.rsplit("/jcr:content/", 1)[-1][:120]})
     feats = sum(len(s["media"]) for s in sections)
     return {"sections": sections, "note": "lg.com 원문 미러 (페이지 컴포넌트 모델) — 모든 텍스트/URL은 원본 그대로, AI 생성 서술 없음",

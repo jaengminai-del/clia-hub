@@ -227,6 +227,10 @@ const API_BASE = (location.protocol === 'file:' || !location.origin || location.
   : location.origin;
 // 1차 컨텐츠 생성 매체 규격 (crawler-py/content_gen/media/shopee_lazada — Shopee·Lazada 공통)
 const MEDIUM = 'shopee_lazada';
+// 이미지 우선순위 — 서버 규격(media/shopee_lazada/spec.json rules.image_prefer)과 같은 값으로 둔다: 'pc' | 'mobile'
+const IMAGE_PREFER = 'pc';
+// 내보내는 HTML(Copy HTML · ZIP · 이미지 HTML · 슬라이스)에는 편집 화면용 동영상 표시(data-video-src)를 넣지 않는다
+const exportHtml = h => String(h || '').replace(/\s+data-video-src="[^"]*"/gi, '');
 // 허브가 연 채널 (?channel=shopee|lazada). 리스팅 문구(허브 제품 상세에서 작성): Lazada 는 HTML 맨 위·맨 아래 카드,
 // Shopee 는 설명란이 일반 텍스트라 이미지에 넣지 않고 "설명 텍스트 복사" 버튼으로 제공
 const CHANNEL = new URLSearchParams(location.search).get('channel') || '';
@@ -290,7 +294,8 @@ function mirrorToEbayFeatures(mirror) {
   const isGallery = (u, s) => /renditions\/thum|[-_]thum[-_]|thum-\d+x\d+/i.test(u || '')
     || (!(s && s.component_id) && /\/gallery\//i.test(u || ''));
   // 모바일 우선 (2026-11-09) — PC 기준 자르기(crop)가 붙은 이미지만 PC (서버 content_gen/model.best_image_url 과 같은 규칙)
-  const bestUrl = m => (m.crop && !m.use_mobile) ? (m.pc_url || m.unified_url || m.mobile_url || '') : (m.mobile_url || m.pc_url || m.unified_url || '');
+  //   Shopee·Lazada 는 PC 우선 — 서버 규격 media/shopee_lazada/spec.json rules.image_prefer 와 같게 (IMAGE_PREFER)
+  const bestUrl = m => (IMAGE_PREFER === 'pc' || (m.crop && !m.use_mobile)) ? (m.pc_url || m.unified_url || m.mobile_url || '') : (m.mobile_url || m.pc_url || m.unified_url || '');
 
   // 1) 섹션 정규화 (텍스트 분리 + 유효 미디어 + 가로 그룹 정보)
   const norm = (mirror.sections || []).map(s => {
@@ -676,7 +681,7 @@ async function downloadImages(maxImages) {
 
   // 미리보기에서 사용자가 편집한 내용을 그대로 반영 (편집 모드 저장 누락 대비)
   const frame = document.getElementById('previewFrame');
-  const html = (frame && frame.innerHTML.trim()) ? frame.innerHTML : generatedHTML;
+  const html = exportHtml((frame && frame.innerHTML.trim()) ? frame.innerHTML : generatedHTML);
 
   // 이미지와 같이: 전체 HTML + 이미지 HTML(Shopee 는 이미지 주소 목록) — 이미지 렌더와 동시에 만든다 (2026-11-11)
   const imgHtmlP = window.CLIAImageHTML ? CLIAImageHTML.build(imageHtmlOpts(html)).catch((e) => ({ error: e.message }))
@@ -774,7 +779,7 @@ function imageHtmlOpts(html) {
 }
 function copyImageHTML() {
   if (!window.CLIAImageHTML) return;
-  CLIAImageHTML.copy({ ...imageHtmlOpts(() => generatedHTML),
+  CLIAImageHTML.copy({ ...imageHtmlOpts(() => exportHtml(generatedHTML)),
                        button: document.getElementById('btnCopyImgHtml'), isEditing: () => editMode });
 }
 // ZIP 에 HTML 도 같이 넣기 (2026-11-11): 같은 서버의 jszip 을 처음 한 번만 불러온다
@@ -825,8 +830,8 @@ async function copyHTML() {
   if (!generatedHTML) return;
   const btn = document.getElementById('btnCopyHtml'), orig = btn.textContent;
   btn.disabled = true; btn.textContent = '⏳';
-  let out = generatedHTML, note = '';
-  try { const top = await pdpSummaryHtml(); if (top) out = top + '\n' + generatedHTML; }
+  let out = exportHtml(generatedHTML), note = '';
+  try { const top = await pdpSummaryHtml(); if (top) out = top + '\n' + out; }
   catch (e) { note = e.message; }
   try { await navigator.clipboard.writeText(out); btn.textContent = note ? '✓ Copied (no summary)' : '✓ Copied!'; }
   catch (_) { btn.textContent = orig; alert('Copy failed'); }

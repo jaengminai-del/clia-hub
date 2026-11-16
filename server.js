@@ -2515,8 +2515,11 @@ const sliceStore = require('./crawl-store');
 
 app.post('/api/v1/slice-html', async (req, res) => {
   const path = require('path'), fs = require('fs'), crypto = require('crypto');
-  const { html, medium = 'shopee_lazada', name = 'pdp', rev = '' } = req.body || {};
-  if (typeof html !== 'string' || !html) return res.status(400).json({ error: 'html required' });
+  const { html: rawHtml, medium = 'shopee_lazada', name = 'pdp', rev = '' } = req.body || {};
+  if (typeof rawHtml !== 'string' || !rawHtml) return res.status(400).json({ error: 'html required' });
+  // 편집 화면용 동영상 표시(data-video-src, 동영상 장면 고르기)는 그림에 영향이 없다 — 빼고 해시해야
+  // 같은 컨텐츠가 표시 유무에 따라 다른 주소(새 슬라이스 묶음)로 갈라지지 않는다
+  const html = rawHtml.replace(/\s+data-video-src="[^"]*"/gi, '');
   const med = /^[a-z_]+$/.test(medium) ? medium : 'shopee_lazada';
   // rev: 같은 HTML 이라도 자르기 규칙이 바뀐 것만 새로 그리게 하는 선택 값 (없으면 기존 해시 그대로)
   const rv = /^[\w.-]{1,20}$/.test(String(rev)) ? `|${rev}` : '';

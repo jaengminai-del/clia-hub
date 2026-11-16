@@ -618,8 +618,12 @@ def _mark_video(section: dict, html: str) -> str:
     imgs = usable_media(section)
     if not vid or len(imgs) != 1:
         return html
-    url = best_image_url(imgs[0])
-    return html.replace(f'src="{url}"', f'src="{url}" data-video-src="{escape(vid)}"')
+    # 그려진 이미지 주소는 매체의 이미지 우선순위(rules.image_prefer)·오버레이 모바일 전환에 따라 PC/모바일 중 하나다
+    m = imgs[0]
+    for url in dict.fromkeys(u for u in (best_image_url(m), m.get("pc_url"), m.get("mobile_url"), m.get("unified_url")) if u):
+        if f'src="{url}"' in html:
+            return html.replace(f'src="{url}"', f'src="{url}" data-video-src="{escape(vid)}"')
+    return html
 
 
 def render_blocks(st: Style, blocks: list, align: str) -> list:

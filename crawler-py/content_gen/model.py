@@ -58,12 +58,24 @@ _LEGACY_GALLERY_RE = re.compile(r"/gallery/", re.I)
 _ONOFF_RE = re.compile(r"[_-](on|off)\.(png|jpe?g)$", re.I)
 
 
+_IMAGE_PREFER = "mobile"
+
+
+def set_image_prefer(prefer: str) -> None:
+    """매체 규격 rules.image_prefer ("mobile" | "pc") 를 적용한다 — content_gen.generate 가 렌더 전에 부른다.
+    원본 CLIA(2026-11-09)는 eBay·Shopee/Lazada 모두 모바일 우선, TH 배치(Shopee/Lazada Live 결과)는 PC 우선으로
+    만들어져 있어, 두 저장소를 합칠 때 매체별로 고를 수 있게 했다 (media/<medium>/spec.json rules.image_prefer)."""
+    global _IMAGE_PREFER
+    _IMAGE_PREFER = "pc" if str(prefer or "").strip().lower() == "pc" else "mobile"
+
+
 def best_image_url(media: dict) -> str:
-    """미디어 객체에서 최적 이미지 URL — 모바일 우선 (2026-11-09, 사용자 결정: eBay·Shopee/Lazada 는 모바일 환경 기준).
+    """미디어 객체에서 최적 이미지 URL — 기본은 모바일 우선 (2026-11-09, 사용자 결정: eBay·Shopee/Lazada 는 모바일 환경 기준).
     예외: PC 이미지 기준으로 계산된 자르기(crop: 수상 배지·PC 빈 영역)가 붙어 있고 모바일로 바꾸지 않은 이미지는 PC 유지
-    (자르기 좌표가 PC 이미지 픽셀 기준). Amazon 은 별도 선택(content_gen/amazon/features._best_url, PC·모바일 자동 선택)."""
+    (자르기 좌표가 PC 이미지 픽셀 기준). Amazon 은 별도 선택(content_gen/amazon/features._best_url, PC·모바일 자동 선택).
+    rules.image_prefer = "pc" 인 매체는 PC 우선 (set_image_prefer)."""
     pc, mob = media.get("pc_url") or "", media.get("mobile_url") or ""
-    if media.get("crop") and not media.get("use_mobile"):
+    if _IMAGE_PREFER == "pc" or (media.get("crop") and not media.get("use_mobile")):
         return pc or media.get("unified_url") or mob
     return mob or pc or media.get("unified_url") or ""
 
