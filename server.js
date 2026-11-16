@@ -14,6 +14,8 @@ app.use(require('./video-frames').router); // 동영상 카드 장면 고르기 
 app.use('/crawler-py', (req, res) => res.sendStatus(404)); // 크롤러 소스·산출물은 정적 노출 금지
 // 첫 주소(/)는 바로 허브로 보낸다 — index.html 의 meta refresh 는 허브(2MB)가 뜰 때까지 링크만 있는 중간 페이지가 잠깐 보였다
 app.get('/', (req, res) => res.redirect(302, '/clia/' + req.url.slice(req.path.length)));
+// 탭 아이콘: 아이콘을 따로 지정하지 않은 화면(빌더 등)에서 브라우저가 찾는 기본 주소
+app.get('/favicon.ico', (req, res) => res.redirect(302, '/shared/assets/clia-icon.svg'));
 app.use(express.static('.'));
 
 // Health check
