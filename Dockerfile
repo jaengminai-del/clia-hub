@@ -7,7 +7,7 @@ FROM mcr.microsoft.com/playwright/python:v1.55.0-noble
 RUN apt-get update \
  && apt-get install -y --no-install-recommends curl ca-certificates gnupg \
  && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
- && apt-get install -y --no-install-recommends nodejs ffmpeg \
+ && apt-get install -y --no-install-recommends nodejs ffmpeg tini \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -31,5 +31,6 @@ ENV NODE_ENV=production \
     PYTHONIOENCODING=utf-8
 EXPOSE 3001
 
-ENTRYPOINT ["./docker-entrypoint.sh"]
+# tini 를 PID 1 로: node 는 PID 1 일 때 고아 자식(Chromium 등)을 거두지 않아 좀비가 쌓인다
+ENTRYPOINT ["/usr/bin/tini", "--", "./docker-entrypoint.sh"]
 CMD ["node", "server.js"]

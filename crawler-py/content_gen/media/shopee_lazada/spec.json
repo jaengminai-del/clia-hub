@@ -20,13 +20,14 @@
       "body_min_px": 13,
       "body_max_px": 16
     },
-    "headline_line_height": 1.0,
-    "body_line_height": 1.28,
+    "headline_line_height": "52px",
+    "body_line_height": "36px",
     "spec_table": {
       "_note": "261007 — 본문 24px보다 작게 해 표 길이 유지",
       "group_px": 20,
       "cell_px": 18
-    }
+    },
+    "_note_line_height": "261110 — 태국어는 성조 기호·아래 모음 때문에 글자 높이가 최대 1.39em (Live 155개 실측)이라 헤드라인 1.0·본문 1.28 에서 두 줄이 겹쳤다. 사용자 지정: 헤드라인(36px) 줄간격 52px, 본문(24px) 36px"
   },
   "colors": {
     "headline": "#111111",
@@ -51,7 +52,11 @@
     "logo_fit": true,
     "logo_fill": 0.8,
     "frame_bg": "#FFFFFF",
-    "_legacy": {"logo_column_width": "30%", "logo_max_px": 180, "logo_padding_px": 24}
+    "_legacy": {
+      "logo_column_width": "30%",
+      "logo_max_px": 180,
+      "logo_padding_px": 24
+    }
   },
   "stacked_image": {
     "_note": "여백 없이 이어 붙은 히어로(no-spacing 연속 ST0001): 이미지들을 붙여 한 장처럼, 바깥에만 둥근 모서리",
@@ -120,11 +125,11 @@
     "viewport_px": 1600
   },
   "output": {
-    "_note": "inline_css: <style> 규칙을 각 요소에 인라인으로 복사(편집기가 <style> 을 지워도 유지). font_face: LG 글꼴 @font-face — base_url 서버의 /fonts/ 를 쓴다(<style> 허용 편집기에서만 적용).",
+    "_note": "inline_css: <style> 규칙을 각 요소에 인라인으로 복사(편집기가 <style> 을 지워도 유지). font_face: LG 글꼴 @font-face — base_url 서버의 /fonts/ 를 쓴다(<style> 허용 편집기에서만 적용). LINESeedSansTH: 태국어 글자용 (LG EI 뒤 순서, 2026-11-09).",
     "forbid_active_content": true,
     "inline_css": true,
     "font_face": {
-      "base_url": "https://clia-hub-production.up.railway.app/fonts/",
+      "base_url": "https://clia-hub-production-699d.up.railway.app/fonts/",
       "faces": [
         {
           "family": "LGEIText",
@@ -170,6 +175,36 @@
           "family": "LGEIHeadline",
           "weight": 700,
           "file": "LGEIHeadlineTTF-Bold"
+        },
+        {
+          "family": "LINESeedSansTH",
+          "weight": 100,
+          "file": "LINESeedSansTH-Thin"
+        },
+        {
+          "family": "LINESeedSansTH",
+          "weight": 300,
+          "file": "LINESeedSansTH-Regular"
+        },
+        {
+          "family": "LINESeedSansTH",
+          "weight": 400,
+          "file": "LINESeedSansTH-Regular"
+        },
+        {
+          "family": "LINESeedSansTH",
+          "weight": 700,
+          "file": "LINESeedSansTH-Bold"
+        },
+        {
+          "family": "LINESeedSansTH",
+          "weight": 800,
+          "file": "LINESeedSansTH-ExtraBold"
+        },
+        {
+          "family": "LINESeedSansTH",
+          "weight": 900,
+          "file": "LINESeedSansTH-Heavy"
         }
       ]
     }

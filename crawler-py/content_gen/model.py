@@ -175,6 +175,25 @@ def _drop_gallery_media(sections: list, legacy: bool) -> list:
     return [dict(s, media=[m for m in s.get("media", []) if keep(m, s)]) for s in sections]
 
 
+def _carry_section_titles(sections: list) -> list:
+    """예전 형식 PDP(AEM 모델)의 섹션 제목(sectiontitle)은 글만 있는 별도 섹션이라 '글만 있는 섹션 제외'
+    규칙에 걸려 빠졌다 — 바로 다음 섹션의 맨 위 제목으로 붙인다 (LG 원문 글을 빠짐없이, 2026-11-10)."""
+    out, pending = [], []
+    for s in sections:
+        if s.get("component_id") == "AEM:sectiontitle" and not usable_media(s) and not s.get("specs"):
+            pending.append((s.get("text") or "").strip())
+            continue
+        if pending and not (usable_media(s) or s.get("specs") or s.get("layout_type") == "card_row"):
+            out.append(s)          # 각주·글만 있는 섹션은 건너뛰고 다음 그림 있는 섹션에 붙인다
+            continue
+        if pending:
+            s = dict(s)
+            s["text"] = "\n".join([t for t in pending if t] + [s.get("text") or ""]).strip()
+            pending = []
+        out.append(s)
+    return out
+
+
 def build_blocks(mirror: dict, rules: dict) -> list:
     """mirror → 블록 목록 (화면 순서)."""
     skip_layouts = set(rules.get("skip_layouts") or [])
@@ -184,6 +203,7 @@ def build_blocks(mirror: dict, rules: dict) -> list:
     sections = _merge_card_rows(sections, int(rules.get("max_card_columns") or 4),
                                 bool(rules.get("use_group_heading")))
 
+    sections = _carry_section_titles(sections)
     blocks, kv_seen = [], False
     for s in sections:
         if rules.get("skip_disclaimer", True) and is_disclaimer(s):
@@ -218,7 +238,39 @@ def build_blocks(mirror: dict, rules: dict) -> list:
         blocks.append({"kind": "section", "section": s, "kv": kv and not award, "award": award})
     if rules.get("unify_awards"):
         _spread_award_rows(blocks)
+    n_img = sum(len(usable_media(b["section"])) for b in blocks if b["kind"] == "section") \
+        + sum(len(b.get("cards") or []) for b in blocks if b["kind"] == "card_row")
+    if n_img < int(rules.get("gallery_fallback_min_images", 2)):
+        blocks = _gallery_fallback(mirror, mirror.get("sections") or [], rules) + blocks
     return blocks
+
+
+def _gallery_fallback(mirror: dict, sections: list, rules: dict) -> list:
+    """이미지가 2장 미만일 때(rules.gallery_fallback_min_images; 예전 형식·번들 페이지: 기능 이미지 없이 제품 갤러리만 있음) 빈 컨텐츠가
+    되지 않도록 제품 갤러리 사진과 핵심 특징 글로 채운다 (2026-11-06 TH 배치: 145개 중 다수가 빈 HTML).
+    이미지가 하나라도 있는 일반 페이지는 건드리지 않는다. rules.gallery_fallback_max 로 장수 조절(기본 8, 0=끄기)."""
+    limit = int(rules.get("gallery_fallback_max", 8) or 0)
+    def original(g):   # DAM 렌디션(.../jcr:content/renditions/thum-WxH.jpeg) → 원본 — usable_media 의 썸네일 제외를 피함
+        u = re.sub(r"/jcr:content/renditions/[^?]*", "", best_image_url(g)).split("?")[0]
+        return {"pc_url": u, "mobile_url": "", "unified_url": "", "type": "image", "role": "gallery_fallback"}
+    gal = [original(g) for g in (mirror.get("_gallery") or []) if best_image_url(g)][:limit]
+    if not gal:
+        return []
+    is_intro = lambda s: ((s.get("text") or "").strip() and not s.get("specs") and not is_disclaimer(s)
+                          and any(k in (s.get("text") or "") for k in ("คุณลักษณะที่สำคัญ", "Key Features")))
+    # 제품명(# 제목)으로 시작하는 요약 섹션 → '핵심 특징' 이 있는 섹션 → 아무 글 섹션 순
+    intro = next((s for s in sections if is_intro(s) and (s.get("text") or "").lstrip().startswith("# ")), None) \
+        or next((s for s in sections if is_intro(s)), None)
+    if intro is None:
+        intro = next((s for s in sections if (s.get("text") or "").strip() and not s.get("specs")
+                      and not is_disclaimer(s)), None)
+    out = [{"kind": "section", "kv": True, "award": False,
+            "section": {"order": "gallery-1", "text": (intro or {}).get("text", ""), "media": [gal[0]],
+                        "layout_type": "hero_full_width"}}]
+    for i, g in enumerate(gal[1:], start=2):
+        out.append({"kind": "section", "kv": False, "award": False,
+                    "section": {"order": f"gallery-{i}", "text": "", "media": [g], "layout_type": "hero_full_width"}})
+    return out
 
 
 def _spread_award_rows(blocks: list) -> None:

@@ -5,18 +5,22 @@
  * <img> 를 차례로 쌓은 HTML 을 돌려준다 → 라자다·eBay 설명란에 붙여도 미리보기와 같은 모양.
  * (마켓 편집기가 가로 배치·잘라 보이는 이미지·폰트 등을 지워도 영향 없음 — 모두 이미지에 들어 있다)
  *
- *   CLIAImageHTML.copy({ html, apiBase, button, isEditing })
+ *   CLIAImageHTML.copy({ html, apiBase, button, isEditing, summaryUrl, urlsOnly })
+ *   CLIAImageHTML.build({ html, apiBase, summaryUrl, urlsOnly }) → { text, count, kind, summaryErr }  (복사 없이 만들기만)
+ *   summaryUrl(선택, Shopee/Lazada): LG 제품 URL — 그 제품의 요약 설명(태국어)을 이미지 위에 붙인다 (2026-11-10)
+ *   urlsOnly(선택, Shopee): 숫자 n — HTML 대신 이미지 주소만 앞에서부터 n장, 한 줄에 하나 (요약·alt·태그 없음).
+ *     Shopee 설명은 글·alt 를 받지 않고 이미지(최대 12장)만 넣기 때문 (2026-11-10)
  */
 (function () {
   const T = {
-    en: { busy: '⏳ Building images…', done: (n) => `✓ Copied (${n} images)`, lock: 'Please press Lock first to finish editing.',
-          fail: 'Image HTML failed: ', manual: 'Copy the HTML below (Ctrl/⌘+C) and paste it into the marketplace HTML editor.', close: 'Close', copy: 'Copy' },
-    ko: { busy: '⏳ 이미지 만드는 중…', done: (n) => `✓ 복사됨 (이미지 ${n}장)`, lock: '편집을 마치려면 먼저 잠금(Lock)을 눌러 주세요.',
-          fail: '이미지형 HTML 생성 실패: ', manual: '아래 HTML 을 복사(Ctrl/⌘+C)해서 마켓 HTML 편집기에 붙여 넣으세요.', close: '닫기', copy: '복사' },
-    de: { busy: '⏳ Bilder werden erstellt…', done: (n) => `✓ Kopiert (${n} Bilder)`, lock: 'Bitte zuerst „Sperren“ drücken.',
-          fail: 'Bild-HTML fehlgeschlagen: ', manual: 'HTML unten kopieren (Strg/⌘+C) und in den HTML-Editor einfügen.', close: 'Schließen', copy: 'Kopieren' },
-    th: { busy: '⏳ กำลังสร้างรูปภาพ…', done: (n) => `✓ คัดลอกแล้ว (${n} รูป)`, lock: 'กรุณากดล็อกก่อนเพื่อจบการแก้ไข',
-          fail: 'สร้าง HTML รูปภาพไม่สำเร็จ: ', manual: 'คัดลอก HTML ด้านล่าง (Ctrl/⌘+C) แล้ววางในตัวแก้ไข HTML ของมาร์เก็ตเพลส', close: 'ปิด', copy: 'คัดลอก' },
+    en: { busy: '⏳ Building images…', done: (n) => `✓ Copied (${n} images)`, cut: (n, all) => `✓ Copied ${n} image URLs (first ${n} of ${all})`, lock: 'Please press Lock first to finish editing.',
+          fail: 'Image HTML failed: ', manual: 'Copy the HTML below (Ctrl/⌘+C) and paste it into the marketplace HTML editor.', close: 'Close', copy: 'Copy', summaryFail: 'Copied the images only — the product summary could not be made: ' },
+    ko: { busy: '⏳ 이미지 만드는 중…', done: (n) => `✓ 복사됨 (이미지 ${n}장)`, cut: (n, all) => `✓ 이미지 주소 ${n}개 복사됨 (${all}장 중 앞 ${n}장)`, lock: '편집을 마치려면 먼저 잠금(Lock)을 눌러 주세요.',
+          fail: '이미지형 HTML 생성 실패: ', manual: '아래 HTML 을 복사(Ctrl/⌘+C)해서 마켓 HTML 편집기에 붙여 넣으세요.', close: '닫기', copy: '복사', summaryFail: '이미지만 복사했습니다 — 요약 설명을 만들지 못했습니다: ' },
+    de: { busy: '⏳ Bilder werden erstellt…', done: (n) => `✓ Kopiert (${n} Bilder)`, cut: (n, all) => `✓ ${n} Bild-URLs kopiert (erste ${n} von ${all})`, lock: 'Bitte zuerst „Sperren“ drücken.',
+          fail: 'Bild-HTML fehlgeschlagen: ', manual: 'HTML unten kopieren (Strg/⌘+C) und in den HTML-Editor einfügen.', close: 'Schließen', copy: 'Kopieren', summaryFail: 'Nur Bilder kopiert — Zusammenfassung fehlgeschlagen: ' },
+    th: { busy: '⏳ กำลังสร้างรูปภาพ…', done: (n) => `✓ คัดลอกแล้ว (${n} รูป)`, cut: (n, all) => `✓ คัดลอกลิงก์รูป ${n} รายการ (${n} รูปแรกจาก ${all})`, lock: 'กรุณากดล็อกก่อนเพื่อจบการแก้ไข',
+          fail: 'สร้าง HTML รูปภาพไม่สำเร็จ: ', manual: 'คัดลอก HTML ด้านล่าง (Ctrl/⌘+C) แล้ววางในตัวแก้ไข HTML ของมาร์เก็ตเพลส', close: 'ปิด', copy: 'คัดลอก', summaryFail: 'คัดลอกเฉพาะรูปภาพ — สร้างคำบรรยายสินค้าไม่สำเร็จ: ' },
   };
   const tr = () => T[(window.CLIA_LANG || document.documentElement.lang || 'en').slice(0, 2)] || T.en;
 
@@ -39,6 +43,31 @@
     ta.focus(); ta.select();
   }
 
+  // 이미지형 HTML(또는 Shopee 는 이미지 주소 목록)을 만들어 돌려준다 — 복사·ZIP 다운로드 공용 (2026-11-11)
+  //   → { text, count, kind: 'urls' | 'html', summaryErr }
+  async function build(opts) {
+    const html = typeof opts.html === 'function' ? opts.html() : opts.html;
+    if (!html) throw new Error('no HTML');
+    const nUrls = typeof opts.urlsOnly === 'function' ? opts.urlsOnly() : opts.urlsOnly;
+    const sUrl = nUrls ? '' : (typeof opts.summaryUrl === 'function' ? opts.summaryUrl() : opts.summaryUrl);
+    // 요약 설명은 이미지와 동시에 요청 (처음 한 번은 AI 가 쓰는 시간이 걸리고, 이후엔 보관본)
+    const summaryP = sUrl ? fetch((opts.apiBase || '') + '/api/v1/pdp-summary', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: sUrl }),
+    }).then(async (x) => { const j = await x.json().catch(() => ({})); if (!x.ok || !j.html) throw new Error(j.error || `HTTP ${x.status}`); return j; })
+      : Promise.resolve(null);
+    const r = await fetch((opts.apiBase || '') + '/api/v1/slice-html', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ html, medium: 'shopee_lazada' }),   // 업로드 규격(폭 1000px 등)은 Shopee/Lazada spec 공통
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok || !d.html) throw new Error(d.error || `HTTP ${r.status}`);
+    if (nUrls) return { text: (d.urls || []).slice(0, nUrls).join('\n'), count: d.count, kind: 'urls', summaryErr: '' };   // Shopee: 이미지 주소만
+    let text = d.html, summaryErr = '';
+    try { const sm = await summaryP; if (sm) text = sm.html + '\n' + d.html; }
+    catch (e) { summaryErr = e.message; }
+    return { text, count: d.count, kind: 'html', summaryErr };
+  }
+
   async function copy(opts) {
     const t = tr();
     if (opts.isEditing && opts.isEditing()) { alert(t.lock); return; }
@@ -47,16 +76,14 @@
     const btn = opts.button, orig = btn ? btn.textContent : '';
     if (btn) { btn.disabled = true; btn.textContent = t.busy; }
     try {
-      const r = await fetch((opts.apiBase || '') + '/api/v1/slice-html', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ html, medium: 'shopee_lazada' }),   // 업로드 규격(폭 1000px 등)은 Shopee/Lazada spec 공통
-      });
-      const d = await r.json().catch(() => ({}));
-      if (!r.ok || !d.html) throw new Error(d.error || `HTTP ${r.status}`);
-      try { await navigator.clipboard.writeText(d.html); }
-      catch (_) { manualModal(d.html); }
-      if (btn) { btn.textContent = t.done(d.count); setTimeout(() => { btn.textContent = orig; }, 2500); }
-      return d;
+      const nUrls = typeof opts.urlsOnly === 'function' ? opts.urlsOnly() : opts.urlsOnly;
+      const b = await build({ ...opts, html });
+      try { await navigator.clipboard.writeText(b.text); }
+      catch (_) { manualModal(b.text); }
+      if (b.summaryErr) alert(t.summaryFail + b.summaryErr);
+      const label = nUrls && b.count > nUrls ? t.cut(nUrls, b.count) : t.done(nUrls ? Math.min(b.count, nUrls) : b.count);
+      if (btn) { btn.textContent = label; setTimeout(() => { btn.textContent = orig; }, 3500); }
+      return b;
     } catch (e) {
       alert(t.fail + e.message);
       if (btn) btn.textContent = orig;
@@ -65,5 +92,5 @@
     }
   }
 
-  window.CLIAImageHTML = { copy };
+  window.CLIAImageHTML = { copy, build };
 })();

@@ -36,8 +36,8 @@ class Style:
         self.spec = spec
         self.guide = guide
         self.overlay_ids = overlay_ids
-        self.font_headline = gp1_fonts.get("headline", "'LGEIHeadline', Arial, sans-serif")
-        self.font_body = gp1_fonts.get("body", "'LGEIText', Arial, sans-serif")
+        self.font_headline = gp1_fonts.get("headline", "'LGEIHeadline', 'LINESeedSansTH', Arial, sans-serif")
+        self.font_body = gp1_fonts.get("body", "'LGEIText', 'LINESeedSansTH', Arial, sans-serif")
         self.head_lh = ty.get("headline_line_height", 1.25)
         self.body_lh = ty.get("body_line_height", 1.6)
         self.headline_color = co.get("headline", "#111111")
@@ -76,6 +76,16 @@ class Style:
 
 
 # ── 텍스트 ───────────────────────────────────────────────────────────────
+
+def tx(s) -> str:
+    """보이는 글자: HTML 이스케이프 + LG 원문 줄바꿈(U+2028)은 같은 요소 안의 <br> (2026-11-10)."""
+    return escape(s or "").replace("\u2028", "<br>")
+
+
+def attr(s) -> str:
+    """속성 값(alt 등): 줄바꿈은 공백."""
+    return escape((s or "").replace("\u2028", " "))
+
 
 def clean_line(line: str) -> str:
     """마크다운 잔여물(#, **) 제거한 순수 텍스트."""
@@ -121,22 +131,22 @@ def text_html(st: Style, text: str, component_id: str = "", first_is_title: bool
             title_pending = False   # 명시적 헤딩이 나오면 첫 줄 제목 승격 불필요
             level = len(stripped) - len(stripped.lstrip("#"))
             if level >= 3:
-                parts.append(f'<h3 style="{h_style} margin: 8px 0 6px 0; color: {st.headline_color};">{escape(content)}</h3>')
+                parts.append(f'<h3 style="{h_style} margin: 8px 0 6px 0; color: {st.headline_color};">{tx(content)}</h3>')
             else:
-                parts.append(f'<h2 style="{h_style} margin: 10px 0 8px 0; color: {st.headline_color};">{escape(content)}</h2>')
+                parts.append(f'<h2 style="{h_style} margin: 10px 0 8px 0; color: {st.headline_color};">{tx(content)}</h2>')
         elif stripped.startswith("**") and stripped.endswith("**"):
-            parts.append(f'<p style="font-family: {st.font_body}; font-weight: 700; font-size: {b_px}px; line-height: {st.body_lh}; margin: 10px 0;">{escape(content)}</p>')
+            parts.append(f'<p style="font-family: {st.font_body}; font-weight: 700; font-size: {b_px}px; line-height: {st.body_lh}; margin: 10px 0;">{tx(content)}</p>')
         elif stripped.startswith("*") or stripped.startswith("※"):
-            parts.append(f'<p class="disclaimer" style="{p_style} color: {st.disclaimer_color}; margin: 5px 0;">{escape(stripped)}</p>')
+            parts.append(f'<p class="disclaimer" style="{p_style} color: {st.disclaimer_color}; margin: 5px 0;">{tx(stripped)}</p>')
         elif title_pending:
             # 긴 서술문(본문/카피)은 헤드라인 폰트로 부풀리지 않고 본문으로 렌더 (폰트 위계 보존)
             title_pending = False
             if len(content) <= HEADLINE_MAX_CHARS:
-                parts.append(f'<h2 style="{h_style} margin: 0 0 8px 0; color: {st.headline_color};">{escape(content)}</h2>')
+                parts.append(f'<h2 style="{h_style} margin: 0 0 8px 0; color: {st.headline_color};">{tx(content)}</h2>')
             else:
-                parts.append(f'<p style="{p_style} color: {st.body_color}; margin: 10px 0;">{escape(content)}</p>')
+                parts.append(f'<p style="{p_style} color: {st.body_color}; margin: 10px 0;">{tx(content)}</p>')
         else:
-            parts.append(f'<p style="{p_style} color: {st.body_color}; margin: 10px 0;">{escape(content)}</p>')
+            parts.append(f'<p style="{p_style} color: {st.body_color}; margin: 10px 0;">{tx(content)}</p>')
 
     return "\n".join(parts)
 
@@ -154,15 +164,15 @@ def hcard(st: Style, image_url: str, lines: list, component_id: str = "") -> str
     body = " ".join(lines[1:] if title else lines)
     h = (f'<h3 style="font-family: {st.font_headline}; font-weight: 600; font-size: {h_px}px; '
          f'line-height: {st.head_lh}; margin: 0 0 10px 0; color: {st.headline_color};">'
-         f'{escape(title)}</h3>') if title else ""
+         f'{tx(title)}</h3>') if title else ""
     b = (f'<p style="font-family: {st.font_body}; font-size: {b_px}px; line-height: {st.body_lh}; '
-         f'margin: 0; color: {st.body_color};">{escape(body)}</p>') if body else ""
+         f'margin: 0; color: {st.body_color};">{tx(body)}</p>') if body else ""
     txt = (f'<div class="lg-hcard-text" style="flex: 1 1 {st.card.get("text_width", "60%")}; padding: 20px 24px 20px 0; text-align: left;">{h}{b}</div>'
            if (h or b) else "")
     img_w = st.card.get("image_width", "40%") if txt else "100%"
     return f'''
 <div class="lg-hcard" style="display: flex; align-items: center; gap: 24px; background: #FFFFFF; border: 1px solid {st.stroke}; border-radius: 16px; overflow: hidden;">
-  <div class="lg-hcard-img" style="flex: 0 0 {img_w}; max-width: {img_w};"><img src="{image_url}" alt="{escape(title)}" style="width: 100%; height: auto; display: block;"></div>
+  <div class="lg-hcard-img" style="flex: 0 0 {img_w}; max-width: {img_w};"><img src="{image_url}" alt="{attr(title)}" style="width: 100%; height: auto; display: block;"></div>
   {txt}
 </div>'''
 
@@ -176,7 +186,7 @@ def _cropped_img(image_url: str, crop: dict, alt: str, max_h: int) -> str:
     max_w = round(max_h / box_ratio) if box_ratio else max_h
     return (f'<div style="display: inline-block; width: 100%; max-width: {max_w}px;">'
             f'<div style="position: relative; width: 100%; padding-top: {box_ratio * 100:.2f}%; overflow: hidden;">'
-            f'<img src="{image_url}" alt="{escape(alt)}" style="position: absolute; top: 0; left: 0; '
+            f'<img src="{image_url}" alt="{attr(alt)}" style="position: absolute; top: 0; left: 0; '
             f'width: {100 / w:.2f}%; max-width: none; height: auto; '
             f'margin-left: -{x / w * 100:.2f}%; margin-top: -{y * ratio / w * 100:.2f}%;">'
             f'</div></div>')
@@ -205,7 +215,7 @@ def _frame_img(image_url: str, win: dict, alt: str) -> str:
     ratio = win["ih"] / max(1, win["iw"])
     box = h * ratio / w
     return (f'<div style="position: relative; width: 100%; padding-top: {box * 100:.2f}%; overflow: hidden;">'
-            f'<img src="{image_url}" alt="{escape(alt)}" style="position: absolute; top: 0; left: 0; width: {100 / w:.2f}%; '
+            f'<img src="{image_url}" alt="{attr(alt)}" style="position: absolute; top: 0; left: 0; width: {100 / w:.2f}%; '
             f'max-width: none; height: auto; margin-left: -{x / w * 100:.2f}%; margin-top: -{y * ratio / w * 100:.2f}%;"></div>')
 
 
@@ -215,7 +225,7 @@ def _logo_fit(image_url: str, alt: str, ratio: float, fill: float, bg: str, trim
     if not (trim and trim.get("iw") and trim.get("ih")):
         pad = (1 - fill) / 2 * 100
         return (f'<div style="position: relative; width: 100%; padding-top: {100 / ratio:.2f}%; overflow: hidden; background: {bg};">'
-                f'<img src="{image_url}" alt="{escape(alt)}" style="position: absolute; top: {pad:.2f}%; left: {pad:.2f}%; '
+                f'<img src="{image_url}" alt="{attr(alt)}" style="position: absolute; top: {pad:.2f}%; left: {pad:.2f}%; '
                 f'width: {fill * 100:.2f}%; height: {fill * 100:.2f}%; max-width: none; object-fit: contain;"></div>')
     iw, ih = trim["iw"], trim["ih"]
     cw, ch = trim["w"] * iw, trim["h"] * ih                 # 실제 로고 크기 (px)
@@ -224,7 +234,7 @@ def _logo_fit(image_url: str, alt: str, ratio: float, fill: float, bg: str, trim
     left = W / 2 - (trim["x"] * iw + cw / 2) * s
     top = H / 2 - (trim["y"] * ih + ch / 2) * s
     return (f'<div style="position: relative; width: 100%; padding-top: {H * 100:.2f}%; overflow: hidden; background: {bg};">'
-            f'<img src="{image_url}" alt="{escape(alt)}" style="position: absolute; left: {left * 100:.2f}%; top: {top / H * 100:.2f}%; '
+            f'<img src="{image_url}" alt="{attr(alt)}" style="position: absolute; left: {left * 100:.2f}%; top: {top / H * 100:.2f}%; '
             f'width: {iw * s * 100:.2f}%; height: auto; max-width: none;"></div>')
 
 
@@ -239,9 +249,9 @@ def award_card(st: Style, image_url: str, lines: list, component_id: str = "", c
     title = lines[0] if lines and len(lines[0]) <= HEADLINE_MAX_CHARS else ""
     body = " ".join(lines[1:] if title else lines)
     h = (f'<h3 style="font-family: {st.font_headline}; font-weight: 600; font-size: {h_px}px; '
-         f'line-height: {st.head_lh}; margin: 0 0 10px 0; color: {st.headline_color};">{escape(title)}</h3>') if title else ""
+         f'line-height: {st.head_lh}; margin: 0 0 10px 0; color: {st.headline_color};">{tx(title)}</h3>') if title else ""
     b = (f'<p style="font-family: {st.font_body}; font-size: {b_px}px; line-height: {st.body_lh}; '
-         f'margin: 0; color: {st.body_color};">{escape(body)}</p>') if body else ""
+         f'margin: 0; color: {st.body_color};">{tx(body)}</p>') if body else ""
     txt = (f'<div class="lg-award-text" style="flex: 1 1 {st.card.get("text_width", "60%")}; padding: 20px 24px 20px 0; text-align: left;">{h}{b}</div>'
            if (h or b) else "")
     img_w = st.card.get("image_width", "40%") if txt else "100%"
@@ -354,9 +364,9 @@ def compare_block(st: Style, section: dict, html: str) -> str:
         color = cp.get("after_label_color" if emphasize else "before_label_color", "#111111" if emphasize else "#697072")
         weight = cp.get("after_label_weight", 700) if emphasize else 400
         label = (f'<p style="font-family: {st.font_body}; font-size: {b_px}px; line-height: {st.body_lh}; font-weight: {weight}; '
-                 f'color: {color}; text-align: center; margin: 10px 0 0 0;">{escape(d["label"])}</p>') if d.get("label") else ""
+                 f'color: {color}; text-align: center; margin: 10px 0 0 0;">{tx(d["label"])}</p>') if d.get("label") else ""
         return (f'<div class="lg-compare-{side}" style="margin-top: 16px;">'
-                f'<img src="{d["pc_url"]}" alt="{escape(d.get("label") or "")}" style="width: 100%; height: auto; display: block; border-radius: {r}px;">'
+                f'<img src="{d["pc_url"]}" alt="{attr(d.get("label") or "")}" style="width: 100%; height: auto; display: block; border-radius: {r}px;">'
                 f'{label}</div>')
 
     parts = [] if cp.get("mode") == "after_only" else [item("before", False)]
@@ -430,16 +440,16 @@ def render_spec_table(st: Style, section: dict) -> str:
             rows.append(
                 f'<tr><th colspan="2" style="font-family: {st.font_headline}; font-weight: 600; '
                 f'font-size: {g_px}px; text-align: left; padding: 16px 10px 8px 10px; '
-                f'color: {label_c}; border-bottom: 1px solid {stroke};">{escape(g)}</th></tr>'
+                f'color: {label_c}; border-bottom: 1px solid {stroke};">{tx(g)}</th></tr>'
             )
         rows.append(
             f'<tr>'
             f'<td style="font-family: {st.font_body}; font-size: {c_px}px; font-weight: 600; '
             f'color: {label_c}; padding: 8px 10px; width: 45%; vertical-align: top; '
-            f'border-bottom: 1px solid {stroke};">{escape(sp.get("label", ""))}</td>'
+            f'border-bottom: 1px solid {stroke};">{tx(sp.get("label", ""))}</td>'
             f'<td style="font-family: {st.font_body}; font-size: {c_px}px; color: {body_c}; '
             f'padding: 8px 10px; vertical-align: top; '
-            f'border-bottom: 1px solid {stroke};">{escape(sp.get("value", ""))}</td>'
+            f'border-bottom: 1px solid {stroke};">{tx(sp.get("value", ""))}</td>'
             f'</tr>'
         )
 
@@ -452,12 +462,12 @@ def render_spec_table(st: Style, section: dict) -> str:
         w = (m.get("width") or 0) if url == m.get("pc_url") else 0     # width 는 PC 이미지 픽셀 폭
         cap = f'max-width: {min(int(w), 800)}px;' if w else 'max-width: 100%;'
         img_html = (f'<div style="text-align: center; margin-bottom: 20px;">'
-                    f'<img src="{url}" alt="{escape(m.get("alt") or "")}" '
+                    f'<img src="{url}" alt="{attr(m.get("alt") or "")}" '
                     f'style="{cap} width: 100%; height: auto;"></div>')
         break
 
     head = (f'<h2 style="font-family: {st.font_headline}; font-weight: 600; font-size: {h_px}px; '
-            f'line-height: {st.head_lh}; margin: 0 0 12px 0; color: {label_c};">{escape(title)}</h2>'
+            f'line-height: {st.head_lh}; margin: 0 0 12px 0; color: {label_c};">{tx(title)}</h2>'
             if title else "")
     return f"""
 <section class="lg-section lg-spec" style="padding: 24px 20px;">
@@ -481,7 +491,7 @@ def render_card_row(st: Style, block: dict) -> str:
     heading = hd[0] if hd else ""
     head_html = (f'<h2 style="font-family: {st.font_headline}; font-weight: 600; font-size: {st.px(cid, "headline", 36)}px; line-height: {st.head_lh}; '
                  f'text-align: center; margin: 0 0 16px 0; color: {st.headline_color};">'
-                 f'{escape(heading)}</h2>') if heading else ""
+                 f'{tx(heading)}</h2>') if heading else ""
     return hcard_list(items, head_html)
 
 

@@ -110,8 +110,8 @@ async function download(key, abs) {
   const { GetObjectCommand } = require('@aws-sdk/client-s3');
   const r = await client().send(new GetObjectCommand({ Bucket: config().bucket, Key: key }));
   fs.mkdirSync(path.dirname(abs), { recursive: true });
-  const tmp = `${abs}.part-${process.pid}`;
-  fs.writeFileSync(tmp, Buffer.from(await r.Body.transformToByteArray()));
+  const tmp = `${abs}.part-${process.pid}-${Date.now()}`;
+  await require('stream/promises').pipeline(r.Body, fs.createWriteStream(tmp));
   fs.renameSync(tmp, abs);
 }
 
@@ -236,7 +236,20 @@ async function getBuffer(key) {
   } catch (e) { return null; }
 }
 
-module.exports = { enabled, pullAll, pushAll, pushPaths, pushProduct, pushCrawlerOut, putBuffer, getBuffer, deleteProduct };
+// 큰 파일(묶음 ZIP 등)용: 메모리에 올리지 않고 디스크 ↔ 버킷 스트림
+async function putFile(key, abs, contentType) {
+  if (!enabled()) return false;
+  const { PutObjectCommand } = require('@aws-sdk/client-s3');
+  await client().send(new PutObjectCommand({ Bucket: config().bucket, Key: key, Body: fs.createReadStream(abs),
+                                             ContentLength: fs.statSync(abs).size, ContentType: contentType }));
+  return true;
+}
+async function getToFile(key, abs) {
+  if (!enabled()) return false;
+  try { await download(key, abs); return true; } catch (e) { return false; }
+}
+
+module.exports = { enabled, pullAll, pushAll, pushPaths, pushProduct, pushCrawlerOut, putBuffer, getBuffer, putFile, getToFile, deleteProduct };
 
 if (require.main === module) {
   require('dotenv').config({ path: path.join(__dirname, '.env') });

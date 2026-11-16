@@ -15,7 +15,7 @@ app.use('/crawler-py', (req, res) => res.sendStatus(404)); // 크롤러 소스·
 app.use(express.static('.'));
 
 // Health check
-app.get('/api/health', (req, res) => res.json({ ok: true }));
+app.get('/api/health', (req, res) => res.json({ ok: true, rev: (process.env.RAILWAY_GIT_COMMIT_SHA || '').slice(0, 7) }));   // 배포 확인용 커밋
 
 /* ──────────────────────────────────────────
    /api/analyze  — LG.com PDP 섹션 추출
@@ -2049,7 +2049,9 @@ app.post('/api/ebay-generate', async (req, res) => {
       const mirrorFp = path.join(slugDir, 'mirror.json');
       if (fs.existsSync(mirrorFp)) {
         const mir = JSON.parse(fs.readFileSync(mirrorFp, 'utf8'));
-        const hasCcg = (mir.sections || []).some(s => s.component_id);
+        // 기능 소개 영역이 없는 페이지(_no_feature_area: 액세서리 등)도 빌더로 — 제품명·갤러리로 만든다
+        const hasCcg = (mir.sections || []).some(s => s.component_id)
+          || (mir._no_feature_area && (mir._gallery || []).length > 0);
         if (hasCcg) {
           const venvPy = path.join(__dirname, 'crawler-py', '.venv', 'bin', 'python');
           const py = fs.existsSync(venvPy) ? venvPy : 'python3';
@@ -2085,8 +2087,8 @@ app.post('/api/ebay-generate', async (req, res) => {
     // ── LG GP1 Design System 토큰 (claude.ai/design "LG GP1 Design System" 소싱) ──
     // active_red_50이 GP1의 실제 브랜드 액센트. heritage_red(#A50034)는 GP1 readme상
     // LG 로고 마크 내부에만 쓰이는 색이라 일반 UI 액센트로는 쓰지 않는다.
-    const GP1_FONT_HEAD = "'LGEIHeadline','LG EI Headline','LGEIText',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif";
-    const GP1_FONT_BODY = "'LGEIText','LG EI Text',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif";
+    const GP1_FONT_HEAD = "'LGEIHeadline','LG EI Headline','LGEIText','LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif";
+    const GP1_FONT_BODY = "'LGEIText','LG EI Text','LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif";
     const GP1 = { headline: '#111111', body: '#2D2D2D', sub: '#697072', accentRed: '#EA1917', stroke: '#F0ECE4', pageBg: '#FFFFFF' };
 
     // ── Helper: ensure HTTPS ──
@@ -2358,8 +2360,10 @@ app.get('/api/proxy-image', async (req, res) => {
       res.set('Access-Control-Allow-Origin', '*');
       res.set('Content-Type', imgRes.headers['content-type'] || 'image/jpeg');
       res.set('Cache-Control', 'public, max-age=3600');
+      imgRes.on('error', (e) => { console.warn('Proxy stream error:', e.message); res.destroy(); });
       imgRes.pipe(res);
     });
+    request.on('socket', (sock) => sock.on('error', () => {}));   // 소켓 오류는 아래 request 'error' 로 처리
     request.on('error', (e) => {
       console.error('Proxy error:', e.message);
       res.status(500).send(e.message);
@@ -2504,17 +2508,19 @@ function renderSlicesPy(body) {
    이미지형 HTML (2026-10-20): 미리보기를 업로드 규격 슬라이스 이미지로 만들어 공개 주소에 올리고,
    <img> 를 차례로 쌓은 HTML 을 돌려준다 → 라자다·eBay 설명란에 붙여도 미리보기와 같은 모양
    (글자·폰트·레이아웃·크롭이 이미지에 들어감). 크기는 매체 spec slices(Shopee/Lazada: 폭 1000px · ≤3000px · ≤1MB).
-   같은 HTML·규격이면 같은 해시 → 다시 만들지 않음. 저장: 로컬 media-cache/slices/<hash>/ + 버킷 media-slices/<hash>/
+   같은 HTML·규격이면 같은 해시 → 다시 만들지 않음 (v2 2026-11-09: 이미지 중간을 자르지 않는 자르기 규칙으로 새로 그림). 저장: 로컬 media-cache/slices/<hash>/ + 버킷 media-slices/<hash>/
 ────────────────────────────────────────── */
 const SLICE_CACHE = require('path').join(__dirname, 'media-cache', 'slices');
 const sliceStore = require('./crawl-store');
 
 app.post('/api/v1/slice-html', async (req, res) => {
   const path = require('path'), fs = require('fs'), crypto = require('crypto');
-  const { html, medium = 'shopee_lazada', name = 'pdp' } = req.body || {};
+  const { html, medium = 'shopee_lazada', name = 'pdp', rev = '' } = req.body || {};
   if (typeof html !== 'string' || !html) return res.status(400).json({ error: 'html required' });
   const med = /^[a-z_]+$/.test(medium) ? medium : 'shopee_lazada';
-  const hash = crypto.createHash('sha1').update(`v1|${med}|${html}`).digest('hex').slice(0, 20);
+  // rev: 같은 HTML 이라도 자르기 규칙이 바뀐 것만 새로 그리게 하는 선택 값 (없으면 기존 해시 그대로)
+  const rv = /^[\w.-]{1,20}$/.test(String(rev)) ? `|${rev}` : '';
+  const hash = crypto.createHash('sha1').update(`v2|${med}|${html}${rv}`).digest('hex').slice(0, 20);
   const dir = path.join(SLICE_CACHE, hash);
   try {
     let man = null;
@@ -2544,6 +2550,51 @@ app.post('/api/v1/slice-html', async (req, res) => {
   }
 });
 
+// 이미지형 HTML 슬라이스 묶음 ZIP (2026-11-07): 그 해시에 저장된 슬라이스 이미지 그대로 → 이미지형 HTML 과 같은 이미지.
+// 주소의 파일명은 내려받을 때 이름일 뿐이고, ZIP 은 해시마다 한 번 만들어 로컬·버킷에 둔다.
+app.get(/^\/media\/slices\/([0-9a-f]{20})\/([\w.-]{1,120}\.zip)$/, async (req, res) => {
+  const path = require('path'), fs = require('fs');
+  const hash = req.params[0], name = req.params[1];
+  // 파일명이 …-images-<N>.zip 이면 앞에서부터 N장만 (Shopee 12장 버전, 2026-11-11)
+  const lim = parseInt((name.match(/-images-(\d{1,2})\.zip$/) || [])[1], 10) || 0;
+  const zkey = lim ? `_images_${lim}.zip` : '_images.zip';
+  const dir = path.join(SLICE_CACHE, hash), zipAbs = path.join(dir, zkey);
+  const read = async (file) => {
+    const abs = path.join(dir, file);
+    if (fs.existsSync(abs)) return fs.readFileSync(abs);
+    const buf = await sliceStore.getBuffer(`media-slices/${hash}/${file}`);
+    if (buf) { fs.mkdirSync(dir, { recursive: true }); fs.writeFileSync(abs, buf); }
+    return buf;
+  };
+  try {
+    if (!fs.existsSync(zipAbs)) {
+      let buf = await sliceStore.getBuffer(`media-slices/${hash}/${zkey}`);
+      if (!buf) {
+        const manBuf = await read('manifest.json');
+        if (!manBuf) return res.status(404).end();
+        const man = JSON.parse(manBuf.toString('utf8'));
+        const zip = new (require('jszip'))();
+        for (const im of (lim ? (man.images || []).slice(0, lim) : (man.images || []))) {
+          const b = await read(im.file);
+          if (!b) return res.status(404).json({ error: `slice missing: ${im.file}` });
+          zip.file(im.file, b);
+        }
+        buf = await zip.generateAsync({ type: 'nodebuffer', compression: 'STORE' });
+        await sliceStore.putBuffer(`media-slices/${hash}/${zkey}`, buf, 'application/zip').catch((e) =>
+          console.warn('[slice-zip] 버킷 업로드 실패', hash, e.message));
+      }
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(zipAbs, buf);
+    }
+    res.set({ 'Content-Type': 'application/zip', 'Content-Disposition': `attachment; filename="${name}"`,
+              'Cache-Control': 'public, max-age=31536000, immutable', 'Access-Control-Allow-Origin': '*' });
+    res.sendFile(zipAbs);
+  } catch (e) {
+    console.error('/media/slices zip error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // 이미지형 HTML 슬라이스 이미지 (공개 주소 — 마켓이 이 주소로 이미지를 불러감)
 app.get('/media/slices/:hash/:file', async (req, res) => {
   const path = require('path'), fs = require('fs');
@@ -2558,6 +2609,191 @@ app.get('/media/slices/:hash/:file', async (req, res) => {
   }
   res.set({ 'Cache-Control': 'public, max-age=31536000, immutable', 'Access-Control-Allow-Origin': '*' });
   res.type(file.endsWith('.png') ? 'png' : 'jpeg').sendFile(abs);
+});
+
+/* ──────────────────────────────────────────
+   산출물 파일 공개 주소 (2026-11-06): 배치가 만든 HTML 을 Airtable 첨부 등 외부에서 받아갈 수 있게 보관.
+   POST /api/v1/export-file {content, name}  (헤더 x-export-token = EXPORT_TOKEN 필수) → {url}
+   GET  /media/exports/<hash>/<name>          → 파일 (다운로드 전용: text/plain + attachment)
+   저장: 로컬 media-cache/exports/<hash>/ + 버킷 media-exports/<hash>/  (내용 해시 주소 — 같은 내용은 같은 주소)
+────────────────────────────────────────── */
+const EXPORT_DIR = require('path').join(__dirname, 'media-cache', 'exports');
+app.post('/api/v1/export-file', async (req, res) => {
+  const path = require('path'), fs = require('fs'), crypto = require('crypto');
+  const token = (process.env.EXPORT_TOKEN || '').trim();
+  if (!token || req.get('x-export-token') !== token) return res.status(401).json({ error: 'unauthorized' });
+  const { content, name = 'file.html' } = req.body || {};
+  if (typeof content !== 'string' || !content) return res.status(400).json({ error: 'content required' });
+  if (Buffer.byteLength(content) > 5 * 1024 * 1024) return res.status(413).json({ error: 'too large' });
+  const file = String(name).replace(/[^\w.-]+/g, '-').slice(0, 120);
+  if (!/^[\w.-]+\.(html|txt)$/.test(file)) return res.status(400).json({ error: 'name must end with .html or .txt' });
+  const hash = crypto.createHash('sha1').update(content).digest('hex').slice(0, 20);
+  const abs = path.join(EXPORT_DIR, hash, file);
+  try {
+    if (!fs.existsSync(abs)) {
+      fs.mkdirSync(path.dirname(abs), { recursive: true });
+      fs.writeFileSync(abs, content, 'utf8');
+      await sliceStore.putBuffer(`media-exports/${hash}/${file}`, Buffer.from(content, 'utf8'), 'text/plain; charset=utf-8')
+        .catch((e) => console.warn('[export-file] 버킷 업로드 실패', file, e.message));
+    }
+    const base = (process.env.PUBLIC_BASE_URL || `${req.get('x-forwarded-proto') || req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    res.json({ url: `${base}/media/exports/${hash}/${file}`, hash, bytes: Buffer.byteLength(content) });
+  } catch (e) {
+    console.error('/api/v1/export-file error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+app.get('/media/exports/:hash/:file', async (req, res) => {
+  const path = require('path'), fs = require('fs');
+  const { hash, file } = req.params;
+  if (!/^[0-9a-f]{20}$/.test(hash) || !/^[\w.-]+\.(html|txt)$/.test(file)) return res.status(400).end();
+  const abs = path.join(EXPORT_DIR, hash, file);
+  if (!fs.existsSync(abs)) {   // 재배포 후 로컬에 없으면 버킷에서
+    const buf = await sliceStore.getBuffer(`media-exports/${hash}/${file}`);
+    if (!buf) return res.status(404).end();
+    fs.mkdirSync(path.dirname(abs), { recursive: true });
+    fs.writeFileSync(abs, buf);
+  }
+  // 브라우저에서 실행되지 않게 텍스트·첨부로만 내려준다
+  res.set({ 'Content-Type': 'text/plain; charset=utf-8', 'Content-Disposition': `attachment; filename="${file}"`,
+            'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'public, max-age=31536000, immutable' });
+  res.sendFile(abs);
+});
+
+/* ──────────────────────────────────────────
+   PDP 요약 설명(태국어, 2026-11-10): Shopee/Lazada 상세 설명에서 PDP 이미지 위에 붙는 글
+   POST /api/v1/pdp-summary {url, refresh?} → {product_name, intro, highlights, product_info, conflicts,
+        ref_url, checked_at, model, html, text}
+   만드는 곳: crawler-py/content_gen/pdp_summary.py (지시문 content_gen/prompts/pdp_summary_th.md + 그 제품의 크롤 결과)
+   제품 폴더의 summary.json 에 보관 (버킷에도) — 다시 부르면 그대로, refresh:true 면 새로 만든다
+────────────────────────────────────────── */
+const summaryJobs = new Map();   // slug → Promise (같은 제품 동시 요청은 한 번만 만든다)
+app.post('/api/v1/pdp-summary', async (req, res) => {
+  const path = require('path'), fs = require('fs');
+  const { url, refresh = false } = req.body || {};
+  if (!isLgUrl(url)) return res.status(400).json({ error: 'LG.com url required' });
+  // 모델 지정은 배치(내보내기 토큰)만 — 화면 요청은 서버 기본(SUMMARY_MODEL → CLAUDE_MODEL)
+  const tok = (process.env.EXPORT_TOKEN || '').trim();
+  const model = (tok && req.get('x-export-token') === tok && /^claude-(opus|sonnet|haiku)-5-5$/.test(req.body.model || '')) ? req.body.model : '';
+  const slug = url.replace(/https?:\/\//, '').replace(/[^\w]+/g, '-').replace(/-+$/, '');
+  const slugDir = path.join(__dirname, 'crawler-py', 'out', slug);
+  if (!fs.existsSync(path.join(slugDir, 'mirror.json'))) return res.status(404).json({ error: 'no crawl for this URL — crawl it first' });
+  const key = slug + (refresh ? '|refresh' : '') + (model ? '|' + model : '');
+  let job = summaryJobs.get(key);
+  if (!job) {
+    job = new Promise((resolve, reject) => {
+      const crawlerDir = path.join(__dirname, 'crawler-py');
+      const venvPy = path.join(crawlerDir, '.venv', 'bin', 'python');
+      const py = process.env.CRAWLER_PYTHON || (fs.existsSync(venvPy) ? venvPy : 'python3');
+      const args = ['-m', 'content_gen.pdp_summary', slugDir, url].concat(refresh ? ['--refresh'] : [], model ? ['--model=' + model] : []);
+      require('child_process').execFile(py, args, { cwd: crawlerDir, timeout: 6 * 60 * 1000, maxBuffer: 8 * 1024 * 1024,
+        env: { ...process.env, PYTHONIOENCODING: 'utf-8' } }, (err, stdout, stderr) => {
+        let d = {};
+        try { d = JSON.parse(String(stdout || '').trim().split('\n').pop()); } catch (_) {}
+        if (err || d.error) return reject(new Error(d.error || String(stderr || err.message).trim().split('\n').pop()));
+        resolve(d);
+      });
+    }).then(async (d) => {
+      await sliceStore.pushPaths([path.join(slugDir, 'summary.json')]).catch((e) => console.warn('[pdp-summary] 버킷 업로드 실패', e.message));
+      return d;
+    }).finally(() => summaryJobs.delete(key));
+    summaryJobs.set(key, job);
+  }
+  try {
+    const d = await job;
+    console.log(`[pdp-summary] ${slug}: ${d.chars} chars (${d.model})${(d.conflicts || []).length ? ' · conflicts ' + d.conflicts.length : ''}`);
+    res.json(d);
+  } catch (e) {
+    console.error('[pdp-summary] failed', slug, e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+/* ──────────────────────────────────────────
+   슬라이스 이미지 묶음 ZIP (2026-11-09): 여러 제품의 슬라이스 이미지를 ZIP 하나로 → 링크 하나로 한 번에 내려받기.
+   POST /api/v1/bundle {name: "x.zip", entries: [{hash, file, path}], extra: {"index.csv": "..."}}  (x-export-token 필수)
+        → {id, status, url}  같은 내용이면 같은 id (이미 만들었으면 바로 ready)
+   GET  /api/v1/bundle/:id                → {status: building|ready|failed, images, bytes, error}
+   GET  /media/bundles/:id/:name.zip      → ZIP (로컬 media-cache/bundles, 없으면 버킷 media-bundles/)
+   ZIP 은 crawler-py/bundle_zip.py 가 디스크에 차례로 씀 (메모리에 올리지 않음), 완성 후 버킷에 스트림 업로드.
+────────────────────────────────────────── */
+const BUNDLE_DIR = require('path').join(__dirname, 'media-cache', 'bundles');
+const bundleJobs = new Map();   // id → { status, error, images, bytes }
+const cleanZipPath = (p) => String(p || '').replace(/[\x00-\x1f\\:*?"<>|]+/g, '_').split('/')
+  .map((x) => x.trim()).filter((x) => x && x !== '.' && x !== '..').join('/').slice(0, 240);
+
+app.post('/api/v1/bundle', async (req, res) => {
+  const path = require('path'), fs = require('fs'), crypto = require('crypto');
+  const token = (process.env.EXPORT_TOKEN || '').trim();
+  if (!token || req.get('x-export-token') !== token) return res.status(401).json({ error: 'unauthorized' });
+  const { name = 'images.zip', entries, extra = {} } = req.body || {};
+  const file = String(name).replace(/[^\w.+-]+/g, '-').slice(0, 120);
+  if (!/^[\w.+-]+\.zip$/.test(file)) return res.status(400).json({ error: 'name must end with .zip' });
+  if (!Array.isArray(entries) || !entries.length || entries.length > 50000) return res.status(400).json({ error: 'entries required' });
+  const ents = [], seen = new Set();
+  for (const e of entries) {
+    const p = cleanZipPath(e && e.path);
+    if (!/^[0-9a-f]{20}$/.test(e && e.hash) || !/^[\w-]+\.(jpg|png)$/.test(e && e.file) || !p) return res.status(400).json({ error: 'bad entry', entry: e });
+    if (seen.has(p)) return res.status(400).json({ error: `duplicate path ${p}` });
+    seen.add(p); ents.push({ hash: e.hash, file: e.file, path: p });
+  }
+  const ext = {};
+  for (const [k, v] of Object.entries(extra || {})) {
+    const p = cleanZipPath(k);
+    if (!p || typeof v !== 'string' || seen.has(p)) return res.status(400).json({ error: `bad extra file ${k}` });
+    ext[p] = v;
+  }
+  const id = crypto.createHash('sha1').update(JSON.stringify({ v: 1, ents, ext })).digest('hex').slice(0, 20);
+  const abs = path.join(BUNDLE_DIR, id, file);
+  const base = (process.env.PUBLIC_BASE_URL || `${req.get('x-forwarded-proto') || req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+  const url = `${base}/media/bundles/${id}/${file}`;
+  const job = bundleJobs.get(id);
+  if (job && job.status === 'building') return res.json({ id, status: 'building', url });
+  if (fs.existsSync(abs) || (await sliceStore.getToFile(`media-bundles/${id}/${file}`, abs))) {
+    bundleJobs.set(id, { status: 'ready', bytes: fs.statSync(abs).size });
+    return res.json({ id, status: 'ready', url, bytes: fs.statSync(abs).size });
+  }
+  bundleJobs.set(id, { status: 'building', started: Date.now() });
+  res.json({ id, status: 'building', url });
+  const { spawn } = require('child_process');
+  const crawlerDir = path.join(__dirname, 'crawler-py');
+  const venvPy = path.join(crawlerDir, '.venv', 'bin', 'python');
+  const py = process.env.CRAWLER_PYTHON || (fs.existsSync(venvPy) ? venvPy : 'python3');
+  const proc = spawn(py, ['bundle_zip.py'], { cwd: crawlerDir, env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
+  let out = '', err = '';
+  const timer = setTimeout(() => proc.kill('SIGKILL'), 60 * 60 * 1000);
+  proc.stdout.on('data', (d) => { out += d; });
+  proc.stderr.on('data', (d) => { err += d; });
+  proc.on('error', (e) => { clearTimeout(timer); bundleJobs.set(id, { status: 'failed', error: e.message }); });
+  proc.on('close', async (code) => {
+    clearTimeout(timer);
+    let meta = {};
+    try { meta = JSON.parse(out.trim().split('\n').pop()); } catch (_) {}
+    if (code !== 0 || meta.error) {
+      const error = meta.error || err.trim().split('\n').pop() || `bundle exited ${code}`;
+      console.error('[bundle] failed', id, error);
+      return bundleJobs.set(id, { status: 'failed', error });
+    }
+    try { await sliceStore.putFile(`media-bundles/${id}/${file}`, abs, 'application/zip'); }
+    catch (e) { console.warn('[bundle] 버킷 업로드 실패', id, e.message); }
+    console.log(`[bundle] ${id}/${file}: ${meta.images} images, ${(meta.bytes / 1e6).toFixed(1)} MB`);
+    bundleJobs.set(id, { status: 'ready', images: meta.images, bytes: meta.bytes });
+  });
+  proc.stdin.end(JSON.stringify({ out: abs, cache: SLICE_CACHE, base: `http://127.0.0.1:${PORT}`, entries: ents, extra: ext }));
+});
+app.get('/api/v1/bundle/:id', (req, res) => {
+  const j = bundleJobs.get(req.params.id);
+  res.json(j ? { id: req.params.id, ...j } : { id: req.params.id, status: 'unknown' });
+});
+app.get('/media/bundles/:id/:file', async (req, res) => {
+  const path = require('path'), fs = require('fs');
+  const { id, file } = req.params;
+  if (!/^[0-9a-f]{20}$/.test(id) || !/^[\w.+-]+\.zip$/.test(file)) return res.status(400).end();
+  const abs = path.join(BUNDLE_DIR, id, file);
+  if (!fs.existsSync(abs) && !(await sliceStore.getToFile(`media-bundles/${id}/${file}`, abs))) return res.status(404).end();
+  res.set({ 'Content-Type': 'application/zip', 'Content-Disposition': `attachment; filename="${file}"`,
+            'Cache-Control': 'public, max-age=31536000, immutable' });
+  res.sendFile(abs);
 });
 
 /* ──────────────────────────────────────────
@@ -2650,13 +2886,25 @@ app.post('/api/render-slices', async (req, res) => {
       return res.status(400).json({ error: 'html required' });
     }
     try {
-      const { meta, buf } = await renderSlicesPy(req.body);
+      const r = await renderSlicesPy(req.body), meta = r.meta;
+      let buf = r.buf;
       console.log(`[render-slices] ${meta.log}`);
+      // maxImages (Shopee 12장 버전, 2026-11-11): 앞에서부터 N장(+ 같은 번호의 글 파일)만 ZIP 에 남긴다
+      const maxImages = parseInt(req.body.maxImages, 10) || 0;
+      let manifest = meta.manifest, suffix = '';
+      if (maxImages > 0 && manifest.length > maxImages) {
+        const keep = new Set(manifest.slice(0, maxImages).flatMap((m) => [m.file, m.text_file]));
+        const src = await (require('jszip')).loadAsync(buf), zip = new (require('jszip'))();
+        for (const f of Object.keys(src.files)) if (keep.has(f)) zip.file(f, await src.files[f].async('nodebuffer'));
+        buf = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
+        res.set('X-Slice-Total', String(manifest.length));
+        manifest = manifest.slice(0, maxImages); suffix = `-${maxImages}`;
+      }
       res.set('Content-Type', 'application/zip');
-      res.set('Content-Disposition', `attachment; filename="${meta.name}-images.zip"`);
-      res.set('X-Slice-Manifest', encodeURIComponent(JSON.stringify(meta.manifest)));
+      res.set('Content-Disposition', `attachment; filename="${meta.name}-images${suffix}.zip"`);
+      res.set('X-Slice-Manifest', encodeURIComponent(JSON.stringify(manifest)));
       res.set('X-Images-Loaded', meta.images_loaded);
-      res.set('Access-Control-Expose-Headers', 'X-Slice-Manifest, X-Images-Loaded, Content-Disposition');
+      res.set('Access-Control-Expose-Headers', 'X-Slice-Manifest, X-Slice-Total, X-Images-Loaded, Content-Disposition');
       return res.send(buf);
     } catch (e) {
       console.error('/api/render-slices error:', e.message);
@@ -2894,7 +3142,7 @@ app.post('/api/render-slices', async (req, res) => {
     res.set('Content-Disposition', `attachment; filename="${safeName}-images.zip"`);
     res.set('X-Slice-Manifest', encodeURIComponent(JSON.stringify(manifest)));
     res.set('X-Images-Loaded', `${loadStat.loaded}/${loadStat.total}`);
-    res.set('Access-Control-Expose-Headers', 'X-Slice-Manifest, X-Images-Loaded, Content-Disposition');
+    res.set('Access-Control-Expose-Headers', 'X-Slice-Manifest, X-Slice-Total, X-Images-Loaded, Content-Disposition');
     return res.send(buf);
   } catch (e) {
     console.error('/api/render-slices error:', e.message);
@@ -2902,6 +3150,40 @@ app.post('/api/render-slices', async (req, res) => {
   } finally {
     if (browser) await browser.close().catch(() => {});
   }
+});
+
+/* ──────────────────────────────────────────
+   고아 프로세스 정리: 시간 초과로 죽은 크롤러/렌더러가 남긴 Chromium·Python 이 PID 1(tini) 밑으로
+   붙어 계속 쌓이면 프로세스 한도에 걸려 'spawn python3 EAGAIN' 으로 모든 생성이 실패한다.
+   5분마다 부모가 PID 1 인(=주인 없는) 10분 넘은 프로세스를 정리한다. 서버가 띄운 작업은 부모가 node 라 해당 없음.
+────────────────────────────────────────── */
+function reapOrphans() {
+  if (process.platform !== 'linux' || process.pid === 1) return;
+  require('child_process').execFile('ps', ['-eo', 'pid=,ppid=,etimes=,stat=,comm='], (err, out) => {
+    if (err) return;
+    let killed = 0, procs = 0;
+    for (const ln of out.trim().split('\n')) {
+      procs++;
+      const [pid, ppid, et, stat, comm] = ln.trim().split(/\s+/);
+      if (+ppid !== 1 || +pid === process.pid || stat.startsWith('Z')) continue;
+      if (+et < 600 || !/chrom|headless|python/i.test(comm || '')) continue;
+      try { process.kill(+pid, 'SIGKILL'); killed++; } catch {}
+    }
+    if (killed) console.log(`[reaper] 고아 프로세스 ${killed}개 정리 (전체 ${procs})`);
+  });
+}
+setInterval(reapOrphans, 5 * 60 * 1000).unref();
+
+// 네트워크 연결이 끊겨 생기는 소켓 오류(EPIPE·ECONNRESET 등)가 처리기 없이 올라와 서버 전체가 죽지 않게 (2026-11-07:
+// TH 복구 중 TLSSocket 'write EPIPE' 로 프로세스가 재시작됨). 그 밖의 예외는 기록하고 종료 → Railway 가 재시작.
+const NET_ERR = new Set(['EPIPE', 'ECONNRESET', 'ECONNABORTED', 'ETIMEDOUT', 'ENOTCONN', 'ERR_STREAM_DESTROYED', 'ERR_STREAM_WRITE_AFTER_END']);
+process.on('uncaughtException', (e) => {
+  if (e && NET_ERR.has(e.code)) { console.warn(`[net] 처리되지 않은 소켓 오류 무시: ${e.code} ${e.syscall || ''}`); return; }
+  console.error('uncaughtException:', e && e.stack || e);
+  process.exit(1);
+});
+process.on('unhandledRejection', (e) => {
+  console.error('unhandledRejection:', e && e.stack || e);
 });
 
 app.listen(PORT, () => {

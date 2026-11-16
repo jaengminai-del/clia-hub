@@ -34,9 +34,20 @@ def _clean_url(u: Optional[str]) -> Optional[str]:
     return quote(u.strip(), safe=":/?#[]@!$&'()*+,;=%~")
 
 
+# LG 원문 줄바꿈: 텍스트 안에서는 U+2028, HTML 로 낼 때 <br> (get_text(strip=True) 가 지우지 않게 처음엔 사용자 영역 문자로 둔다)
+LINE_BREAK = "\u2028"
+BR_MARK = "\ue000"
+
+
+def _srcset_head(srcset: str) -> str:
+    """srcset 첫 후보 (설명자 포함). 후보 구분은 '쉼표 + 공백' — LG 는 폴더 이름에 쉼표를 쓴다
+    (…/75nano81tsa-75,65,55,43/…) 그래서 쉼표마다 자르면 주소가 잘린다 (2026-11-09)."""
+    return re.split(r",\s+", (srcset or "").strip())[0].strip()
+
+
 def _srcset_first(srcset: str) -> str:
     """srcset 첫 후보의 URL. 끝의 '1x'·'800w' 설명자만 떼고, 파일명의 공백은 URL 일부로 본다."""
-    first = (srcset or "").split(",")[0].strip()
+    first = _srcset_head(srcset)
     if LEGACY:
         return first.split()[0] if first else ""
     return _clean_url(re.sub(r"\s+\d+(\.\d+)?[wx]$", "", first)) or ""
@@ -56,7 +67,7 @@ def is_award_media(el) -> bool:
             break
         if re.search(r"award", " ".join(p.get("class") or []), re.I):
             return True
-    src = el.get("src") or el.get("data-src") or (el.get("srcset") or "").split(",")[0]
+    src = el.get("src") or el.get("data-src") or _srcset_head(el.get("srcset") or "")
     if not src and el.name == "picture":
         img = el.find("img")
         src = (img.get("src") if img else "") or ""
@@ -372,7 +383,7 @@ class ComponentParser:
         if box is None or not box.select(".cmp-carousel__item, .c-carousel__item"):
             return False
         for img in box.find_all(["img", "source"]):
-            src = img.get("src") or img.get("data-src") or (img.get("srcset") or "").split(",")[0]
+            src = img.get("src") or img.get("data-src") or _srcset_head(img.get("srcset") or "")
             if re.search(r"/awards?/", src or "", re.I) or is_award_media(img):
                 return True
         for a in box.find_all("a", href=True):
@@ -801,13 +812,18 @@ class ComponentParser:
                 t.decompose()
             for t in frag.find_all(class_=cls._BUTTON_CLASS_RE):
                 t.decompose()
+            # LG 원문의 줄바꿈(<br>)은 같은 요소 안의 줄바꿈(U+2028)으로 남긴다 — 렌더러가 <br> 로 되돌린다 (2026-11-10)
+            for t in frag.find_all('br'):
+                t.replace_with(BR_MARK)
             for t in frag.find_all(cls._INLINE_TAGS):
                 t.unwrap()
             frag.smooth()
             text = frag.get_text(' ', strip=True)
         except Exception:
             text = el.get_text(' ', strip=True)
-        return re.sub(r'\s+', ' ', text).strip()
+        text = re.sub(r'[^\S\u2028\ue000]+', ' ', text).replace(BR_MARK, LINE_BREAK)
+        text = re.sub(r' *\u2028[ \u2028]*', LINE_BREAK, text)     # 줄바꿈 앞뒤 공백·연속 줄바꿈 정리
+        return text.strip(' \u2028')
 
     def _parse_text_elements(self, component: Tag, skip_ids=None) -> List[TextElement]:
         """텍스트 요소 파싱 (CCG 슬롯 우선, 미지 슬롯은 본문으로 수용)
@@ -946,7 +962,7 @@ class ComponentParser:
             media_query = source.get('media', '')
             srcset = source.get('srcset', '')
             if srcset:
-                src = srcset.split(',')[0].strip().split()[0]
+                src = re.sub(r"\s+\d+(\.\d+)?[wx]$", "", _srcset_head(srcset))
                 if 'min-width: 769' in media_query or 'min-width:769' in media_query:
                     media.src_desktop = src
                 elif 'max-width: 768' in media_query or 'max-width:768' in media_query:
