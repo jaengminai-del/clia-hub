@@ -1,24 +1,26 @@
 /* 콘텐츠 이미지 가이드 — 화면 그리기.
    내용은 guide-data.js(한글, 배포돼 있던 Content Guide 문구 그대로) / guide-data.en.js(영문 번역),
    형식은 Retail OBS Guide 와 같다: 왼쪽 목차 · 1920×1080 한 장씩 · ← → 키 · 쪽 번호 입력 · PDF 저장.
-   언어: 주소의 ?lang=ko|en → 지난번 고른 언어 → 브라우저 언어(한국어면 ko, 아니면 en) */
+   언어: 주소의 ?lang=ko|en, 없으면 항상 영어.
+   이동: ← → ↑ ↓ · PageUp/Down · Space · 마우스 휠 · 화면 밀기. 검색: 왼쪽 위 칸 (/ 또는 Ctrl+K).
+   CLIA 에서 같은 탭으로 들어오고, 'Back to CLIA' 는 들어오기 전 화면으로 돌아간다 (가이드 안에서 넘긴 쪽 기록은 건너뜀). */
 (function () {
   'use strict';
   const LANGS = { ko: window.GUIDE_DATA, en: window.GUIDE_DATA_EN };
   const pickLang = () => {
     const q = new URLSearchParams(location.search).get('lang');
-    if (q && LANGS[q]) return q;
-    try { const s = localStorage.getItem('guideLang'); if (s && LANGS[s]) return s; } catch (e) {}
-    return /^ko/i.test(navigator.language || '') ? 'ko' : 'en';
+    return q && LANGS[q] ? q : 'en';
   };
-  const LANG = pickLang(), D = LANGS[LANG] || LANGS.ko;
+  const LANG = pickLang(), D = LANGS[LANG] || LANGS.en;
   // 화면 글자 (내용 밖)
   const T = {
     ko: { doc: '콘텐츠 이미지 가이드', cover: '글로벌 콘텐츠<br>이미지 가이드라인', toc: '목차', overview: '가이드 구성', start: '시작하기', coverNav: '표지', end: '마무리',
-      specs: '공통 사양', aiSpecs: '공통 적용 스펙 요약', aiRules: '학습 원칙 · 파이프라인 주의', open: 'CLIA 열기', pdf: 'PDF로 저장', hint: '← → 키로 넘길 수 있습니다',
+      specs: '공통 사양', aiSpecs: '공통 적용 스펙 요약', aiRules: '학습 원칙 · 파이프라인 주의', open: 'CLIA로 돌아가기', pdf: 'PDF로 저장', hint: '← → ↑ ↓ 키나 스크롤로 넘길 수 있습니다',
+      search: '가이드 검색', results: (n) => `결과 ${n}개`, none: '찾는 내용이 없습니다', pageWord: '쪽',
       ui: 'UI 영역', key: '핵심 콘텐츠', safe: '안전 영역', comment: '댓글창 UI', menu: '목차 열기', prev: '이전 쪽', next: '다음 쪽', page: '쪽 번호', nav: '가이드 목차' },
     en: { doc: 'Content Image Guide', cover: 'Global Content<br>Image Guidelines', toc: 'Contents', overview: 'Guide Overview', start: 'Getting Started', coverNav: 'Cover', end: 'Closing',
-      specs: 'Common Specs', aiSpecs: 'Common Spec Summary', aiRules: 'Training Principles · Pipeline Notes', open: 'Open CLIA', pdf: 'Download as PDF', hint: 'Press ← → keys to navigate',
+      specs: 'Common Specs', aiSpecs: 'Common Spec Summary', aiRules: 'Training Principles · Pipeline Notes', open: 'Back to CLIA', pdf: 'Download as PDF', hint: 'Use ← → ↑ ↓ keys or scroll to navigate',
+      search: 'Search the guide', results: (n) => `${n} result${n === 1 ? '' : 's'}`, none: 'No matches', pageWord: 'p.',
       ui: 'UI area', key: 'Key content', safe: 'Safe zone', comment: 'Comment UI', menu: 'Open contents', prev: 'Previous page', next: 'Next page', page: 'Page number', nav: 'Guide navigation' },
   }[LANG] ;
 
@@ -206,14 +208,79 @@
   $('pdfBtn').textContent = T.pdf; $('openBtn').textContent = T.open; $('hint').textContent = T.hint;
   $('menuBtn').setAttribute('aria-label', T.menu); $('prevBtn').setAttribute('aria-label', T.prev); $('nextBtn').setAttribute('aria-label', T.next);
   input.setAttribute('aria-label', T.page); $('side').setAttribute('aria-label', T.nav);
+
+  // ── 기록: 이 탭에서 가이드 안에서 쌓은 기록 수(g). 'Back to CLIA' 는 그만큼 + 1 뒤로 간다 ──
+  const ss = { get: (k) => { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
+    set: (k, v) => { try { sessionStorage.setItem(k, v); } catch (e) {} }, del: (k) => { try { sessionStorage.removeItem(k); } catch (e) {} } };
+  const fromClia = (() => { try { const r = new URL(document.referrer); return r.origin === location.origin && /^\/clia\/?/.test(r.pathname); } catch (e) { return false; } })();
+  if (fromClia) ss.set('guideFrom', 'clia');
+  let depth = history.state && typeof history.state.g === 'number' ? history.state.g : +(ss.get('guideDepthCarry') || 0);
+  ss.del('guideDepthCarry');
+  history.replaceState({ g: depth }, '', location.href);
+  $('openBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    if (ss.get('guideFrom') === 'clia' && history.length > depth + 1) history.go(-(depth + 1));   // 들어오기 전 CLIA 화면 그대로
+    else location.href = '/clia/';
+  });
   document.querySelectorAll('.lang button').forEach((b) => {
     b.classList.toggle('on', b.dataset.lang === LANG); b.setAttribute('aria-pressed', String(b.dataset.lang === LANG));
-    // 같은 쪽 번호로 다른 언어를 연다 (두 언어의 쪽 구성은 같다)
-    b.addEventListener('click', () => { if (b.dataset.lang === LANG) return; try { localStorage.setItem('guideLang', b.dataset.lang); } catch (e) {}
-      location.href = `?lang=${b.dataset.lang}#${cur + 1}`; });
+    // 같은 쪽 번호로 다른 언어를 연다 (기록을 늘리지 않음)
+    b.addEventListener('click', () => { if (b.dataset.lang === LANG) return; ss.set('guideDepthCarry', String(depth));
+      location.replace(`?lang=${b.dataset.lang}${q ? '&q=' + encodeURIComponent(q) : ''}#${cur + 1}`); });
   });
+
+  // ── 검색 ──
+  const sInput = $('searchInput'), sBox = $('searchResults'), sCount = $('searchCount');
+  sInput.placeholder = T.search; sInput.setAttribute('aria-label', T.search);
+  const norm = (s) => s.toLowerCase().normalize('NFKC').replace(/\s+/g, ' ');
+  const tmp = document.createElement('div');
+  const INDEX = PAGES.map((p) => { tmp.innerHTML = render(p).replace(/></g, '> <'); const text = (tmp.textContent || '').replace(/\s+/g, ' ').trim();
+    return { text, low: norm(text), label: [p.crumb, p.title || p.nav].filter(Boolean).join(' › ') || p.nav || '' }; });
+  tmp.innerHTML = '';
+  let q = new URLSearchParams(location.search).get('q') || '', hits = [], sel = 0;
+  const escRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  function snippet(e, terms) {
+    const i = Math.max(0, e.low.indexOf(terms[0])); const s = Math.max(0, i - 36), en = Math.min(e.text.length, i + terms[0].length + 64);
+    let out = esc((s ? '…' : '') + e.text.slice(s, en) + (en < e.text.length ? '…' : ''));
+    terms.filter((w) => w.length > 1).forEach((w) => { out = out.replace(new RegExp(escRe(esc(w)), 'gi'), (m) => `<mark>${m}</mark>`); });
+    return out;
+  }
+  function runSearch() {
+    const terms = norm(q).trim().split(' ').filter(Boolean);
+    document.body.classList.toggle('searching', terms.length > 0);
+    if (!terms.length) { hits = []; sBox.innerHTML = ''; sCount.textContent = ''; highlight(); return; }
+    hits = INDEX.map((e, i) => ({ i, e, n: terms.every((w) => e.low.includes(w)) ? terms.reduce((a, w) => a + e.low.split(w).length - 1, 0) : 0 })).filter((h) => h.n);
+    sel = Math.min(sel, Math.max(0, hits.length - 1));
+    sCount.textContent = hits.length ? T.results(hits.length) : T.none;
+    sBox.innerHTML = hits.map((h, k) => `<button type="button" class="hit${k === sel ? ' sel' : ''}${h.i === cur ? ' cur' : ''}" data-i="${h.i}" role="option" aria-selected="${k === sel}">
+      <span class="hit-top"><span class="hit-label">${esc(INDEX[h.i].label)}</span><span class="nav-num">${num(h.i)}</span></span>
+      <span class="hit-snip">${snippet(h.e, terms)}</span></button>`).join('');
+    highlight();
+  }
+  // 현재 쪽 안의 검색어를 표시
+  function highlight() {
+    const terms = norm(q).trim().split(' ').filter((w) => w.length > 1); if (!terms.length) return;
+    const re = new RegExp(terms.map(escRe).join('|'), 'gi');
+    const walker = document.createTreeWalker(frame, NodeFilter.SHOW_TEXT); const nodes = [];
+    while (walker.nextNode()) if (re.test(walker.currentNode.nodeValue)) nodes.push(walker.currentNode), re.lastIndex = 0; else re.lastIndex = 0;
+    nodes.forEach((n) => { const span = document.createElement('span'); span.innerHTML = esc(n.nodeValue).replace(re, (m) => `<mark class="hl">${m}</mark>`); n.replaceWith(...span.childNodes); });
+  }
+  const pickHit = (k) => { const h = hits[k]; if (h) { sel = k; go(h.i, true); runSearch(); } };
+  sInput.value = q;
+  sInput.addEventListener('input', () => { q = sInput.value; sel = 0; runSearch(); });
+  sInput.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+    if (e.key === 'ArrowDown') { e.preventDefault(); sel = Math.min(hits.length - 1, sel + 1); runSearch(); sBox.querySelector('.sel')?.scrollIntoView({ block: 'nearest' }); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); sel = Math.max(0, sel - 1); runSearch(); sBox.querySelector('.sel')?.scrollIntoView({ block: 'nearest' }); }
+    else if (e.key === 'Enter') { e.preventDefault(); pickHit(sel); }
+    else if (e.key === 'Escape') { e.preventDefault(); if (q) { q = ''; sInput.value = ''; runSearch(); go(cur, false); } else sInput.blur(); }
+  });
+  sBox.addEventListener('click', (e) => { const b = e.target.closest('button[data-i]'); if (b) pickHit(hits.findIndex((h) => h.i === +b.dataset.i)); });
+
   function go(i, push) {
-    cur = Math.max(0, Math.min(PAGES.length - 1, i));
+    const next = Math.max(0, Math.min(PAGES.length - 1, i));
+    if (push && next === cur && frame.firstChild) return;
+    cur = next;
     const p = PAGES[cur];
     frame.innerHTML = render(p);
     box.classList.toggle('dark', ['cover', 'divider', 'toc', 'outro'].includes(p.type));
@@ -221,26 +288,57 @@
     $('prevBtn').disabled = cur === 0; $('nextBtn').disabled = cur === PAGES.length - 1;
     document.title = (cur ? `${p.title || p.nav} — ` : '') + BASE_TITLE;
     const h = '#' + p.id;
-    if (location.hash !== h) (push ? history.pushState : history.replaceState).call(history, null, '', h);
-    mark();
+    if (location.hash !== h) {
+      if (push) { depth += 1; history.pushState({ g: depth }, '', h); } else history.replaceState({ g: depth }, '', h);
+    }
+    mark(); highlight();
+    sBox.querySelectorAll('.hit').forEach((b) => b.classList.toggle('cur', +b.dataset.i === cur));
     document.body.classList.remove('menu-open'); $('menuBtn').setAttribute('aria-expanded', 'false');
   }
   const fromHash = () => { const id = decodeURIComponent(location.hash.slice(1)); const k = PAGES.findIndex((p) => p.id === id || String(p.index + 1) === id); return k < 0 ? 0 : k; };
 
   drawNav();
   $('pageTotal').textContent = `/ ${PAGES.length}`;
-  nav.addEventListener('click', (e) => { const b = e.target.closest('button[data-i]'); if (b) go(+b.dataset.i, true); });
-  $('prevBtn').addEventListener('click', () => go(cur - 1, true));
-  $('nextBtn').addEventListener('click', () => go(cur + 1, true));
+  const step = (d) => go(cur + d, true);
+  nav.addEventListener('click', (e) => { const b = e.target.closest('button[data-i]'); if (b) { go(+b.dataset.i, true); b.blur(); } });
+  $('prevBtn').addEventListener('click', () => step(-1));
+  $('nextBtn').addEventListener('click', () => step(1));
   input.addEventListener('change', () => { const n = parseInt(input.value, 10); if (n >= 1 && n <= PAGES.length) go(n - 1, true); else input.value = String(cur + 1); });
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); e.stopPropagation(); });
+
+  // 키보드: 어디에 초점이 있든(입력칸 제외) 쪽을 넘긴다
   document.addEventListener('keydown', (e) => {
+    if ((e.key === '/' || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k')) && !/INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || '')) {
+      e.preventDefault(); document.body.classList.add('menu-open'); sInput.focus(); sInput.select(); return;
+    }
     if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
-    if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); go(cur + 1, true); }
-    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(cur - 1, true); }
-    else if (e.key === 'Home') go(0, true); else if (e.key === 'End') go(PAGES.length - 1, true);
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    const k = e.key;
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) { e.preventDefault(); step(1); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey)) { e.preventDefault(); step(-1); }
+    else if (k === 'Home') { e.preventDefault(); go(0, true); } else if (k === 'End') { e.preventDefault(); go(PAGES.length - 1, true); }
   });
-  window.addEventListener('popstate', () => go(fromHash(), false));
+  // 마우스 휠·트랙패드: 한 번 굴리면 한 쪽 (관성 스크롤로 여러 쪽이 넘어가지 않게 잠금)
+  let acc = 0, lockUntil = 0, lastWheel = 0;
+  $('stage').addEventListener('wheel', (e) => {
+    if (e.ctrlKey) return;                                   // 확대·축소는 그대로
+    e.preventDefault();
+    const now = Date.now(), dy = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+    if (now - lastWheel > 250) acc = 0;
+    lastWheel = now;
+    if (now < lockUntil) { lockUntil = Math.max(lockUntil, now + 120); return; }
+    acc += e.deltaMode === 1 ? dy * 40 : dy;
+    if (Math.abs(acc) >= 50) { step(acc > 0 ? 1 : -1); acc = 0; lockUntil = now + 550; }
+  }, { passive: false });
+  // 화면 밀기 (휴대폰·태블릿)
+  let tx = 0, ty = 0;
+  $('stage').addEventListener('touchstart', (e) => { const t0 = e.touches[0]; tx = t0.clientX; ty = t0.clientY; }, { passive: true });
+  $('stage').addEventListener('touchend', (e) => {
+    const t1 = e.changedTouches[0], dx = t1.clientX - tx, dy = t1.clientY - ty;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 50) return;
+    step((Math.abs(dx) > Math.abs(dy) ? dx : dy) < 0 ? 1 : -1);
+  }, { passive: true });
+  window.addEventListener('popstate', (e) => { if (e.state && typeof e.state.g === 'number') depth = e.state.g; go(fromHash(), false); });
   window.addEventListener('resize', fit);
   $('menuBtn').addEventListener('click', () => { const o = document.body.classList.toggle('menu-open'); $('menuBtn').setAttribute('aria-expanded', String(o)); });
 
@@ -252,6 +350,7 @@
   window.addEventListener('afterprint', () => { $('printPages').innerHTML = ''; });
 
   go(fromHash(), false);
+  if (q) runSearch();
   fit();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
 })();
