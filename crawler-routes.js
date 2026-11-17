@@ -26,6 +26,7 @@ const path = require('path');
 const { spawn, execFile } = require('child_process');
 const crypto = require('crypto');
 const store = require('./crawl-store'); // 버킷 동기화 (설정 없으면 no-op)
+const { autoFrame } = require('./video-frames'); // 크롤 직후 동영상 자동 장면 (검은·없는 포스터만)
 
 const CRAWLER_DIR = path.join(__dirname, 'crawler-py');
 const OUT_DIR = path.join(CRAWLER_DIR, 'out');
@@ -57,7 +58,7 @@ function auth(req, res, next) {
   next();
 }
 
-function launchPipeline(jobId, url, usePro, geminiKey, fullAi, html = null) {
+function launchPipeline(jobId, url, usePro, geminiKey, fullAi, html = null, base = '') {
   const slug = slugify(url);
   const out = path.join(OUT_DIR, slug);
   fs.mkdirSync(out, { recursive: true });
@@ -84,11 +85,18 @@ function launchPipeline(jobId, url, usePro, geminiKey, fullAi, html = null) {
   const job = jobs.get(jobId);
   Object.assign(job, { slug, out, proc, exited: false });
   proc.on('exit', (code) => {
+    const ok = code === 0 && fs.existsSync(path.join(out, 'mirror.json'));
+    // 텍스트 v2 크롤 결과: 검은·없는 동영상 포스터에 자동 장면 (video-frames.js) — 끝날 때까지 작업은 '처리 중'
+    if (ok) job.post = true;
     job.exited = true;
-    // 크롤 결과를 버킷에 보관 (재배포해도 유지)
-    if (code === 0 && fs.existsSync(path.join(out, 'mirror.json'))) {
-      store.pushProduct(slug).then((n) => n && console.log(`[crawl-store] ${slug}: ${n}개 파일 업로드`));
-    }
+    if (!ok) return;
+    autoFrame(out, { base })
+      .catch((e) => console.warn('[auto-frame]', slug, e.message))
+      .finally(() => {
+        job.post = false;
+        // 크롤 결과를 버킷에 보관 (재배포해도 유지)
+        store.pushProduct(slug).then((n) => n && console.log(`[crawl-store] ${slug}: ${n}개 파일 업로드`));
+      });
   });
   proc.on('error', (e) => { job.exited = true; job.spawnError = e.message; });
 }
@@ -118,6 +126,10 @@ function snapshot(jobId) {
   const mirrorFp = path.join(job.out, 'mirror.json');
   const prog = readJson(path.join(job.out, 'progress.json')) || { percent: 0, message: '' };
 
+  if (job.post) {   // 파이프라인은 끝났고 동영상 자동 장면을 고르는 중
+    return { job_id: jobId, status: 'processing', progress_percent: 98,
+      log_message: '동영상 대표 장면 확인 중...', step: 'video', updated_at: Date.now() / 1000 };
+  }
   if (fs.existsSync(mirrorFp) && fs.statSync(mirrorFp).mtimeMs / 1000 >= job.startedAt - 1) {
     return {
       job_id: jobId, status: 'completed', progress_percent: 100,
@@ -201,7 +213,7 @@ router.get('/healthz', (req, res) => res.json({
 }));
 
 // 크롤 작업 등록 → { jobId, cached }. 캐시(mirror.json)가 있으면 파이프라인 없이 즉시 완료.
-function startCrawl(url, { force = false, pro = false, geminiKey = null, fullAi = false, html = null } = {}) {
+function startCrawl(url, { force = false, pro = false, geminiKey = null, fullAi = false, html = null, base = '' } = {}) {
   const slug = slugify(url);
   const out = path.join(OUT_DIR, slug);
   if (html) force = true;
@@ -217,7 +229,7 @@ function startCrawl(url, { force = false, pro = false, geminiKey = null, fullAi 
   }
   const jobId = 'job_' + crypto.randomBytes(6).toString('hex');
   jobs.set(jobId, { url, slug, startedAt: Date.now() / 1000 });
-  launchPipeline(jobId, url, pro, geminiKey, fullAi, html);
+  launchPipeline(jobId, url, pro, geminiKey, fullAi, html, base);
   return { jobId, cached: false };
 }
 
@@ -361,6 +373,7 @@ router.post('/api/v1/crawl', auth, (req, res) => {
   const { jobId, cached } = startCrawl(url, {
     force: !!force_refresh, pro: !!use_pro_model, fullAi: !!full_ai, geminiKey: req.get('x-gemini-api-key') || null,
     html: html || null,
+    base: `${req.get('x-forwarded-proto') || req.protocol}://${req.get('host')}`,   // 자동 장면 이미지 주소 (PUBLIC_BASE_URL 우선)
   });
   if (cached) {
     return res.status(202).json({ job_id: jobId, status: 'completed', cached: true,

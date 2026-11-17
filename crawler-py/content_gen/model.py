@@ -144,6 +144,8 @@ def _merge_card_rows(sections: list, max_cols: int, use_group_heading: bool = Fa
                 if um:
                     for mm in um:
                         cards.append({"img": best_image_url(mm), "text": nx.get("text", ""),
+                                      **({"text_roles": nx["text_roles"]} if nx.get("text_roles") is not None else {}),
+                                      **({"disclaimers": nx["disclaimers"]} if nx.get("disclaimers") else {}),
                                       **({"crop": mm["crop"]} if mm.get("crop") else {})})
                 elif nx.get("text", "").strip().startswith("##") and not heading_text:
                     heading_text = nx["text"]      # ## 대제목 → 카드 행 헤딩
@@ -152,7 +154,7 @@ def _merge_card_rows(sections: list, max_cols: int, use_group_heading: bool = Fa
                 # 직전 텍스트-only 섹션도 대제목 후보 (컴포넌트 밖 헤딩)
                 if not heading_text and merged and merged[-1].get("layout_type") != "card_row" \
                         and not is_disclaimer(merged[-1]) and not usable_media(merged[-1]) \
-                        and merged[-1].get("text"):
+                        and merged[-1].get("text") and not _v2_intro_keep(merged[-1]):
                     heading_text = merged.pop()["text"]
                 # 대제목이 첫 카드 제목과 같으면 생략 (탭형 컴포넌트는 대제목 칸에 첫 항목 제목을 넣는다)
                 if use_group_heading and heading_text:
@@ -168,6 +170,8 @@ def _merge_card_rows(sections: list, max_cols: int, use_group_heading: bool = Fa
                         "cols": per,
                         "heading": heading_text if k == 0 else "",
                         "cards": cards[k:k + per],
+                        **({"disclaimers": list(dict.fromkeys(d for c in cards[k:k + per] for d in (c.get("disclaimers") or [])))}
+                           if any(c.get("disclaimers") for c in cards[k:k + per]) else {}),
                         "media": [], "text": "",
                     })
                 i = j
@@ -175,6 +179,12 @@ def _merge_card_rows(sections: list, max_cols: int, use_group_heading: bool = Fa
         merged.append(s)
         i += 1
     return merged
+
+
+def _v2_intro_keep(s: dict) -> bool:
+    """v2 소개 섹션에 제목 말고 다른 글(눈썹·본문)도 있으면 카드 행 대제목으로 흡수하지 않는다 (제목 한 줄만 옮겨지고 나머지가 사라짐)."""
+    roles = [r for r in (s.get("text_roles") or []) if r.get("role") != "disclaimer"]
+    return bool(s.get("intro")) and len(roles) > 1
 
 
 def _drop_gallery_media(sections: list, legacy: bool) -> list:
@@ -192,7 +202,8 @@ def _carry_section_titles(sections: list) -> list:
     규칙에 걸려 빠졌다 — 바로 다음 섹션의 맨 위 제목으로 붙인다 (LG 원문 글을 빠짐없이, 2026-11-10)."""
     out, pending = [], []
     for s in sections:
-        if s.get("component_id") == "AEM:sectiontitle" and not usable_media(s) and not s.get("specs"):
+        # v2 크롤 결과(intro 표시)는 소개 제목 블록으로 따로 그린다 — 다음 섹션 글에 붙이면 text_roles 에 없어 빠짐
+        if s.get("component_id") == "AEM:sectiontitle" and not usable_media(s) and not s.get("specs") and not s.get("intro"):
             pending.append((s.get("text") or "").strip())
             continue
         if pending and not (usable_media(s) or s.get("specs") or s.get("layout_type") == "card_row"):
@@ -235,10 +246,11 @@ def build_blocks(mirror: dict, rules: dict) -> list:
                     (c.get("crop") or {}).get("kind") == "badge" or _is_award_url(c.get("img")) for c in cards)))
             blocks.append({"kind": "card_row", "component_id": s.get("component_id", ""),
                            "cols": s.get("cols"), "heading": s.get("heading", ""),
-                           "cards": cards, "award": award})
+                           "cards": cards, "award": award,
+                           **({"disclaimers": s["disclaimers"]} if s.get("disclaimers") else {})})
             continue
         has_media = bool(usable_media(s))
-        if rules.get("drop_text_only_sections", True) and not has_media:
+        if rules.get("drop_text_only_sections", True) and not has_media and not (rules.get("v2") and s.get("intro")):
             continue
         # KV: 문서 최상단의 첫 히어로(이미지 보유)
         kv = False

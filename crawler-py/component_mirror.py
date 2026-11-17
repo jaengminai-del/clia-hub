@@ -50,7 +50,47 @@ try:
 except Exception:
     LEGACY = False
 
+import component_parser as _cp     # GEN2 스위치는 호출 시점에 읽는다 (파이프라인이 import 뒤에 켠다)
+
 _TEXT_ROLES_HEAD = ("headline", "subheadline")
+_UI_NOISE_TEXT = re.compile(r"^(play video|pause video|previous slide|next slide|close|toggle contents|close contents)$", re.I)
+
+
+_FAQ_COMPONENTS = {"ST0025", "ST0049", "PD0050"}   # FAQ — 크롤 제외 원칙 (coverage_check.py 와 같은 목록)
+
+
+def _gen2() -> bool:
+    return bool(getattr(_cp, "GEN2", False)) and not LEGACY
+
+
+def _ordered_roles(text_list: list, exclude: set = None) -> list:
+    """텍스트 v2: 글을 화면 순서 그대로 [{role, text}] — eyebrow·headline·subcopy·body·disclaimer.
+    (역할별로 모으면 '제목 N개 → 본문 N개' 로 순서가 섞인다 — 글 목록형 블록)"""
+    out, seen = [], set()
+    for t in (text_list or []):
+        raw = (t.get("text") or "").strip()
+        txt = strip_descriptions(raw).strip() if raw else ""
+        if not txt or is_image_description(txt) or _UI_NOISE_TEXT.match(txt):
+            continue
+        key = re.sub(r"\s+", " ", txt.lower())[:120]
+        if key in seen or (exclude and key in exclude):
+            continue
+        seen.add(key)
+        r = (t.get("role") or "").lower()
+        role = ("eyebrow" if r == "eyebrow" else "headline" if r in _TEXT_ROLES_HEAD else "subcopy" if r == "subcopy"
+                else "disclaimer" if r == "disclaimer" else "body")
+        out.append({"role": role, "text": txt})
+    # 제목·본문 없이 eyebrow 만 있으면 그 문구가 제목 (F4 와 같은 규칙)
+    if out and not any(x["role"] in ("headline", "body", "subcopy") for x in out):
+        for x in out:
+            if x["role"] == "eyebrow":
+                x["role"] = "headline"
+                break
+    return out
+
+
+def _roles_text_key(roles: list) -> set:
+    return {re.sub(r"\s+", " ", x["text"].lower())[:120] for x in roles}
 _TEXT_ROLES_BODY = ("body_copy", "body", "description")
 
 
@@ -199,6 +239,8 @@ def build_component_sections(component_data: list, origin: str = _LG_ORIGIN) -> 
     """
     sections, gallery, assets_all = [], [], []
     seen_assets = set()
+    gen2 = _gen2()
+    pending_disc = []          # v2: 앞에 붙일 섹션이 아직 없는 디스클레이머
 
     for comp in sorted(component_data, key=lambda c: c.get("dom_index", 0)):
         cid = (comp.get("component_id") or "").upper()
@@ -225,6 +267,14 @@ def build_component_sections(component_data: list, origin: str = _LG_ORIGIN) -> 
         head = texts["headline"]
         body = texts["body"]
         specs = _pick_specs(comp)
+        roles = _ordered_roles(comp.get("elements", {}).get("texts")) if gen2 else None
+        if gen2 and texts["disclaimer"] and not (head or body or specs) and not [m for m in media if m["role"] == "content"]:
+            # v2: 디스클레이머만 있는 컴포넌트(ST0010 등) — 바로 위 콘텐츠의 각주이므로 그 섹션에 붙인다
+            if sections:
+                sections[-1]["disclaimer"] = list(dict.fromkeys(sections[-1]["disclaimer"] + texts["disclaimer"]))
+            else:
+                pending_disc += texts["disclaimer"]
+            continue
         content_media = [m for m in media if m["role"] == "content"]
         cols = _infer_columns(comp, len(content_media), len(head))
         has_text = bool(head or body or specs)
@@ -256,6 +306,9 @@ def build_component_sections(component_data: list, origin: str = _LG_ORIGIN) -> 
                         "body": body,
                         "specs": [],
                         "disclaimer": texts["disclaimer"],
+                        **({"text_roles": _ordered_roles(comp.get("elements", {}).get("texts"),
+                                                         exclude=_roles_text_key([r for it in item_groups for r in _ordered_roles(it.get("texts"))]))}
+                           if gen2 else {}),
                         "media": lead_media,
                         "kind": "content",
                         "item_group": False,
@@ -284,6 +337,7 @@ def build_component_sections(component_data: list, origin: str = _LG_ORIGIN) -> 
                     "body": it_body,
                     "specs": [],
                     "disclaimer": it_texts["disclaimer"],
+                    **({"text_roles": _ordered_roles(it.get("texts"))} if gen2 else {}),
                     "media": it_media,
                     "kind": "content",
                     "renderable": True,
@@ -293,6 +347,8 @@ def build_component_sections(component_data: list, origin: str = _LG_ORIGIN) -> 
                 })
                 made += 1
             if made >= 2:
+                if gen2 and texts["disclaimer"] and (lead is None or not lead["renderable"]):
+                    sections[-1]["disclaimer"] = list(dict.fromkeys(sections[-1]["disclaimer"] + texts["disclaimer"]))
                 continue                     # 항목 섹션으로 대체했으므로 통합 섹션은 만들지 않는다
             # 항목이 2개 미만으로 살아남으면 통합 경로로 폴백 (부분 추가분 되돌리기)
             if made:
@@ -322,7 +378,8 @@ def build_component_sections(component_data: list, origin: str = _LG_ORIGIN) -> 
             "headline": head,
             "body": body,
             "specs": specs,
-            "disclaimer": texts["disclaimer"],
+            "disclaimer": list(dict.fromkeys(pending_disc + texts["disclaimer"])) if gen2 else texts["disclaimer"],
+            **({"text_roles": roles} if gen2 else {}),
             "media": content_media,
             "kind": "spec" if cid in SPEC_IDS else "content",
             "item_group": False,
@@ -335,6 +392,7 @@ def build_component_sections(component_data: list, origin: str = _LG_ORIGIN) -> 
             # (이미지 요건은 '텍스트 조각만 떠도는 섹션'을 걸러내기 위한 규칙).
             "renderable": (has_text and has_img) or bool(specs),
         })
+        pending_disc = []
 
     stats = {
         "components_in": len(component_data),
@@ -415,6 +473,7 @@ def to_mirror_format(built: dict, product_title: str = "") -> dict:
     """
     out_secs, cards = [], []
     order = 0
+    gen2 = _gen2()
     for s in built["sections"]:
         parts = []
         parts += s["eyebrow"]
@@ -453,7 +512,29 @@ def to_mirror_format(built: dict, product_title: str = "") -> dict:
             **({"compare": s["compare"]} if s.get("compare") else {}),
             **({"text_overlay": s["text_overlay"]} if s.get("text_overlay") else {}),
             **({"award_list": True} if s.get("award_list") else {}),
+            **({"text_roles": s["text_roles"]} if gen2 and s.get("text_roles") is not None else {}),
         }
+        if gen2:
+            # v2: 디스클레이머는 섹션 안에(블록 아래에 그린다) · 글만 있는 소개 제목은 섹션으로 · 나머지 글만 조각은 예전처럼 카드 후보
+            disc = [d.lstrip("*").strip() for d in (s["disclaimer"] or []) if d.strip()]
+            roles = s.get("text_roles") or []
+            intro = (not s["renderable"] and not s["media"] and not s.get("specs")
+                     and s.get("component_id") not in _FAQ_COMPONENTS
+                     and any(x["role"] == "headline" for x in roles)
+                     and sum(len(x["text"]) for x in roles if x["role"] != "disclaimer") <= 1200)
+            if s["renderable"] or intro:
+                order += 1
+                entry["order"] = order
+                if intro:
+                    entry.update(layout_type="text_intro", intro=True)
+                if disc:
+                    entry["disclaimers"] = disc
+                out_secs.append(entry)
+            else:
+                if disc and out_secs:
+                    out_secs[-1]["disclaimers"] = list(dict.fromkeys((out_secs[-1].get("disclaimers") or []) + disc))
+                cards.append(entry)
+            continue
         if s["renderable"]:
             order += 1
             entry["order"] = order

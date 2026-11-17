@@ -32,7 +32,31 @@
       "group_px": 20,
       "cell_px": 18
     },
-    "_note_line_height": "261110 — 태국어는 성조 기호·아래 모음 때문에 글자 높이가 최대 1.39em (Live 155개 실측)이라 헤드라인 1.0·본문 1.28 에서 두 줄이 겹쳤다. 사용자 지정: 헤드라인(36px) 줄간격 52px, 본문(24px) 36px"
+    "_note_line_height": "261110 — 태국어는 성조 기호·아래 모음 때문에 글자 높이가 최대 1.39em (Live 155개 실측)이라 헤드라인 1.0·본문 1.28 에서 두 줄이 겹쳤다. 사용자 지정: 헤드라인(36px) 줄간격 52px, 본문(24px) 36px",
+    "v2": {
+      "_note": "텍스트 v2 (2026-11-17) — 크롤 결과 _gen 2 에만. 눈썹=본문 모양, 블록 다음 제목, 보조 문구, 블록 아래 디스클레이머",
+      "eyebrow": {
+        "px": 24,
+        "line_height": "36px",
+        "weight": 400,
+        "color": "#2D2D2D"
+      },
+      "subhead": {
+        "px": 30,
+        "line_height": "42px",
+        "weight": 600
+      },
+      "subcopy": {
+        "px": 28,
+        "line_height": "40px",
+        "weight": 400
+      },
+      "disclaimer": {
+        "px": 18,
+        "line_height": "28px",
+        "color": "#716F6A"
+      }
+    }
   },
   "colors": {
     "headline": "#111111",
@@ -102,7 +126,9 @@
     "gallery_fallback_max": 8,
     "_gallery_fallback_note": "이미지가 2장 미만인 페이지는 제품 갤러리 사진(최대 8장)으로 채운다 — 이 매체만",
     "image_prefer": "pc",
-    "_image_prefer_note": "Shopee·Lazada 는 PC 우선 (TH 배치 Live 결과와 같게 — 모바일 우선으로 바꾸려면 mobile)"
+    "_image_prefer_note": "Shopee·Lazada 는 PC 우선 (TH 배치 Live 결과와 같게 — 모바일 우선으로 바꾸려면 mobile)",
+    "text_v2": true,
+    "_text_v2_note": "true 면 v2 크롤 결과(_gen 2)에 텍스트 v2 규칙 (content_gen/text_v2.py). 예전 결과는 영향 없음"
   },
   "layouts": {
     "_note": "크롤 컴포넌트의 layout_type → eBay 렌더 패턴. kv(문서 최상단 히어로)·overlay·card_row·spec_table은 별도 처리.",

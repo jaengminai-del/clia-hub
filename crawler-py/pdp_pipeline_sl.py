@@ -45,8 +45,15 @@ import aem_model_sl as aem_model  # 페이지에 실린 AEM 컴포넌트 모델 
 import component_parser as _component_parser
 _component_parser.KEEP_LINE_BREAKS = True   # LG 원문 줄바꿈(<br>) 유지는 이 파이프라인에서만 (원본 파이프라인은 공백)
 _component_parser.SRCSET_FIX = True         # 쉼표·공백 든 이미지 주소를 자르지 않는 수정도 이 파이프라인에서만
+_component_parser.GEN2 = True               # 텍스트 v2 (글 역할·디스클레이머·소개 제목) — 새 크롤만. 결과에 _gen: 2 (2026-11-17)
+aem_model.GEN2 = True          # 페이지 모델 경로(예전 형식 PDP)도 같은 텍스트 v2
 import make_mirror as _make_mirror
 _make_mirror.SRCSET_FIX = True
+
+
+# 결과 판: 2 = 텍스트 v2 규칙으로 만든 크롤 결과. 렌더러는 이 표시가 있을 때만 v2 텍스트 규칙을 쓴다
+# (표시가 없는 예전 크롤 결과 — 태국 Live 등 — 는 다시 만들어도 예전과 똑같이 나온다)
+MIRROR_GEN = 2
 
 
 class _CFSkip(Exception):
@@ -1393,7 +1400,7 @@ def main():
             _clean_media(mirror)
             (out / "qa_report.json").write_text(
                 json.dumps(content_checks(mirror, html), ensure_ascii=False, indent=2), encoding="utf-8")
-            (out / "mirror.json").write_text(json.dumps(mirror, ensure_ascii=False, indent=2), encoding="utf-8")
+            (out / "mirror.json").write_text(json.dumps(dict(mirror, _gen=MIRROR_GEN), ensure_ascii=False, indent=2), encoding="utf-8")
             write_progress(100, "분석 완료!", "done")
             print(f"\n✓ 완료 (페이지 컴포넌트 모델 경로). 산출물: {out}/mirror.json")
             return
@@ -1419,7 +1426,7 @@ def main():
             _clean_media(mirror)
             (out / "qa_report.json").write_text(
                 json.dumps(content_checks(mirror, html), ensure_ascii=False, indent=2), encoding="utf-8")
-            (out / "mirror.json").write_text(json.dumps(mirror, ensure_ascii=False, indent=2), encoding="utf-8")
+            (out / "mirror.json").write_text(json.dumps(dict(mirror, _gen=MIRROR_GEN), ensure_ascii=False, indent=2), encoding="utf-8")
             write_progress(100, "분석 완료!", "done")
             print(f"\n✓ 완료 (빠른 컴포넌트 경로). 산출물: {out}/mirror.json")
             return
@@ -1634,7 +1641,7 @@ def main():
             print(f"   ✓ 타이틀-이미지 페어링: {_pt}건 (파편 텍스트 → 진짜 타이틀)")
     _polish_mirror(mirror, datasets["pc"]["html"])
 
-    (out / "mirror.json").write_text(json.dumps(mirror, ensure_ascii=False, indent=2), encoding="utf-8")
+    (out / "mirror.json").write_text(json.dumps(dict(mirror, _gen=MIRROR_GEN), ensure_ascii=False, indent=2), encoding="utf-8")
 
     write_progress(100, "분석 완료! 검수용 플레이 패널을 출력합니다.", "done")
     print(f"\n✓ 완료. 산출물: {out}/mirror.json (활용) + final.json / verify_report.json / qa_report.json")

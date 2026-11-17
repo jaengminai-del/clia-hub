@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -29,9 +29,16 @@
     <div class="brand-sub">Amazon · Shopee · Lazada · Instagram · eBay</div>
     <div class="lang" role="group" aria-label="Language"><button type="button" data-lang="ko">한국어</button><button type="button" data-lang="en">English</button></div>
   </div>
+  <div class="search">
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <input id="searchInput" type="search" autocomplete="off" spellcheck="false" placeholder="Search the guide" aria-label="Search the guide" aria-controls="searchResults">
+    <kbd>/</kbd>
+  </div>
+  <div class="search-count" id="searchCount" aria-live="polite"></div>
+  <div class="search-results" id="searchResults" role="listbox" aria-label="Search results"></div>
   <div class="nav" id="nav"></div>
   <div class="side-foot">
-    <a class="btn-light" id="openBtn" href="../clia/" target="_blank" rel="noopener">CLIA 열기</a>
+    <a class="btn-light" id="openBtn" href="/clia/">Back to CLIA</a>
     <button class="btn-ghost" id="pdfBtn" type="button">PDF로 저장</button>
   </div>
 </nav>

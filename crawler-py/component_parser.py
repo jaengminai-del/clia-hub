@@ -42,6 +42,9 @@ KEEP_LINE_BREAKS = False
 # True 면 srcset 의 쉼표·공백 든 주소를 자르지 않는다 (TH 배치 수정, 2026-11-09) — 이것도 pdp_pipeline_sl.py 만 켠다.
 # 기본(False)은 원본 규칙 그대로: 원본 파이프라인의 결과가 한 글자도 달라지지 않게 한다.
 SRCSET_FIX = False
+# True 면 텍스트 v2 (2026-11-17): 글 역할(eyebrow·headline·subcopy·body·disclaimer)을 화면 순서대로 남기고,
+# 디스클레이머만 있는 컴포넌트·글만 있는 소개 제목도 버리지 않는다 — pdp_pipeline_sl.py(Shopee·Lazada 새 크롤)만 켠다.
+GEN2 = False
 
 
 def _srcset_head(srcset: str) -> str:
@@ -803,6 +806,8 @@ class ComponentParser:
     @classmethod
     def _role_for_slot(cls, slot: str) -> str:
         s = slot.lower()
+        if GEN2 and 'subcopy' in s:
+            return 'subcopy'
         for kw, role in cls.SLOT_ROLE_KEYWORDS:
             if kw in s:
                 return role
