@@ -85,6 +85,10 @@ def generate(mirror: dict, medium: str = "ebay", fragment: bool = False, listing
     m = load_medium(medium)
     spec, st = m["spec"], _style(medium)
     rules = spec.get("rules", {})
+    # 텍스트 v2: 매체가 켜 두었고(Shopee·Lazada) 크롤 결과가 v2 판(_gen >= 2)일 때만 — 예전 결과는 예전 그대로
+    st.v2 = bool(rules.get("text_v2")) and int(mirror.get("_gen") or 0) >= 2
+    if st.v2:
+        rules = dict(rules, v2=True)
     set_image_prefer(rules.get("image_prefer", "mobile"))   # 매체별 이미지 우선순위 (모바일 | PC)
     blocks = build_blocks(mirror, rules)
     body_cards = render_blocks(st, blocks, rules.get("text_alignment", "center"))

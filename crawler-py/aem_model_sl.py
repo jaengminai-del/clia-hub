@@ -29,6 +29,11 @@ SKIP_TYPES = re.compile(r"/(faq|joinmembers|socialshare|productcardbuttons|klarn
                         r"reviews?|buyingguide|countdown|cookie|productpage|wheretobuy|personalizationbanner)$")
 # 구독(LG Subscribe) 등 판매 안내 블록 — 제품 기능이 아님
 SKIP_PATH = re.compile(r"/subscribe/|/promotion/|/sample/", re.I)
+# 텍스트 v2 (2026-11-17, pdp_pipeline_sl 이 켬): 글 역할(text_roles) · 디스클레이머 · 소개 제목을 남긴다.
+# 꺼져 있으면 예전과 똑같은 결과.
+GEN2 = False
+_ROLE_OF_KEY = {"eyebrow": "eyebrow", "keyBenefitsTitleText": "headline", "imageText": "headline", "jcrTitle": "headline",
+                "title": "headline", "headline": "headline", "subTitle": "subcopy", "subtitle": "subcopy"}
 TEXT_KEYS = ("eyebrow", "keyBenefitsTitleText", "imageText", "jcrTitle", "title", "headline", "subTitle", "subtitle",
              "keyBenefitsContentDesc", "description", "bodyCopy", "bodycopy", "desc", "text")
 LIST_KEYS = ("keyBenefitsSummaryItems", "blockImageList", "featureIconTabsList", "mediaDescriptionList",
@@ -189,41 +194,120 @@ def _clean(s: str) -> str:
     return re.sub(r"\n{2,}", "\n", s).strip()
 
 
-def _texts(o, out=None, depth=0):
-    """컴포넌트 안의 글을 화면 순서로 (제목 노드 → '## ', 본문 노드 → 그대로)."""
+def _add_role(roles, role: str, text: str) -> None:
+    """글 역할 기록 (텍스트 v2). 본문은 줄마다, '*'·'※' 로 시작하는 줄은 디스클레이머."""
+    if roles is None:
+        return
+    lines = [text] if role in ("headline", "eyebrow") else [l for l in text.split("\n") if l.strip()]
+    for l in lines:
+        r = "disclaimer" if l.lstrip().startswith(("*", "※")) else role
+        if not roles or roles[-1]["text"] != l.strip():
+            roles.append({"role": r, "text": l.strip()})
+
+
+def _title_role(o: dict) -> str:
+    """LG 예전 형식은 제목·보조 문구·본문이 모두 title(h2) 컴포넌트 — 역할은 PC 글자 크기 클래스(font-w-<굵기>-<px>)로.
+    48px 이상 제목 · 24~47px 보조 문구 · 그보다 작으면 본문. 클래스가 없으면 제목."""
+    m = re.search(r"font-w-[a-z]+-(\d+)", o.get("appliedCssClassNames") or "")
+    if not m:
+        return "headline"
+    px = int(m.group(1))
+    return "headline" if px >= 48 else "subcopy" if px >= 24 else "body"
+
+
+def _texts(o, out=None, depth=0, roles=None):
+    """컴포넌트 안의 글을 화면 순서로 (제목 노드 → '## ', 본문 노드 → 그대로). roles 를 주면 글 역할도 같은 순서로."""
     out = [] if out is None else out
     if depth > 8: return out
     if isinstance(o, dict):
         ty = o.get(":type") or ""
         if ty.endswith("/title") and isinstance(o.get("text"), str):
             t = _clean(o["text"]).replace("\n", " ")
-            if t: out.append("## " + t)
+            if t: out.append("## " + t); _add_role(roles, _title_role(o), t)
             return out
         if ty.endswith("/text") and isinstance(o.get("text"), str):
             t = _clean(o["text"])
-            if t: out.append(t)
+            if t: out.append(t); _add_role(roles, "body", t)
             return out
         for k in TEXT_KEYS:
             v = o.get(k)
             if isinstance(v, str) and k != "text" and not v.startswith("/content/") and not v.startswith("http"):
                 t = _clean(v)
-                if t and len(t) > 1: out.append(("## " + t.replace("\n", " ")) if k in ("keyBenefitsTitleText", "jcrTitle", "imageText", "headline", "title") else t)
+                if t and len(t) > 1:
+                    out.append(("## " + t.replace("\n", " ")) if k in ("keyBenefitsTitleText", "jcrTitle", "imageText", "headline", "title") else t)
+                    _add_role(roles, _ROLE_OF_KEY.get(k, "body"), t.replace("\n", " ") if _ROLE_OF_KEY.get(k) == "headline" else t)
         order = o.get(":itemsOrder") or []
         items = o.get(":items") or {}
         for k in order:
-            if k in items: _texts(items[k], out, depth + 1)
+            if k in items: _texts(items[k], out, depth + 1, roles)
         for k, v in o.items():
             if k in (":items", ":itemsOrder", "dataLayer", "ctaModel", "scheduleUsabilityModel") or k in LIST_KEYS:
                 continue
             if isinstance(v, dict) and k == "mediaDescriptionModel":
-                _texts(v, out, depth + 1)
+                _texts(v, out, depth + 1, roles)
     elif isinstance(o, list):
-        for v in o: _texts(v, out, depth + 1)
+        for v in o: _texts(v, out, depth + 1, roles)
     # 연속 중복 제거
     ded = []
     for t in out:
         if not ded or ded[-1] != t: ded.append(t)
     out[:] = ded
+    return out
+
+
+def _v2_fields(o) -> dict:
+    """텍스트 v2: {text_roles, disclaimers} — 디스클레이머 줄은 블록 아래로 따로."""
+    roles = []
+    _texts(o, roles=roles)
+    disc = [r["text"] for r in roles if r["role"] == "disclaimer" and r["text"].lstrip("*※ ").strip()]
+    out = {"text_roles": [r for r in roles if r["role"] != "disclaimer"]}
+    if disc:
+        out["disclaimers"] = disc
+    return out
+
+
+def _v2_group(sections: list) -> list:
+    """텍스트 v2: 예전 형식은 제목 · 보조 문구 · 이미지가 각각 다른 컴포넌트다. 글만 있는 블록이 이어지면 하나로 묶고,
+    바로 뒤 이미지 블록에 자기 제목이 없으면 그 블록 위 글로 합친다 (닷컴에서 한 덩어리로 보이는 단위)."""
+    out, buf = [], []
+
+    def text_only(s):
+        return (not s.get("media") and not s.get("specs") and not s.get("item_group") and s.get("text_roles") is not None
+                and not s.get("list_head") and not str(s.get("order")).startswith("disclaimer"))
+
+    def merged(group, into=None):
+        base = dict(into or group[0])
+        parts = group + ([into] if into else [])
+        base["text"] = "\n".join(x.get("text") or "" for x in parts if x.get("text"))
+        base["text_roles"] = [r for x in parts for r in x.get("text_roles") or []]
+        disc = [d for x in parts for d in x.get("disclaimers") or []]
+        base.pop("disclaimers", None)
+        if disc:
+            base["disclaimers"] = list(dict.fromkeys(disc))
+        if into:
+            base.pop("intro", None)
+        elif any(r["role"] == "headline" for r in base["text_roles"]):
+            base["intro"] = True
+        return base
+
+    for s in sections:
+        if text_only(s):
+            buf.append(s); continue
+        if buf:
+            own_head = any(r["role"] == "headline" for r in s.get("text_roles") or [])
+            if s.get("media") and not s.get("item_group") and s.get("text_roles") is not None and not own_head:
+                out.append(merged(buf, s)); buf = []; continue
+            out.append(merged(buf)); buf = []
+        out.append(s)
+    if buf:
+        out.append(merged(buf))
+    for i, s in enumerate(out, 1):
+        if not str(s.get("order")).startswith("disclaimer"):
+            s["order"] = i
+        roles = s.get("text_roles") or []
+        # 제목 없이 보조 문구로 시작하는 블록(기능 이름 + 설명) — 그 보조 문구가 블록 제목
+        if roles and roles[0]["role"] == "subcopy" and not any(r["role"] == "headline" for r in roles):
+            s["text_roles"] = [dict(roles[0], role="headline")] + roles[1:]
     return out
 
 
@@ -378,7 +462,8 @@ def extract(html: str, url: str):
                                  # 대표 그림이 있으면 별도 섹션(카드 행에 섞이지 않게), 글만이면 카드 행 대제목으로 쓰이게 같은 묶음
                                  "component_id": cid, "component_dom_index": (-1 - idx) if own_imgs else idx,
                                  "layout_type": _layout(ty, own_imgs) if own_imgs else "text_block",
-                                 "columns": 1, "column_count": 1})
+                                 "columns": 1, "column_count": 1,
+                                 **({"list_head": True} if GEN2 else {})})
             n = len(items)
             cols = n if n <= 4 else (3 if n % 3 == 0 else 4 if n % 4 == 0 else 3)
             for it in items:
@@ -390,7 +475,8 @@ def extract(html: str, url: str):
                 sections.append({"order": order, "text": text, "specs": [], "item_group": True,
                                  "group_heading": (head[0][3:] if head and head[0].startswith("## ") else ""),
                                  "media": media, "component_id": cid, "component_dom_index": idx,
-                                 "layout_type": f"grid_{cols}_column", "columns": cols, "column_count": cols})
+                                 "layout_type": f"grid_{cols}_column", "columns": cols, "column_count": cols,
+                                 **(_v2_fields(it) if GEN2 else {})})
             continue
         text = "\n".join(_texts(c))
         if re.search(r"lorem ipsum", text, re.I):   # 작성 중 자리표시 블록 (페이지에 보이지 않음)
@@ -399,13 +485,29 @@ def extract(html: str, url: str):
         imgs = [m for m in media if m["type"] == "image" and m["role"] != "icon"]
         if not text and not imgs:
             continue
-        order += 1
         disclaimer = name == "textblock" and (c.get("blockType") == "disclaimer")
+        if GEN2 and disclaimer and not imgs and sections:
+            # v2: 디스클레이머 블록은 바로 앞 블록 아래로 (따로 두면 렌더에서 빠진다)
+            lines = [re.sub(r"^#+\s*", "", l).strip() for l in text.split("\n")]
+            lines = [l for l in lines if l]
+            sections[-1]["disclaimers"] = list(dict.fromkeys((sections[-1].get("disclaimers") or []) + lines))
+            continue
+        order += 1
+        if GEN2:
+            v2 = _v2_fields(c)
+            roles = v2["text_roles"]
+            # 글만 있는 소개 제목 블록 (예: 'Why LG AI TV?') — 렌더에서 글만 있는 섹션을 빼도 남게 표시
+            if (not imgs and not disclaimer and any(r["role"] == "headline" for r in roles)
+                    and sum(len(r["text"]) for r in roles) <= 1200):
+                v2.update(intro=True)
         sections.append({"order": f"disclaimer-{order}" if disclaimer else order, "text": text, "specs": [],
                          "item_group": False, "group_heading": "", "media": imgs + [m for m in media if m["type"] == "video"][:1],
                          "component_id": cid, "component_dom_index": idx,
                          "layout_type": _layout(ty, imgs), "columns": 1, "column_count": 1,
-                         "_aem_path": rp.rsplit("/jcr:content/", 1)[-1][:120]})
+                         "_aem_path": rp.rsplit("/jcr:content/", 1)[-1][:120],
+                         **(v2 if GEN2 else {})})
+    if GEN2:
+        sections = _v2_group(sections)
     feats = sum(len(s["media"]) for s in sections)
     return {"sections": sections, "note": "lg.com 원문 미러 (페이지 컴포넌트 모델) — 모든 텍스트/URL은 원본 그대로, AI 생성 서술 없음",
             "_aem_stats": {"components": len(comps), "sections": len(sections), "media": feats}}

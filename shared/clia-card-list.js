@@ -12,25 +12,25 @@
  */
 (function () {
   const T = {
-    en: { vid: 'Video', vidTitle: 'Choose a frame from the video', vidHint: 'Play or drag the bar to find a scene, or click a thumbnail — then press “Use this frame”.', vidUse: 'Use this frame', vidLoading: 'Loading video…', vidBusy: 'Extracting frame…', vidLock: 'Please press Lock first to finish editing.', vidFail: 'Could not load the video: ', vidDone: 'Frame replaced',
+    en: { vidAuto: 'Auto-picked', vidAlt: 'Candidate', vid: 'Video', vidTitle: 'Choose a frame from the video', vidHint: 'Play or drag the bar to find a scene, or click a thumbnail — then press “Use this frame”.', vidUse: 'Use this frame', vidLoading: 'Loading video…', vidBusy: 'Extracting frame…', vidLock: 'Please press Lock first to finish editing.', vidFail: 'Could not load the video: ', vidDone: 'Frame replaced',
           title: (n) => `Content cards (${n})`, full: 'View full lg.com page', hint: 'Drag cards to reorder — the preview on the left follows the same order. Click a thumbnail to see the original image(s).',
           imgs: (n) => `${n} image${n === 1 ? '' : 's'}`, untitled: '(no title)', capturing: 'Capturing the lg.com page… (usually 10–40 s)',
           capTitle: 'Snap, snap!', capTips: ['Working hard to capture the lg.com product page…', 'Scrolling down the page, one screen at a time', 'Waiting for every product image to load', 'Long pages take a little longer — almost there!'], capNote: 'Usually 10–40 s',
           failed: 'Could not capture the page.', retry: 'Try again', open: 'Open lg.com', empty: 'No cards yet.', close: 'Close',
           del: 'Delete card', delQ: (n) => `Delete card ${n}?`, delMsg: 'Are you sure? It will also be removed from the preview on the left. To get it back, generate the content again.', cancel: 'Cancel', delOk: 'Delete' },
-    ko: { vid: '동영상', vidTitle: '동영상에서 쓸 장면 고르기', vidHint: '재생하거나 막대를 끌어 장면을 찾거나 아래 미리보기를 누른 뒤 “이 장면 사용”을 누르세요.', vidUse: '이 장면 사용', vidLoading: '동영상 불러오는 중…', vidBusy: '장면 추출 중…', vidLock: '편집을 마치려면 먼저 잠금(Lock)을 눌러 주세요.', vidFail: '동영상을 불러오지 못했습니다: ', vidDone: '장면이 바뀌었습니다',
+    ko: { vidAuto: '자동 선택', vidAlt: '후보', vid: '동영상', vidTitle: '동영상에서 쓸 장면 고르기', vidHint: '재생하거나 막대를 끌어 장면을 찾거나 아래 미리보기를 누른 뒤 “이 장면 사용”을 누르세요.', vidUse: '이 장면 사용', vidLoading: '동영상 불러오는 중…', vidBusy: '장면 추출 중…', vidLock: '편집을 마치려면 먼저 잠금(Lock)을 눌러 주세요.', vidFail: '동영상을 불러오지 못했습니다: ', vidDone: '장면이 바뀌었습니다',
           title: (n) => `컨텐츠 카드 (${n})`, full: '전체 lg.com 컨텐츠 확인하기', hint: '카드를 끌어서 순서를 바꾸면 왼쪽 미리보기에도 같은 순서로 반영됩니다. 썸네일을 누르면 원본 이미지를 볼 수 있습니다.',
           imgs: (n) => `이미지 ${n}장`, untitled: '(제목 없음)', capturing: 'lg.com 페이지 캡처 중… (보통 10~40초)',
           capTitle: '찰칵, 찰칵!', capTips: ['lg.com 제품 페이지를 열심히 캡처하고 있어요…', '페이지를 위에서 아래로 한 화면씩 훑는 중이에요', '제품 이미지가 모두 뜰 때까지 기다리는 중이에요', '긴 페이지는 조금 더 걸려요. 거의 다 왔어요!'], capNote: '보통 10~40초 걸려요',
           failed: '페이지를 캡처하지 못했습니다.', retry: '다시 시도', open: 'lg.com 열기', empty: '아직 카드가 없습니다.', close: '닫기',
           del: '카드 삭제', delQ: (n) => `${n}번 카드를 지울까요?`, delMsg: '정말 지우시겠어요? 왼쪽 미리보기에서도 함께 사라지며, 되살리려면 컨텐츠를 다시 생성해야 합니다.', cancel: '취소', delOk: '삭제' },
-    de: { vid: 'Video', vidTitle: 'Szene aus dem Video wählen', vidHint: 'Abspielen oder Leiste ziehen, um eine Szene zu finden, oder Vorschaubild anklicken — dann „Diese Szene verwenden“.', vidUse: 'Diese Szene verwenden', vidLoading: 'Video wird geladen…', vidBusy: 'Szene wird extrahiert…', vidLock: 'Bitte zuerst „Sperren“ drücken.', vidFail: 'Video konnte nicht geladen werden: ', vidDone: 'Szene ersetzt',
+    de: { vidAuto: 'Automatisch gewählt', vidAlt: 'Alternative', vid: 'Video', vidTitle: 'Szene aus dem Video wählen', vidHint: 'Abspielen oder Leiste ziehen, um eine Szene zu finden, oder Vorschaubild anklicken — dann „Diese Szene verwenden“.', vidUse: 'Diese Szene verwenden', vidLoading: 'Video wird geladen…', vidBusy: 'Szene wird extrahiert…', vidLock: 'Bitte zuerst „Sperren“ drücken.', vidFail: 'Video konnte nicht geladen werden: ', vidDone: 'Szene ersetzt',
           title: (n) => `Inhaltskarten (${n})`, full: 'Gesamte lg.com-Seite ansehen', hint: 'Karten ziehen, um die Reihenfolge zu ändern — die Vorschau links folgt. Vorschaubild anklicken für das Originalbild.',
           imgs: (n) => `${n} Bild${n === 1 ? '' : 'er'}`, untitled: '(ohne Titel)', capturing: 'lg.com-Seite wird erfasst… (meist 10–40 s)',
           capTitle: 'Klick, klick!', capTips: ['Wir erfassen fleißig die lg.com-Produktseite…', 'Die Seite wird Bildschirm für Bildschirm gescrollt', 'Warten, bis alle Produktbilder geladen sind', 'Lange Seiten dauern etwas länger — fast geschafft!'], capNote: 'Meist 10–40 s',
           failed: 'Seite konnte nicht erfasst werden.', retry: 'Erneut versuchen', open: 'lg.com öffnen', empty: 'Noch keine Karten.', close: 'Schließen',
           del: 'Karte löschen', delQ: (n) => `Karte ${n} löschen?`, delMsg: 'Wirklich löschen? Sie wird auch aus der Vorschau links entfernt. Um sie zurückzuholen, Inhalte neu erstellen.', cancel: 'Abbrechen', delOk: 'Löschen' },
-    th: { vid: 'วิดีโอ', vidTitle: 'เลือกฉากจากวิดีโอ', vidHint: 'เล่นหรือลากแถบเพื่อหาฉาก หรือคลิกภาพย่อ แล้วกด “ใช้ฉากนี้”', vidUse: 'ใช้ฉากนี้', vidLoading: 'กำลังโหลดวิดีโอ…', vidBusy: 'กำลังดึงภาพฉาก…', vidLock: 'กรุณากดล็อกก่อนเพื่อจบการแก้ไข', vidFail: 'โหลดวิดีโอไม่สำเร็จ: ', vidDone: 'เปลี่ยนฉากแล้ว',
+    th: { vidAuto: 'เลือกอัตโนมัติ', vidAlt: 'ตัวเลือก', vid: 'วิดีโอ', vidTitle: 'เลือกฉากจากวิดีโอ', vidHint: 'เล่นหรือลากแถบเพื่อหาฉาก หรือคลิกภาพย่อ แล้วกด “ใช้ฉากนี้”', vidUse: 'ใช้ฉากนี้', vidLoading: 'กำลังโหลดวิดีโอ…', vidBusy: 'กำลังดึงภาพฉาก…', vidLock: 'กรุณากดล็อกก่อนเพื่อจบการแก้ไข', vidFail: 'โหลดวิดีโอไม่สำเร็จ: ', vidDone: 'เปลี่ยนฉากแล้ว',
           title: (n) => `การ์ดคอนเทนต์ (${n})`, full: 'ดูหน้า lg.com ทั้งหมด', hint: 'ลากการ์ดเพื่อจัดลำดับใหม่ — ตัวอย่างด้านซ้ายจะเรียงตามลำดับเดียวกัน คลิกภาพย่อเพื่อดูรูปต้นฉบับ',
           imgs: (n) => `${n} รูป`, untitled: '(ไม่มีหัวข้อ)', capturing: 'กำลังจับภาพหน้า lg.com… (ปกติ 10–40 วินาที)',
           capTitle: 'แชะ แชะ!', capTips: ['กำลังตั้งใจจับภาพหน้าสินค้า lg.com…', 'กำลังเลื่อนหน้าลงทีละหน้าจอ', 'รอให้รูปสินค้าโหลดครบทุกรูป', 'หน้ายาวอาจใช้เวลานานขึ้นนิดหน่อย — ใกล้เสร็จแล้ว!'], capNote: 'ปกติ 10–40 วินาที',
@@ -161,11 +161,19 @@
     fetch(`${api}/api/v1/video-frames?url=${encodeURIComponent(video)}&n=8`).then((r) => r.json()).then((d) => {
       if (!d.frames) throw new Error(d.error || 'no frames');
       strip.innerHTML = '';
-      d.frames.forEach((f) => {
+      // 크롤 직후 자동으로 고른 장면(LG 포스터가 검은 화면·없을 때) — 맨 앞에 '자동 선택' · 후보 2·3
+      const autos = ((d.auto && d.auto.top) || []).map((x, k) => ({ t: x.t, src: x.src, label: k ? `${t.vidAlt} ${k + 1}` : t.vidAuto, auto: !k }));
+      if (autos.length) {   // 처음 0초 장면이 검은 화면인 경우라 자동 선택 장면에서 연다
+        const go = () => { if (!v.currentTime) v.currentTime = autos[0].t; };
+        if (v.readyState >= 1) go(); else v.addEventListener('loadedmetadata', go, { once: true });
+      }
+      [...autos, ...d.frames].forEach((f) => {
         const b = document.createElement('button');
         b.type = 'button'; b.title = fmt(f.t);
         b.style.cssText = 'flex:0 0 auto;padding:0;border:2px solid transparent;border-radius:6px;background:none;cursor:pointer;position:relative;';
-        b.innerHTML = `<img src="${esc(api + f.src)}" alt="" style="height:56px;display:block;border-radius:4px;"><span style="position:absolute;right:3px;bottom:3px;background:rgba(0,0,0,.7);color:#fff;font-size:10px;padding:0 4px;border-radius:3px;">${fmt(f.t)}</span>`;
+        b.innerHTML = `<img src="${esc(api + f.src)}" alt="" style="height:56px;display:block;border-radius:4px;"><span style="position:absolute;right:3px;bottom:3px;background:rgba(0,0,0,.7);color:#fff;font-size:10px;padding:0 4px;border-radius:3px;">${fmt(f.t)}</span>`
+          + (f.label ? `<span style="position:absolute;left:3px;top:3px;background:${f.auto ? '#A50034' : 'rgba(0,0,0,.7)'};color:#fff;font-size:10px;font-weight:600;padding:0 5px;border-radius:3px;">${esc(f.label)}</span>` : '');
+        if (f.auto) b.style.borderColor = '#A50034';
         b.onclick = () => { v.pause(); v.currentTime = f.t; strip.querySelectorAll('button').forEach((x) => { x.style.borderColor = 'transparent'; }); b.style.borderColor = '#FD312E'; };
         strip.appendChild(b);
       });

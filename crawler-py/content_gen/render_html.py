@@ -23,6 +23,7 @@ from text_filters import (
 )
 
 from .model import best_image_url, usable_media
+from . import text_v2
 
 _MD_HEAD = re.compile(r"^#{1,6}\s*")
 
@@ -488,7 +489,8 @@ def render_card_row(st: Style, block: dict) -> str:
         items = [award_card(st, c.get("img", ""), content_lines(c.get("text")), cid, c.get("crop"))
                  for c in block.get("cards", [])]
     else:
-        items = [hcard(st, c.get("img", ""), content_lines(c.get("text")), cid) for c in block.get("cards", [])]
+        items = [(text_v2.card_html(st, c.get("img", ""), c) if getattr(st, "v2", False)
+                  else hcard(st, c.get("img", ""), content_lines(c.get("text")), cid)) for c in block.get("cards", [])]
     hd = content_lines(block.get("heading", ""))
     heading = hd[0] if hd else ""
     head_html = (f'<h2 style="font-family: {st.font_headline}; font-weight: 600; font-size: {st.px(cid, "headline", 36)}px; line-height: {st.head_lh}; '
@@ -502,7 +504,8 @@ def render_section(st: Style, section: dict, kv: bool, align: str) -> str:
     cid = section.get("component_id", "")
     text = section.get("text", "")
     media_list = usable_media(section)
-    html = text_html(st, text, cid, first_is_title=True)
+    html = (text_v2.text_html(st, text_v2.roles_of(section)) if getattr(st, "v2", False)
+            else text_html(st, text, cid, first_is_title=True))
 
     if not media_list:
         return text_only(html, align)
@@ -645,6 +648,10 @@ def render_blocks(st: Style, blocks: list, align: str) -> list:
             h = render_section(st, b["section"], b.get("kv", False), align)
         if h and b.get("section"):
             h = _mark_video(b["section"], h)
+        if h and getattr(st, "v2", False):      # v2: 디스클레이머는 그 블록 아래에
+            h = text_v2.with_disclaimers(st, h, (list(b.get("disclaimers") or []) + [d for c in b.get("cards") or [] if c.get("text_roles") is None
+                                                                               for d in text_v2.disclaimers_of(c)])
+                                         if b["kind"] == "card_row" else text_v2.disclaimers_of(b.get("section") or {}))
         if h:
             out.append(h)
     return out
