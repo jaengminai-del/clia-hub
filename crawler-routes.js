@@ -501,4 +501,6 @@ module.exports = router;
 module.exports.crawl = crawl;
 module.exports.slugify = slugify;
 module.exports.stripNonContent = stripNonContent;
+module.exports.productSummary = productSummary;   // 벌크 엑셀 SKU 연결 (bulk-routes.js)
+module.exports.OUT_DIR = OUT_DIR;
 setImmediate(() => { try { stripNonContent(); } catch (e) { console.warn('[crawl] stripNonContent:', e.message); } });

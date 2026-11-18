@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Bulk Excel — CLIA</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/svg+xml" href="../shared/assets/clia-icon.svg">
+<link rel="stylesheet" href="../css/fonts.css">
+<link rel="stylesheet" href="../shared/clia-ui.css">
+<style>
+:root { --line: var(--clia-gray-200); --muted: var(--clia-gray-500); --ok: #1E7F4F; --warn: #A15C00; --bad: #C8241F; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--clia-font); background: var(--clia-page); color: var(--clia-gray-900); font-size: 13px; -webkit-font-smoothing: antialiased; }
+button, input, select { font-family: var(--clia-font); }
+.top { position: sticky; top: 0; z-index: 10; height: 64px; background: #fff; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 14px; padding: 0 24px 0 20px; }
+.top img { height: 24px; display: block; }
+.top .div { width: 1px; height: 16px; background: var(--line); }
+.top .t { font-weight: 700; font-size: 15px; }
+.top .sp { flex: 1; }
+.lang { display: inline-flex; border: 1px solid var(--clia-gray-300); border-radius: 999px; overflow: hidden; }
+.lang button { border: 0; background: #fff; padding: 0 12px; height: 32px; cursor: pointer; color: var(--clia-gray-700); font-size: 12px; }
+.lang button.on { background: var(--clia-gray-900); color: #fff; }
+main { max-width: 1280px; margin: 0 auto; padding: 24px 24px 120px; }
+h1 { font-size: 22px; margin: 0 0 6px; }
+.lead { color: var(--muted); margin: 0 0 20px; line-height: 1.5; max-width: 860px; }
+.card { background: #fff; border: 1px solid var(--line); border-radius: var(--clia-radius); padding: 20px; margin-bottom: 16px; box-shadow: var(--clia-shadow); }
+.card h2 { font-size: 15px; margin: 0 0 14px; display: flex; align-items: center; gap: 8px; }
+.card h2 .n { display: inline-flex; width: 22px; height: 22px; border-radius: 50%; background: var(--clia-gray-900); color: #fff; font-size: 12px; align-items: center; justify-content: center; }
+.drop { border: 1.5px dashed var(--clia-gray-300); border-radius: var(--clia-radius); padding: 28px; text-align: center; color: var(--muted); cursor: pointer; transition: border-color .15s, background .15s; }
+.drop:hover, .drop.over { border-color: var(--clia-brand); background: var(--clia-brand-soft); color: var(--clia-gray-900); }
+.drop b { color: var(--clia-gray-900); }
+.row { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
+.seg { display: inline-flex; border: 1px solid var(--clia-gray-300); border-radius: 999px; overflow: hidden; }
+.seg button { border: 0; background: #fff; height: 34px; padding: 0 16px; cursor: pointer; color: var(--clia-gray-700); font-size: 13px; }
+.seg button.on { background: var(--clia-brand); color: #fff; }
+label.f { display: inline-flex; flex-direction: column; gap: 4px; font-size: 11px; color: var(--muted); }
+select, input[type=text], input[type=search], input[type=date] { height: 34px; border: 1px solid var(--clia-gray-300); border-radius: 8px; padding: 0 10px; background: #fff; color: var(--clia-gray-900); font-size: 13px; min-width: 120px; }
+select:focus, input:focus { outline: none; border-color: var(--clia-brand); box-shadow: 0 0 0 3px var(--clia-brand-soft); }
+.hint { color: var(--muted); font-size: 12px; line-height: 1.5; }
+.stats { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; }
+.chip { display: inline-flex; gap: 6px; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; background: var(--clia-gray-100); color: var(--clia-gray-700); font-size: 12px; }
+.chip b { color: var(--clia-gray-900); }
+.chip.warn { background: #FFF4E0; color: var(--warn); }
+.tbl-wrap { overflow: auto; max-height: 62vh; border: 1px solid var(--line); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; min-width: 980px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--clia-gray-100); vertical-align: top; }
+th { position: sticky; top: 0; background: var(--clia-gray-50); font-size: 11px; color: var(--muted); font-weight: 600; z-index: 1; white-space: nowrap; }
+tr.off td { color: var(--clia-gray-400); }
+td.ck { width: 34px; }
+.prod { display: flex; gap: 8px; align-items: flex-start; }
+.prod img { width: 40px; height: 40px; object-fit: contain; border-radius: 6px; background: var(--clia-gray-50); flex: none; }
+.prod .m { font-weight: 700; }
+.prod .tt { color: var(--muted); font-size: 12px; max-width: 320px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.mp { max-width: 260px; font-size: 12px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.mono { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.b-rep { background: #FFF4E0; color: var(--warn); }
+.b-new { background: var(--clia-gray-100); color: var(--clia-gray-600); }
+.b-ok { background: #E3F4EA; color: var(--ok); }
+.b-bad { background: #FDE8E7; color: var(--bad); }
+.b-run { background: #E8EEF9; color: #2A4E8F; }
+.b-none { background: var(--clia-gray-100); color: var(--clia-gray-500); }
+.sub { display: block; color: var(--muted); font-size: 11px; margin-top: 3px; }
+.bar { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-top: 1px solid var(--line); padding: 12px 24px; display: none; z-index: 10; }
+.bar .in { max-width: 1280px; margin: 0 auto; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.bar .sp { flex: 1; }
+a.clia-btn { text-decoration: none; }
+.prog { height: 6px; border-radius: 3px; background: var(--clia-gray-100); overflow: hidden; width: 220px; }
+.prog i { display: block; height: 100%; width: 0; background: var(--clia-brand); transition: width .3s; }
+.err { color: var(--bad); white-space: pre-wrap; }
+.hidden { display: none !important; }
+details summary { cursor: pointer; color: var(--clia-gray-700); font-size: 12px; margin-top: 6px; }
+@media (max-width: 720px) { main { padding: 16px 16px 140px; } .top { padding: 0 16px; } .top .t2 { display: none; } }
+</style>
+</head>
+<body>
+<div class="top">
+  <img src="../shared/assets/lg-logo.svg" alt="LG"><span class="div"></span><span class="t">CLIA Content Hub</span><span class="t t2" style="color:var(--muted);font-weight:500" data-i="title"></span>
+  <span class="sp"></span>
+  <div class="lang" id="lang"></div>
+  <button class="clia-btn" id="back" data-i="back"></button>
+</div>
+<main>
+  <h1 data-i="title"></h1>
+  <p class="lead" data-i="lead"></p>
+
+  <section class="card">
+    <h2><span class="n">1</span><span data-i="s1"></span></h2>
+    <div class="row" style="margin-bottom:14px">
+      <div class="seg" id="chSeg"><button data-ch="shopee">Shopee</button><button data-ch="lazada">Lazada</button></div>
+      <span class="hint" id="chHint"></span>
+    </div>
+    <div class="drop" id="drop"><input type="file" id="file" accept=".xlsx" hidden><div data-i="drop"></div><div class="hint" id="fileInfo" style="margin-top:6px"></div></div>
+    <div class="err" id="upErr"></div>
+  </section>
+
+  <section class="card hidden" id="colsCard">
+    <h2><span class="n">2</span><span data-i="s2"></span></h2>
+    <div class="row" id="colsRow"></div>
+    <p class="hint" data-i="colsHint" style="margin:10px 0 0"></p>
+  </section>
+
+  <section class="card hidden" id="listCard">
+    <h2><span class="n">3</span><span data-i="s3"></span></h2>
+    <div class="stats" id="stats"></div>
+    <div class="row" style="margin-bottom:12px">
+      <label class="f"><span data-i="fCountry"></span><select id="fCountry"></select></label>
+      <label class="f"><span data-i="fCat"></span><select id="fCat"></select></label>
+      <label class="f"><span data-i="fSub"></span><select id="fSub"></select></label>
+      <label class="f"><span data-i="fSearch"></span><input type="search" id="fSearch"></label>
+      <label class="f"><span data-i="fFrom"></span><input type="date" id="fFrom"></label>
+      <label class="f"><span data-i="fTo"></span><input type="date" id="fTo"></label>
+      <label class="f"><span data-i="fMatch"></span><select id="fMatch"></select></label>
+    </div>
+    <div class="row" style="margin-bottom:10px">
+      <button class="clia-btn" id="selShown" data-i="selShown"></button>
+      <button class="clia-btn" id="selNone" data-i="selNone"></button>
+      <span class="hint" id="shownInfo"></span>
+    </div>
+    <div class="tbl-wrap"><table><thead><tr>
+      <th class="ck"><input type="checkbox" id="ckAll"></th><th data-i="cRow"></th><th>SKU</th><th data-i="cMp"></th><th data-i="cClia"></th>
+      <th data-i="cCat"></th><th data-i="cCrawled"></th><th data-i="cDesc"></th><th data-i="cStatus"></th>
+    </tr></thead><tbody id="tb"></tbody></table></div>
+  </section>
+</main>
+<div class="bar" id="bar"><div class="in">
+  <span id="selInfo"></span>
+  <div class="prog hidden" id="prog"><i></i></div><span class="hint" id="progInfo"></span>
+  <span class="sp"></span>
+  <a class="clia-btn hidden" id="dl" data-i="download"></a>
+  <button class="clia-btn primary" id="build"></button>
+</div></div>
+<script src="bulk.js"></script>
+</body>
+</html>
