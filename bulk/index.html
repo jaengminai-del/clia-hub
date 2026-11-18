@@ -69,6 +69,25 @@ button { font-family: inherit; }
 .qact .pill { height: 30px; padding: 0 12px; font-size: 12px; }
 .tip { margin-inline-start: auto; color: var(--muted); font-size: 12px; }
 .item.hidden { display: none; }
+/* 보기 전환 (리스트 · 갤러리) */
+.view { display: inline-flex; border: 1px solid var(--clia-gray-300); border-radius: 999px; overflow: hidden; background: #fff; flex: none; }
+.view button { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border: 0; background: none; cursor: pointer; color: var(--clia-gray-600); font-size: 12px; font-weight: 600; }
+.view button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.view button.on { background: var(--clia-gray-900); color: #fff; }
+.tip + .view { margin-inline-start: 4px; }
+/* 갤러리: 같은 항목을 카드로 */
+.list.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; background: none; border: 0; border-radius: 0; overflow: visible; }
+.list.grid .item { position: relative; display: flex; flex-direction: column; align-items: stretch; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: #fff; transition: border-color .15s, box-shadow .15s; }
+.list.grid .item:hover { background: #fff; border-color: var(--clia-gray-400); box-shadow: var(--clia-shadow); }
+.list.grid .item:has(input:checked) { border-color: var(--red); box-shadow: 0 0 0 1px var(--red); }
+.list.grid .item.off { opacity: .6; }
+.list.grid .item input { position: absolute; top: 12px; inset-inline-start: 12px; z-index: 1; width: 20px; height: 20px; }
+.list.grid .item img { width: 100%; height: 150px; border-radius: 10px; object-fit: contain; background: var(--clia-gray-50); }
+.list.grid .item .s { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; min-height: 2.8em; }
+.list.grid .item .m { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.list.grid .item .m .dv { margin-inline-start: 0; }
+.list.grid .item .r { align-items: flex-start; text-align: start; min-height: 20px; }
+@media (max-width: 640px) { .list.grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } .list.grid .item img { height: 110px; } .list.grid .item { grid-column: auto; } .list.grid .item .r { grid-column: auto; } }
 .list { background: #fff; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
 .item { display: grid; grid-template-columns: 22px 48px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--clia-gray-100); cursor: pointer;
   animation: rise .35s ease both; }
@@ -135,7 +154,7 @@ a.clia-btn { text-decoration: none; }
     <div class="res-h"><span class="n" id="rn"></span><span class="f" id="rf"></span><button class="again" id="again" data-i="again"></button></div>
     <div class="ctl" id="ctl"></div>
     <div class="ctl ctl2" id="ctl2"></div>
-    <div class="srch"><input type="search" id="q" autocomplete="off"><span class="qact hidden" id="qAct"><span id="qN"></span><button class="pill" id="qSel"></button><button class="pill" id="qDesel"></button></span><span class="tip" id="shiftTip"></span></div>
+    <div class="srch"><input type="search" id="q" autocomplete="off"><span class="qact hidden" id="qAct"><span id="qN"></span><button class="pill" id="qSel"></button><button class="pill" id="qDesel"></button></span><span class="tip" id="shiftTip"></span><span class="view" id="view" role="group"><button data-v="list" aria-label="List"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span id="vList"></span></button><button data-v="grid" aria-label="Gallery"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span id="vGrid"></span></button></span></div>
     <div class="list" id="list"></div>
     <details class="skip hidden" id="skip"><summary id="skipSum"></summary><ul id="skipList"></ul></details>
   </section>

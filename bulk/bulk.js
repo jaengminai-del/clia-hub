@@ -9,7 +9,7 @@
       title: 'Bulk Excel', drop: 'Attach the Shopee / Lazada bulk Excel', dropSub: 'Drop an .xlsx file here or click to choose',
       reading: 'Reading the Excel', matching: 'Matching products', again: 'Attach another file',
       found: (n) => `${n} products matched`, of: (all) => `out of ${all} products in the file`,
-      selAll: 'Select all', selNone: 'Deselect all',
+      selAll: 'Select all', selNone: 'Deselect all', viewList: 'List', viewGrid: 'Gallery',
       search: 'Search model or product name', qRes: (n) => `${n} results`, qSel: 'Select results', qDesel: 'Deselect results', shift: 'Tip: Shift + click selects a range',
       grp: { TV: 'TV', Audio: 'Audio', Monitor: 'Monitor', Laptop: 'Laptop', Projector: 'Projector', Fridge: 'Fridge', Washer: 'Washer', Dryer: 'Dryer', Vacuum: 'Vacuum', Dishwasher: 'Dishwasher', Cooking: 'Cooking', Styler: 'Styler', AC: 'Air conditioner', Purifier: 'Air purifier', Dehumidifier: 'Dehumidifier', Other: 'Other' },
       rep: 'Replaces current description', skip: (n) => `${n} products were not matched — they stay as they are in the Excel`,
@@ -25,7 +25,7 @@
       title: 'Bulk Excel', drop: 'แนบไฟล์ Excel แบบ bulk ของ Shopee / Lazada', dropSub: 'วางไฟล์ .xlsx ที่นี่ หรือคลิกเพื่อเลือกไฟล์',
       reading: 'กำลังอ่านไฟล์ Excel', matching: 'กำลังจับคู่สินค้า', again: 'แนบไฟล์อื่น',
       found: (n) => `จับคู่สินค้าได้ ${n} รายการ`, of: (all) => `จากทั้งหมด ${all} รายการในไฟล์`,
-      selAll: 'เลือกทั้งหมด', selNone: 'ยกเลิกทั้งหมด',
+      selAll: 'เลือกทั้งหมด', selNone: 'ยกเลิกทั้งหมด', viewList: 'รายการ', viewGrid: 'แกลเลอรี',
       search: 'ค้นหารุ่นหรือชื่อสินค้า', qRes: (n) => `ผลการค้นหา ${n} รายการ`, qSel: 'เลือกผลการค้นหา', qDesel: 'ยกเลิกผลการค้นหา', shift: 'เคล็ดลับ: Shift + คลิก เพื่อเลือกเป็นช่วง',
       grp: { TV: 'ทีวี', Audio: 'เครื่องเสียง', Monitor: 'จอมอนิเตอร์', Laptop: 'แล็ปท็อป', Projector: 'โปรเจกเตอร์', Fridge: 'ตู้เย็น', Washer: 'เครื่องซักผ้า', Dryer: 'เครื่องอบผ้า', Vacuum: 'เครื่องดูดฝุ่น', Dishwasher: 'เครื่องล้างจาน', Cooking: 'เครื่องครัว', Styler: 'สไตเลอร์', AC: 'เครื่องปรับอากาศ', Purifier: 'เครื่องฟอกอากาศ', Dehumidifier: 'เครื่องลดความชื้น', Other: 'อื่น ๆ' },
       rep: 'แทนที่รายละเอียดเดิม', skip: (n) => `${n} สินค้าจับคู่ไม่ได้ — จะคงเดิมในไฟล์ Excel`,
@@ -41,7 +41,7 @@
       title: '벌크 엑셀', drop: 'Shopee / Lazada 벌크 엑셀을 첨부하세요', dropSub: '.xlsx 파일을 여기에 끌어 놓거나 눌러서 고르세요',
       reading: '엑셀을 읽고 있습니다', matching: '제품을 매칭하고 있습니다', again: '다른 파일 첨부',
       found: (n) => `${n}개 제품이 매칭됐습니다`, of: (all) => `파일 안 ${all}개 상품 중`,
-      selAll: '전체 선택', selNone: '전체 해제',
+      selAll: '전체 선택', selNone: '전체 해제', viewList: '리스트', viewGrid: '갤러리',
       search: '모델명·상품명 검색', qRes: (n) => `검색 결과 ${n}개`, qSel: '검색 결과 선택', qDesel: '검색 결과 해제', shift: '팁: Shift + 클릭으로 범위 선택',
       grp: { TV: 'TV', Audio: '오디오', Monitor: '모니터', Laptop: '노트북', Projector: '프로젝터', Fridge: '냉장고', Washer: '세탁기', Dryer: '건조기', Vacuum: '청소기', Dishwasher: '식기세척기', Cooking: '조리기기', Styler: '스타일러', AC: '에어컨', Purifier: '공기청정기', Dehumidifier: '제습기', Other: '기타' },
       rep: '기존 설명 교체', skip: (n) => `매칭되지 않은 상품 ${n}개 — 엑셀에서 그대로 둡니다`,
@@ -57,7 +57,7 @@
       title: 'Bulk-Excel', drop: 'Shopee-/Lazada-Bulk-Excel anhängen', dropSub: '.xlsx-Datei hier ablegen oder zum Auswählen klicken',
       reading: 'Excel wird gelesen', matching: 'Produkte werden zugeordnet', again: 'Andere Datei anhängen',
       found: (n) => `${n} Produkte zugeordnet`, of: (all) => `von ${all} Produkten in der Datei`,
-      selAll: 'Alle auswählen', selNone: 'Alle abwählen',
+      selAll: 'Alle auswählen', selNone: 'Alle abwählen', viewList: 'Liste', viewGrid: 'Galerie',
       search: 'Modell oder Produktname suchen', qRes: (n) => `${n} Treffer`, qSel: 'Treffer auswählen', qDesel: 'Treffer abwählen', shift: 'Tipp: Umschalt + Klick wählt einen Bereich',
       grp: { TV: 'TV', Audio: 'Audio', Monitor: 'Monitor', Laptop: 'Laptop', Projector: 'Beamer', Fridge: 'Kühlschrank', Washer: 'Waschmaschine', Dryer: 'Trockner', Vacuum: 'Staubsauger', Dishwasher: 'Geschirrspüler', Cooking: 'Kochen', Styler: 'Styler', AC: 'Klimaanlage', Purifier: 'Luftreiniger', Dehumidifier: 'Luftentfeuchter', Other: 'Sonstiges' },
       rep: 'Ersetzt aktuelle Beschreibung', skip: (n) => `${n} Produkte nicht zugeordnet — sie bleiben unverändert`,
@@ -73,7 +73,7 @@
       title: 'Excel مجمّع', drop: 'أرفق ملف Excel المجمّع من Shopee / Lazada', dropSub: 'أسقط ملف ‎.xlsx هنا أو انقر للاختيار',
       reading: 'جارٍ قراءة الملف', matching: 'جارٍ مطابقة المنتجات', again: 'إرفاق ملف آخر',
       found: (n) => `تمت مطابقة ${n} منتجات`, of: (all) => `من أصل ${all} منتجاً في الملف`,
-      selAll: 'تحديد الكل', selNone: 'إلغاء تحديد الكل',
+      selAll: 'تحديد الكل', selNone: 'إلغاء تحديد الكل', viewList: 'قائمة', viewGrid: 'معرض',
       search: 'ابحث بالطراز أو اسم المنتج', qRes: (n) => `${n} نتائج`, qSel: 'تحديد النتائج', qDesel: 'إلغاء تحديد النتائج', shift: 'تلميح: Shift + نقرة لتحديد نطاق',
       grp: { TV: 'تلفزيون', Audio: 'الصوتيات', Monitor: 'شاشة', Laptop: 'لابتوب', Projector: 'بروجكتور', Fridge: 'ثلاجة', Washer: 'غسالة', Dryer: 'مجفف', Vacuum: 'مكنسة', Dishwasher: 'غسالة صحون', Cooking: 'الطهي', Styler: 'ستايلر', AC: 'مكيف', Purifier: 'منقي هواء', Dehumidifier: 'مزيل رطوبة', Other: 'أخرى' },
       rep: 'يستبدل الوصف الحالي', skip: (n) => `لم تتم مطابقة ${n} منتجات — ستبقى كما هي`,
@@ -290,6 +290,16 @@
     refresh();
   };
 
+  // 보기 전환: 리스트(기본, 열 때마다 리스트) · 갤러리
+  let VIEW = 'list';
+  function setView(v) {
+    VIEW = v === 'grid' ? 'grid' : 'list';
+    $('list').classList.toggle('grid', VIEW === 'grid');
+    document.querySelectorAll('#view button').forEach((b) => { b.classList.toggle('on', b.dataset.v === VIEW); b.setAttribute('aria-pressed', b.dataset.v === VIEW); });
+  }
+  $('vList').textContent = t('viewList'); $('vGrid').textContent = t('viewGrid');
+  $('view').onclick = (e) => { const b = e.target.closest('button'); if (b) setView(b.dataset.v); };
+  setView(VIEW);
   $('q').placeholder = t('search');
   $('shiftTip').textContent = t('shift');
   $('qSel').textContent = t('qSel'); $('qDesel').textContent = t('qDesel');
