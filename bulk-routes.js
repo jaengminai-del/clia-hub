@@ -67,7 +67,8 @@ function detect(sheet) {
   const pick = (test, not, skip) => {
     for (const c of cols) {
       if (skip && skip.includes(c.col)) continue;
-      const i = c.labels.findIndex((l) => test.test(l) && !(not && not.test(l)));
+      // Shopee 내부 키(et_title_product_description 등)의 'title' 은 이름 칸 표시가 아니므로 빼고 본다
+      const i = c.labels.findIndex((l) => test.test(l) && !(not && not.test(l.replace(/^et_title_/i, ''))));
       if (i >= 0) { headEnd = Math.max(headEnd, c.rows[i]); return c.col; }
     }
     return null;
@@ -233,6 +234,8 @@ function analyze(wb, fileName, { sheet: wantSheet, cols: over } = {}) {
     fileName, channel: channelGuess(fileName, d.cols),
     sheets: wb.sheets.map((s) => ({ path: s.path, name: s.name, hidden: s.hidden })),
     sheet: sheet.path, headEnd,
+    // 마켓 벌크 엑셀처럼 보이는지 (설명·상품 ID·SKU 열 가운데 하나라도 찾았는지) — 아니면 화면이 "마켓 파일이 아님" 안내
+    looksLikeMarket: !!(f.desc || f.id || f.parentSku || f.sku),
     columns: d.cols.map((c) => ({ col: c.col, letter: c.letter, label: c.labels.join(' / ').slice(0, 120) })),
     cols: f, rows, products,
   };
@@ -320,14 +323,30 @@ async function runJob(j, wb, sheetPath, descCol) {
 }
 
 const router = express.Router();
-const raw = express.raw({ type: () => true, limit: '40mb' });
+const MAX_MB = 40;
+const rawBody = express.raw({ type: () => true, limit: MAX_MB + 'mb' });
+// 큰 파일은 express 기본 처리(HTML 오류) 대신 화면이 알아듣는 JSON 으로
+const raw = (req, res, next) => rawBody(req, res, (err) => (err
+  ? res.status(err.status === 413 ? 413 : 400).json({ error: err.message, code: err.status === 413 ? 'too_big' : 'bad_upload', maxMb: MAX_MB })
+  : next()));
+// .xlsx 로 못 읽은 이유 — 화면이 사용자 언어로 안내한다
+function fileProblem(buf, fileName) {
+  if (buf.length >= 4 && buf.readUInt32BE(0) === 0xD0CF11E0) return 'xls_or_locked';   // 예전 .xls 또는 비밀번호 건 엑셀 (OLE 파일)
+  const head = buf.subarray(0, 4096);
+  const isText = !head.some((b) => b < 9 || (b > 13 && b < 32));
+  if (/\.(csv|tsv|txt)$/i.test(fileName) || (isText && /[,;\t]/.test(head.toString('latin1')) && head.includes(0x0A))) return 'csv';
+  if (buf.length >= 2 && buf[0] === 0x50 && buf[1] === 0x4B) return 'broken';
+  return 'not_xlsx';
+}
 
 router.post('/api/v1/bulk/upload', raw, async (req, res) => {
   const buf = req.body;
   if (!Buffer.isBuffer(buf) || !buf.length) return res.status(400).json({ error: 'file required (.xlsx body)' });
   const fileName = cleanName(req.query.name);
+  let wb;
+  try { wb = await xlsx.load(buf); }
+  catch (e) { return res.status(400).json({ error: e.message, code: fileProblem(buf, fileName) }); }
   try {
-    const wb = await xlsx.load(buf);
     const out = analyze(wb, fileName);
     cleanup();
     const id = crypto.randomBytes(8).toString('hex');

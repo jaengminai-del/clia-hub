@@ -30,7 +30,14 @@ button { font-family: inherit; }
 .drop .ico { width: 64px; height: 64px; margin: 0 auto 14px; display: block; color: var(--red); }
 .drop .big { font-size: 18px; font-weight: 700; }
 .drop .small { color: var(--muted); margin-top: 8px; font-size: 13px; }
-.err { color: var(--bad); margin-top: 14px; line-height: 1.5; text-align: center; }
+.ecard { display: flex; gap: 14px; align-items: flex-start; margin-top: 16px; padding: 18px 20px; border-radius: 14px; background: #FDF1F0; border: 1px solid #F6C9C6; animation: rise .3s ease both; }
+.ecard svg { width: 24px; height: 24px; flex: none; fill: none; stroke: var(--bad); stroke-width: 2; stroke-linecap: round; }
+.ecard .et, .empty .et { font-weight: 700; font-size: 15px; color: var(--clia-gray-900); }
+.ecard .eb, .empty .eb { margin-top: 4px; color: var(--clia-gray-700); line-height: 1.55; font-size: 13px; }
+.ecard .ef { margin-top: 6px; color: var(--muted); font-size: 12px; }
+.empty { background: #fff; border: 1px dashed var(--clia-gray-300); border-radius: 14px; padding: 28px 24px; text-align: center; margin-bottom: 12px; }
+.ask.mis { background: #FFF4E0; border-color: #F3D9A8; }
+.ask .f { color: var(--clia-gray-700); font-size: 13px; margin-top: 2px; }
 
 /* 2. 인식·매칭 */
 .proc { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 48px 24px; text-align: center; }
@@ -141,7 +148,7 @@ a.clia-btn { text-decoration: none; }
       <div class="big" data-i="drop"></div>
       <div class="small" data-i="dropSub"></div>
     </div>
-    <div class="err" id="err"></div>
+    <div class="ecard hidden" id="ecard" role="alert"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.5v5.5M12 16.5v.01"/></svg><div><div class="et" id="et"></div><div class="eb" id="eb"></div><div class="ef" id="ef"></div></div></div>
   </section>
 
   <section id="s2" class="hidden">
@@ -149,9 +156,11 @@ a.clia-btn { text-decoration: none; }
   </section>
 
   <section id="s3" class="hidden">
+    <div class="ask mis hidden" id="askMis"><div style="flex:1 1 320px"><b id="misT"></b><div id="misB" class="f"></div></div><button class="pill on" id="misA"></button><button class="pill" id="misB2"></button></div>
     <div class="ask hidden" id="askCh"><span data-i="askCh"></span><button class="pill" data-ch="shopee">Shopee</button><button class="pill" data-ch="lazada">Lazada</button></div>
     <div class="ask hidden" id="askDesc"><span data-i="askDesc"></span><select id="descSel"></select></div>
     <div class="res-h"><span class="n" id="rn"></span><span class="f" id="rf"></span><button class="again" id="again" data-i="again"></button></div>
+    <div class="empty hidden" id="noMatch"><div class="et" id="noMatchT"></div><div class="eb" id="noMatchB"></div></div>
     <div class="ctl" id="ctl"></div>
     <div class="ctl ctl2" id="ctl2"></div>
     <div class="srch"><input type="search" id="q" autocomplete="off"><span class="qact hidden" id="qAct"><span id="qN"></span><button class="pill" id="qSel"></button><button class="pill" id="qDesel"></button></span><span class="tip" id="shiftTip"></span><span class="view" id="view" role="group"><button data-v="list" aria-label="List"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span id="vList"></span></button><button data-v="grid" aria-label="Gallery"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span id="vGrid"></span></button></span></div>

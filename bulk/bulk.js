@@ -19,6 +19,16 @@
       exp: (n) => `Export Excel (${n})`, exporting: 'Exporting…', dlAgain: 'Download again',
       prog: (d, t) => `Exporting ${d} / ${t}`, done: (ok, rep, bad) => `✓ ${ok} filled` + (rep ? ` · ${rep} replaced` : '') + (bad ? ` · <span style="color:var(--bad)">${bad} failed</span>` : ''),
       q: 'Waiting', w: 'Making…', ok: 'Filled', okRep: 'Replaced', bad: 'Failed', imgs: (n) => `${n} images`, noSummary: 'Images only — summary could not be made',
+      e_not_xlsx: ['This is not an Excel (.xlsx) file', 'Upload the .xlsx file you downloaded from the Shopee / Lazada seller center, as it is.'],
+      e_xls_or_locked: ['This is an old .xls file or a password-protected Excel', 'In Excel, use Save As → .xlsx, or remove the password, then upload again.'],
+      e_csv: ['This is a CSV / text file', 'Download the file from the seller center in Excel (.xlsx) format.'],
+      e_broken: ['The file is damaged or was not fully downloaded', 'Download it again from the seller center and upload it again.'],
+      e_too_big: ['The file is too large (max {n} MB)', 'Download the products in smaller parts from the seller center.'],
+      e_notMarket: ['This does not look like a Shopee / Lazada bulk Excel', 'No product ID, SKU or product description column was found. Upload the file from the seller center’s mass update / bulk manage.'],
+      e_noRows: ['There are no products in this file', 'It is an empty template with headers only. Download a file that contains your products.'],
+      e_other: ['The file could not be read', ''],
+      noMatchT: 'No product matches a CLIA product', noMatchB: 'The file may be for another country, or these products are not crawled in CLIA yet. The Excel stays as it is.',
+      misT: (f, c) => `This file looks like a ${f} file, but you opened the ${c} builder.`, misB: 'How should the description be filled?', useAs: (c) => `Fill as ${c}`,
       upFail: 'Could not read the file: ', expFail: 'Export failed: ', leave: 'The Excel is still being exported. Close anyway?',
     },
     th: {
@@ -35,6 +45,16 @@
       exp: (n) => `ส่งออก Excel (${n})`, exporting: 'กำลังส่งออก…', dlAgain: 'ดาวน์โหลดอีกครั้ง',
       prog: (d, t) => `กำลังส่งออก ${d} / ${t}`, done: (ok, rep, bad) => `✓ เติมแล้ว ${ok} รายการ` + (rep ? ` · แทนที่ ${rep}` : '') + (bad ? ` · <span style="color:var(--bad)">ไม่สำเร็จ ${bad}</span>` : ''),
       q: 'รอคิว', w: 'กำลังสร้าง…', ok: 'เติมแล้ว', okRep: 'แทนที่แล้ว', bad: 'ไม่สำเร็จ', imgs: (n) => `${n} รูป`, noSummary: 'มีเฉพาะรูป — สร้างสรุปสินค้าไม่สำเร็จ',
+      e_not_xlsx: ['ไม่ใช่ไฟล์ Excel (.xlsx)', 'กรุณาอัปโหลดไฟล์ .xlsx ที่ดาวน์โหลดจาก Seller Center ของ Shopee / Lazada โดยไม่ต้องแก้ไข'],
+      e_xls_or_locked: ['เป็นไฟล์ .xls แบบเก่า หรือไฟล์ Excel ที่ตั้งรหัสผ่านไว้', 'ใน Excel ให้ใช้ "บันทึกเป็น" → .xlsx หรือลบรหัสผ่าน แล้วอัปโหลดอีกครั้ง'],
+      e_csv: ['เป็นไฟล์ CSV / ข้อความ', 'กรุณาดาวน์โหลดไฟล์จาก Seller Center ในรูปแบบ Excel (.xlsx)'],
+      e_broken: ['ไฟล์เสียหายหรือดาวน์โหลดไม่ครบ', 'กรุณาดาวน์โหลดจาก Seller Center ใหม่แล้วอัปโหลดอีกครั้ง'],
+      e_too_big: ['ไฟล์ใหญ่เกินไป (สูงสุด {n} MB)', 'กรุณาแบ่งดาวน์โหลดสินค้าจาก Seller Center เป็นหลายไฟล์'],
+      e_notMarket: ['ไฟล์นี้ดูไม่ใช่ไฟล์ Excel แบบ bulk ของ Shopee / Lazada', 'ไม่พบคอลัมน์รหัสสินค้า SKU หรือรายละเอียดสินค้า กรุณาอัปโหลดไฟล์จากเมนูแก้ไขสินค้าแบบกลุ่ม (Mass Update / Bulk Manage) ของ Seller Center'],
+      e_noRows: ['ไม่มีสินค้าในไฟล์นี้', 'เป็นแบบฟอร์มเปล่าที่มีแต่หัวตาราง กรุณาดาวน์โหลดไฟล์ที่มีสินค้าของคุณ'],
+      e_other: ['อ่านไฟล์ไม่ได้', ''],
+      noMatchT: 'ไม่มีสินค้าที่ตรงกับสินค้าใน CLIA', noMatchB: 'ไฟล์อาจเป็นของประเทศอื่น หรือสินค้าเหล่านี้ยังไม่ได้ครอว์ลใน CLIA ไฟล์ Excel จะคงเดิม',
+      misT: (f, c) => `ไฟล์นี้ดูเหมือนไฟล์ ${f} แต่คุณเปิดจากตัวสร้าง ${c}`, misB: 'ต้องการเติมรายละเอียดแบบใด?', useAs: (c) => `เติมแบบ ${c}`,
       upFail: 'อ่านไฟล์ไม่ได้: ', expFail: 'ส่งออกไม่สำเร็จ: ', leave: 'กำลังส่งออก Excel อยู่ ต้องการปิดหรือไม่?',
     },
     ko: {
@@ -51,6 +71,16 @@
       exp: (n) => `엑셀 내보내기 (${n})`, exporting: '내보내는 중…', dlAgain: '다시 받기',
       prog: (d, t) => `내보내는 중 ${d} / ${t}`, done: (ok, rep, bad) => `✓ ${ok}개 채움` + (rep ? ` · ${rep}개 교체` : '') + (bad ? ` · <span style="color:var(--bad)">${bad}개 실패</span>` : ''),
       q: '대기', w: '만드는 중…', ok: '채움', okRep: '교체함', bad: '실패', imgs: (n) => `이미지 ${n}장`, noSummary: '요약을 만들지 못해 이미지만 넣음',
+      e_not_xlsx: ['엑셀(.xlsx) 파일이 아닙니다', 'Shopee·Lazada 셀러 센터에서 내려받은 .xlsx 파일을 그대로 올려 주세요.'],
+      e_xls_or_locked: ['예전 형식(.xls)이거나 비밀번호가 걸린 엑셀입니다', '엑셀에서 "다른 이름으로 저장 → .xlsx" 로 저장하거나 비밀번호를 풀고 다시 올려 주세요.'],
+      e_csv: ['CSV·텍스트 파일입니다', '셀러 센터에서 엑셀(.xlsx) 형식으로 내려받아 주세요.'],
+      e_broken: ['파일이 손상됐거나 끝까지 받지 못했습니다', '셀러 센터에서 다시 내려받아 올려 주세요.'],
+      e_too_big: ['파일이 너무 큽니다 (최대 {n}MB)', '셀러 센터에서 상품을 나눠 내려받아 주세요.'],
+      e_notMarket: ['Shopee·Lazada 벌크 엑셀이 아닌 것 같습니다', '상품 ID·SKU·상품 설명 열을 찾지 못했습니다. 셀러 센터의 대량 수정(Mass Update / Bulk Manage)에서 받은 파일을 올려 주세요.'],
+      e_noRows: ['파일에 상품이 없습니다', '머리글만 있는 빈 양식입니다. 상품이 들어간 파일을 내려받아 올려 주세요.'],
+      e_other: ['파일을 읽지 못했습니다', ''],
+      noMatchT: 'CLIA 제품과 매칭되는 상품이 없습니다', noMatchB: '다른 나라 파일이거나, 이 상품들이 아직 CLIA 에 크롤되지 않았을 수 있습니다. 엑셀은 그대로입니다.',
+      misT: (f, c) => `이 파일은 ${f} 파일로 보입니다 (지금 연 빌더: ${c})`, misB: '어느 방식으로 설명을 채울까요?', useAs: (c) => `${c} 방식으로 채우기`,
       upFail: '파일을 읽지 못했습니다: ', expFail: '내보내기 실패: ', leave: '엑셀을 내보내는 중입니다. 닫을까요?',
     },
     de: {
@@ -67,6 +97,16 @@
       exp: (n) => `Excel exportieren (${n})`, exporting: 'Exportiere…', dlAgain: 'Erneut herunterladen',
       prog: (d, t) => `Exportiere ${d} / ${t}`, done: (ok, rep, bad) => `✓ ${ok} gefüllt` + (rep ? ` · ${rep} ersetzt` : '') + (bad ? ` · <span style="color:var(--bad)">${bad} fehlgeschlagen</span>` : ''),
       q: 'Wartet', w: 'Wird erstellt…', ok: 'Gefüllt', okRep: 'Ersetzt', bad: 'Fehler', imgs: (n) => `${n} Bilder`, noSummary: 'Nur Bilder — Zusammenfassung fehlgeschlagen',
+      e_not_xlsx: ['Keine Excel-Datei (.xlsx)', 'Laden Sie die .xlsx-Datei aus dem Shopee-/Lazada-Seller-Center unverändert hoch.'],
+      e_xls_or_locked: ['Alte .xls-Datei oder passwortgeschützte Excel-Datei', 'In Excel „Speichern unter → .xlsx“ wählen oder das Passwort entfernen und erneut hochladen.'],
+      e_csv: ['CSV-/Textdatei', 'Laden Sie die Datei im Seller-Center im Excel-Format (.xlsx) herunter.'],
+      e_broken: ['Die Datei ist beschädigt oder unvollständig', 'Laden Sie sie im Seller-Center erneut herunter.'],
+      e_too_big: ['Die Datei ist zu groß (max. {n} MB)', 'Laden Sie die Produkte in kleineren Teilen herunter.'],
+      e_notMarket: ['Keine Shopee-/Lazada-Bulk-Excel', 'Keine Spalte für Produkt-ID, SKU oder Beschreibung gefunden. Laden Sie die Datei aus der Massenbearbeitung des Seller-Centers hoch.'],
+      e_noRows: ['Die Datei enthält keine Produkte', 'Leere Vorlage nur mit Kopfzeilen. Laden Sie eine Datei mit Ihren Produkten herunter.'],
+      e_other: ['Datei konnte nicht gelesen werden', ''],
+      noMatchT: 'Kein Produkt passt zu einem CLIA-Produkt', noMatchB: 'Die Datei ist evtl. für ein anderes Land, oder die Produkte sind noch nicht in CLIA gecrawlt. Die Excel-Datei bleibt unverändert.',
+      misT: (f, c) => `Diese Datei sieht wie eine ${f}-Datei aus (geöffneter Builder: ${c}).`, misB: 'Wie soll die Beschreibung gefüllt werden?', useAs: (c) => `Als ${c} füllen`,
       upFail: 'Datei konnte nicht gelesen werden: ', expFail: 'Export fehlgeschlagen: ', leave: 'Der Export läuft noch. Trotzdem schließen?',
     },
     ar: {
@@ -83,6 +123,16 @@
       exp: (n) => `تصدير Excel ‏(${n})`, exporting: 'جارٍ التصدير…', dlAgain: 'تنزيل مجدداً',
       prog: (d, t) => `جارٍ التصدير ${d} / ${t}`, done: (ok, rep, bad) => `✓ تم ملء ${ok}` + (rep ? ` · استبدال ${rep}` : '') + (bad ? ` · <span style="color:var(--bad)">فشل ${bad}</span>` : ''),
       q: 'في الانتظار', w: 'جارٍ الإنشاء…', ok: 'تم الملء', okRep: 'تم الاستبدال', bad: 'فشل', imgs: (n) => `${n} صور`, noSummary: 'صور فقط — تعذّر إنشاء الملخص',
+      e_not_xlsx: ['هذا ليس ملف Excel ‏(.xlsx)', 'ارفع ملف ‎.xlsx الذي نزّلته من مركز البائعين في Shopee / Lazada كما هو.'],
+      e_xls_or_locked: ['ملف ‎.xls قديم أو ملف Excel محمي بكلمة مرور', 'في Excel استخدم "حفظ باسم ← ‎.xlsx" أو أزل كلمة المرور ثم ارفعه مجدداً.'],
+      e_csv: ['هذا ملف CSV / نصي', 'نزّل الملف من مركز البائعين بصيغة Excel ‏(.xlsx).'],
+      e_broken: ['الملف تالف أو لم يكتمل تنزيله', 'نزّله مجدداً من مركز البائعين ثم ارفعه.'],
+      e_too_big: ['الملف كبير جداً (الحد {n} ميغابايت)', 'نزّل المنتجات على أجزاء أصغر.'],
+      e_notMarket: ['لا يبدو أن هذا ملف Excel مجمّع من Shopee / Lazada', 'لم يتم العثور على عمود معرّف المنتج أو SKU أو الوصف. ارفع الملف من التعديل المجمّع في مركز البائعين.'],
+      e_noRows: ['لا توجد منتجات في هذا الملف', 'قالب فارغ بالعناوين فقط. نزّل ملفاً يحتوي على منتجاتك.'],
+      e_other: ['تعذّرت قراءة الملف', ''],
+      noMatchT: 'لا يوجد منتج يطابق منتجات CLIA', noMatchB: 'قد يكون الملف لدولة أخرى، أو لم يتم زحف هذه المنتجات في CLIA بعد. يبقى الملف كما هو.',
+      misT: (f, c) => `يبدو هذا الملف ملف ${f} (الأداة المفتوحة: ${c})`, misB: 'كيف تريد ملء الوصف؟', useAs: (c) => `الملء كـ ${c}`,
       upFail: 'تعذّرت قراءة الملف: ', expFail: 'فشل التصدير: ', leave: 'لا يزال التصدير جارياً. الإغلاق على أي حال؟',
     },
   };
@@ -100,7 +150,9 @@
   const GRPS = { MS: ['TV', 'Audio', 'Monitor', 'Laptop', 'Projector', 'Other'], HS: ['Fridge', 'Washer', 'Dryer', 'Vacuum', 'Dishwasher', 'Cooking', 'Styler', 'Other'], ES: ['AC', 'Purifier', 'Dehumidifier'] };
   const grpName = (g) => (T.grp || TX.en.grp)[g] || g;
 
-  const S = { q: '', last: null, data: null, channel: ['shopee', 'lazada'].includes(qs.get('channel')) ? qs.get('channel') : '', ok: [], skip: [], sel: new Set(), job: null, busy: false };
+  const CH0 = ['shopee', 'lazada'].includes(qs.get('channel')) ? qs.get('channel') : '';   // 빌더가 넘긴 채널
+  const chName = (c) => (c === 'lazada' ? 'Lazada' : 'Shopee');
+  const S = { q: '', last: null, mis: '', data: null, channel: CH0, ok: [], skip: [], sel: new Set(), job: null, busy: false };
 
   document.documentElement.lang = L;
   document.documentElement.dir = L === 'ar' ? 'rtl' : 'ltr';
@@ -125,29 +177,46 @@
   $('again').onclick = () => { if (!S.busy) file.click(); };
 
   // ── 2. 인식 → 매칭 (서버는 한 번에 하지만 두 단계가 보이게 최소 시간을 둔다) ──
+  // 잘못된 파일: 첨부 화면으로 돌아가 무엇이 잘못됐고 어떻게 하면 되는지 사용자 언어로 보여 준다
+  function fail(code, extra) {
+    const [title, body] = T['e_' + code] || TX.en['e_' + code] || T.e_other;
+    show('s1');
+    $('foot').style.display = 'none';
+    $('et').textContent = title.replace('{n}', (extra && extra.maxMb) || 40);
+    $('eb').textContent = body || (extra && extra.error) || '';
+    $('ef').textContent = (extra && extra.fileName) || '';
+    $('ecard').classList.remove('hidden');
+  }
   async function attach(f) {
     if (S.busy) return;
-    $('err').textContent = '';
+    $('ecard').classList.add('hidden');
     $('pfile').textContent = f.name;
     $('pmsg').textContent = t('reading');
     $('foot').style.display = 'none';
     show('s2');
     const t0 = Date.now();
     const req = fetch('/api/v1/bulk/upload?name=' + encodeURIComponent(f.name), { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: f })
-      .then(async (r) => { const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.error || 'HTTP ' + r.status); return d; });
+      .then(async (r) => {
+        const d = await r.json().catch(() => ({ code: r.status === 413 ? 'too_big' : 'other' }));
+        if (!r.ok) throw Object.assign(new Error(d.error || 'HTTP ' + r.status), { code: d.code || 'other', maxMb: d.maxMb });
+        return d;
+      });
     try {
       await Promise.race([sleep(900), req.catch(() => {})]);
       await sleep(Math.max(0, 900 - (Date.now() - t0)));
       $('pmsg').textContent = t('matching');
       const d = await req;
       await sleep(Math.max(0, 2000 - (Date.now() - t0)));
-      if (!S.channel && d.channel) S.channel = d.channel;
+      if (!d.looksLikeMarket) return fail('notMarket', { fileName: f.name });
+      if (!d.rows.length) return fail('noRows', { fileName: f.name });
+      // 빌더 채널과 파일이 다르면(예: Shopee 화면에 Lazada 파일) 고를 때까지 내보내기를 막는다
+      S.mis = CH0 && d.channel && d.channel !== CH0 ? d.channel : '';
+      S.channel = S.mis ? '' : (CH0 || d.channel || '');
       chTag();
       S.job = null; S.q = ''; S.last = null; $('q').value = '';
       setData(d, true);
     } catch (e) {
-      show('s1');
-      $('err').textContent = t('upFail') + e.message;
+      fail(e.code || 'other', { maxMb: e.maxMb, error: e.message, fileName: f.name });
     }
   }
 
@@ -174,6 +243,7 @@
     const d = await r.json();
     if (r.ok) setData(d, false); else alert(d.error || 'HTTP ' + r.status);
   };
+  $('askMis').onclick = (e) => { const c = e.target.closest('button'); if (c && c.dataset.ch && !S.busy) { S.channel = c.dataset.ch; chTag(); render(); } };
   $('askCh').onclick = (e) => { const c = e.target.dataset && e.target.dataset.ch; if (c) { S.channel = c; chTag(); render(); } };
 
   // ── 3. 목록 ──
@@ -189,7 +259,19 @@
 
   function render(animate) {
     const d = S.data;
-    $('askCh').classList.toggle('hidden', !!S.channel);
+    $('askCh').classList.toggle('hidden', !!S.channel || !!S.mis);
+    $('askMis').classList.toggle('hidden', !S.mis || !!S.channel);
+    if (S.mis) {
+      $('misT').textContent = t('misT', chName(S.mis), chName(CH0));
+      $('misB').textContent = t('misB');
+      $('misA').textContent = t('useAs', chName(S.mis)); $('misA').dataset.ch = S.mis;
+      $('misB2').textContent = t('useAs', chName(CH0)); $('misB2').dataset.ch = CH0;
+    }
+    $('noMatch').classList.toggle('hidden', S.ok.length > 0);
+    $('noMatchT').textContent = t('noMatchT'); $('noMatchB').textContent = t('noMatchB');
+    ['ctl', 'ctl2'].forEach((id) => $(id).classList.toggle('hidden', !S.ok.length));
+    document.querySelector('.srch').classList.toggle('hidden', !S.ok.length);
+    if (!S.ok.length) $('skip').open = true;
     $('askDesc').classList.toggle('hidden', !!d.cols.desc);
     if (!d.cols.desc) $('descSel').innerHTML = '<option value="">—</option>' + d.columns.map((c) => `<option value="${c.col}">${c.letter} · ${esc(c.label)}</option>`).join('');
     $('rn').textContent = t('found', S.ok.length);
@@ -203,7 +285,7 @@
     $('skip').classList.toggle('hidden', !S.skip.length);
     $('skipSum').textContent = t('skip', S.skip.length);
     $('skipList').innerHTML = S.skip.map((r) => `<li>${esc(r.parentSku || r.sku || '—')} · ${esc(r.name)} <span class="badge b-q">${esc(t(r.why))}</span></li>`).join('');
-    $('foot').style.display = 'block';
+    $('foot').style.display = S.ok.length ? 'block' : 'none';   // 매칭 0개면 내보낼 것이 없다
     refresh();
   }
 
