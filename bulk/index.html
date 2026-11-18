@@ -60,6 +60,15 @@ button { font-family: inherit; }
 .pill.on { background: var(--clia-gray-900); border-color: var(--clia-gray-900); color: #fff; }
 .pill b { opacity: .6; margin-inline-start: 6px; }
 .ctl .div { width: 1px; height: 20px; background: var(--line); margin: 0 4px; }
+.pill.part { background: var(--clia-gray-100); border-color: var(--clia-gray-900); color: var(--clia-gray-900); }
+.ctl2 .pill { height: 30px; padding: 0 12px; font-size: 12px; font-weight: 500; }
+.srch { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.srch input { flex: 1 1 260px; max-width: 360px; height: 36px; border: 1px solid var(--clia-gray-300); border-radius: 999px; padding: 0 16px; font: inherit; font-size: 13px; background: #fff; }
+.srch input:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px var(--clia-brand-soft); }
+.qact { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; color: var(--clia-gray-700); }
+.qact .pill { height: 30px; padding: 0 12px; font-size: 12px; }
+.tip { margin-inline-start: auto; color: var(--muted); font-size: 12px; }
+.item.hidden { display: none; }
 .list { background: #fff; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
 .item { display: grid; grid-template-columns: 22px 48px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--clia-gray-100); cursor: pointer;
   animation: rise .35s ease both; }
@@ -125,6 +134,8 @@ a.clia-btn { text-decoration: none; }
     <div class="ask hidden" id="askDesc"><span data-i="askDesc"></span><select id="descSel"></select></div>
     <div class="res-h"><span class="n" id="rn"></span><span class="f" id="rf"></span><button class="again" id="again" data-i="again"></button></div>
     <div class="ctl" id="ctl"></div>
+    <div class="ctl ctl2" id="ctl2"></div>
+    <div class="srch"><input type="search" id="q" autocomplete="off"><span class="qact hidden" id="qAct"><span id="qN"></span><button class="pill" id="qSel"></button><button class="pill" id="qDesel"></button></span><span class="tip" id="shiftTip"></span></div>
     <div class="list" id="list"></div>
     <details class="skip hidden" id="skip"><summary id="skipSum"></summary><ul id="skipList"></ul></details>
   </section>

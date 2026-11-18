@@ -10,6 +10,8 @@
       reading: 'Reading the Excel', matching: 'Matching products', again: 'Attach another file',
       found: (n) => `${n} products matched`, of: (all) => `out of ${all} products in the file`,
       selAll: 'Select all', selNone: 'Deselect all',
+      search: 'Search model or product name', qRes: (n) => `${n} results`, qSel: 'Select results', qDesel: 'Deselect results', shift: 'Tip: Shift + click selects a range',
+      grp: { TV: 'TV', Audio: 'Audio', Monitor: 'Monitor', Laptop: 'Laptop', Projector: 'Projector', Fridge: 'Fridge', Washer: 'Washer', Dryer: 'Dryer', Vacuum: 'Vacuum', Dishwasher: 'Dishwasher', Cooking: 'Cooking', Styler: 'Styler', AC: 'Air conditioner', Purifier: 'Air purifier', Dehumidifier: 'Dehumidifier', Other: 'Other' },
       rep: 'Replaces current description', skip: (n) => `${n} products were not matched — they stay as they are in the Excel`,
       rNone: 'not in CLIA', rMulti: 'several CLIA products', rBundle: 'bundle',
       askCh: 'Which marketplace is this file for?', askDesc: 'The product description column was not found. Choose it:',
@@ -24,6 +26,8 @@
       reading: 'กำลังอ่านไฟล์ Excel', matching: 'กำลังจับคู่สินค้า', again: 'แนบไฟล์อื่น',
       found: (n) => `จับคู่สินค้าได้ ${n} รายการ`, of: (all) => `จากทั้งหมด ${all} รายการในไฟล์`,
       selAll: 'เลือกทั้งหมด', selNone: 'ยกเลิกทั้งหมด',
+      search: 'ค้นหารุ่นหรือชื่อสินค้า', qRes: (n) => `ผลการค้นหา ${n} รายการ`, qSel: 'เลือกผลการค้นหา', qDesel: 'ยกเลิกผลการค้นหา', shift: 'เคล็ดลับ: Shift + คลิก เพื่อเลือกเป็นช่วง',
+      grp: { TV: 'ทีวี', Audio: 'เครื่องเสียง', Monitor: 'จอมอนิเตอร์', Laptop: 'แล็ปท็อป', Projector: 'โปรเจกเตอร์', Fridge: 'ตู้เย็น', Washer: 'เครื่องซักผ้า', Dryer: 'เครื่องอบผ้า', Vacuum: 'เครื่องดูดฝุ่น', Dishwasher: 'เครื่องล้างจาน', Cooking: 'เครื่องครัว', Styler: 'สไตเลอร์', AC: 'เครื่องปรับอากาศ', Purifier: 'เครื่องฟอกอากาศ', Dehumidifier: 'เครื่องลดความชื้น', Other: 'อื่น ๆ' },
       rep: 'แทนที่รายละเอียดเดิม', skip: (n) => `${n} สินค้าจับคู่ไม่ได้ — จะคงเดิมในไฟล์ Excel`,
       rNone: 'ไม่มีใน CLIA', rMulti: 'ตรงกับหลายสินค้าใน CLIA', rBundle: 'สินค้าชุด',
       askCh: 'ไฟล์นี้เป็นของมาร์เก็ตเพลสใด?', askDesc: 'ไม่พบคอลัมน์รายละเอียดสินค้า โปรดเลือก:',
@@ -38,6 +42,8 @@
       reading: '엑셀을 읽고 있습니다', matching: '제품을 매칭하고 있습니다', again: '다른 파일 첨부',
       found: (n) => `${n}개 제품이 매칭됐습니다`, of: (all) => `파일 안 ${all}개 상품 중`,
       selAll: '전체 선택', selNone: '전체 해제',
+      search: '모델명·상품명 검색', qRes: (n) => `검색 결과 ${n}개`, qSel: '검색 결과 선택', qDesel: '검색 결과 해제', shift: '팁: Shift + 클릭으로 범위 선택',
+      grp: { TV: 'TV', Audio: '오디오', Monitor: '모니터', Laptop: '노트북', Projector: '프로젝터', Fridge: '냉장고', Washer: '세탁기', Dryer: '건조기', Vacuum: '청소기', Dishwasher: '식기세척기', Cooking: '조리기기', Styler: '스타일러', AC: '에어컨', Purifier: '공기청정기', Dehumidifier: '제습기', Other: '기타' },
       rep: '기존 설명 교체', skip: (n) => `매칭되지 않은 상품 ${n}개 — 엑셀에서 그대로 둡니다`,
       rNone: 'CLIA 에 없음', rMulti: 'CLIA 제품 여러 개와 맞음', rBundle: '묶음 상품',
       askCh: '어느 마켓 파일인가요?', askDesc: '상품 설명 열을 찾지 못했습니다. 골라 주세요:',
@@ -52,6 +58,8 @@
       reading: 'Excel wird gelesen', matching: 'Produkte werden zugeordnet', again: 'Andere Datei anhängen',
       found: (n) => `${n} Produkte zugeordnet`, of: (all) => `von ${all} Produkten in der Datei`,
       selAll: 'Alle auswählen', selNone: 'Alle abwählen',
+      search: 'Modell oder Produktname suchen', qRes: (n) => `${n} Treffer`, qSel: 'Treffer auswählen', qDesel: 'Treffer abwählen', shift: 'Tipp: Umschalt + Klick wählt einen Bereich',
+      grp: { TV: 'TV', Audio: 'Audio', Monitor: 'Monitor', Laptop: 'Laptop', Projector: 'Beamer', Fridge: 'Kühlschrank', Washer: 'Waschmaschine', Dryer: 'Trockner', Vacuum: 'Staubsauger', Dishwasher: 'Geschirrspüler', Cooking: 'Kochen', Styler: 'Styler', AC: 'Klimaanlage', Purifier: 'Luftreiniger', Dehumidifier: 'Luftentfeuchter', Other: 'Sonstiges' },
       rep: 'Ersetzt aktuelle Beschreibung', skip: (n) => `${n} Produkte nicht zugeordnet — sie bleiben unverändert`,
       rNone: 'nicht in CLIA', rMulti: 'mehrere CLIA-Produkte', rBundle: 'Set',
       askCh: 'Für welchen Marktplatz ist diese Datei?', askDesc: 'Spalte für die Produktbeschreibung nicht gefunden. Bitte wählen:',
@@ -66,6 +74,8 @@
       reading: 'جارٍ قراءة الملف', matching: 'جارٍ مطابقة المنتجات', again: 'إرفاق ملف آخر',
       found: (n) => `تمت مطابقة ${n} منتجات`, of: (all) => `من أصل ${all} منتجاً في الملف`,
       selAll: 'تحديد الكل', selNone: 'إلغاء تحديد الكل',
+      search: 'ابحث بالطراز أو اسم المنتج', qRes: (n) => `${n} نتائج`, qSel: 'تحديد النتائج', qDesel: 'إلغاء تحديد النتائج', shift: 'تلميح: Shift + نقرة لتحديد نطاق',
+      grp: { TV: 'تلفزيون', Audio: 'الصوتيات', Monitor: 'شاشة', Laptop: 'لابتوب', Projector: 'بروجكتور', Fridge: 'ثلاجة', Washer: 'غسالة', Dryer: 'مجفف', Vacuum: 'مكنسة', Dishwasher: 'غسالة صحون', Cooking: 'الطهي', Styler: 'ستايلر', AC: 'مكيف', Purifier: 'منقي هواء', Dehumidifier: 'مزيل رطوبة', Other: 'أخرى' },
       rep: 'يستبدل الوصف الحالي', skip: (n) => `لم تتم مطابقة ${n} منتجات — ستبقى كما هي`,
       rNone: 'غير موجود في CLIA', rMulti: 'عدة منتجات في CLIA', rBundle: 'مجموعة',
       askCh: 'لأي متجر هذا الملف؟', askDesc: 'لم يتم العثور على عمود وصف المنتج. اختره:',
@@ -86,8 +96,11 @@
   const EMBED = qs.get('embed') === '1';
   const home = String(qs.get('corp') || '').toLowerCase();
   const DIVS = ['MS', 'HS', 'ES'];
+  // 사업부별 제품군 순서 (허브 목록과 같음)
+  const GRPS = { MS: ['TV', 'Audio', 'Monitor', 'Laptop', 'Projector', 'Other'], HS: ['Fridge', 'Washer', 'Dryer', 'Vacuum', 'Dishwasher', 'Cooking', 'Styler', 'Other'], ES: ['AC', 'Purifier', 'Dehumidifier'] };
+  const grpName = (g) => (T.grp || TX.en.grp)[g] || g;
 
-  const S = { data: null, channel: ['shopee', 'lazada'].includes(qs.get('channel')) ? qs.get('channel') : '', ok: [], skip: [], sel: new Set(), job: null, busy: false };
+  const S = { q: '', last: null, data: null, channel: ['shopee', 'lazada'].includes(qs.get('channel')) ? qs.get('channel') : '', ok: [], skip: [], sel: new Set(), job: null, busy: false };
 
   document.documentElement.lang = L;
   document.documentElement.dir = L === 'ar' ? 'rtl' : 'ltr';
@@ -130,7 +143,7 @@
       await sleep(Math.max(0, 2000 - (Date.now() - t0)));
       if (!S.channel && d.channel) S.channel = d.channel;
       chTag();
-      S.job = null;
+      S.job = null; S.q = ''; S.last = null; $('q').value = '';
       setData(d, true);
     } catch (e) {
       show('s1');
@@ -184,7 +197,7 @@
     $('list').innerHTML = S.ok.map((r, i) => `<label class="item" style="${animate ? `animation-delay:${Math.min(i, 30) * 45}ms` : 'animation:none'}">` +
       `<input type="checkbox" data-row="${r.row}">` +
       `<img src="${esc(r.p.thumb || '')}" alt="" loading="lazy">` +
-      `<div style="min-width:0"><div class="m">${esc(r.p.model)}<span class="dv">${esc(r.p.dv || '')}</span></div><div class="s">${esc(r.name || r.p.title)}</div></div>` +
+      `<div style="min-width:0"><div class="m">${esc(r.p.model)}<span class="dv">${esc(r.p.dv || '')} · ${esc(grpName(r.p.grp))}</span></div><div class="s">${esc(r.name || r.p.title)}</div></div>` +
       `<div class="r" data-st="${r.row}"></div></label>`).join('');
     $('list').classList.toggle('hidden', !S.ok.length);
     $('skip').classList.toggle('hidden', !S.skip.length);
@@ -199,17 +212,33 @@
     const n = S.ok.length;
     const cnt = (dv) => S.ok.filter((r) => r.p.dv === dv);
     const allOf = (rows) => rows.length > 0 && rows.every((r) => S.sel.has(r.row));
+    // 선택 버튼: 전체 · 사업부 · 제품군 — 누르면 그 묶음을 모두 선택(이미 모두 선택이면 해제). 일부만 선택된 묶음은 반쯤 칠한 모양
+    const pill = (attr, label, rows) => {
+      const k = rows.filter((r) => S.sel.has(r.row)).length;
+      const st = k === 0 ? '' : (k === rows.length ? 'on' : 'part');
+      return `<button class="pill ${st}" ${attr}>${esc(label)}<b>${k ? k + '/' : ''}${rows.length}</b></button>`;
+    };
+    const ofDv = (dv) => S.ok.filter((r) => r.p.dv === dv);
+    const ofGrp = (dv, g) => S.ok.filter((r) => r.p.dv === dv && r.p.grp === g);
     $('ctl').innerHTML =
       `<button class="pill ${allOf(S.ok) ? 'on' : ''}" data-act="all">${esc(t('selAll'))}<b>${n}</b></button>` +
       `<button class="pill" data-act="none">${esc(t('selNone'))}</button><span class="div"></span>` +
-      DIVS.filter((dv) => cnt(dv).length).map((dv) => `<button class="pill ${allOf(cnt(dv)) ? 'on' : ''}" data-dv="${dv}">${dv}<b>${cnt(dv).length}</b></button>`).join('');
-    $('ctl').querySelectorAll('button').forEach((b) => { b.disabled = S.busy; });
+      DIVS.filter((dv) => ofDv(dv).length).map((dv) => pill(`data-dv="${dv}"`, dv, ofDv(dv))).join('');
+    $('ctl2').innerHTML = DIVS.filter((dv) => ofDv(dv).length).map((dv) =>
+      GRPS[dv].filter((g) => ofGrp(dv, g).length).map((g) => pill(`data-dv="${dv}" data-grp="${g}"`, grpName(g), ofGrp(dv, g))).join('')).filter(Boolean).join('<span class="div"></span>');
+    [...$('ctl').querySelectorAll('button'), ...$('ctl2').querySelectorAll('button'), ...$('qAct').querySelectorAll('button')].forEach((b) => { b.disabled = S.busy; });
+    // 검색: 맞는 상품만 보이고, 결과를 한꺼번에 선택·해제
+    const hit = (r) => !S.q || [r.p.model, r.name, r.sku, r.parentSku, r.p.title, r.id].join(' ').toLowerCase().includes(S.q);
+    const hits = S.ok.filter(hit);
+    $('qAct').classList.toggle('hidden', !S.q);
+    $('qN').textContent = t('qRes', hits.length);
     document.querySelectorAll('#list .item').forEach((el) => {
       const row = +el.querySelector('input').dataset.row;
       const r = S.ok.find((x) => x.row === row);
       el.querySelector('input').checked = S.sel.has(row);
       el.querySelector('input').disabled = S.busy;
       el.classList.toggle('off', !S.sel.has(row));
+      el.classList.toggle('hidden', !hit(r));
       el.querySelector('.r').innerHTML = itemStatus(r);
     });
     // 아래 막대
@@ -231,23 +260,45 @@
     $('again').disabled = S.busy;
   }
 
+  $('ctl2').onclick = (e) => $('ctl').onclick(e);
   $('ctl').onclick = (e) => {
     const b = e.target.closest('button');
     if (!b || S.busy) return;
     if (b.dataset.act === 'all') S.ok.forEach((r) => S.sel.add(r.row));
     else if (b.dataset.act === 'none') S.sel.clear();
     else if (b.dataset.dv) {
-      const rows = S.ok.filter((r) => r.p.dv === b.dataset.dv);
+      const rows = S.ok.filter((r) => r.p.dv === b.dataset.dv && (!b.dataset.grp || r.p.grp === b.dataset.grp));
       const on = rows.every((r) => S.sel.has(r.row));
       rows.forEach((r) => (on ? S.sel.delete(r.row) : S.sel.add(r.row)));
     }
     if (S.job && S.job.status !== 'running') S.job = null;
     refresh();
   };
+  // Shift + 클릭: 마지막으로 누른 상품부터 이번 상품까지(보이는 순서) 같은 상태로
+  let shiftDown = false;
+  $('list').addEventListener('click', (e) => { shiftDown = e.shiftKey; }, true);
   $('list').onchange = (e) => {
     const el = e.target;
     if (!el.dataset.row) return;
-    if (el.checked) S.sel.add(+el.dataset.row); else S.sel.delete(+el.dataset.row);
+    const row = +el.dataset.row;
+    const vis = [...document.querySelectorAll('#list .item:not(.hidden) input')].map((x) => +x.dataset.row);
+    const a = vis.indexOf(S.last), z = vis.indexOf(row);
+    const range = shiftDown && a >= 0 && z >= 0 ? vis.slice(Math.min(a, z), Math.max(a, z) + 1) : [row];
+    range.forEach((x) => (el.checked ? S.sel.add(x) : S.sel.delete(x)));
+    S.last = row;
+    if (S.job && S.job.status !== 'running') S.job = null;
+    refresh();
+  };
+
+  $('q').placeholder = t('search');
+  $('shiftTip').textContent = t('shift');
+  $('qSel').textContent = t('qSel'); $('qDesel').textContent = t('qDesel');
+  $('q').oninput = () => { S.q = $('q').value.trim().toLowerCase(); refresh(); };
+  $('qAct').onclick = (e) => {
+    const b = e.target.closest('button');
+    if (!b || S.busy) return;
+    const on = b.id === 'qSel';
+    document.querySelectorAll('#list .item:not(.hidden) input').forEach((x) => (on ? S.sel.add(+x.dataset.row) : S.sel.delete(+x.dataset.row)));
     if (S.job && S.job.status !== 'running') S.job = null;
     refresh();
   };

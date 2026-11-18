@@ -104,6 +104,32 @@ function divOf(cat, sub, url) {
   if (cat === 'Air' || DIV_ES.test(k)) return 'ES';
   return DIV_MS.test(k) ? 'MS' : 'HS';
 }
+// 제품군 (허브 목록 2단계 필터와 같은 규칙, clia/index.html grpOf)
+function grpOf(p) {
+  const k = [p.cat, p.sub, String(p.url || '').replace(/^https?:\/\/[^/]+/, '')].join(' ').toLowerCase();
+  if (p.dv === 'ES') {
+    if (/dehumid|entfeuchter/.test(k)) return 'Dehumidifier';
+    if (/air[-_ ]?condition|aircon|klima|condicionado|split|heat[-_ ]?pump|waermepumpe|heizung/.test(k)) return 'AC';
+    if (/purif|puricare|luftreiniger|purificador/.test(k)) return 'Purifier';
+    return 'AC';
+  }
+  if (p.dv === 'MS') {
+    if (/monitor/.test(k)) return 'Monitor';
+    if (/laptop|gram|notebook/.test(k)) return 'Laptop';
+    if (/projector|beamer|cinebeam/.test(k)) return 'Projector';
+    if (/audio|soundbar|sound[-_ ]?suite|speaker|lautsprecher|xboom|earbuds|kopfhoerer|headphone|tone[-_ ]?free/.test(k) && !/tvs?[-_ ]?(und|and|&)?[-_ ]?soundbar|tvs?-soundbars/.test(k)) return 'Audio';
+    return 'TV';
+  }
+  if (/styler/.test(k)) return 'Styler';
+  if (/dishwasher|geschirr|\bdw\b/.test(k)) return 'Dishwasher';
+  if (/vacuum|cordzero|staubsauger/.test(k)) return 'Vacuum';
+  if (/micro|mikrowell|cook|oven|backofen|range|hob|kochfeld/.test(k)) return 'Cooking';
+  if (/fridge|refrigerator|kuehl|kühl|freezer|kimchi/.test(k)) return 'Fridge';
+  const pth = [p.sub, String(p.url || '').replace(/^https?:\/\/[^/]+/, '')].join(' ').toLowerCase();
+  if (/dryer|trockner/.test(pth) && !/washtower|waschtrockner|washers?[-_ ]?dryers?|wash[-_ ]?combo|washcombo/.test(pth)) return 'Dryer';
+  if (/wash|wasch|waesche|laundry/.test(k)) return 'Washer';
+  return 'Other';
+}
 const titleCase = (s) => String(s || '').replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
 let _index = null;
@@ -127,6 +153,7 @@ function productIndex() {
       sub: titleCase(segs[segs.length - 2] || segs[1]),
     };
     p.dv = divOf(p.cat, p.sub, p.url);
+    p.grp = grpOf(p);
     products[p.slug] = p;
     const k = norm(model);
     if (k.length >= 4) { if (!byModel.has(k)) byModel.set(k, []); byModel.get(k).push(p.slug); }
