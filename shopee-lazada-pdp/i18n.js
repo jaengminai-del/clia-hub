@@ -17,6 +17,7 @@ CLIA_I18N.init({
   '📋 Copy HTML': { de: '📋 HTML kopieren', th: '📋 คัดลอก HTML', ar: '📋 نسخ HTML' },
   '📝 Copy description text': { de: '📝 Beschreibungstext kopieren', th: '📝 คัดลอกข้อความคำอธิบาย', ar: '📝 نسخ نص الوصف' },
   '✓ Copied!': { de: '✓ Kopiert!', th: '✓ คัดลอกแล้ว!', ar: '✓ تم النسخ!' },
+  'Reset': { de: 'Zurücksetzen', th: 'รีเซ็ต', ar: 'إعادة تعيين' },
   '📊 Bulk Excel': { de: '📊 Bulk-Excel', th: '📊 Bulk Excel', ar: '📊 Excel مجمّع' },
   'Fill the product description of many products at once in a Shopee / Lazada bulk Excel': { de: 'Produktbeschreibungen vieler Produkte auf einmal in einer Shopee-/Lazada-Bulk-Excel füllen', th: 'เติมรายละเอียดสินค้าหลายรายการพร้อมกันในไฟล์ Excel แบบ bulk ของ Shopee / Lazada', ar: 'املأ وصف منتجات كثيرة دفعة واحدة في ملف Excel المجمّع لـ Shopee / Lazada' },
   '✕ Reset': { de: '✕ Zurücksetzen', th: '✕ รีเซ็ต', ar: '✕ إعادة تعيين' },

@@ -148,13 +148,19 @@ body{font-family:'LGEIText', 'LINESeedSansTH',Arial,sans-serif;background:#F6F3E
 <div class="workspace" id="mainWorkspace" style="display:none">
   <!-- Left: Preview -->
   <div class="panel-left">
-    <!-- 버튼 줄이 왼쪽 패널 폭을 넘으면 오른쪽 패널에 가려졌다 → 넘치면 다음 줄로 (2026-11-18) -->
-    <div class="panel-head" style="height:auto;min-height:56px;padding-top:8px;padding-bottom:8px;gap:12px">
+    <!-- 버튼 줄 한 줄로 (2026-11-18): 버튼을 작게, 제목(화면 위 머리글·허브 창 제목과 겹침)은 숨기고, Reset 은 ✕ 만.
+         그래도 좁은 화면에서 넘치면 다음 줄로 내려간다 (전에는 오른쪽 패널에 가려졌다) -->
+    <style>
+      .panel-left > .panel-head .panel-head-title { display: none; }
+      .panel-left > .panel-head .btn-sm { height: 30px; padding: 0 9px; font-size: 11.5px; }
+      .panel-left > .panel-head .btn-sm.danger { padding: 0 10px; }
+    </style>
+    <div class="panel-head" style="height:auto;min-height:52px;padding-top:8px;padding-bottom:8px;justify-content:flex-end">
       <div class="panel-head-title">
         Listing Preview
         <span class="badge-ebay">Shopee / Lazada</span>
       </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;min-width:0">
+      <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;min-width:0">
         <button class="btn-sm" id="btnEditMode" onclick="toggleEdit()">✏ Edit</button>
         <button class="btn-sm primary" id="btnDownload" onclick="downloadImages()" disabled>⬇ Download Images (ZIP)</button>
         <button class="btn-sm primary" id="btnDownload12" onclick="downloadImages(SHOPEE_MAX_IMAGES)" disabled style="display:none" title="Shopee: only the first 12 images (Shopee description limit)">⬇ 12 images (ZIP)</button>
@@ -162,7 +168,7 @@ body{font-family:'LGEIText', 'LINESeedSansTH',Arial,sans-serif;background:#F6F3E
         <button class="btn-sm" id="btnCopyListing" onclick="copyListingText()" style="display:none" title="Promotion · Product details · Delivery · After care · Return policy written in the CLIA hub product page — paste into the Shopee description">📝 Copy description text</button>
         <button class="btn-sm" id="btnCopyImgHtml" onclick="copyImageHTML()" disabled title="Images of the preview (1000px wide) + HTML that shows them — looks the same on Lazada/eBay">🖼 Copy image HTML</button>
         <button class="btn-sm" id="btnBulk" onclick="openBulkExcel()" title="Fill the product description of many products at once in a Shopee / Lazada bulk Excel">📊 Bulk Excel</button>
-        <button class="btn-sm danger" onclick="resetAll()">✕ Reset</button>
+        <button class="btn-sm danger" onclick="resetAll()" title="Reset" aria-label="Reset">✕</button>
       </div>
     </div>
     <div class="compliance-bar" id="complianceBar" style="display:none">
