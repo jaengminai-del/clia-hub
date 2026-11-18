@@ -11,6 +11,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(require('./crawler-routes')); // 내장 PDP 크롤러 (/api/v1/*) — 별도 FastAPI·터널 불필요
 app.use(require('./listing-routes').router); // 제품별 리스팅 문구 (프로모션·제품 상세·배송·사후 케어·반품) 버전 저장
 app.use(require('./video-frames').router); // 동영상 카드 장면 고르기 (빌더 카드 목록 팝업 → ffmpeg 장면 추출)
+app.use(require('./bulk-routes').router); // Shopee/Lazada 벌크 엑셀 설명 칸 채우기 (/bulk/ 화면)
 app.use('/crawler-py', (req, res) => res.sendStatus(404)); // 크롤러 소스·산출물은 정적 노출 금지
 // 첫 주소(/)는 바로 허브로 보낸다 — index.html 의 meta refresh 는 허브(2MB)가 뜰 때까지 링크만 있는 중간 페이지가 잠깐 보였다
 app.get('/', (req, res) => res.redirect(302, '/clia/' + req.url.slice(req.path.length)));
@@ -2536,6 +2537,11 @@ app.post('/api/v1/slice-html', async (req, res) => {
   try {
     let man = null;
     try { man = JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8')); } catch (_) {}
+    if (!man) {
+      // 재배포 뒤 로컬 캐시가 비어 있어도 버킷에 같은 묶음이 있으면 다시 그리지 않는다 (이미지는 /media/slices 가 버킷에서 가져옴)
+      const mb = await sliceStore.getBuffer(`media-slices/${hash}/manifest.json`).catch(() => null);
+      try { if (mb) { const m = JSON.parse(mb.toString('utf8')); if ((m.images || []).length) man = m; } } catch (_) {}
+    }
     if (!man) {
       const { meta } = await renderSlicesPy({ html, medium: med, name: 'slice', imagesDir: dir });
       console.log(`[slice-html] ${meta.log}`);
