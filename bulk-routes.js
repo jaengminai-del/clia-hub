@@ -96,6 +96,14 @@ function channelGuess(fileName, cols) {
 const CAT = [[/tvs?[-_/]|oled|qned|stanbyme|lifestyle-(tvs|screens|ekranlar)/i, 'TV'], [/soundbar|speaker|lautsprecher|audio/i, 'Audio'],
   [/fridge|refrigerator|kuehl/i, 'Fridge'], [/dishwasher/i, 'Dishwasher'], [/wash|laundry|dryer|waesche/i, 'Washer'], [/monitor/i, 'Monitor'],
   [/laptop|gram/i, 'Laptop'], [/microwave|cook|oven/i, 'Cooking'], [/air|puricare|dehumid|condicionado/i, 'Air']];
+// 사업부 (허브 목록과 같은 규칙, clia/index.html divOf): 에어 솔루션 = ES, TV·오디오·모니터·노트북 = MS, 나머지 = HS
+const DIV_ES = /(^|[^a-z])(aircon|air[-_ ]?condition\w*|air[-_ ]?purif\w*|puricare|dehumid\w*|air[-_ ]?solution\w*|air[-_ ]?care|klima\w*|luftreiniger|luftentfeuchter|condicionado|purificador)([^a-z]|$)/i;
+const DIV_MS = /(^|[^a-z])(tvs?|oled|qned|nanocell|stanbyme|lifestyle[-_ ]?(tvs|screens|ekranlar)|audio|soundbars?|sound[-_ ]?suite|speakers?|lautsprecher|xboom|xboombuds|earbuds|kopfhoerer|headphones?|tone[-_ ]?free|monitors?|monitore|laptops?|gram|notebooks?|it[-_ ]?products?|projectors?|beamer|cinebeam)([^a-z]|$)/i;
+function divOf(cat, sub, url) {
+  const k = [cat, sub, String(url || '').replace(/^https?:\/\/[^/]+/, '')].join(' ');
+  if (cat === 'Air' || DIV_ES.test(k)) return 'ES';
+  return DIV_MS.test(k) ? 'MS' : 'HS';
+}
 const titleCase = (s) => String(s || '').replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
 let _index = null;
@@ -118,6 +126,7 @@ function productIndex() {
       cat: (CAT.find(([r]) => r.test(s.url)) || [0, titleCase(segs[1])])[1],
       sub: titleCase(segs[segs.length - 2] || segs[1]),
     };
+    p.dv = divOf(p.cat, p.sub, p.url);
     products[p.slug] = p;
     const k = norm(model);
     if (k.length >= 4) { if (!byModel.has(k)) byModel.set(k, []); byModel.get(k).push(p.slug); }

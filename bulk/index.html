@@ -9,111 +9,132 @@
 <link rel="stylesheet" href="../css/fonts.css">
 <link rel="stylesheet" href="../shared/clia-ui.css">
 <style>
-:root { --line: var(--clia-gray-200); --muted: var(--clia-gray-500); --ok: #1E7F4F; --warn: #A15C00; --bad: #C8241F; }
+:root { --line: var(--clia-gray-200); --muted: var(--clia-gray-500); --ok: #1E7F4F; --warn: #A15C00; --bad: #C8241F; --red: var(--clia-brand); }
 * { box-sizing: border-box; }
-body { margin: 0; font-family: var(--clia-font), 'LINESeedSansTH', sans-serif; background: var(--clia-page); color: var(--clia-gray-900); font-size: 14px; -webkit-font-smoothing: antialiased; }
-button, input, select { font-family: inherit; }
-.top { position: sticky; top: 0; z-index: 10; height: 64px; background: #fff; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 14px; padding: 0 24px 0 20px; }
-.top img { height: 24px; display: block; }
-.top .div { width: 1px; height: 16px; background: var(--line); }
-.top .t { font-weight: 700; font-size: 15px; }
-.top .sp { flex: 1; }
-main { max-width: 960px; margin: 0 auto; padding: 32px 24px 140px; }
-h1 { font-size: 24px; margin: 0 0 6px; }
-.lead { color: var(--muted); margin: 0 0 24px; line-height: 1.55; }
-.drop { background: #fff; border: 1.5px dashed var(--clia-gray-300); border-radius: var(--clia-radius-lg); padding: 48px 24px; text-align: center; cursor: pointer; transition: border-color .15s, background .15s; }
-.drop:hover, .drop.over { border-color: var(--clia-brand); background: #FFF8F7; }
-.drop .ico { width: 48px; height: 48px; margin: 0 auto 12px; color: var(--clia-brand); display: block; }
-.drop .big { font-size: 17px; font-weight: 700; }
-.drop .small { color: var(--muted); margin-top: 6px; font-size: 13px; }
-.file { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid var(--line); border-radius: var(--clia-radius); padding: 14px 18px; margin-bottom: 16px; }
-.file .nm { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-.file .sp { flex: 1; }
-.tag { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--clia-gray-900); color: #fff; flex: none; }
-.link { border: 0; background: none; color: var(--clia-gray-700); text-decoration: underline; cursor: pointer; font-size: 13px; padding: 0; flex: none; }
-.err { color: var(--bad); margin-top: 12px; line-height: 1.5; }
-.ask { background: #FFF8EC; border: 1px solid #F3D9A8; border-radius: var(--clia-radius); padding: 14px 18px; margin-bottom: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.sum { font-size: 17px; font-weight: 700; margin: 8px 0 4px; }
-.sum-sub { color: var(--muted); font-size: 13px; margin-bottom: 16px; line-height: 1.5; }
-.tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
-.chip { height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--clia-gray-300); background: #fff; color: var(--clia-gray-700); cursor: pointer; font-size: 13px; }
-.chip.on { background: var(--clia-gray-900); border-color: var(--clia-gray-900); color: #fff; }
-.chip b { font-weight: 700; margin-inline-start: 4px; opacity: .7; }
-.search { margin-inline-start: auto; height: 34px; border: 1px solid var(--clia-gray-300); border-radius: 999px; padding: 0 14px; min-width: 200px; font-size: 13px; background: #fff; }
-.search:focus { outline: none; border-color: var(--clia-brand); }
-.list { background: #fff; border: 1px solid var(--line); border-radius: var(--clia-radius); overflow: hidden; }
-.head, .item { display: grid; grid-template-columns: 28px 52px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 10px 16px; }
-.head { background: var(--clia-gray-50); border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); padding-top: 8px; padding-bottom: 8px; }
-.item { border-bottom: 1px solid var(--clia-gray-100); cursor: pointer; }
+html, body { height: 100%; }
+body { margin: 0; font-family: var(--clia-font), 'LINESeedSansTH', sans-serif; background: var(--clia-page); color: var(--clia-gray-900); font-size: 14px; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; }
+button { font-family: inherit; }
+.hd { flex: none; height: 60px; display: flex; align-items: center; gap: 10px; padding: 0 20px; background: #fff; border-bottom: 1px solid var(--line); }
+.hd .t { font-weight: 700; font-size: 16px; }
+.hd .ch { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; background: var(--clia-gray-900); color: #fff; font-size: 12px; font-weight: 700; }
+.hd .sp { flex: 1; }
+.x { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--clia-gray-300); background: #fff; cursor: pointer; font-size: 16px; color: var(--clia-gray-700); }
+.x:hover { border-color: var(--clia-gray-700); }
+.body { flex: 1; overflow: auto; }
+.wrap { max-width: 880px; margin: 0 auto; padding: 28px 24px 120px; }
+
+/* 1. 첨부 */
+.drop { background: #fff; border: 2px dashed var(--clia-gray-300); border-radius: 20px; padding: 64px 24px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s, transform .2s; }
+.drop:hover, .drop.over { border-color: var(--red); background: #FFF8F7; }
+.drop.over { transform: scale(1.01); }
+.drop .ico { width: 64px; height: 64px; margin: 0 auto 14px; display: block; color: var(--red); }
+.drop .big { font-size: 18px; font-weight: 700; }
+.drop .small { color: var(--muted); margin-top: 8px; font-size: 13px; }
+.err { color: var(--bad); margin-top: 14px; line-height: 1.5; text-align: center; }
+
+/* 2. 인식·매칭 */
+.proc { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 48px 24px; text-align: center; }
+.sheet { width: 72px; height: 88px; margin: 0 auto 22px; position: relative; border-radius: 10px; background: #fff; border: 2px solid var(--clia-gray-900); overflow: hidden; animation: pop .45s cubic-bezier(.2,1.4,.4,1) both; }
+.sheet::before { content: ''; position: absolute; left: 10px; right: 10px; top: 16px; height: 52px;
+  background: repeating-linear-gradient(to bottom, var(--clia-gray-200) 0 6px, transparent 6px 13px); }
+.sheet::after { content: 'XLSX'; position: absolute; left: 0; right: 0; bottom: 0; height: 18px; background: #1E7F4F; color: #fff; font-size: 10px; font-weight: 700; line-height: 18px; letter-spacing: .5px; }
+.sheet i { position: absolute; left: 0; right: 0; height: 26px; top: -26px; background: linear-gradient(to bottom, transparent, rgba(253,49,46,.35), transparent); animation: scan 1.2s ease-in-out infinite; }
+.proc .msg { font-size: 17px; font-weight: 700; min-height: 26px; }
+.proc .fn { color: var(--muted); font-size: 13px; margin-top: 6px; }
+.dots::after { content: ''; animation: dots 1.2s steps(4) infinite; }
+.bar2 { width: 240px; height: 4px; border-radius: 2px; background: var(--clia-gray-100); margin: 20px auto 0; overflow: hidden; }
+.bar2 i { display: block; width: 40%; height: 100%; background: var(--red); border-radius: 2px; animation: slide 1.1s ease-in-out infinite; }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes scan { 0% { top: -26px; } 100% { top: 88px; } }
+@keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+@keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+
+/* 3. 목록 */
+.res-h { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.res-h .n { font-size: 20px; font-weight: 700; }
+.res-h .f { color: var(--muted); font-size: 13px; }
+.res-h .again { margin-inline-start: auto; border: 0; background: none; text-decoration: underline; color: var(--clia-gray-700); cursor: pointer; font-size: 13px; }
+.ctl { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.pill { height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--clia-gray-300); background: #fff; color: var(--clia-gray-700); cursor: pointer; font-size: 13px; font-weight: 600; }
+.pill:hover { border-color: var(--clia-gray-700); }
+.pill.on { background: var(--clia-gray-900); border-color: var(--clia-gray-900); color: #fff; }
+.pill b { opacity: .6; margin-inline-start: 6px; }
+.ctl .div { width: 1px; height: 20px; background: var(--line); margin: 0 4px; }
+.list { background: #fff; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.item { display: grid; grid-template-columns: 22px 48px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--clia-gray-100); cursor: pointer;
+  animation: rise .35s ease both; }
 .item:last-child { border-bottom: 0; }
 .item:hover { background: var(--clia-gray-50); }
-.item img { width: 52px; height: 52px; object-fit: contain; border-radius: 8px; background: var(--clia-gray-50); }
+.item.off { opacity: .55; }
+.item img { width: 48px; height: 48px; object-fit: contain; border-radius: 8px; background: var(--clia-gray-50); }
 .item .m { font-weight: 700; }
+.item .m .dv { display: inline-block; margin-inline-start: 6px; padding: 1px 6px; border-radius: 4px; background: var(--clia-gray-100); color: var(--clia-gray-600); font-size: 10px; font-weight: 700; vertical-align: 1px; }
 .item .s { color: var(--muted); font-size: 12px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.item .r { text-align: end; display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
-input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--clia-brand); cursor: pointer; margin: 0; }
+.item .r { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; text-align: end; }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--red); cursor: pointer; margin: 0; }
 .badge { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; }
 .b-rep { background: #FFF1DC; color: var(--warn); }
 .b-ok { background: #E3F4EA; color: var(--ok); }
 .b-bad { background: #FDE8E7; color: var(--bad); }
 .b-run { background: #E8EEF9; color: #2A4E8F; }
 .b-q { background: var(--clia-gray-100); color: var(--clia-gray-500); }
-.note { font-size: 11px; color: var(--muted); max-width: 280px; }
-details.skip { margin-top: 16px; }
-details.skip summary { cursor: pointer; color: var(--clia-gray-700); font-size: 13px; }
-details.skip .list { margin-top: 8px; }
-details.skip .item { grid-template-columns: minmax(0, 1fr) auto; cursor: default; }
-.bar { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-top: 1px solid var(--line); padding: 14px 24px; display: none; z-index: 10; }
-.bar .in { max-width: 960px; margin: 0 auto; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
-.bar .sp { flex: 1; }
-.prog { height: 6px; border-radius: 3px; background: var(--clia-gray-100); overflow: hidden; width: 200px; }
-.prog i { display: block; height: 100%; width: 0; background: var(--clia-brand); transition: width .3s; }
-.clia-btn.big { height: 44px; padding: 0 24px; font-size: 15px; }
+.note { font-size: 11px; color: var(--muted); max-width: 260px; }
+details.skip { margin-top: 14px; color: var(--clia-gray-700); font-size: 13px; }
+details.skip summary { cursor: pointer; }
+details.skip ul { margin: 8px 0 0; padding-inline-start: 20px; color: var(--muted); line-height: 1.7; }
+.ask { background: #FFF8EC; border: 1px solid #F3D9A8; border-radius: 12px; padding: 12px 16px; margin-bottom: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.ask select { height: 34px; border: 1px solid var(--clia-gray-300); border-radius: 8px; padding: 0 10px; max-width: 100%; }
+
+.foot { flex: none; background: #fff; border-top: 1px solid var(--line); padding: 14px 20px; display: none; }
+.foot .in { max-width: 880px; margin: 0 auto; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.foot .sp { flex: 1; }
+.prog { height: 6px; width: 180px; border-radius: 3px; background: var(--clia-gray-100); overflow: hidden; }
+.prog i { display: block; height: 100%; width: 0; background: var(--red); transition: width .3s; }
+.clia-btn.big { height: 44px; padding: 0 26px; font-size: 15px; }
 a.clia-btn { text-decoration: none; }
 .hidden { display: none !important; }
-@media (max-width: 720px) {
-  main { padding: 20px 16px 170px; } .top { padding: 0 16px; } .top .t, .top .div { display: none; }
-  .search { margin-inline-start: 0; width: 100%; } .head { display: none; }
-  .item { grid-template-columns: 24px 44px minmax(0, 1fr); } .item .r { grid-column: 3; align-items: flex-start; text-align: start; } .item img { width: 44px; height: 44px; }
-  .bar { padding: 12px 16px; } .prog { width: 120px; }
+@media (max-width: 640px) {
+  .wrap { padding: 18px 14px 40px; } .drop { padding: 44px 16px; }
+  .item { grid-template-columns: 22px 40px minmax(0, 1fr); } .item img { width: 40px; height: 40px; }
+  .item .r { grid-column: 3; align-items: flex-start; text-align: start; }
 }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 </head>
 <body>
-<div class="top">
-  <img src="../shared/assets/lg-logo.svg" alt="LG"><span class="div"></span><span class="t">CLIA Content Hub</span>
-  <span class="sp"></span>
-  <button class="clia-btn" id="back" data-i="back"></button>
-</div>
-<main>
-  <h1 data-i="title"></h1>
-  <p class="lead" data-i="lead"></p>
+<div class="hd"><span class="t" data-i="title"></span><span class="ch hidden" id="chTag"></span><span class="sp"></span><button class="x" id="close" aria-label="Close">✕</button></div>
+<div class="body"><div class="wrap">
 
-  <div class="drop" id="drop">
-    <input type="file" id="file" accept=".xlsx" hidden>
-    <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h11l5 5v13H4z"/><path d="M15 3v5h5"/><path d="M12 18v-7M9 14l3-3 3 3"/></svg>
-    <div class="big" data-i="drop"></div>
-    <div class="small" data-i="dropSub"></div>
-  </div>
-  <div class="err" id="err"></div>
+  <section id="s1">
+    <div class="drop" id="drop">
+      <input type="file" id="file" accept=".xlsx" hidden>
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h11l5 5v13H4z"/><path d="M15 3v5h5"/><path d="M12 18v-7M9 14l3-3 3 3"/></svg>
+      <div class="big" data-i="drop"></div>
+      <div class="small" data-i="dropSub"></div>
+    </div>
+    <div class="err" id="err"></div>
+  </section>
 
-  <div id="after" class="hidden">
-    <div class="file"><span>📄</span><span class="nm" id="fname"></span><span class="tag" id="ftag"></span><span class="sp"></span><button class="link" id="again" data-i="again"></button></div>
-    <div class="ask hidden" id="askCh"><span data-i="askCh"></span><button class="chip" data-ch="shopee">Shopee</button><button class="chip" data-ch="lazada">Lazada</button></div>
-    <div class="ask hidden" id="askDesc"><span data-i="askDesc"></span><select id="descSel" class="search" style="margin:0"></select></div>
-    <div class="sum" id="sum"></div>
-    <div class="sum-sub" id="sumSub"></div>
-    <div class="tools" id="tools"></div>
+  <section id="s2" class="hidden">
+    <div class="proc"><div class="sheet"><i></i></div><div class="msg"><span id="pmsg"></span><span class="dots"></span></div><div class="fn" id="pfile"></div><div class="bar2"><i></i></div></div>
+  </section>
+
+  <section id="s3" class="hidden">
+    <div class="ask hidden" id="askCh"><span data-i="askCh"></span><button class="pill" data-ch="shopee">Shopee</button><button class="pill" data-ch="lazada">Lazada</button></div>
+    <div class="ask hidden" id="askDesc"><span data-i="askDesc"></span><select id="descSel"></select></div>
+    <div class="res-h"><span class="n" id="rn"></span><span class="f" id="rf"></span><button class="again" id="again" data-i="again"></button></div>
+    <div class="ctl" id="ctl"></div>
     <div class="list" id="list"></div>
-    <details class="skip" id="skip"><summary id="skipSum"></summary><div class="list" id="skipList"></div></details>
-  </div>
-</main>
-<div class="bar" id="bar"><div class="in">
-  <span id="selInfo"></span>
-  <div class="prog hidden" id="prog"><i></i></div>
+    <details class="skip hidden" id="skip"><summary id="skipSum"></summary><ul id="skipList"></ul></details>
+  </section>
+
+</div></div>
+<div class="foot" id="foot"><div class="in">
+  <span id="info"></span><div class="prog hidden" id="prog"><i></i></div>
   <span class="sp"></span>
   <a class="clia-btn hidden" id="dl" data-i="dlAgain"></a>
-  <button class="clia-btn primary big" id="build"></button>
+  <button class="clia-btn primary big" id="export"></button>
 </div></div>
 <script src="bulk.js"></script>
 </body>
