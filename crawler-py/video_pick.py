@@ -8,7 +8,9 @@ LG 포스터가 검은 화면이거나 없을 때만 쓴다 (서버 video-frames
   python video_pick.py poster <이미지>          → {"black": bool, "mean": 평균 밝기, "black_ratio": 검정 픽셀 비율}
   python video_pick.py pick <동영상> <작업 폴더>  → {"frames": n, "top": [{"t": 초, "score": 점수}, …]}  (최대 3개, 서로 2초 이상 떨어짐)
 
-검은 포스터: 평균 밝기 < 3 이고 거의 검정(밝기 < 16) 픽셀이 99% 넘음 — 어두운 장면·로고만 있는 포스터는 검은 화면이 아님.
+검은 포스터: 검정(밝기 < 16) 픽셀이 차지한 영역(경계 상자)이 그림의 절반 이상이고, 그 영역 안이 평균 밝기 < 3 · 검정 99% 넘음.
+  LG 포스터는 검은 화면 위에 배경 띠(베이지 등)가 붙어 있기도 해서 그림 전체가 아니라 검은 영역 안을 본다 (예: AI Chatbot).
+  어두운 장면·검은 바탕의 로고(예: Gemini, 검정 97%)는 검은 화면이 아님.
 장면 점수 (전체 프레임 중 '비주얼이 가장 많은' 장면, 초당 2장):
   채움 coverage 45% : 16x16 칸 중 밝기 표준편차 > 8 인 칸 비율 (빈 검정·단색 배경이 넓으면 낮다)
   디테일 detail 35% : 가장자리 세기 평균 (동영상 안 최대값으로 나눠 0~1)
@@ -29,14 +31,20 @@ BLACK_MEAN, BLACK_RATIO, BLACK_LEVEL = 3.0, 0.99, 16
 FFMPEG = os.environ.get("FFMPEG_PATH", "ffmpeg")
 
 
+BLACK_AREA = 0.5
+
+
 def poster(path: str) -> dict:
     g = Image.open(path).convert("L")
     g.thumbnail((640, 640))
-    hist = g.histogram()
-    n = sum(hist) or 1
-    mean = ImageStat.Stat(g).mean[0]
-    ratio = sum(hist[:BLACK_LEVEL]) / n
-    return {"black": mean < BLACK_MEAN and ratio > BLACK_RATIO, "mean": round(mean, 2), "black_ratio": round(ratio, 4)}
+    box = g.point(lambda v: 255 if v < BLACK_LEVEL else 0).getbbox()
+    area = ((box[2] - box[0]) * (box[3] - box[1]) / (g.size[0] * g.size[1])) if box else 0
+    inner = g.crop(box) if box else g
+    hist = inner.histogram()
+    mean = ImageStat.Stat(inner).mean[0]
+    ratio = sum(hist[:BLACK_LEVEL]) / (sum(hist) or 1)
+    return {"black": area >= BLACK_AREA and mean < BLACK_MEAN and ratio > BLACK_RATIO,
+            "mean": round(mean, 2), "black_ratio": round(ratio, 4), "black_area": round(area, 3)}
 
 
 def _features(path: str) -> dict:
