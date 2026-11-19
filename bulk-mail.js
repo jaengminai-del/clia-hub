@@ -86,7 +86,7 @@ function shell(o) {
 
 const TX = {
   en: {
-    sOk: (ok, rv) => `[CLIA] Bulk Excel ready — ${ok} matched${rv ? ` · ${rv} to check` : ''}`,
+    sOk: (ok, rv) => `[CLIA] Bulk Excel ready — ${ok} matched${rv ? ` · ${rv} need review` : ''}`,
     sFail: '[CLIA] Bulk Excel could not be made',
     hOk: 'Your bulk Excel is ready', hFail: 'Your bulk Excel could not be made',
     pOk: 'The finished file is attached to this email.', pBig: 'The file is too large to attach — download it in CLIA.',
@@ -94,7 +94,7 @@ const TX = {
     why: { crawl: 'No product page could be fetched from LG.com.', content: 'The server that makes the description images did not respond.', items: 'None of the selected products could be filled.', upload: 'The uploaded Excel could not be found again.', server: 'An unexpected error happened on the server.' },
     ask: 'Contact the admin',
     mailSub: (id) => `[CLIA] Bulk Excel failed — job ${id}`, mailBody: (id, f) => `Job number: ${id}\nFile: ${f}\n\n`,
-    rOk: 'Matched SKUs', rRv: 'SKUs to check', rFile: 'Bulk upload file', att: 'Attached to this email', n: (x) => String(x),
+    rOk: 'Matched SKUs', rRv: 'SKUs needing review', rFile: 'Bulk upload file', att: 'Attached to this email', n: (x) => String(x),
     open: 'Check in CLIA',
   },
   th: {
@@ -171,8 +171,9 @@ function build(j, { base = '', attached = false, lang, admin = admins() } = {}) 
   const open = `${b}/bulk/?job=${encodeURIComponent(j.id)}&lang=${encodeURIComponent(L)}`;
   const logo = `${b}/shared/assets/lg-logo-mail.png`;
   const its = j.items || [];
-  const ok = its.filter((x) => x.status === 'ok').length;
-  const rv = its.filter((x) => (x.flags || []).some((f) => f.sev !== 'info')).length;
+  const needs = (x) => (x.flags || []).some((f) => f.sev !== 'info');
+  const rv = its.filter(needs).length;                                   // 확인 필요
+  const ok = its.filter((x) => x.status === 'ok' && !needs(x)).length;   // 매칭 완료 — 화면의 세 상태가 겹치지 않게 확인 필요는 뺀다
 
   if (j.status !== 'ready') {
     // 짧게: 제목 · 한 줄 · [CLIA 확인] [담당자에게 문의] (담당자 주소가 있을 때만)

@@ -29,8 +29,10 @@
   const grpName = (g) => (T.grp || TX.en.grp)[g] || g;
   const CH0 = ['shopee', 'lazada'].includes(qs.get('channel')) ? qs.get('channel') : '';
   const chName = (c) => (c === 'lazada' ? 'Lazada' : 'Shopee');
-  const S = { tab: 'all', q: '', last: null, mis: '', data: null, channel: CH0, ok: [], reg: [], skip: [], regOn: false, own: {}, sel: new Set(), force: new Set(), ack: new Set(), job: null, busy: false, cfg: {} };
+  const S = { tab: 'all', q: '', last: null, mis: '', data: null, channel: CH0, ok: [], reg: [], skip: [], regOn: false, own: {}, sel: new Set(), force: new Set(), redo: new Set(), ack: new Set(), job: null, busy: false, cfg: {} };
   const act = () => (S.regOn ? S.ok.concat(S.reg) : S.ok);
+  // 매칭 불가 = CLIA 가 건드리지 않는 행: 제품을 못 정한 행 + (등록을 켜지 않았으면) CLIA 에 없는 행
+  const noMatch = () => S.skip.concat(S.regOn ? [] : S.reg.map((r) => ({ ...r, why: 'rReg' })));
 
   document.documentElement.lang = L;
   document.documentElement.dir = L === 'ar' ? 'rtl' : 'ltr';
@@ -84,7 +86,7 @@
       S.mis = CH0 && d.channel && d.channel !== CH0 ? d.channel : '';
       S.channel = S.mis ? '' : (CH0 || d.channel || '');
       chTag();
-      Object.assign(S, { job: null, q: '', last: null, regOn: false, own: {}, force: new Set(), ack: new Set() });
+      Object.assign(S, { job: null, q: '', last: null, regOn: false, own: {}, force: new Set(), redo: new Set(), ack: new Set() });
       $('q').value = '';
       setData(d, true);
       askRegister();
@@ -126,34 +128,39 @@
 
   // ── 확인 필요 ──
   const itemOf = (row) => S.job && S.job.items && S.job.items.find((x) => x.row === row);
-  const openFlags = (row) => ((itemOf(row) || {}).flags || []).filter((f) => f.sev !== 'info' && !S.ack.has(`${row}:${f.code}`));
-  const flagText = (f) => ({ crawl: () => t('f_crawl'), content: () => t('f_content'), qa: () => t('f_qa', f.texts, f.images), frame: () => t('f_frame', f.n),
+  // 확인 필요 = 다른 제품일 수 있거나 다시 돌리면 고쳐질 수 있는 것. 그대로 써도 되는 것(장면 자동 선택 · 글 일부 누락)은 작은 안내
+  const normFlag = (f) => (f.code === 'frame' ? { ...f, sev: 'info' } : f.code === 'qa' && !f.images ? { ...f, code: 'qaTx', sev: 'info' } : f);   // 예전 작업 기록 호환
+  const flagsOf = (row) => ((itemOf(row) || {}).flags || []).map(normFlag);
+  const openFlags = (row) => flagsOf(row).filter((f) => f.sev !== 'info' && !S.ack.has(`${row}:${f.code}`));
+  const flagText = (f) => ({ crawl: () => t('f_crawl'), content: () => t('f_content'), qa: () => t('f_qa', f.images), qaTx: () => t('f_qaTx', f.texts), frame: () => t('f_frame', f.n),
     over12: () => t('f_over12', f.all), summary: () => t('f_summary'), fuzzy: () => t('f_fuzzy'), alts: () => t('f_alts', f.n) }[f.code] || (() => f.code))();
   const builderUrl = (u) => `/shopee-lazada-pdp/index.html?url=${encodeURIComponent(u || '')}&channel=${S.channel || 'shopee'}&lang=${L}`;
   const reviewRows = () => act().filter((r) => openFlags(r.row).length);
+  // 다시 돌리면 고쳐지는 것: LG.com 페이지 · 이미지 누락은 다시 가져오고, 설명 · 요약은 다시 만든다
+  const RETRY = { crawl: 'a_retry', content: 'a_retry', summary: 'a_retry', qa: 'a_refetch' };
   function flagHtml(r) {
     const it = itemOf(r.row);
     const fl = openFlags(r.row);
-    let h = ((it || {}).flags || []).filter((f) => f.sev === 'info').map((f) => `<span class="note">${esc(flagText(f))}</span>`).join('');
+    let h = flagsOf(r.row).filter((f) => f.sev === 'info' && !S.ack.has(`${r.row}:${f.code}`)).map((f) => `<div class="nrow"><span class="note">${esc(flagText(f))}</span>` +
+      (f.code === 'frame' ? `<button class="mini" data-a="frame" data-slug="${esc(it.slug)}">${esc(t('a_frame'))}</button>` : '') + `</div>`).join('');
     if (!fl.length) return h;
     return h + `<div class="fl">` + fl.map((f) => `<div class="fx"><span>${esc(flagText(f))}</span>` +
-      (f.code === 'frame' ? `<button class="mini" data-a="frame" data-slug="${esc(it.slug)}">${esc(t('a_frame'))}</button>` : '') +
-      (f.code === 'crawl' || f.code === 'content' ? `<button class="mini" data-a="retry" data-row="${r.row}" data-code="${f.code}">${esc(t('a_retry'))}</button>` : '') +
-      (['qa', 'over12', 'summary', 'fuzzy'].includes(f.code) ? `<a class="mini" target="_blank" rel="noopener" href="${esc(builderUrl(r.p.url))}">${esc(t('a_builder'))}</a>` : '') +
+      (RETRY[f.code] ? `<button class="mini" data-a="retry" data-row="${r.row}" data-code="${f.code}">${esc(t(RETRY[f.code]))}</button>` : '') +
+      (['qa', 'fuzzy'].includes(f.code) ? `<a class="mini" target="_blank" rel="noopener" href="${esc(builderUrl(r.p.url))}">${esc(t('a_builder'))}</a>` : '') +
       (f.sev === 'warn' ? `<button class="mini" data-a="ack" data-row="${r.row}" data-code="${f.code}">${esc(t('a_ack'))}</button>` : '') +
       `</div>`).join('') + `</div>`;
   }
   function itemStatus(r) {
     const it = itemOf(r.row);
     let h = '';
-    if (S.force.has(r.row)) h = `<span class="note">${esc(t('a_retryNote'))}</span>`;
-    else if (!it) h = r.descLen > 0 ? `<span class="badge b-rep">${esc(t('rep'))}</span>` : '';
+    if (S.force.has(r.row) || S.redo.has(r.row)) h = `<span class="note">${esc(t('a_retryNote'))}</span>`;
+    else if (!it) h = r.descLen > 0 ? `<span class="note">${esc(t('repNote'))}</span>` : '';
     else if (it.status === 'queued') h = `<span class="badge b-q">${esc(it.register && !it.crawled ? t('st_regq') : t('q'))}</span>`;
     else if (it.status === 'crawling') h = `<span class="badge b-run">${esc(t('st_crawl'))}</span>`;
     else if (it.status === 'working') h = `<span class="badge b-run">${esc(t('w'))}</span>`;
     else if (it.status === 'failed') h = `<span class="badge b-bad">${esc(t('bad'))}</span>`;
     else if (it.status === 'cancelled') h = `<span class="badge b-q">${esc(t('st_stop'))}</span>`;
-    else h = `<span class="badge ${it.prevLen > 0 ? 'b-rep' : 'b-ok'}">${esc(it.prevLen > 0 ? t('okRep') : t('ok'))}</span><span class="note">${esc(t('imgs', it.images))}</span>`;
+    else h = `<span class="badge b-ok">${esc(t('ok'))}</span>` + (it.prevLen > 0 ? `<span class="note">${esc(t('okRep'))}</span>` : '') + `<span class="note">${esc(t('imgs', it.images))}</span>`;
     return h + flagHtml(r);
   }
 
@@ -188,7 +195,7 @@
     $('askDesc').classList.toggle('hidden', !!d.cols.desc);
     if (!d.cols.desc) $('descSel').innerHTML = '<option value="">—</option>' + d.columns.map((c) => `<option value="${c.col}">${c.letter} · ${esc(c.label)}</option>`).join('');
     $('pFile').textContent = d.fileName || '';
-    $('pMatch').textContent = t('found', S.ok.length) + ' · ' + t('of', d.rows.length);
+    $('pMatch').textContent = t('rowsN', d.rows.length);
     const rv = new Set(reviewRows().map((r) => r.row));   // 확인 필요는 맨 위
     const ordered = rows.slice().sort((a, b) => (rv.has(b.row) - rv.has(a.row)));
     $('list').innerHTML = ordered.map((r, i) => `<label class="item${rv.has(r.row) ? ' rv' : ''}" style="${animate ? `animation-delay:${Math.min(i, 30) * 45}ms` : 'animation:none'}">` +
@@ -196,10 +203,14 @@
       ((r.p.thumb || (itemOf(r.row) || {}).thumb) ? `<img src="${esc(r.p.thumb || itemOf(r.row).thumb)}" alt="" loading="lazy">` : `<div class="ph">${esc(grpName(r.p.grp))}</div>`) +
       `<div style="min-width:0"><div class="m">${rv.has(r.row) ? `<span class="badge b-bad rvt">${esc(t('rvTag'))}</span>` : ''}${esc(r.p.model)}<span class="dv">${esc(r.p.dv || '')} · ${esc(grpName(r.p.grp))}</span>${r.p.isNew ? `<span class="badge b-new">${esc(t('newTag'))}</span>` : ''}</div>` +
       `<div class="s">${esc(r.name || r.p.title)}</div></div><div class="r"></div></label>`).join('');
-    if (!rows.length && !S.reg.length && S.skip.length) S.tab = 'skip';
-    $('skipSum').textContent = t('skip', S.skip.length);
-    $('skipList').innerHTML = S.skip.map((r) => `<li>${esc(r.parentSku || r.sku || '—')} · ${esc(r.name)} <span class="badge b-q">${esc(r.why === 'rNone' && d.site ? t('notFound') : t(r.why))}</span>` +
-      (r.why === 'rNone' && d.site ? `<span class="urlin"><input type="url" data-urow="${r.row}" placeholder="${esc(t('urlPh'))}"><button class="mini" data-uadd="${r.row}">${esc(t('urlAdd'))}</button><span class="err2" data-uerr="${r.row}"></span></span>` : '') + `</li>`).join('');
+    if (!rows.length && noMatch().length) S.tab = 'skip';
+    // 매칭 불가: 다른 탭과 같은 행 — SKU · 상품명 · 이유 (CLIA·LG.com 어디에도 없으면 주소를 직접 넣는 칸)
+    $('skip').innerHTML = noMatch().map((r) => { const none = r.why === 'rNone' && d.site;
+      return `<div class="item"><span></span><div class="ph">—</div>` +
+        `<div style="min-width:0"><div class="m">${esc(r.parentSku || r.sku || '—')}</div><div class="s">${esc(r.name)}</div></div>` +
+        `<div class="r"><span class="badge b-q">${esc(none ? t('notFound') : t(r.why))}</span>` +
+        (none ? `<span class="urlin"><input type="url" data-urow="${r.row}" placeholder="${esc(t('urlPh'))}"><button class="mini" data-uadd="${r.row}">${esc(t('urlAdd'))}</button></span><span class="err2" data-uerr="${r.row}"></span>` : '') +
+        `</div></div>`; }).join('');
     refresh();
   }
 
@@ -228,15 +239,15 @@
       gs.map(([d, g], i) => [d, g, i]).filter(([d]) => d === dv).map(([d, g, i]) => { const n = ofGrp(d, g).length;
         return `<button class="opt" role="menuitemcheckbox" aria-checked="${ariaOf(gK[i], n)}" data-dv="${d}" data-grp="${g}"${S.busy || !dvK[d] ? ' disabled' : ''}><span class="cb ${cbOf(gK[i], n)}"></span>${esc(grpName(g))}<span class="n">${gK[i]}/${n}</span></button>`; }).join('')).join('');
     $('dvBtn').disabled = $('grpBtn').disabled = S.busy;
-    // 탭: 전체 · 확인 필요 · 새로 등록 · 제외 — 확인 필요는 빨간 숫자
+    // 탭: 전체 · 확인 필요 · 매칭 완료 · 매칭 불가 — 세 상태는 겹치지 않고, 전체 = 세 상태의 합 (확인 필요는 빨간 숫자)
     const rvSet = new Set(reviewRows().map((r) => r.row));
-    const rvN = rvSet.size;
-    const newN = S.regOn ? S.reg.length : 0;
-    if ((S.tab === 'review' && !rvN) || (S.tab === 'new' && !newN) || (S.tab === 'skip' && !S.skip.length)) S.tab = 'all';
-    const tabs = [['all', t('tabAll'), rows.length, ''], ['review', t('tabReview'), rvN, 'rv'], ['new', t('tabNew'), newN, ''], ['skip', t('tabSkip'), S.skip.length, '']]
+    const rvN = rvSet.size, noN = noMatch().length, okN = rows.length - rvN;
+    if ((S.tab === 'review' && !rvN) || (S.tab === 'ok' && !okN) || (S.tab === 'skip' && !noN)) S.tab = 'all';
+    const tabs = [['all', t('tabAll'), rows.length + noN, ''], ['review', t('tabReview'), rvN, 'rv'], ['ok', t('tabOk'), okN, ''], ['skip', t('tabSkip'), noN, '']]
       .filter(([k, , n]) => k === 'all' || n);
+    $('tabD').textContent = t({ all: 'td_all', review: 'td_review', ok: 'td_ok', skip: 'td_skip' }[S.tab] || 'td_all');
     $('tabs').innerHTML = tabs.map(([k, label, n, cls]) => `<button class="tab ${cls}${S.tab === k ? ' on' : ''}" role="tab" aria-selected="${S.tab === k}" data-tab="${k}">${esc(label)}<b>${n}</b></button>`).join('');
-    const inTab = (r) => S.tab === 'all' || (S.tab === 'review' && rvSet.has(r.row)) || (S.tab === 'new' && r.kind === 'new');
+    const inTab = (r) => S.tab === 'all' || (S.tab === 'review' && rvSet.has(r.row)) || (S.tab === 'ok' && !rvSet.has(r.row));
     // 전체 선택 ↔ 해제: 버튼 하나 (지금 보이는 상품 — 탭 · 검색 결과 — 에만)
     const vis = rows.filter((r) => hit(r) && inTab(r)), vk = nSel(vis);
     $('selCb').className = 'cb ' + cbOf(vk, vis.length);
@@ -256,7 +267,9 @@
     });
     const skipTab = S.tab === 'skip';
     $('list').classList.toggle('hidden', skipTab || !rows.length);
-    $('skip').classList.toggle('hidden', !skipTab);
+    $('skip').classList.toggle('hidden', !((skipTab || S.tab === 'all') && noN));   // 전체 탭에서는 목록 아래에 매칭 불가 행도 보인다
+    $('skipHead').classList.toggle('hidden', !(S.tab === 'all' && noN && rows.length));
+    $('skipHead').innerHTML = `${esc(t('tabSkip'))}<b>${noN}</b>`;
     $('selbar').classList.toggle('hidden', skipTab || !rows.length);
     $('shiftTip').classList.toggle('hidden', skipTab || !rows.length);
     // 상황판
@@ -330,7 +343,7 @@
     e.preventDefault();
     const row = +b.dataset.row;
     if (b.dataset.a === 'ack') { S.ack.add(`${row}:${b.dataset.code}`); saveAck(); render(false); }
-    if (b.dataset.a === 'retry') { if (b.dataset.code === 'crawl') S.force.add(row); S.ack.add(`${row}:${b.dataset.code}`); S.sel.add(row); saveAck(); render(false); }
+    if (b.dataset.a === 'retry') { if (['crawl', 'qa'].includes(b.dataset.code)) S.force.add(row); else S.redo.add(row); S.ack.add(`${row}:${b.dataset.code}`); S.sel.add(row); saveAck(); render(false); }   // crawl · qa: LG.com 에서 다시 가져옴 / 그 밖: 다시 만듦
     if (b.dataset.a === 'frame') openFrames(b.dataset.slug);
   });
 
@@ -351,7 +364,7 @@
   $('rgNo').onclick = rgClose;
   $('rg').onclick = (e) => { if (e.target === $('rg')) rgClose(); };
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('rg').classList.contains('hidden')) rgClose(); });
-  $('skipList').addEventListener('click', async (e) => {
+  $('skip').addEventListener('click', async (e) => {
     const b = e.target.closest('button[data-uadd]');
     if (!b) return;
     e.preventDefault();
@@ -487,7 +500,7 @@
     S.busy = true; refresh();
     try {
       const j = await api('/api/v1/bulk/build', { id: S.data.id, channel: S.channel, sheet: S.data.sheet, descCol: S.data.cols.desc, country: home, lang: L, items });
-      S.force = new Set(); S.ack = new Set();
+      S.force = new Set(); S.redo = new Set(); S.ack = new Set();
       store.set(lastKey, { job: j.id, file: S.data.fileName, at: Date.now() });
       S.job = j; openXp(est, longJob);
       await poll(j);
