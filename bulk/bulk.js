@@ -1,141 +1,10 @@
-/* bulk.js — Shopee / Lazada 벌크 엑셀 (2026-11-18)
-   빌더의 "Bulk Excel" 버튼이 이 화면을 빌더 위에 띄운다 (?embed=1&channel=&lang=&corp=).
-   엑셀 첨부 → 인식·매칭 애니메이션 → 매칭된 제품 목록 → 전체 선택·해제·사업부(MS·HS·ES)별 선택 → 엑셀 내보내기.
-   이미 설명이 있던 칸은 교체하고 "기존 설명 교체" 로 표시. 매칭이 안 되거나 애매한 행(후보 여러 개·묶음)은 엑셀에서 그대로 둔다.
-   화면 언어는 법인 언어(?lang=, 태국 → 태국어), 확인용 ?lang=ko. 서버: bulk-routes.js */
+/* bulk.js — Shopee / Lazada 벌크 엑셀 (2026-11-18 · 일괄 등록·확인 필요·알림 2026-11-19)
+   빌더의 "Bulk Excel" 버튼이 이 화면을 빌더 위에 띄운다 (?embed=1&channel=&lang=&corp=). 메일 링크는 ?job= 로 연다.
+   첨부 → 인식·매칭 → (CLIA 에 없는 상품은 같은 나라 LG.com 에서 찾아 일괄 등록할지 선택) → 고르기 → 내보내기.
+   확인 필요(크롤 실패·원문 누락·동영상 장면 자동 선택·Shopee 12장 초과·요약 실패·모델명 추정)는 맨 위 빨간색 + 바로 할 일.
+   문구: bulk-i18n.js. 서버: bulk-routes.js · bulk-jobs.js */
 (function () {
-  const TX = {
-    en: {
-      title: 'Bulk Excel', drop: 'Attach the Shopee / Lazada bulk Excel', dropSub: 'Drop an .xlsx file here or click to choose',
-      reading: 'Reading the Excel', matching: 'Matching products', again: 'Attach another file',
-      found: (n) => `${n} products matched`, of: (all) => `out of ${all} products in the file`,
-      selAll: 'Select all', selNone: 'Deselect all', viewList: 'List', viewGrid: 'Gallery',
-      search: 'Search model or product name', qRes: (n) => `${n} results`, qSel: 'Select results', qDesel: 'Deselect results', shift: 'Tip: Shift + click selects a range',
-      grp: { TV: 'TV', Audio: 'Audio', Monitor: 'Monitor', Laptop: 'Laptop', Projector: 'Projector', Fridge: 'Fridge', Washer: 'Washer', Dryer: 'Dryer', Vacuum: 'Vacuum', Dishwasher: 'Dishwasher', Cooking: 'Cooking', Styler: 'Styler', AC: 'Air conditioner', Purifier: 'Air purifier', Dehumidifier: 'Dehumidifier', Other: 'Other' },
-      rep: 'Replaces current description', skip: (n) => `${n} products were not matched — they stay as they are in the Excel`,
-      rNone: 'not in CLIA', rMulti: 'several CLIA products', rBundle: 'bundle',
-      askCh: 'Which marketplace is this file for?', askDesc: 'The product description column was not found. Choose it:',
-      info: (n, r) => `<b>${n}</b> selected` + (r ? ` · <span class="badge b-rep">${r} replace a current description</span>` : ''),
-      exp: (n) => `Export Excel (${n})`, exporting: 'Exporting…', dlAgain: 'Download again',
-      prog: (d, t) => `Exporting ${d} / ${t}`, done: (ok, rep, bad) => `✓ ${ok} filled` + (rep ? ` · ${rep} replaced` : '') + (bad ? ` · <span style="color:var(--bad)">${bad} failed</span>` : ''),
-      q: 'Waiting', w: 'Making…', ok: 'Filled', okRep: 'Replaced', bad: 'Failed', imgs: (n) => `${n} images`, noSummary: 'Images only — summary could not be made',
-      e_not_xlsx: ['This is not an Excel (.xlsx) file', 'Upload the .xlsx file you downloaded from the Shopee / Lazada seller center, as it is.'],
-      e_xls_or_locked: ['This is an old .xls file or a password-protected Excel', 'In Excel, use Save As → .xlsx, or remove the password, then upload again.'],
-      e_csv: ['This is a CSV / text file', 'Download the file from the seller center in Excel (.xlsx) format.'],
-      e_broken: ['The file is damaged or was not fully downloaded', 'Download it again from the seller center and upload it again.'],
-      e_too_big: ['The file is too large (max {n} MB)', 'Download the products in smaller parts from the seller center.'],
-      e_notMarket: ['This does not look like a Shopee / Lazada bulk Excel', 'No product ID, SKU or product description column was found. Upload the file from the seller center’s mass update / bulk manage.'],
-      e_noRows: ['There are no products in this file', 'It is an empty template with headers only. Download a file that contains your products.'],
-      e_other: ['The file could not be read', ''],
-      noMatchT: 'No product matches a CLIA product', noMatchB: 'The file may be for another country, or these products are not crawled in CLIA yet. The Excel stays as it is.',
-      misT: (f, c) => `This file looks like a ${f} file, but you opened the ${c} builder.`, misB: 'How should the description be filled?', useAs: (c) => `Fill as ${c}`,
-      upFail: 'Could not read the file: ', expFail: 'Export failed: ', leave: 'The Excel is still being exported. Close anyway?',
-    },
-    th: {
-      title: 'Bulk Excel', drop: 'แนบไฟล์ Excel แบบ bulk ของ Shopee / Lazada', dropSub: 'วางไฟล์ .xlsx ที่นี่ หรือคลิกเพื่อเลือกไฟล์',
-      reading: 'กำลังอ่านไฟล์ Excel', matching: 'กำลังจับคู่สินค้า', again: 'แนบไฟล์อื่น',
-      found: (n) => `จับคู่สินค้าได้ ${n} รายการ`, of: (all) => `จากทั้งหมด ${all} รายการในไฟล์`,
-      selAll: 'เลือกทั้งหมด', selNone: 'ยกเลิกทั้งหมด', viewList: 'รายการ', viewGrid: 'แกลเลอรี',
-      search: 'ค้นหารุ่นหรือชื่อสินค้า', qRes: (n) => `ผลการค้นหา ${n} รายการ`, qSel: 'เลือกผลการค้นหา', qDesel: 'ยกเลิกผลการค้นหา', shift: 'เคล็ดลับ: Shift + คลิก เพื่อเลือกเป็นช่วง',
-      grp: { TV: 'ทีวี', Audio: 'เครื่องเสียง', Monitor: 'จอมอนิเตอร์', Laptop: 'แล็ปท็อป', Projector: 'โปรเจกเตอร์', Fridge: 'ตู้เย็น', Washer: 'เครื่องซักผ้า', Dryer: 'เครื่องอบผ้า', Vacuum: 'เครื่องดูดฝุ่น', Dishwasher: 'เครื่องล้างจาน', Cooking: 'เครื่องครัว', Styler: 'สไตเลอร์', AC: 'เครื่องปรับอากาศ', Purifier: 'เครื่องฟอกอากาศ', Dehumidifier: 'เครื่องลดความชื้น', Other: 'อื่น ๆ' },
-      rep: 'แทนที่รายละเอียดเดิม', skip: (n) => `${n} สินค้าจับคู่ไม่ได้ — จะคงเดิมในไฟล์ Excel`,
-      rNone: 'ไม่มีใน CLIA', rMulti: 'ตรงกับหลายสินค้าใน CLIA', rBundle: 'สินค้าชุด',
-      askCh: 'ไฟล์นี้เป็นของมาร์เก็ตเพลสใด?', askDesc: 'ไม่พบคอลัมน์รายละเอียดสินค้า โปรดเลือก:',
-      info: (n, r) => `เลือก <b>${n}</b> รายการ` + (r ? ` · <span class="badge b-rep">แทนที่รายละเอียดเดิม ${r} รายการ</span>` : ''),
-      exp: (n) => `ส่งออก Excel (${n})`, exporting: 'กำลังส่งออก…', dlAgain: 'ดาวน์โหลดอีกครั้ง',
-      prog: (d, t) => `กำลังส่งออก ${d} / ${t}`, done: (ok, rep, bad) => `✓ เติมแล้ว ${ok} รายการ` + (rep ? ` · แทนที่ ${rep}` : '') + (bad ? ` · <span style="color:var(--bad)">ไม่สำเร็จ ${bad}</span>` : ''),
-      q: 'รอคิว', w: 'กำลังสร้าง…', ok: 'เติมแล้ว', okRep: 'แทนที่แล้ว', bad: 'ไม่สำเร็จ', imgs: (n) => `${n} รูป`, noSummary: 'มีเฉพาะรูป — สร้างสรุปสินค้าไม่สำเร็จ',
-      e_not_xlsx: ['ไม่ใช่ไฟล์ Excel (.xlsx)', 'กรุณาอัปโหลดไฟล์ .xlsx ที่ดาวน์โหลดจาก Seller Center ของ Shopee / Lazada โดยไม่ต้องแก้ไข'],
-      e_xls_or_locked: ['เป็นไฟล์ .xls แบบเก่า หรือไฟล์ Excel ที่ตั้งรหัสผ่านไว้', 'ใน Excel ให้ใช้ "บันทึกเป็น" → .xlsx หรือลบรหัสผ่าน แล้วอัปโหลดอีกครั้ง'],
-      e_csv: ['เป็นไฟล์ CSV / ข้อความ', 'กรุณาดาวน์โหลดไฟล์จาก Seller Center ในรูปแบบ Excel (.xlsx)'],
-      e_broken: ['ไฟล์เสียหายหรือดาวน์โหลดไม่ครบ', 'กรุณาดาวน์โหลดจาก Seller Center ใหม่แล้วอัปโหลดอีกครั้ง'],
-      e_too_big: ['ไฟล์ใหญ่เกินไป (สูงสุด {n} MB)', 'กรุณาแบ่งดาวน์โหลดสินค้าจาก Seller Center เป็นหลายไฟล์'],
-      e_notMarket: ['ไฟล์นี้ดูไม่ใช่ไฟล์ Excel แบบ bulk ของ Shopee / Lazada', 'ไม่พบคอลัมน์รหัสสินค้า SKU หรือรายละเอียดสินค้า กรุณาอัปโหลดไฟล์จากเมนูแก้ไขสินค้าแบบกลุ่ม (Mass Update / Bulk Manage) ของ Seller Center'],
-      e_noRows: ['ไม่มีสินค้าในไฟล์นี้', 'เป็นแบบฟอร์มเปล่าที่มีแต่หัวตาราง กรุณาดาวน์โหลดไฟล์ที่มีสินค้าของคุณ'],
-      e_other: ['อ่านไฟล์ไม่ได้', ''],
-      noMatchT: 'ไม่มีสินค้าที่ตรงกับสินค้าใน CLIA', noMatchB: 'ไฟล์อาจเป็นของประเทศอื่น หรือสินค้าเหล่านี้ยังไม่ได้ครอว์ลใน CLIA ไฟล์ Excel จะคงเดิม',
-      misT: (f, c) => `ไฟล์นี้ดูเหมือนไฟล์ ${f} แต่คุณเปิดจากตัวสร้าง ${c}`, misB: 'ต้องการเติมรายละเอียดแบบใด?', useAs: (c) => `เติมแบบ ${c}`,
-      upFail: 'อ่านไฟล์ไม่ได้: ', expFail: 'ส่งออกไม่สำเร็จ: ', leave: 'กำลังส่งออก Excel อยู่ ต้องการปิดหรือไม่?',
-    },
-    ko: {
-      title: '벌크 엑셀', drop: 'Shopee / Lazada 벌크 엑셀을 첨부하세요', dropSub: '.xlsx 파일을 여기에 끌어 놓거나 눌러서 고르세요',
-      reading: '엑셀을 읽고 있습니다', matching: '제품을 매칭하고 있습니다', again: '다른 파일 첨부',
-      found: (n) => `${n}개 제품이 매칭됐습니다`, of: (all) => `파일 안 ${all}개 상품 중`,
-      selAll: '전체 선택', selNone: '전체 해제', viewList: '리스트', viewGrid: '갤러리',
-      search: '모델명·상품명 검색', qRes: (n) => `검색 결과 ${n}개`, qSel: '검색 결과 선택', qDesel: '검색 결과 해제', shift: '팁: Shift + 클릭으로 범위 선택',
-      grp: { TV: 'TV', Audio: '오디오', Monitor: '모니터', Laptop: '노트북', Projector: '프로젝터', Fridge: '냉장고', Washer: '세탁기', Dryer: '건조기', Vacuum: '청소기', Dishwasher: '식기세척기', Cooking: '조리기기', Styler: '스타일러', AC: '에어컨', Purifier: '공기청정기', Dehumidifier: '제습기', Other: '기타' },
-      rep: '기존 설명 교체', skip: (n) => `매칭되지 않은 상품 ${n}개 — 엑셀에서 그대로 둡니다`,
-      rNone: 'CLIA 에 없음', rMulti: 'CLIA 제품 여러 개와 맞음', rBundle: '묶음 상품',
-      askCh: '어느 마켓 파일인가요?', askDesc: '상품 설명 열을 찾지 못했습니다. 골라 주세요:',
-      info: (n, r) => `<b>${n}</b>개 선택` + (r ? ` · <span class="badge b-rep">${r}개는 기존 설명 교체</span>` : ''),
-      exp: (n) => `엑셀 내보내기 (${n})`, exporting: '내보내는 중…', dlAgain: '다시 받기',
-      prog: (d, t) => `내보내는 중 ${d} / ${t}`, done: (ok, rep, bad) => `✓ ${ok}개 채움` + (rep ? ` · ${rep}개 교체` : '') + (bad ? ` · <span style="color:var(--bad)">${bad}개 실패</span>` : ''),
-      q: '대기', w: '만드는 중…', ok: '채움', okRep: '교체함', bad: '실패', imgs: (n) => `이미지 ${n}장`, noSummary: '요약을 만들지 못해 이미지만 넣음',
-      e_not_xlsx: ['엑셀(.xlsx) 파일이 아닙니다', 'Shopee·Lazada 셀러 센터에서 내려받은 .xlsx 파일을 그대로 올려 주세요.'],
-      e_xls_or_locked: ['예전 형식(.xls)이거나 비밀번호가 걸린 엑셀입니다', '엑셀에서 "다른 이름으로 저장 → .xlsx" 로 저장하거나 비밀번호를 풀고 다시 올려 주세요.'],
-      e_csv: ['CSV·텍스트 파일입니다', '셀러 센터에서 엑셀(.xlsx) 형식으로 내려받아 주세요.'],
-      e_broken: ['파일이 손상됐거나 끝까지 받지 못했습니다', '셀러 센터에서 다시 내려받아 올려 주세요.'],
-      e_too_big: ['파일이 너무 큽니다 (최대 {n}MB)', '셀러 센터에서 상품을 나눠 내려받아 주세요.'],
-      e_notMarket: ['Shopee·Lazada 벌크 엑셀이 아닌 것 같습니다', '상품 ID·SKU·상품 설명 열을 찾지 못했습니다. 셀러 센터의 대량 수정(Mass Update / Bulk Manage)에서 받은 파일을 올려 주세요.'],
-      e_noRows: ['파일에 상품이 없습니다', '머리글만 있는 빈 양식입니다. 상품이 들어간 파일을 내려받아 올려 주세요.'],
-      e_other: ['파일을 읽지 못했습니다', ''],
-      noMatchT: 'CLIA 제품과 매칭되는 상품이 없습니다', noMatchB: '다른 나라 파일이거나, 이 상품들이 아직 CLIA 에 크롤되지 않았을 수 있습니다. 엑셀은 그대로입니다.',
-      misT: (f, c) => `이 파일은 ${f} 파일로 보입니다 (지금 연 빌더: ${c})`, misB: '어느 방식으로 설명을 채울까요?', useAs: (c) => `${c} 방식으로 채우기`,
-      upFail: '파일을 읽지 못했습니다: ', expFail: '내보내기 실패: ', leave: '엑셀을 내보내는 중입니다. 닫을까요?',
-    },
-    de: {
-      title: 'Bulk-Excel', drop: 'Shopee-/Lazada-Bulk-Excel anhängen', dropSub: '.xlsx-Datei hier ablegen oder zum Auswählen klicken',
-      reading: 'Excel wird gelesen', matching: 'Produkte werden zugeordnet', again: 'Andere Datei anhängen',
-      found: (n) => `${n} Produkte zugeordnet`, of: (all) => `von ${all} Produkten in der Datei`,
-      selAll: 'Alle auswählen', selNone: 'Alle abwählen', viewList: 'Liste', viewGrid: 'Galerie',
-      search: 'Modell oder Produktname suchen', qRes: (n) => `${n} Treffer`, qSel: 'Treffer auswählen', qDesel: 'Treffer abwählen', shift: 'Tipp: Umschalt + Klick wählt einen Bereich',
-      grp: { TV: 'TV', Audio: 'Audio', Monitor: 'Monitor', Laptop: 'Laptop', Projector: 'Beamer', Fridge: 'Kühlschrank', Washer: 'Waschmaschine', Dryer: 'Trockner', Vacuum: 'Staubsauger', Dishwasher: 'Geschirrspüler', Cooking: 'Kochen', Styler: 'Styler', AC: 'Klimaanlage', Purifier: 'Luftreiniger', Dehumidifier: 'Luftentfeuchter', Other: 'Sonstiges' },
-      rep: 'Ersetzt aktuelle Beschreibung', skip: (n) => `${n} Produkte nicht zugeordnet — sie bleiben unverändert`,
-      rNone: 'nicht in CLIA', rMulti: 'mehrere CLIA-Produkte', rBundle: 'Set',
-      askCh: 'Für welchen Marktplatz ist diese Datei?', askDesc: 'Spalte für die Produktbeschreibung nicht gefunden. Bitte wählen:',
-      info: (n, r) => `<b>${n}</b> ausgewählt` + (r ? ` · <span class="badge b-rep">${r} ersetzen eine Beschreibung</span>` : ''),
-      exp: (n) => `Excel exportieren (${n})`, exporting: 'Exportiere…', dlAgain: 'Erneut herunterladen',
-      prog: (d, t) => `Exportiere ${d} / ${t}`, done: (ok, rep, bad) => `✓ ${ok} gefüllt` + (rep ? ` · ${rep} ersetzt` : '') + (bad ? ` · <span style="color:var(--bad)">${bad} fehlgeschlagen</span>` : ''),
-      q: 'Wartet', w: 'Wird erstellt…', ok: 'Gefüllt', okRep: 'Ersetzt', bad: 'Fehler', imgs: (n) => `${n} Bilder`, noSummary: 'Nur Bilder — Zusammenfassung fehlgeschlagen',
-      e_not_xlsx: ['Keine Excel-Datei (.xlsx)', 'Laden Sie die .xlsx-Datei aus dem Shopee-/Lazada-Seller-Center unverändert hoch.'],
-      e_xls_or_locked: ['Alte .xls-Datei oder passwortgeschützte Excel-Datei', 'In Excel „Speichern unter → .xlsx“ wählen oder das Passwort entfernen und erneut hochladen.'],
-      e_csv: ['CSV-/Textdatei', 'Laden Sie die Datei im Seller-Center im Excel-Format (.xlsx) herunter.'],
-      e_broken: ['Die Datei ist beschädigt oder unvollständig', 'Laden Sie sie im Seller-Center erneut herunter.'],
-      e_too_big: ['Die Datei ist zu groß (max. {n} MB)', 'Laden Sie die Produkte in kleineren Teilen herunter.'],
-      e_notMarket: ['Keine Shopee-/Lazada-Bulk-Excel', 'Keine Spalte für Produkt-ID, SKU oder Beschreibung gefunden. Laden Sie die Datei aus der Massenbearbeitung des Seller-Centers hoch.'],
-      e_noRows: ['Die Datei enthält keine Produkte', 'Leere Vorlage nur mit Kopfzeilen. Laden Sie eine Datei mit Ihren Produkten herunter.'],
-      e_other: ['Datei konnte nicht gelesen werden', ''],
-      noMatchT: 'Kein Produkt passt zu einem CLIA-Produkt', noMatchB: 'Die Datei ist evtl. für ein anderes Land, oder die Produkte sind noch nicht in CLIA gecrawlt. Die Excel-Datei bleibt unverändert.',
-      misT: (f, c) => `Diese Datei sieht wie eine ${f}-Datei aus (geöffneter Builder: ${c}).`, misB: 'Wie soll die Beschreibung gefüllt werden?', useAs: (c) => `Als ${c} füllen`,
-      upFail: 'Datei konnte nicht gelesen werden: ', expFail: 'Export fehlgeschlagen: ', leave: 'Der Export läuft noch. Trotzdem schließen?',
-    },
-    ar: {
-      title: 'Excel مجمّع', drop: 'أرفق ملف Excel المجمّع من Shopee / Lazada', dropSub: 'أسقط ملف ‎.xlsx هنا أو انقر للاختيار',
-      reading: 'جارٍ قراءة الملف', matching: 'جارٍ مطابقة المنتجات', again: 'إرفاق ملف آخر',
-      found: (n) => `تمت مطابقة ${n} منتجات`, of: (all) => `من أصل ${all} منتجاً في الملف`,
-      selAll: 'تحديد الكل', selNone: 'إلغاء تحديد الكل', viewList: 'قائمة', viewGrid: 'معرض',
-      search: 'ابحث بالطراز أو اسم المنتج', qRes: (n) => `${n} نتائج`, qSel: 'تحديد النتائج', qDesel: 'إلغاء تحديد النتائج', shift: 'تلميح: Shift + نقرة لتحديد نطاق',
-      grp: { TV: 'تلفزيون', Audio: 'الصوتيات', Monitor: 'شاشة', Laptop: 'لابتوب', Projector: 'بروجكتور', Fridge: 'ثلاجة', Washer: 'غسالة', Dryer: 'مجفف', Vacuum: 'مكنسة', Dishwasher: 'غسالة صحون', Cooking: 'الطهي', Styler: 'ستايلر', AC: 'مكيف', Purifier: 'منقي هواء', Dehumidifier: 'مزيل رطوبة', Other: 'أخرى' },
-      rep: 'يستبدل الوصف الحالي', skip: (n) => `لم تتم مطابقة ${n} منتجات — ستبقى كما هي`,
-      rNone: 'غير موجود في CLIA', rMulti: 'عدة منتجات في CLIA', rBundle: 'مجموعة',
-      askCh: 'لأي متجر هذا الملف؟', askDesc: 'لم يتم العثور على عمود وصف المنتج. اختره:',
-      info: (n, r) => `تم تحديد <b>${n}</b>` + (r ? ` · <span class="badge b-rep">${r} تستبدل وصفاً حالياً</span>` : ''),
-      exp: (n) => `تصدير Excel ‏(${n})`, exporting: 'جارٍ التصدير…', dlAgain: 'تنزيل مجدداً',
-      prog: (d, t) => `جارٍ التصدير ${d} / ${t}`, done: (ok, rep, bad) => `✓ تم ملء ${ok}` + (rep ? ` · استبدال ${rep}` : '') + (bad ? ` · <span style="color:var(--bad)">فشل ${bad}</span>` : ''),
-      q: 'في الانتظار', w: 'جارٍ الإنشاء…', ok: 'تم الملء', okRep: 'تم الاستبدال', bad: 'فشل', imgs: (n) => `${n} صور`, noSummary: 'صور فقط — تعذّر إنشاء الملخص',
-      e_not_xlsx: ['هذا ليس ملف Excel ‏(.xlsx)', 'ارفع ملف ‎.xlsx الذي نزّلته من مركز البائعين في Shopee / Lazada كما هو.'],
-      e_xls_or_locked: ['ملف ‎.xls قديم أو ملف Excel محمي بكلمة مرور', 'في Excel استخدم "حفظ باسم ← ‎.xlsx" أو أزل كلمة المرور ثم ارفعه مجدداً.'],
-      e_csv: ['هذا ملف CSV / نصي', 'نزّل الملف من مركز البائعين بصيغة Excel ‏(.xlsx).'],
-      e_broken: ['الملف تالف أو لم يكتمل تنزيله', 'نزّله مجدداً من مركز البائعين ثم ارفعه.'],
-      e_too_big: ['الملف كبير جداً (الحد {n} ميغابايت)', 'نزّل المنتجات على أجزاء أصغر.'],
-      e_notMarket: ['لا يبدو أن هذا ملف Excel مجمّع من Shopee / Lazada', 'لم يتم العثور على عمود معرّف المنتج أو SKU أو الوصف. ارفع الملف من التعديل المجمّع في مركز البائعين.'],
-      e_noRows: ['لا توجد منتجات في هذا الملف', 'قالب فارغ بالعناوين فقط. نزّل ملفاً يحتوي على منتجاتك.'],
-      e_other: ['تعذّرت قراءة الملف', ''],
-      noMatchT: 'لا يوجد منتج يطابق منتجات CLIA', noMatchB: 'قد يكون الملف لدولة أخرى، أو لم يتم زحف هذه المنتجات في CLIA بعد. يبقى الملف كما هو.',
-      misT: (f, c) => `يبدو هذا الملف ملف ${f} (الأداة المفتوحة: ${c})`, misB: 'كيف تريد ملء الوصف؟', useAs: (c) => `الملء كـ ${c}`,
-      upFail: 'تعذّرت قراءة الملف: ', expFail: 'فشل التصدير: ', leave: 'لا يزال التصدير جارياً. الإغلاق على أي حال؟',
-    },
-  };
+  const TX = window.BULK_TX;
   const qs = new URLSearchParams(location.search);
   const L = TX[qs.get('lang')] ? qs.get('lang') : 'en';
   const T = TX[L];
@@ -143,28 +12,33 @@
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const store = { get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (_) { return null; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} } };
+  const api = async (p, body) => {
+    const r = await fetch(p, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {});
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw Object.assign(new Error(d.error || 'HTTP ' + r.status), { code: d.code });
+    return d;
+  };
   const EMBED = qs.get('embed') === '1';
-  const home = String(qs.get('corp') || '').toLowerCase();
+  let home = String(qs.get('corp') || '').toLowerCase();
   const DIVS = ['MS', 'HS', 'ES'];
-  // 사업부별 제품군 순서 (허브 목록과 같음)
   const GRPS = { MS: ['TV', 'Audio', 'Monitor', 'Laptop', 'Projector', 'Other'], HS: ['Fridge', 'Washer', 'Dryer', 'Vacuum', 'Dishwasher', 'Cooking', 'Styler', 'Other'], ES: ['AC', 'Purifier', 'Dehumidifier'] };
   const grpName = (g) => (T.grp || TX.en.grp)[g] || g;
-
-  const CH0 = ['shopee', 'lazada'].includes(qs.get('channel')) ? qs.get('channel') : '';   // 빌더가 넘긴 채널
+  const CH0 = ['shopee', 'lazada'].includes(qs.get('channel')) ? qs.get('channel') : '';
   const chName = (c) => (c === 'lazada' ? 'Lazada' : 'Shopee');
-  const S = { q: '', last: null, mis: '', data: null, channel: CH0, ok: [], skip: [], sel: new Set(), job: null, busy: false };
+  const S = { tab: 'all', q: '', last: null, mis: '', data: null, channel: CH0, ok: [], reg: [], skip: [], regOn: false, own: {}, sel: new Set(), force: new Set(), ack: new Set(), job: null, busy: false, cfg: {} };
+  const act = () => (S.regOn ? S.ok.concat(S.reg) : S.ok);
 
   document.documentElement.lang = L;
   document.documentElement.dir = L === 'ar' ? 'rtl' : 'ltr';
   document.querySelectorAll('[data-i]').forEach((el) => { el.textContent = t(el.dataset.i); });
-  function chTag() { $('chTag').textContent = S.channel === 'lazada' ? 'Lazada' : 'Shopee'; $('chTag').classList.toggle('hidden', !S.channel); }
+  function chTag() { $('chTag').textContent = chName(S.channel); $('chTag').classList.toggle('hidden', !S.channel); }
   chTag();
+  api('/api/v1/bulk/config').then((c) => { S.cfg = c; if (S.data) refresh(); }).catch(() => {});
   $('close').onclick = () => {
-    if (S.busy && !confirm(t('leave'))) return;
-    if (EMBED && parent !== window) parent.postMessage('clia-bulk-close', '*');
+    if (EMBED && parent !== window) parent.postMessage('clia-bulk-close', '*');   // 작업은 서버에서 계속된다
     else if (history.length > 1) history.back(); else location.href = '/clia/';
   };
-  window.addEventListener('beforeunload', (e) => { if (S.busy) { e.preventDefault(); e.returnValue = ''; } });
   const show = (id) => ['s1', 's2', 's3'].forEach((x) => $(x).classList.toggle('hidden', x !== id));
 
   // ── 1. 첨부 ──
@@ -176,12 +50,9 @@
   file.onchange = () => { if (file.files[0]) attach(file.files[0]); file.value = ''; };
   $('again').onclick = () => { if (!S.busy) file.click(); };
 
-  // ── 2. 인식 → 매칭 (서버는 한 번에 하지만 두 단계가 보이게 최소 시간을 둔다) ──
-  // 잘못된 파일: 첨부 화면으로 돌아가 무엇이 잘못됐고 어떻게 하면 되는지 사용자 언어로 보여 준다
   function fail(code, extra) {
     const [title, body] = T['e_' + code] || TX.en['e_' + code] || T.e_other;
     show('s1');
-    $('foot').style.display = 'none';
     $('et').textContent = title.replace('{n}', (extra && extra.maxMb) || 40);
     $('eb').textContent = body || (extra && extra.error) || '';
     $('ef').textContent = (extra && extra.fileName) || '';
@@ -189,13 +60,11 @@
   }
   async function attach(f) {
     if (S.busy) return;
-    $('ecard').classList.add('hidden');
-    $('pfile').textContent = f.name;
-    $('pmsg').textContent = t('reading');
-    $('foot').style.display = 'none';
+    $('ecard').classList.add('hidden'); $('resume').classList.add('hidden');
+    $('pfile').textContent = f.name; $('pmsg').textContent = t('reading');
     show('s2');
     const t0 = Date.now();
-    const req = fetch('/api/v1/bulk/upload?name=' + encodeURIComponent(f.name), { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: f })
+    const req = fetch(`/api/v1/bulk/upload?name=${encodeURIComponent(f.name)}&country=${encodeURIComponent(home)}`, { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: f })
       .then(async (r) => {
         const d = await r.json().catch(() => ({ code: r.status === 413 ? 'too_big' : 'other' }));
         if (!r.ok) throw Object.assign(new Error(d.error || 'HTTP ' + r.status), { code: d.code || 'other', maxMb: d.maxMb });
@@ -209,154 +78,229 @@
       await sleep(Math.max(0, 2000 - (Date.now() - t0)));
       if (!d.looksLikeMarket) return fail('notMarket', { fileName: f.name });
       if (!d.rows.length) return fail('noRows', { fileName: f.name });
-      // 빌더 채널과 파일이 다르면(예: Shopee 화면에 Lazada 파일) 고를 때까지 내보내기를 막는다
       S.mis = CH0 && d.channel && d.channel !== CH0 ? d.channel : '';
       S.channel = S.mis ? '' : (CH0 || d.channel || '');
       chTag();
-      S.job = null; S.q = ''; S.last = null; $('q').value = '';
+      Object.assign(S, { job: null, q: '', last: null, regOn: false, own: {}, force: new Set(), ack: new Set() });
+      $('q').value = '';
       setData(d, true);
-    } catch (e) {
-      fail(e.code || 'other', { maxMb: e.maxMb, error: e.message, fileName: f.name });
-    }
+    } catch (e) { fail(e.code || 'other', { maxMb: e.maxMb, error: e.message, fileName: f.name }); }
   }
 
-  // 매칭: CLIA 제품 하나에 딱 맞는 행만 (법인 나라 제품을 먼저 본다). 나머지는 엑셀에서 그대로
+  // 행 나누기: CLIA 제품 하나에 딱 맞음(ok) · 같은 나라 LG.com 에서 찾음(reg, 등록 후보) · 그 밖(skip)
+  const newP = (r, lg) => ({ slug: null, url: lg.url, model: lg.model, dv: lg.dv, grp: lg.grp, title: r.name, thumb: '', isNew: true, alts: lg.alts || 0, fuzzy: !!lg.fuzzy });
   function setData(d, fresh) {
     S.data = d;
-    S.ok = []; S.skip = [];
+    if (!home) {   // 법인 나라를 모르면 매칭된 제품이 가장 많은 나라
+      const cnt = {};
+      d.rows.forEach((r) => r.candidates.forEach((s) => { const c = d.products[s] && d.products[s].country; if (c) cnt[c] = (cnt[c] || 0) + 1; }));
+      home = (Object.entries(cnt).sort((a, b) => b[1] - a[1])[0] || [''])[0];
+    }
+    S.ok = []; S.reg = []; S.skip = [];
     for (const r of d.rows) {
       let c = r.candidates.map((s) => d.products[s]).filter(Boolean);
-      if (home && c.some((p) => p.country === home)) c = c.filter((p) => p.country === home);
+      if (home) c = c.filter((p) => p.country === home);
+      const own = S.own[r.row];
       if (r.bundle) S.skip.push({ ...r, why: 'rBundle' });
-      else if (!c.length) S.skip.push({ ...r, why: 'rNone' });
+      else if (c.length === 1) S.ok.push({ ...r, p: c[0], kind: 'clia' });
       else if (c.length > 1) S.skip.push({ ...r, why: 'rMulti' });
-      else S.ok.push({ ...r, p: c[0] });
+      else if (own || r.lg) S.reg.push({ ...r, kind: 'new', p: newP(r, own || r.lg) });
+      else S.skip.push({ ...r, why: 'rNone' });
     }
-    if (fresh) S.sel = new Set(S.ok.map((r) => r.row));
+    if (fresh) S.sel = new Set(S.ok.map((r) => r.row).concat(S.reg.map((r) => r.row)));
     show('s3');
     render(fresh);
   }
+
   $('descSel').onchange = async () => {
     const v = +$('descSel').value;
     if (!v) return;
-    const r = await fetch('/api/v1/bulk/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: S.data.id, sheet: S.data.sheet, cols: { desc: v } }) });
-    const d = await r.json();
-    if (r.ok) setData(d, false); else alert(d.error || 'HTTP ' + r.status);
+    try { setData(await api('/api/v1/bulk/analyze', { id: S.data.id, sheet: S.data.sheet, cols: { desc: v }, country: home }), false); } catch (e) { alert(e.message); }
   };
   $('askMis').onclick = (e) => { const c = e.target.closest('button'); if (c && c.dataset.ch && !S.busy) { S.channel = c.dataset.ch; chTag(); render(); } };
   $('askCh').onclick = (e) => { const c = e.target.dataset && e.target.dataset.ch; if (c) { S.channel = c; chTag(); render(); } };
 
-  // ── 3. 목록 ──
+  // ── 확인 필요 ──
+  const itemOf = (row) => S.job && S.job.items && S.job.items.find((x) => x.row === row);
+  const openFlags = (row) => ((itemOf(row) || {}).flags || []).filter((f) => f.sev !== 'info' && !S.ack.has(`${row}:${f.code}`));
+  const flagText = (f) => ({ crawl: () => t('f_crawl'), content: () => t('f_content'), qa: () => t('f_qa', f.texts, f.images), frame: () => t('f_frame', f.n),
+    over12: () => t('f_over12', f.all), summary: () => t('f_summary'), fuzzy: () => t('f_fuzzy'), alts: () => t('f_alts', f.n) }[f.code] || (() => f.code))();
+  const builderUrl = (u) => `/shopee-lazada-pdp/index.html?url=${encodeURIComponent(u || '')}&channel=${S.channel || 'shopee'}&lang=${L}`;
+  const reviewRows = () => act().filter((r) => openFlags(r.row).length);
+  function flagHtml(r) {
+    const it = itemOf(r.row);
+    const fl = openFlags(r.row);
+    let h = ((it || {}).flags || []).filter((f) => f.sev === 'info').map((f) => `<span class="note">${esc(flagText(f))}</span>`).join('');
+    if (!fl.length) return h;
+    return h + `<div class="fl">` + fl.map((f) => `<div class="fx"><span>${esc(flagText(f))}</span>` +
+      (f.code === 'frame' ? `<button class="mini" data-a="frame" data-slug="${esc(it.slug)}">${esc(t('a_frame'))}</button>` : '') +
+      (f.code === 'crawl' || f.code === 'content' ? `<button class="mini" data-a="retry" data-row="${r.row}" data-code="${f.code}">${esc(t('a_retry'))}</button>` : '') +
+      (['qa', 'over12', 'summary', 'fuzzy'].includes(f.code) ? `<a class="mini" target="_blank" rel="noopener" href="${esc(builderUrl(r.p.url))}">${esc(t('a_builder'))}</a>` : '') +
+      (f.sev === 'warn' ? `<button class="mini" data-a="ack" data-row="${r.row}" data-code="${f.code}">${esc(t('a_ack'))}</button>` : '') +
+      `</div>`).join('') + `</div>`;
+  }
   function itemStatus(r) {
-    const it = S.job && S.job.items && S.job.items.find((x) => x.row === r.row);
-    if (!it) return r.descLen > 0 ? `<span class="badge b-rep">${esc(t('rep'))}</span>` : '';
-    if (it.status === 'queued') return `<span class="badge b-q">${esc(t('q'))}</span>`;
-    if (it.status === 'working') return `<span class="badge b-run">${esc(t('w'))}</span>`;
-    if (it.status === 'failed') return `<span class="badge b-bad">${esc(t('bad'))}</span><span class="note">${esc(it.error)}</span>`;
-    return `<span class="badge ${it.prevLen > 0 ? 'b-rep' : 'b-ok'}">${esc(it.prevLen > 0 ? t('okRep') : t('ok'))}</span><span class="note">${esc(t('imgs', it.images))}</span>` +
-      (it.summaryErr ? `<span class="note" style="color:var(--warn)" title="${esc(it.summaryErr)}">${esc(t('noSummary'))}</span>` : '');
+    const it = itemOf(r.row);
+    let h = '';
+    if (S.force.has(r.row)) h = `<span class="note">${esc(t('a_retryNote'))}</span>`;
+    else if (!it) h = r.descLen > 0 ? `<span class="badge b-rep">${esc(t('rep'))}</span>` : '';
+    else if (it.status === 'queued') h = `<span class="badge b-q">${esc(it.register && !it.crawled ? t('st_regq') : t('q'))}</span>`;
+    else if (it.status === 'crawling') h = `<span class="badge b-run">${esc(t('st_crawl'))}</span>`;
+    else if (it.status === 'working') h = `<span class="badge b-run">${esc(t('w'))}</span>`;
+    else if (it.status === 'failed') h = `<span class="badge b-bad">${esc(t('bad'))}</span>`;
+    else h = `<span class="badge ${it.prevLen > 0 ? 'b-rep' : 'b-ok'}">${esc(it.prevLen > 0 ? t('okRep') : t('ok'))}</span><span class="note">${esc(t('imgs', it.images))}</span>`;
+    return h + flagHtml(r);
   }
 
+  // ── 3. 목록 ──
+  function estMin(nNew, nAll) {
+    const c = S.cfg.crawlConc || 2, sc = S.cfg.secPerCrawl || 55, si = S.cfg.secPerItem || 15;
+    return Math.max(1, Math.round((nNew * sc / c + nAll * si / 2) / 60));
+  }
   function render(animate) {
     const d = S.data;
     $('askCh').classList.toggle('hidden', !!S.channel || !!S.mis);
     $('askMis').classList.toggle('hidden', !S.mis || !!S.channel);
     if (S.mis) {
-      $('misT').textContent = t('misT', chName(S.mis), chName(CH0));
-      $('misB').textContent = t('misB');
+      $('misT').textContent = t('misT', chName(S.mis), chName(CH0)); $('misB').textContent = t('misB');
       $('misA').textContent = t('useAs', chName(S.mis)); $('misA').dataset.ch = S.mis;
       $('misB2').textContent = t('useAs', chName(CH0)); $('misB2').dataset.ch = CH0;
     }
-    $('noMatch').classList.toggle('hidden', S.ok.length > 0);
+    const rows = act();
+    // CLIA 에 없는 상품 → 같은 나라 LG.com 에서 찾은 것을 등록할지
+    const notIn = S.reg.length + S.skip.filter((r) => r.why === 'rNone').length;
+    $('regCard').classList.toggle('hidden', !notIn || !d.site);
+    if (notIn && d.site) {
+      $('regT').textContent = t('regT', notIn, S.reg.length, d.site);
+      $('regSw').checked = S.regOn; $('regSw').disabled = S.busy || !S.reg.length;
+      $('regL').textContent = t('regSw'); $('regN').textContent = t('regNote', d.site);
+    }
+    $('noMatch').classList.toggle('hidden', rows.length > 0 || S.reg.length > 0);
     $('noMatchT').textContent = t('noMatchT'); $('noMatchB').textContent = t('noMatchB');
-    ['ctl', 'ctl2'].forEach((id) => $(id).classList.toggle('hidden', !S.ok.length));
-    document.querySelector('.srch').classList.toggle('hidden', !S.ok.length);
-    if (!S.ok.length) $('skip').open = true;
     $('askDesc').classList.toggle('hidden', !!d.cols.desc);
     if (!d.cols.desc) $('descSel').innerHTML = '<option value="">—</option>' + d.columns.map((c) => `<option value="${c.col}">${c.letter} · ${esc(c.label)}</option>`).join('');
-    $('rn').textContent = t('found', S.ok.length);
-    $('rf').textContent = t('of', d.rows.length);
-    $('list').innerHTML = S.ok.map((r, i) => `<label class="item" style="${animate ? `animation-delay:${Math.min(i, 30) * 45}ms` : 'animation:none'}">` +
+    $('pFile').textContent = d.fileName || '';
+    $('pMatch').textContent = t('found', S.ok.length) + ' · ' + t('of', d.rows.length);
+    const rv = new Set(reviewRows().map((r) => r.row));   // 확인 필요는 맨 위
+    const ordered = rows.slice().sort((a, b) => (rv.has(b.row) - rv.has(a.row)));
+    $('list').innerHTML = ordered.map((r, i) => `<label class="item${rv.has(r.row) ? ' rv' : ''}" style="${animate ? `animation-delay:${Math.min(i, 30) * 45}ms` : 'animation:none'}">` +
       `<input type="checkbox" data-row="${r.row}">` +
-      `<img src="${esc(r.p.thumb || '')}" alt="" loading="lazy">` +
-      `<div style="min-width:0"><div class="m">${esc(r.p.model)}<span class="dv">${esc(r.p.dv || '')} · ${esc(grpName(r.p.grp))}</span></div><div class="s">${esc(r.name || r.p.title)}</div></div>` +
-      `<div class="r" data-st="${r.row}"></div></label>`).join('');
-    $('list').classList.toggle('hidden', !S.ok.length);
-    $('skip').classList.toggle('hidden', !S.skip.length);
+      ((r.p.thumb || (itemOf(r.row) || {}).thumb) ? `<img src="${esc(r.p.thumb || itemOf(r.row).thumb)}" alt="" loading="lazy">` : `<div class="ph">${esc(grpName(r.p.grp))}</div>`) +
+      `<div style="min-width:0"><div class="m">${rv.has(r.row) ? `<span class="badge b-bad rvt">${esc(t('rvTag'))}</span>` : ''}${esc(r.p.model)}<span class="dv">${esc(r.p.dv || '')} · ${esc(grpName(r.p.grp))}</span>${r.p.isNew ? `<span class="badge b-new">${esc(t('newTag'))}</span>` : ''}</div>` +
+      `<div class="s">${esc(r.name || r.p.title)}</div></div><div class="r"></div></label>`).join('');
+    if (!rows.length && !S.reg.length && S.skip.length) S.tab = 'skip';
     $('skipSum').textContent = t('skip', S.skip.length);
-    $('skipList').innerHTML = S.skip.map((r) => `<li>${esc(r.parentSku || r.sku || '—')} · ${esc(r.name)} <span class="badge b-q">${esc(t(r.why))}</span></li>`).join('');
-    $('foot').style.display = S.ok.length ? 'block' : 'none';   // 매칭 0개면 내보낼 것이 없다
+    $('skipList').innerHTML = S.skip.map((r) => `<li>${esc(r.parentSku || r.sku || '—')} · ${esc(r.name)} <span class="badge b-q">${esc(r.why === 'rNone' && d.site ? t('notFound') : t(r.why))}</span>` +
+      (r.why === 'rNone' && d.site ? `<span class="urlin"><input type="url" data-urow="${r.row}" placeholder="${esc(t('urlPh'))}"><button class="mini" data-uadd="${r.row}">${esc(t('urlAdd'))}</button><span class="err2" data-uerr="${r.row}"></span></span>` : '') + `</li>`).join('');
     refresh();
   }
 
-  // 선택·상태만 다시 그린다 (목록 애니메이션은 처음 한 번)
   function refresh() {
-    const n = S.ok.length;
-    const cnt = (dv) => S.ok.filter((r) => r.p.dv === dv);
-    const allOf = (rows) => rows.length > 0 && rows.every((r) => S.sel.has(r.row));
-    // 선택 버튼: 전체 · 사업부 · 제품군 — 누르면 그 묶음을 모두 선택(이미 모두 선택이면 해제). 일부만 선택된 묶음은 반쯤 칠한 모양
-    const pill = (attr, label, rows) => {
-      const k = rows.filter((r) => S.sel.has(r.row)).length;
-      const st = k === 0 ? '' : (k === rows.length ? 'on' : 'part');
-      return `<button class="pill ${st}" ${attr}>${esc(label)}<b>${k ? k + '/' : ''}${rows.length}</b></button>`;
-    };
-    const ofDv = (dv) => S.ok.filter((r) => r.p.dv === dv);
-    const ofGrp = (dv, g) => S.ok.filter((r) => r.p.dv === dv && r.p.grp === g);
-    $('ctl').innerHTML =
-      `<button class="pill ${allOf(S.ok) ? 'on' : ''}" data-act="all">${esc(t('selAll'))}<b>${n}</b></button>` +
-      `<button class="pill" data-act="none">${esc(t('selNone'))}</button><span class="div"></span>` +
-      DIVS.filter((dv) => ofDv(dv).length).map((dv) => pill(`data-dv="${dv}"`, dv, ofDv(dv))).join('');
-    $('ctl2').innerHTML = DIVS.filter((dv) => ofDv(dv).length).map((dv) =>
-      GRPS[dv].filter((g) => ofGrp(dv, g).length).map((g) => pill(`data-dv="${dv}" data-grp="${g}"`, grpName(g), ofGrp(dv, g))).join('')).filter(Boolean).join('<span class="div"></span>');
-    [...$('ctl').querySelectorAll('button'), ...$('ctl2').querySelectorAll('button'), ...$('qAct').querySelectorAll('button')].forEach((b) => { b.disabled = S.busy; });
-    // 검색: 맞는 상품만 보이고, 결과를 한꺼번에 선택·해제
+    const rows = act();
+    const nSel = (rs) => rs.filter((r) => S.sel.has(r.row)).length;
+    const cbOf = (k, n) => (k === 0 ? '' : (k === n ? 'on' : 'part'));
+    const ariaOf = (k, n) => (k === 0 ? 'false' : (k === n ? 'true' : 'mixed'));
+    const ofDv = (dv) => rows.filter((r) => r.p.dv === dv);
+    const ofGrp = (dv, g) => rows.filter((r) => r.p.dv === dv && r.p.grp === g);
     const hit = (r) => !S.q || [r.p.model, r.name, r.sku, r.parentSku, r.p.title, r.id].join(' ').toLowerCase().includes(S.q);
-    const hits = S.ok.filter(hit);
-    $('qAct').classList.toggle('hidden', !S.q);
-    $('qN').textContent = t('qRes', hits.length);
+    const chev = '<svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
+    const ddLabel = (key, v) => `<span class="k">${esc(t(key))}</span><span class="v">${esc(v)}</span>${chev}`;
+    // 본부: 하나 또는 여러 개 — 고르면 그 본부 상품이 선택된다
+    const dvs = DIVS.filter((dv) => ofDv(dv).length);
+    const dvK = Object.fromEntries(dvs.map((dv) => [dv, nSel(ofDv(dv))]));
+    const dvOn = dvs.filter((dv) => dvK[dv] > 0);
+    $('dvBtn').innerHTML = ddLabel('dvBtn', dvs.every((dv) => dvK[dv] === ofDv(dv).length) ? t('ddAll') : (!dvOn.length ? t('ddNone') : dvOn.join(', ')));
+    $('dvPop').innerHTML = dvs.map((dv) => { const n = ofDv(dv).length;
+      return `<button class="opt" role="menuitemcheckbox" aria-checked="${ariaOf(dvK[dv], n)}" data-dv="${dv}"${S.busy ? ' disabled' : ''}><span class="cb ${cbOf(dvK[dv], n)}"></span>${esc(dv)}<span class="n">${dvK[dv]}/${n}</span></button>`; }).join('');
+    // 제품군: 목록 전체를 보여 주고, 선택한 본부의 제품군만 고를 수 있다 (나머지는 회색)
+    const gs = dvs.flatMap((dv) => GRPS[dv].filter((g) => ofGrp(dv, g).length).map((g) => [dv, g]));
+    const gK = gs.map(([dv, g]) => nSel(ofGrp(dv, g)));
+    $('grpBtn').innerHTML = ddLabel('grpBtn', gs.every(([dv, g], i) => gK[i] === ofGrp(dv, g).length) ? t('ddAll') : (gK.some((k) => k) ? t('ddN', gK.filter((k) => k).length) : t('ddNone')));
+    $('ctl2').innerHTML = `<div class="hint">${esc(t('grpHint'))}</div>` + dvs.map((dv) => `<div class="gh">${esc(dv)}</div>` +
+      gs.map(([d, g], i) => [d, g, i]).filter(([d]) => d === dv).map(([d, g, i]) => { const n = ofGrp(d, g).length;
+        return `<button class="opt" role="menuitemcheckbox" aria-checked="${ariaOf(gK[i], n)}" data-dv="${d}" data-grp="${g}"${S.busy || !dvK[d] ? ' disabled' : ''}><span class="cb ${cbOf(gK[i], n)}"></span>${esc(grpName(g))}<span class="n">${gK[i]}/${n}</span></button>`; }).join('')).join('');
+    $('dvBtn').disabled = $('grpBtn').disabled = S.busy;
+    // 탭: 전체 · 확인 필요 · 새로 등록 · 제외 — 확인 필요는 빨간 숫자
+    const rvSet = new Set(reviewRows().map((r) => r.row));
+    const rvN = rvSet.size;
+    const newN = S.regOn ? S.reg.length : 0;
+    if ((S.tab === 'review' && !rvN) || (S.tab === 'new' && !newN) || (S.tab === 'skip' && !S.skip.length)) S.tab = 'all';
+    const tabs = [['all', t('tabAll'), rows.length, ''], ['review', t('tabReview'), rvN, 'rv'], ['new', t('tabNew'), newN, ''], ['skip', t('tabSkip'), S.skip.length, '']]
+      .filter(([k, , n]) => k === 'all' || n);
+    $('tabs').innerHTML = tabs.map(([k, label, n, cls]) => `<button class="tab ${cls}${S.tab === k ? ' on' : ''}" role="tab" aria-selected="${S.tab === k}" data-tab="${k}">${esc(label)}<b>${n}</b></button>`).join('');
+    const inTab = (r) => S.tab === 'all' || (S.tab === 'review' && rvSet.has(r.row)) || (S.tab === 'new' && r.kind === 'new');
+    // 전체 선택 ↔ 해제: 버튼 하나 (지금 보이는 상품 — 탭 · 검색 결과 — 에만)
+    const vis = rows.filter((r) => hit(r) && inTab(r)), vk = nSel(vis);
+    $('selCb').className = 'cb ' + cbOf(vk, vis.length);
+    $('selL').textContent = S.q ? t('qRes', vis.length) : t('selAll');
+    $('selN').textContent = `${vk}/${vis.length}`;
+    $('selAll').setAttribute('aria-pressed', String(vis.length > 0 && vk === vis.length));
+    $('selAll').disabled = S.busy || !vis.length;
     document.querySelectorAll('#list .item').forEach((el) => {
       const row = +el.querySelector('input').dataset.row;
-      const r = S.ok.find((x) => x.row === row);
+      const r = rows.find((x) => x.row === row);
+      if (!r) return;
       el.querySelector('input').checked = S.sel.has(row);
       el.querySelector('input').disabled = S.busy;
       el.classList.toggle('off', !S.sel.has(row));
-      el.classList.toggle('hidden', !hit(r));
+      el.classList.toggle('hidden', !hit(r) || !inTab(r));
       el.querySelector('.r').innerHTML = itemStatus(r);
     });
-    // 아래 막대
-    const c = S.ok.filter((r) => S.sel.has(r.row)), rep = c.filter((r) => r.descLen > 0).length;
+    const skipTab = S.tab === 'skip';
+    $('list').classList.toggle('hidden', skipTab || !rows.length);
+    $('skip').classList.toggle('hidden', !skipTab);
+    $('selbar').classList.toggle('hidden', skipTab || !rows.length);
+    $('shiftTip').classList.toggle('hidden', skipTab || !rows.length);
+    // 상황판
+    const c = rows.filter((r) => S.sel.has(r.row)), rep = c.filter((r) => r.descLen > 0).length;
+    const nNew = c.filter((r) => r.kind === 'new').length;
+    $('regE').textContent = S.regOn && nNew ? t('regEst', estMin(nNew, c.length)) : '';
     const j = S.job, running = j && j.status === 'running';
     if (running) {
-      const prods = new Set(j.items.map((x) => x.slug)).size;
-      const doneP = new Set(j.items.filter((x) => x.status === 'ok' || x.status === 'failed').map((x) => x.slug)).size;
-      $('info').textContent = t('prog', doneP, prods);
-      $('prog').firstElementChild.style.width = (100 * doneP / Math.max(1, prods)) + '%';
-    } else if (j && j.status === 'ready') $('info').innerHTML = t('done', j.ok, j.replaced, j.failed);
+      const crawling = j.crawlTotal && j.crawlDone < j.crawlTotal;
+      $('info').textContent = crawling ? t('progCrawl', j.crawlDone, j.crawlTotal) : t('progMake', j.done, j.total);
+      $('prog').firstElementChild.style.width = (100 * (crawling ? j.crawlDone / j.crawlTotal : j.done / Math.max(1, j.total))) + '%';
+    } else if (j && j.status === 'ready') $('info').innerHTML = t('done', j.ok, j.replaced, j.failed) + (rvN ? ` <button class="lnk" data-tab="review">${esc(t('rvLink', rvN))}</button>` : '');
     else if (j && j.status === 'failed') $('info').innerHTML = `<span style="color:var(--bad)">${esc(t('expFail') + (j.error || ''))}</span>`;
-    else $('info').innerHTML = t('info', c.length, rep);
+    else $('info').innerHTML = `<span>${t('info', c.length, rep)}</span>` + (rvN ? ` <button class="lnk" data-tab="review">${esc(t('rvLink', rvN))}</button>` : '');
     $('prog').classList.toggle('hidden', !running);
-    $('export').textContent = S.busy ? t('exporting') : t('exp', c.length);
+    // 알림 고르기: 오래 걸릴 작업(새로 등록 포함 또는 상품 40개 초과)에만
+    $('export').textContent = S.busy ? t('exporting') : (j && !running ? t('expAgain', c.length) : t('exp', c.length));
     $('export').disabled = S.busy || !c.length || !S.channel || !S.data.cols.desc;
     $('dl').classList.toggle('hidden', !(j && j.status === 'ready' && !S.busy));
     if (j && j.file) { $('dl').href = j.file; $('dl').setAttribute('download', j.fileName || 'clia-bulk.xlsx'); }
     $('again').disabled = S.busy;
   }
 
-  $('ctl2').onclick = (e) => $('ctl').onclick(e);
-  $('ctl').onclick = (e) => {
-    const b = e.target.closest('button');
-    if (!b || S.busy) return;
-    if (b.dataset.act === 'all') S.ok.forEach((r) => S.sel.add(r.row));
-    else if (b.dataset.act === 'none') S.sel.clear();
-    else if (b.dataset.dv) {
-      const rows = S.ok.filter((r) => r.p.dv === b.dataset.dv && (!b.dataset.grp || r.p.grp === b.dataset.grp));
-      const on = rows.every((r) => S.sel.has(r.row));
-      rows.forEach((r) => (on ? S.sel.delete(r.row) : S.sel.add(r.row)));
-    }
-    if (S.job && S.job.status !== 'running') S.job = null;
+  // 탭 · 상황판의 "확인 필요 보기"
+  const goTab = (e) => { const b = e.target.closest('[data-tab]'); if (!b) return; S.tab = b.dataset.tab; refresh(); };
+  $('tabs').onclick = goTab;
+  $('info').addEventListener('click', (e) => { goTab(e); if (e.target.closest('[data-tab]')) $('tabs').scrollIntoView({ block: 'nearest' }); });
+  // 펼침 메뉴: 제품군 · 알림 (바깥을 누르면 닫힘)
+  const POPS = [['dvBtn', 'dvPop'], ['grpBtn', 'ctl2']];
+  const closePops = (keep) => POPS.forEach(([b, x]) => { if (x !== keep) { $(x).classList.add('hidden'); $(b).setAttribute('aria-expanded', 'false'); } });
+  const pop = (btn, box) => { $(btn).onclick = (e) => { e.stopPropagation(); closePops(box); const open = $(box).classList.toggle('hidden'); $(btn).setAttribute('aria-expanded', String(!open)); }; $(box).onclick = (e) => e.stopPropagation(); };
+  POPS.forEach(([b, x]) => pop(b, x));
+  document.addEventListener('click', () => closePops());
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePops(); });
+  // 선택
+  const pickDv = (e) => {
+    const b = e.target.closest('button[data-dv]');
+    if (!b || b.disabled || S.busy) return;
+    const rs = act().filter((r) => r.p.dv === b.dataset.dv && (!b.dataset.grp || r.p.grp === b.dataset.grp));
+    const on = rs.every((r) => S.sel.has(r.row));
+    rs.forEach((r) => (on ? S.sel.delete(r.row) : S.sel.add(r.row)));
     refresh();
   };
-  // Shift + 클릭: 마지막으로 누른 상품부터 이번 상품까지(보이는 순서) 같은 상태로
+  $('dvPop').addEventListener('click', pickDv);
+  $('ctl2').addEventListener('click', pickDv);
+  $('selAll').onclick = () => {
+    if (S.busy) return;
+    const vis = [...document.querySelectorAll('#list .item:not(.hidden) input')].map((x) => +x.dataset.row);
+    const all = vis.length && vis.every((r) => S.sel.has(r));
+    vis.forEach((r) => (all ? S.sel.delete(r) : S.sel.add(r)));
+    refresh();
+  };
   let shiftDown = false;
   $('list').addEventListener('click', (e) => { shiftDown = e.shiftKey; }, true);
   $('list').onchange = (e) => {
@@ -365,14 +309,38 @@
     const row = +el.dataset.row;
     const vis = [...document.querySelectorAll('#list .item:not(.hidden) input')].map((x) => +x.dataset.row);
     const a = vis.indexOf(S.last), z = vis.indexOf(row);
-    const range = shiftDown && a >= 0 && z >= 0 ? vis.slice(Math.min(a, z), Math.max(a, z) + 1) : [row];
-    range.forEach((x) => (el.checked ? S.sel.add(x) : S.sel.delete(x)));
+    (shiftDown && a >= 0 && z >= 0 ? vis.slice(Math.min(a, z), Math.max(a, z) + 1) : [row]).forEach((x) => (el.checked ? S.sel.add(x) : S.sel.delete(x)));
     S.last = row;
-    if (S.job && S.job.status !== 'running') S.job = null;
     refresh();
   };
+  // 확인 필요 항목의 할 일
+  const saveAck = () => { if (S.job && S.job.id) store.set('clia-bulk-ack-' + S.job.id, [...S.ack]); };
+  $('list').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-a]');
+    if (!b) return;
+    e.preventDefault();
+    const row = +b.dataset.row;
+    if (b.dataset.a === 'ack') { S.ack.add(`${row}:${b.dataset.code}`); saveAck(); render(false); }
+    if (b.dataset.a === 'retry') { if (b.dataset.code === 'crawl') S.force.add(row); S.ack.add(`${row}:${b.dataset.code}`); S.sel.add(row); saveAck(); render(false); }
+    if (b.dataset.a === 'frame') openFrames(b.dataset.slug);
+  });
 
-  // 보기 전환: 리스트(기본, 열 때마다 리스트) · 갤러리
+  // 등록 스위치 · 주소 직접 넣기
+  $('regSw').onchange = () => { S.regOn = $('regSw').checked; render(true); };
+  $('skipList').addEventListener('click', async (e) => {
+    const b = e.target.closest('button[data-uadd]');
+    if (!b) return;
+    e.preventDefault();
+    const row = +b.dataset.uadd, inp = document.querySelector(`input[data-urow="${row}"]`), err = document.querySelector(`[data-uerr="${row}"]`);
+    try {
+      const c = await api(`/api/v1/bulk/classify?url=${encodeURIComponent(inp.value.trim())}&country=${encodeURIComponent(home)}`);
+      S.own[row] = { ...c, alts: 0, fuzzy: false };
+      S.regOn = true; S.sel.add(row);
+      setData(S.data, false);
+    } catch (_) { err.textContent = t('urlBad', S.data.site || home); }
+  });
+
+  // 보기 · 검색
   let VIEW = 'list';
   function setView(v) {
     VIEW = v === 'grid' ? 'grid' : 'list';
@@ -380,44 +348,140 @@
     document.querySelectorAll('#view button').forEach((b) => { b.classList.toggle('on', b.dataset.v === VIEW); b.setAttribute('aria-pressed', b.dataset.v === VIEW); });
   }
   $('vList').textContent = t('viewList'); $('vGrid').textContent = t('viewGrid');
+  document.querySelectorAll('#view button').forEach((b) => { b.title = t(b.dataset.v === 'grid' ? 'viewGrid' : 'viewList'); });
   $('view').onclick = (e) => { const b = e.target.closest('button'); if (b) setView(b.dataset.v); };
   setView(VIEW);
-  $('q').placeholder = t('search');
-  $('shiftTip').textContent = t('shift');
-  $('qSel').textContent = t('qSel'); $('qDesel').textContent = t('qDesel');
+  $('q').placeholder = t('search'); $('shiftTip').textContent = t('shift');
   $('q').oninput = () => { S.q = $('q').value.trim().toLowerCase(); refresh(); };
-  $('qAct').onclick = (e) => {
-    const b = e.target.closest('button');
-    if (!b || S.busy) return;
-    const on = b.id === 'qSel';
-    document.querySelectorAll('#list .item:not(.hidden) input').forEach((x) => (on ? S.sel.add(+x.dataset.row) : S.sel.delete(+x.dataset.row)));
-    if (S.job && S.job.status !== 'running') S.job = null;
-    refresh();
+
+  // ── 동영상 장면 고르기 (자동으로 고른 장면의 1~3위 후보) ──
+  async function openFrames(slug) {
+    $('frm').classList.remove('hidden');
+    $('frmT').textContent = t('frT'); $('frmX').textContent = t('frClose'); $('frmMsg').textContent = '';
+    $('frmBody').innerHTML = '<div class="bar2"><i></i></div>';
+    try { drawFrames(slug, (await api('/api/v1/bulk/frames?slug=' + encodeURIComponent(slug))).videos); }
+    catch (e) { $('frmBody').textContent = e.message; }
+  }
+  function drawFrames(slug, videos) {
+    if (!videos.length) { $('frmBody').textContent = t('frNone'); return; }
+    $('frmBody').innerHTML = videos.map((v, i) => `<div class="fv"><div class="fvh">#${i + 1}</div><div class="fo">` +
+      v.options.map((o) => `<button class="fopt${o === v.current ? ' on' : ''}" data-v="${esc(v.video)}" data-src="${esc(o)}"><img src="${esc(o)}" alt="" loading="lazy">${o === v.current ? `<span>${esc(t('frCur'))}</span>` : ''}</button>`).join('') + `</div></div>`).join('');
+    $('frmBody').onclick = async (e) => {
+      const b = e.target.closest('.fopt');
+      if (!b) return;
+      try {
+        const d = await api('/api/v1/bulk/frame', { slug, video: b.dataset.v, src: b.dataset.src });
+        drawFrames(slug, d.videos);
+        $('frmMsg').textContent = t('frSaved');
+        if (d.videos.every((v) => v.confirmed) && S.job) S.job.items.filter((x) => x.slug === slug).forEach((x) => S.ack.add(`${x.row}:frame`));
+        saveAck(); render(false);
+      } catch (err) { $('frmMsg').textContent = err.message; }
+    };
+  }
+  $('frmX').onclick = () => $('frm').classList.add('hidden');
+  $('frm').onclick = (e) => { if (e.target === $('frm')) $('frm').classList.add('hidden'); };
+
+  // ── 내보내기 · 진행 · 알림 ──
+  // 내보내기 팝업: 예상 소요 시간 → 오래 걸리면 "완료되면 메일로 알려 드릴까요?" (완성된 엑셀 첨부)
+  const LONG_MIN = 3;
+  const xpShow = (w, on) => $(w).classList.toggle('hidden', !on);
+  const xpClose = () => $('xp').classList.add('hidden');
+  function openXp(est, long) {
+    $('xpT').textContent = t('xpT');
+    $('xpE').innerHTML = t('xpEst', est);
+    const ask = long && !!S.cfg.mail;
+    xpShow('xpAskW', ask); xpShow('xpSetW', false); xpShow('xpOkW', !ask);
+    $('xpNote').textContent = ask ? '' : t(long ? 'xpLeave' : 'xpShort'); xpShow('xpNote', !ask);
+    $('xpAsk').textContent = t('xpAsk'); $('xpAskS').textContent = t('xpAskS');
+    $('xpYes').textContent = t('xpYes'); $('xpNo').textContent = t('xpNo'); $('xpOk').textContent = t('xpOk');
+    $('xpMail').placeholder = t('xpMailPh'); $('xpErr').textContent = ''; $('xpYes').disabled = false;
+    if (!$('xpMail').value) { try { $('xpMail').value = localStorage.getItem('clia-bulk-mail') || sessionStorage.getItem('clia_user') || ''; } catch (_) {} }
+    $('xp').classList.remove('hidden');
+    (ask ? $('xpMail') : $('xpOk')).focus();
+  }
+  $('xpYes').onclick = async () => {
+    const email = $('xpMail').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { $('xpErr').textContent = t('xpBadMail'); $('xpMail').focus(); return; }
+    if (!S.job || !S.job.id) return;
+    $('xpYes').disabled = true; $('xpErr').textContent = '';
+    try {
+      await api(`/api/v1/bulk/jobs/${S.job.id}/notify`, { email, lang: L });
+      try { localStorage.setItem('clia-bulk-mail', email); } catch (_) {}
+      $('xpSet').textContent = t('xpSet', email);
+      xpShow('xpAskW', false); xpShow('xpSetW', true); xpShow('xpOkW', true); $('xpOk').focus();
+    } catch (e) { $('xpErr').textContent = t(e.code === 'bad_email' ? 'xpBadMail' : 'xpMailFail'); $('xpYes').disabled = false; }
+  };
+  $('xpMail').onkeydown = (e) => { if (e.key === 'Enter') $('xpYes').click(); };
+  $('xpNo').onclick = xpClose; $('xpOk').onclick = xpClose;
+  $('xp').onclick = (e) => { if (e.target === $('xp')) xpClose(); };
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') xpClose(); });
+  const lastKey = 'clia-bulk-last-' + (CH0 || 'any');
+  async function poll(j) {
+    S.busy = true; S.job = j; render(false);
+    try {
+      while (j.status === 'running') {
+        await sleep(3000);
+        const before = S.job;
+        j = await api('/api/v1/bulk/jobs/' + j.id);
+        S.job = j;
+        if (!before || before.done !== j.done || before.crawlDone !== j.crawlDone) render(false); else refresh();
+        document.title = (j.status === 'running' ? `(${j.done}/${j.total}) ` : '') + 'Bulk Excel — CLIA';
+      }
+    } catch (e) { S.job = { ...(S.job || { items: [] }), status: 'failed', error: e.message }; }
+    S.busy = false;
+    render(false);
+    if ($('xpSetW').classList.contains('hidden')) xpClose();   // 끝났으면 팝업을 닫는다 (메일 주소를 넣었으면 그 안내는 남긴다)
+    document.title = (S.job.status === 'ready' ? '✓ ' : '! ') + 'Bulk Excel — CLIA';
+    if (S.job.status === 'ready' && S.autoDl) $('dl').click();
+  }
+  $('export').onclick = async () => {
+    const items = act().filter((r) => S.sel.has(r.row)).map((r) => (r.kind === 'new'
+      ? { row: r.row, url: r.p.url, register: true, alts: r.p.alts, fuzzy: r.p.fuzzy, force: S.force.has(r.row) }
+      : { row: r.row, slug: r.p.slug, force: S.force.has(r.row) }));
+    if (S.busy || !items.length) return;
+    const est = estMin(items.filter((x) => x.register || x.force).length, items.length);
+    const longJob = est >= LONG_MIN;
+    S.autoDl = !longJob;   // 오래 걸리는 작업은 자동 다운로드 대신 '다시 받기' 버튼 · 메일
+    S.busy = true; refresh();
+    try {
+      const j = await api('/api/v1/bulk/build', { id: S.data.id, channel: S.channel, sheet: S.data.sheet, descCol: S.data.cols.desc, country: home, lang: L, items });
+      S.force = new Set(); S.ack = new Set();
+      store.set(lastKey, { job: j.id, file: S.data.fileName, at: Date.now() });
+      S.job = j; openXp(est, longJob);
+      await poll(j);
+    } catch (e) { S.busy = false; S.job = { items: [], status: 'failed', error: e.message }; render(false); }
   };
 
-  // ── 내보내기 ──
-  $('export').onclick = async () => {
-    const items = S.ok.filter((r) => S.sel.has(r.row)).map((r) => ({ row: r.row, slug: r.p.slug }));
-    if (S.busy || !items.length) return;
-    S.busy = true; S.job = null; refresh();
+  // ── 이어 보기: 메일 링크(?job=) 또는 이 화면에서 마지막으로 한 작업 ──
+  async function resume(id) {
+    $('resume').classList.add('hidden');
+    show('s2'); $('pmsg').textContent = t('reading'); $('pfile').textContent = '';
     try {
-      const r = await fetch('/api/v1/bulk/build', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: S.data.id, channel: S.channel, sheet: S.data.sheet, descCol: S.data.cols.desc, items }) });
-      let j = await r.json();
-      if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status);
-      S.job = j; refresh();
-      while (j.status === 'running') {
-        await sleep(2500);
-        const pr = await fetch('/api/v1/bulk/jobs/' + j.id);
-        if (!pr.ok) throw new Error((await pr.json().catch(() => ({}))).error || 'HTTP ' + pr.status);
-        j = await pr.json();
-        S.job = j; refresh();
-      }
-    } catch (e) {
-      S.job = { ...(S.job || { items: [] }), status: 'failed', error: e.message };
-    } finally {
-      S.busy = false; refresh();
-      if (S.job && S.job.status === 'ready') $('dl').click();
+      const j = await api('/api/v1/bulk/jobs/' + id);
+      if (!S.channel) S.channel = j.channel;
+      chTag();
+      const d = await api('/api/v1/bulk/analyze', { id: j.upload, country: home });
+      S.own = {};
+      for (const it of j.items) if (it.register) S.own[it.row] = { ...((d.rows.find((r) => r.row === it.row) || {}).lg || {}), url: it.url, model: it.model, alts: it.alts, fuzzy: it.fuzzy };
+      S.regOn = j.items.some((x) => x.register);
+      S.ack = new Set(store.get('clia-bulk-ack-' + id) || []);
+      setData(d, false);
+      S.sel = new Set(j.items.map((x) => x.row));
+      S.job = j;
+      render(true);
+      if (j.status === 'running') poll(j);
+    } catch (e) { fail('other', { error: e.message }); }
+  }
+  if (/^[0-9a-f]{16}$/.test(qs.get('job') || '')) resume(qs.get('job'));
+  else {
+    const last = store.get(lastKey);
+    if (last && last.job && Date.now() - last.at < 7 * 864e5) {
+      api('/api/v1/bulk/jobs/' + last.job).then((j) => {
+        $('resume').classList.remove('hidden');
+        $('resumeT').textContent = t('resumeT', last.file || '') + ' · ' + (j.status === 'running' ? t('resumeRun', j.done, j.total) : t('resumeDone'));
+        $('resumeB').textContent = t('resumeBtn');
+        $('resumeB').onclick = () => resume(last.job);
+      }).catch(() => {});
     }
-  };
+  }
 })();
