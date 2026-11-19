@@ -197,9 +197,13 @@
       `<div style="min-width:0"><div class="m">${rv.has(r.row) ? `<span class="badge b-bad rvt">${esc(t('rvTag'))}</span>` : ''}${esc(r.p.model)}<span class="dv">${esc(r.p.dv || '')} · ${esc(grpName(r.p.grp))}</span>${r.p.isNew ? `<span class="badge b-new">${esc(t('newTag'))}</span>` : ''}</div>` +
       `<div class="s">${esc(r.name || r.p.title)}</div></div><div class="r"></div></label>`).join('');
     if (!rows.length && !S.reg.length && S.skip.length) S.tab = 'skip';
-    $('skipSum').textContent = t('skip', S.skip.length);
-    $('skipList').innerHTML = S.skip.map((r) => `<li>${esc(r.parentSku || r.sku || '—')} · ${esc(r.name)} <span class="badge b-q">${esc(r.why === 'rNone' && d.site ? t('notFound') : t(r.why))}</span>` +
-      (r.why === 'rNone' && d.site ? `<span class="urlin"><input type="url" data-urow="${r.row}" placeholder="${esc(t('urlPh'))}"><button class="mini" data-uadd="${r.row}">${esc(t('urlAdd'))}</button><span class="err2" data-uerr="${r.row}"></span></span>` : '') + `</li>`).join('');
+    // 채우지 않음: 다른 탭과 같은 행 — SKU · 상품명 · 이유 (CLIA·LG.com 어디에도 없으면 주소를 직접 넣는 칸)
+    $('skip').innerHTML = S.skip.map((r) => { const none = r.why === 'rNone' && d.site;
+      return `<div class="item"><span></span><div class="ph">—</div>` +
+        `<div style="min-width:0"><div class="m">${esc(r.parentSku || r.sku || '—')}</div><div class="s">${esc(r.name)}</div></div>` +
+        `<div class="r"><span class="badge b-q">${esc(none ? t('notFound') : t(r.why))}</span>` +
+        (none ? `<span class="urlin"><input type="url" data-urow="${r.row}" placeholder="${esc(t('urlPh'))}"><button class="mini" data-uadd="${r.row}">${esc(t('urlAdd'))}</button></span><span class="err2" data-uerr="${r.row}"></span>` : '') +
+        `</div></div>`; }).join('');
     refresh();
   }
 
@@ -235,6 +239,7 @@
     if ((S.tab === 'review' && !rvN) || (S.tab === 'new' && !newN) || (S.tab === 'skip' && !S.skip.length)) S.tab = 'all';
     const tabs = [['all', t('tabAll'), rows.length, ''], ['review', t('tabReview'), rvN, 'rv'], ['new', t('tabNew'), newN, ''], ['skip', t('tabSkip'), S.skip.length, '']]
       .filter(([k, , n]) => k === 'all' || n);
+    $('tabD').textContent = t({ all: 'td_all', review: 'td_review', new: 'td_new', skip: 'td_skip' }[S.tab] || 'td_all', t('a_ack'));   // 확인 탭 설명은 확인 버튼 이름을 그대로 쓴다
     $('tabs').innerHTML = tabs.map(([k, label, n, cls]) => `<button class="tab ${cls}${S.tab === k ? ' on' : ''}" role="tab" aria-selected="${S.tab === k}" data-tab="${k}">${esc(label)}<b>${n}</b></button>`).join('');
     const inTab = (r) => S.tab === 'all' || (S.tab === 'review' && rvSet.has(r.row)) || (S.tab === 'new' && r.kind === 'new');
     // 전체 선택 ↔ 해제: 버튼 하나 (지금 보이는 상품 — 탭 · 검색 결과 — 에만)
@@ -351,7 +356,7 @@
   $('rgNo').onclick = rgClose;
   $('rg').onclick = (e) => { if (e.target === $('rg')) rgClose(); };
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('rg').classList.contains('hidden')) rgClose(); });
-  $('skipList').addEventListener('click', async (e) => {
+  $('skip').addEventListener('click', async (e) => {
     const b = e.target.closest('button[data-uadd]');
     if (!b) return;
     e.preventDefault();

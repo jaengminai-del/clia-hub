@@ -187,9 +187,6 @@ a.clia-btn { text-decoration: none; }
 .grppop .div { width: 100%; height: 0; }
 .grppop .pill { height: 30px; padding: 0 12px; font-size: 12px; font-weight: 500; }
 .tip { color: var(--muted); font-size: 11px; margin: 0 0 8px; text-align: end; }
-.skipbox { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; font-size: 13px; color: var(--clia-gray-700); }
-.skipbox .skiph { font-weight: 700; margin-bottom: 8px; color: var(--clia-gray-900); }
-.skipbox ul { margin: 0; padding-inline-start: 18px; line-height: 2; }
 @media (max-width: 640px) { .panel { position: static; padding: 12px 14px; } .p-file { flex-wrap: wrap; flex-basis: 100%; } .pfn { flex: 1 1 0; } .pmt { white-space: normal; flex-basis: 100%; order: 3; } .p-act { width: 100%; justify-content: flex-end; flex-wrap: wrap; } .p-act #export { flex: 1 1 100%; order: 3; } .tools input[type=search] { width: 100%; } .tools .sp { display: none; } }
 /* 작업 영역 (큰 흰 상자) (2026-11-19) — 밑줄 탭 · 도구 줄 · 펼침 메뉴는 shared/clia-ui.css 로 옮김 (CLIA 제품 목록과 같은 모양) */
 .work { background: #fff; border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 2px 10px rgba(38,38,38,.05); overflow: visible; }
@@ -200,10 +197,17 @@ a.clia-btn { text-decoration: none; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .work .list { border: 0; border-radius: 0; background: none; }
 .work .list.grid { padding: 14px 16px; }
-.work .skipbox { border: 0; border-radius: 0; background: none; padding: 16px 20px; }
 .wfoot { padding: 10px 20px 12px; font-size: 11px; color: var(--muted); text-align: end; border-top: 1px solid var(--clia-gray-100); }
 .work .item:last-child { border-bottom: 0; }
 @media (max-width: 640px) { .work .list { border-radius: 0 0 17px 17px; overflow: hidden; } .wfoot { display: none; } }
+/* 탭 설명 한 줄 · 채우지 않음 목록 (2026-11-19) */
+.tabd { padding: 10px 20px 0; font-size: 13px; color: var(--clia-gray-600); line-height: 1.5; word-break: keep-all; }
+.skiplist .item { cursor: default; }
+.skiplist .item:hover { background: none; }
+.skiplist .item .r { align-items: flex-end; }
+.skiplist .urlin { margin: 0; justify-content: flex-end; }
+.skiplist .urlin input { min-width: 260px; height: 30px; }
+@media (max-width: 640px) { .tabd { padding: 10px 14px 0; } .skiplist .item { grid-template-columns: 0 48px minmax(0, 1fr); } .skiplist .item .r { grid-column: 2 / -1; align-items: flex-start; } .skiplist .urlin { justify-content: flex-start; } .skiplist .urlin input { min-width: 0; flex: 1; } }
 /* CLIA 에 없는 상품 등록: 상황판 안의 눈에 띄는 한 줄 + 올리자마자 묻는 팝업 (2026-11-19) */
 .p-reg { display: flex; gap: 12px 16px; align-items: center; flex-wrap: wrap; margin-top: 14px; padding: 14px 16px; border-radius: 14px; background: #F2F6FD; border: 1px solid #C9D7F2; }
 .p-reg.on { background: #E3F4EA; border-color: #B7E0C6; }
@@ -300,6 +304,7 @@ a.clia-btn { text-decoration: none; }
     <!-- 작업 영역: 큰 흰 상자 하나 — 위에 탭(밑줄), 그 아래 도구 줄, 그 아래 목록 -->
     <div class="work" id="work">
       <div class="wtabs" id="tabs" role="tablist"></div>
+      <div class="tabd" id="tabD"></div>
       <div class="wbar" id="selbar">
         <button class="ctlb selall" id="selAll" type="button"><span class="cb" id="selCb"></span><span id="selL"></span><b id="selN"></b></button>
         <div class="ddw"><button class="ctlb" id="dvBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="dvPop"></button><div class="ddpop hidden" id="dvPop" role="menu"></div></div>
@@ -309,7 +314,8 @@ a.clia-btn { text-decoration: none; }
         <span class="view" id="view" role="group"><button data-v="list" type="button"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span class="sr" id="vList"></span></button><button data-v="grid" type="button"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="sr" id="vGrid"></span></button></span>
       </div>
       <div class="list" id="list"></div>
-      <div class="skipbox hidden" id="skip"><div class="skiph" id="skipSum"></div><ul id="skipList"></ul></div>
+      <!-- 채우지 않음: 다른 탭과 같은 행 모양 (2026-11-19) -->
+      <div class="list skiplist hidden" id="skip"></div>
       <div class="wfoot" id="shiftTip"></div>
     </div>
   </section>
