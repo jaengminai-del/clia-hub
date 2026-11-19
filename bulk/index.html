@@ -200,7 +200,11 @@ a.clia-btn { text-decoration: none; }
 .wfoot { padding: 10px 20px 12px; font-size: 11px; color: var(--muted); text-align: end; border-top: 1px solid var(--clia-gray-100); }
 .work .item:last-child { border-bottom: 0; }
 @media (max-width: 640px) { .work .list { border-radius: 0 0 17px 17px; overflow: hidden; } .wfoot { display: none; } }
-/* 탭 설명 한 줄 · 채우지 않음 목록 (2026-11-19) */
+/* 탭 설명 한 줄 · 매칭 불가 목록 (2026-11-19) */
+.nrow { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.list.grid .nrow { justify-content: flex-start; }
+.sech { padding: 10px 20px; border-top: 1px solid var(--clia-gray-200); border-bottom: 1px solid var(--clia-gray-100); background: var(--clia-gray-50); font-size: 13px; font-weight: 700; color: var(--clia-gray-700); }
+.sech b { margin-inline-start: 6px; font-weight: 600; color: var(--clia-gray-400); }
 .tabd { padding: 10px 20px 0; font-size: 13px; color: var(--clia-gray-600); line-height: 1.5; word-break: keep-all; }
 .skiplist .item { cursor: default; }
 .skiplist .item:hover { background: none; }
@@ -314,7 +318,8 @@ a.clia-btn { text-decoration: none; }
         <span class="view" id="view" role="group"><button data-v="list" type="button"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span class="sr" id="vList"></span></button><button data-v="grid" type="button"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="sr" id="vGrid"></span></button></span>
       </div>
       <div class="list" id="list"></div>
-      <!-- 채우지 않음: 다른 탭과 같은 행 모양 (2026-11-19) -->
+      <!-- 매칭 불가: 다른 탭과 같은 행 모양 (2026-11-19) -->
+      <div class="sech hidden" id="skipHead"></div>
       <div class="list skiplist hidden" id="skip"></div>
       <div class="wfoot" id="shiftTip"></div>
     </div>

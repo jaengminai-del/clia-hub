@@ -152,9 +152,11 @@ function flagsFor(j, it, c) {
   const real = (x) => x && x.component_id !== 'ST0018';
   const texts = (cov.missing_texts || []).filter((x) => real(x) && !x.only_in_cards).length;
   const images = (cov.missing_images || []).filter(real).length + (chk.images_missing_url || 0);
-  if (images || texts >= 5) f.push({ code: 'qa', sev: 'warn', texts, images });
+  // 확인 필요(warn·error)는 '다른 제품일 수 있음' 또는 '다시 돌리면 고쳐질 수 있음'만. 그대로 써도 되는 것은 info(작은 안내)
+  if (images) f.push({ code: 'qa', sev: 'warn', images, texts });                       // 이미지 누락: 다시 가져오기 · 확인
+  if (texts >= 5) f.push({ code: 'qaTx', sev: 'info', texts });                         // 글 누락: 캐러셀 버튼 글자 같은 오탐이 많아 안내만
   const frames = autoFrames(mirror).filter((m) => !m.auto_frame.confirmed).length;
-  if (frames) f.push({ code: 'frame', sev: 'warn', n: frames });
+  if (frames) f.push({ code: 'frame', sev: 'info', n: frames });                        // 자동으로 고른 장면은 정상 동작 — 바꾸고 싶을 때만
   if (c && j.channel === 'shopee' && c.allImages > SHOPEE_MAX_IMAGES) f.push({ code: 'over12', sev: 'info', all: c.allImages });   // 앞 12장만 넣는 것은 정한 동작 — 안내만
   if (c && c.summaryErr) f.push({ code: 'summary', sev: 'warn' });
   if (it.fuzzy) f.push({ code: 'fuzzy', sev: 'warn' });
