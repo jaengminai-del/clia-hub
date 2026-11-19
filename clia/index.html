@@ -907,6 +907,15 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 :root{ --clia-font: 'LGEIHeadline', 'LG EI Headline', 'LGEIText', 'LINESeedSansTH', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif; }
 .coffee-card{ font-family:'LGEIText', 'LINESeedSansTH', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
 .coffee-title{ font-family:'LGEIHeadline', 'LINESeedSansTH', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
+/* 상단 국가 버튼 = 화면 언어 토글 (2026-11-19) */
+.clia-hub button.tb-corp{font:inherit;font-size:14px;cursor:pointer;}
+.clia-hub button.tb-corp.has-lang{padding:0 4px 0 14px;}
+.clia-hub button.tb-corp:hover:not(:disabled){border-color:var(--clia-gray-600);}
+.clia-hub button.tb-corp:disabled{cursor:default;opacity:1;}
+.clia-hub .tb-lang{display:none;gap:2px;padding:2px;border-radius:999px;background:var(--clia-gray-100);}
+.clia-hub .tb-corp.has-lang .tb-lang{display:inline-flex;}
+.clia-hub .tb-lang b{font-size:11px;font-weight:600;line-height:1;padding:6px 8px;border-radius:999px;color:var(--clia-gray-500);}
+.clia-hub .tb-lang b.on{background:#fff;color:var(--clia-gray-900);box-shadow:0 1px 2px rgba(38,38,38,.15);}
 /* 제품 목록 왼쪽: 벌크 엑셀 버튼 · 필터 줄 (2026-11-19) — 탭·펼침 메뉴 모양은 shared/clia-ui.css (벌크 엑셀 화면과 같음) */
 .clia-hub .left .lh-ctrl{border-bottom:0;padding-bottom:12px;}
 .clia-hub .bulk-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;}
@@ -941,7 +950,7 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 </div>
 <div class="topbar">
 <div class="tb-logo"><img src="../shared/assets/lg-logo.svg" alt="LG"></div><span class="tb-div"></span><span class="tb-title">CLIA Content Hub</span>
-<div class="tb-right"><div class="tb-corp" id="tbCorp"></div><div class="tb-avatar" id="tbAvatar" title="">JJ</div></div>
+<div class="tb-right"><button class="tb-corp" id="tbCorp" type="button" onclick="toggleUiLang()" data-no-i18n><span id="tbCorpName"></span><span class="tb-lang" id="tbLang"><b id="tbLangNative"></b><b id="tbLangEn">EN</b></span></button><div class="tb-avatar" id="tbAvatar" title="">JJ</div></div>
 </div>
 <nav class="clia-rail"><div class="clia-rail-in">
   <button class="clia-rail-item act" onclick="cliaGoHome()"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span id="railProducts">Products</span></button>
@@ -1001,6 +1010,11 @@ const CORPS={
   sa:{flag:'🇸🇦',name:'Saudi Arabia',lang:'ar'},
 };
 let CORP=CORPS[sessionStorage.getItem('clia_corp')]?sessionStorage.getItem('clia_corp'):'uk';
+// 화면 언어 (2026-11-19): 기본은 법인 언어, 상단 국가 버튼으로 영어 ↔ 법인 언어를 바꾼다.
+// 바뀌는 것은 화면 글자뿐 — 크롤한 제품 내용과 만드는 결과물은 그 나라 LG.com 언어 그대로다
+let UI_EN=false;try{UI_EN=sessionStorage.getItem('clia_ui_en')==='1';}catch(e){}
+function corpLang(){return (CORPS[CORP]||{}).lang||'en';}
+function uiLang(){return UI_EN?'en':corpLang();}
 // lg.com URL 국가코드 → 법인 (sa_en/sa_ar → sa)
 function corpOfCountry(c){return String(c||'').toLowerCase().slice(0,2);}
 // 기존 42개 하드코딩 제품: geo==='de'는 독일, 나머지는 사우디(sa_en 기준 데이터)
@@ -1058,7 +1072,7 @@ const I18N={en:{
   'ebb.height':'Total content height: {h}px · Use Edit to delete unnecessary content or modify the text. When you finish editing, be sure to Lock.',
   'list.serverDown':'Crawler server (localhost:3001) is not responding — crawled products cannot be loaded.',
 }};
-function t(k,vars){const L=I18N[(CORPS[CORP]||{}).lang]||{};let v=L[k]!=null?L[k]:(I18N.en[k]!=null?I18N.en[k]:k);if(vars)for(const x in vars)v=v.split('{'+x+'}').join(vars[x]);return v;}
+function t(k,vars){const L=I18N[uiLang()]||{};let v=L[k]!=null?L[k]:(I18N.en[k]!=null?I18N.en[k]:k);if(vars)for(const x in vars)v=v.split('{'+x+'}').join(vars[x]);return v;}
 // ── 법인 언어 번역 (로그인 화면 제외, 로그인 이후 모든 UI) ──
 I18N.de={
   'rail.products':'Produkte','rail.guide':'Content-Leitfaden',
@@ -1190,7 +1204,7 @@ const UI_TX={
  'Idle':{de:'Bereit',th:'ว่าง',ar:'خامل'},
  'Cancel':{de:'Abbrechen',th:'ยกเลิก',ar:'إلغاء'},
 };
-const _txLang=()=>(CORPS[CORP]||{}).lang||'en';
+const _txLang=()=>uiLang();
 function _tx(src){const e=UI_TX[src];if(!e)return null;const L=_txLang();return e[L]!=null?e[L]:(e.en!=null?e.en:src);}
 // 텍스트 노드·placeholder·title·data-tip 번역. 원문은 노드에 보관해 언어를 바꿔도 다시 번역 가능.
 function translateDOM(root){
@@ -1223,10 +1237,27 @@ function startI18n(){
 const CORP_NAMES={uk:{en:'United Kingdom',de:'Vereinigtes Königreich',th:'สหราชอาณาจักร',ar:'المملكة المتحدة'},de:{en:'Germany',de:'Deutschland',th:'เยอรมนี',ar:'ألمانيا'},th:{en:'Thailand',de:'Thailand',th:'ประเทศไทย',ar:'تايلاند'},sa:{en:'Saudi Arabia',de:'Saudi-Arabien',th:'ซาอุดีอาระเบีย',ar:'المملكة العربية السعودية'}};
 function corpLabel(c){const n=CORP_NAMES[c];return n?(CORPS[c].flag+' '+(n[_txLang()]||n.en)):String(c||'').toUpperCase();}
 const CORP_SITE={uk:'uk',de:'de',th:'th',sa:'sa_en'};
+const LANG_NAMES={th:{en:'Thai',th:'ภาษาไทย'},de:{en:'German',de:'Deutsch'},ar:{en:'Arabic',ar:'العربية'}};
+// 국가 버튼: 화면 언어만 영어 ↔ 법인 언어 (국가·제품 목록·결과물 언어는 그대로)
+function toggleUiLang(){
+  if(corpLang()==='en')return;
+  UI_EN=!UI_EN;
+  try{UI_EN?sessionStorage.setItem('clia_ui_en','1'):sessionStorage.removeItem('clia_ui_en');}catch(e){}
+  applyCorpUI();   // 고정 문구는 startI18n 이 원문에서 다시 번역한다
+  renderList();
+  if(selId)sel(selId);   // 열어 둔 상세 화면도 새 언어로 다시 그린다
+}
 // 로그인 후 UI 반영: 언어·법인 표시·제품 목록
 function applyCorpUI(){
   document.documentElement.lang=_txLang();
-  document.getElementById('tbCorp').textContent=corpLabel(CORP);
+  document.getElementById('tbCorpName').textContent=corpLabel(CORP);
+  const cl=corpLang(),hasEn=cl!=='en',tb=document.getElementById('tbCorp');   // 영국은 법인 언어가 영어라 바꿀 것이 없다
+  tb.disabled=!hasEn;tb.classList.toggle('has-lang',hasEn);
+  document.getElementById('tbLangNative').textContent=cl.toUpperCase();
+  document.getElementById('tbLangNative').classList.toggle('on',!UI_EN);
+  document.getElementById('tbLangEn').classList.toggle('on',UI_EN);
+  tb.setAttribute('aria-pressed',String(UI_EN));
+  tb.title=hasEn?t('tb.langTip',{lang:(LANG_NAMES[cl]||{})[uiLang()]||cl}):'';
   document.getElementById('tbLogout').textContent=t('tb.logout');
   document.getElementById('railProducts').textContent=t('rail.products');
   document.getElementById('railGuide').textContent=t('rail.guide');
@@ -1282,7 +1313,7 @@ async function deleteCrawled(id,btn){
   }catch(e){alert(t('list.deleteFail')+e.message);btn.disabled=false;}
 }
 function cliaLogout(){
-  sessionStorage.removeItem('clia_corp');sessionStorage.removeItem('clia_user');
+  sessionStorage.removeItem('clia_corp');sessionStorage.removeItem('clia_user');sessionStorage.removeItem('clia_ui_en');UI_EN=false;
   ['ebbOverlay','chbOverlay'].forEach(id=>{const o=document.getElementById(id);if(o)o.classList.remove('show');});
   renderLoginCorps();
   document.getElementById('loginPw').value='';
@@ -2300,6 +2331,10 @@ Object.assign(I18N.en,{'grp.Other':'Other','grp.TV':'TV','grp.Audio':'Audio','gr
 Object.assign(I18N.de,{'grp.Other':'Sonstiges','grp.TV':'TV','grp.Audio':'Audio','grp.Monitor':'Monitor','grp.Laptop':'Laptop','grp.Projector':'Beamer','grp.Fridge':'Kühlschrank','grp.Washer':'Waschmaschine','grp.Dryer':'Trockner','grp.Vacuum':'Staubsauger','grp.Dishwasher':'Geschirrspüler','grp.Cooking':'Kochen','grp.Styler':'Styler','grp.AC':'Klimaanlage','grp.Purifier':'Luftreiniger','grp.Dehumidifier':'Luftentfeuchter','grp.all':'Alle'});
 Object.assign(I18N.th,{'grp.Other':'อื่น ๆ','grp.TV':'ทีวี','grp.Audio':'เครื่องเสียง','grp.Monitor':'จอมอนิเตอร์','grp.Laptop':'แล็ปท็อป','grp.Projector':'โปรเจกเตอร์','grp.Fridge':'ตู้เย็น','grp.Washer':'เครื่องซักผ้า','grp.Dryer':'เครื่องอบผ้า','grp.Vacuum':'เครื่องดูดฝุ่น','grp.Dishwasher':'เครื่องล้างจาน','grp.Cooking':'เครื่องครัว','grp.Styler':'สไตเลอร์','grp.AC':'เครื่องปรับอากาศ','grp.Purifier':'เครื่องฟอกอากาศ','grp.Dehumidifier':'เครื่องลดความชื้น','grp.all':'ทั้งหมด'});
 Object.assign(I18N.ar,{'grp.Other':'أخرى','grp.TV':'تلفزيون','grp.Audio':'الصوتيات','grp.Monitor':'شاشة','grp.Laptop':'لابتوب','grp.Projector':'بروجكتور','grp.Fridge':'ثلاجة','grp.Washer':'غسالة','grp.Dryer':'مجفف','grp.Vacuum':'مكنسة','grp.Dishwasher':'غسالة صحون','grp.Cooking':'الطهي','grp.Styler':'ستايلر','grp.AC':'مكيف','grp.Purifier':'منقي هواء','grp.Dehumidifier':'مزيل رطوبة','grp.all':'الكل'});
+Object.assign(I18N.en,{'tb.langTip':'Screen language only — content you create stays in {lang}'});
+Object.assign(I18N.de,{'tb.langTip':'Nur die Sprache der Oberfläche — erstellte Inhalte bleiben auf {lang}'});
+Object.assign(I18N.th,{'tb.langTip':'เปลี่ยนเฉพาะภาษาของหน้าจอ — คอนเทนต์ที่สร้างยังเป็น{lang}'});
+Object.assign(I18N.ar,{'tb.langTip':'لغة الواجهة فقط — يبقى المحتوى الذي تنشئه باللغة {lang}'});
 // 목록 필터 · 벌크 엑셀 버튼 (2026-11-19) — 필터 낱말은 벌크 엑셀 화면(bulk/bulk-i18n.js)과 같다
 Object.assign(I18N.en,{'tab.all':'All','tab.md':'Only MD','flt.dv':'Division','flt.grp':'Product group','flt.all':'All','flt.none':'None','flt.n':'{n} selected','flt.grpHint':'Only groups in the selected divisions can be chosen','list.search':'Search product name...','bulk.shopee':'Shopee bulk upload','bulk.lazada':'Lazada bulk upload','bulk.tip':'Upload a {ch} bulk Excel — CLIA fills in the product descriptions, and crawls LG.com for products it does not have yet'});
 Object.assign(I18N.de,{'tab.all':'Alle','tab.md':'Nur MD','flt.dv':'Bereich','flt.grp':'Produktgruppe','flt.all':'Alle','flt.none':'Keine','flt.n':'{n} gewählt','flt.grpHint':'Nur Gruppen der gewählten Bereiche sind wählbar','list.search':'Produktname suchen...','bulk.shopee':'Shopee-Bulk-Upload','bulk.lazada':'Lazada-Bulk-Upload','bulk.tip':'{ch}-Bulk-Excel hochladen — CLIA füllt die Produktbeschreibungen und crawlt fehlende Produkte von LG.com'});
