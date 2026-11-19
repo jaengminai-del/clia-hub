@@ -137,7 +137,9 @@ function failKind(j) {
 }
 const admins = () => String(process.env.BULK_ADMIN_EMAIL || '').split(',').map((x) => x.trim()).filter((x) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x));
 
-function build(j, { base = '', attached = false, lang, admin = admins()[0] } = {}) {
+// admin: BULK_ADMIN_EMAIL 의 주소들 — 첫 번째가 받는 사람(To), 나머지는 참조(CC)
+function build(j, { base = '', attached = false, lang, admin = admins() } = {}) {
+  const adm = [].concat(admin || []).filter(Boolean);
   const want = lang || (j.notify && j.notify.lang) || j.lang;
   const L = TX[want] ? want : 'en';
   const t = TX[L];
@@ -150,12 +152,14 @@ function build(j, { base = '', attached = false, lang, admin = admins()[0] } = {
 
   if (j.status !== 'ready') {
     // 짧게: 제목 · 한 줄 · [CLIA 확인] [담당자에게 문의] (담당자 주소가 있을 때만)
-    const ask = admin ? [t.ask, `mailto:${admin}?subject=${encodeURIComponent(t.mailSub(j.id))}&body=${encodeURIComponent(t.mailBody(j.id, j.outName || ''))}`] : null;
+    const addr = (x) => encodeURIComponent(x).replace(/%40/g, '@').replace(/%2C/g, ',');   // @ · , 는 그대로 (메일 앱 호환)
+    const cc = adm.length > 1 ? `cc=${addr(adm.slice(1).join(','))}&` : '';
+    const ask = adm.length ? [t.ask, `mailto:${addr(adm[0])}?${cc}subject=${encodeURIComponent(t.mailSub(j.id))}&body=${encodeURIComponent(t.mailBody(j.id, j.outName || ''))}`] : null;
     const content = `${heading(t.hFail)}${paragraph(t.pFail)}${buttons([t.open, open], ask)}`;
     return {
       subject: t.sFail,
       html: shell({ lang: L, title: t.sFail, logo, preheader: t.pFail, content }),
-      text: [t.hFail, '', t.pFail, '', `${t.open}: ${open}`, ...(admin ? [`${t.ask}: ${admin}`] : [])].join('\n'),
+      text: [t.hFail, '', t.pFail, '', `${t.open}: ${open}`, ...(adm.length ? [`${t.ask}: ${adm[0]}${adm.length > 1 ? ` (cc ${adm.slice(1).join(', ')})` : ''}`] : [])].join('\n'),
     };
   }
   const p = attached ? t.pOk : t.pBig;

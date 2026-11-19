@@ -280,7 +280,7 @@ async function sendMail(j, to, key, from) {
   if (!r.ok) throw new Error(`mail HTTP ${r.status}`);
   j.notify.sent = true;
 }
-// 작업이 실패하면 담당자(BULK_ADMIN_EMAIL, 쉼표로 여러 명)에게 자동으로 — 사용자가 메일을 신청했든 안 했든
+// 작업이 실패하면 담당자(BULK_ADMIN_EMAIL, 쉼표로 여러 명 — 첫 번째 To, 나머지 CC)에게 자동으로 — 사용자가 메일을 신청했든 안 했든
 async function alertAdmin(j) {
   const mail = require('./bulk-mail');
   const to = mail.admins();
@@ -290,7 +290,8 @@ async function alertAdmin(j) {
   const m = mail.buildAdmin(j, { base: (process.env.PUBLIC_BASE_URL || j.base || '').replace(/\/$/, '') });
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from, to, subject: m.subject, html: m.html, text: m.text, ...(j.notify && j.notify.email ? { reply_to: j.notify.email } : {}) }), signal: AbortSignal.timeout(30000) });
+    // 첫 번째 담당자는 받는 사람(To), 나머지는 참조(CC)
+    body: JSON.stringify({ from, to: [to[0]], ...(to.length > 1 ? { cc: to.slice(1) } : {}), subject: m.subject, html: m.html, text: m.text, ...(j.notify && j.notify.email ? { reply_to: j.notify.email } : {}) }), signal: AbortSignal.timeout(30000) });
   if (!r.ok) { j.adminSent = false; throw new Error(`mail HTTP ${r.status}`); }
 }
 const MAIL_ATTACH_MAX = 15 * 1024 * 1024;   // Resend 한도(40MB)보다 넉넉히 작게
