@@ -8,7 +8,7 @@
  * 바탕으로 한다 — 흰 카드, 큰 제목 · 회색 본문, 회색 정보 칸, 8px 빨간 버튼. 머리는 CLIA 화면 상단과 같게
  * (LG 로고 | CLIA Content Hub). 로고는 메일 프로그램이 SVG 를 못 그려서 PNG(shared/assets/lg-logo-mail.png, 3배).
  * 메일 프로그램 제약도 같다: 표로만 배치, 인라인 스타일 + bgcolor, 웹 글꼴 없음, 숨은 미리보기 줄.
- * 내용은 짧게: 제목 · 한 줄 · 정보 칸 · 버튼 하나, 아래 작은 글 없음. 언어: ko · th · en (그 밖은 en).
+ * 내용은 짧게: 제목 · 한 줄 · 정보 칸 · 버튼 하나, 아래 작은 글 없음. 언어: CLIA 법인 언어 en(영국) · de(독일) · th(태국) · ar(사우디, 오른쪽→왼쪽) + 확인용 ko, 그 밖은 en.
  */
 
 /** emailTheme.ts 의 T (앱 tokens-v2 밝은 테마) 를 그대로 옮김. */
@@ -52,7 +52,7 @@ const buttons = (a, b) => `<table role="presentation" width="100%" cellpadding="
 /** emailTheme.ts 의 shell() 짜임 — 머리는 CLIA 화면 상단, 배지 · 아래 작은 글 없음. */
 function shell(o) {
   return `<!DOCTYPE html>
-<html lang="${esc(o.lang)}">
+<html lang="${esc(o.lang)}" dir="${o.lang === 'ar' ? 'rtl' : 'ltr'}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -66,14 +66,14 @@ function shell(o) {
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;">
 
         <tr><td bgcolor="${T.surface}" style="background:${T.surface};border:1px solid ${T.border};border-bottom:1px solid ${T.hdLine};border-radius:${T.radiusCard} ${T.radiusCard} 0 0;padding:20px 32px;">
-          <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+          <table role="presentation" cellpadding="0" cellspacing="0" dir="ltr"><tr>
             <td style="vertical-align:middle;line-height:0;"><img src="${esc(o.logo)}" width="54" height="24" alt="LG" style="display:block;width:54px;height:24px;border:0;outline:none;text-decoration:none;font-family:${T.font};font-size:16px;font-weight:800;color:#A50034;line-height:24px;"></td>
             <td style="vertical-align:middle;padding:0 14px;"><div style="width:1px;height:16px;background:${T.hdLine};line-height:16px;font-size:0;">&nbsp;</div></td>
             <td style="vertical-align:middle;font-family:${T.font};font-size:15px;font-weight:700;color:${T.hdTitle};white-space:nowrap;">CLIA Content Hub</td>
           </tr></table>
         </td></tr>
 
-        <tr><td bgcolor="${T.surface}" style="background:${T.surface};border:1px solid ${T.border};border-top:none;border-radius:0 0 ${T.radiusCard} ${T.radiusCard};padding:34px 32px 30px;font-family:${T.font};">
+        <tr><td bgcolor="${T.surface}" style="background:${T.surface};border:1px solid ${T.border};border-top:none;border-radius:0 0 ${T.radiusCard} ${T.radiusCard};padding:34px 32px 30px;font-family:${T.font};${o.lang === 'ar' ? 'direction:rtl;text-align:right;' : ''}" dir="${o.lang === 'ar' ? 'rtl' : 'ltr'}">
           ${o.content}
         </td></tr>
 
@@ -120,6 +120,30 @@ const TX = {
     mailSub: (id) => `[CLIA] 벌크 엑셀 실패 — 작업 ${id}`, mailBody: (id, f) => `작업 번호: ${id}\n파일: ${f}\n\n`,
     rOk: '매칭된 SKU', rRv: '확인 필요한 SKU', rFile: '벌크 업로드 파일명', att: '메일 첨부 완료', n: (x) => `${x}개`,
     open: 'CLIA 확인',
+  },
+  de: {
+    sOk: (ok, rv) => `[CLIA] Bulk-Excel fertig — ${ok} zugeordnet${rv ? ` · ${rv} zu prüfen` : ''}`,
+    sFail: '[CLIA] Bulk-Excel konnte nicht erstellt werden',
+    hOk: 'Ihre Bulk-Excel ist fertig', hFail: 'Ihre Bulk-Excel konnte nicht erstellt werden',
+    pOk: 'Die fertige Datei ist dieser E-Mail angehängt.', pBig: 'Die Datei ist zu groß zum Anhängen — bitte in CLIA herunterladen.',
+    pFail: 'Ihre Excel-Datei wurde nicht verändert. Öffnen Sie sie in CLIA und exportieren Sie erneut.',
+    why: { crawl: 'Keine Produktseite konnte von LG.com abgerufen werden.', content: 'Der Server für die Beschreibungsbilder hat nicht geantwortet.', items: 'Keines der ausgewählten Produkte konnte befüllt werden.', upload: 'Die hochgeladene Excel-Datei wurde nicht mehr gefunden.', server: 'Auf dem Server ist ein unerwarteter Fehler aufgetreten.' },
+    ask: 'Admin kontaktieren',
+    mailSub: (id) => `[CLIA] Bulk-Excel fehlgeschlagen — Auftrag ${id}`, mailBody: (id, f) => `Auftragsnummer: ${id}\nDatei: ${f}\n\n`,
+    rOk: 'Zugeordnete SKUs', rRv: 'Zu prüfende SKUs', rFile: 'Bulk-Upload-Datei', att: 'An diese E-Mail angehängt', n: (x) => String(x),
+    open: 'In CLIA prüfen',
+  },
+  ar: {
+    sOk: (ok, rv) => `[CLIA] ملف Excel المجمّع جاهز — ${ok} مطابق${rv ? ` · ${rv} للمراجعة` : ''}`,
+    sFail: '[CLIA] تعذّر إنشاء ملف Excel المجمّع',
+    hOk: 'ملف Excel المجمّع جاهز', hFail: 'تعذّر إنشاء ملف Excel المجمّع',
+    pOk: 'الملف الجاهز مرفق بهذا البريد.', pBig: 'الملف أكبر من أن يُرفق — نزّله من CLIA.',
+    pFail: 'لم يتغيّر ملف Excel الخاص بك. افتحه في CLIA وصدّره مرة أخرى.',
+    why: { crawl: 'تعذّر جلب أي صفحة منتج من LG.com.', content: 'لم يستجب الخادم الذي ينشئ صور الوصف.', items: 'تعذّر ملء أي من المنتجات المحددة.', upload: 'تعذّر العثور على ملف Excel المرفوع.', server: 'حدث خطأ غير متوقع في الخادم.' },
+    ask: 'تواصل مع المسؤول',
+    mailSub: (id) => `[CLIA] فشل ملف Excel المجمّع — المهمة ${id}`, mailBody: (id, f) => `رقم المهمة: ${id}\nالملف: ${f}\n\n`,
+    rOk: 'رموز SKU المطابقة', rRv: 'رموز SKU التي تحتاج مراجعة', rFile: 'اسم ملف الرفع المجمّع', att: 'مرفق بهذا البريد', n: (x) => String(x),
+    open: 'تحقّق في CLIA',
   },
 };
 
