@@ -197,22 +197,29 @@
 
   function refresh() {
     const rows = act();
-    const allOf = (rs) => rs.length > 0 && rs.every((r) => S.sel.has(r.row));
-    const pill = (attr, label, rs) => {
-      const k = rs.filter((r) => S.sel.has(r.row)).length;
-      return `<button class="pill ${k === 0 ? '' : (k === rs.length ? 'on' : 'part')}" ${attr}>${esc(label)}<b>${k ? k + '/' : ''}${rs.length}</b></button>`;
-    };
+    const nSel = (rs) => rs.filter((r) => S.sel.has(r.row)).length;
+    const cbOf = (k, n) => (k === 0 ? '' : (k === n ? 'on' : 'part'));
+    const ariaOf = (k, n) => (k === 0 ? 'false' : (k === n ? 'true' : 'mixed'));
     const ofDv = (dv) => rows.filter((r) => r.p.dv === dv);
     const ofGrp = (dv, g) => rows.filter((r) => r.p.dv === dv && r.p.grp === g);
-    $('ctl').innerHTML = `<button class="pill ${allOf(rows) ? 'on' : ''}" data-act="all">${esc(t('selAll'))}<b>${rows.length}</b></button>` +
-      `<button class="pill" data-act="none">${esc(t('selNone'))}</button><span class="div"></span>` +
-      DIVS.filter((dv) => ofDv(dv).length).map((dv) => pill(`data-dv="${dv}"`, dv, ofDv(dv))).join('');
-    $('ctl2').innerHTML = DIVS.filter((dv) => ofDv(dv).length).map((dv) =>
-      GRPS[dv].filter((g) => ofGrp(dv, g).length).map((g) => pill(`data-dv="${dv}" data-grp="${g}"`, grpName(g), ofGrp(dv, g))).join('')).filter(Boolean).join('<span class="div"></span>');
-    [...$('ctl').querySelectorAll('button'), ...$('ctl2').querySelectorAll('button'), ...$('qAct').querySelectorAll('button')].forEach((b) => { b.disabled = S.busy; });
     const hit = (r) => !S.q || [r.p.model, r.name, r.sku, r.parentSku, r.p.title, r.id].join(' ').toLowerCase().includes(S.q);
-    $('qAct').classList.toggle('hidden', !S.q);
-    $('qN').textContent = t('qRes', rows.filter(hit).length);
+    const chev = '<svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
+    const ddLabel = (key, v) => `<span class="k">${esc(t(key))}</span><span class="v">${esc(v)}</span>${chev}`;
+    // 본부: 하나 또는 여러 개 — 고르면 그 본부 상품이 선택된다
+    const dvs = DIVS.filter((dv) => ofDv(dv).length);
+    const dvK = Object.fromEntries(dvs.map((dv) => [dv, nSel(ofDv(dv))]));
+    const dvOn = dvs.filter((dv) => dvK[dv] > 0);
+    $('dvBtn').innerHTML = ddLabel('dvBtn', dvs.every((dv) => dvK[dv] === ofDv(dv).length) ? t('ddAll') : (!dvOn.length ? t('ddNone') : dvOn.join(', ')));
+    $('dvPop').innerHTML = dvs.map((dv) => { const n = ofDv(dv).length;
+      return `<button class="opt" role="menuitemcheckbox" aria-checked="${ariaOf(dvK[dv], n)}" data-dv="${dv}"${S.busy ? ' disabled' : ''}><span class="cb ${cbOf(dvK[dv], n)}"></span>${esc(dv)}<span class="n">${dvK[dv]}/${n}</span></button>`; }).join('');
+    // 제품군: 목록 전체를 보여 주고, 선택한 본부의 제품군만 고를 수 있다 (나머지는 회색)
+    const gs = dvs.flatMap((dv) => GRPS[dv].filter((g) => ofGrp(dv, g).length).map((g) => [dv, g]));
+    const gK = gs.map(([dv, g]) => nSel(ofGrp(dv, g)));
+    $('grpBtn').innerHTML = ddLabel('grpBtn', gs.every(([dv, g], i) => gK[i] === ofGrp(dv, g).length) ? t('ddAll') : (gK.some((k) => k) ? t('ddN', gK.filter((k) => k).length) : t('ddNone')));
+    $('ctl2').innerHTML = `<div class="hint">${esc(t('grpHint'))}</div>` + dvs.map((dv) => `<div class="gh">${esc(dv)}</div>` +
+      gs.map(([d, g], i) => [d, g, i]).filter(([d]) => d === dv).map(([d, g, i]) => { const n = ofGrp(d, g).length;
+        return `<button class="opt" role="menuitemcheckbox" aria-checked="${ariaOf(gK[i], n)}" data-dv="${d}" data-grp="${g}"${S.busy || !dvK[d] ? ' disabled' : ''}><span class="cb ${cbOf(gK[i], n)}"></span>${esc(grpName(g))}<span class="n">${gK[i]}/${n}</span></button>`; }).join('')).join('');
+    $('dvBtn').disabled = $('grpBtn').disabled = S.busy;
     // 탭: 전체 · 확인 필요 · 새로 등록 · 제외 — 확인 필요는 빨간 숫자
     const rvSet = new Set(reviewRows().map((r) => r.row));
     const rvN = rvSet.size;
@@ -222,6 +229,13 @@
       .filter(([k, , n]) => k === 'all' || n);
     $('tabs').innerHTML = tabs.map(([k, label, n, cls]) => `<button class="tab ${cls}${S.tab === k ? ' on' : ''}" role="tab" aria-selected="${S.tab === k}" data-tab="${k}">${esc(label)}<b>${n}</b></button>`).join('');
     const inTab = (r) => S.tab === 'all' || (S.tab === 'review' && rvSet.has(r.row)) || (S.tab === 'new' && r.kind === 'new');
+    // 전체 선택 ↔ 해제: 버튼 하나 (지금 보이는 상품 — 탭 · 검색 결과 — 에만)
+    const vis = rows.filter((r) => hit(r) && inTab(r)), vk = nSel(vis);
+    $('selCb').className = 'cb ' + cbOf(vk, vis.length);
+    $('selL').textContent = S.q ? t('qRes', vis.length) : t('selAll');
+    $('selN').textContent = `${vk}/${vis.length}`;
+    $('selAll').setAttribute('aria-pressed', String(vis.length > 0 && vk === vis.length));
+    $('selAll').disabled = S.busy || !vis.length;
     document.querySelectorAll('#list .item').forEach((el) => {
       const row = +el.querySelector('input').dataset.row;
       const r = rows.find((x) => x.row === row);
@@ -235,9 +249,8 @@
     const skipTab = S.tab === 'skip';
     $('list').classList.toggle('hidden', skipTab || !rows.length);
     $('skip').classList.toggle('hidden', !skipTab);
-    document.querySelector('.tools').classList.toggle('hidden', skipTab || !rows.length); $('selbar').classList.toggle('hidden', skipTab || !rows.length);
+    $('selbar').classList.toggle('hidden', skipTab || !rows.length);
     $('shiftTip').classList.toggle('hidden', skipTab || !rows.length);
-    $('grpBtn').innerHTML = `${esc(t('grpBtn'))} ▾`;
     // 상황판
     const c = rows.filter((r) => S.sel.has(r.row)), rep = c.filter((r) => r.descLen > 0).length;
     const nNew = c.filter((r) => r.kind === 'new').length;
@@ -254,7 +267,7 @@
     // 알림 고르기: 오래 걸릴 작업(새로 등록 포함 또는 상품 40개 초과)에만
     $('ntW').classList.toggle('hidden', !((nNew > 0 || c.length > 40) && !running));
     $('ntMailW').classList.toggle('hidden', !S.cfg.mail);
-    $('ntBtnL').textContent = t('ntBtn');
+    $('ntBtnL').textContent = t('ntBtn'); $('ntBtn').title = t('ntBtn');
     $('ntBtn').classList.toggle('on', $('ntB').checked || ($('ntMailC').checked && !!S.cfg.mail));
     $('export').textContent = S.busy ? t('exporting') : (j && !running ? t('expAgain', c.length) : t('exp', c.length));
     $('export').disabled = S.busy || !c.length || !S.channel || !S.data.cols.desc;
@@ -268,24 +281,29 @@
   $('tabs').onclick = goTab;
   $('info').addEventListener('click', (e) => { goTab(e); if (e.target.closest('[data-tab]')) $('tabs').scrollIntoView({ block: 'nearest' }); });
   // 펼침 메뉴: 제품군 · 알림 (바깥을 누르면 닫힘)
-  const pop = (btn, box) => { btn.onclick = (e) => { e.stopPropagation(); const open = box.classList.toggle('hidden'); btn.setAttribute('aria-expanded', String(!open)); }; box.onclick = (e) => e.stopPropagation(); };
-  pop($('grpBtn'), $('ctl2'));
-  pop($('ntBtn'), $('ntPop'));
-  document.addEventListener('click', () => { ['ctl2', 'ntPop'].forEach((id) => $(id).classList.add('hidden')); });
+  const POPS = [['dvBtn', 'dvPop'], ['grpBtn', 'ctl2'], ['ntBtn', 'ntPop']];
+  const closePops = (keep) => POPS.forEach(([b, x]) => { if (x !== keep) { $(x).classList.add('hidden'); $(b).setAttribute('aria-expanded', 'false'); } });
+  const pop = (btn, box) => { $(btn).onclick = (e) => { e.stopPropagation(); closePops(box); const open = $(box).classList.toggle('hidden'); $(btn).setAttribute('aria-expanded', String(!open)); }; $(box).onclick = (e) => e.stopPropagation(); };
+  POPS.forEach(([b, x]) => pop(b, x));
+  document.addEventListener('click', () => closePops());
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePops(); });
   ['ntB', 'ntMailC'].forEach((id) => $(id).addEventListener('change', refresh));
   // 선택
-  $('ctl2').addEventListener('click', (e) => $('ctl').onclick(e));
-  $('ctl').onclick = (e) => {
-    const b = e.target.closest('button');
-    if (!b || S.busy) return;
-    const rows = act();
-    if (b.dataset.act === 'all') rows.forEach((r) => S.sel.add(r.row));
-    else if (b.dataset.act === 'none') S.sel.clear();
-    else if (b.dataset.dv) {
-      const rs = rows.filter((r) => r.p.dv === b.dataset.dv && (!b.dataset.grp || r.p.grp === b.dataset.grp));
-      const on = rs.every((r) => S.sel.has(r.row));
-      rs.forEach((r) => (on ? S.sel.delete(r.row) : S.sel.add(r.row)));
-    }
+  const pickDv = (e) => {
+    const b = e.target.closest('button[data-dv]');
+    if (!b || b.disabled || S.busy) return;
+    const rs = act().filter((r) => r.p.dv === b.dataset.dv && (!b.dataset.grp || r.p.grp === b.dataset.grp));
+    const on = rs.every((r) => S.sel.has(r.row));
+    rs.forEach((r) => (on ? S.sel.delete(r.row) : S.sel.add(r.row)));
+    refresh();
+  };
+  $('dvPop').addEventListener('click', pickDv);
+  $('ctl2').addEventListener('click', pickDv);
+  $('selAll').onclick = () => {
+    if (S.busy) return;
+    const vis = [...document.querySelectorAll('#list .item:not(.hidden) input')].map((x) => +x.dataset.row);
+    const all = vis.length && vis.every((r) => S.sel.has(r));
+    vis.forEach((r) => (all ? S.sel.delete(r) : S.sel.add(r)));
     refresh();
   };
   let shiftDown = false;
@@ -335,17 +353,11 @@
     document.querySelectorAll('#view button').forEach((b) => { b.classList.toggle('on', b.dataset.v === VIEW); b.setAttribute('aria-pressed', b.dataset.v === VIEW); });
   }
   $('vList').textContent = t('viewList'); $('vGrid').textContent = t('viewGrid');
+  document.querySelectorAll('#view button').forEach((b) => { b.title = t(b.dataset.v === 'grid' ? 'viewGrid' : 'viewList'); });
   $('view').onclick = (e) => { const b = e.target.closest('button'); if (b) setView(b.dataset.v); };
   setView(VIEW);
   $('q').placeholder = t('search'); $('shiftTip').textContent = t('shift');
-  $('qSel').textContent = t('qSel'); $('qDesel').textContent = t('qDesel');
   $('q').oninput = () => { S.q = $('q').value.trim().toLowerCase(); refresh(); };
-  $('qAct').onclick = (e) => {
-    const b = e.target.closest('button');
-    if (!b || S.busy) return;
-    document.querySelectorAll('#list .item:not(.hidden) input').forEach((x) => (b.id === 'qSel' ? S.sel.add(+x.dataset.row) : S.sel.delete(+x.dataset.row)));
-    refresh();
-  };
 
   // ── 동영상 장면 고르기 (자동으로 고른 장면의 1~3위 후보) ──
   async function openFrames(slug) {

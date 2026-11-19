@@ -143,8 +143,8 @@ a.clia-btn { text-decoration: none; }
 [dir=rtl] .sw input:checked + .tr::after { transform: translateX(-18px); }
 .sw input:focus-visible + .tr { outline: 2px solid var(--red); outline-offset: 2px; }
 .rvban { background: #FDE8E7; color: var(--bad); border: 1px solid #F6C9C6; border-radius: 12px; padding: 10px 16px; margin-bottom: 12px; font-weight: 700; font-size: 13px; }
-.item.rv { background: #FFF6F5; box-shadow: inset 4px 0 0 var(--bad); }
-.list.grid .item.rv { border-color: var(--bad); box-shadow: 0 0 0 1px var(--bad); }
+.item.rv { background: #FFF6F5; }
+.list.grid .item.rv { background: #FFF6F5; }
 .rvt { margin-inline-end: 6px; vertical-align: 1px; }
 .b-new { background: #E8EEF9; color: #2A4E8F; margin-inline-start: 6px; vertical-align: 1px; }
 .ph { width: 48px; height: 48px; border-radius: 8px; background: var(--clia-gray-100); color: var(--clia-gray-500); font-size: 10px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2px; overflow: hidden; }
@@ -181,6 +181,8 @@ a.clia-btn { text-decoration: none; }
 .bell { display: inline-flex; gap: 6px; align-items: center; height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--clia-gray-300); background: #fff; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--clia-gray-700); }
 .bell svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .bell.on { border-color: var(--clia-gray-900); color: var(--clia-gray-900); }
+.bell { width: 36px; padding: 0; justify-content: center; position: relative; }
+.bell.on::after { content: ""; position: absolute; top: 7px; inset-inline-end: 8px; width: 7px; height: 7px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 2px #fff; }
 .ntpop { position: absolute; top: 42px; inset-inline-end: 0; z-index: 8; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; box-shadow: 0 10px 30px rgba(0,0,0,.12); display: flex; flex-direction: column; gap: 8px; min-width: 280px; font-size: 13px; }
 .ntpop .ntl { font-weight: 700; }
 .ntpop label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
@@ -208,32 +210,58 @@ a.clia-btn { text-decoration: none; }
 .skipbox { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; font-size: 13px; color: var(--clia-gray-700); }
 .skipbox .skiph { font-weight: 700; margin-bottom: 8px; color: var(--clia-gray-900); }
 .skipbox ul { margin: 0; padding-inline-start: 18px; line-height: 2; }
-@media (max-width: 640px) { .panel { position: static; padding: 12px 14px; } .p-file { flex-wrap: wrap; flex-basis: 100%; } .pfn { flex: 1 1 0; } .pmt { white-space: normal; flex-basis: 100%; order: 3; } .p-act { width: 100%; justify-content: flex-end; } .tools input[type=search] { width: 100%; } .tools .sp { display: none; } .ntpop { inset-inline-end: auto; inset-inline-start: 0; } }
-/* 탭 · 도구 영역 분리 (흰 상자, 2026-11-19) */
-.bar1 { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
-.bar1 .sp, .selbar .sp { flex: 1; }
-.seg, .bar1 .view, .sbox { background: #fff; border: 1px solid var(--line); box-shadow: 0 2px 8px rgba(38,38,38,.05); }
-.tabs.seg { display: inline-flex; gap: 2px; padding: 4px; border-radius: 999px; border-bottom: 1px solid var(--line); margin: 0; overflow-x: auto; max-width: 100%; }
-.tabs.seg .tab { border: 0; margin: 0; padding: 0 14px; height: 34px; border-radius: 999px; font-size: 13px; display: inline-flex; align-items: center; }
-.tabs.seg .tab:hover { color: var(--clia-gray-900); }
-.tabs.seg .tab.on { background: var(--clia-gray-100); color: var(--clia-gray-900); }
-.tabs.seg .tab.rv, .tabs.seg .tab.rv.on { color: var(--bad); }
-.tabs.seg .tab.rv.on { background: #FDE8E7; }
-.bar1 .tools { display: flex; gap: 8px; align-items: center; margin: 0; flex-wrap: nowrap; }
-.sbox { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 999px; width: 300px; }
-.sbox:focus-within { border-color: var(--red); box-shadow: 0 0 0 3px var(--clia-brand-soft); }
-.sbox svg { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--clia-gray-500); stroke-width: 2; stroke-linecap: round; }
-.sbox input[type=search], .tools .sbox input[type=search] { flex: 1; min-width: 0; border: 0; outline: none; box-shadow: none; height: 100%; padding: 0; width: 100%; background: none; font: inherit; font-size: 13px; }
-.tools .sbox input[type=search]:focus { box-shadow: none; }
-.bar1 .view { padding: 4px; gap: 2px; border-radius: 999px; }
-.bar1 .view button { border-radius: 999px; height: 34px; }
-.bar1 .view button.on { background: var(--clia-gray-100); color: var(--clia-gray-900); }
-.selbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 10px 12px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(38,38,38,.05); }
-.selbar .ctl { margin: 0; }
-.selbar .tip { margin: 0; }
-.selbar .pill { height: 32px; padding: 0 14px; font-size: 12.5px; }
-.selbar .ctl .div { height: 18px; }
-@media (max-width: 640px) { .bar1 .tools { width: 100%; } .sbox { flex: 1; width: auto; } .bar1 .sp { display: none; } .selbar .sp, .selbar .tip { display: none; } }
+@media (max-width: 640px) { .panel { position: static; padding: 12px 14px; } .p-file { flex-wrap: wrap; flex-basis: 100%; } .pfn { flex: 1 1 0; } .pmt { white-space: normal; flex-basis: 100%; order: 3; } .p-act { width: 100%; justify-content: flex-end; flex-wrap: wrap; } .p-act #export { flex: 1 1 100%; order: 3; } .tools input[type=search] { width: 100%; } .tools .sp { display: none; } .ntpop { inset-inline-end: auto; inset-inline-start: 0; } }
+/* 작업 영역 (큰 흰 상자) · 밑줄 탭 · 도구 줄 · 펼침 메뉴 (2026-11-19) */
+.work { background: #fff; border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 2px 10px rgba(38,38,38,.05); overflow: visible; }
+.wtabs { display: flex; gap: 22px; padding: 0 20px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+.wtabs .tab { position: relative; border: 0; background: none; margin: 0; padding: 15px 0 13px; font-size: 14px; font-weight: 600; color: var(--clia-gray-500); cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent; }
+.wtabs .tab:hover { color: var(--clia-gray-900); }
+.wtabs .tab.on { color: var(--clia-gray-900); border-bottom-color: var(--clia-gray-900); }
+.wtabs .tab b { margin-inline-start: 6px; font-size: 12px; font-weight: 600; color: var(--clia-gray-400); background: none; padding: 0; }
+.wtabs .tab.on b { color: var(--clia-gray-700); }
+.wtabs .tab.rv { color: var(--bad); }
+.wtabs .tab.rv b { display: inline-block; min-width: 18px; padding: 0 5px; line-height: 18px; border-radius: 999px; background: var(--bad); color: #fff; text-align: center; }
+.wtabs .tab.rv.on { border-bottom-color: var(--bad); }
+.wbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 12px 16px; border-bottom: 1px solid var(--clia-gray-100); }
+.wbar .sp { flex: 1; }
+.ctlb { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid var(--clia-gray-300); border-radius: 8px; background: #fff; color: var(--clia-gray-900); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+.ctlb:hover:not(:disabled) { border-color: var(--clia-gray-600); }
+.ctlb:disabled { opacity: .5; cursor: default; }
+.ctlb .k { color: var(--muted); }
+.ctlb .v { font-weight: 700; }
+.ctlb .chev, .ddpop .chev { width: 14px; height: 14px; fill: none; stroke: var(--clia-gray-500); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.ctlb[aria-expanded="true"] { border-color: var(--clia-gray-900); }
+.selall b { font-weight: 500; color: var(--muted); font-size: 12px; }
+.cb { width: 16px; height: 16px; flex: none; border: 1.5px solid var(--clia-gray-400); border-radius: 4px; background: #fff; position: relative; }
+.cb.on, .cb.part { background: var(--red); border-color: var(--red); }
+.cb.on::after { content: ""; position: absolute; left: 4.5px; top: 1px; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.cb.part::after { content: ""; position: absolute; left: 3px; top: 6px; width: 7px; height: 2px; background: #fff; }
+.ddw { position: relative; }
+.ddpop { position: absolute; top: 42px; inset-inline-start: 0; z-index: 7; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.12); min-width: 220px; max-height: 60vh; overflow: auto; }
+.ddpop.wide { min-width: 260px; }
+.ddpop.hidden { display: none !important; }
+.ddpop .opt { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: none; padding: 8px 10px; border-radius: 8px; font: inherit; font-size: 13px; color: var(--clia-gray-900); cursor: pointer; text-align: start; }
+.ddpop .opt:hover:not(:disabled) { background: var(--clia-gray-50); }
+.ddpop .opt:disabled { color: var(--clia-gray-400); cursor: default; }
+.ddpop .opt:disabled .cb { border-color: var(--clia-gray-200); background: var(--clia-gray-50); }
+.ddpop .opt .n { margin-inline-start: auto; color: var(--muted); font-size: 12px; }
+.ddpop .opt:disabled .n { color: var(--clia-gray-300); }
+.ddpop .gh { padding: 8px 10px 2px; font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .04em; }
+.ddpop .hint { padding: 6px 10px 8px; font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--clia-gray-100); margin-bottom: 4px; }
+.wbar .sbox { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid var(--clia-gray-300); border-radius: 8px; width: 260px; background: #fff; }
+.wbar .sbox:focus-within { border-color: var(--clia-gray-900); }
+.wbar .sbox svg { width: 15px; height: 15px; flex: none; fill: none; stroke: var(--clia-gray-500); stroke-width: 2; stroke-linecap: round; }
+.wbar .sbox input[type=search] { flex: 1; min-width: 0; border: 0; outline: none; box-shadow: none; height: 100%; padding: 0; background: none; font: inherit; font-size: 13px; }
+.wbar .view { border: 1px solid var(--clia-gray-300); border-radius: 8px; padding: 2px; gap: 2px; display: inline-flex; background: #fff; }
+.wbar .view button { height: 30px; width: 34px; padding: 0; justify-content: center; border-radius: 6px; color: var(--clia-gray-500); }
+.wbar .view button.on { background: var(--clia-gray-100); color: var(--clia-gray-900); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.work .list { border: 0; border-radius: 0; background: none; }
+.work .list.grid { padding: 14px 16px; }
+.work .skipbox { border: 0; border-radius: 0; background: none; padding: 16px 20px; }
+.wfoot { padding: 10px 20px 12px; font-size: 11px; color: var(--muted); text-align: end; border-top: 1px solid var(--clia-gray-100); }
+.work .item:last-child { border-bottom: 0; }
+@media (max-width: 640px) { .wtabs { padding: 0 14px; gap: 18px; } .wbar { padding: 10px 12px; gap: 6px; } .ctlb { padding: 0 10px; gap: 6px; } .wbar .sp { flex-basis: 100%; height: 0; } .wbar .sbox { flex: 1 1 0; min-width: 0; width: auto; } .work .list { border-radius: 0 0 17px 17px; overflow: hidden; } .wfoot { display: none; } .ddpop { min-width: min(260px, 80vw); } }
 .hidden { display: none !important; }
 .nt input[type=email] { height: 30px; border: 1px solid var(--clia-gray-300); border-radius: 8px; padding: 0 8px; min-width: 200px; font-size: 12px; }
 .modal { position: fixed; inset: 0; background: rgba(38,38,38,.5); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -284,7 +312,7 @@ a.clia-btn { text-decoration: none; }
       <div class="p-top">
         <div class="p-file"><svg viewBox="0 0 24 24"><path d="M4 3h11l5 5v13H4z"/><path d="M15 3v5h5"/></svg><span class="pfn" id="pFile"></span><span class="pmt" id="pMatch"></span><button class="again" id="again" data-i="again"></button></div>
         <div class="p-act">
-          <div class="ntw hidden" id="ntW"><button class="bell" id="ntBtn" aria-expanded="false" aria-controls="ntPop"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span id="ntBtnL"></span></button>
+          <div class="ntw hidden" id="ntW"><button class="bell" id="ntBtn" aria-expanded="false" aria-controls="ntPop"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="sr" id="ntBtnL"></span></button>
             <div class="ntpop hidden" id="ntPop"><div class="ntl" id="ntL"></div><label><input type="checkbox" id="ntB"> <span id="ntBL"></span></label><span id="ntMailW" class="hidden"><label><input type="checkbox" id="ntMailC"> <span id="ntML"></span></label><input type="email" id="ntMail" autocomplete="email"></span></div></div>
           <a class="clia-btn hidden" id="dl" data-i="dlAgain"></a>
           <button class="clia-btn primary big" id="export"></button>
@@ -295,25 +323,21 @@ a.clia-btn { text-decoration: none; }
       <div class="p-reg hidden" id="regCard"><span class="regt" id="regT"></span><label class="sw"><input type="checkbox" id="regSw"><span class="tr"></span><span id="regL"></span></label><span class="regn"><span id="regN"></span> <b id="regE"></b></span></div>
     </div>
     <div class="empty hidden" id="noMatch"><div class="et" id="noMatchT"></div><div class="eb" id="noMatchB"></div></div>
-    <!-- 탭 · 검색 · 보기 (한 줄) -->
-    <div class="bar1">
-      <div class="tabs seg" id="tabs" role="tablist"></div>
-      <span class="sp"></span>
-      <div class="tools">
+    <!-- 작업 영역: 큰 흰 상자 하나 — 위에 탭(밑줄), 그 아래 도구 줄, 그 아래 목록 -->
+    <div class="work" id="work">
+      <div class="wtabs" id="tabs" role="tablist"></div>
+      <div class="wbar" id="selbar">
+        <button class="ctlb selall" id="selAll" type="button"><span class="cb" id="selCb"></span><span id="selL"></span><b id="selN"></b></button>
+        <div class="ddw"><button class="ctlb" id="dvBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="dvPop"></button><div class="ddpop hidden" id="dvPop" role="menu"></div></div>
+        <div class="ddw"><button class="ctlb" id="grpBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="ctl2"></button><div class="ddpop wide hidden" id="ctl2" role="menu"></div></div>
+        <span class="sp"></span>
         <label class="sbox"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="q" autocomplete="off"></label>
-        <span class="view" id="view" role="group"><button data-v="list" aria-label="List"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span id="vList"></span></button><button data-v="grid" aria-label="Gallery"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span id="vGrid"></span></button></span>
+        <span class="view" id="view" role="group"><button data-v="list" type="button"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span class="sr" id="vList"></span></button><button data-v="grid" type="button"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="sr" id="vGrid"></span></button></span>
       </div>
+      <div class="list" id="list"></div>
+      <div class="skipbox hidden" id="skip"><div class="skiph" id="skipSum"></div><ul id="skipList"></ul></div>
+      <div class="wfoot" id="shiftTip"></div>
     </div>
-    <!-- 선택 도구 (흰 카드) -->
-    <div class="selbar" id="selbar">
-      <div class="ctl" id="ctl"></div>
-      <div class="grpw"><button class="pill" id="grpBtn" aria-expanded="false" aria-controls="ctl2"></button><div class="grppop hidden" id="ctl2"></div></div>
-      <span class="qact hidden" id="qAct"><span id="qN"></span><button class="pill" id="qSel"></button><button class="pill" id="qDesel"></button></span>
-      <span class="sp"></span>
-      <span class="tip" id="shiftTip"></span>
-    </div>
-    <div class="list" id="list"></div>
-    <div class="skipbox hidden" id="skip"><div class="skiph" id="skipSum"></div><ul id="skipList"></ul></div>
   </section>
 
 </div></div>
