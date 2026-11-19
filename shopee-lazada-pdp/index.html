@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shopee / Lazada PDP Content Builder</title>
 <link rel="stylesheet" href="../css/fonts.css">
+<!-- CLIA 허브가 ?url= 로 열면 첫 화면(URL 입력)을 그리기 전부터 숨긴다 — 잠깐 보였다 사라지는 깜빡임 없애기 (2026-11-19) -->
+<script>if(new URLSearchParams(location.search).get('url'))document.documentElement.classList.add('clia-direct');</script>
+<style>.clia-direct .intro-view{display:none!important}</style>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'LGEIText', 'LINESeedSansTH',Arial,sans-serif;background:#F6F3EB;height:100vh;overflow:hidden;display:flex;flex-direction:column}
@@ -265,18 +268,20 @@ if (CHANNEL === 'shopee') {
 // ══════════════════════════════════════════
 // Intro
 // ══════════════════════════════════════════
-function introGo() {
+function introGo(instant) {
   const url = document.getElementById('introUrl').value.trim();
   if (!url) { document.getElementById('introUrl').focus(); return; }
   document.getElementById('pdpUrl').value = url;
   const iv = document.getElementById('introView');
-  iv.classList.add('fading');
-  setTimeout(() => {
+  const show = () => {
     iv.classList.add('hidden');
     document.getElementById('mainHeader').style.display = '';
     document.getElementById('mainWorkspace').style.display = '';
     analyzePDP();
-  }, 380);
+  };
+  if (instant) return show();   // CLIA 에서 바로 열 때: 첫 화면 페이드 없이 곧바로
+  iv.classList.add('fading');
+  setTimeout(show, 380);
 }
 
 // ══════════════════════════════════════════
@@ -1371,7 +1376,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const url = new URLSearchParams(location.search).get('url');
   if (!url) return;
   document.getElementById('introUrl').value = url;
-  introGo();
+  introGo(true);
 });
 </script>
 <!-- 벌크 엑셀 (2026-11-18): 버튼을 누르면 이 화면 위에 /bulk/ 를 띄운다. 닫기는 /bulk/ 가 postMessage('clia-bulk-close') -->
