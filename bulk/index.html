@@ -195,47 +195,9 @@ a.clia-btn { text-decoration: none; }
 .skipbox .skiph { font-weight: 700; margin-bottom: 8px; color: var(--clia-gray-900); }
 .skipbox ul { margin: 0; padding-inline-start: 18px; line-height: 2; }
 @media (max-width: 640px) { .panel { position: static; padding: 12px 14px; } .p-file { flex-wrap: wrap; flex-basis: 100%; } .pfn { flex: 1 1 0; } .pmt { white-space: normal; flex-basis: 100%; order: 3; } .p-act { width: 100%; justify-content: flex-end; flex-wrap: wrap; } .p-act #export { flex: 1 1 100%; order: 3; } .tools input[type=search] { width: 100%; } .tools .sp { display: none; } }
-/* 작업 영역 (큰 흰 상자) · 밑줄 탭 · 도구 줄 · 펼침 메뉴 (2026-11-19) */
+/* 작업 영역 (큰 흰 상자) (2026-11-19) — 밑줄 탭 · 도구 줄 · 펼침 메뉴는 shared/clia-ui.css 로 옮김 (CLIA 제품 목록과 같은 모양) */
 .work { background: #fff; border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 2px 10px rgba(38,38,38,.05); overflow: visible; }
-.wtabs { display: flex; gap: 22px; padding: 0 20px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
-.wtabs .tab { position: relative; border: 0; background: none; margin: 0; padding: 15px 0 13px; font-size: 14px; font-weight: 600; color: var(--clia-gray-500); cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent; }
-.wtabs .tab:hover { color: var(--clia-gray-900); }
-.wtabs .tab.on { color: var(--clia-gray-900); border-bottom-color: var(--clia-gray-900); }
-.wtabs .tab b { margin-inline-start: 6px; font-size: 12px; font-weight: 600; color: var(--clia-gray-400); background: none; padding: 0; }
-.wtabs .tab.on b { color: var(--clia-gray-700); }
-.wtabs .tab.rv { color: var(--bad); }
-.wtabs .tab.rv b { display: inline-block; min-width: 18px; padding: 0 5px; line-height: 18px; border-radius: 999px; background: var(--bad); color: #fff; text-align: center; }
-.wtabs .tab.rv.on { border-bottom-color: var(--bad); }
-.wbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 12px 16px; border-bottom: 1px solid var(--clia-gray-100); }
-.wbar .sp { flex: 1; }
-.ctlb { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid var(--clia-gray-300); border-radius: 8px; background: #fff; color: var(--clia-gray-900); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; }
-.ctlb:hover:not(:disabled) { border-color: var(--clia-gray-600); }
-.ctlb:disabled { opacity: .5; cursor: default; }
-.ctlb .k { color: var(--muted); }
-.ctlb .v { font-weight: 700; }
-.ctlb .chev, .ddpop .chev { width: 14px; height: 14px; fill: none; stroke: var(--clia-gray-500); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-.ctlb[aria-expanded="true"] { border-color: var(--clia-gray-900); }
 .selall b { font-weight: 500; color: var(--muted); font-size: 12px; }
-.cb { width: 16px; height: 16px; flex: none; border: 1.5px solid var(--clia-gray-400); border-radius: 4px; background: #fff; position: relative; }
-.cb.on, .cb.part { background: var(--red); border-color: var(--red); }
-.cb.on::after { content: ""; position: absolute; left: 4.5px; top: 1px; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
-.cb.part::after { content: ""; position: absolute; left: 3px; top: 6px; width: 7px; height: 2px; background: #fff; }
-.ddw { position: relative; }
-.ddpop { position: absolute; top: 42px; inset-inline-start: 0; z-index: 7; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.12); min-width: 220px; max-height: 60vh; overflow: auto; }
-.ddpop.wide { min-width: 260px; }
-.ddpop.hidden { display: none !important; }
-.ddpop .opt { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: none; padding: 8px 10px; border-radius: 8px; font: inherit; font-size: 13px; color: var(--clia-gray-900); cursor: pointer; text-align: start; }
-.ddpop .opt:hover:not(:disabled) { background: var(--clia-gray-50); }
-.ddpop .opt:disabled { color: var(--clia-gray-400); cursor: default; }
-.ddpop .opt:disabled .cb { border-color: var(--clia-gray-200); background: var(--clia-gray-50); }
-.ddpop .opt .n { margin-inline-start: auto; color: var(--muted); font-size: 12px; }
-.ddpop .opt:disabled .n { color: var(--clia-gray-300); }
-.ddpop .gh { padding: 8px 10px 2px; font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .04em; }
-.ddpop .hint { padding: 6px 10px 8px; font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--clia-gray-100); margin-bottom: 4px; }
-.wbar .sbox { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid var(--clia-gray-300); border-radius: 8px; width: 260px; background: #fff; }
-.wbar .sbox:focus-within { border-color: var(--clia-gray-900); }
-.wbar .sbox svg { width: 15px; height: 15px; flex: none; fill: none; stroke: var(--clia-gray-500); stroke-width: 2; stroke-linecap: round; }
-.wbar .sbox input[type=search] { flex: 1; min-width: 0; border: 0; outline: none; box-shadow: none; height: 100%; padding: 0; background: none; font: inherit; font-size: 13px; }
 .wbar .view { border: 1px solid var(--clia-gray-300); border-radius: 8px; padding: 2px; gap: 2px; display: inline-flex; background: #fff; }
 .wbar .view button { height: 30px; width: 34px; padding: 0; justify-content: center; border-radius: 6px; color: var(--clia-gray-500); }
 .wbar .view button.on { background: var(--clia-gray-100); color: var(--clia-gray-900); }
@@ -245,7 +207,7 @@ a.clia-btn { text-decoration: none; }
 .work .skipbox { border: 0; border-radius: 0; background: none; padding: 16px 20px; }
 .wfoot { padding: 10px 20px 12px; font-size: 11px; color: var(--muted); text-align: end; border-top: 1px solid var(--clia-gray-100); }
 .work .item:last-child { border-bottom: 0; }
-@media (max-width: 640px) { .wtabs { padding: 0 14px; gap: 18px; } .wbar { padding: 10px 12px; gap: 6px; } .ctlb { padding: 0 10px; gap: 6px; } .wbar .sp { flex-basis: 100%; height: 0; } .wbar .sbox { flex: 1 1 0; min-width: 0; width: auto; } .work .list { border-radius: 0 0 17px 17px; overflow: hidden; } .wfoot { display: none; } .ddpop { min-width: min(260px, 80vw); } }
+@media (max-width: 640px) { .work .list { border-radius: 0 0 17px 17px; overflow: hidden; } .wfoot { display: none; } }
 /* 내보내기 팝업: 예상 소요 시간 · 오래 걸리면 메일 알림 (2026-11-19) */
 .mbox.xpbox { width: min(460px, 100%); padding: 24px 24px 20px; }
 .xph { display: flex; align-items: center; gap: 12px; font-size: 17px; margin-bottom: 6px; }

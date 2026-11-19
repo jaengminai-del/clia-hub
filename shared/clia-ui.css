@@ -80,22 +80,9 @@ body.clia-hub button, body.clia-hub input, body.clia-hub select, body.clia-hub t
 .clia-hub .lh h2 { font-size: 20px; font-weight: 700; color: var(--clia-gray-900); letter-spacing: -.2px; }
 .clia-hub .lh-meta { font-size: 13px; color: var(--clia-gray-500); margin-top: 6px; gap: 12px; }
 .clia-hub .lh-ctrl { padding: 8px 24px 16px; gap: 8px; border-bottom: 1px solid var(--clia-gray-200); }
-.clia-hub .seg { display: inline-flex; padding: 3px; background: var(--clia-gray-100); border-radius: 999px; gap: 2px; }
-.clia-hub .seg button { height: 28px; padding: 0 14px; border: none; border-radius: 999px; background: transparent; color: var(--clia-gray-500); font-size: 12px; font-weight: 500; cursor: pointer; }
-.clia-hub .seg button.act { background: #fff; color: var(--clia-gray-900); box-shadow: 0 1px 3px rgba(38, 38, 38, .12); }
-.clia-hub .fbtn { height: 30px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--clia-gray-300); background: #fff; color: var(--clia-gray-700); font-size: 12px; font-weight: 500; }
-.clia-hub .fbtn:hover { border-color: var(--clia-gray-700); }
-.clia-hub .sub-flt { display: none; width: 100%; flex-wrap: wrap; gap: 6px; padding: 8px 10px; background: var(--clia-gray-50); border: 1px solid var(--clia-gray-200); border-radius: var(--clia-radius); }
-.clia-hub .sfbtn { height: 26px; padding: 0 11px; border-radius: 999px; border: 1px solid transparent; background: transparent; color: var(--clia-gray-600); font-size: 12px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
-.clia-hub .sfbtn span { font-size: 11px; color: var(--clia-gray-400); }
-.clia-hub .sfbtn:hover { background: #fff; border-color: var(--clia-gray-200); }
-.clia-hub .sfbtn.act { background: #fff; border-color: var(--clia-gray-700); color: var(--clia-gray-900); font-weight: 600; }
-.clia-hub .sfbtn.act span { color: var(--clia-gray-500); }
-.clia-hub .fbtn.act { background: var(--clia-brand-soft); border-color: var(--clia-brand); color: var(--clia-brand); }
 .clia-hub .sbox { height: 40px; padding: 0 14px; border: 1px solid var(--clia-gray-300); border-radius: 10px; font-size: 13px; color: var(--clia-gray-900); background: #fff; transition: border-color .15s, box-shadow .15s; }
 .clia-hub .sbox:focus { border-color: var(--clia-brand); box-shadow: 0 0 0 3px var(--clia-brand-soft); }
 .clia-hub .sbox::placeholder { color: var(--clia-gray-400); }
-.clia-hub #prodSearch { flex-basis: 100%; margin-top: 4px; }
 .clia-hub .crawl-url-row { gap: 8px; margin-top: 2px; }
 .clia-hub .crawl-url-btn { height: 40px; padding: 0 20px; border-radius: 999px; background: var(--clia-brand); font-size: 13px; font-weight: 600; }
 .clia-hub .crawl-url-btn:hover { background: var(--clia-brand-hover); }
@@ -401,3 +388,45 @@ body.clia-skin-aplus { font-family: var(--clia-font); background: var(--clia-pag
 .clia-skin-aplus .btn-intro-create:hover:not(:disabled) { background: var(--clia-brand-hover); }
 .clia-skin-aplus .intro-self-link:hover { color: var(--clia-brand); }
 .clia-skin-aplus .intro-status .spinner { border-top-color: var(--clia-brand); }
+
+/* 목록 필터 — 밑줄 탭 · 도구 줄(펼침 버튼 · 검색) · 펼침 메뉴 (2026-11-19)
+   벌크 엑셀(/bulk/)과 CLIA 제품 목록이 같이 쓴다. 두 화면의 필터 모양을 여기 한 곳에서 맞춘다. */
+.wtabs { display: flex; gap: 22px; padding: 0 20px; border-bottom: 1px solid var(--clia-gray-200); overflow-x: auto; scrollbar-width: none; }
+.wtabs .tab { position: relative; border: 0; background: none; margin: 0; padding: 15px 0 13px; font-size: 14px; font-weight: 600; color: var(--clia-gray-500); cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent; }
+.wtabs .tab:hover { color: var(--clia-gray-900); }
+.wtabs .tab.on { color: var(--clia-gray-900); border-bottom-color: var(--clia-gray-900); }
+.wtabs .tab b { margin-inline-start: 6px; font-size: 12px; font-weight: 600; color: var(--clia-gray-400); background: none; padding: 0; }
+.wtabs .tab.on b { color: var(--clia-gray-700); }
+.wtabs .tab.rv { color: #C8241F; }
+.wtabs .tab.rv b { display: inline-block; min-width: 18px; padding: 0 5px; line-height: 18px; border-radius: 999px; background: #C8241F; color: #fff; text-align: center; }
+.wtabs .tab.rv.on { border-bottom-color: #C8241F; }
+.wbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 12px 16px; border-bottom: 1px solid var(--clia-gray-100); }
+.wbar .sp { flex: 1; }
+.ctlb { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid var(--clia-gray-300); border-radius: 8px; background: #fff; color: var(--clia-gray-900); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+.ctlb:hover:not(:disabled) { border-color: var(--clia-gray-600); }
+.ctlb:disabled { opacity: .5; cursor: default; }
+.ctlb .k { color: var(--clia-gray-500); }
+.ctlb .v { font-weight: 700; }
+.ctlb .chev, .ddpop .chev { width: 14px; height: 14px; fill: none; stroke: var(--clia-gray-500); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.ctlb[aria-expanded="true"] { border-color: var(--clia-gray-900); }
+.cb { width: 16px; height: 16px; flex: none; border: 1.5px solid var(--clia-gray-400); border-radius: 4px; background: #fff; position: relative; }
+.cb.on, .cb.part { background: var(--clia-brand); border-color: var(--clia-brand); }
+.cb.on::after { content: ""; position: absolute; left: 4.5px; top: 1px; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.cb.part::after { content: ""; position: absolute; left: 3px; top: 6px; width: 7px; height: 2px; background: #fff; }
+.ddw { position: relative; }
+.ddpop { position: absolute; top: 42px; inset-inline-start: 0; z-index: 7; background: #fff; border: 1px solid var(--clia-gray-200); border-radius: 12px; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.12); min-width: 220px; max-height: 60vh; overflow: auto; }
+.ddpop.wide { min-width: 260px; }
+.ddpop.hidden { display: none !important; }
+.ddpop .opt { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: none; padding: 8px 10px; border-radius: 8px; font: inherit; font-size: 13px; color: var(--clia-gray-900); cursor: pointer; text-align: start; }
+.ddpop .opt:hover:not(:disabled) { background: var(--clia-gray-50); }
+.ddpop .opt:disabled { color: var(--clia-gray-400); cursor: default; }
+.ddpop .opt:disabled .cb { border-color: var(--clia-gray-200); background: var(--clia-gray-50); }
+.ddpop .opt .n { margin-inline-start: auto; color: var(--clia-gray-500); font-size: 12px; }
+.ddpop .opt:disabled .n { color: var(--clia-gray-300); }
+.ddpop .gh { padding: 8px 10px 2px; font-size: 11px; font-weight: 700; color: var(--clia-gray-500); letter-spacing: .04em; }
+.ddpop .hint { padding: 6px 10px 8px; font-size: 11px; color: var(--clia-gray-500); border-bottom: 1px solid var(--clia-gray-100); margin-bottom: 4px; }
+.wbar .sbox { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid var(--clia-gray-300); border-radius: 8px; width: 260px; background: #fff; }
+.wbar .sbox:focus-within { border-color: var(--clia-gray-900); }
+.wbar .sbox svg { width: 15px; height: 15px; flex: none; fill: none; stroke: var(--clia-gray-500); stroke-width: 2; stroke-linecap: round; }
+.wbar .sbox input[type=search] { flex: 1; min-width: 0; border: 0; outline: none; box-shadow: none; height: 100%; padding: 0; background: none; font: inherit; font-size: 13px; }
+@media (max-width: 640px) { .wtabs { padding: 0 14px; gap: 18px; } .wbar { padding: 10px 12px; gap: 6px; } .ctlb { padding: 0 10px; gap: 6px; } .wbar .sp { flex-basis: 100%; height: 0; } .wbar .sbox { flex: 1 1 0; min-width: 0; width: auto; } .ddpop { min-width: min(260px, 80vw); } }

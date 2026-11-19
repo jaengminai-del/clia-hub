@@ -36,8 +36,6 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 .lh{padding:12px 14px 8px;border-bottom:1px solid #eee;}.lh h2{font-size:14px;font-weight:700;}
 .lh-meta{font-size:10px;color:#999;margin-top:2px;display:flex;gap:10px;}
 .lh-ctrl{display:flex;align-items:center;gap:6px;padding:8px 14px;border-bottom:1px solid #eee;flex-wrap:wrap;}
-.fbtn{padding:4px 10px;border-radius:12px;border:1px solid #ddd;background:#fff;font-size:10px;font-weight:600;cursor:pointer;}
-.fbtn.act{background:#111;color:#fff;border-color:#111;}
 .sbox{flex:1;min-width:100px;padding:5px 10px;border:1px solid #ddd;border-radius:4px;font-size:11px;outline:none;}.sbox:focus{border-color:#A50034;}
 .lt-wrap{flex:1;overflow-y:auto;}
 .lt{width:100%;border-collapse:collapse;font-size:11px;}
@@ -909,6 +907,13 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 :root{ --clia-font: 'LGEIHeadline', 'LG EI Headline', 'LGEIText', 'LINESeedSansTH', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif; }
 .coffee-card{ font-family:'LGEIText', 'LINESeedSansTH', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
 .coffee-title{ font-family:'LGEIHeadline', 'LINESeedSansTH', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
+/* 제품 목록 왼쪽: 벌크 엑셀 버튼 · 필터 줄 (2026-11-19) — 탭·펼침 메뉴 모양은 shared/clia-ui.css (벌크 엑셀 화면과 같음) */
+.clia-hub .left .lh-ctrl{border-bottom:0;padding-bottom:12px;}
+.clia-hub .bulk-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;}
+.clia-hub .bulk-row .ch-btn.ch-main{height:40px;font-size:13px;}
+.clia-hub .left .wtabs{padding:0 24px;flex:none;}
+.clia-hub .left .wbar{padding:12px 24px;flex:none;}
+.clia-hub .left .wbar .sbox{flex:1 1 150px;width:auto;min-width:0;}
 </style>
 <script src="../shared/clia-card-edit.js"></script>
 <script src="../shared/clia-zoom-bar.js"></script>
@@ -949,15 +954,17 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 <div class="left">
 <div class="lh"><h2 id="listTitle"></h2><div class="lh-meta"><span id="countLabel"></span><span id="listSubtitle"></span></div></div>
 <div class="lh-ctrl">
-<div class="seg" id="viewSeg"><button id="vbtn-all" class="act" onclick="switchView('all',this)">All</button><button id="vbtn-md" onclick="switchView('md-only',this)">Only MD</button></div>
-<button class="fbtn act" onclick="flt('all',this)">All</button>
-<button class="fbtn" onclick="flt('MS',this)">MS</button>
-<button class="fbtn" onclick="flt('HS',this)">HS</button>
-<button class="fbtn" onclick="flt('ES',this)">ES</button>
-<div class="sub-flt" id="subFlt" data-no-i18n></div>
-<input class="sbox" id="prodSearch" placeholder="🔍 Search product name..." oninput="sch(this.value)">
 <div class="crawl-url-row"><input class="sbox" id="newCrawlUrl" placeholder="🔗 LG.com product URL" onkeydown="if(event.key==='Enter')crawlNewUrl()"><button class="crawl-url-btn" id="newCrawlBtn" onclick="crawlNewUrl()">Crawl</button></div>
+<!-- 벌크 엑셀 (2026-11-19): 빌더를 거치지 않고 여기서 바로 연다 — 채널을 정해서 /bulk/ 를 이 화면 위에 띄운다 -->
+<div class="bulk-row"><button class="ch-btn ch-main" style="--ch-color:#EE4D2D" id="bulkShopee" onclick="openBulkExcel('shopee')">Shopee bulk upload</button><button class="ch-btn ch-main" style="--ch-color:#0F146D" id="bulkLazada" onclick="openBulkExcel('lazada')">Lazada bulk upload</button></div>
 <div class="list-warn" id="listWarn"></div>
+</div>
+<!-- 목록 필터 (2026-11-19): 벌크 엑셀 화면과 같은 모양 — 밑줄 탭 · 펼침 버튼(본부 · 제품군) · 검색 -->
+<div class="wtabs" id="viewTabs" role="tablist"></div>
+<div class="wbar">
+<div class="ddw"><button class="ctlb" id="dvBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="dvPop"></button><div class="ddpop hidden" id="dvPop" role="menu"></div></div>
+<div class="ddw"><button class="ctlb" id="grpBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="grpPop"></button><div class="ddpop wide hidden" id="grpPop" role="menu"></div></div>
+<label class="sbox"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="prodSearch" autocomplete="off" oninput="sch(this.value)"></label>
 </div>
 <div class="lt-wrap"><table class="lt"><thead><tr><th>IMG</th><th>DIV</th><th>MODEL</th><th>STATUS</th><th></th></tr></thead><tbody id="pl"></tbody></table></div>
 </div>
@@ -972,6 +979,9 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
   <div class="coffee-status"><span id="coffeeStep"></span><span id="coffeeTime">0:00</span></div>
 </div></div>
 <div class="right" id="rp"><div class="empty"><div class="ico">📋</div><div style="font-size:14px;font-weight:600;">Select a product</div><div style="font-size:11px;color:#aaa;">Click "Detail →" to view</div></div></div>
+<div id="bulkOverlay" style="display:none;position:fixed;inset:0;z-index:2147483000;background:rgba(38,38,38,.45)">
+  <iframe id="bulkFrame" title="Bulk Excel" style="position:absolute;inset:16px;width:calc(100% - 32px);height:calc(100% - 32px);border:0;border-radius:16px;background:#F8F7F5;box-shadow:0 12px 48px rgba(0,0,0,.25)"></iframe>
+</div>
 </div>
 <script>
 // ===== Embedded external HTML files (for fully self-contained portable HTML) =====
@@ -1222,6 +1232,8 @@ function applyCorpUI(){
   document.getElementById('tbAvatar').title=sessionStorage.getItem('clia_user')||'';
   document.getElementById('listTitle').textContent=t('list.title',{c:corpLabel(CORP).replace(/^\S+\s/,'')});
   document.getElementById('listSubtitle').textContent='LG.com/'+CORP_SITE[CORP];
+  document.getElementById('prodSearch').placeholder=t('list.search');
+  [['bulkShopee','shopee','Shopee'],['bulkLazada','lazada','Lazada']].forEach(([id,k,ch])=>{const b=document.getElementById(id);b.textContent=t('bulk.'+k);b.title=t('bulk.tip',{ch});});
   const u=sessionStorage.getItem('clia_user')||'';
   document.getElementById('tbAvatar').textContent=(u.replace(/[^\p{L}\p{N}]/gu,'').slice(0,2)||'JJ').toUpperCase();
   startI18n();
@@ -2287,31 +2299,84 @@ Object.assign(I18N.en,{'grp.Other':'Other','grp.TV':'TV','grp.Audio':'Audio','gr
 Object.assign(I18N.de,{'grp.Other':'Sonstiges','grp.TV':'TV','grp.Audio':'Audio','grp.Monitor':'Monitor','grp.Laptop':'Laptop','grp.Projector':'Beamer','grp.Fridge':'Kühlschrank','grp.Washer':'Waschmaschine','grp.Dryer':'Trockner','grp.Vacuum':'Staubsauger','grp.Dishwasher':'Geschirrspüler','grp.Cooking':'Kochen','grp.Styler':'Styler','grp.AC':'Klimaanlage','grp.Purifier':'Luftreiniger','grp.Dehumidifier':'Luftentfeuchter','grp.all':'Alle'});
 Object.assign(I18N.th,{'grp.Other':'อื่น ๆ','grp.TV':'ทีวี','grp.Audio':'เครื่องเสียง','grp.Monitor':'จอมอนิเตอร์','grp.Laptop':'แล็ปท็อป','grp.Projector':'โปรเจกเตอร์','grp.Fridge':'ตู้เย็น','grp.Washer':'เครื่องซักผ้า','grp.Dryer':'เครื่องอบผ้า','grp.Vacuum':'เครื่องดูดฝุ่น','grp.Dishwasher':'เครื่องล้างจาน','grp.Cooking':'เครื่องครัว','grp.Styler':'สไตเลอร์','grp.AC':'เครื่องปรับอากาศ','grp.Purifier':'เครื่องฟอกอากาศ','grp.Dehumidifier':'เครื่องลดความชื้น','grp.all':'ทั้งหมด'});
 Object.assign(I18N.ar,{'grp.Other':'أخرى','grp.TV':'تلفزيون','grp.Audio':'الصوتيات','grp.Monitor':'شاشة','grp.Laptop':'لابتوب','grp.Projector':'بروجكتور','grp.Fridge':'ثلاجة','grp.Washer':'غسالة','grp.Dryer':'مجفف','grp.Vacuum':'مكنسة','grp.Dishwasher':'غسالة صحون','grp.Cooking':'الطهي','grp.Styler':'ستايلر','grp.AC':'مكيف','grp.Purifier':'منقي هواء','grp.Dehumidifier':'مزيل رطوبة','grp.all':'الكل'});
-let curSub='all';
-function renderSubFilter(){
-  const box=document.getElementById('subFlt');if(!box)return;
-  if(!['MS','HS','ES'].includes(curFilter)){box.innerHTML='';box.style.display='none';return;}
-  const cnt={};
-  P.filter(p=>productCorp(p)===CORP&&p.dv===curFilter&&(curView!=='md-only'||p.md)).forEach(p=>{const g=grpOf(p);cnt[g]=(cnt[g]||0)+1;});
-  const keys=(GRP_ORDER[curFilter]||[]).filter(k=>cnt[k]);
-  if(curSub!=='all'&&!cnt[curSub])curSub='all';
-  box.style.display=keys.length>1?'flex':'none';
-  box.innerHTML=[`<button class="sfbtn${curSub==='all'?' act':''}" onclick="subFlt('all')">${t('grp.all')}</button>`]
-    .concat(keys.map(k=>`<button class="sfbtn${curSub===k?' act':''}" onclick="subFlt('${k}')">${t('grp.'+k)} <span>${cnt[k]}</span></button>`)).join('');
+// 목록 필터 · 벌크 엑셀 버튼 (2026-11-19) — 필터 낱말은 벌크 엑셀 화면(bulk/bulk-i18n.js)과 같다
+Object.assign(I18N.en,{'tab.all':'All','tab.md':'Only MD','flt.dv':'Division','flt.grp':'Product group','flt.all':'All','flt.none':'None','flt.n':'{n} selected','flt.grpHint':'Only groups in the selected divisions can be chosen','list.search':'Search product name...','bulk.shopee':'Shopee bulk upload','bulk.lazada':'Lazada bulk upload','bulk.tip':'Upload a {ch} bulk Excel — CLIA fills in the product descriptions, and crawls LG.com for products it does not have yet'});
+Object.assign(I18N.de,{'tab.all':'Alle','tab.md':'Nur MD','flt.dv':'Bereich','flt.grp':'Produktgruppe','flt.all':'Alle','flt.none':'Keine','flt.n':'{n} gewählt','flt.grpHint':'Nur Gruppen der gewählten Bereiche sind wählbar','list.search':'Produktname suchen...','bulk.shopee':'Shopee-Bulk-Upload','bulk.lazada':'Lazada-Bulk-Upload','bulk.tip':'{ch}-Bulk-Excel hochladen — CLIA füllt die Produktbeschreibungen und crawlt fehlende Produkte von LG.com'});
+Object.assign(I18N.th,{'tab.all':'ทั้งหมด','tab.md':'เฉพาะ MD','flt.dv':'หน่วยธุรกิจ','flt.grp':'กลุ่มสินค้า','flt.all':'ทั้งหมด','flt.none':'ไม่ได้เลือก','flt.n':'เลือก {n}','flt.grpHint':'เลือกได้เฉพาะกลุ่มสินค้าของหน่วยธุรกิจที่เลือก','list.search':'ค้นหาชื่อสินค้า...','bulk.shopee':'อัปโหลด Shopee แบบกลุ่ม','bulk.lazada':'อัปโหลด Lazada แบบกลุ่ม','bulk.tip':'อัปโหลดไฟล์ Excel แบบกลุ่มของ {ch} — CLIA จะเติมรายละเอียดสินค้า และครอว์ลสินค้าที่ยังไม่มีจาก LG.com'});
+Object.assign(I18N.ar,{'tab.all':'الكل','tab.md':'MD فقط','flt.dv':'القطاع','flt.grp':'فئة المنتج','flt.all':'الكل','flt.none':'لا شيء','flt.n':'{n} محدد','flt.grpHint':'يمكن اختيار فئات القطاعات المحددة فقط','list.search':'ابحث عن اسم المنتج...','bulk.shopee':'رفع جماعي إلى Shopee','bulk.lazada':'رفع جماعي إلى Lazada','bulk.tip':'ارفع ملف Excel المجمّع لـ {ch} — يملأ CLIA أوصاف المنتجات ويزحف إلى LG.com للمنتجات غير الموجودة'});
+// 벌크 엑셀: 이 화면 위에 /bulk/ 를 띄운다 (채널·법인·언어를 넘긴다). 닫으면 벌크가 새로 크롤한 제품까지 목록을 다시 불러온다
+function openBulkExcel(ch){
+  const p=new URLSearchParams({embed:'1',channel:ch,lang:_txLang(),corp:CORP});
+  document.getElementById('bulkFrame').src=CRAWLER_API+'/bulk/?'+p;
+  document.getElementById('bulkOverlay').style.display='block';
 }
-function subFlt(k){curSub=k;renderList();}
-let curFilter='all',curSearch='',curView='all',selId=null;
+function closeBulkExcel(){
+  document.getElementById('bulkOverlay').style.display='none';
+  document.getElementById('bulkFrame').removeAttribute('src');
+  loadCrawledProducts();
+}
+window.addEventListener('message',e=>{if(e.data==='clia-bulk-close'&&e.source===document.getElementById('bulkFrame').contentWindow)closeBulkExcel();});
+// 목록 필터 (2026-11-19) — 벌크 엑셀 화면과 같은 모양·동작: 밑줄 탭(전체 · MD만) + 펼침 버튼(본부 · 제품군, 체크와 보이는/전체 개수) + 검색
+const FLT_DIVS=['MS','HS','ES'];
+const fltOff=new Set();   // 숨긴 제품군 'MS|TV' — 비어 있으면 전부 보인다 (새로 크롤해 생긴 제품군은 기본으로 보인다)
+const fltKey=(dv,g)=>dv+'|'+g;
+const fltShown=p=>!fltOff.has(fltKey(p.dv,grpOf(p)));
+const fltEsc=v=>String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+let curSearch='',curView='all',selId=null;
+function fltCorpRows(){return P.filter(p=>productCorp(p)===CORP);}
+function fltViewRows(){const r=fltCorpRows();return curView==='md-only'?r.filter(p=>p.md):r;}
+// 지금 탭에 있는 본부·제품군만 [[본부,[제품군…]]] — 순서는 벌크 엑셀과 같다
+function fltTree(rows){
+  const dvs=FLT_DIVS.concat([...new Set(rows.map(p=>p.dv).filter(d=>d&&!FLT_DIVS.includes(d)))]);
+  return dvs.map(dv=>{const have=new Set(rows.filter(p=>p.dv===dv).map(grpOf));const ord=GRP_ORDER[dv]||[];
+    return [dv,ord.filter(g=>have.has(g)).concat([...have].filter(g=>!ord.includes(g)))];}).filter(([,gs])=>gs.length);
+}
+function renderFilters(){
+  const all=fltCorpRows(),mdN=all.filter(p=>p.md).length;
+  if(curView==='md-only'&&!mdN)curView='all';
+  const tabs=[['all',t('tab.all'),all.length],['md-only',t('tab.md'),mdN]].filter(([k,,n])=>k==='all'||n);
+  document.getElementById('viewTabs').innerHTML=tabs.map(([k,l,n])=>`<button class="tab${curView===k?' on':''}" role="tab" aria-selected="${curView===k}" data-tab="${k}">${fltEsc(l)}<b>${n}</b></button>`).join('');
+  const rows=fltViewRows(),tree=fltTree(rows);
+  const chev='<svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
+  const lbl=(k,v)=>`<span class="k">${fltEsc(t(k))}</span><span class="v">${fltEsc(v)}</span>${chev}`;
+  const cbOf=(k,n)=>k===0?'':(k===n?'on':'part'),ariaOf=(k,n)=>k===0?'false':(k===n?'true':'mixed');
+  const ofDv=dv=>rows.filter(p=>p.dv===dv),ofGrp=(dv,g)=>rows.filter(p=>p.dv===dv&&grpOf(p)===g);
+  const dvK={},dvN={};tree.forEach(([dv])=>{const r=ofDv(dv);dvN[dv]=r.length;dvK[dv]=r.filter(fltShown).length;});
+  const dvOn=tree.map(([dv])=>dv).filter(dv=>dvK[dv]>0);
+  document.getElementById('dvBtn').innerHTML=lbl('flt.dv',tree.every(([dv])=>dvK[dv]===dvN[dv])?t('flt.all'):(!dvOn.length?t('flt.none'):dvOn.join(', ')));
+  document.getElementById('dvPop').innerHTML=tree.map(([dv])=>`<button class="opt" role="menuitemcheckbox" aria-checked="${ariaOf(dvK[dv],dvN[dv])}" data-dv="${fltEsc(dv)}"><span class="cb ${cbOf(dvK[dv],dvN[dv])}"></span>${fltEsc(dv)}<span class="n">${dvK[dv]}/${dvN[dv]}</span></button>`).join('');
+  document.getElementById('dvBtn').disabled=document.getElementById('grpBtn').disabled=!tree.length;   // 제품이 없으면 펼칠 것도 없다
+  const gs=tree.flatMap(([dv,g])=>g.map(x=>[dv,x])),gOn=gs.filter(([dv,g])=>!fltOff.has(fltKey(dv,g)));
+  document.getElementById('grpBtn').innerHTML=lbl('flt.grp',gOn.length===gs.length?t('flt.all'):(gOn.length?t('flt.n',{n:gOn.length}):t('flt.none')));
+  document.getElementById('grpPop').innerHTML=`<div class="hint">${fltEsc(t('flt.grpHint'))}</div>`+tree.map(([dv,g])=>`<div class="gh">${fltEsc(dv)}</div>`+g.map(x=>{
+    const n=ofGrp(dv,x).length,k=fltOff.has(fltKey(dv,x))?0:n;
+    return `<button class="opt" role="menuitemcheckbox" aria-checked="${ariaOf(k,n)}" data-dv="${fltEsc(dv)}" data-grp="${fltEsc(x)}"${dvK[dv]?'':' disabled'}><span class="cb ${cbOf(k,n)}"></span>${fltEsc(t('grp.'+x)==='grp.'+x?x:t('grp.'+x))}<span class="n">${k}/${n}</span></button>`;}).join('')).join('');
+}
+// 본부: 다 보이면 숨기고, 아니면 전부 보인다 · 제품군: 하나씩 켜고 끈다 (숨긴 본부의 제품군은 고를 수 없다)
+function fltPick(e){
+  const o=e.target.closest('.opt');if(!o||o.disabled)return;
+  const dv=o.dataset.dv,g=o.dataset.grp;
+  if(g){const k=fltKey(dv,g);fltOff.has(k)?fltOff.delete(k):fltOff.add(k);}
+  else{const tr=fltTree(fltViewRows()).find(([d])=>d===dv);if(!tr)return;
+    const rows=fltViewRows().filter(p=>p.dv===dv),allOn=rows.every(fltShown);
+    tr[1].forEach(x=>allOn?fltOff.add(fltKey(dv,x)):fltOff.delete(fltKey(dv,x)));}
+  renderList();
+}
+(function(){
+  const POPS=[['dvBtn','dvPop'],['grpBtn','grpPop']],$=id=>document.getElementById(id);
+  const closePops=keep=>POPS.forEach(([b,x])=>{if(x!==keep){$(x).classList.add('hidden');$(b).setAttribute('aria-expanded','false');}});
+  POPS.forEach(([b,x])=>{
+    $(b).onclick=e=>{e.stopPropagation();closePops(x);const shut=$(x).classList.toggle('hidden');$(b).setAttribute('aria-expanded',String(!shut));};
+    $(x).addEventListener('click',e=>{e.stopPropagation();fltPick(e);});
+  });
+  document.addEventListener('click',()=>closePops());
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closePops();});
+  $('viewTabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(!b)return;curView=b.dataset.tab;renderList();};
+})();
 function renderList(){
   const tb=document.getElementById('pl');
-  renderSubFilter();
-  let fp=P.filter(p=>productCorp(p)===CORP).filter(p=>{
-    if(curView==='md-only')return p.md;
-    return true;
-  }).filter(p=>{
-    if(curFilter==='all')return true;
-    if(curFilter==='MS'||curFilter==='HS'||curFilter==='ES')return p.dv===curFilter&&(curSub==='all'||grpOf(p)===curSub);
-    return p.cat===curFilter;
-  }).filter(p=>{
+  renderFilters();
+  let fp=fltViewRows().filter(fltShown).filter(p=>{
     if(!curSearch)return true;
     const s=curSearch;
     return p.id.toLowerCase().includes(s)||p.nm.toLowerCase().includes(s)||p.cat.toLowerCase().includes(s)||p.sub.toLowerCase().includes(s);
@@ -2320,9 +2385,7 @@ function renderList(){
   document.getElementById('countLabel').textContent=t('list.count',{n:fp.length});
   const pc=document.getElementById('prodCount');if(pc)pc.textContent=P.filter(x=>productCorp(x)===CORP).length;   // 상단 배지 = 법인 전체 제품 수
 }
-function flt(f,el){curFilter=f;curSub='all';document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('act'));el.classList.add('act');renderList();}
 function sch(v){curSearch=v.toLowerCase();renderList();}
-function switchView(v,el){curView=v;curFilter='all';curSub='all';document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('act',b===el));document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('act'));document.querySelector('.fbtn').classList.add('act');renderList();}
 
 function sel(id){
   selId=id;renderList();
