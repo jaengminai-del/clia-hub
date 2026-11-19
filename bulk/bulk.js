@@ -87,6 +87,7 @@
       Object.assign(S, { job: null, q: '', last: null, regOn: false, own: {}, force: new Set(), ack: new Set() });
       $('q').value = '';
       setData(d, true);
+      askRegister();
     } catch (e) { fail(e.code || 'other', { maxMb: e.maxMb, error: e.message, fileName: f.name }); }
   }
 
@@ -151,6 +152,7 @@
     else if (it.status === 'crawling') h = `<span class="badge b-run">${esc(t('st_crawl'))}</span>`;
     else if (it.status === 'working') h = `<span class="badge b-run">${esc(t('w'))}</span>`;
     else if (it.status === 'failed') h = `<span class="badge b-bad">${esc(t('bad'))}</span>`;
+    else if (it.status === 'cancelled') h = `<span class="badge b-q">${esc(t('st_stop'))}</span>`;
     else h = `<span class="badge ${it.prevLen > 0 ? 'b-rep' : 'b-ok'}">${esc(it.prevLen > 0 ? t('okRep') : t('ok'))}</span><span class="note">${esc(t('imgs', it.images))}</span>`;
     return h + flagHtml(r);
   }
@@ -170,13 +172,16 @@
       $('misB2').textContent = t('useAs', chName(CH0)); $('misB2').dataset.ch = CH0;
     }
     const rows = act();
-    // CLIA 에 없는 상품 → 같은 나라 LG.com 에서 찾은 것을 등록할지
-    const notIn = S.reg.length + S.skip.filter((r) => r.why === 'rNone').length;
-    $('regCard').classList.toggle('hidden', !notIn || !d.site);
-    if (notIn && d.site) {
-      $('regT').textContent = t('regT', notIn, S.reg.length, d.site);
-      $('regSw').checked = S.regOn; $('regSw').disabled = S.busy || !S.reg.length;
-      $('regL').textContent = t('regSw'); $('regN').textContent = t('regNote', d.site);
+    // CLIA 에 없지만 같은 나라 LG.com 에 있는 상품 → 한 줄 + 버튼 하나 (켜면 등록하고 함께 채운다)
+    const nReg = S.reg.length;
+    $('regCard').classList.toggle('hidden', !nReg || !d.site);
+    if (nReg && d.site) {
+      $('regCard').classList.toggle('on', S.regOn);
+      $('regCard').querySelector('.regi path').setAttribute('d', S.regOn ? 'M5 12.5l4.5 4.5L19 7.5' : 'M12 5v14M5 12h14');   // 켜면 ✓
+      $('regT').textContent = t(S.regOn ? 'regOn' : 'regOff', nReg, d.site);
+      $('regBtn').textContent = S.regOn ? t('regUndo') : t('regDo', nReg);
+      $('regBtn').className = 'clia-btn' + (S.regOn ? '' : ' primary');
+      $('regBtn').disabled = S.busy;
     }
     $('noMatch').classList.toggle('hidden', rows.length > 0 || S.reg.length > 0);
     $('noMatchT').textContent = t('noMatchT'); $('noMatchB').textContent = t('noMatchB');
@@ -257,16 +262,17 @@
     // 상황판
     const c = rows.filter((r) => S.sel.has(r.row)), rep = c.filter((r) => r.descLen > 0).length;
     const nNew = c.filter((r) => r.kind === 'new').length;
-    $('regE').textContent = S.regOn && nNew ? t('regEst', estMin(nNew, c.length)) : '';
     const j = S.job, running = j && j.status === 'running';
     if (running) {
       const crawling = j.crawlTotal && j.crawlDone < j.crawlTotal;
       $('info').textContent = crawling ? t('progCrawl', j.crawlDone, j.crawlTotal) : t('progMake', j.done, j.total);
       $('prog').firstElementChild.style.width = (100 * (crawling ? j.crawlDone / j.crawlTotal : j.done / Math.max(1, j.total))) + '%';
     } else if (j && j.status === 'ready') $('info').innerHTML = t('done', j.ok, j.replaced, j.failed) + (rvN ? ` <button class="lnk" data-tab="review">${esc(t('rvLink', rvN))}</button>` : '');
+    else if (j && j.status === 'cancelled') $('info').innerHTML = `<span>${esc(t('stopped', j.ok || 0, j.total || (j.items || []).length))}</span>`;
     else if (j && j.status === 'failed') $('info').innerHTML = `<span style="color:var(--bad)">${esc(t('expFail') + (j.error || ''))}</span>`;
     else $('info').innerHTML = `<span>${t('info', c.length, rep)}</span>` + (rvN ? ` <button class="lnk" data-tab="review">${esc(t('rvLink', rvN))}</button>` : '');
     $('prog').classList.toggle('hidden', !running);
+    $('stop').classList.toggle('hidden', !running); $('stop').textContent = t('stop');   // 진행 중일 때만 중단
     // 알림 고르기: 오래 걸릴 작업(새로 등록 포함 또는 상품 40개 초과)에만
     $('export').textContent = S.busy ? t('exporting') : (j && !running ? t('expAgain', c.length) : t('exp', c.length));
     $('export').disabled = S.busy || !c.length || !S.channel || !S.data.cols.desc;
@@ -329,7 +335,22 @@
   });
 
   // 등록 스위치 · 주소 직접 넣기
-  $('regSw').onchange = () => { S.regOn = $('regSw').checked; render(true); };
+  $('regBtn').onclick = () => { S.regOn = !S.regOn; render(true); };
+  // 올리자마자 묻는다: CLIA 에 없지만 LG.com 에 있는 상품을 등록하고 함께 채울지 (중요한 기능이라 놓치지 않게)
+  const rgClose = () => $('rg').classList.add('hidden');
+  function askRegister() {
+    const d = S.data, n = S.reg.length;
+    if (!n || !d || !d.site) return;
+    $('rgT').textContent = t('rgT', n); $('rgB').textContent = t('rgB', d.site);
+    const MAX = 8, models = S.reg.map((r) => r.p.model).filter(Boolean);
+    $('rgM').innerHTML = models.slice(0, MAX).map((m) => `<span>${esc(m)}</span>`).join('') + (models.length > MAX ? `<span class="more">${esc(t('rgMore', models.length - MAX))}</span>` : '');
+    $('rgYes').textContent = t('rgYes', n); $('rgNo').textContent = t('rgNo');
+    $('rg').classList.remove('hidden'); $('rgYes').focus();
+  }
+  $('rgYes').onclick = () => { rgClose(); S.regOn = true; render(true); };
+  $('rgNo').onclick = rgClose;
+  $('rg').onclick = (e) => { if (e.target === $('rg')) rgClose(); };
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('rg').classList.contains('hidden')) rgClose(); });
   $('skipList').addEventListener('click', async (e) => {
     const b = e.target.closest('button[data-uadd]');
     if (!b) return;
@@ -419,6 +440,24 @@
   $('xp').onclick = (e) => { if (e.target === $('xp')) xpClose(); };
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') xpClose(); });
   const lastKey = 'clia-bulk-last-' + (CH0 || 'any');
+  // ── 중단: 확인 팝업 → 서버에 cancel. 이미 등록한 제품은 남고 엑셀은 만들지 않는다 ──
+  const cfClose = () => $('cf').classList.add('hidden');
+  function askStop(id, after) {
+    $('cfT').textContent = t('stopT'); $('cfB').textContent = t('stopB'); $('cfErr').textContent = '';
+    $('cfNo').textContent = t('stopKeep'); $('cfYes').textContent = t('stop'); $('cfYes').disabled = false;
+    $('cfYes').onclick = async () => {
+      $('cfYes').disabled = true;
+      try {
+        const j = await api(`/api/v1/bulk/jobs/${id}/cancel`, {});
+        cfClose(); after(j);
+      } catch (e) { $('cfErr').textContent = t('stopFail') + e.message; $('cfYes').disabled = false; }
+    };
+    $('cf').classList.remove('hidden'); $('cfNo').focus();
+  }
+  $('cfNo').onclick = cfClose;
+  $('cf').onclick = (e) => { if (e.target === $('cf')) cfClose(); };
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('cf').classList.contains('hidden')) cfClose(); });
+  $('stop').onclick = () => { if (S.job && S.job.id && S.job.status === 'running') askStop(S.job.id, (j) => { S.job = j; render(false); }); };
   async function poll(j) {
     S.busy = true; S.job = j; render(false);
     try {
@@ -434,7 +473,7 @@
     S.busy = false;
     render(false);
     if ($('xpSetW').classList.contains('hidden')) xpClose();   // 끝났으면 팝업을 닫는다 (메일 주소를 넣었으면 그 안내는 남긴다)
-    document.title = (S.job.status === 'ready' ? '✓ ' : '! ') + 'Bulk Excel — CLIA';
+    document.title = (S.job.status === 'ready' ? '✓ ' : S.job.status === 'cancelled' ? '' : '! ') + 'Bulk Excel — CLIA';
     if (S.job.status === 'ready' && S.autoDl) $('dl').click();
   }
   $('export').onclick = async () => {
@@ -481,9 +520,12 @@
     if (last && last.job && Date.now() - last.at < 7 * 864e5) {
       api('/api/v1/bulk/jobs/' + last.job).then((j) => {
         $('resume').classList.remove('hidden');
-        $('resumeT').textContent = t('resumeT', last.file || '') + ' · ' + (j.status === 'running' ? t('resumeRun', j.done, j.total) : t('resumeDone'));
+        const label = (x) => t('resumeT', last.file || '') + ' · ' + (x.status === 'running' ? t('resumeRun', x.done, x.total) : x.status === 'cancelled' ? t('st_stop') : t('resumeDone'));
+        $('resumeT').textContent = label(j);
         $('resumeB').textContent = t('resumeBtn');
         $('resumeB').onclick = () => resume(last.job);
+        $('resumeS').textContent = t('stop'); $('resumeS').classList.toggle('hidden', j.status !== 'running');
+        $('resumeS').onclick = () => askStop(last.job, (x) => { $('resumeT').textContent = label(x); $('resumeS').classList.add('hidden'); });
       }).catch(() => {});
     }
   }
