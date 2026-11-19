@@ -26,7 +26,7 @@
   const grpName = (g) => (T.grp || TX.en.grp)[g] || g;
   const CH0 = ['shopee', 'lazada'].includes(qs.get('channel')) ? qs.get('channel') : '';
   const chName = (c) => (c === 'lazada' ? 'Lazada' : 'Shopee');
-  const S = { q: '', last: null, mis: '', data: null, channel: CH0, ok: [], reg: [], skip: [], regOn: false, own: {}, sel: new Set(), force: new Set(), ack: new Set(), job: null, busy: false, cfg: {} };
+  const S = { tab: 'all', q: '', last: null, mis: '', data: null, channel: CH0, ok: [], reg: [], skip: [], regOn: false, own: {}, sel: new Set(), force: new Set(), ack: new Set(), job: null, busy: false, cfg: {} };
   const act = () => (S.regOn ? S.ok.concat(S.reg) : S.ok);
 
   document.documentElement.lang = L;
@@ -52,7 +52,7 @@
 
   function fail(code, extra) {
     const [title, body] = T['e_' + code] || TX.en['e_' + code] || T.e_other;
-    show('s1'); $('foot').style.display = 'none';
+    show('s1');
     $('et').textContent = title.replace('{n}', (extra && extra.maxMb) || 40);
     $('eb').textContent = body || (extra && extra.error) || '';
     $('ef').textContent = (extra && extra.fileName) || '';
@@ -62,7 +62,6 @@
     if (S.busy) return;
     $('ecard').classList.add('hidden'); $('resume').classList.add('hidden');
     $('pfile').textContent = f.name; $('pmsg').textContent = t('reading');
-    $('foot').style.display = 'none';
     show('s2');
     const t0 = Date.now();
     const req = fetch(`/api/v1/bulk/upload?name=${encodeURIComponent(f.name)}&country=${encodeURIComponent(home)}`, { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: f })
@@ -178,12 +177,10 @@
     }
     $('noMatch').classList.toggle('hidden', rows.length > 0 || S.reg.length > 0);
     $('noMatchT').textContent = t('noMatchT'); $('noMatchB').textContent = t('noMatchB');
-    ['ctl', 'ctl2'].forEach((id) => $(id).classList.toggle('hidden', !rows.length));
-    document.querySelector('.srch').classList.toggle('hidden', !rows.length);
     $('askDesc').classList.toggle('hidden', !!d.cols.desc);
     if (!d.cols.desc) $('descSel').innerHTML = '<option value="">—</option>' + d.columns.map((c) => `<option value="${c.col}">${c.letter} · ${esc(c.label)}</option>`).join('');
-    $('rn').textContent = t('found', S.ok.length);
-    $('rf').textContent = t('of', d.rows.length);
+    $('pFile').textContent = d.fileName || '';
+    $('pMatch').textContent = t('found', S.ok.length) + ' · ' + t('of', d.rows.length);
     const rv = new Set(reviewRows().map((r) => r.row));   // 확인 필요는 맨 위
     const ordered = rows.slice().sort((a, b) => (rv.has(b.row) - rv.has(a.row)));
     $('list').innerHTML = ordered.map((r, i) => `<label class="item${rv.has(r.row) ? ' rv' : ''}" style="${animate ? `animation-delay:${Math.min(i, 30) * 45}ms` : 'animation:none'}">` +
@@ -191,13 +188,10 @@
       ((r.p.thumb || (itemOf(r.row) || {}).thumb) ? `<img src="${esc(r.p.thumb || itemOf(r.row).thumb)}" alt="" loading="lazy">` : `<div class="ph">${esc(grpName(r.p.grp))}</div>`) +
       `<div style="min-width:0"><div class="m">${rv.has(r.row) ? `<span class="badge b-bad rvt">${esc(t('rvTag'))}</span>` : ''}${esc(r.p.model)}<span class="dv">${esc(r.p.dv || '')} · ${esc(grpName(r.p.grp))}</span>${r.p.isNew ? `<span class="badge b-new">${esc(t('newTag'))}</span>` : ''}</div>` +
       `<div class="s">${esc(r.name || r.p.title)}</div></div><div class="r"></div></label>`).join('');
-    $('list').classList.toggle('hidden', !rows.length);
-    $('skip').classList.toggle('hidden', !S.skip.length);
-    if (!rows.length) $('skip').open = true;
+    if (!rows.length && !S.reg.length && S.skip.length) S.tab = 'skip';
     $('skipSum').textContent = t('skip', S.skip.length);
     $('skipList').innerHTML = S.skip.map((r) => `<li>${esc(r.parentSku || r.sku || '—')} · ${esc(r.name)} <span class="badge b-q">${esc(r.why === 'rNone' && d.site ? t('notFound') : t(r.why))}</span>` +
       (r.why === 'rNone' && d.site ? `<span class="urlin"><input type="url" data-urow="${r.row}" placeholder="${esc(t('urlPh'))}"><button class="mini" data-uadd="${r.row}">${esc(t('urlAdd'))}</button><span class="err2" data-uerr="${r.row}"></span></span>` : '') + `</li>`).join('');
-    $('foot').style.display = rows.length ? 'block' : 'none';
     refresh();
   }
 
@@ -219,6 +213,15 @@
     const hit = (r) => !S.q || [r.p.model, r.name, r.sku, r.parentSku, r.p.title, r.id].join(' ').toLowerCase().includes(S.q);
     $('qAct').classList.toggle('hidden', !S.q);
     $('qN').textContent = t('qRes', rows.filter(hit).length);
+    // 탭: 전체 · 확인 필요 · 새로 등록 · 제외 — 확인 필요는 빨간 숫자
+    const rvSet = new Set(reviewRows().map((r) => r.row));
+    const rvN = rvSet.size;
+    const newN = S.regOn ? S.reg.length : 0;
+    if ((S.tab === 'review' && !rvN) || (S.tab === 'new' && !newN) || (S.tab === 'skip' && !S.skip.length)) S.tab = 'all';
+    const tabs = [['all', t('tabAll'), rows.length, ''], ['review', t('tabReview'), rvN, 'rv'], ['new', t('tabNew'), newN, ''], ['skip', t('tabSkip'), S.skip.length, '']]
+      .filter(([k, , n]) => k === 'all' || n);
+    $('tabs').innerHTML = tabs.map(([k, label, n, cls]) => `<button class="tab ${cls}${S.tab === k ? ' on' : ''}" role="tab" aria-selected="${S.tab === k}" data-tab="${k}">${esc(label)}<b>${n}</b></button>`).join('');
+    const inTab = (r) => S.tab === 'all' || (S.tab === 'review' && rvSet.has(r.row)) || (S.tab === 'new' && r.kind === 'new');
     document.querySelectorAll('#list .item').forEach((el) => {
       const row = +el.querySelector('input').dataset.row;
       const r = rows.find((x) => x.row === row);
@@ -226,12 +229,16 @@
       el.querySelector('input').checked = S.sel.has(row);
       el.querySelector('input').disabled = S.busy;
       el.classList.toggle('off', !S.sel.has(row));
-      el.classList.toggle('hidden', !hit(r));
+      el.classList.toggle('hidden', !hit(r) || !inTab(r));
       el.querySelector('.r').innerHTML = itemStatus(r);
     });
-    const rvN = reviewRows().length;
-    $('rvBan').classList.toggle('hidden', !rvN); $('rvBan').textContent = t('rvBanner', rvN);
-    // 아래 막대
+    const skipTab = S.tab === 'skip';
+    $('list').classList.toggle('hidden', skipTab || !rows.length);
+    $('skip').classList.toggle('hidden', !skipTab);
+    document.querySelector('.tools').classList.toggle('hidden', skipTab || !rows.length);
+    $('shiftTip').classList.toggle('hidden', skipTab || !rows.length);
+    $('grpBtn').innerHTML = `${esc(t('grpBtn'))} ▾`;
+    // 상황판
     const c = rows.filter((r) => S.sel.has(r.row)), rep = c.filter((r) => r.descLen > 0).length;
     const nNew = c.filter((r) => r.kind === 'new').length;
     $('regE').textContent = S.regOn && nNew ? t('regEst', estMin(nNew, c.length)) : '';
@@ -240,13 +247,15 @@
       const crawling = j.crawlTotal && j.crawlDone < j.crawlTotal;
       $('info').textContent = crawling ? t('progCrawl', j.crawlDone, j.crawlTotal) : t('progMake', j.done, j.total);
       $('prog').firstElementChild.style.width = (100 * (crawling ? j.crawlDone / j.crawlTotal : j.done / Math.max(1, j.total))) + '%';
-    } else if (j && j.status === 'ready') $('info').innerHTML = t('done', j.ok, j.replaced, j.failed);
+    } else if (j && j.status === 'ready') $('info').innerHTML = t('done', j.ok, j.replaced, j.failed) + (rvN ? ` <button class="lnk" data-tab="review">${esc(t('rvLink', rvN))}</button>` : '');
     else if (j && j.status === 'failed') $('info').innerHTML = `<span style="color:var(--bad)">${esc(t('expFail') + (j.error || ''))}</span>`;
-    else $('info').innerHTML = t('info', c.length, rep);
+    else $('info').innerHTML = `<span>${t('info', c.length, rep)}</span>` + (rvN ? ` <button class="lnk" data-tab="review">${esc(t('rvLink', rvN))}</button>` : '');
     $('prog').classList.toggle('hidden', !running);
     // 알림 고르기: 오래 걸릴 작업(새로 등록 포함 또는 상품 40개 초과)에만
-    $('nt').classList.toggle('hidden', !((nNew > 0 || c.length > 40) && !running));
+    $('ntW').classList.toggle('hidden', !((nNew > 0 || c.length > 40) && !running));
     $('ntMailW').classList.toggle('hidden', !S.cfg.mail);
+    $('ntBtnL').textContent = t('ntBtn');
+    $('ntBtn').classList.toggle('on', $('ntB').checked || ($('ntMailC').checked && !!S.cfg.mail));
     $('export').textContent = S.busy ? t('exporting') : (j && !running ? t('expAgain', c.length) : t('exp', c.length));
     $('export').disabled = S.busy || !c.length || !S.channel || !S.data.cols.desc;
     $('dl').classList.toggle('hidden', !(j && j.status === 'ready' && !S.busy));
@@ -254,8 +263,18 @@
     $('again').disabled = S.busy;
   }
 
+  // 탭 · 상황판의 "확인 필요 보기"
+  const goTab = (e) => { const b = e.target.closest('[data-tab]'); if (!b) return; S.tab = b.dataset.tab; refresh(); };
+  $('tabs').onclick = goTab;
+  $('info').addEventListener('click', (e) => { goTab(e); if (e.target.closest('[data-tab]')) $('tabs').scrollIntoView({ block: 'nearest' }); });
+  // 펼침 메뉴: 제품군 · 알림 (바깥을 누르면 닫힘)
+  const pop = (btn, box) => { btn.onclick = (e) => { e.stopPropagation(); const open = box.classList.toggle('hidden'); btn.setAttribute('aria-expanded', String(!open)); }; box.onclick = (e) => e.stopPropagation(); };
+  pop($('grpBtn'), $('ctl2'));
+  pop($('ntBtn'), $('ntPop'));
+  document.addEventListener('click', () => { ['ctl2', 'ntPop'].forEach((id) => $(id).classList.add('hidden')); });
+  ['ntB', 'ntMailC'].forEach((id) => $(id).addEventListener('change', refresh));
   // 선택
-  $('ctl2').onclick = (e) => $('ctl').onclick(e);
+  $('ctl2').addEventListener('click', (e) => $('ctl').onclick(e));
   $('ctl').onclick = (e) => {
     const b = e.target.closest('button');
     if (!b || S.busy) return;
@@ -385,7 +404,8 @@
       ? { row: r.row, url: r.p.url, register: true, alts: r.p.alts, fuzzy: r.p.fuzzy, force: S.force.has(r.row) }
       : { row: r.row, slug: r.p.slug, force: S.force.has(r.row) }));
     if (S.busy || !items.length) return;
-    const longJob = !$('nt').classList.contains('hidden');
+    const longJob = !$('ntW').classList.contains('hidden');
+    $('ntPop').classList.add('hidden');
     S.wantNotify = longJob && $('ntB').checked;
     if (S.wantNotify && 'Notification' in window && Notification.permission === 'default') { try { await Notification.requestPermission(); } catch (_) {} }
     const email = longJob && S.cfg.mail && $('ntMailC').checked ? $('ntMail').value.trim() : '';

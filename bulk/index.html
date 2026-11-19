@@ -161,6 +161,55 @@ a.clia-btn { text-decoration: none; }
 .nt label { display: inline-flex; gap: 4px; align-items: center; cursor: pointer; }
 #ntMailW { display: inline-flex; gap: 6px; align-items: center; }
 #ntMailW.hidden { display: none !important; }
+/* 작업 상황판 · 탭 · 한 줄 도구 (2026-11-19 UI 정리) */
+.panel { position: sticky; top: 0; z-index: 6; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 14px 18px; margin: 0 0 14px; box-shadow: 0 6px 18px rgba(38,38,38,.06); }
+.p-top { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.p-file { display: flex; gap: 8px; align-items: center; min-width: 0; flex: 1 1 320px; }
+.p-file svg { width: 20px; height: 20px; flex: none; fill: none; stroke: var(--clia-gray-500); stroke-width: 1.6; }
+.pfn { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.pmt { color: var(--muted); font-size: 12px; white-space: nowrap; }
+.p-file .again { border: 0; background: none; text-decoration: underline; color: var(--clia-gray-700); cursor: pointer; font-size: 12px; white-space: nowrap; }
+.p-act { display: flex; gap: 8px; align-items: center; margin-inline-start: auto; }
+.p-stat { margin-top: 8px; font-size: 14px; color: var(--clia-gray-900); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; min-height: 22px; }
+.p-stat .lnk { border: 0; background: #FDE8E7; color: var(--bad); font-weight: 700; border-radius: 999px; padding: 3px 10px; cursor: pointer; font-size: 12px; }
+.panel .prog { width: 100%; margin-top: 8px; height: 6px; }
+.p-reg { display: flex; gap: 10px 14px; align-items: center; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: 13px; }
+.p-reg .regt { font-weight: 700; }
+.p-reg .regn { color: var(--clia-gray-700); font-size: 12px; }
+.p-reg .regn b { color: #2A4E8F; }
+.ntw { position: relative; }
+.bell { display: inline-flex; gap: 6px; align-items: center; height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--clia-gray-300); background: #fff; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--clia-gray-700); }
+.bell svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.bell.on { border-color: var(--clia-gray-900); color: var(--clia-gray-900); }
+.ntpop { position: absolute; top: 42px; inset-inline-end: 0; z-index: 8; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; box-shadow: 0 10px 30px rgba(0,0,0,.12); display: flex; flex-direction: column; gap: 8px; min-width: 280px; font-size: 13px; }
+.ntpop .ntl { font-weight: 700; }
+.ntpop label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.ntpop #ntMailW { display: flex; flex-direction: column; gap: 6px; }
+.ntpop #ntMailW.hidden { display: none !important; }
+.ntpop input[type=email] { height: 32px; border: 1px solid var(--clia-gray-300); border-radius: 8px; padding: 0 8px; font-size: 12px; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 10px; overflow-x: auto; }
+.tab { border: 0; background: none; padding: 10px 14px; font-size: 14px; font-weight: 600; color: var(--clia-gray-500); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tab.on { color: var(--clia-gray-900); border-bottom-color: var(--clia-gray-900); }
+.tab b { margin-inline-start: 6px; font-size: 12px; padding: 1px 7px; border-radius: 999px; background: var(--clia-gray-100); color: var(--clia-gray-600); }
+.tab.rv b { background: var(--bad); color: #fff; }
+.tab.rv { color: var(--bad); }
+.tab.rv.on { border-bottom-color: var(--bad); }
+.tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+.tools .ctl { margin: 0; }
+.tools .sp { flex: 1; }
+.tools input[type=search] { height: 36px; border: 1px solid var(--clia-gray-300); border-radius: 999px; padding: 0 16px; font: inherit; font-size: 13px; background: #fff; width: 240px; }
+.tools input[type=search]:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px var(--clia-brand-soft); }
+.grpw { position: relative; }
+.grppop { position: absolute; top: 42px; inset-inline-start: 0; z-index: 7; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.12); display: flex; flex-wrap: wrap; gap: 6px; width: min(560px, 86vw); }
+.grppop.hidden { display: none !important; }
+.grppop .div { width: 100%; height: 0; }
+.grppop .pill { height: 30px; padding: 0 12px; font-size: 12px; font-weight: 500; }
+.tip { color: var(--muted); font-size: 11px; margin: 0 0 8px; text-align: end; }
+.skipbox { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; font-size: 13px; color: var(--clia-gray-700); }
+.skipbox .skiph { font-weight: 700; margin-bottom: 8px; color: var(--clia-gray-900); }
+.skipbox ul { margin: 0; padding-inline-start: 18px; line-height: 2; }
+@media (max-width: 640px) { .panel { position: static; padding: 12px 14px; } .p-file { flex-wrap: wrap; flex-basis: 100%; } .pfn { flex: 1 1 0; } .pmt { white-space: normal; flex-basis: 100%; order: 3; } .p-act { width: 100%; justify-content: flex-end; } .tools input[type=search] { width: 100%; } .tools .sp { display: none; } .ntpop { inset-inline-end: auto; inset-inline-start: 0; } }
+.hidden { display: none !important; }
 .nt input[type=email] { height: 30px; border: 1px solid var(--clia-gray-300); border-radius: 8px; padding: 0 8px; min-width: 200px; font-size: 12px; }
 .modal { position: fixed; inset: 0; background: rgba(38,38,38,.5); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
 .mbox { background: #fff; border-radius: 16px; width: min(860px, 100%); max-height: 90vh; overflow: auto; padding: 18px 20px; box-shadow: 0 12px 48px rgba(0,0,0,.25); }
@@ -205,24 +254,35 @@ a.clia-btn { text-decoration: none; }
     <div class="ask mis hidden" id="askMis"><div style="flex:1 1 320px"><b id="misT"></b><div id="misB" class="f"></div></div><button class="pill on" id="misA"></button><button class="pill" id="misB2"></button></div>
     <div class="ask hidden" id="askCh"><span data-i="askCh"></span><button class="pill" data-ch="shopee">Shopee</button><button class="pill" data-ch="lazada">Lazada</button></div>
     <div class="ask hidden" id="askDesc"><span data-i="askDesc"></span><select id="descSel"></select></div>
-    <div class="res-h"><span class="n" id="rn"></span><span class="f" id="rf"></span><button class="again" id="again" data-i="again"></button></div>
-    <div class="reg hidden" id="regCard"><div class="regt" id="regT"></div><label class="sw"><input type="checkbox" id="regSw"><span class="tr"></span><span id="regL"></span></label><div class="regn"><span id="regN"></span> <b id="regE"></b></div></div>
-    <div class="rvban hidden" id="rvBan" role="status"></div>
+    <!-- 작업 상황판: 파일 · 지금 상태 · 진행 · 내보내기 · 알림 · 일괄 등록 — 화면을 내려도 맨 위에 고정 -->
+    <div class="panel" id="panel">
+      <div class="p-top">
+        <div class="p-file"><svg viewBox="0 0 24 24"><path d="M4 3h11l5 5v13H4z"/><path d="M15 3v5h5"/></svg><span class="pfn" id="pFile"></span><span class="pmt" id="pMatch"></span><button class="again" id="again" data-i="again"></button></div>
+        <div class="p-act">
+          <div class="ntw hidden" id="ntW"><button class="bell" id="ntBtn" aria-expanded="false" aria-controls="ntPop"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span id="ntBtnL"></span></button>
+            <div class="ntpop hidden" id="ntPop"><div class="ntl" id="ntL"></div><label><input type="checkbox" id="ntB"> <span id="ntBL"></span></label><span id="ntMailW" class="hidden"><label><input type="checkbox" id="ntMailC"> <span id="ntML"></span></label><input type="email" id="ntMail" autocomplete="email"></span></div></div>
+          <a class="clia-btn hidden" id="dl" data-i="dlAgain"></a>
+          <button class="clia-btn primary big" id="export"></button>
+        </div>
+      </div>
+      <div class="p-stat" id="info" aria-live="polite"></div>
+      <div class="prog hidden" id="prog"><i></i></div>
+      <div class="p-reg hidden" id="regCard"><span class="regt" id="regT"></span><label class="sw"><input type="checkbox" id="regSw"><span class="tr"></span><span id="regL"></span></label><span class="regn"><span id="regN"></span> <b id="regE"></b></span></div>
+    </div>
     <div class="empty hidden" id="noMatch"><div class="et" id="noMatchT"></div><div class="eb" id="noMatchB"></div></div>
-    <div class="ctl" id="ctl"></div>
-    <div class="ctl ctl2" id="ctl2"></div>
-    <div class="srch"><input type="search" id="q" autocomplete="off"><span class="qact hidden" id="qAct"><span id="qN"></span><button class="pill" id="qSel"></button><button class="pill" id="qDesel"></button></span><span class="tip" id="shiftTip"></span><span class="view" id="view" role="group"><button data-v="list" aria-label="List"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span id="vList"></span></button><button data-v="grid" aria-label="Gallery"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span id="vGrid"></span></button></span></div>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div class="tools">
+      <div class="ctl" id="ctl"></div>
+      <div class="grpw"><button class="pill" id="grpBtn" aria-expanded="false" aria-controls="ctl2"></button><div class="grppop hidden" id="ctl2"></div></div>
+      <span class="sp"></span>
+      <input type="search" id="q" autocomplete="off"><span class="qact hidden" id="qAct"><span id="qN"></span><button class="pill" id="qSel"></button><button class="pill" id="qDesel"></button></span>
+      <span class="view" id="view" role="group"><button data-v="list" aria-label="List"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span id="vList"></span></button><button data-v="grid" aria-label="Gallery"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span id="vGrid"></span></button></span>
+    </div>
+    <div class="tip" id="shiftTip"></div>
     <div class="list" id="list"></div>
-    <details class="skip hidden" id="skip"><summary id="skipSum"></summary><ul id="skipList"></ul></details>
+    <div class="skipbox hidden" id="skip"><div class="skiph" id="skipSum"></div><ul id="skipList"></ul></div>
   </section>
 
-</div></div>
-<div class="foot" id="foot"><div class="in">
-  <span id="info"></span><div class="prog hidden" id="prog"><i></i></div>
-  <span class="nt hidden" id="nt"><span id="ntL"></span><label><input type="checkbox" id="ntB"> <span id="ntBL"></span></label><span id="ntMailW" class="hidden"><label><input type="checkbox" id="ntMailC"> <span id="ntML"></span></label><input type="email" id="ntMail" autocomplete="email"></span></span>
-  <span class="sp"></span>
-  <a class="clia-btn hidden" id="dl" data-i="dlAgain"></a>
-  <button class="clia-btn primary big" id="export"></button>
 </div></div>
 <div class="modal hidden" id="frm" role="dialog" aria-modal="true"><div class="mbox"><div class="mh"><b id="frmT"></b><button class="pill" id="frmX"></button></div><div id="frmBody"></div><div class="fmsg" id="frmMsg"></div></div></div>
 <script src="bulk-i18n.js"></script>
