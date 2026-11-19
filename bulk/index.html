@@ -169,10 +169,6 @@ a.clia-btn { text-decoration: none; }
 .p-stat { margin-top: 8px; font-size: 14px; color: var(--clia-gray-900); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; min-height: 22px; }
 .p-stat .lnk { border: 0; background: #FDE8E7; color: var(--bad); font-weight: 700; border-radius: 999px; padding: 3px 10px; cursor: pointer; font-size: 12px; }
 .panel .prog { width: 100%; margin-top: 8px; height: 6px; }
-.p-reg { display: flex; gap: 10px 14px; align-items: center; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: 13px; }
-.p-reg .regt { font-weight: 700; }
-.p-reg .regn { color: var(--clia-gray-700); font-size: 12px; }
-.p-reg .regn b { color: #2A4E8F; }
 .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 10px; overflow-x: auto; }
 .tab { border: 0; background: none; padding: 10px 14px; font-size: 14px; font-weight: 600; color: var(--clia-gray-500); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
 .tab.on { color: var(--clia-gray-900); border-bottom-color: var(--clia-gray-900); }
@@ -208,6 +204,23 @@ a.clia-btn { text-decoration: none; }
 .wfoot { padding: 10px 20px 12px; font-size: 11px; color: var(--muted); text-align: end; border-top: 1px solid var(--clia-gray-100); }
 .work .item:last-child { border-bottom: 0; }
 @media (max-width: 640px) { .work .list { border-radius: 0 0 17px 17px; overflow: hidden; } .wfoot { display: none; } }
+/* CLIA 에 없는 상품 등록: 상황판 안의 눈에 띄는 한 줄 + 올리자마자 묻는 팝업 (2026-11-19) */
+.p-reg { display: flex; gap: 12px 16px; align-items: center; flex-wrap: wrap; margin-top: 14px; padding: 14px 16px; border-radius: 14px; background: #F2F6FD; border: 1px solid #C9D7F2; }
+.p-reg.on { background: #E3F4EA; border-color: #B7E0C6; }
+.p-reg .regi, .rgbox .rgi { flex: none; width: 36px; height: 36px; border-radius: 50%; background: #2A4E8F; display: inline-flex; align-items: center; justify-content: center; }
+.p-reg.on .regi { background: var(--ok); }
+.p-reg .regi svg, .rgbox .rgi svg { width: 18px; height: 18px; fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; }
+.p-reg .regt { flex: 1 1 280px; font-size: 16px; font-weight: 700; color: var(--clia-gray-900); line-height: 1.4; }
+.p-reg .clia-btn { height: 42px; padding: 0 20px; font-size: 14px; font-weight: 700; }
+.mbox.rgbox { width: min(480px, 100%); padding: 26px 26px 22px; }
+.p-reg .regt, .rgbox .rgt, .rgbox .rgb { word-break: keep-all; overflow-wrap: anywhere; }   /* 한국어가 낱말 중간에서 끊기지 않게 */
+.rgbox .rgi { width: 44px; height: 44px; margin-bottom: 14px; }
+.rgbox .rgt { display: block; font-size: 20px; line-height: 1.35; }
+.rgbox .rgb { margin: 8px 0 14px; font-size: 14px; line-height: 1.6; color: var(--clia-gray-700); }
+.rgbox .rgm { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+.rgbox .rgm span { padding: 4px 10px; border-radius: 999px; background: var(--clia-gray-100); font-size: 12px; font-weight: 600; color: var(--clia-gray-700); }
+.rgbox .rgm span.more { background: none; color: var(--muted); font-weight: 500; }
+.rgbox .xpb .clia-btn { height: 42px; padding: 0 18px; }
 /* 내보내기 팝업: 예상 소요 시간 · 오래 걸리면 메일 알림 (2026-11-19) */
 .mbox.xpbox { width: min(460px, 100%); padding: 24px 24px 20px; }
 .xph { display: flex; align-items: center; gap: 12px; font-size: 17px; margin-bottom: 6px; }
@@ -256,7 +269,7 @@ a.clia-btn { text-decoration: none; }
       <div class="big" data-i="drop"></div>
       <div class="small" data-i="dropSub"></div>
     </div>
-    <div class="resume hidden" id="resume"><span id="resumeT"></span><button class="pill on" id="resumeB"></button></div>
+    <div class="resume hidden" id="resume"><span id="resumeT"></span><button class="pill on" id="resumeB"></button><button class="pill hidden" id="resumeS" type="button"></button></div>
     <div class="ecard hidden" id="ecard" role="alert"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.5v5.5M12 16.5v.01"/></svg><div><div class="et" id="et"></div><div class="eb" id="eb"></div><div class="ef" id="ef"></div></div></div>
   </section>
 
@@ -274,12 +287,14 @@ a.clia-btn { text-decoration: none; }
         <div class="p-file"><svg viewBox="0 0 24 24"><path d="M4 3h11l5 5v13H4z"/><path d="M15 3v5h5"/></svg><span class="pfn" id="pFile"></span><span class="pmt" id="pMatch"></span><button class="again" id="again" data-i="again"></button></div>
         <div class="p-act">
           <a class="clia-btn hidden" id="dl" data-i="dlAgain"></a>
+          <button class="clia-btn big hidden" id="stop" type="button"></button>
           <button class="clia-btn primary big" id="export"></button>
         </div>
       </div>
       <div class="p-stat" id="info" aria-live="polite"></div>
       <div class="prog hidden" id="prog"><i></i></div>
-      <div class="p-reg hidden" id="regCard"><span class="regt" id="regT"></span><label class="sw"><input type="checkbox" id="regSw"><span class="tr"></span><span id="regL"></span></label><span class="regn"><span id="regN"></span> <b id="regE"></b></span></div>
+      <!-- CLIA 에 없지만 LG.com 에 있는 상품: 한 줄 + 버튼 하나 (2026-11-19). 올리자마자 팝업(#rg)으로도 묻는다 -->
+      <div class="p-reg hidden" id="regCard"><span class="regi" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><span class="regt" id="regT"></span><button class="clia-btn" id="regBtn" type="button"></button></div>
     </div>
     <div class="empty hidden" id="noMatch"><div class="et" id="noMatchT"></div><div class="eb" id="noMatchB"></div></div>
     <!-- 작업 영역: 큰 흰 상자 하나 — 위에 탭(밑줄), 그 아래 도구 줄, 그 아래 목록 -->
@@ -307,6 +322,20 @@ a.clia-btn { text-decoration: none; }
   <div id="xpSetW" class="hidden"><div class="xpok"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span id="xpSet"></span></div></div>
   <p class="xpnote hidden" id="xpNote"></p>
   <div class="xpb" id="xpOkW"><button class="clia-btn primary" id="xpOk" type="button"></button></div>
+</div></div>
+<div class="modal hidden" id="rg" role="dialog" aria-modal="true" aria-labelledby="rgT"><div class="mbox rgbox">
+  <div class="rgi" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+  <b class="rgt" id="rgT"></b>
+  <p class="rgb" id="rgB"></p>
+  <div class="rgm" id="rgM"></div>
+  <div class="xpb"><button class="clia-btn" id="rgNo" type="button"></button><button class="clia-btn primary" id="rgYes" type="button"></button></div>
+</div></div>
+<!-- 중단 확인 (실수로 내보내기를 눌렀을 때) -->
+<div class="modal hidden" id="cf" role="dialog" aria-modal="true" aria-labelledby="cfT"><div class="mbox rgbox">
+  <b class="rgt" id="cfT"></b>
+  <p class="rgb" id="cfB"></p>
+  <p class="xperr" id="cfErr" aria-live="polite"></p>
+  <div class="xpb"><button class="clia-btn" id="cfNo" type="button"></button><button class="clia-btn primary" id="cfYes" type="button"></button></div>
 </div></div>
 <div class="modal hidden" id="frm" role="dialog" aria-modal="true"><div class="mbox"><div class="mh"><b id="frmT"></b><button class="pill" id="frmX"></button></div><div id="frmBody"></div><div class="fmsg" id="frmMsg"></div></div></div>
 <script src="bulk-i18n.js"></script>

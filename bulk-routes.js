@@ -267,6 +267,14 @@ router.get('/api/v1/bulk/jobs/:job', async (req, res) => {
   res.json(bulkJobs.jobView(j));
 });
 
+// 중단 (실수로 내보내기를 눌렀을 때) — 진행 중일 때만
+router.post('/api/v1/bulk/jobs/:job/cancel', async (req, res) => {
+  const j = await bulkJobs.getJob(req.params.job);
+  if (!j) return res.status(404).json({ error: 'job not found' });
+  if (!(await bulkJobs.cancel(j))) return res.status(409).json({ error: 'job is not running', code: 'not_running', job: bulkJobs.jobView(j) });
+  res.json(bulkJobs.jobView(j));
+});
+
 // 내보내기 팝업: "완료되면 메일로 알려 드릴까요?" → 메일 주소 저장 (완성된 엑셀을 첨부해 보낸다)
 router.post('/api/v1/bulk/jobs/:job/notify', async (req, res) => {
   const j = await bulkJobs.getJob(req.params.job);

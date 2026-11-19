@@ -29,7 +29,7 @@ const OUT_DIR = () => require('./crawler-routes').OUT_DIR;
 function limiter(n) {
   let active = 0;
   const q = [];
-  const next = () => { if (active >= n || !q.length) return; active++; const { fn, ok, no } = q.shift(); fn().then(ok, no).finally(() => { active--; next(); }); };
+  const next = () => { if (active >= n || !q.length) return; active++; const { fn, ok, no } = q.shift(); new Promise((r) => r(fn())).then(ok, no).finally(() => { active--; next(); }); };   // fn 이 바로 throw 해도(중단) 자리를 돌려준다
   return (fn) => new Promise((ok, no) => { q.push({ fn, ok, no }); next(); });
 }
 const crawlSlot = limiter(CRAWL_CONC);
@@ -175,35 +175,42 @@ async function run(j) {
   const contentSlot = limiter(2);
   j.phase = j.items.some((x) => (x.register || x.force) && !x.crawled) ? 'crawl' : 'content';
   persist(j);
+  // 중단(cancel): 아직 시작 안 한 크롤·내용 만들기는 하지 않는다. 이미 돌고 있는 것은 끝나도 결과를 버린다
+  const stop = () => { if (j.status === 'cancelled') throw Object.assign(new Error('cancelled'), { cancelled: true }); };
   await Promise.all(j.items.map(async (it) => {
     if (it.status === 'failed' && !it.retry) return;      // 이어서 할 때: 이미 실패한 것은 그대로
     try {
+      stop();
       if ((it.register || it.force) && !it.crawled) {
         // 차례가 오면 '가져오는 중' (그 전에는 '등록 대기')
-        await crawlSlot(() => { it.status = 'crawling'; persist(j); return cr.crawl(it.url, { force: !!it.force, base: j.base }); });
+        await crawlSlot(() => { stop(); it.status = 'crawling'; persist(j); return cr.crawl(it.url, { force: !!it.force, base: j.base }); });
         it.crawled = true;
         it.slug = cr.slugify(it.url);
         catalog.invalidate();
         const sum = cr.productSummary(it.slug);   // 목록에 새로 등록한 제품 썸네일·제목
         if (sum) Object.assign(it, { thumb: sum.thumb || '', title: sum.title || '' });
         await persist(j, true);   // 크롤이 끝난 것은 바로 기록 — 재시작해도 다시 크롤하지 않게
+        stop();
       }
       if (!it.slug) it.slug = cr.slugify(it.url);
       if (!j.items.some((x) => (x.register || x.force) && !x.crawled && x.status !== 'failed')) j.phase = 'content';
       it.status = 'working'; persist(j);
-      if (!contentBy.has(it.slug)) contentBy.set(it.slug, contentSlot(() => contentFor(j.channel, it.url)));
+      if (!contentBy.has(it.slug)) contentBy.set(it.slug, contentSlot(() => { stop(); return contentFor(j.channel, it.url); }));
       const c = await contentBy.get(it.slug);
+      stop();
       if (c.text.length > CELL_MAX) throw Object.assign(new Error(`too long for one Excel cell (${c.text.length} chars)`), { stage: 'content' });
       texts.set(it.row, c.text);
       Object.assign(it, { status: 'ok', error: '', images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: c.summaryErr });
       it.flags = flagsFor(j, it, c);
     } catch (e) {
+      if (e.cancelled || j.status === 'cancelled') { it.status = 'cancelled'; persist(j); return; }
       const msg = String(e.message || e).slice(0, 300);
       const stage = (it.register || it.force) && !it.crawled ? 'crawl' : 'content';
       Object.assign(it, { status: 'failed', error: msg, flags: [{ code: stage, sev: 'error', msg }] });
     }
     persist(j);
   }));
+  if (j.status === 'cancelled') return;   // 중단했으면 엑셀을 만들지 않는다
   j.phase = 'write';
   for (const it of j.items) {
     if (it.status !== 'ok') continue;
@@ -222,12 +229,12 @@ function start(j) {
   j.status = 'running';
   activeList((ids) => [...new Set([...ids, j.id])]).catch(() => {});
   run(j)
-    .then(() => { j.status = 'ready'; })
-    .catch((e) => { j.status = 'failed'; j.error = e.message; console.error('[bulk] failed', j.id, e.message); })
+    .then(() => { if (j.status !== 'cancelled') j.status = 'ready'; })
+    .catch((e) => { if (j.status === 'cancelled') return; j.status = 'failed'; j.error = e.message; console.error('[bulk] failed', j.id, e.message); })
     .finally(async () => {
       j.finishedAt = Date.now(); j.phase = 'done';
       console.log(`[bulk] ${j.status} ${j.outName}: ok ${j.items.filter((x) => x.status === 'ok').length}, failed ${j.items.filter((x) => x.status === 'failed').length}`);
-      await notify(j).catch((e) => console.warn('[bulk] notify', e.message));
+      if (j.status !== 'cancelled') await notify(j).catch((e) => console.warn('[bulk] notify', e.message));   // 중단한 작업은 메일을 보내지 않는다
       if (j.status === 'failed') await alertAdmin(j).catch((e) => console.warn('[bulk] admin alert', e.message));
       await persist(j, true);
       await activeList((ids) => ids.filter((x) => x !== j.id)).catch(() => {});
@@ -241,6 +248,17 @@ function create({ upload, channel, sheet, descCol, items, outName, base, notify:
   for (const [k, x] of jobs) if (Date.now() - (x.at || 0) > KEEP_MS) jobs.delete(k);
   cleanup();
   return start(j);
+}
+
+// 중단: 실수로 내보내기를 눌렀을 때. 이미 CLIA 에 등록한 제품은 그대로 두고, 엑셀은 만들지 않는다
+async function cancel(j) {
+  if (j.status !== 'running') return false;
+  j.status = 'cancelled'; j.cancelledAt = Date.now();
+  for (const it of j.items) if (it.status === 'queued') it.status = 'cancelled';
+  console.log(`[bulk] cancel ${j.id} (${j.outName})`);
+  await persist(j, true);
+  await activeList((ids) => ids.filter((x) => x !== j.id)).catch(() => {});   // 재시작해도 다시 돌리지 않게
+  return true;
 }
 
 // 재배포·재시작 뒤: 진행 중이던 작업을 이어서 (크롤이 끝난 제품은 캐시라 바로 넘어간다)
@@ -337,4 +355,4 @@ async function saveFrame(slug, video, src) {
   return framesOf(slug);
 }
 
-module.exports = { create, setNotify, getJob, jobView, resumeAll, saveUpload, readUpload, framesOf, saveFrame, mailReady, emailOk, CRAWL_CONC, DIR };
+module.exports = { create, cancel, setNotify, getJob, jobView, resumeAll, saveUpload, readUpload, framesOf, saveFrame, mailReady, emailOk, CRAWL_CONC, DIR };
