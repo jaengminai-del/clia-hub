@@ -265,10 +265,6 @@
     else $('info').innerHTML = `<span>${t('info', c.length, rep)}</span>` + (rvN ? ` <button class="lnk" data-tab="review">${esc(t('rvLink', rvN))}</button>` : '');
     $('prog').classList.toggle('hidden', !running);
     // 알림 고르기: 오래 걸릴 작업(새로 등록 포함 또는 상품 40개 초과)에만
-    $('ntW').classList.toggle('hidden', !((nNew > 0 || c.length > 40) && !running));
-    $('ntMailW').classList.toggle('hidden', !S.cfg.mail);
-    $('ntBtnL').textContent = t('ntBtn'); $('ntBtn').title = t('ntBtn');
-    $('ntBtn').classList.toggle('on', $('ntB').checked || ($('ntMailC').checked && !!S.cfg.mail));
     $('export').textContent = S.busy ? t('exporting') : (j && !running ? t('expAgain', c.length) : t('exp', c.length));
     $('export').disabled = S.busy || !c.length || !S.channel || !S.data.cols.desc;
     $('dl').classList.toggle('hidden', !(j && j.status === 'ready' && !S.busy));
@@ -281,13 +277,12 @@
   $('tabs').onclick = goTab;
   $('info').addEventListener('click', (e) => { goTab(e); if (e.target.closest('[data-tab]')) $('tabs').scrollIntoView({ block: 'nearest' }); });
   // 펼침 메뉴: 제품군 · 알림 (바깥을 누르면 닫힘)
-  const POPS = [['dvBtn', 'dvPop'], ['grpBtn', 'ctl2'], ['ntBtn', 'ntPop']];
+  const POPS = [['dvBtn', 'dvPop'], ['grpBtn', 'ctl2']];
   const closePops = (keep) => POPS.forEach(([b, x]) => { if (x !== keep) { $(x).classList.add('hidden'); $(b).setAttribute('aria-expanded', 'false'); } });
   const pop = (btn, box) => { $(btn).onclick = (e) => { e.stopPropagation(); closePops(box); const open = $(box).classList.toggle('hidden'); $(btn).setAttribute('aria-expanded', String(!open)); }; $(box).onclick = (e) => e.stopPropagation(); };
   POPS.forEach(([b, x]) => pop(b, x));
   document.addEventListener('click', () => closePops());
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePops(); });
-  ['ntB', 'ntMailC'].forEach((id) => $(id).addEventListener('change', refresh));
   // 선택
   const pickDv = (e) => {
     const b = e.target.closest('button[data-dv]');
@@ -387,9 +382,39 @@
   $('frm').onclick = (e) => { if (e.target === $('frm')) $('frm').classList.add('hidden'); };
 
   // ── 내보내기 · 진행 · 알림 ──
-  $('ntB').checked = true; $('ntMailC').checked = true;
-  try { $('ntMail').value = sessionStorage.getItem('clia_user') || ''; } catch (_) {}
-  $('ntL').textContent = t('nt'); $('ntBL').textContent = t('ntBrowser'); $('ntML').textContent = t('ntMail');
+  // 내보내기 팝업: 예상 소요 시간 → 오래 걸리면 "완료되면 메일로 알려 드릴까요?" (완성된 엑셀 첨부)
+  const LONG_MIN = 3;
+  const xpShow = (w, on) => $(w).classList.toggle('hidden', !on);
+  const xpClose = () => $('xp').classList.add('hidden');
+  function openXp(est, long) {
+    $('xpT').textContent = t('xpT');
+    $('xpE').innerHTML = t('xpEst', est);
+    const ask = long && !!S.cfg.mail;
+    xpShow('xpAskW', ask); xpShow('xpSetW', false); xpShow('xpOkW', !ask);
+    $('xpNote').textContent = ask ? '' : t(long ? 'xpLeave' : 'xpShort'); xpShow('xpNote', !ask);
+    $('xpAsk').textContent = t('xpAsk'); $('xpAskS').textContent = t('xpAskS');
+    $('xpYes').textContent = t('xpYes'); $('xpNo').textContent = t('xpNo'); $('xpOk').textContent = t('xpOk');
+    $('xpMail').placeholder = t('xpMailPh'); $('xpErr').textContent = ''; $('xpYes').disabled = false;
+    if (!$('xpMail').value) { try { $('xpMail').value = localStorage.getItem('clia-bulk-mail') || sessionStorage.getItem('clia_user') || ''; } catch (_) {} }
+    $('xp').classList.remove('hidden');
+    (ask ? $('xpMail') : $('xpOk')).focus();
+  }
+  $('xpYes').onclick = async () => {
+    const email = $('xpMail').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { $('xpErr').textContent = t('xpBadMail'); $('xpMail').focus(); return; }
+    if (!S.job || !S.job.id) return;
+    $('xpYes').disabled = true; $('xpErr').textContent = '';
+    try {
+      await api(`/api/v1/bulk/jobs/${S.job.id}/notify`, { email, lang: L });
+      try { localStorage.setItem('clia-bulk-mail', email); } catch (_) {}
+      $('xpSet').textContent = t('xpSet', email);
+      xpShow('xpAskW', false); xpShow('xpSetW', true); xpShow('xpOkW', true); $('xpOk').focus();
+    } catch (e) { $('xpErr').textContent = t(e.code === 'bad_email' ? 'xpBadMail' : 'xpMailFail'); $('xpYes').disabled = false; }
+  };
+  $('xpMail').onkeydown = (e) => { if (e.key === 'Enter') $('xpYes').click(); };
+  $('xpNo').onclick = xpClose; $('xpOk').onclick = xpClose;
+  $('xp').onclick = (e) => { if (e.target === $('xp')) xpClose(); };
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') xpClose(); });
   const lastKey = 'clia-bulk-last-' + (CH0 || 'any');
   async function poll(j) {
     S.busy = true; S.job = j; render(false);
@@ -405,9 +430,7 @@
     } catch (e) { S.job = { ...(S.job || { items: [] }), status: 'failed', error: e.message }; }
     S.busy = false;
     render(false);
-    if (S.wantNotify && 'Notification' in window && Notification.permission === 'granted') {
-      try { new Notification('CLIA', { body: S.job.status === 'ready' ? t('notifDone', S.job.ok, S.job.review) : t('notifFail') }); } catch (_) {}
-    }
+    if ($('xpSetW').classList.contains('hidden')) xpClose();   // 끝났으면 팝업을 닫는다 (메일 주소를 넣었으면 그 안내는 남긴다)
     document.title = (S.job.status === 'ready' ? '✓ ' : '! ') + 'Bulk Excel — CLIA';
     if (S.job.status === 'ready' && S.autoDl) $('dl').click();
   }
@@ -416,17 +439,15 @@
       ? { row: r.row, url: r.p.url, register: true, alts: r.p.alts, fuzzy: r.p.fuzzy, force: S.force.has(r.row) }
       : { row: r.row, slug: r.p.slug, force: S.force.has(r.row) }));
     if (S.busy || !items.length) return;
-    const longJob = !$('ntW').classList.contains('hidden');
-    $('ntPop').classList.add('hidden');
-    S.wantNotify = longJob && $('ntB').checked;
-    if (S.wantNotify && 'Notification' in window && Notification.permission === 'default') { try { await Notification.requestPermission(); } catch (_) {} }
-    const email = longJob && S.cfg.mail && $('ntMailC').checked ? $('ntMail').value.trim() : '';
-    S.autoDl = !longJob;   // 오래 걸리는 작업은 자동 다운로드 대신 '다시 받기' 버튼 · 알림
+    const est = estMin(items.filter((x) => x.register || x.force).length, items.length);
+    const longJob = est >= LONG_MIN;
+    S.autoDl = !longJob;   // 오래 걸리는 작업은 자동 다운로드 대신 '다시 받기' 버튼 · 메일
     S.busy = true; refresh();
     try {
-      const j = await api('/api/v1/bulk/build', { id: S.data.id, channel: S.channel, sheet: S.data.sheet, descCol: S.data.cols.desc, country: home, lang: L, items, notify: email ? { email } : null });
+      const j = await api('/api/v1/bulk/build', { id: S.data.id, channel: S.channel, sheet: S.data.sheet, descCol: S.data.cols.desc, country: home, lang: L, items });
       S.force = new Set(); S.ack = new Set();
       store.set(lastKey, { job: j.id, file: S.data.fileName, at: Date.now() });
+      S.job = j; openXp(est, longJob);
       await poll(j);
     } catch (e) { S.busy = false; S.job = { items: [], status: 'failed', error: e.message }; render(false); }
   };

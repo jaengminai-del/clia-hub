@@ -9,6 +9,7 @@
  *
  *   POST /api/v1/bulk/upload?name=<파일명>&country=<cc> (본문 = .xlsx) → 분석 (CLIA 에 없는 행은 같은 나라 LG.com 주소 lg)
  *   POST /api/v1/bulk/analyze {id, sheet, cols, country}     → 열을 직접 고른 뒤 다시 분석
+ *   POST /api/v1/bulk/jobs/:job/notify {email, lang} → 끝나면 메일 (완성된 엑셀 첨부)
  *   POST /api/v1/bulk/build {id, channel, sheet, descCol, country, lang, notify:{email},
  *                            items:[{row, slug} | {row, url, register:true, alts, fuzzy} | {row, slug, force:true}]} → 작업
  *   GET  /api/v1/bulk/jobs/:job · /api/v1/bulk/jobs/:job/file · /api/v1/bulk/config
@@ -263,6 +264,19 @@ router.get('/api/v1/bulk/config', (req, res) => res.json({ mail: bulkJobs.mailRe
 router.get('/api/v1/bulk/jobs/:job', async (req, res) => {
   const j = await bulkJobs.getJob(req.params.job);
   if (!j) return res.status(404).json({ error: 'job not found' });
+  res.json(bulkJobs.jobView(j));
+});
+
+// 내보내기 팝업: "완료되면 메일로 알려 드릴까요?" → 메일 주소 저장 (완성된 엑셀을 첨부해 보낸다)
+router.post('/api/v1/bulk/jobs/:job/notify', async (req, res) => {
+  const j = await bulkJobs.getJob(req.params.job);
+  if (!j) return res.status(404).json({ error: 'job not found' });
+  if (!bulkJobs.mailReady()) return res.status(503).json({ error: 'mail is not set up', code: 'no_mail' });
+  const email = String((req.body || {}).email || '').trim();
+  if (!bulkJobs.emailOk(email)) return res.status(400).json({ error: 'email address not allowed', code: 'bad_email' });
+  const lang = /^[a-z]{2}$/.test((req.body || {}).lang || '') ? req.body.lang : j.lang;
+  try { await bulkJobs.setNotify(j, email, lang); } catch (e) { return res.status(502).json({ error: e.message, code: 'mail_failed' }); }
+  console.log(`[bulk] notify set ${j.id} (${j.status})`);
   res.json(bulkJobs.jobView(j));
 });
 

@@ -248,7 +248,8 @@ async function resumeAll() {
   for (const id of ids) {
     const j = await getJob(id);
     if (!j || j.status !== 'running') { await activeList((xs) => xs.filter((x) => x !== id)).catch(() => {}); continue; }
-    for (const it of j.items) if (it.status !== 'failed') it.status = 'queued';   // 크롤이 끝난 것(crawled)은 내용만 다시
+    for (const it of j.items) if (it.status !== 'failed') it.status = 'queued';
+    if (j.notify) j.notify.sending = false;   // 크롤이 끝난 것(crawled)은 내용만 다시
     console.log(`[bulk] resume ${id} (${j.items.length} rows)`);
     start(j);
   }
@@ -256,14 +257,18 @@ async function resumeAll() {
 
 // ── 끝났을 때 메일 (lge-d2c.com Resend) ──
 const MAIL = {
-  en: { s: (ok, rv) => `[CLIA] Bulk Excel ready — ${ok} filled${rv ? `, ${rv} need checking` : ''}`, fail: '[CLIA] Bulk Excel could not be made', h: 'Your bulk Excel is ready', open: 'Open in CLIA', dl: 'Download Excel', rv: (n) => `${n} products need checking (highlighted in red).`, f: (ok, bad) => `${ok} rows filled · ${bad} failed` },
-  th: { s: (ok, rv) => `[CLIA] Bulk Excel พร้อมแล้ว — เติม ${ok} รายการ${rv ? ` · ต้องตรวจสอบ ${rv}` : ''}`, fail: '[CLIA] สร้าง Bulk Excel ไม่สำเร็จ', h: 'ไฟล์ Excel แบบ bulk ของคุณพร้อมแล้ว', open: 'เปิดใน CLIA', dl: 'ดาวน์โหลด Excel', rv: (n) => `มี ${n} สินค้าที่ต้องตรวจสอบ (ไฮไลต์สีแดง)`, f: (ok, bad) => `เติมแล้ว ${ok} แถว · ไม่สำเร็จ ${bad}` },
-  ko: { s: (ok, rv) => `[CLIA] 벌크 엑셀 완료 — ${ok}개 채움${rv ? `, 확인 필요 ${rv}개` : ''}`, fail: '[CLIA] 벌크 엑셀을 만들지 못했습니다', h: '벌크 엑셀이 완성됐습니다', open: 'CLIA 에서 열기', dl: '엑셀 받기', rv: (n) => `확인이 필요한 제품 ${n}개 (빨간색 표시)`, f: (ok, bad) => `${ok}행 채움 · ${bad}행 실패` },
+  en: { s: (ok, rv) => `[CLIA] Bulk Excel ready — ${ok} filled${rv ? `, ${rv} need checking` : ''}`, fail: '[CLIA] Bulk Excel could not be made', h: 'Your bulk Excel is ready', open: 'Open in CLIA', dl: 'Download Excel', att: 'The finished Excel file is attached.', rv: (n) => `${n} products need checking (highlighted in red).`, f: (ok, bad) => `${ok} rows filled · ${bad} failed` },
+  th: { s: (ok, rv) => `[CLIA] Bulk Excel พร้อมแล้ว — เติม ${ok} รายการ${rv ? ` · ต้องตรวจสอบ ${rv}` : ''}`, fail: '[CLIA] สร้าง Bulk Excel ไม่สำเร็จ', h: 'ไฟล์ Excel แบบ bulk ของคุณพร้อมแล้ว', open: 'เปิดใน CLIA', dl: 'ดาวน์โหลด Excel', att: 'แนบไฟล์ Excel ที่เสร็จแล้วมาด้วย', rv: (n) => `มี ${n} สินค้าที่ต้องตรวจสอบ (ไฮไลต์สีแดง)`, f: (ok, bad) => `เติมแล้ว ${ok} แถว · ไม่สำเร็จ ${bad}` },
+  ko: { s: (ok, rv) => `[CLIA] 벌크 엑셀 완료 — ${ok}개 채움${rv ? `, 확인 필요 ${rv}개` : ''}`, fail: '[CLIA] 벌크 엑셀을 만들지 못했습니다', h: '벌크 엑셀이 완성됐습니다', open: 'CLIA 에서 열기', dl: '엑셀 받기', att: '완성된 엑셀 파일을 첨부했습니다.', rv: (n) => `확인이 필요한 제품 ${n}개 (빨간색 표시)`, f: (ok, bad) => `${ok}행 채움 · ${bad}행 실패` },
 };
 async function notify(j) {
   const to = j.notify && j.notify.email;
   const key = process.env.RESEND_API_KEY, from = process.env.CLIA_MAIL_FROM;
-  if (!to || !key || !from || j.notify.sent) return;
+  if (!to || !key || !from || j.notify.sent || j.notify.sending) return;
+  j.notify.sending = true;   // 끝날 때 · 주소를 받을 때 거의 동시에 불려도 한 번만
+  try { await sendMail(j, to, key, from); } finally { j.notify.sending = false; }
+}
+async function sendMail(j, to, key, from) {
   const t = MAIL[j.notify.lang] || MAIL.en;
   const base = (process.env.PUBLIC_BASE_URL || j.base || '').replace(/\/$/, '');
   const ok = j.items.filter((x) => x.status === 'ok').length, bad = j.items.filter((x) => x.status === 'failed').length;
@@ -271,14 +276,29 @@ async function notify(j) {
   const open = `${base}/bulk/?job=${j.id}&lang=${encodeURIComponent(j.lang || 'en')}`;
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const btn = (href, label, red) => `<a href="${esc(href)}" style="display:inline-block;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:700;${red ? 'background:#FD312E;color:#fff' : 'border:1px solid #CBC8C2;color:#262626'}">${esc(label)}</a>`;
+  // 완성된 엑셀을 메일에 첨부 (너무 크면 링크만)
+  let attachments;
+  if (j.status === 'ready') {
+    const fp = path.join(DIR, j.upload, `result-${j.id}.xlsx`);
+    const buf = fs.existsSync(fp) ? fs.readFileSync(fp) : await store.getBuffer(`bulk/${j.upload}/result-${j.id}.xlsx`).catch(() => null);
+    if (buf && buf.length <= MAIL_ATTACH_MAX) attachments = [{ filename: j.outName, content: buf.toString('base64') }];
+  }
   const html = j.status === 'ready'
-    ? `<div style="font-family:Arial,sans-serif;color:#262626;line-height:1.6"><h2 style="margin:0 0 8px">${esc(t.h)}</h2><p>${esc(j.outName)}<br>${esc(t.f(ok, bad))}</p>${rv ? `<p style="color:#C8241F;font-weight:700">${esc(t.rv(rv))}</p>` : ''}<p>${btn(open, t.open, true)} &nbsp; ${btn(`${base}/api/v1/bulk/jobs/${j.id}/file`, t.dl)}</p></div>`
+    ? `<div style="font-family:Arial,sans-serif;color:#262626;line-height:1.6"><h2 style="margin:0 0 8px">${esc(t.h)}</h2><p>${esc(j.outName)}<br>${esc(t.f(ok, bad))}</p>${attachments ? `<p>📎 ${esc(t.att)}</p>` : ''}${rv ? `<p style="color:#C8241F;font-weight:700">${esc(t.rv(rv))}</p>` : ''}<p>${btn(open, t.open, true)} &nbsp; ${btn(`${base}/api/v1/bulk/jobs/${j.id}/file`, t.dl)}</p></div>`
     : `<div style="font-family:Arial,sans-serif"><h2>${esc(t.fail)}</h2><p>${esc(j.error || '')}</p><p>${btn(open, t.open, true)}</p></div>`;
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from, to: [to], subject: j.status === 'ready' ? t.s(ok, rv) : t.fail, html }), signal: AbortSignal.timeout(20000) });
+    body: JSON.stringify({ from, to: [to], subject: j.status === 'ready' ? t.s(ok, rv) : t.fail, html, ...(attachments ? { attachments } : {}) }), signal: AbortSignal.timeout(60000) });
   if (!r.ok) throw new Error(`mail HTTP ${r.status}`);
   j.notify.sent = true;
+}
+const MAIL_ATTACH_MAX = 15 * 1024 * 1024;   // Resend 한도(40MB)보다 넉넉히 작게
+// 내보내기 시작 뒤 팝업에서 받은 메일 주소 — 이미 끝났으면 바로 보낸다
+async function setNotify(j, email, lang) {
+  j.notify = { email, lang: lang || j.lang || 'en' };
+  await persist(j, true);
+  if (j.status !== 'running') { await notify(j); await persist(j, true); }
+  return j;
 }
 const mailReady = () => !!(process.env.RESEND_API_KEY && process.env.CLIA_MAIL_FROM);
 function emailOk(e) {
@@ -315,4 +335,4 @@ async function saveFrame(slug, video, src) {
   return framesOf(slug);
 }
 
-module.exports = { create, getJob, jobView, resumeAll, saveUpload, readUpload, framesOf, saveFrame, mailReady, emailOk, CRAWL_CONC, DIR };
+module.exports = { create, setNotify, getJob, jobView, resumeAll, saveUpload, readUpload, framesOf, saveFrame, mailReady, emailOk, CRAWL_CONC, DIR };

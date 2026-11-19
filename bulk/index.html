@@ -157,10 +157,6 @@ a.clia-btn { text-decoration: none; }
 .urlin { display: inline-flex; gap: 6px; align-items: center; margin-inline-start: 8px; flex-wrap: wrap; }
 .urlin input { height: 28px; border: 1px solid var(--clia-gray-300); border-radius: 8px; padding: 0 8px; min-width: 280px; font-size: 12px; }
 .err2 { color: var(--bad); font-size: 12px; }
-.nt { display: inline-flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 12px; color: var(--clia-gray-700); }
-.nt label { display: inline-flex; gap: 4px; align-items: center; cursor: pointer; }
-#ntMailW { display: inline-flex; gap: 6px; align-items: center; }
-#ntMailW.hidden { display: none !important; }
 /* 작업 상황판 · 탭 · 한 줄 도구 (2026-11-19 UI 정리) */
 .panel { position: sticky; top: 0; z-index: 6; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 14px 18px; margin: 0 0 14px; box-shadow: 0 6px 18px rgba(38,38,38,.06); }
 .p-top { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
@@ -177,18 +173,6 @@ a.clia-btn { text-decoration: none; }
 .p-reg .regt { font-weight: 700; }
 .p-reg .regn { color: var(--clia-gray-700); font-size: 12px; }
 .p-reg .regn b { color: #2A4E8F; }
-.ntw { position: relative; }
-.bell { display: inline-flex; gap: 6px; align-items: center; height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--clia-gray-300); background: #fff; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--clia-gray-700); }
-.bell svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.bell.on { border-color: var(--clia-gray-900); color: var(--clia-gray-900); }
-.bell { width: 36px; padding: 0; justify-content: center; position: relative; }
-.bell.on::after { content: ""; position: absolute; top: 7px; inset-inline-end: 8px; width: 7px; height: 7px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 2px #fff; }
-.ntpop { position: absolute; top: 42px; inset-inline-end: 0; z-index: 8; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; box-shadow: 0 10px 30px rgba(0,0,0,.12); display: flex; flex-direction: column; gap: 8px; min-width: 280px; font-size: 13px; }
-.ntpop .ntl { font-weight: 700; }
-.ntpop label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
-.ntpop #ntMailW { display: flex; flex-direction: column; gap: 6px; }
-.ntpop #ntMailW.hidden { display: none !important; }
-.ntpop input[type=email] { height: 32px; border: 1px solid var(--clia-gray-300); border-radius: 8px; padding: 0 8px; font-size: 12px; }
 .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 10px; overflow-x: auto; }
 .tab { border: 0; background: none; padding: 10px 14px; font-size: 14px; font-weight: 600; color: var(--clia-gray-500); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
 .tab.on { color: var(--clia-gray-900); border-bottom-color: var(--clia-gray-900); }
@@ -210,7 +194,7 @@ a.clia-btn { text-decoration: none; }
 .skipbox { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; font-size: 13px; color: var(--clia-gray-700); }
 .skipbox .skiph { font-weight: 700; margin-bottom: 8px; color: var(--clia-gray-900); }
 .skipbox ul { margin: 0; padding-inline-start: 18px; line-height: 2; }
-@media (max-width: 640px) { .panel { position: static; padding: 12px 14px; } .p-file { flex-wrap: wrap; flex-basis: 100%; } .pfn { flex: 1 1 0; } .pmt { white-space: normal; flex-basis: 100%; order: 3; } .p-act { width: 100%; justify-content: flex-end; flex-wrap: wrap; } .p-act #export { flex: 1 1 100%; order: 3; } .tools input[type=search] { width: 100%; } .tools .sp { display: none; } .ntpop { inset-inline-end: auto; inset-inline-start: 0; } }
+@media (max-width: 640px) { .panel { position: static; padding: 12px 14px; } .p-file { flex-wrap: wrap; flex-basis: 100%; } .pfn { flex: 1 1 0; } .pmt { white-space: normal; flex-basis: 100%; order: 3; } .p-act { width: 100%; justify-content: flex-end; flex-wrap: wrap; } .p-act #export { flex: 1 1 100%; order: 3; } .tools input[type=search] { width: 100%; } .tools .sp { display: none; } }
 /* 작업 영역 (큰 흰 상자) · 밑줄 탭 · 도구 줄 · 펼침 메뉴 (2026-11-19) */
 .work { background: #fff; border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 2px 10px rgba(38,38,38,.05); overflow: visible; }
 .wtabs { display: flex; gap: 22px; padding: 0 20px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
@@ -262,8 +246,23 @@ a.clia-btn { text-decoration: none; }
 .wfoot { padding: 10px 20px 12px; font-size: 11px; color: var(--muted); text-align: end; border-top: 1px solid var(--clia-gray-100); }
 .work .item:last-child { border-bottom: 0; }
 @media (max-width: 640px) { .wtabs { padding: 0 14px; gap: 18px; } .wbar { padding: 10px 12px; gap: 6px; } .ctlb { padding: 0 10px; gap: 6px; } .wbar .sp { flex-basis: 100%; height: 0; } .wbar .sbox { flex: 1 1 0; min-width: 0; width: auto; } .work .list { border-radius: 0 0 17px 17px; overflow: hidden; } .wfoot { display: none; } .ddpop { min-width: min(260px, 80vw); } }
+/* 내보내기 팝업: 예상 소요 시간 · 오래 걸리면 메일 알림 (2026-11-19) */
+.mbox.xpbox { width: min(460px, 100%); padding: 24px 24px 20px; }
+.xph { display: flex; align-items: center; gap: 12px; font-size: 17px; margin-bottom: 6px; }
+.xspin { width: 22px; height: 22px; flex: none; border-radius: 50%; border: 3px solid var(--clia-gray-200); border-top-color: var(--red); animation: xspin .9s linear infinite; }
+@keyframes xspin { to { transform: rotate(360deg); } }
+.xpe { margin: 0 0 4px 34px; font-size: 14px; color: var(--clia-gray-700); }
+.xpe b { color: var(--clia-gray-900); }
+.xpq { margin: 18px 0 10px; padding-top: 16px; border-top: 1px solid var(--clia-gray-100); font-size: 14px; line-height: 1.55; color: var(--clia-gray-900); }
+.xpq small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+.xpbox input[type=email] { width: 100%; height: 42px; border: 1px solid var(--clia-gray-300); border-radius: 10px; padding: 0 12px; font: inherit; font-size: 14px; }
+.xpbox input[type=email]:focus { outline: none; border-color: var(--clia-gray-900); }
+.xperr { color: var(--bad); font-size: 12px; min-height: 18px; margin-top: 4px; }
+.xpb { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+.xpok { display: flex; gap: 10px; align-items: flex-start; margin-top: 18px; padding: 14px; border-radius: 12px; background: #EEF7F1; color: var(--clia-gray-900); font-size: 14px; line-height: 1.5; }
+.xpok svg { width: 20px; height: 20px; flex: none; fill: none; stroke: var(--ok); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; margin-top: 1px; }
+.xpnote { margin-top: 16px; font-size: 13px; color: var(--clia-gray-700); line-height: 1.5; }
 .hidden { display: none !important; }
-.nt input[type=email] { height: 30px; border: 1px solid var(--clia-gray-300); border-radius: 8px; padding: 0 8px; min-width: 200px; font-size: 12px; }
 .modal { position: fixed; inset: 0; background: rgba(38,38,38,.5); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
 .mbox { background: #fff; border-radius: 16px; width: min(860px, 100%); max-height: 90vh; overflow: auto; padding: 18px 20px; box-shadow: 0 12px 48px rgba(0,0,0,.25); }
 .mh { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; font-size: 16px; }
@@ -312,8 +311,6 @@ a.clia-btn { text-decoration: none; }
       <div class="p-top">
         <div class="p-file"><svg viewBox="0 0 24 24"><path d="M4 3h11l5 5v13H4z"/><path d="M15 3v5h5"/></svg><span class="pfn" id="pFile"></span><span class="pmt" id="pMatch"></span><button class="again" id="again" data-i="again"></button></div>
         <div class="p-act">
-          <div class="ntw hidden" id="ntW"><button class="bell" id="ntBtn" aria-expanded="false" aria-controls="ntPop"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="sr" id="ntBtnL"></span></button>
-            <div class="ntpop hidden" id="ntPop"><div class="ntl" id="ntL"></div><label><input type="checkbox" id="ntB"> <span id="ntBL"></span></label><span id="ntMailW" class="hidden"><label><input type="checkbox" id="ntMailC"> <span id="ntML"></span></label><input type="email" id="ntMail" autocomplete="email"></span></div></div>
           <a class="clia-btn hidden" id="dl" data-i="dlAgain"></a>
           <button class="clia-btn primary big" id="export"></button>
         </div>
@@ -340,6 +337,14 @@ a.clia-btn { text-decoration: none; }
     </div>
   </section>
 
+</div></div>
+<div class="modal hidden" id="xp" role="dialog" aria-modal="true" aria-labelledby="xpT"><div class="mbox xpbox">
+  <div class="xph"><span class="xspin" aria-hidden="true"></span><b id="xpT"></b></div>
+  <p class="xpe" id="xpE"></p>
+  <div id="xpAskW" class="hidden"><div class="xpq"><span id="xpAsk"></span><small id="xpAskS"></small></div><input type="email" id="xpMail" autocomplete="email" inputmode="email"><div class="xperr" id="xpErr" aria-live="polite"></div><div class="xpb"><button class="clia-btn" id="xpNo" type="button"></button><button class="clia-btn primary" id="xpYes" type="button"></button></div></div>
+  <div id="xpSetW" class="hidden"><div class="xpok"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span id="xpSet"></span></div></div>
+  <p class="xpnote hidden" id="xpNote"></p>
+  <div class="xpb" id="xpOkW"><button class="clia-btn primary" id="xpOk" type="button"></button></div>
 </div></div>
 <div class="modal hidden" id="frm" role="dialog" aria-modal="true"><div class="mbox"><div class="mh"><b id="frmT"></b><button class="pill" id="frmX"></button></div><div id="frmBody"></div><div class="fmsg" id="frmMsg"></div></div></div>
 <script src="bulk-i18n.js"></script>
