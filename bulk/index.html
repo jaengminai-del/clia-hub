@@ -209,6 +209,31 @@ a.clia-btn { text-decoration: none; }
 .skipbox .skiph { font-weight: 700; margin-bottom: 8px; color: var(--clia-gray-900); }
 .skipbox ul { margin: 0; padding-inline-start: 18px; line-height: 2; }
 @media (max-width: 640px) { .panel { position: static; padding: 12px 14px; } .p-file { flex-wrap: wrap; flex-basis: 100%; } .pfn { flex: 1 1 0; } .pmt { white-space: normal; flex-basis: 100%; order: 3; } .p-act { width: 100%; justify-content: flex-end; } .tools input[type=search] { width: 100%; } .tools .sp { display: none; } .ntpop { inset-inline-end: auto; inset-inline-start: 0; } }
+/* 탭 · 도구 영역 분리 (흰 상자, 2026-11-19) */
+.bar1 { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+.bar1 .sp, .selbar .sp { flex: 1; }
+.seg, .bar1 .view, .sbox { background: #fff; border: 1px solid var(--line); box-shadow: 0 2px 8px rgba(38,38,38,.05); }
+.tabs.seg { display: inline-flex; gap: 2px; padding: 4px; border-radius: 999px; border-bottom: 1px solid var(--line); margin: 0; overflow-x: auto; max-width: 100%; }
+.tabs.seg .tab { border: 0; margin: 0; padding: 0 14px; height: 34px; border-radius: 999px; font-size: 13px; display: inline-flex; align-items: center; }
+.tabs.seg .tab:hover { color: var(--clia-gray-900); }
+.tabs.seg .tab.on { background: var(--clia-gray-100); color: var(--clia-gray-900); }
+.tabs.seg .tab.rv, .tabs.seg .tab.rv.on { color: var(--bad); }
+.tabs.seg .tab.rv.on { background: #FDE8E7; }
+.bar1 .tools { display: flex; gap: 8px; align-items: center; margin: 0; flex-wrap: nowrap; }
+.sbox { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 999px; width: 300px; }
+.sbox:focus-within { border-color: var(--red); box-shadow: 0 0 0 3px var(--clia-brand-soft); }
+.sbox svg { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--clia-gray-500); stroke-width: 2; stroke-linecap: round; }
+.sbox input[type=search], .tools .sbox input[type=search] { flex: 1; min-width: 0; border: 0; outline: none; box-shadow: none; height: 100%; padding: 0; width: 100%; background: none; font: inherit; font-size: 13px; }
+.tools .sbox input[type=search]:focus { box-shadow: none; }
+.bar1 .view { padding: 4px; gap: 2px; border-radius: 999px; }
+.bar1 .view button { border-radius: 999px; height: 34px; }
+.bar1 .view button.on { background: var(--clia-gray-100); color: var(--clia-gray-900); }
+.selbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 10px 12px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(38,38,38,.05); }
+.selbar .ctl { margin: 0; }
+.selbar .tip { margin: 0; }
+.selbar .pill { height: 32px; padding: 0 14px; font-size: 12.5px; }
+.selbar .ctl .div { height: 18px; }
+@media (max-width: 640px) { .bar1 .tools { width: 100%; } .sbox { flex: 1; width: auto; } .bar1 .sp { display: none; } .selbar .sp, .selbar .tip { display: none; } }
 .hidden { display: none !important; }
 .nt input[type=email] { height: 30px; border: 1px solid var(--clia-gray-300); border-radius: 8px; padding: 0 8px; min-width: 200px; font-size: 12px; }
 .modal { position: fixed; inset: 0; background: rgba(38,38,38,.5); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -270,15 +295,23 @@ a.clia-btn { text-decoration: none; }
       <div class="p-reg hidden" id="regCard"><span class="regt" id="regT"></span><label class="sw"><input type="checkbox" id="regSw"><span class="tr"></span><span id="regL"></span></label><span class="regn"><span id="regN"></span> <b id="regE"></b></span></div>
     </div>
     <div class="empty hidden" id="noMatch"><div class="et" id="noMatchT"></div><div class="eb" id="noMatchB"></div></div>
-    <div class="tabs" id="tabs" role="tablist"></div>
-    <div class="tools">
+    <!-- 탭 · 검색 · 보기 (한 줄) -->
+    <div class="bar1">
+      <div class="tabs seg" id="tabs" role="tablist"></div>
+      <span class="sp"></span>
+      <div class="tools">
+        <label class="sbox"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="q" autocomplete="off"></label>
+        <span class="view" id="view" role="group"><button data-v="list" aria-label="List"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span id="vList"></span></button><button data-v="grid" aria-label="Gallery"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span id="vGrid"></span></button></span>
+      </div>
+    </div>
+    <!-- 선택 도구 (흰 카드) -->
+    <div class="selbar" id="selbar">
       <div class="ctl" id="ctl"></div>
       <div class="grpw"><button class="pill" id="grpBtn" aria-expanded="false" aria-controls="ctl2"></button><div class="grppop hidden" id="ctl2"></div></div>
+      <span class="qact hidden" id="qAct"><span id="qN"></span><button class="pill" id="qSel"></button><button class="pill" id="qDesel"></button></span>
       <span class="sp"></span>
-      <input type="search" id="q" autocomplete="off"><span class="qact hidden" id="qAct"><span id="qN"></span><button class="pill" id="qSel"></button><button class="pill" id="qDesel"></button></span>
-      <span class="view" id="view" role="group"><button data-v="list" aria-label="List"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span id="vList"></span></button><button data-v="grid" aria-label="Gallery"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span id="vGrid"></span></button></span>
+      <span class="tip" id="shiftTip"></span>
     </div>
-    <div class="tip" id="shiftTip"></div>
     <div class="list" id="list"></div>
     <div class="skipbox hidden" id="skip"><div class="skiph" id="skipSum"></div><ul id="skipList"></ul></div>
   </section>

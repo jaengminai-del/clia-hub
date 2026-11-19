@@ -235,7 +235,7 @@
     const skipTab = S.tab === 'skip';
     $('list').classList.toggle('hidden', skipTab || !rows.length);
     $('skip').classList.toggle('hidden', !skipTab);
-    document.querySelector('.tools').classList.toggle('hidden', skipTab || !rows.length);
+    document.querySelector('.tools').classList.toggle('hidden', skipTab || !rows.length); $('selbar').classList.toggle('hidden', skipTab || !rows.length);
     $('shiftTip').classList.toggle('hidden', skipTab || !rows.length);
     $('grpBtn').innerHTML = `${esc(t('grpBtn'))} ▾`;
     // 상황판
