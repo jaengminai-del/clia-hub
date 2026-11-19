@@ -1,0 +1,318 @@
+/**
+ * bulk-jobs.js — 벌크 엑셀 작업 실행 (2026-11-19)
+ *
+ * 한 작업 = 고른 행들을 (필요하면 먼저 LG.com 에서 크롤해 CLIA 에 등록하고) 설명 칸 내용을 만들어 엑셀에 쓴다.
+ *   크롤: 서버 전체에서 동시에 BULK_CRAWL_CONC(기본 2)개 — 200개를 한 번에 띄우면 서버가 버티지 못한다
+ *   내용: 작업마다 동시에 2개 (/api/ebay-generate → /api/v1/slice-html, Lazada 는 /api/v1/pdp-summary 도)
+ *   확인 필요(flags): 크롤·생성 실패, 원문 누락, 동영상 장면 자동 선택, Shopee 12장 초과, Lazada 요약 실패, 주소 추정
+ *   보관: 작업·올린 파일·결과를 로컬 + 버킷(bulk/…)에 7일 — 재배포·재시작 뒤 진행 중이던 작업을 이어서 한다
+ *   알림: 끝나면 메일 (RESEND_API_KEY + CLIA_MAIL_FROM 이 있을 때, lge-d2c.com 발신) · 화면은 브라우저 알림
+ */
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+const xlsx = require('./bulk-xlsx');
+const store = require('./crawl-store');
+const catalog = require('./bulk-catalog');
+
+const DIR = path.join(__dirname, 'media-cache', 'bulk');
+const KEEP_MS = 7 * 24 * 3600 * 1000;
+const SHOPEE_MAX_IMAGES = 12;
+const CELL_MAX = 32767;
+const CRAWL_CONC = Math.max(1, Math.min(4, parseInt(process.env.BULK_CRAWL_CONC, 10) || 2));
+const LOCAL = () => (process.env.BULK_API_BASE || `http://127.0.0.1:${process.env.PORT || 3001}`).replace(/\/$/, '');
+const idOk = (s) => /^[0-9a-f]{16}$/.test(String(s || ''));
+const readJson = (fp) => { try { return JSON.parse(fs.readFileSync(fp, 'utf8')); } catch (_) { return null; } };
+const OUT_DIR = () => require('./crawler-routes').OUT_DIR;
+
+// ── 동시에 몇 개까지 (크롤은 서버 전체 공용) ──
+function limiter(n) {
+  let active = 0;
+  const q = [];
+  const next = () => { if (active >= n || !q.length) return; active++; const { fn, ok, no } = q.shift(); fn().then(ok, no).finally(() => { active--; next(); }); };
+  return (fn) => new Promise((ok, no) => { q.push({ fn, ok, no }); next(); });
+}
+const crawlSlot = limiter(CRAWL_CONC);
+
+// ── 올린 파일 (로컬 + 버킷) ──
+async function saveUpload(id, buf, meta) {
+  fs.mkdirSync(path.join(DIR, id), { recursive: true });
+  fs.writeFileSync(path.join(DIR, id, 'source.xlsx'), buf);
+  fs.writeFileSync(path.join(DIR, id, 'meta.json'), JSON.stringify(meta));
+  await store.putBuffer(`bulk/${id}/source.xlsx`, buf, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet').catch(() => {});
+  await store.putBuffer(`bulk/${id}/meta.json`, Buffer.from(JSON.stringify(meta)), 'application/json').catch(() => {});
+}
+async function readUpload(id) {
+  if (!idOk(id)) return null;
+  const d = path.join(DIR, id);
+  if (!fs.existsSync(path.join(d, 'source.xlsx'))) {   // 재배포 뒤: 버킷에서
+    const [b, m] = await Promise.all([store.getBuffer(`bulk/${id}/source.xlsx`), store.getBuffer(`bulk/${id}/meta.json`)]);
+    if (!b || !m) return null;
+    fs.mkdirSync(d, { recursive: true });
+    fs.writeFileSync(path.join(d, 'source.xlsx'), b);
+    fs.writeFileSync(path.join(d, 'meta.json'), m);
+  }
+  const meta = readJson(path.join(d, 'meta.json'));
+  return meta ? { meta, buf: fs.readFileSync(path.join(d, 'source.xlsx')) } : null;
+}
+function cleanup() {
+  let ents = [];
+  try { ents = fs.readdirSync(DIR); } catch (_) { return; }
+  for (const n of ents) {
+    try { if (Date.now() - fs.statSync(path.join(DIR, n)).mtimeMs > KEEP_MS) fs.rmSync(path.join(DIR, n), { recursive: true, force: true }); } catch (_) {}
+  }
+}
+
+// ── 작업 보관 ──
+const jobs = new Map();
+const jobFile = (id) => path.join(DIR, 'jobs', `${id}.json`);
+let saveTimers = new Map();
+function persist(j, now) {
+  const write = async () => {
+    saveTimers.delete(j.id);
+    const buf = Buffer.from(JSON.stringify(j));
+    fs.mkdirSync(path.dirname(jobFile(j.id)), { recursive: true });
+    fs.writeFileSync(jobFile(j.id), buf);
+    await store.putBuffer(`bulk/jobs/${j.id}.json`, buf, 'application/json').catch(() => {});
+  };
+  if (now) { clearTimeout(saveTimers.get(j.id)); return write(); }
+  if (!saveTimers.has(j.id)) saveTimers.set(j.id, setTimeout(write, 4000));
+  return Promise.resolve();
+}
+async function activeList(update) {
+  const buf = await store.getBuffer('bulk/jobs/active.json').catch(() => null);
+  let ids = [];
+  try { ids = buf ? JSON.parse(buf.toString('utf8')) : readJson(path.join(DIR, 'jobs', 'active.json')) || []; } catch (_) {}
+  if (!update) return ids;
+  ids = update(ids);
+  const out = Buffer.from(JSON.stringify(ids));
+  fs.mkdirSync(path.join(DIR, 'jobs'), { recursive: true });
+  fs.writeFileSync(path.join(DIR, 'jobs', 'active.json'), out);
+  await store.putBuffer('bulk/jobs/active.json', out, 'application/json').catch(() => {});
+  return ids;
+}
+async function getJob(id) {
+  if (!idOk(id)) return null;
+  if (jobs.has(id)) return jobs.get(id);
+  let j = readJson(jobFile(id));
+  if (!j) { const b = await store.getBuffer(`bulk/jobs/${id}.json`).catch(() => null); try { j = b && JSON.parse(b.toString('utf8')); } catch (_) {} }
+  if (j) jobs.set(id, j);
+  return j || null;
+}
+
+function jobView(j) {
+  const its = j.items;
+  const fin = (x) => x.status === 'ok' || x.status === 'failed';
+  return { id: j.id, upload: j.upload, status: j.status, error: j.error, channel: j.channel, phase: j.phase,
+    total: its.length, done: its.filter(fin).length,
+    ok: its.filter((x) => x.status === 'ok').length, failed: its.filter((x) => x.status === 'failed').length,
+    replaced: its.filter((x) => x.status === 'ok' && x.prevLen > 0).length,
+    crawlTotal: its.filter((x) => x.register || x.force).length, crawlDone: its.filter((x) => (x.register || x.force) && (x.crawled || x.status === 'failed')).length,
+    review: its.filter((x) => (x.flags || []).some((f) => f.sev !== 'info')).length,
+    notify: j.notify ? { email: !!j.notify.email, sent: !!j.notify.sent } : null,
+    items: its, file: j.status === 'ready' ? `/api/v1/bulk/jobs/${j.id}/file` : null, fileName: j.outName, at: j.at, finishedAt: j.finishedAt };
+}
+
+// ── 내용 만들기 (같은 서버의 기존 API) ──
+async function post(p, body, timeoutMs) {
+  const r = await fetch(LOCAL() + p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(timeoutMs) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || j.detail || `HTTP ${r.status} ${p}`);
+  return j;
+}
+async function contentFor(channel, url) {
+  const listing = channel === 'lazada';
+  const summaryP = channel === 'lazada' ? post('/api/v1/pdp-summary', { url }, 7 * 60 * 1000).catch((e) => ({ error: e.message })) : null;
+  const g = await post('/api/ebay-generate', { url, medium: 'shopee_lazada', listing }, 5 * 60 * 1000);
+  if (!g.html) throw new Error('generate returned no HTML');
+  const sl = await post('/api/v1/slice-html', { html: g.html, medium: 'shopee_lazada' }, 12 * 60 * 1000);
+  if (channel === 'shopee') {
+    const urls = (sl.urls || []).slice(0, SHOPEE_MAX_IMAGES);
+    if (!urls.length) throw new Error('no images');
+    return { text: urls.join('\n'), images: urls.length, allImages: sl.count, summaryErr: '' };
+  }
+  const sm = await summaryP;
+  return { text: (sm && sm.html ? sm.html + '\n' : '') + sl.html, images: sl.count, allImages: sl.count, summaryErr: sm && sm.error ? sm.error.slice(0, 200) : '' };
+}
+
+// ── 확인 필요 ──
+function autoFrames(mirror) {
+  const out = [];
+  for (const s of (mirror && mirror.sections) || []) for (const m of s.media || []) if (m.auto_frame) out.push(m);
+  return out;
+}
+function flagsFor(j, it, c) {
+  const f = [];
+  const dir = path.join(OUT_DIR(), it.slug || '');
+  const mirror = readJson(path.join(dir, 'mirror.json'));
+  const qa = readJson(path.join(dir, 'qa_report.json')) || (mirror && mirror._qa) || {};
+  // 원문 누락: 일부러 빼는 것(바로가기 링크 영역 ST0018 · 탭 카드 안 글)은 세지 않는다 — 그대로 세면 거의 모든 제품이 걸린다.
+  // 실제로 빠진 이미지가 있거나, 본문 글이 5개 이상 빠졌을 때만
+  const cov = qa.coverage || {}, chk = qa.checks || {};
+  const real = (x) => x && x.component_id !== 'ST0018';
+  const texts = (cov.missing_texts || []).filter((x) => real(x) && !x.only_in_cards).length;
+  const images = (cov.missing_images || []).filter(real).length + (chk.images_missing_url || 0);
+  if (images || texts >= 5) f.push({ code: 'qa', sev: 'warn', texts, images });
+  const frames = autoFrames(mirror).filter((m) => !m.auto_frame.confirmed).length;
+  if (frames) f.push({ code: 'frame', sev: 'warn', n: frames });
+  if (c && j.channel === 'shopee' && c.allImages > SHOPEE_MAX_IMAGES) f.push({ code: 'over12', sev: 'info', all: c.allImages });   // 앞 12장만 넣는 것은 정한 동작 — 안내만
+  if (c && c.summaryErr) f.push({ code: 'summary', sev: 'warn' });
+  if (it.fuzzy) f.push({ code: 'fuzzy', sev: 'warn' });
+  if (it.alts) f.push({ code: 'alts', sev: 'info', n: it.alts });
+  return f;
+}
+
+// ── 실행 ──
+async function run(j) {
+  const cr = require('./crawler-routes');
+  const wbUp = await readUpload(j.upload);
+  if (!wbUp) throw new Error('uploaded file expired');
+  const wb = await xlsx.load(wbUp.buf);
+  const sheet = wb.sheets.find((s) => s.path === j.sheet);
+  if (!sheet) throw new Error('sheet not found');
+  const contentBy = new Map();     // slug → Promise<content>
+  const texts = new Map();         // row → 설명 칸 내용 (작업 기록에는 넣지 않는다)
+  const contentSlot = limiter(2);
+  j.phase = j.items.some((x) => (x.register || x.force) && !x.crawled) ? 'crawl' : 'content';
+  persist(j);
+  await Promise.all(j.items.map(async (it) => {
+    if (it.status === 'failed' && !it.retry) return;      // 이어서 할 때: 이미 실패한 것은 그대로
+    try {
+      if ((it.register || it.force) && !it.crawled) {
+        // 차례가 오면 '가져오는 중' (그 전에는 '등록 대기')
+        await crawlSlot(() => { it.status = 'crawling'; persist(j); return cr.crawl(it.url, { force: !!it.force, base: j.base }); });
+        it.crawled = true;
+        it.slug = cr.slugify(it.url);
+        catalog.invalidate();
+        const sum = cr.productSummary(it.slug);   // 목록에 새로 등록한 제품 썸네일·제목
+        if (sum) Object.assign(it, { thumb: sum.thumb || '', title: sum.title || '' });
+        await persist(j, true);   // 크롤이 끝난 것은 바로 기록 — 재시작해도 다시 크롤하지 않게
+      }
+      if (!it.slug) it.slug = cr.slugify(it.url);
+      if (!j.items.some((x) => (x.register || x.force) && !x.crawled && x.status !== 'failed')) j.phase = 'content';
+      it.status = 'working'; persist(j);
+      if (!contentBy.has(it.slug)) contentBy.set(it.slug, contentSlot(() => contentFor(j.channel, it.url)));
+      const c = await contentBy.get(it.slug);
+      if (c.text.length > CELL_MAX) throw Object.assign(new Error(`too long for one Excel cell (${c.text.length} chars)`), { stage: 'content' });
+      texts.set(it.row, c.text);
+      Object.assign(it, { status: 'ok', error: '', images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: c.summaryErr });
+      it.flags = flagsFor(j, it, c);
+    } catch (e) {
+      const msg = String(e.message || e).slice(0, 300);
+      const stage = (it.register || it.force) && !it.crawled ? 'crawl' : 'content';
+      Object.assign(it, { status: 'failed', error: msg, flags: [{ code: stage, sev: 'error', msg }] });
+    }
+    persist(j);
+  }));
+  j.phase = 'write';
+  for (const it of j.items) {
+    if (it.status !== 'ok') continue;
+    it.prevLen = String((sheet.rows.get(it.row) || new Map()).get(j.descCol) || '').trim().length;
+    wb.setCell(j.sheet, it.row, j.descCol, texts.get(it.row));
+  }
+  if (!j.items.some((x) => x.status === 'ok')) throw new Error('no row could be filled');
+  const buf = await wb.save();
+  fs.mkdirSync(path.join(DIR, j.upload), { recursive: true });
+  fs.writeFileSync(path.join(DIR, j.upload, `result-${j.id}.xlsx`), buf);
+  await store.putBuffer(`bulk/${j.upload}/result-${j.id}.xlsx`, buf, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet').catch(() => {});
+}
+
+function start(j) {
+  jobs.set(j.id, j);
+  j.status = 'running';
+  activeList((ids) => [...new Set([...ids, j.id])]).catch(() => {});
+  run(j)
+    .then(() => { j.status = 'ready'; })
+    .catch((e) => { j.status = 'failed'; j.error = e.message; console.error('[bulk] failed', j.id, e.message); })
+    .finally(async () => {
+      j.finishedAt = Date.now(); j.phase = 'done';
+      console.log(`[bulk] ${j.status} ${j.outName}: ok ${j.items.filter((x) => x.status === 'ok').length}, failed ${j.items.filter((x) => x.status === 'failed').length}`);
+      await notify(j).catch((e) => console.warn('[bulk] notify', e.message));
+      await persist(j, true);
+      await activeList((ids) => ids.filter((x) => x !== j.id)).catch(() => {});
+    });
+  return j;
+}
+
+function create({ upload, channel, sheet, descCol, items, outName, base, notify: nt, lang }) {
+  const j = { id: crypto.randomBytes(8).toString('hex'), upload, channel, sheet, descCol, items, outName, base, lang,
+    notify: nt && nt.email ? { email: nt.email, lang } : null, status: 'running', phase: 'queued', error: '', at: Date.now() };
+  for (const [k, x] of jobs) if (Date.now() - (x.at || 0) > KEEP_MS) jobs.delete(k);
+  cleanup();
+  return start(j);
+}
+
+// 재배포·재시작 뒤: 진행 중이던 작업을 이어서 (크롤이 끝난 제품은 캐시라 바로 넘어간다)
+async function resumeAll() {
+  const ids = await activeList().catch(() => []);
+  for (const id of ids) {
+    const j = await getJob(id);
+    if (!j || j.status !== 'running') { await activeList((xs) => xs.filter((x) => x !== id)).catch(() => {}); continue; }
+    for (const it of j.items) if (it.status !== 'failed') it.status = 'queued';   // 크롤이 끝난 것(crawled)은 내용만 다시
+    console.log(`[bulk] resume ${id} (${j.items.length} rows)`);
+    start(j);
+  }
+}
+
+// ── 끝났을 때 메일 (lge-d2c.com Resend) ──
+const MAIL = {
+  en: { s: (ok, rv) => `[CLIA] Bulk Excel ready — ${ok} filled${rv ? `, ${rv} need checking` : ''}`, fail: '[CLIA] Bulk Excel could not be made', h: 'Your bulk Excel is ready', open: 'Open in CLIA', dl: 'Download Excel', rv: (n) => `${n} products need checking (highlighted in red).`, f: (ok, bad) => `${ok} rows filled · ${bad} failed` },
+  th: { s: (ok, rv) => `[CLIA] Bulk Excel พร้อมแล้ว — เติม ${ok} รายการ${rv ? ` · ต้องตรวจสอบ ${rv}` : ''}`, fail: '[CLIA] สร้าง Bulk Excel ไม่สำเร็จ', h: 'ไฟล์ Excel แบบ bulk ของคุณพร้อมแล้ว', open: 'เปิดใน CLIA', dl: 'ดาวน์โหลด Excel', rv: (n) => `มี ${n} สินค้าที่ต้องตรวจสอบ (ไฮไลต์สีแดง)`, f: (ok, bad) => `เติมแล้ว ${ok} แถว · ไม่สำเร็จ ${bad}` },
+  ko: { s: (ok, rv) => `[CLIA] 벌크 엑셀 완료 — ${ok}개 채움${rv ? `, 확인 필요 ${rv}개` : ''}`, fail: '[CLIA] 벌크 엑셀을 만들지 못했습니다', h: '벌크 엑셀이 완성됐습니다', open: 'CLIA 에서 열기', dl: '엑셀 받기', rv: (n) => `확인이 필요한 제품 ${n}개 (빨간색 표시)`, f: (ok, bad) => `${ok}행 채움 · ${bad}행 실패` },
+};
+async function notify(j) {
+  const to = j.notify && j.notify.email;
+  const key = process.env.RESEND_API_KEY, from = process.env.CLIA_MAIL_FROM;
+  if (!to || !key || !from || j.notify.sent) return;
+  const t = MAIL[j.notify.lang] || MAIL.en;
+  const base = (process.env.PUBLIC_BASE_URL || j.base || '').replace(/\/$/, '');
+  const ok = j.items.filter((x) => x.status === 'ok').length, bad = j.items.filter((x) => x.status === 'failed').length;
+  const rv = j.items.filter((x) => (x.flags || []).some((f) => f.sev !== 'info')).length;
+  const open = `${base}/bulk/?job=${j.id}&lang=${encodeURIComponent(j.lang || 'en')}`;
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const btn = (href, label, red) => `<a href="${esc(href)}" style="display:inline-block;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:700;${red ? 'background:#FD312E;color:#fff' : 'border:1px solid #CBC8C2;color:#262626'}">${esc(label)}</a>`;
+  const html = j.status === 'ready'
+    ? `<div style="font-family:Arial,sans-serif;color:#262626;line-height:1.6"><h2 style="margin:0 0 8px">${esc(t.h)}</h2><p>${esc(j.outName)}<br>${esc(t.f(ok, bad))}</p>${rv ? `<p style="color:#C8241F;font-weight:700">${esc(t.rv(rv))}</p>` : ''}<p>${btn(open, t.open, true)} &nbsp; ${btn(`${base}/api/v1/bulk/jobs/${j.id}/file`, t.dl)}</p></div>`
+    : `<div style="font-family:Arial,sans-serif"><h2>${esc(t.fail)}</h2><p>${esc(j.error || '')}</p><p>${btn(open, t.open, true)}</p></div>`;
+  const r = await fetch('https://api.resend.com/emails', {
+    method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from, to: [to], subject: j.status === 'ready' ? t.s(ok, rv) : t.fail, html }), signal: AbortSignal.timeout(20000) });
+  if (!r.ok) throw new Error(`mail HTTP ${r.status}`);
+  j.notify.sent = true;
+}
+const mailReady = () => !!(process.env.RESEND_API_KEY && process.env.CLIA_MAIL_FROM);
+function emailOk(e) {
+  if (!/^[^\s@<>"]{1,64}@[^\s@<>"]{1,190}\.[a-z]{2,}$/i.test(String(e || ''))) return false;
+  const allow = String(process.env.BULK_NOTIFY_DOMAINS || '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
+  return !allow.length || allow.some((d) => String(e).toLowerCase().endsWith('@' + d) || String(e).toLowerCase().endsWith('.' + d));
+}
+
+// ── 동영상 대표 장면 (자동으로 고른 것) 확인·바꾸기 ──
+function framesOf(slug) {
+  const mirror = readJson(path.join(OUT_DIR(), path.basename(slug), 'mirror.json'));
+  return autoFrames(mirror).map((m) => {
+    const a = m.auto_frame;
+    const first = a.first_src || m.pc_url;
+    const options = [first, ...(a.alternatives || []).map((x) => x.src)].filter((v, i, all) => v && all.indexOf(v) === i);
+    return { video: a.video, reason: a.reason, current: m.pc_url, options, confirmed: !!a.confirmed };
+  });
+}
+async function saveFrame(slug, video, src) {
+  const dir = path.join(OUT_DIR(), path.basename(slug));
+  const fp = path.join(dir, 'mirror.json');
+  const mirror = readJson(fp);
+  if (!mirror) throw Object.assign(new Error('product not found'), { status: 404 });
+  const m = autoFrames(mirror).find((x) => x.auto_frame.video === video);
+  if (!m) throw Object.assign(new Error('video not found'), { status: 404 });
+  const first = m.auto_frame.first_src || m.pc_url;
+  const options = [first, ...(m.auto_frame.alternatives || []).map((x) => x.src)];
+  if (!options.includes(src)) throw Object.assign(new Error('choose one of the offered scenes'), { status: 400 });
+  m.auto_frame.first_src = first;
+  m.auto_frame.confirmed = true;
+  Object.assign(m, { pc_url: src, mobile_url: '', unified_url: '' });
+  fs.writeFileSync(fp, JSON.stringify(mirror, null, 2));
+  await store.pushPaths([fp]).catch(() => {});
+  return framesOf(slug);
+}
+
+module.exports = { create, getJob, jobView, resumeAll, saveUpload, readUpload, framesOf, saveFrame, mailReady, emailOk, CRAWL_CONC, DIR };

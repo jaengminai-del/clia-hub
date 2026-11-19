@@ -128,6 +128,51 @@ details.skip ul { margin: 8px 0 0; padding-inline-start: 20px; color: var(--mute
 .prog i { display: block; height: 100%; width: 0; background: var(--red); transition: width .3s; }
 .clia-btn.big { height: 44px; padding: 0 26px; font-size: 15px; }
 a.clia-btn { text-decoration: none; }
+/* 일괄 등록 · 확인 필요 · 알림 · 장면 고르기 (2026-11-19) */
+.resume { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; padding: 12px 16px; border-radius: 12px; background: #fff; border: 1px solid var(--line); font-size: 13px; }
+.reg { background: #F2F6FD; border: 1px solid #C9D7F2; border-radius: 14px; padding: 14px 18px; margin-bottom: 14px; }
+.regt { font-weight: 700; margin-bottom: 8px; }
+.regn { color: var(--clia-gray-700); font-size: 12px; margin-top: 6px; }
+.regn b { color: #2A4E8F; }
+.sw { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600; }
+.sw input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.sw .tr { width: 40px; height: 22px; border-radius: 11px; background: var(--clia-gray-300); position: relative; transition: background .15s; flex: none; }
+.sw .tr::after { content: ''; position: absolute; top: 3px; inset-inline-start: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .15s; }
+.sw input:checked + .tr { background: var(--red); }
+.sw input:checked + .tr::after { transform: translateX(18px); }
+[dir=rtl] .sw input:checked + .tr::after { transform: translateX(-18px); }
+.sw input:focus-visible + .tr { outline: 2px solid var(--red); outline-offset: 2px; }
+.rvban { background: #FDE8E7; color: var(--bad); border: 1px solid #F6C9C6; border-radius: 12px; padding: 10px 16px; margin-bottom: 12px; font-weight: 700; font-size: 13px; }
+.item.rv { background: #FFF6F5; box-shadow: inset 4px 0 0 var(--bad); }
+.list.grid .item.rv { border-color: var(--bad); box-shadow: 0 0 0 1px var(--bad); }
+.rvt { margin-inline-end: 6px; vertical-align: 1px; }
+.b-new { background: #E8EEF9; color: #2A4E8F; margin-inline-start: 6px; vertical-align: 1px; }
+.ph { width: 48px; height: 48px; border-radius: 8px; background: var(--clia-gray-100); color: var(--clia-gray-500); font-size: 10px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2px; overflow: hidden; }
+.list.grid .item .ph { width: 100%; height: 150px; font-size: 13px; }
+.fl { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; align-items: flex-end; }
+.fx { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; font-size: 12px; color: var(--bad); font-weight: 600; max-width: 460px; text-align: end; }
+.list.grid .fl, .list.grid .fx { align-items: flex-start; justify-content: flex-start; text-align: start; }
+.mini { height: 26px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--clia-gray-300); background: #fff; color: var(--clia-gray-900); font: 600 11px/24px var(--clia-font), sans-serif; cursor: pointer; text-decoration: none; white-space: nowrap; }
+.mini:hover { border-color: var(--clia-gray-700); }
+.urlin { display: inline-flex; gap: 6px; align-items: center; margin-inline-start: 8px; flex-wrap: wrap; }
+.urlin input { height: 28px; border: 1px solid var(--clia-gray-300); border-radius: 8px; padding: 0 8px; min-width: 280px; font-size: 12px; }
+.err2 { color: var(--bad); font-size: 12px; }
+.nt { display: inline-flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 12px; color: var(--clia-gray-700); }
+.nt label { display: inline-flex; gap: 4px; align-items: center; cursor: pointer; }
+#ntMailW { display: inline-flex; gap: 6px; align-items: center; }
+#ntMailW.hidden { display: none !important; }
+.nt input[type=email] { height: 30px; border: 1px solid var(--clia-gray-300); border-radius: 8px; padding: 0 8px; min-width: 200px; font-size: 12px; }
+.modal { position: fixed; inset: 0; background: rgba(38,38,38,.5); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.mbox { background: #fff; border-radius: 16px; width: min(860px, 100%); max-height: 90vh; overflow: auto; padding: 18px 20px; box-shadow: 0 12px 48px rgba(0,0,0,.25); }
+.mh { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; font-size: 16px; }
+.fv { margin-bottom: 14px; }
+.fvh { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.fo { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.fopt { position: relative; border: 2px solid var(--line); border-radius: 10px; padding: 0; overflow: hidden; background: #000; cursor: pointer; aspect-ratio: 16 / 9; }
+.fopt img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fopt.on { border-color: var(--red); }
+.fopt span { position: absolute; top: 6px; inset-inline-start: 6px; background: var(--red); color: #fff; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+.fmsg { color: var(--ok); font-weight: 600; min-height: 18px; }
 .hidden { display: none !important; }
 @media (max-width: 640px) {
   .wrap { padding: 18px 14px 40px; } .drop { padding: 44px 16px; }
@@ -148,6 +193,7 @@ a.clia-btn { text-decoration: none; }
       <div class="big" data-i="drop"></div>
       <div class="small" data-i="dropSub"></div>
     </div>
+    <div class="resume hidden" id="resume"><span id="resumeT"></span><button class="pill on" id="resumeB"></button></div>
     <div class="ecard hidden" id="ecard" role="alert"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.5v5.5M12 16.5v.01"/></svg><div><div class="et" id="et"></div><div class="eb" id="eb"></div><div class="ef" id="ef"></div></div></div>
   </section>
 
@@ -160,6 +206,8 @@ a.clia-btn { text-decoration: none; }
     <div class="ask hidden" id="askCh"><span data-i="askCh"></span><button class="pill" data-ch="shopee">Shopee</button><button class="pill" data-ch="lazada">Lazada</button></div>
     <div class="ask hidden" id="askDesc"><span data-i="askDesc"></span><select id="descSel"></select></div>
     <div class="res-h"><span class="n" id="rn"></span><span class="f" id="rf"></span><button class="again" id="again" data-i="again"></button></div>
+    <div class="reg hidden" id="regCard"><div class="regt" id="regT"></div><label class="sw"><input type="checkbox" id="regSw"><span class="tr"></span><span id="regL"></span></label><div class="regn"><span id="regN"></span> <b id="regE"></b></div></div>
+    <div class="rvban hidden" id="rvBan" role="status"></div>
     <div class="empty hidden" id="noMatch"><div class="et" id="noMatchT"></div><div class="eb" id="noMatchB"></div></div>
     <div class="ctl" id="ctl"></div>
     <div class="ctl ctl2" id="ctl2"></div>
@@ -171,10 +219,13 @@ a.clia-btn { text-decoration: none; }
 </div></div>
 <div class="foot" id="foot"><div class="in">
   <span id="info"></span><div class="prog hidden" id="prog"><i></i></div>
+  <span class="nt hidden" id="nt"><span id="ntL"></span><label><input type="checkbox" id="ntB"> <span id="ntBL"></span></label><span id="ntMailW" class="hidden"><label><input type="checkbox" id="ntMailC"> <span id="ntML"></span></label><input type="email" id="ntMail" autocomplete="email"></span></span>
   <span class="sp"></span>
   <a class="clia-btn hidden" id="dl" data-i="dlAgain"></a>
   <button class="clia-btn primary big" id="export"></button>
 </div></div>
+<div class="modal hidden" id="frm" role="dialog" aria-modal="true"><div class="mbox"><div class="mh"><b id="frmT"></b><button class="pill" id="frmX"></button></div><div id="frmBody"></div><div class="fmsg" id="frmMsg"></div></div></div>
+<script src="bulk-i18n.js"></script>
 <script src="bulk.js"></script>
 </body>
 </html>

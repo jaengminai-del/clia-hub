@@ -3213,6 +3213,10 @@ app.listen(PORT, () => {
     console.log('[crawl-store] 버킷 → 로컬 동기화 시작');
     store.pullAll()
       .then((s) => { console.log(`[crawl-store] 동기화 완료: 다운로드 ${s.downloaded}, 같음 ${s.unchanged}, 실패 ${s.failed}`); require('./crawler-routes').stripNonContent(); })
-      .catch((e) => console.error('[crawl-store] 동기화 실패:', e.message));
+      .catch((e) => console.error('[crawl-store] 동기화 실패:', e.message))
+      // 재배포 전에 진행 중이던 벌크 엑셀 작업을 이어서 (제품 목록을 다 받은 뒤 — 크롤이 끝난 제품은 다시 크롤하지 않는다)
+      .finally(() => require('./bulk-jobs').resumeAll().catch((e) => console.warn('[bulk] resume', e.message)));
+  } else {
+    require('./bulk-jobs').resumeAll().catch((e) => console.warn('[bulk] resume', e.message));
   }
 });
