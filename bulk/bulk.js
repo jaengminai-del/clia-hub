@@ -8,7 +8,10 @@
   const qs = new URLSearchParams(location.search);
   const L = TX[qs.get('lang')] ? qs.get('lang') : 'en';
   const T = TX[L];
-  const t = (k, ...a) => { const v = T[k] ?? TX.en[k]; return typeof v === 'function' ? v(...a) : v; };
+  // 채널을 정해서 열었으면(CLIA·빌더의 Shopee / Lazada 버튼) 안내 문구의 'Shopee / Lazada' 를 그 채널 하나로 쓴다 (2026-11-19)
+  const ONE_CH = { shopee: 'Shopee', lazada: 'Lazada' }[qs.get('channel')] || '';
+  const oneCh = (v) => (!ONE_CH ? v : typeof v === 'string' ? v.replace(/Shopee-\/Lazada-/g, ONE_CH + '-').replace(/Shopee\s*[\/·]\s*Lazada/g, ONE_CH) : Array.isArray(v) ? v.map(oneCh) : v);
+  const t = (k, ...a) => { const v = T[k] ?? TX.en[k]; return oneCh(typeof v === 'function' ? v(...a) : v); };
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
