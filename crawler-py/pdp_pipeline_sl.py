@@ -1230,6 +1230,15 @@ def fetch_product_html(url: str):
     raise RuntimeError("제품 페이지를 받지 못함 — " + " | ".join(reasons))
 
 
+# LG 페이지가 가끔 같은 경로를 두 번 붙여 내보낸다: …/wcms/content/dam/channel/wcms/my/… 는 404, 한 번만 쓰면 정상 이미지.
+# 실제로 있는 이미지라서 '죽은 이미지'로 빼지 않고 주소를 바로잡는다 (2026-11-20, MY FX1411S5W 치수 이미지)
+_DUP_DAM = re.compile(r"(?:/content/dam/channel/wcms){2,}")
+
+
+def _fix_dup_dam(u: str) -> str:
+    return _DUP_DAM.sub("/content/dam/channel/wcms", u) if u else u
+
+
 def _clean_media(mirror: dict) -> None:
     """미러의 모든 이미지 주소를 URL 인코딩(공백·괄호 등)하고, LG 가 실제로 내주지 않는 이미지
     (404/410, 또는 300바이트 미만 자리표시 그림)는 뺀다. 네트워크 오류 등 확실하지 않으면 그대로 둔다.
@@ -1244,6 +1253,14 @@ def _clean_media(mirror: dict) -> None:
     items += list(mirror.get("_gallery") or [])
     # 비교 슬라이더(전/후) 이미지도 같은 검사 — 깨진 그림이면 슬라이더를 빼고 섹션 그림으로 보인다 (2026-11-09)
     items += [side for s in mirror.get("sections") or [] for side in (s.get("compare") or {}).values() if isinstance(side, dict)]
+    fixed = 0
+    for m in items:
+        for k in ("pc_url", "mobile_url", "unified_url"):
+            if m.get(k):
+                v = _fix_dup_dam(m[k])
+                if v != m[k]: m[k] = v; fixed += 1
+    if fixed:
+        print(f"   ✓ 겹친 경로 이미지 주소 {fixed}개 바로잡음")
     for m in items:
         for k in ("pc_url", "mobile_url", "unified_url"):
             if m.get(k): m[k] = enc(m[k])
