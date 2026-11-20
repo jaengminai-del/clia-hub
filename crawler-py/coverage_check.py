@@ -35,6 +35,28 @@ def _norm(s: str) -> str:
     return re.sub(r"\s+", "", s).lower()
 
 
+# 화면 조작용 글자: 규격 탭 이름, 캐러셀 · 동영상 버튼 글자. 결과 컨텐츠에 일부러 넣지 않으므로 '빠진 글'로 세지 않는다.
+# 캐러셀 버튼 글자는 실제 캡션 뒤에 붙어 한 덩어리로 나온다 ("… 캡션 ก่อนหน้า วิดีโอหยุดชั่วคราว ก่อนหน้า วิดีโอหยุดชั่วคราว")
+# — 버튼 글자를 떼고 남은 캡션이 결과에 있으면 있는 것으로 본다. (2026-11-20, TH WT2116SHEG·ISC10E 재현)
+_UI_CONTROL_RE = re.compile(
+    r"(?:ก่อนหน้า|ถัดไป|previous|next|zurück|weiter)?\s*"
+    r"(?:วิดีโอ(?:หยุดชั่วคราว|กำลังเล่น|เล่น)|video\s+(?:paused|playing|play)|video\s+(?:pausiert|wiedergabe))", re.I)
+_UI_TAB_LABELS = {"สรุป", "สเปคทั้งหมด", "ข้อมูลจำเพาะทั้งหมด", "summary", "all specs", "all specifications",
+                  "zusammenfassung", "alle spezifikationen"}
+
+
+def _only_ui(t: str, blob: str) -> bool:
+    """텍스트가 화면 조작 글자뿐이거나, 그것을 떼면 남는 부분이 모두 결과에 있으면 True."""
+    t = (t or "").strip()
+    if _norm(t) in {_norm(x) for x in _UI_TAB_LABELS}:
+        return True
+    parts = [_norm(x) for x in _UI_CONTROL_RE.split(t)]
+    parts = [x for x in parts if len(x) >= 2]
+    if len(parts) == 0 and _UI_CONTROL_RE.search(t):
+        return True
+    return bool(_UI_CONTROL_RE.search(t)) and all(x in blob for x in parts)
+
+
 def _img_key(u: str) -> str:
     u = (u or "").split("?")[0]
     u = re.sub(r"/jcr:content/.*$", "", u)
@@ -137,7 +159,7 @@ def check(html: str, mirror: dict) -> dict:
     for c in inv:
         for t in c["texts"]:
             n_t += 1
-            if _norm(t) not in blob:
+            if _norm(t) not in blob and not _only_ui(t, blob):
                 missing_t.append({"component_id": c["component_id"], "text": t[:160],
                                   "only_in_cards": _norm(t) in card_blob})
         for im in c["images"]:
