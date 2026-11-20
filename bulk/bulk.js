@@ -144,7 +144,7 @@
     let h = flagsOf(r.row).filter((f) => f.sev === 'info' && !S.ack.has(`${r.row}:${f.code}`)).map((f) => `<div class="nrow"><span class="note">${esc(flagText(f))}</span>` +
       (f.code === 'frame' ? `<button class="mini" data-a="frame" data-slug="${esc(it.slug)}">${esc(t('a_frame'))}</button>` : '') + `</div>`).join('');
     if (!fl.length) return h;
-    return h + `<div class="fl">` + fl.map((f) => `<div class="fx"><span>${esc(flagText(f))}</span>` +
+    return h + `<div class="fl">` + fl.map((f) => `<div class="fx"><span${f.files && f.files.length ? ` title="${esc(f.files.join(', '))}"` : ''}>${esc(flagText(f))}</span>` +   // 마우스를 올리면 빠진 이미지 파일 이름
       (RETRY[f.code] ? `<button class="mini" data-a="retry" data-row="${r.row}" data-code="${f.code}">${esc(t(RETRY[f.code]))}</button>` : '') +
       (['qa', 'fuzzy'].includes(f.code) ? `<a class="mini" target="_blank" rel="noopener" href="${esc(builderUrl(r.p.url))}">${esc(t('a_builder'))}</a>` : '') +
       (f.sev === 'warn' ? `<button class="mini" data-a="ack" data-row="${r.row}" data-code="${f.code}">${esc(t('a_ack'))}</button>` : '') +

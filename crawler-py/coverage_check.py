@@ -14,6 +14,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from urllib.parse import unquote
 
 from bs4 import BeautifulSoup
 
@@ -124,7 +125,15 @@ def check(html: str, mirror: dict) -> dict:
     have |= {_img_key(g.get(k)) for g in mirror.get("_gallery") or [] for k in ("pc_url", "mobile_url") if g.get(k)}
 
     inv = html_inventory(html)
-    missing_t, missing_i, n_t, n_i = [], [], 0, 0
+    # 크롤러가 일부러 뺀 이미지(LG 가 404·자리표시를 내줌, mirror._dead_media_dropped)는 누락이 아니다.
+    # 단 주소가 겹쳐 있던 것(…/wcms/content/dam/channel/wcms/…)은 실제 이미지를 잃은 것이라 세지 않을 이유가 없다.
+    dead = set()
+    for d in mirror.get("_dead_media_dropped") or []:
+        u = d.get("url") or ""
+        if re.search(r"(?:/content/dam/channel/wcms){2,}", u):
+            continue
+        dead |= {_img_key(u), _img_key(unquote(u))}
+    missing_t, missing_i, n_t, n_i, n_dead = [], [], 0, 0, 0
     for c in inv:
         for t in c["texts"]:
             n_t += 1
@@ -134,11 +143,14 @@ def check(html: str, mirror: dict) -> dict:
         for im in c["images"]:
             n_i += 1
             if not (set(im["keys"]) & have):
+                if set(im["keys"]) & dead:
+                    n_dead += 1          # LG 에도 없는 이미지 — 의도한 제외
+                    continue
                 missing_i.append({"component_id": c["component_id"], "image": im["url"].split("?")[0][-120:],
                                   "only_in_cards": bool(set(im["keys"]) & card_imgs)})
     return {
         "texts_total": n_t, "texts_missing": len(missing_t),
-        "images_total": n_i, "images_missing": len(missing_i),
+        "images_total": n_i, "images_missing": len(missing_i), "images_dead_on_lg": n_dead,
         "missing_texts": missing_t[:40], "missing_images": missing_i[:40],
     }
 

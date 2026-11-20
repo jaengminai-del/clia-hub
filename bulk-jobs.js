@@ -141,6 +141,14 @@ function autoFrames(mirror) {
   for (const s of (mirror && mirror.sections) || []) for (const m of s.media || []) if (m.auto_frame) out.push(m);
   return out;
 }
+// 이미지 파일 이름 비교용 (crawler-py/coverage_check.py 의 _img_key 와 같은 규칙)
+const imgKey = (u) => {
+  let k = String(u || '').split('?')[0].replace(/\/jcr:content\/.*$/, '');
+  k = k.slice(k.lastIndexOf('/') + 1).toLowerCase().replace(/%20/g, ' ');
+  try { k = decodeURIComponent(k); } catch (_) {}
+  return k.replace(/[._-]\d{2,4}x\d{2,4}/g, '');
+};
+const DUP_DAM = /(?:\/content\/dam\/channel\/wcms){2,}/;   // LG 페이지가 경로를 두 번 붙인 주소 — 이미지가 실제로 있어서 크롤러가 바로잡는다
 function flagsFor(j, it, c) {
   const f = [];
   const dir = path.join(OUT_DIR(), it.slug || '');
@@ -151,9 +159,14 @@ function flagsFor(j, it, c) {
   const cov = qa.coverage || {}, chk = qa.checks || {};
   const real = (x) => x && x.component_id !== 'ST0018';
   const texts = (cov.missing_texts || []).filter((x) => real(x) && !x.only_in_cards).length;
-  const images = (cov.missing_images || []).filter(real).length + (chk.images_missing_url || 0);
+  // 예전에 크롤한 결과의 검사 기록에는 '크롤러가 일부러 뺀 이미지(LG 가 404·자리표시를 내줌)'가 누락으로 들어 있다 — 그것은 빼고 센다.
+  // 새 크롤은 검사가 이미 제외한다. 주소가 겹쳐 있던 것은 실제로 이미지를 잃은 것이라 그대로 센다 (다시 가져오면 고쳐진다).
+  const dead = new Set(((mirror && mirror._dead_media_dropped) || []).filter((d) => !DUP_DAM.test(d.url || '')).map((d) => imgKey(d.url)));
+  const gone = (cov.missing_images || []).filter(real).filter((x) => !dead.has(imgKey(x.image)));
+  const images = gone.length + (chk.images_missing_url || 0);
+  const files = gone.slice(0, 3).map((x) => String(x.image || '').split('/').pop());   // 어떤 이미지가 빠졌는지 (화면에서 마우스를 올리면 보임)
   // 확인 필요(warn·error)는 '다른 제품일 수 있음' 또는 '다시 돌리면 고쳐질 수 있음'만. 그대로 써도 되는 것은 info(작은 안내)
-  if (images) f.push({ code: 'qa', sev: 'warn', images, texts });                       // 이미지 누락: 다시 가져오기 · 확인
+  if (images) f.push({ code: 'qa', sev: 'warn', images, texts, files });                       // 이미지 누락: 다시 가져오기 · 확인
   if (texts >= 5) f.push({ code: 'qaTx', sev: 'info', texts });                         // 글 누락: 캐러셀 버튼 글자 같은 오탐이 많아 안내만
   const frames = autoFrames(mirror).filter((m) => !m.auto_frame.confirmed).length;
   if (frames) f.push({ code: 'frame', sev: 'info', n: frames });                        // 자동으로 고른 장면은 정상 동작 — 바꾸고 싶을 때만
