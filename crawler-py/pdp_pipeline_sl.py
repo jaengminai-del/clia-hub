@@ -1405,7 +1405,9 @@ def main():
             write_progress(90, "3단계: 페이지 컴포넌트 모델로 컨텐츠 데이터 생성 중...", "build")
             mirror = _am
             # 스펙 표(PD0008 등)는 컴포넌트 파서가 읽은 것을 그대로 붙인다 — 모델 경로에도 스펙이 빠지지 않게
-            _specs = [s for s in (_cf or {}).get("sections", []) if s.get("specs")]
+            # 규격 영역이 표 없이 이미지(치수 도면)만 가진 페이지도 있다 (예: TH ISC10E) — 표만 보고 붙이면 그 이미지가 통째로 빠진다
+            _specs = [s for s in (_cf or {}).get("sections", [])
+                      if s.get("specs") or ((s.get("component_id") or "").upper() in ("PD0008", "ST0035") and s.get("media"))]
             for i, s in enumerate(_specs):
                 s = dict(s); s["order"] = len(mirror["sections"]) + i + 1
                 mirror["sections"].append(s)
