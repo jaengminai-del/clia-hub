@@ -225,6 +225,15 @@ def _ufn(name: str, model: str) -> str:
     return n.strip(" |")
 
 
+# 구성품별 스펙 제목 — 그 나라 LG.com 말로 (전에는 독일어 'Spezifikationen' 고정이라 태국·싱가포르 번들에도 독일어가 나왔다)
+_SPEC_LABEL = {"de": "Spezifikationen", "th": "ข้อมูลจำเพาะ"}
+
+
+def _spec_label(url: str) -> str:
+    cc = (urlparse(url).path.strip("/").split("/") or [""])[0][:2].lower()
+    return _SPEC_LABEL.get(cc, "Specifications")
+
+
 def merge(info: dict, parts: List[dict]) -> dict:
     """parts: [{comp, mirror|None}] → 한 mirror."""
     sections, specs_tail, cards, gallery, assets = [], [], [], [], []
@@ -256,7 +265,7 @@ def merge(info: dict, parts: List[dict]) -> dict:
                 s["component_dom_index"] = idx * 10000 + s["component_dom_index"]   # 제품 간 카드 병합 방지
             if s.get("specs"):
                 txt = s.get("text", "")
-                s["text"] = re.sub(r"^## .*", f"## {c['model'] or name} — Spezifikationen", txt, count=1) \
+                s["text"] = re.sub(r"^## .*", f"## {c['model'] or name} — {_spec_label(c.get('url') or info.get('url') or '')}", txt, count=1) \
                     if txt.startswith("## ") else txt
                 specs_tail.append(s)
             else:
@@ -320,3 +329,42 @@ def maybe_run(url: str, html: str, out: Path, slugify, write_progress, extra_arg
     write_progress(100, "분석 완료! (번들 PTO)", "done")
     print(f"\n✓ 완료 (번들 PTO). 산출물: {out}/mirror.json")
     return True
+
+
+def combine(out: Path, spec: dict) -> dict:
+    """번들 페이지가 없는 묶음 상품(벌크 엑셀의 'A + B' 행, 2026-11-23)을 빌더 번들과 같은 모양으로 만든다.
+    spec = {title, bundle_model, components: [{model, url, slug}]} — 구성품은 이미 크롤된 제품(out/<slug>/mirror.json).
+    결과: out/mirror.json ([번들 제목] → [구성품 구분 띠 + 섹션] … → [제품별 스펙])."""
+    parts = []
+    for i, c in enumerate(spec.get("components") or [], 1):
+        fp = ROOT / "out" / str(c.get("slug") or "") / "mirror.json"
+        m = json.loads(fp.read_text(encoding="utf-8")) if c.get("slug") and fp.exists() else None
+        g = ((m or {}).get("_gallery") or [{}])[0]
+        thumb = g.get("pc_url") or g.get("mobile_url") or g.get("unified_url") or ""
+        comp = {"index": i, "model": c.get("model") or "", "name": (m or {}).get("product_title") or c.get("model") or "",
+                "url": c.get("url") or "", "thumb": thumb, "found_by": "bulk"}
+        parts.append({"comp": comp, "mirror": m})
+    # 묶음 제목 아래에 구성품 모델명 줄 — 세트 이미지가 없어서 제목만 있으면 렌더러가 그 섹션을 빼기 때문
+    info = {"title": (spec.get("title") or " + ".join(p["comp"]["model"] for p in parts))
+                     + "\n" + " + ".join(p["comp"]["model"] for p in parts if p["comp"]["model"]),
+            "bundle_model": spec.get("bundle_model") or ".".join(p["comp"]["model"] for p in parts),
+            "set_image": "", "set_images": [], "components": [p["comp"] for p in parts],
+            "url": (parts[0]["comp"]["url"] if parts else "")}
+    mirror = merge(info, parts)
+    # 세트 이미지가 없다 → 묶음 제목 섹션에 구성품 대표 이미지를 나란히 (이미지 없는 글 섹션은 렌더러가 빼므로)
+    thumbs = [p["comp"]["thumb"] for p in parts if p["comp"]["thumb"]]
+    if thumbs and mirror["sections"] and mirror["sections"][0].get("component_id") == "BUNDLE_PTO":
+        mirror["sections"][0]["media"] = [_media(u) for u in thumbs]
+    mirror["_gen"] = 2
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "mirror.json").write_text(json.dumps(mirror, ensure_ascii=False, indent=2), encoding="utf-8")
+    return mirror
+
+
+if __name__ == "__main__":
+    # python bundle_pto.py combine <결과 폴더> <spec.json>  (bulk-jobs.js 가 부른다)
+    if len(sys.argv) == 4 and sys.argv[1] == "combine":
+        m = combine(Path(sys.argv[2]), json.loads(Path(sys.argv[3]).read_text(encoding="utf-8")))
+        print(json.dumps({"sections": len(m["sections"]), "components": [c["slug_ok"] for c in m["bundle_pto"]["components"]]}))
+    else:
+        sys.exit("usage: bundle_pto.py combine <out_dir> <spec.json>")

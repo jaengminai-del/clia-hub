@@ -135,6 +135,27 @@ function analyze(wb, fileName, { sheet: wantSheet, cols: over } = {}) {
 const bulkCountry = require('./bulk-country');
 const wrongCountry = (out, country) => bulkCountry.check(out, country, analyze, (buf) => xlsx.load(buf));
 
+// 묶음 상품 행('A + B' SKU, 2026-11-23): 구성품마다 같은 나라 CLIA 제품 → 없으면 LG.com 사이트맵. 모두 찾으면 r.bundleParts
+//   → 빌더 번들(crawler-py/bundle_pto.py)과 같은 모양으로 채운다: [묶음 제목] → [구성품 구분 띠 + 내용] … (bulk-jobs.js)
+// 실측: 싱가포르 엑셀 묶음 행 182개 중 162개가 구성품을 모두 찾음 (나머지는 'Soundbar' 처럼 모델명이 없는 것)
+async function addBundleParts(rows, cc, site) {
+  const idx = productIndex();
+  for (const r of rows) {
+    const parts = String(r.parentSku || r.sku || '').split(/\s*[+&]\s*/).map((s) => s.trim()).filter(Boolean);
+    r.bundleParts = null;
+    if (parts.length < 2 || parts.length > 6) continue;
+    const res = [];
+    for (const p of parts) {
+      const keys = skuKeys(p);
+      const own = [...new Set(keys.flatMap((k) => idx.byModel.get(k) || []))].filter((s) => idx.products[s] && idx.products[s].country === cc);
+      if (own.length === 1) { const x = idx.products[own[0]]; res.push({ slug: x.slug, url: x.url, model: x.model, dv: x.dv, grp: x.grp, thumb: x.thumb || '' }); continue; }
+      const hit = keys.length ? await sitemap.lookup(site, keys) : null;
+      res.push(hit ? { url: hit.url, register: true, fuzzy: !!hit.fuzzy, ...classifyUrl(hit.url) } : null);
+    }
+    if (res.every(Boolean)) r.bundleParts = res;
+  }
+}
+
 async function addLgUrls(out, country) {
   const cc = String(country || '').toLowerCase();
   if (!/^[a-z]{2}$/.test(cc)) return out;
@@ -146,8 +167,10 @@ async function addLgUrls(out, country) {
   if (!sitemap.siteOk(site)) return out;
   out.site = site;
   const todo = out.rows.filter((r) => !r.bundle && !r.candidates.some((s) => out.products[s] && out.products[s].country === cc));
-  if (!todo.length) return out;
+  const bundles = out.rows.filter((r) => r.bundle);
+  if (!todo.length && !bundles.length) return out;
   try { await sitemap.index(site); } catch (e) { out.siteError = e.message; return out; }
+  await addBundleParts(bundles, cc, site);
   for (const r of todo) {
     const keys = [...skuKeys(r.parentSku), ...skuKeys(r.sku)];
     // SKU 가 없으면 상품명 안의 모델명처럼 생긴 낱말 (글자+숫자 5자 이상)
@@ -234,7 +257,19 @@ router.post('/api/v1/bulk/build', async (req, res) => {
     const row = parseInt(it.row, 10);
     if (!(row >= 1) || seen.has(row)) continue;
     const p = idx.products[String(it.slug || '')];
-    if (p && !it.register) {
+    if (Array.isArray(it.bundle)) {   // 묶음 상품: 구성품 2~6개 — 모두 같은 나라 CLIA 제품이거나 등록할 같은 나라 LG.com 주소
+      const parts = it.bundle.slice(0, 6).map((x) => {
+        const q = idx.products[String((x && x.slug) || '')];
+        if (q && !x.register && (!country || q.country === country)) return { slug: q.slug, url: q.url, model: q.model };
+        if (x && x.register && lgUrlOk(x.url, country)) return { url: x.url, slug: cr.slugify(x.url), model: (classifyUrl(x.url) || {}).model, register: true };
+        return null;
+      });
+      if (parts.length < 2 || !parts.every(Boolean)) continue;
+      // 묶음 제목: 엑셀 상품명에서 [New]·[Free … Voucher] 같은 앞머리 표시를 뺀 것
+      const bundleTitle = String(it.title || '').replace(/^(\s*\[[^\]]*\]\s*)+/, '').trim().slice(0, 120);
+      items.push({ row, bundle: parts, bundleTitle, model: parts.map((x) => x.model).join(' + '), slug: '', url: '', register: parts.some((x) => x.register),
+        force: !!it.force, status: 'queued' });
+    } else if (p && !it.register) {
       items.push({ row, slug: p.slug, url: p.url, model: p.model, force: !!it.force, status: 'queued' });
     } else if (it.register && lgUrlOk(it.url, country)) {
       const c = classifyUrl(it.url) || {};
@@ -247,7 +282,7 @@ router.post('/api/v1/bulk/build', async (req, res) => {
   if (items.length > 2000) return res.status(400).json({ error: 'too many rows (max 2000)' });
   // 크롤 비용·시간: 한 번에 새로 등록(크롤)하는 제품은 300개까지
   const MAX_REG = Math.max(1, parseInt(process.env.BULK_MAX_REGISTER, 10) || 300);
-  if (items.filter((x) => x.register || x.force).length > MAX_REG) return res.status(400).json({ error: `too many products to register at once (max ${MAX_REG})`, code: 'too_many_register', max: MAX_REG });
+  if (items.reduce((n, x) => n + (x.bundle ? x.bundle.filter((y) => y.register).length : (x.register || x.force ? 1 : 0)), 0) > MAX_REG) return res.status(400).json({ error: `too many products to register at once (max ${MAX_REG})`, code: 'too_many_register', max: MAX_REG });
   const wb = await xlsx.load(up.buf).catch(() => null);
   if (!wb || !wb.sheets.some((s) => s.path === b.sheet)) return res.status(400).json({ error: 'sheet not found' });
   const sheetOut = analyze(wb, up.meta.fileName, { sheet: b.sheet });
