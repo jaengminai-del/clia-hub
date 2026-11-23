@@ -131,6 +131,10 @@ function analyze(wb, fileName, { sheet: wantSheet, cols: over } = {}) {
 }
 
 // CLIA 에 없는 행(같은 나라 기준) → 같은 나라 LG.com 사이트맵에서 주소 찾기. 일괄 등록(크롤) 후보가 된다
+// 엑셀이 고른 나라 것인가 (2026-11-23) — 상품 ID 히스토리 · 모델 코드 · 태국 문자 (bulk-country.js)
+const bulkCountry = require('./bulk-country');
+const wrongCountry = (out, country) => bulkCountry.check(out, country, analyze, (buf) => xlsx.load(buf));
+
 async function addLgUrls(out, country) {
   const cc = String(country || '').toLowerCase();
   if (!/^[a-z]{2}$/.test(cc)) return out;
@@ -179,6 +183,8 @@ router.post('/api/v1/bulk/upload', raw, async (req, res) => {
   try { wb = await xlsx.load(buf); }
   catch (e) { return res.status(400).json({ error: e.message, code: fileProblem(buf, fileName) }); }
   try {
+    const bad = await wrongCountry(analyze(wb, fileName), req.query.country);
+    if (bad) { console.log(`[bulk] upload ${fileName}: 나라가 다름 (${bad.selected} 화면 → ${bad.detected}, ${bad.by} ${bad.n}/${bad.all})`); return res.status(400).json(bad); }
     const out = await addLgUrls(analyze(wb, fileName), req.query.country);
     const id = crypto.randomBytes(8).toString('hex');
     await bulkJobs.saveUpload(id, buf, { fileName, at: Date.now() });
@@ -195,7 +201,10 @@ router.post('/api/v1/bulk/analyze', async (req, res) => {
   if (!up) return res.status(404).json({ error: 'upload not found — upload again' });
   try {
     const wb = await xlsx.load(up.buf);
-    res.json({ id: b.id, ...(await addLgUrls(analyze(wb, up.meta.fileName, { sheet: b.sheet, cols: b.cols }), b.country)) });
+    const a = analyze(wb, up.meta.fileName, { sheet: b.sheet, cols: b.cols });
+    const bad = await wrongCountry(a, b.country);
+    if (bad) return res.status(400).json(bad);
+    res.json({ id: b.id, ...(await addLgUrls(a, b.country)) });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
@@ -241,12 +250,17 @@ router.post('/api/v1/bulk/build', async (req, res) => {
   if (items.filter((x) => x.register || x.force).length > MAX_REG) return res.status(400).json({ error: `too many products to register at once (max ${MAX_REG})`, code: 'too_many_register', max: MAX_REG });
   const wb = await xlsx.load(up.buf).catch(() => null);
   if (!wb || !wb.sheets.some((s) => s.path === b.sheet)) return res.status(400).json({ error: 'sheet not found' });
+  const sheetOut = analyze(wb, up.meta.fileName, { sheet: b.sheet });
+  const bad = await wrongCountry(sheetOut, country);   // 화면을 거치지 않은 요청도 막는다
+  if (bad) return res.status(400).json(bad);
   const email = b.notify && b.notify.email ? String(b.notify.email).trim() : '';
   if (email && !bulkJobs.emailOk(email)) return res.status(400).json({ error: 'email address not allowed', code: 'bad_email' });
   const base = `${req.get('x-forwarded-proto') || req.protocol}://${req.get('host')}`;
   const j = bulkJobs.create({ upload: b.id, channel: b.channel, country, sheet: b.sheet, descCol, items, base,
     outName: `${up.meta.fileName.replace(/\.xlsx$/i, '')}-clia-${b.channel}.xlsx`,
     notify: email && bulkJobs.mailReady() ? { email } : null, lang: /^[a-z]{2}$/.test(b.lang || '') ? b.lang : 'en' });
+  // 내보낸 엑셀의 상품 ID 를 그 나라 히스토리에 (다음 업로드 확인용)
+  bulkCountry.remember(country, sheetOut, analyze, (buf) => xlsx.load(buf)).catch((e) => console.warn('[bulk-country]', e.message));
   console.log(`[bulk] build ${j.outName}: ${items.length} rows, register ${items.filter((x) => x.register).length}`);
   res.json(bulkJobs.jobView(j));
 });
@@ -307,4 +321,4 @@ router.get('/api/v1/bulk/jobs/:job/file', async (req, res) => {
   res.type('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet').sendFile(fp);
 });
 
-module.exports = { router, analyze, matchRow, skuKeys, addLgUrls };
+module.exports = { router, analyze, matchRow, skuKeys, addLgUrls, wrongCountry };
