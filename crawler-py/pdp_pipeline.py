@@ -1447,14 +1447,14 @@ def main():
 
 def _use_sl_pipeline(argv: list) -> bool:
     """Shopee·Lazada 용 파이프라인(pdp_pipeline_sl.py)으로 넘길지.
-    - 대상 국가: CRAWLER_SL_COUNTRIES (쉼표 구분, 기본 "th") — lg.com/<국가>/… 의 국가 코드로 판단
+    - 대상 국가: CRAWLER_SL_COUNTRIES (쉼표 구분, 기본 "th,sg" — 싱가포르는 2026-11-23 테스트) — lg.com/<국가>/… 의 국가 코드로 판단
     - --html-file (미리 받은 페이지 HTML) 은 그 파이프라인에만 있는 기능
     그 밖의 국가(Amazon·eBay 대상)는 이 파일의 원본 흐름 그대로다."""
     if "--html-file" in argv:
         return True
     url = next((a for a in argv[1:] if a.startswith("http")), "")
     cc = (url.split("//", 1)[-1].split("/", 2) + ["", ""])[1].lower()
-    return cc in {c.strip().lower() for c in os.getenv("CRAWLER_SL_COUNTRIES", "th").split(",") if c.strip()}
+    return cc in {c.strip().lower() for c in os.getenv("CRAWLER_SL_COUNTRIES", "th,sg").split(",") if c.strip()}
 
 
 if __name__ == "__main__":

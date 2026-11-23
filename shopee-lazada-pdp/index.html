@@ -769,7 +769,7 @@ async function downloadImages(maxImages) {
 function imageHtmlOpts(html) {
   return { html, apiBase: typeof API_BASE !== 'undefined' ? API_BASE : '',
            // PDP 이미지 위에 그 제품의 요약 설명(태국어)을 붙인다 (2026-11-10)
-           summaryUrl: () => (document.getElementById('pdpUrl').value || '').trim(),
+           summaryUrl: () => summaryFor((document.getElementById('pdpUrl').value || '').trim()),   // 태국 제품만
            // Shopee: 설명에 글·alt 를 못 넣으므로 이미지 주소만, 앞 12장 (2026-11-10)
            urlsOnly: CHANNEL === 'shopee' ? SHOPEE_MAX_IMAGES : 0 };
 }
@@ -813,9 +813,11 @@ function copyListingText() {
 }
 
 // 전체 HTML 맨 위의 PDP 요약(태국어) — 제품 URL 마다 한 번만 받아 둔다 (2026-11-11)
+// 태국 제품만 (2026-11-23): 싱가포르 등은 요약 없이 이미지만
+const summaryFor = (u) => (/lg\.com\/th\//i.test(u || '') ? u : '');
 const _summaryCache = {};
 function pdpSummaryHtml() {
-  const u = (document.getElementById('pdpUrl').value || '').trim();
+  const u = summaryFor((document.getElementById('pdpUrl').value || '').trim());
   if (!u) return Promise.resolve('');
   return _summaryCache[u] || (_summaryCache[u] = fetch(API_BASE + '/api/v1/pdp-summary', {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: u }),
@@ -1365,14 +1367,15 @@ function bulkCorp() {
   const u = (document.getElementById('pdpUrl').value || new URLSearchParams(location.search).get('url') || '').trim();
   return ((/lg\.com\/([a-z]{2})(?:_[a-z]{2})?\//i.exec(u) || [])[1] || '').toLowerCase();
 }
-// 벌크 엑셀은 태국 전용 (2026-11-23): 태국 제품일 때만 버튼을 보인다
+// 벌크 엑셀은 Shopee/Lazada 법인 전용 (2026-11-23): 태국 · 싱가포르(테스트) 제품일 때만 버튼을 보인다
+const SL_CORPS = ['th', 'sg'];
 function syncBulkBtn() {
   const b = document.getElementById('btnBulk');
-  if (b) b.style.display = bulkCorp() === 'th' ? '' : 'none';
+  if (b) b.style.display = SL_CORPS.includes(bulkCorp()) ? '' : 'none';
 }
 syncBulkBtn();
 function openBulkExcel() {
-  if (bulkCorp() !== 'th') return;
+  if (!SL_CORPS.includes(bulkCorp())) return;
   const qs = new URLSearchParams(location.search);
   const p = new URLSearchParams({ embed: '1', channel: CHANNEL, lang: qs.get('lang') || 'en', corp: bulkCorp() });
   document.getElementById('bulkFrame').src = (typeof API_BASE !== 'undefined' && API_BASE ? API_BASE : '..') + '/bulk/?' + p;
