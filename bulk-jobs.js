@@ -100,8 +100,20 @@ async function getJob(id) {
   return j || null;
 }
 
+// 끝난 작업을 다시 열 때 '확인 필요'를 지금 규칙으로 다시 센다 (2026-11-23) — 작업 기록·결과 엑셀은 그대로, 화면에 보내는 값만.
+// 작업이 끝난 뒤 그 제품을 다시 크롤했으면 지금 데이터는 엑셀에 들어간 내용과 다르므로 그때 저장한 것을 쓴다.
+function currentFlags(j, it) {
+  if (it.status !== 'ok' || !it.slug || !j.finishedAt) return it.flags;
+  const dir = path.join(OUT_DIR(), it.slug);
+  const src = readJson(path.join(dir, 'source.json'));
+  if (!src || !fs.existsSync(path.join(dir, 'mirror.json'))) return it.flags;
+  if (!(src.crawled_at > 0) || src.crawled_at * 1000 > j.finishedAt) return it.flags;
+  return flagsFor(j, it, { allImages: it.allImages, summaryErr: it.summaryErr });
+}
+
 function jobView(j) {
-  const its = j.items;
+  const done = j.status !== 'running' && j.status !== 'queued';
+  const its = done ? j.items.map((it) => { const flags = currentFlags(j, it); return flags === it.flags ? it : { ...it, flags }; }) : j.items;
   const fin = (x) => x.status === 'ok' || x.status === 'failed';
   return { id: j.id, upload: j.upload, status: j.status, error: j.error, channel: j.channel, phase: j.phase,
     total: its.length, done: its.filter(fin).length,
