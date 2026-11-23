@@ -59,13 +59,21 @@
   function fail(code, extra) {
     const [title, body] = T['e_' + code] || TX.en['e_' + code] || T.e_other;
     show('s1');
-    // 나라가 다른 엑셀: 고른 나라·채널 이름을 넣는다 (예: 싱가포르 Shopee 벌크 엑셀 템플릿을 올려 주세요)
-    const fill = (s) => String(s || '').replaceAll('{n}', (extra && extra.maxMb) || 40)
-      .replaceAll('{sel}', cName(home)).replaceAll('{ch}', S.channel === 'lazada' ? 'Lazada' : S.channel === 'shopee' ? 'Shopee' : 'Shopee / Lazada')
-      .replaceAll('{thai}', (extra && extra.thai) || 0).replaceAll('{all}', (extra && extra.named) || 0);
-    $('et').textContent = fill(title);
-    $('eb').textContent = fill(body) || (extra && extra.error) || '';
+    $('et').textContent = title.replace('{n}', (extra && extra.maxMb) || 40);
+    $('eb').textContent = body || (extra && extra.error) || '';
     $('ef').textContent = (extra && extra.fileName) || '';
+    $('ecard').classList.remove('hidden');
+  }
+  // 고른 나라와 다른 엑셀 (bulk-country.js): 왜 그렇게 봤는지 + 고른 나라의 템플릿을 올리라는 안내
+  function wrongCountry(d, fileName) {
+    const ch = S.channel === 'lazada' ? 'Lazada' : S.channel === 'shopee' ? 'Shopee' : 'Shopee / Lazada';
+    const det = d.detected === 'other' ? '' : cName(d.detected);
+    const why = d.by === 'history' ? t('wcHist', d.n, d.all, det) : d.by === 'sku' ? t('wcSku', d.n, det, d.ex || '')
+      : d.detected === 'other' ? t('wcNotThai', d.n, d.all) : t('wcThai', d.n, d.all);
+    show('s1');
+    $('et').textContent = det ? t('wcT', det) : t('wcNotThT');
+    $('eb').textContent = why + ' ' + t('wcTail', cName(home), ch);
+    $('ef').textContent = fileName || '';
     $('ecard').classList.remove('hidden');
   }
   async function attach(f) {
@@ -77,7 +85,7 @@
     const req = fetch(`/api/v1/bulk/upload?name=${encodeURIComponent(f.name)}&country=${encodeURIComponent(home)}`, { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: f })
       .then(async (r) => {
         const d = await r.json().catch(() => ({ code: r.status === 413 ? 'too_big' : 'other' }));
-        if (!r.ok) throw Object.assign(new Error(d.error || 'HTTP ' + r.status), { code: d.code || 'other', maxMb: d.maxMb, detected: d.detected, thai: d.thai, named: d.named });
+        if (!r.ok) throw Object.assign(new Error(d.error || 'HTTP ' + r.status), { code: d.code || 'other', maxMb: d.maxMb, info: d });
         return d;
       });
     try {
@@ -95,7 +103,10 @@
       $('q').value = '';
       setData(d, true);
       askRegister();
-    } catch (e) { fail(e.code === 'wrong_country' ? (e.detected === 'th' ? 'wrongTh' : 'wrongNotTh') : (e.code || 'other'), { maxMb: e.maxMb, error: e.message, fileName: f.name, thai: e.thai, named: e.named }); }
+    } catch (e) {
+      if (e.code === 'wrong_country') return wrongCountry(e.info || {}, f.name);
+      fail(e.code || 'other', { maxMb: e.maxMb, error: e.message, fileName: f.name });
+    }
   }
 
   // 행 나누기: CLIA 제품 하나에 딱 맞음(ok) · 같은 나라 LG.com 에서 찾음(reg, 등록 후보) · 그 밖(skip)

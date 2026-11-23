@@ -260,7 +260,7 @@ async function getToFile(key, abs) {
   try { await download(key, abs); return true; } catch (e) { return false; }
 }
 
-module.exports = { enabled, pullAll, whenPulled, pushAll, pushPaths, pushProduct, pushCrawlerOut, putBuffer, getBuffer, putFile, getToFile, deleteProduct };
+module.exports = { enabled, listRemote, pullAll, whenPulled, pushAll, pushPaths, pushProduct, pushCrawlerOut, putBuffer, getBuffer, putFile, getToFile, deleteProduct };
 
 if (require.main === module) {
   require('dotenv').config({ path: path.join(__dirname, '.env') });
