@@ -110,6 +110,9 @@
   }
 
   // 행 나누기: CLIA 제품 하나에 딱 맞음(ok) · 같은 나라 LG.com 에서 찾음(reg, 등록 후보) · 그 밖(skip)
+  // 묶음 상품 ('A + B' SKU): 구성품을 모두 찾았으면 빌더 번들처럼 합쳐서 채운다 — 등록이 필요한 구성품이 있으면 '등록하고 채우기' 쪽
+  const bundleP = (r) => { const ps = r.bundleParts; return { slug: null, isBundle: true, parts: ps, model: ps.map((x) => x.model || '?').join(' + '),
+    dv: ps[0].dv, grp: ps[0].grp, title: r.name, thumb: (ps.find((x) => x.thumb) || {}).thumb || '', isNew: ps.some((x) => x.register), fuzzy: ps.some((x) => x.fuzzy) }; };
   const newP = (r, lg) => ({ slug: null, url: lg.url, model: lg.model, dv: lg.dv, grp: lg.grp, title: r.name, thumb: '', isNew: true, alts: lg.alts || 0, fuzzy: !!lg.fuzzy });
   function setData(d, fresh) {
     S.data = d;
@@ -123,7 +126,8 @@
       let c = r.candidates.map((s) => d.products[s]).filter(Boolean);
       if (home) c = c.filter((p) => p.country === home);
       const own = S.own[r.row];
-      if (r.bundle) S.skip.push({ ...r, why: 'rBundle' });
+      if (r.bundle && r.bundleParts) (r.bundleParts.some((x) => x.register) ? S.reg : S.ok).push({ ...r, kind: 'bundle', p: bundleP(r) });
+      else if (r.bundle) S.skip.push({ ...r, why: 'rBundle' });
       else if (c.length === 1) S.ok.push({ ...r, p: c[0], kind: 'clia' });
       else if (c.length > 1) S.skip.push({ ...r, why: 'rMulti' });
       else if (own || r.lg) S.reg.push({ ...r, kind: 'new', p: newP(r, own || r.lg) });
@@ -148,7 +152,7 @@
   const normFlag = (f) => (f.code === 'frame' ? { ...f, sev: 'info' } : f.code === 'qa' && !f.images ? { ...f, code: 'qaTx', sev: 'info' } : f);   // 예전 작업 기록 호환
   const flagsOf = (row) => ((itemOf(row) || {}).flags || []).map(normFlag);
   const openFlags = (row) => flagsOf(row).filter((f) => f.sev !== 'info' && !S.ack.has(`${row}:${f.code}`));
-  const flagText = (f) => ({ crawl: () => t('f_crawl'), content: () => t('f_content'), qa: () => t('f_qa', f.images), qaTx: () => t('f_qaTx', f.texts), frame: () => t('f_frame', f.n),
+  const flagText = (f) => ({ bundle: () => t('f_bundle', f.n), crawl: () => t('f_crawl'), content: () => t('f_content'), qa: () => t('f_qa', f.images), qaTx: () => t('f_qaTx', f.texts), frame: () => t('f_frame', f.n),
     over12: () => t('f_over12', f.all), summary: () => t('f_summary'), fuzzy: () => t('f_fuzzy'), alts: () => t('f_alts', f.n) }[f.code] || (() => f.code))();
   const builderUrl = (u) => `/shopee-lazada-pdp/index.html?url=${encodeURIComponent(u || '')}&channel=${S.channel || 'shopee'}&lang=${L}`;
   const reviewRows = () => act().filter((r) => openFlags(r.row).length);
@@ -220,7 +224,7 @@
     $('list').innerHTML = ordered.map((r, i) => `<label class="item${rv.has(r.row) ? ' rv' : ''}" style="${animate ? `animation-delay:${Math.min(i, 30) * 45}ms` : 'animation:none'}">` +
       `<input type="checkbox" data-row="${r.row}">` +
       ((r.p.thumb || (itemOf(r.row) || {}).thumb) ? `<img src="${esc(r.p.thumb || itemOf(r.row).thumb)}" alt="" loading="lazy">` : `<div class="ph">${esc(grpName(r.p.grp))}</div>`) +
-      `<div style="min-width:0"><div class="m">${rv.has(r.row) ? `<span class="badge b-bad rvt">${esc(t('rvTag'))}</span>` : ''}${esc(r.p.model)}<span class="dv">${esc(r.p.dv || '')} · ${esc(grpName(r.p.grp))}</span>${r.p.isNew ? `<span class="badge b-new">${esc(t('newTag'))}</span>` : ''}</div>` +
+      `<div style="min-width:0"><div class="m">${rv.has(r.row) ? `<span class="badge b-bad rvt">${esc(t('rvTag'))}</span>` : ''}${r.p.isBundle ? `<span class="badge b-q">${esc(t('bundleTag'))}</span> ` : ''}${esc(r.p.model)}<span class="dv">${esc(r.p.dv || '')} · ${esc(grpName(r.p.grp))}</span>${r.p.isNew ? `<span class="badge b-new">${esc(t('newTag'))}</span>` : ''}</div>` +
       `<div class="s">${esc(r.name || r.p.title)}</div></div><div class="r"></div></label>`).join('');
     if (!rows.length && noMatch().length) S.tab = 'skip';
     // 매칭 불가: 다른 탭과 같은 행 — SKU · 상품명 · 이유 (CLIA·LG.com 어디에도 없으면 주소를 직접 넣는 칸)
@@ -517,11 +521,15 @@
     if (S.job.status === 'ready' && S.autoDl) $('dl').click();
   }
   $('export').onclick = async () => {
-    const items = act().filter((r) => S.sel.has(r.row)).map((r) => (r.kind === 'new'
+    const items = act().filter((r) => S.sel.has(r.row)).map((r) => (r.kind === 'bundle'
+      ? { row: r.row, title: r.name, force: S.force.has(r.row), bundle: r.p.parts.map((x) => (x.register ? { url: x.url, register: true } : { slug: x.slug })) }
+      : r.kind === 'new'
       ? { row: r.row, url: r.p.url, register: true, alts: r.p.alts, fuzzy: r.p.fuzzy, force: S.force.has(r.row) }
       : { row: r.row, slug: r.p.slug, force: S.force.has(r.row) }));
     if (S.busy || !items.length) return;
-    const est = estMin(items.filter((x) => x.register || x.force).length, items.length);
+    // 크롤 수: 단품 등록 + 묶음 구성품 중 등록할 것 (같은 제품은 한 번만)
+    const toCrawl = new Set(items.flatMap((x) => (x.bundle ? x.bundle.filter((y) => y.register || x.force).map((y) => y.url || y.slug) : (x.register || x.force ? [x.url || x.slug] : []))));
+    const est = estMin(toCrawl.size, items.length);
     const longJob = est >= LONG_MIN;
     S.autoDl = !longJob;   // 오래 걸리는 작업은 자동 다운로드 대신 '다시 받기' 버튼 · 메일
     S.busy = true; refresh();

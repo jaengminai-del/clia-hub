@@ -168,6 +168,30 @@ async function contentFor(channel, url) {
   return { text: (sm && sm.html ? sm.html + '\n' : '') + sl.html, images: sl.count, allImages: sl.count, summaryErr: sm && sm.error ? sm.error.slice(0, 200) : '' };
 }
 
+// 묶음 상품 ('A + B' 행, 2026-11-23): 구성품 크롤 결과를 빌더 번들과 같은 모양으로 합쳐(crawler-py/bundle_pto.py combine)
+// 같은 렌더러(ebay_builder.py)로 그리고, 단품과 같은 슬라이스 이미지로 만든다. 묶음 결과는 media-cache/bulk/bundles/<키>/ (제품 목록엔 안 나옴)
+const PY_DIR = path.join(__dirname, 'crawler-py');
+const python = () => process.env.CRAWLER_PYTHON || (fs.existsSync(path.join(PY_DIR, '.venv', 'bin', 'python')) ? path.join(PY_DIR, '.venv', 'bin', 'python') : 'python3');
+const runPy = (args, timeoutMs) => new Promise((resolve, reject) => require('child_process').execFile(python(), args, { cwd: PY_DIR, timeout: timeoutMs },
+  (err, out, stderr) => (err ? reject(new Error(String(stderr || err.message).trim().split('\n').pop().slice(0, 300))) : resolve(String(out)))));
+const bundleKey = (it) => crypto.createHash('sha1').update(it.bundle.map((x) => x.slug).join('+')).digest('hex').slice(0, 16);
+async function contentForBundle(channel, it, title) {
+  const dir = path.join(DIR, 'bundles', bundleKey(it));
+  fs.mkdirSync(dir, { recursive: true });
+  const spec = { title: title || it.model, components: it.bundle.map((x) => ({ model: x.model || '', url: x.url, slug: x.slug })) };
+  fs.writeFileSync(path.join(dir, 'spec.json'), JSON.stringify(spec));
+  await runPy(['bundle_pto.py', 'combine', dir, path.join(dir, 'spec.json')], 60 * 1000);
+  await runPy(['ebay_builder.py', dir, '--fragment', '--medium', 'shopee_lazada', '-o', 'content.html'], 3 * 60 * 1000);
+  const html = fs.readFileSync(path.join(dir, 'content.html'), 'utf8');
+  const sl = await post('/api/v1/slice-html', { html, medium: 'shopee_lazada' }, 12 * 60 * 1000);
+  if (channel === 'shopee') {
+    const urls = (sl.urls || []).slice(0, SHOPEE_MAX_IMAGES);
+    if (!urls.length) throw new Error('no images');
+    return { text: urls.join('\n'), images: urls.length, allImages: sl.count, summaryErr: '' };
+  }
+  return { text: sl.html, images: sl.count, allImages: sl.count, summaryErr: '' };   // 묶음은 PDP 요약 없이 (요약은 제품 하나 기준)
+}
+
 // ── 확인 필요 ──
 function autoFrames(mirror) {
   const out = [];
@@ -185,6 +209,7 @@ const NON_CONTENT = new Set(['ST0018', 'PD0016']);   // 누락으로 세지 않�
 const DUP_DAM = /(?:\/content\/dam\/channel\/wcms){2,}/;   // LG 페이지가 경로를 두 번 붙인 주소 — 이미지가 실제로 있어서 크롤러가 바로잡는다
 function flagsFor(j, it, c) {
   const f = [];
+  if (it.bundle) f.push({ code: 'bundle', sev: 'info', n: it.bundle.length });   // 묶음 상품: 구성품 N개를 합친 내용 (안내)
   const dir = path.join(OUT_DIR(), it.slug || '');
   const mirror = readJson(path.join(dir, 'mirror.json'));
   const qa = readJson(path.join(dir, 'qa_report.json')) || (mirror && mirror._qa) || {};
@@ -223,6 +248,12 @@ async function run(j) {
   const contentBy = new Map();     // slug → Promise<content>
   const texts = new Map();         // row → 설명 칸 내용 (작업 기록에는 넣지 않는다)
   const contentSlot = limiter(2);
+  // 같은 제품은 작업 안에서 한 번만 크롤 (단품 행과 여러 묶음의 구성품이 겹칠 수 있다 — 같은 폴더에 두 크롤이 동시에 쓰지 않게)
+  const crawlBy = new Map();
+  const crawlOnce = (url, force, onStart) => {   // onStart: 차례가 와서 실제로 크롤을 시작할 때 ('등록 대기' → '가져오는 중')
+    if (!crawlBy.has(url)) crawlBy.set(url, crawlSlot(() => { stop(); if (onStart) onStart(); return cr.crawl(url, { force: !!force, base: j.base }); }).then(() => { catalog.invalidate(); }));
+    return crawlBy.get(url);
+  };
   j.phase = j.items.some((x) => (x.register || x.force) && !x.crawled) ? 'crawl' : 'content';
   persist(j);
   // 중단(cancel): 아직 시작 안 한 크롤·내용 만들기는 하지 않는다. 이미 돌고 있는 것은 끝나도 결과를 버린다
@@ -231,9 +262,32 @@ async function run(j) {
     if (it.status === 'failed' && !it.retry) return;      // 이어서 할 때: 이미 실패한 것은 그대로
     try {
       stop();
+      if (it.bundle) {   // 묶음 상품: 필요한 구성품만 크롤 → 합쳐서 내용 만들기
+        if (!it.crawled) {
+          const need = it.bundle.filter((x) => x.register || it.force);
+          const started = () => { if (it.status !== 'crawling') { it.status = 'crawling'; persist(j); } };
+          for (const x of need) { await crawlOnce(x.url, it.force, started); x.crawled = true; }
+          it.crawled = true;
+          await persist(j, true);
+          stop();
+        }
+        if (!j.items.some((x) => (x.register || x.force) && !x.crawled && x.status !== 'failed')) j.phase = 'content';
+        it.status = 'working'; persist(j);
+        const key = 'bundle:' + bundleKey(it);
+        if (!contentBy.has(key)) contentBy.set(key, contentSlot(() => { stop(); return contentForBundle(j.channel, it, it.bundleTitle); }));
+        const c = await contentBy.get(key);
+        stop();
+        if (c.text.length > CELL_MAX) throw Object.assign(new Error(`too long for one Excel cell (${c.text.length} chars)`), { stage: 'content' });
+        texts.set(it.row, c.text);
+        Object.assign(it, { status: 'ok', error: '', images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: '' });
+        it.flags = flagsFor(j, it, c);
+        it.videos = 0;
+        persist(j);
+        return;
+      }
       if ((it.register || it.force) && !it.crawled) {
         // 차례가 오면 '가져오는 중' (그 전에는 '등록 대기')
-        await crawlSlot(() => { stop(); it.status = 'crawling'; persist(j); return cr.crawl(it.url, { force: !!it.force, base: j.base }); });
+        await crawlOnce(it.url, it.force, () => { it.status = 'crawling'; persist(j); });
         it.crawled = true;
         it.slug = cr.slugify(it.url);
         catalog.invalidate();
