@@ -965,8 +965,9 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 <div class="lh"><h2 id="listTitle"></h2><div class="lh-meta"><span id="countLabel"></span><span id="listSubtitle"></span></div></div>
 <div class="lh-ctrl">
 <div class="crawl-url-row"><input class="sbox" id="newCrawlUrl" placeholder="🔗 LG.com product URL" onkeydown="if(event.key==='Enter')crawlNewUrl()"><button class="crawl-url-btn" id="newCrawlBtn" onclick="crawlNewUrl()">Crawl</button></div>
-<!-- 벌크 엑셀 (2026-11-19): 빌더를 거치지 않고 여기서 바로 연다 — 채널을 정해서 /bulk/ 를 이 화면 위에 띄운다 -->
-<div class="bulk-row"><button class="ch-btn ch-main" style="--ch-color:#EE4D2D" id="bulkShopee" onclick="openBulkExcel('shopee')">Shopee bulk upload</button><button class="ch-btn ch-main" style="--ch-color:#0F146D" id="bulkLazada" onclick="openBulkExcel('lazada')">Lazada bulk upload</button></div>
+<!-- 벌크 엑셀 (2026-11-19): 빌더를 거치지 않고 여기서 바로 연다 — 채널을 정해서 /bulk/ 를 이 화면 위에 띄운다
+     태국 전용 (2026-11-23): Shopee/Lazada 벌크 업로드는 태국 법인만 쓴다 — 다른 법인은 applyCorpUI 에서 숨긴다 -->
+<div class="bulk-row" id="bulkRow" style="display:none"><button class="ch-btn ch-main" style="--ch-color:#EE4D2D" id="bulkShopee" onclick="openBulkExcel('shopee')">Shopee bulk upload</button><button class="ch-btn ch-main" style="--ch-color:#0F146D" id="bulkLazada" onclick="openBulkExcel('lazada')">Lazada bulk upload</button></div>
 <div class="list-warn" id="listWarn"></div>
 </div>
 <!-- 목록 필터 (2026-11-19): 벌크 엑셀 화면과 같은 모양 — 밑줄 탭 · 펼침 버튼(본부 · 제품군) · 검색 -->
@@ -1267,6 +1268,7 @@ function applyCorpUI(){
   document.getElementById('listSubtitle').textContent='LG.com/'+CORP_SITE[CORP];
   document.getElementById('prodSearch').placeholder=t('list.search');
   [['bulkShopee','shopee','Shopee'],['bulkLazada','lazada','Lazada']].forEach(([id,k,ch])=>{const b=document.getElementById(id);b.textContent=t('bulk.'+k);b.title=t('bulk.tip',{ch});});
+  document.getElementById('bulkRow').style.display=CORP==='th'?'':'none';   // 벌크 업로드는 태국 전용
   const u=sessionStorage.getItem('clia_user')||'';
   document.getElementById('tbAvatar').textContent=(u.replace(/[^\p{L}\p{N}]/gu,'').slice(0,2)||'JJ').toUpperCase();
   startI18n();
@@ -2343,6 +2345,7 @@ Object.assign(I18N.th,{'tab.all':'ทั้งหมด','tab.md':'เฉพา�
 Object.assign(I18N.ar,{'tab.all':'الكل','tab.md':'MD فقط','flt.dv':'BU','flt.grp':'فئة المنتج','flt.all':'الكل','flt.none':'لا شيء','flt.n':'{n} محدد','flt.grpHint':'يمكن اختيار فئات BU المحددة فقط','list.search':'ابحث عن اسم المنتج...','bulk.shopee':'رفع جماعي إلى Shopee','bulk.lazada':'رفع جماعي إلى Lazada','bulk.tip':'ارفع ملف Excel المجمّع لـ {ch} — يملأ CLIA أوصاف المنتجات ويزحف إلى LG.com للمنتجات غير الموجودة'});
 // 벌크 엑셀: 이 화면 위에 /bulk/ 를 띄운다 (채널·법인·언어를 넘긴다). 닫으면 벌크가 새로 크롤한 제품까지 목록을 다시 불러온다
 function openBulkExcel(ch){
+  if(CORP!=='th')return;   // 태국 전용
   const p=new URLSearchParams({embed:'1',channel:ch,lang:_txLang(),corp:CORP});
   document.getElementById('bulkFrame').src=CRAWLER_API+'/bulk/?'+p;
   document.getElementById('bulkOverlay').style.display='block';

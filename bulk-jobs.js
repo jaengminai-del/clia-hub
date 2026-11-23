@@ -101,8 +101,20 @@ async function getJob(id) {
   return j || null;
 }
 
+// 끝난 작업을 다시 열 때 '확인 필요'를 지금 규칙으로 다시 센다 (2026-11-23) — 작업 기록·결과 엑셀은 그대로, 화면에 보내는 값만.
+// 작업이 끝난 뒤 그 제품을 다시 크롤했으면 지금 데이터는 엑셀에 들어간 내용과 다르므로 그때 저장한 것을 쓴다.
+function currentFlags(j, it) {
+  if (it.status !== 'ok' || !it.slug || !j.finishedAt) return it.flags;
+  const dir = path.join(OUT_DIR(), it.slug);
+  const src = readJson(path.join(dir, 'source.json'));
+  if (!src || !fs.existsSync(path.join(dir, 'mirror.json'))) return it.flags;
+  if (!(src.crawled_at > 0) || src.crawled_at * 1000 > j.finishedAt) return it.flags;
+  return flagsFor(j, it, { allImages: it.allImages, summaryErr: it.summaryErr });
+}
+
 function jobView(j) {
-  const its = j.items;
+  const done = j.status !== 'running' && j.status !== 'queued';
+  const its = done ? j.items.map((it) => { const flags = currentFlags(j, it); return flags === it.flags ? it : { ...it, flags }; }) : j.items;
   const fin = (x) => x.status === 'ok' || x.status === 'failed';
   return { id: j.id, upload: j.upload, status: j.status, error: j.error, channel: j.channel, phase: j.phase,
     total: its.length, done: its.filter(fin).length,
@@ -149,6 +161,7 @@ const imgKey = (u) => {
   try { k = decodeURIComponent(k); } catch (_) {}
   return k.replace(/[._-]\d{2,4}x\d{2,4}/g, '');
 };
+const NON_CONTENT = new Set(['ST0018', 'PD0016']);   // 누락으로 세지 않는 영역: 바로가기 링크(ST0018) · 구매처(PD0016)
 const DUP_DAM = /(?:\/content\/dam\/channel\/wcms){2,}/;   // LG 페이지가 경로를 두 번 붙인 주소 — 이미지가 실제로 있어서 크롤러가 바로잡는다
 function flagsFor(j, it, c) {
   const f = [];
@@ -156,9 +169,10 @@ function flagsFor(j, it, c) {
   const mirror = readJson(path.join(dir, 'mirror.json'));
   const qa = readJson(path.join(dir, 'qa_report.json')) || (mirror && mirror._qa) || {};
   // 원문 누락: 일부러 빼는 것(바로가기 링크 영역 ST0018 · 탭 카드 안 글)은 세지 않는다 — 그대로 세면 거의 모든 제품이 걸린다.
+  // 구매처 영역(PD0016 Where to buy)도 컨텐츠가 아니다 — 이 규칙 전에 크롤한 제품의 검사 기록에는 그 썸네일이 누락으로 들어 있다
   // 실제로 빠진 이미지가 있거나, 본문 글이 5개 이상 빠졌을 때만
   const cov = qa.coverage || {}, chk = qa.checks || {};
-  const real = (x) => x && x.component_id !== 'ST0018';
+  const real = (x) => x && !NON_CONTENT.has(x.component_id);
   const texts = (cov.missing_texts || []).filter((x) => real(x) && !x.only_in_cards).length;
   // 예전에 크롤한 결과의 검사 기록에는 '크롤러가 일부러 뺀 이미지(LG 가 404·자리표시를 내줌)'가 누락으로 들어 있다 — 그것은 빼고 센다.
   // 새 크롤은 검사가 이미 제외한다. 주소가 겹쳐 있던 것은 실제로 이미지를 잃은 것이라 그대로 센다 (다시 가져오면 고쳐진다).

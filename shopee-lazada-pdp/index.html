@@ -170,7 +170,7 @@ body{font-family:'LGEIText', 'LINESeedSansTH',Arial,sans-serif;background:#F6F3E
         <button class="btn-sm" id="btnCopyHtml" onclick="copyHTML()" disabled>📋 Copy HTML</button>
         <button class="btn-sm" id="btnCopyListing" onclick="copyListingText()" style="display:none" title="Promotion · Product details · Delivery · After care · Return policy written in the CLIA hub product page — paste into the Shopee description">📝 Copy description text</button>
         <button class="btn-sm" id="btnCopyImgHtml" onclick="copyImageHTML()" disabled title="Images of the preview (1000px wide) + HTML that shows them — looks the same on Lazada/eBay">🖼 Copy image HTML</button>
-        <button class="btn-sm" id="btnBulk" onclick="openBulkExcel()" title="Fill the product description of many products at once in a Shopee / Lazada bulk Excel">📊 Bulk Excel</button>
+        <button class="btn-sm" id="btnBulk" onclick="openBulkExcel()" style="display:none" title="Fill the product description of many products at once in a Shopee / Lazada bulk Excel">📊 Bulk Excel</button>
         <button class="btn-sm danger" onclick="resetAll()" title="Reset" aria-label="Reset">✕</button>
       </div>
     </div>
@@ -420,6 +420,7 @@ function mirrorToEbayFeatures(mirror) {
 // ══════════════════════════════════════════
 async function analyzePDP() {
   const url = document.getElementById('pdpUrl').value.trim();
+  if (typeof syncBulkBtn === 'function') syncBulkBtn();
   if (!url) return;
   const btn = document.getElementById('btnAnalyze');
   btn.disabled = true; btn.textContent = 'Crawling...';
@@ -1384,11 +1385,21 @@ document.addEventListener('DOMContentLoaded', () => {
   <iframe id="bulkFrame" title="Bulk Excel" style="position:absolute;inset:16px;width:calc(100% - 32px);height:calc(100% - 32px);border:0;border-radius:16px;background:#F8F7F5;box-shadow:0 12px 48px rgba(0,0,0,.25)"></iframe>
 </div>
 <script>
+// 제품 URL 의 국가 (lg.com/th/... → 'th')
+function bulkCorp() {
+  const u = (document.getElementById('pdpUrl').value || new URLSearchParams(location.search).get('url') || '').trim();
+  return ((/lg\.com\/([a-z]{2})(?:_[a-z]{2})?\//i.exec(u) || [])[1] || '').toLowerCase();
+}
+// 벌크 엑셀은 태국 전용 (2026-11-23): 태국 제품일 때만 버튼을 보인다
+function syncBulkBtn() {
+  const b = document.getElementById('btnBulk');
+  if (b) b.style.display = bulkCorp() === 'th' ? '' : 'none';
+}
+syncBulkBtn();
 function openBulkExcel() {
+  if (bulkCorp() !== 'th') return;
   const qs = new URLSearchParams(location.search);
-  const u = (document.getElementById('pdpUrl').value || qs.get('url') || '').trim();
-  const corp = (/lg\.com\/([a-z]{2})(?:_[a-z]{2})?\//i.exec(u) || [])[1] || '';
-  const p = new URLSearchParams({ embed: '1', channel: CHANNEL, lang: qs.get('lang') || 'en', corp: corp.toLowerCase() });
+  const p = new URLSearchParams({ embed: '1', channel: CHANNEL, lang: qs.get('lang') || 'en', corp: bulkCorp() });
   document.getElementById('bulkFrame').src = (typeof API_BASE !== 'undefined' && API_BASE ? API_BASE : '..') + '/bulk/?' + p;
   document.getElementById('bulkOverlay').style.display = 'block';
 }
