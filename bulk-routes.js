@@ -244,7 +244,7 @@ router.post('/api/v1/bulk/build', async (req, res) => {
   const email = b.notify && b.notify.email ? String(b.notify.email).trim() : '';
   if (email && !bulkJobs.emailOk(email)) return res.status(400).json({ error: 'email address not allowed', code: 'bad_email' });
   const base = `${req.get('x-forwarded-proto') || req.protocol}://${req.get('host')}`;
-  const j = bulkJobs.create({ upload: b.id, channel: b.channel, sheet: b.sheet, descCol, items, base,
+  const j = bulkJobs.create({ upload: b.id, channel: b.channel, country, sheet: b.sheet, descCol, items, base,
     outName: `${up.meta.fileName.replace(/\.xlsx$/i, '')}-clia-${b.channel}.xlsx`,
     notify: email && bulkJobs.mailReady() ? { email } : null, lang: /^[a-z]{2}$/.test(b.lang || '') ? b.lang : 'en' });
   console.log(`[bulk] build ${j.outName}: ${items.length} rows, register ${items.filter((x) => x.register).length}`);
@@ -264,6 +264,9 @@ router.get('/api/v1/bulk/config', (req, res) => res.json({ mail: bulkJobs.mailRe
 router.get('/api/v1/bulk/jobs/:job', async (req, res) => {
   const j = await bulkJobs.getJob(req.params.job);
   if (!j) return res.status(404).json({ error: 'job not found' });
+  // 나라별로 나눈다: 화면이 나라를 알려 주면(?country=) 다른 나라 작업은 없는 것으로 (메일 링크처럼 나라 없이 열면 그대로)
+  const want = /^[a-z]{2}$/.test(req.query.country || '') ? req.query.country : '';
+  if (want && bulkJobs.countryOf(j) !== want) return res.status(404).json({ error: 'job not found', code: 'other_country' });
   // 재배포 직후 제품 데이터를 버킷에서 받는 동안(약 1분)은 끝난 작업의 '확인 필요'를 지금 규칙으로 셀 수 없다 — 받을 때까지 기다린다
   if (j.status !== 'running' && j.status !== 'queued') await require('./crawl-store').whenPulled(75 * 1000);
   res.json(bulkJobs.jobView(j));

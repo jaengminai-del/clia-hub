@@ -460,7 +460,10 @@
   $('xpNo').onclick = xpClose; $('xpOk').onclick = xpClose;
   $('xp').onclick = (e) => { if (e.target === $('xp')) xpClose(); };
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') xpClose(); });
-  const lastKey = 'clia-bulk-last-' + (CH0 || 'any');
+  // 이 화면에서 마지막으로 한 작업 — 나라·채널별로 따로 (2026-11-23: 태국 작업이 싱가포르 화면에 보이지 않게)
+  const lastKey = 'clia-bulk-last-' + (home || 'any') + '-' + (CH0 || 'any');
+  const oldKey = 'clia-bulk-last-' + (CH0 || 'any');   // 나라 구분 전 기록 — 같은 나라 작업일 때만 옮겨 쓴다
+  const jobUrl = (id) => '/api/v1/bulk/jobs/' + id + (home ? '?country=' + encodeURIComponent(home) : '');
   // ── 중단: 확인 팝업 → 서버에 cancel. 이미 등록한 제품은 남고 엑셀은 만들지 않는다 ──
   const cfClose = () => $('cf').classList.add('hidden');
   function askStop(id, after) {
@@ -520,7 +523,8 @@
     $('resume').classList.add('hidden');
     show('s2'); $('pmsg').textContent = t('reading'); $('pfile').textContent = '';
     try {
-      const j = await api('/api/v1/bulk/jobs/' + id);
+      const j = await api(jobUrl(id));
+      if (!home && j.country) home = j.country;   // 메일 링크(나라 없이 열림): 작업의 나라로 맞춘다
       if (!S.channel) S.channel = j.channel;
       chTag();
       const d = await api('/api/v1/bulk/analyze', { id: j.upload, country: home });
@@ -537,9 +541,11 @@
   }
   if (/^[0-9a-f]{16}$/.test(qs.get('job') || '')) resume(qs.get('job'));
   else {
-    const last = store.get(lastKey);
+    let last = store.get(lastKey);
+    if (!last && home) { const o = store.get(oldKey); if (o && o.job) last = { ...o, migrate: true }; }
     if (last && last.job && Date.now() - last.at < 7 * 864e5) {
-      api('/api/v1/bulk/jobs/' + last.job).then((j) => {
+      api(jobUrl(last.job)).then((j) => {   // 다른 나라 작업이면 서버가 404 → 보이지 않는다
+        if (last.migrate) { store.set(lastKey, { job: last.job, file: last.file, at: last.at }); }
         $('resume').classList.remove('hidden');
         const label = (x) => t('resumeT', last.file || '') + ' · ' + (x.status === 'running' ? t('resumeRun', x.done, x.total) : x.status === 'cancelled' ? t('st_stop') : t('resumeDone'));
         $('resumeT').textContent = label(j);
