@@ -1162,22 +1162,10 @@ def main():
 
     # ★ 번들 PTO (2026-11-09~): 페이지 자체엔 피처가 없고 구성품 단품 PDP 에 있다 →
     #   구성품을 각각 크롤해 위→아래로 결합 (bundle_pto.py). 번들이 아니면 아래 기존 흐름 그대로.
-    if not args.skip_ai and os.getenv("CRAWLER_BUNDLE_LEGACY", "").strip() != "1":
-        from bundle_pto import is_bundle_pto, run_bundle
-        if is_bundle_pto(args.url, html):
-            extra = (["--pro"] if args.pro else []) + (["--full-ai"] if args.full_ai else [])
-            mirror = run_bundle(args.url, html, out, slugify, write_progress, extra)
-            (out / "qa_report.json").write_text(json.dumps({
-                "mode": "bundle_pto", "match_score": None,
-                "checks": {"gallery_images": len(mirror.get("_gallery") or []),
-                           "components": len(mirror["bundle_pto"]["components"]),
-                           "crawled": sum(c["slug_ok"] for c in mirror["bundle_pto"]["components"])},
-                "issues": [f"구성품 #{c['index']} {c['model'] or c['name'][:40]}: 단품 PDP 없음/실패"
-                           for c in mirror["bundle_pto"]["components"] if not c["slug_ok"]],
-            }, ensure_ascii=False, indent=2), encoding="utf-8")
-            (out / "mirror.json").write_text(json.dumps(mirror, ensure_ascii=False, indent=2), encoding="utf-8")
-            write_progress(100, "분석 완료! (번들 PTO)", "done")
-            print(f"\n✓ 완료 (번들 PTO). 산출물: {out}/mirror.json")
+    if not args.skip_ai:
+        from bundle_pto import maybe_run as bundle_pto_run
+        extra = (["--pro"] if args.pro else []) + (["--full-ai"] if args.full_ai else [])
+        if bundle_pto_run(args.url, html, out, slugify, write_progress, extra):
             return
 
     # ★ 빠른 경로 (2026-10-10~): 최종 미러는 컴포넌트-우선(Step7-CF)으로 만들어지고 Gemini 결과는

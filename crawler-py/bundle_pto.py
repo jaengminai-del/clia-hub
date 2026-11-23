@@ -298,3 +298,25 @@ def run_bundle(url: str, html: str, out: Path, slugify, write_progress, extra_ar
         parts.append({"comp": c, "mirror": m})
     write_progress(92, "번들 구성품 결합 중...", "build")
     return merge(info, parts)
+
+
+def maybe_run(url: str, html: str, out: Path, slugify, write_progress, extra_args: List[str], extra_fields: Optional[dict] = None) -> bool:
+    """번들 PTO 페이지면 구성품을 크롤·결합해 out/mirror.json · qa_report.json 을 쓰고 True. 아니면 아무것도 안 하고 False.
+    일반 파이프라인(pdp_pipeline.py)과 Shopee·Lazada 파이프라인(pdp_pipeline_sl.py)이 같이 쓴다 (2026-11-23 —
+    전에는 일반 파이프라인에만 있어 태국·싱가포르 번들 페이지는 번들로 처리되지 않았다).
+    extra_fields: mirror 에 더 붙일 값 (예: Shopee·Lazada 결과 표시 _gen)."""
+    if os.getenv("CRAWLER_BUNDLE_LEGACY", "").strip() == "1" or not is_bundle_pto(url, html):
+        return False
+    mirror = run_bundle(url, html, out, slugify, write_progress, extra_args)
+    mirror.update(extra_fields or {})
+    comps = mirror["bundle_pto"]["components"]
+    (out / "qa_report.json").write_text(json.dumps({
+        "mode": "bundle_pto", "match_score": None,
+        "checks": {"gallery_images": len(mirror.get("_gallery") or []),
+                   "components": len(comps), "crawled": sum(c["slug_ok"] for c in comps)},
+        "issues": [f"구성품 #{c['index']} {c['model'] or c['name'][:40]}: 단품 PDP 없음/실패" for c in comps if not c["slug_ok"]],
+    }, ensure_ascii=False, indent=2), encoding="utf-8")
+    (out / "mirror.json").write_text(json.dumps(mirror, ensure_ascii=False, indent=2), encoding="utf-8")
+    write_progress(100, "분석 완료! (번들 PTO)", "done")
+    print(f"\n✓ 완료 (번들 PTO). 산출물: {out}/mirror.json")
+    return True
