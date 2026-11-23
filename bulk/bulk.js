@@ -181,7 +181,10 @@
     }
     const scene = it && it.status === 'ok' && it.slug && (it.videos || flagsOf(r.row).some((f) => f.code === 'frame'))
       ? `<button class="ib" data-a="frame" data-slug="${esc(it.slug)}" title="${esc(t('a_frame'))}" aria-label="${esc(t('a_frame'))}"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg></button>` : '<span class="ib0"></span>';
-    const bld = r.p && r.p.url ? `<a class="ib" target="_blank" rel="noopener" href="${esc(builderUrl(r.p.url))}" title="${esc(t('a_builder'))}" aria-label="${esc(t('a_builder'))}"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>` : '<span class="ib0"></span>';
+    // 편집 = 빌더 (그 제품을 빌더로 열어 고친다). 모든 행 맨 오른쪽 같은 자리
+    const pen = '<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>';
+    const bld = r.p && r.p.url ? `<a class="eb" target="_blank" rel="noopener" href="${esc(builderUrl(r.p.url))}" title="${esc(t('a_editTip'))}">${pen}${esc(t('a_edit'))}</a>`
+      : `<span class="eb" aria-hidden="true" style="visibility:hidden">${pen}${esc(t('a_edit'))}</span>`;
     return `${why}${btns}<span class="ics">${scene}${bld}</span>`;
   }
   function itemStatus(r) {
