@@ -154,8 +154,56 @@ a.clia-btn { text-decoration: none; }
 .list.grid .fl, .list.grid .fx { align-items: flex-start; justify-content: flex-start; text-align: start; }
 .mini { height: 26px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--clia-gray-300); background: #fff; color: var(--clia-gray-900); font: 600 11px/24px var(--clia-font), sans-serif; cursor: pointer; text-decoration: none; white-space: nowrap; }
 .mini:hover { border-color: var(--clia-gray-700); }
-.urlin { display: inline-flex; gap: 6px; align-items: center; margin-inline-start: 8px; flex-wrap: wrap; }
-.urlin input { height: 28px; border: 1px solid var(--clia-gray-300); border-radius: 8px; padding: 0 8px; min-width: 280px; font-size: 12px; }
+/* 매칭 불가 (2026-11-23): 이유별 칩 + 한 번에 한 묶음만 펼침 + 한 줄 행 (SKU · 상품명 · 할 일) */
+.schips { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 16px; border-bottom: 1px solid var(--clia-gray-100); }
+.schip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--clia-gray-300); background: #fff; color: var(--clia-gray-700); font: 600 12px var(--clia-font), sans-serif; cursor: pointer; }
+.schip b { padding: 0 6px; border-radius: 999px; background: var(--clia-gray-100); font-size: 11px; }
+.schip i { font-style: normal; color: var(--ok); font-size: 11px; }
+.schip:hover { border-color: var(--clia-gray-700); }
+.schip.on { background: var(--clia-gray-900); border-color: var(--clia-gray-900); color: #fff; }
+.schip.on b { background: rgba(255,255,255,.18); }
+.schip.on i { color: #8FE0B4; }
+.srow { display: grid; grid-template-columns: minmax(140px, 220px) minmax(0, 1fr) minmax(280px, 420px); gap: 14px; align-items: center; min-height: 44px; padding: 5px 16px; border-bottom: 1px solid var(--clia-gray-100); font-size: 12px; }
+.srow:last-child { border-bottom: 0; }
+.srow .k { font-weight: 700; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.srow .k.nosku { color: var(--clia-gray-500); font-weight: 600; font-style: italic; }
+.srow .n { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.srow .a { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; justify-content: flex-end; min-width: 0; }
+.srow input { flex: 1 1 100%; min-width: 0; height: 32px; border: 1px solid var(--clia-gray-300); border-radius: 8px; padding: 0 10px; font: 12px var(--clia-font), sans-serif; background: #fff; color: var(--clia-gray-900); }
+.srow input:hover { border-color: var(--clia-gray-500); }
+.srow input:focus { outline: none; border-color: var(--clia-gray-900); box-shadow: 0 0 0 3px rgba(38,38,38,.08); }
+.srow.bad input { border-color: var(--bad); box-shadow: 0 0 0 3px rgba(200,36,31,.08); }
+.ust { flex: 1 1 100%; font-size: 11px; color: var(--muted); text-align: end; }
+.ust:empty { display: none; }
+.srow.bad .ust { color: var(--bad); }
+.pick { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border: 1px solid var(--clia-gray-300); border-radius: 999px; background: #fff; color: var(--clia-gray-900); font: 600 12px var(--clia-font), sans-serif; cursor: pointer; }
+.pick:has(img) { padding-inline-start: 3px; }
+.pick img { width: 24px; height: 24px; object-fit: contain; border-radius: 999px; background: var(--clia-gray-50); }
+.pick:hover { border-color: var(--clia-gray-900); }
+.pick .pc { color: var(--muted); font-weight: 500; font-size: 11px; }
+.pick:focus-visible, .schip:focus-visible, .mini:focus-visible { outline: 2px solid var(--clia-gray-900); outline-offset: 2px; }
+.srow.fixed { background: #F3FAF6; }
+.okt { color: var(--ok); font-weight: 700; font-size: 12px; }
+/* 목록 행 오른쪽 (2026-11-23 단순화): [상태 · 이유][고치기][문제없음] … [장면][빌더] — 아이콘은 모든 행 같은 자리 */
+.acts { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.acts .why { color: var(--bad); font-weight: 700; font-size: 12px; }
+.ics { display: inline-flex; gap: 4px; margin-inline-start: 4px; }
+.ib, .ib0 { width: 30px; height: 30px; flex: none; }
+.ib { display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--clia-gray-200); border-radius: 8px; background: #fff; color: var(--clia-gray-600); cursor: pointer; text-decoration: none; }
+.ib:hover { border-color: var(--clia-gray-700); color: var(--clia-gray-900); }
+.ib svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ib:focus-visible { outline: 2px solid var(--clia-gray-900); outline-offset: 2px; }
+.eb { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 11px 0 9px; border: 1px solid var(--clia-gray-300); border-radius: 8px; background: #fff; color: var(--clia-gray-900); font: 600 12px var(--clia-font), sans-serif; text-decoration: none; white-space: nowrap; }
+.eb:hover { border-color: var(--clia-gray-900); }
+.eb svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.eb:focus-visible { outline: 2px solid var(--clia-gray-900); outline-offset: 2px; }
+button.eb { cursor: pointer; }
+.b-ed { background: #EDE7FB; color: #5B3DB5; margin-inline-start: 6px; }
+/* 편집(빌더) 덮개 — 벌크 화면 전체 위 */
+.edov { position: fixed; inset: 0; z-index: 50; background: #fff; }
+.edov iframe { width: 100%; height: 100%; border: 0; display: block; }
+.list.grid .acts { justify-content: flex-start; }
+.shint { padding: 8px 16px; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--clia-gray-100); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .err2 { color: var(--bad); font-size: 12px; }
 /* 작업 상황판 · 탭 · 한 줄 도구 (2026-11-19 UI 정리) */
 .panel { position: sticky; top: 0; z-index: 6; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 14px 18px; margin: 0 0 14px; box-shadow: 0 6px 18px rgba(38,38,38,.06); }
@@ -167,6 +215,7 @@ a.clia-btn { text-decoration: none; }
 .p-file .again { border: 0; background: none; text-decoration: underline; color: var(--clia-gray-700); cursor: pointer; font-size: 12px; white-space: nowrap; }
 .p-act { display: flex; gap: 8px; align-items: center; margin-inline-start: auto; }
 .p-stat { margin-top: 8px; font-size: 14px; color: var(--clia-gray-900); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; min-height: 22px; }
+.p-stat .okline { color: var(--ok); font-weight: 700; }
 .p-stat .lnk { border: 0; background: #FDE8E7; color: var(--bad); font-weight: 700; border-radius: 999px; padding: 3px 10px; cursor: pointer; font-size: 12px; }
 .panel .prog { width: 100%; margin-top: 8px; height: 6px; }
 .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 10px; overflow-x: auto; }
@@ -197,29 +246,30 @@ a.clia-btn { text-decoration: none; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .work .list { border: 0; border-radius: 0; background: none; }
 .work .list.grid { padding: 14px 16px; }
-.wfoot { padding: 10px 20px 12px; font-size: 11px; color: var(--muted); text-align: end; border-top: 1px solid var(--clia-gray-100); }
 .work .item:last-child { border-bottom: 0; }
-@media (max-width: 640px) { .work .list { border-radius: 0 0 17px 17px; overflow: hidden; } .wfoot { display: none; } }
+@media (max-width: 640px) { .work .list { border-radius: 0 0 17px 17px; overflow: hidden; } }
 /* 탭 설명 한 줄 · 매칭 불가 목록 (2026-11-19) */
 .nrow { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 .list.grid .nrow { justify-content: flex-start; }
 .sech { padding: 10px 20px; border-top: 1px solid var(--clia-gray-200); border-bottom: 1px solid var(--clia-gray-100); background: var(--clia-gray-50); font-size: 13px; font-weight: 700; color: var(--clia-gray-700); }
 .sech b { margin-inline-start: 6px; font-weight: 600; color: var(--clia-gray-400); }
-.tabd { padding: 10px 20px 0; font-size: 13px; color: var(--clia-gray-600); line-height: 1.5; word-break: keep-all; }
 .skiplist .item { cursor: default; }
 .skiplist .item:hover { background: none; }
 .skiplist .item .r { align-items: flex-end; }
-.skiplist .urlin { margin: 0; justify-content: flex-end; }
-.skiplist .urlin input { min-width: 260px; height: 30px; }
-@media (max-width: 640px) { .tabd { padding: 10px 14px 0; } .skiplist .item { grid-template-columns: 0 48px minmax(0, 1fr); } .skiplist .item .r { grid-column: 2 / -1; align-items: flex-start; } .skiplist .urlin { justify-content: flex-start; } .skiplist .urlin input { min-width: 0; flex: 1; } }
+@media (max-width: 640px) { .skiplist .item { grid-template-columns: 0 48px minmax(0, 1fr); } .skiplist .item .r { grid-column: 2 / -1; align-items: flex-start; } .srow { grid-template-columns: minmax(0, 1fr); gap: 4px; padding: 8px 14px; } .srow .a { justify-content: flex-start; } .ust { text-align: start; } .schips { padding: 10px 14px; } .shint { padding: 8px 14px; } }
 /* CLIA 에 없는 상품 등록: 상황판 안의 눈에 띄는 한 줄 + 올리자마자 묻는 팝업 (2026-11-19) */
-.p-reg { display: flex; gap: 12px 16px; align-items: center; flex-wrap: wrap; margin-top: 14px; padding: 14px 16px; border-radius: 14px; background: #F2F6FD; border: 1px solid #C9D7F2; }
-.p-reg.on { background: #E3F4EA; border-color: #B7E0C6; }
+.p-reg { display: flex; gap: 12px; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--clia-gray-100); }
+.p-reg .regt { flex: 0 1 auto; font-size: 13px; font-weight: 600; color: var(--clia-gray-700); }
+.sw { flex: none; position: relative; width: 40px; height: 24px; border-radius: 999px; border: 0; background: var(--clia-gray-300); cursor: pointer; padding: 0; transition: background .15s; }
+.sw i { position: absolute; top: 3px; inset-inline-start: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2); transition: transform .15s; }
+.sw[aria-checked="true"] { background: var(--ok); }
+.sw[aria-checked="true"] i { transform: translateX(16px); }
+[dir="rtl"] .sw[aria-checked="true"] i { transform: translateX(-16px); }
+.sw:focus-visible { outline: 2px solid var(--clia-gray-900); outline-offset: 2px; }
+.sw:disabled { opacity: .5; cursor: default; }
 .p-reg .regi, .rgbox .rgi { flex: none; width: 36px; height: 36px; border-radius: 50%; background: #2A4E8F; display: inline-flex; align-items: center; justify-content: center; }
 .p-reg.on .regi { background: var(--ok); }
 .p-reg .regi svg, .rgbox .rgi svg { width: 18px; height: 18px; fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; }
-.p-reg .regt { flex: 1 1 280px; font-size: 16px; font-weight: 700; color: var(--clia-gray-900); line-height: 1.4; }
-.p-reg .clia-btn { height: 42px; padding: 0 20px; font-size: 14px; font-weight: 700; }
 .mbox.rgbox { width: min(480px, 100%); padding: 26px 26px 22px; }
 .p-reg .regt, .rgbox .rgt, .rgbox .rgb { word-break: keep-all; overflow-wrap: anywhere; }   /* 한국어가 낱말 중간에서 끊기지 않게 */
 .rgbox .rgi { width: 44px; height: 44px; margin-bottom: 14px; }
@@ -292,9 +342,9 @@ a.clia-btn { text-decoration: none; }
     <!-- 작업 상황판: 파일 · 지금 상태 · 진행 · 내보내기 · 알림 · 일괄 등록 — 화면을 내려도 맨 위에 고정 -->
     <div class="panel" id="panel">
       <div class="p-top">
-        <div class="p-file"><svg viewBox="0 0 24 24"><path d="M4 3h11l5 5v13H4z"/><path d="M15 3v5h5"/></svg><span class="pfn" id="pFile"></span><span class="pmt" id="pMatch"></span><button class="again" id="again" data-i="again"></button></div>
+        <div class="p-file"><svg viewBox="0 0 24 24"><path d="M4 3h11l5 5v13H4z"/><path d="M15 3v5h5"/></svg><span class="pfn" id="pFile"></span><button class="again" id="again" data-i="again"></button></div>
         <div class="p-act">
-          <a class="clia-btn hidden" id="dl" data-i="dlAgain"></a>
+          <a class="clia-btn primary big hidden" id="dl" data-i="dlAgain"></a>
           <button class="clia-btn big hidden" id="stop" type="button"></button>
           <button class="clia-btn primary big" id="export"></button>
         </div>
@@ -302,14 +352,13 @@ a.clia-btn { text-decoration: none; }
       <div class="p-stat" id="info" aria-live="polite"></div>
       <div class="prog hidden" id="prog"><i></i></div>
       <!-- CLIA 에 없지만 LG.com 에 있는 상품: 한 줄 + 버튼 하나 (2026-11-19). 올리자마자 팝업(#rg)으로도 묻는다 -->
-      <div class="p-reg hidden" id="regCard"><span class="regi" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><span class="regt" id="regT"></span><button class="clia-btn" id="regBtn" type="button"></button></div>
+      <div class="p-reg hidden" id="regCard"><span class="regt" id="regT"></span><button class="sw" id="regBtn" type="button" role="switch" aria-checked="false" aria-labelledby="regT"><i></i></button></div>
     </div>
     <div class="empty hidden" id="noMatch"><div class="et" id="noMatchT"></div><div class="eb" id="noMatchB"></div></div>
     <!-- 작업 영역: 큰 흰 상자 하나 — 위에 탭(밑줄), 그 아래 도구 줄, 그 아래 목록 -->
     <div class="work" id="work">
       <div class="wtabs" id="tabs" role="tablist"></div>
-      <div class="tabd" id="tabD"></div>
-      <div class="wbar" id="selbar">
+            <div class="wbar" id="selbar">
         <button class="ctlb selall" id="selAll" type="button"><span class="cb" id="selCb"></span><span id="selL"></span><b id="selN"></b></button>
         <div class="ddw"><button class="ctlb" id="dvBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="dvPop"></button><div class="ddpop hidden" id="dvPop" role="menu"></div></div>
         <div class="ddw"><button class="ctlb" id="grpBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="ctl2"></button><div class="ddpop wide hidden" id="ctl2" role="menu"></div></div>
@@ -321,8 +370,7 @@ a.clia-btn { text-decoration: none; }
       <!-- 매칭 불가: 다른 탭과 같은 행 모양 (2026-11-19) -->
       <div class="sech hidden" id="skipHead"></div>
       <div class="list skiplist hidden" id="skip"></div>
-      <div class="wfoot" id="shiftTip"></div>
-    </div>
+          </div>
   </section>
 
 </div></div>
@@ -349,6 +397,7 @@ a.clia-btn { text-decoration: none; }
   <div class="xpb"><button class="clia-btn" id="cfNo" type="button"></button><button class="clia-btn primary" id="cfYes" type="button"></button></div>
 </div></div>
 <div class="modal hidden" id="frm" role="dialog" aria-modal="true"><div class="mbox"><div class="mh"><b id="frmT"></b><button class="pill" id="frmX"></button></div><div id="frmBody"></div><div class="fmsg" id="frmMsg"></div></div></div>
+<div class="edov hidden" id="edov"><iframe id="edFrame" title="Builder"></iframe></div>
 <script src="../shared/clia-frame-picker.js"></script>
 <script src="bulk-i18n.js"></script>
 <script src="bulk.js"></script>

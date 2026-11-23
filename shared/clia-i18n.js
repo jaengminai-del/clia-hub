@@ -37,6 +37,7 @@
       }
       return null;
     };
+    window.CLIA_I18N.tx = (s) => tx(s);   // 확인 창처럼 화면 밖 문구 (2026-11-23)
     const skip = (el) => !el || (el.closest && el.closest(skipSel));
     const doText = (n) => {
       if (skip(n.parentElement)) return;
