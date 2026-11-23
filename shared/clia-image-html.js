@@ -6,7 +6,8 @@
  * (마켓 편집기가 가로 배치·잘라 보이는 이미지·폰트 등을 지워도 영향 없음 — 모두 이미지에 들어 있다)
  *
  *   CLIAImageHTML.copy({ html, apiBase, button, isEditing, summaryUrl, urlsOnly })
- *   CLIAImageHTML.build({ html, apiBase, summaryUrl, urlsOnly }) → { text, count, kind, summaryErr }  (복사 없이 만들기만)
+ *   CLIAImageHTML.build({ html, apiBase, summaryUrl, urlsOnly }) → { text, count, kind, summaryErr, hash, width }  (복사 없이 만들기만)
+ *     hash: 슬라이스 묶음 — ZIP 은 GET /media/slices/<hash>/<name>-images[-N].zip (빌더 이미지 다운로드, 같은 이미지)
  *   summaryUrl(선택, Shopee/Lazada): LG 제품 URL — 그 제품의 요약 설명(태국어)을 이미지 위에 붙인다 (2026-11-10)
  *   urlsOnly(선택, Shopee): 숫자 n — HTML 대신 이미지 주소만 앞에서부터 n장, 한 줄에 하나 (요약·alt·태그 없음).
  *     Shopee 설명은 글·alt 를 받지 않고 이미지(최대 12장)만 넣기 때문 (2026-11-10)
@@ -44,7 +45,7 @@
   }
 
   // 이미지형 HTML(또는 Shopee 는 이미지 주소 목록)을 만들어 돌려준다 — 복사·ZIP 다운로드 공용 (2026-11-11)
-  //   → { text, count, kind: 'urls' | 'html', summaryErr }
+  //   → { text, count, kind: 'urls' | 'html', summaryErr, hash, width }
   async function build(opts) {
     const html = typeof opts.html === 'function' ? opts.html() : opts.html;
     if (!html) throw new Error('no HTML');
@@ -61,11 +62,12 @@
     });
     const d = await r.json().catch(() => ({}));
     if (!r.ok || !d.html) throw new Error(d.error || `HTTP ${r.status}`);
-    if (nUrls) return { text: (d.urls || []).slice(0, nUrls).join('\n'), count: d.count, kind: 'urls', summaryErr: '' };   // Shopee: 이미지 주소만
+    const set = { hash: d.hash, width: d.width };
+    if (nUrls) return { text: (d.urls || []).slice(0, nUrls).join('\n'), count: d.count, kind: 'urls', summaryErr: '', ...set };   // Shopee: 이미지 주소만
     let text = d.html, summaryErr = '';
     try { const sm = await summaryP; if (sm) text = sm.html + '\n' + d.html; }
     catch (e) { summaryErr = e.message; }
-    return { text, count: d.count, kind: 'html', summaryErr };
+    return { text, count: d.count, kind: 'html', summaryErr, ...set };
   }
 
   async function copy(opts) {
