@@ -1395,6 +1395,14 @@ def main():
     datasets["pc"] = {"md": md, "html": html}
     _cf_origin = "https://" + (args.url.split("//", 1)[-1].split("/", 1)[0] or "www.lg.com")
 
+    # ★ 번들 PTO (일반 파이프라인과 같은 처리, 2026-11-23): 페이지 자체엔 피처가 없고 구성품 단품 PDP 에 있다 →
+    #   구성품을 각각 크롤해 [번들 헤더] → [구성품 구분 띠 + 섹션] … 으로 결합 (bundle_pto.py). 구성품도 이 파이프라인으로 크롤된다.
+    if not args.skip_ai:
+        from bundle_pto import maybe_run as bundle_pto_run
+        extra = (["--pro"] if args.pro else []) + (["--full-ai"] if args.full_ai else [])
+        if bundle_pto_run(args.url, raw or html, out, slugify, write_progress, extra, {"_gen": MIRROR_GEN}):
+            return
+
     # ★ 빠른 경로 (2026-10-10~): 최종 미러는 컴포넌트-우선(Step7-CF)으로 만들어지고 Gemini 결과는
     #   제품명만 쓰였다. 컴포넌트 근거가 충분하면 스크린샷·Gemini 분석·시각 QA(기존 10분+)를 건너뛰고
     #   HTML 컴포넌트만으로 바로 완성한다. 품질이 떨어지면 --full-ai / CRAWLER_FULL_AI=1 로 기존 방식 복귀.
