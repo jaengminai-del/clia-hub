@@ -23,6 +23,7 @@
     return d;
   };
   const EMBED = qs.get('embed') === '1';
+  const cName = (c) => ((T.cn || TX.en.cn)[c]) || String(c || '').toUpperCase();
   let home = String(qs.get('corp') || '').toLowerCase();
   const DIVS = ['MS', 'HS', 'ES'];
   const GRPS = { MS: ['TV', 'Audio', 'Monitor', 'Laptop', 'Projector', 'Other'], HS: ['Fridge', 'Washer', 'Dryer', 'Vacuum', 'Dishwasher', 'Cooking', 'Styler', 'Other'], ES: ['AC', 'Purifier', 'Dehumidifier'] };
@@ -58,8 +59,12 @@
   function fail(code, extra) {
     const [title, body] = T['e_' + code] || TX.en['e_' + code] || T.e_other;
     show('s1');
-    $('et').textContent = title.replace('{n}', (extra && extra.maxMb) || 40);
-    $('eb').textContent = body || (extra && extra.error) || '';
+    // 나라가 다른 엑셀: 고른 나라·채널 이름을 넣는다 (예: 싱가포르 Shopee 벌크 엑셀 템플릿을 올려 주세요)
+    const fill = (s) => String(s || '').replaceAll('{n}', (extra && extra.maxMb) || 40)
+      .replaceAll('{sel}', cName(home)).replaceAll('{ch}', S.channel === 'lazada' ? 'Lazada' : S.channel === 'shopee' ? 'Shopee' : 'Shopee / Lazada')
+      .replaceAll('{thai}', (extra && extra.thai) || 0).replaceAll('{all}', (extra && extra.named) || 0);
+    $('et').textContent = fill(title);
+    $('eb').textContent = fill(body) || (extra && extra.error) || '';
     $('ef').textContent = (extra && extra.fileName) || '';
     $('ecard').classList.remove('hidden');
   }
@@ -72,7 +77,7 @@
     const req = fetch(`/api/v1/bulk/upload?name=${encodeURIComponent(f.name)}&country=${encodeURIComponent(home)}`, { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: f })
       .then(async (r) => {
         const d = await r.json().catch(() => ({ code: r.status === 413 ? 'too_big' : 'other' }));
-        if (!r.ok) throw Object.assign(new Error(d.error || 'HTTP ' + r.status), { code: d.code || 'other', maxMb: d.maxMb });
+        if (!r.ok) throw Object.assign(new Error(d.error || 'HTTP ' + r.status), { code: d.code || 'other', maxMb: d.maxMb, detected: d.detected, thai: d.thai, named: d.named });
         return d;
       });
     try {
@@ -90,7 +95,7 @@
       $('q').value = '';
       setData(d, true);
       askRegister();
-    } catch (e) { fail(e.code || 'other', { maxMb: e.maxMb, error: e.message, fileName: f.name }); }
+    } catch (e) { fail(e.code === 'wrong_country' ? (e.detected === 'th' ? 'wrongTh' : 'wrongNotTh') : (e.code || 'other'), { maxMb: e.maxMb, error: e.message, fileName: f.name, thai: e.thai, named: e.named }); }
   }
 
   // 행 나누기: CLIA 제품 하나에 딱 맞음(ok) · 같은 나라 LG.com 에서 찾음(reg, 등록 후보) · 그 밖(skip)
