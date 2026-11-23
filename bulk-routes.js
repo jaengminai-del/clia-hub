@@ -264,6 +264,8 @@ router.get('/api/v1/bulk/config', (req, res) => res.json({ mail: bulkJobs.mailRe
 router.get('/api/v1/bulk/jobs/:job', async (req, res) => {
   const j = await bulkJobs.getJob(req.params.job);
   if (!j) return res.status(404).json({ error: 'job not found' });
+  // 재배포 직후 제품 데이터를 버킷에서 받는 동안(약 1분)은 끝난 작업의 '확인 필요'를 지금 규칙으로 셀 수 없다 — 받을 때까지 기다린다
+  if (j.status !== 'running' && j.status !== 'queued') await require('./crawl-store').whenPulled(75 * 1000);
   res.json(bulkJobs.jobView(j));
 });
 

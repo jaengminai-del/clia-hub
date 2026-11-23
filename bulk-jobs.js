@@ -102,12 +102,19 @@ async function getJob(id) {
 
 // 끝난 작업을 다시 열 때 '확인 필요'를 지금 규칙으로 다시 센다 (2026-11-23) — 작업 기록·결과 엑셀은 그대로, 화면에 보내는 값만.
 // 작업이 끝난 뒤 그 제품을 다시 크롤했으면 지금 데이터는 엑셀에 들어간 내용과 다르므로 그때 저장한 것을 쓴다.
+// 저장한 이유를 그대로 쓸 때도 제품 데이터 없이 알 수 있는 것은 지금 규칙으로 (화면 bulk.js normFlag 와 같은 규칙):
+// 동영상 장면 자동 선택은 안내, 이미지 없이 글만 빠진 원문 누락도 안내
+function normStored(flags) {
+  if (!flags) return flags;
+  const out = flags.map((f) => (f.code === 'frame' ? { ...f, sev: 'info' } : f.code === 'qa' && !f.images ? { ...f, code: 'qaTx', sev: 'info' } : f));
+  return out.every((f, i) => f === flags[i]) ? flags : out;
+}
 function currentFlags(j, it) {
-  if (it.status !== 'ok' || !it.slug || !j.finishedAt) return it.flags;
+  if (it.status !== 'ok' || !it.slug || !j.finishedAt) return normStored(it.flags);
   const dir = path.join(OUT_DIR(), it.slug);
   const src = readJson(path.join(dir, 'source.json'));
-  if (!src || !fs.existsSync(path.join(dir, 'mirror.json'))) return it.flags;
-  if (!(src.crawled_at > 0) || src.crawled_at * 1000 > j.finishedAt) return it.flags;
+  if (!src || !fs.existsSync(path.join(dir, 'mirror.json'))) return normStored(it.flags);
+  if (!(src.crawled_at > 0) || src.crawled_at * 1000 > j.finishedAt) return normStored(it.flags);
   return flagsFor(j, it, { allImages: it.allImages, summaryErr: it.summaryErr });
 }
 
