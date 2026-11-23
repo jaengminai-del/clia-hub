@@ -117,3 +117,31 @@ def strip_descriptions(text: str) -> str:
         if stripped.strip() or not ln.strip():
             kept.append(stripped)
     return "\n".join(kept).strip()
+
+
+# 규격(스펙) 영역의 탭 이름 — LG 페이지에서 '요약 · 전체 스펙' 탭을 고르는 버튼 글자다 (컨텐츠가 아님).
+# 스펙 표가 있으면 표 제목으로 쓰이지만, 표 없이 치수 도면만 있는 규격 영역(TH ISC10E · WT1410NHEN)에서는
+# 그림 아래 'สรุป(요약)' 제목만 덩그러니 남는다. (2026-11-23)
+SPEC_TAB_LABELS = {"สรุป", "สเปคทั้งหมด", "ข้อมูลจำเพาะทั้งหมด", "summary", "all specs", "all specifications",
+                   "zusammenfassung", "alle spezifikationen"}
+SPEC_COMPONENT_IDS = ("PD0008", "ST0035")
+
+
+def spec_tab_label_only(section: dict) -> bool:
+    """스펙 표가 없는 규격 영역인데 글이 탭 이름뿐이면 True."""
+    if section.get("specs") or (section.get("component_id") or "").upper() not in SPEC_COMPONENT_IDS:
+        return False
+    lines = [_MD_HEAD.sub("", ln).strip() for ln in (section.get("text") or "").split("\n") if ln.strip()]
+    return bool(lines) and all(ln.lower() in SPEC_TAB_LABELS for ln in lines)
+
+
+def drop_spec_tab_labels(mirror: dict) -> int:
+    """표 없는 규격 영역에 남은 탭 이름 글을 지운다 (그림은 그대로). 지운 섹션 수."""
+    n = 0
+    for s in mirror.get("sections") or []:
+        if spec_tab_label_only(s):
+            s["text"] = ""
+            s.pop("text_roles", None)
+            n += 1
+    return n
+

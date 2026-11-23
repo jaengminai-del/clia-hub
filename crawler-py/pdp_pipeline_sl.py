@@ -38,7 +38,7 @@ from pydantic import BaseModel, Field
 
 from make_mirror import to_mirror, order_by_document, tag_media_roles, ensure_product_gallery, upgrade_media_resolution, rehome_by_md_anchor, merge_same_component, pair_title_image, sanitize_texts, _best_url, _is_disclaimer_section, drop_ui_control_media, drop_duplicate_sections, extract_gallery
 from component_parser import ComponentParser, parse_html_components, LayoutType
-from text_filters import is_image_description
+from text_filters import is_image_description, drop_spec_tab_labels
 from component_mirror import build_from_components
 import llm_claude  # ANTHROPIC_API_KEY 가 있으면 Gemini 대신 Claude 로 시각 분석
 import aem_model_sl as aem_model  # 페이지에 실린 AEM 컴포넌트 모델 → 섹션 (예전 형식 PDP) + 받은 페이지 확인
@@ -1128,6 +1128,9 @@ def _polish_mirror(mirror: dict, html: str):
     _ui = drop_ui_control_media(mirror, html)
     if _ui:
         print(f"   ✓ UI 컨트롤 이미지 제외: {_ui}건 (탭 아이콘·썸네일 등)")
+    _tab = drop_spec_tab_labels(mirror)
+    if _tab:
+        print(f"   ✓ 표 없는 규격 영역의 탭 이름 글 제거: {_tab}건 (요약·전체 스펙)")
     _san = sanitize_texts(mirror)   # 최종 방어: 캡션 신설 등으로 뒤늦게 유입된 alt 묘사문 제거
     if _san:
         print(f"   ✓ 텍스트 최종 정제: {_san}개 섹션에서 alt 묘사문 제거")

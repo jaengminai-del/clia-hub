@@ -131,8 +131,19 @@ function keyFor(abs) {
 }
 
 /** 버킷 → 로컬. 로컬에 없거나 내용이 다른 파일만 내려받는다. */
-async function pullAll({ log = console.log } = {}) {
+// 동기화 중인지 — 재배포 직후 약 1분은 로컬 폴더가 비어 있다 (벌크 작업 조회가 이것을 기다린다, 2026-11-23)
+let pulling = null;
+/** 버킷 → 로컬 동기화가 끝날 때까지(최대 ms) 기다린다. 동기화 중이 아니면 바로. */
+function whenPulled(ms) {
+  if (!pulling) return Promise.resolve(true);
+  return Promise.race([pulling.then(() => true, () => true), new Promise((r) => setTimeout(() => r(false), ms))]);
+}
+async function pullAll(opts = {}) {
   if (!enabled()) return null;
+  pulling = pullAllOnce(opts);
+  try { return await pulling; } finally { pulling = null; }
+}
+async function pullAllOnce({ log = console.log } = {}) {
   const stats = { downloaded: 0, unchanged: 0, failed: 0 };
   for (const r of ROOTS) {
     const remote = await listRemote(r.prefix);
@@ -249,7 +260,7 @@ async function getToFile(key, abs) {
   try { await download(key, abs); return true; } catch (e) { return false; }
 }
 
-module.exports = { enabled, pullAll, pushAll, pushPaths, pushProduct, pushCrawlerOut, putBuffer, getBuffer, putFile, getToFile, deleteProduct };
+module.exports = { enabled, pullAll, whenPulled, pushAll, pushPaths, pushProduct, pushCrawlerOut, putBuffer, getBuffer, putFile, getToFile, deleteProduct };
 
 if (require.main === module) {
   require('dotenv').config({ path: path.join(__dirname, '.env') });
