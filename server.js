@@ -2469,15 +2469,12 @@ app.get('/api/pcg-vision/progress', (req, res) => {
 const PORT = process.env.PORT || 3001;
 
 /* ──────────────────────────────────────────
-   /api/render-slices — 생성된 리스팅 HTML을 이미지 슬라이스 ZIP으로
-   Shopee / Lazada 는 상품 상세를 HTML이 아닌 이미지로 올린다.
-   한 장이 너무 길면 업로드가 거부되므로 N등분(기본 6)해서 zip으로 내려준다.
-
-   실제 Chrome(puppeteer)으로 렌더한다 — LG 폰트·원격 DAM 이미지·인라인 CSS가
-   브라우저와 100% 동일하게 나오고, 브라우저 canvas의 CORS 오염 문제도 없다.
+   슬라이스 이미지 (Shopee / Lazada 상품 상세는 HTML 이 아닌 이미지로 올린다)
+   만드는 곳은 하나: POST /api/v1/slice-html (매체 규격 · 해시로 캐시 · 버킷 보관)
+   ZIP 은 그 해시의 이미지를 묶은 GET /media/slices/<hash>/<name>-images[-N].zip
+   → 빌더 이미지 ZIP · 이미지형 HTML · 벌크 엑셀이 같은 이미지 (2026-11-23, 예전 /api/render-slices 제거)
+   그리기: crawler-py/content_gen/slices.py (Playwright)
 ────────────────────────────────────────── */
-// 슬라이스 생성은 1차 컨텐츠 생성 엔진(crawler-py/content_gen/slices.py, Playwright)이 담당 — 요청·응답 형식은 그대로.
-// SLICES_LEGACY=1 이면 아래 기존 Node(Puppeteer) 구현을 사용.
 function renderSlicesPy(body) {
   const path = require('path');
   const fs = require('fs');
@@ -2574,7 +2571,8 @@ app.get(/^\/media\/slices\/([0-9a-f]{20})\/([\w.-]{1,120}\.zip)$/, async (req, r
   const hash = req.params[0], name = req.params[1];
   // 파일명이 …-images-<N>.zip 이면 앞에서부터 N장만 (Shopee 12장 버전, 2026-11-11)
   const lim = parseInt((name.match(/-images-(\d{1,2})\.zip$/) || [])[1], 10) || 0;
-  const zkey = lim ? `_images_${lim}.zip` : '_images.zip';
+  // t2: 슬라이스마다 글 파일(.txt)도 넣는다 — 예전 빌더 ZIP(/api/render-slices)과 같은 내용. 글 없이 만든 예전 ZIP 과 이름을 나눈다
+  const zkey = lim ? `_images_${lim}_t2.zip` : '_images_t2.zip';
   const dir = path.join(SLICE_CACHE, hash), zipAbs = path.join(dir, zkey);
   const read = async (file) => {
     const abs = path.join(dir, file);
@@ -2595,6 +2593,7 @@ app.get(/^\/media\/slices\/([0-9a-f]{20})\/([\w.-]{1,120}\.zip)$/, async (req, r
           const b = await read(im.file);
           if (!b) return res.status(404).json({ error: `slice missing: ${im.file}` });
           zip.file(im.file, b);
+          zip.file(im.file.replace(/\.(jpg|png)$/, '.txt'), `${im.text || '(no text)'}\n`);
         }
         buf = await zip.generateAsync({ type: 'nodebuffer', compression: 'STORE' });
         await sliceStore.putBuffer(`media-slices/${hash}/${zkey}`, buf, 'application/zip').catch((e) =>
@@ -2895,278 +2894,6 @@ app.get('/media/fullshot/:file', async (req, res) => {
   if (!m || !(await fullshotReady(m[1]))) return res.status(404).end();
   res.set({ 'Cache-Control': 'public, max-age=86400', 'Access-Control-Allow-Origin': '*' });
   res.type('jpeg').sendFile(path.join(FULLSHOT_DIR, req.params.file));
-});
-
-app.post('/api/render-slices', async (req, res) => {
-  if (process.env.SLICES_LEGACY !== '1') {
-    if (!req.body || typeof req.body.html !== 'string' || !req.body.html) {
-      return res.status(400).json({ error: 'html required' });
-    }
-    try {
-      const r = await renderSlicesPy(req.body), meta = r.meta;
-      let buf = r.buf;
-      console.log(`[render-slices] ${meta.log}`);
-      // maxImages (Shopee 12장 버전, 2026-11-11): 앞에서부터 N장(+ 같은 번호의 글 파일)만 ZIP 에 남긴다
-      const maxImages = parseInt(req.body.maxImages, 10) || 0;
-      let manifest = meta.manifest, suffix = '';
-      if (maxImages > 0 && manifest.length > maxImages) {
-        const keep = new Set(manifest.slice(0, maxImages).flatMap((m) => [m.file, m.text_file]));
-        const src = await (require('jszip')).loadAsync(buf), zip = new (require('jszip'))();
-        for (const f of Object.keys(src.files)) if (keep.has(f)) zip.file(f, await src.files[f].async('nodebuffer'));
-        buf = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
-        res.set('X-Slice-Total', String(manifest.length));
-        manifest = manifest.slice(0, maxImages); suffix = `-${maxImages}`;
-      }
-      res.set('Content-Type', 'application/zip');
-      res.set('Content-Disposition', `attachment; filename="${meta.name}-images${suffix}.zip"`);
-      res.set('X-Slice-Manifest', encodeURIComponent(JSON.stringify(manifest)));
-      res.set('X-Images-Loaded', meta.images_loaded);
-      res.set('Access-Control-Expose-Headers', 'X-Slice-Manifest, X-Slice-Total, X-Images-Loaded, Content-Disposition');
-      return res.send(buf);
-    } catch (e) {
-      console.error('/api/render-slices error:', e.message);
-      return res.status(500).json({ error: e.message });
-    }
-  }
-  const {
-    html,
-    // 레이아웃 계산용 뷰포트 폭. 실제 잘라내는 폭은 콘텐츠 실측 경계로 정한다
-    // (컨테이너가 max-width로 가운데 정렬되면 좌우에 빈 여백이 생기므로 그대로 쓰면 안 된다).
-    viewportWidth,
-    width,                       // 하위호환: 예전 파라미터명
-    outputWidth,                 // 원하는 최종 이미지 폭(px). 비우면 콘텐츠 폭 x2
-    slices = 6,
-    format = 'jpeg',
-    quality = 88,
-    name = 'pdp',
-  } = req.body || {};
-
-  if (!html || typeof html !== 'string') {
-    return res.status(400).json({ error: 'html required' });
-  }
-
-  const N = Math.max(1, Math.min(parseInt(slices, 10) || 6, 20));
-  const VW = Math.max(600, Math.min(parseInt(viewportWidth ?? width, 10) || 1600, 3000));
-  const OW = parseInt(outputWidth, 10) || 0;
-  const fmt = format === 'png' ? 'png' : 'jpeg';
-  const q = Math.max(40, Math.min(parseInt(quality, 10) || 88, 100));
-  const safeName = String(name).replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 60) || 'pdp';
-
-  let browser;
-  try {
-    browser = await puppeteer.launch({
-      headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage',
-             '--disable-gpu', '--font-render-hinting=none'],
-    });
-    const page = await browser.newPage();
-    await page.setViewport({ width: VW, height: 1400, deviceScaleFactor: 1 });
-    // lg.com DAM은 headless UA를 느리게 응답시키는 경우가 있어 일반 Chrome UA로 요청한다
-    await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 '
-                            + '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-    await page.setExtraHTTPHeaders({ 'Referer': 'https://www.lg.com/' });
-
-    // 폰트는 이 서버가 정적으로 서빙하는 css/fonts.css 를 그대로 쓴다
-    const doc = `<!doctype html><html><head><meta charset="utf-8">
-<link rel="stylesheet" href="http://127.0.0.1:${PORT}/css/fonts.css">
-<style>
-  html, body { margin: 0; padding: 0; background: #FFFFFF; }
-  #slice-root { width: ${VW}px; background: #FFFFFF; }
-  #slice-root img { max-width: 100%; }
-</style></head><body><div id="slice-root">${html}</div></body></html>`;
-
-    // networkidle0 은 DAM 이미지 하나가 연결을 놓지 않으면 통째로 멈춘다.
-    // DOM만 먼저 세운 뒤, 이미지를 '개별 타임아웃'으로 기다리는 편이 안전하다.
-    await page.setContent(doc, { waitUntil: 'domcontentloaded', timeout: 60000 });
-
-    const loadStat = await page.evaluate(async (perImgMs) => {
-      const imgs = Array.from(document.images);
-      const settle = img => new Promise(resolve => {
-        if (img.complete) return resolve(img.naturalWidth > 0);
-        const done = ok => resolve(ok);
-        img.addEventListener('load', () => done(true), { once: true });
-        img.addEventListener('error', () => done(false), { once: true });
-        setTimeout(() => done(img.naturalWidth > 0), perImgMs);   // 느린 이미지는 포기하고 진행
-      });
-      const results = await Promise.all(imgs.map(settle));
-      if (document.fonts && document.fonts.ready) {
-        await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 8000))]);
-      }
-      return { total: imgs.length, loaded: results.filter(Boolean).length };
-    }, 25000);
-
-    if (loadStat.total && loadStat.loaded < loadStat.total) {
-      console.warn(`[render-slices] 이미지 ${loadStat.total - loadStat.loaded}/${loadStat.total}장 로드 실패 — 해당 영역은 빈칸으로 렌더됩니다`);
-    }
-    await new Promise(r => setTimeout(r, 400));
-
-    // 전체 높이 + 자를 수 있는 안전 경계 수집.
-    //   coarse = 섹션 바닥 (제목·이미지·본문이 한 덩어리로 유지되는 최적 절단선)
-    //   fine   = 표 행 / 리스트 / 문단 바닥 (섹션이 한 슬라이스보다 길 때의 대안)
-    // 글자 중간을 자르지 않도록 항상 요소 경계에서만 자른다.
-    const layout = await page.evaluate(() => {
-      const root = document.getElementById('slice-root');
-      const H = Math.ceil(root.scrollHeight);
-      const rootTop = root.getBoundingClientRect().top + window.scrollY;
-      const bottomOf = el => {
-        const r = el.getBoundingClientRect();
-        return Math.round(r.bottom + window.scrollY - rootTop);
-      };
-      const collect = sel => {
-        const out = [];
-        root.querySelectorAll(sel).forEach(el => {
-          const b = bottomOf(el);
-          if (b > 0 && b < H) out.push(b);
-        });
-        return Array.from(new Set(out)).sort((a, b) => a - b);
-      };
-      // 콘텐츠의 실제 좌우 끝 — 가운데 정렬 컨테이너 밖의 빈 여백을 잘라내기 위해.
-      // 배경이 칠해진 최상위 자식(예: .lg-container)들의 합집합을 콘텐츠 영역으로 본다.
-      let left = Infinity, right = -Infinity;
-      Array.from(root.children).forEach(el => {
-        const r = el.getBoundingClientRect();
-        if (r.width < 1 || r.height < 1) return;          // <style> 등 비시각 요소 제외
-        left = Math.min(left, r.left + window.scrollX);
-        right = Math.max(right, r.right + window.scrollX);
-      });
-      const rootRect = root.getBoundingClientRect();
-      if (!isFinite(left) || right <= left) {             // 폴백: 루트 전체
-        left = rootRect.left + window.scrollX;
-        right = rootRect.right + window.scrollX;
-      }
-      return {
-        width: Math.ceil(rootRect.width),
-        height: H,
-        contentLeft: Math.max(0, Math.floor(left)),
-        contentWidth: Math.max(1, Math.ceil(right - left)),
-        edges: collect(':scope > *, :scope > * > section, :scope > section'),
-        fineEdges: collect('tr, li, p, h1, h2, h3, h4, img, .lg-grid-item'),
-      };
-    });
-
-    const H = layout.height;
-    if (!H) throw new Error('렌더 높이가 0 — HTML이 비어있는지 확인하세요');
-
-    // 콘텐츠 폭이 뷰포트보다 좁으면(가운데 정렬 컨테이너) 그만큼만 잘라내므로
-    // 결과 이미지가 작아진다. 선명도를 유지하기 위해 배율을 올려 촬영한다.
-    //   outputWidth 지정 시 → 그 폭에 맞는 배율, 없으면 x2
-    const scale = OW
-      ? Math.max(0.5, Math.min(OW / layout.contentWidth, 4))
-      : 2;
-    if (scale !== 1) {
-      await page.setViewport({ width: VW, height: 1400, deviceScaleFactor: scale });
-      await new Promise(r => setTimeout(r, 250));
-    }
-
-    // 자를 위치 계산: 이상적인 등분점에서 가장 가까운 섹션 경계로 스냅.
-    // 경계가 너무 멀면(등분 높이의 45% 초과) 텍스트 중간을 자르는 대신 등분점을 쓴다.
-    const ideal = H / N;
-    const cuts = [0];
-    const nearest = (list, target, minY, tol) => {
-      let best = null;
-      for (const e of list) {
-        if (e <= minY + 8) continue;
-        const d = Math.abs(e - target);
-        if (d <= tol && (best === null || d < Math.abs(best - target))) best = e;
-      }
-      return best;
-    };
-    for (let k = 1; k < N; k++) {
-      const target = Math.round(ideal * k);
-      const prev = cuts[cuts.length - 1];
-      // ① 섹션 경계 우선 → ② 표 행/문단 경계 → ③ 그래도 없으면 등분점
-      const cut = nearest(layout.edges, target, prev, ideal * 0.45)
-               ?? nearest(layout.fineEdges, target, prev, ideal * 0.45)
-               ?? target;
-      cuts.push(Math.max(cut, prev + 8));
-    }
-    cuts.push(H);
-
-    // 슬라이스별 텍스트(제목/본문) 추출 — 이미지에 들어간 카피를 마켓 등록 시 그대로 쓸 수 있게 (261007).
-    // 요소의 위쪽 끝이 속한 슬라이스에 배정. 표는 행 단위 "라벨: 값".
-    const textBlocks = await page.evaluate(() => {
-      const root = document.getElementById('slice-root');
-      const rootTop = root.getBoundingClientRect().top + window.scrollY;
-      const out = [];
-      root.querySelectorAll('h1, h2, h3, h4, p, li, tr').forEach(el => {
-        if (el.closest('li, tr') && el.closest('li, tr') !== el) return;   // 중첩 중복 방지
-        const r = el.getBoundingClientRect();
-        if (r.height < 1) return;
-        const txt = el.tagName === 'TR'
-          ? Array.from(el.cells).map(c => c.innerText.trim()).filter(Boolean).join(': ')
-          : el.innerText.replace(/\s+/g, ' ').trim();
-        if (!txt) return;
-        out.push({ top: Math.round(r.top + window.scrollY - rootTop), kind: /^H\d$/.test(el.tagName) ? 'Title' : 'Body', txt });
-      });
-      return out;
-    });
-    const sliceTexts = Array.from({ length: N }, () => []);
-    textBlocks.forEach(b => {
-      let i = cuts.findIndex((c, k) => k < N && b.top >= c && b.top < cuts[k + 1]);
-      if (i < 0) i = N - 1;
-      sliceTexts[i].push(`${b.kind}: ${b.txt}`);
-    });
-
-    const JSZip = require('jszip');
-    const zip = new JSZip();
-    const manifest = [];
-    for (let i = 0; i < N; i++) {
-      const y = cuts[i];
-      const h = Math.max(1, Math.min(cuts[i + 1], H) - y);
-      if (h <= 1) continue;
-      const shot = await page.screenshot({
-        type: fmt,
-        ...(fmt === 'jpeg' ? { quality: q } : {}),
-        clip: { x: layout.contentLeft, y, width: layout.contentWidth, height: h },
-        captureBeyondViewport: true,
-      });
-      const fname = `${safeName}-${String(i + 1).padStart(2, '0')}.${fmt === 'jpeg' ? 'jpg' : 'png'}`;
-      zip.file(fname, shot);
-      const tname = fname.replace(/\.(jpg|png)$/, '.txt');
-      zip.file(tname, (sliceTexts[i].join('\n') || '(no text)') + '\n');
-      manifest.push({
-        file: fname,
-        width: Math.round(layout.contentWidth * scale),
-        height: Math.round(h * scale),
-        css_height: h,
-        bytes: shot.length,
-        text_file: tname,
-        slice: i + 1,
-      });
-    }
-    // 전체 텍스트 한 파일 (슬라이스 순서대로)
-    zip.file(`${safeName}-texts.txt`, manifest.map(m =>
-      `=== ${String(m.slice).padStart(2, '0')} · ${m.file} ===\n${sliceTexts[m.slice - 1].join('\n') || '(no text)'}`).join('\n\n') + '\n');
-
-    zip.file(`${safeName}-manifest.json`, JSON.stringify({
-      viewport_width: VW,
-      content_width_css: layout.contentWidth,
-      content_left_css: layout.contentLeft,
-      scale,
-      output_width: Math.round(layout.contentWidth * scale),
-      total_height_css: H,
-      slices: manifest.length,
-      format: fmt, quality: fmt === 'jpeg' ? q : null,
-      images_loaded: `${loadStat.loaded}/${loadStat.total}`,
-      images: manifest,
-    }, null, 2));
-
-    const buf = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
-    console.log(`[render-slices] ${safeName}: 콘텐츠 ${layout.contentWidth}x${H}css (여백 좌 ${layout.contentLeft}px 제외)`
-      + ` x${scale} → ${Math.round(layout.contentWidth * scale)}px 폭 ${manifest.length}장, zip ${(buf.length / 1024 / 1024).toFixed(2)}MB`);
-
-    res.set('Content-Type', 'application/zip');
-    res.set('Content-Disposition', `attachment; filename="${safeName}-images.zip"`);
-    res.set('X-Slice-Manifest', encodeURIComponent(JSON.stringify(manifest)));
-    res.set('X-Images-Loaded', `${loadStat.loaded}/${loadStat.total}`);
-    res.set('Access-Control-Expose-Headers', 'X-Slice-Manifest, X-Slice-Total, X-Images-Loaded, Content-Disposition');
-    return res.send(buf);
-  } catch (e) {
-    console.error('/api/render-slices error:', e.message);
-    return res.status(500).json({ error: e.message });
-  } finally {
-    if (browser) await browser.close().catch(() => {});
-  }
 });
 
 /* ──────────────────────────────────────────
