@@ -30,10 +30,10 @@
   const grpName = (g) => (T.grp || TX.en.grp)[g] || g;
   const CH0 = ['shopee', 'lazada'].includes(qs.get('channel')) ? qs.get('channel') : '';
   const chName = (c) => (c === 'lazada' ? 'Lazada' : 'Shopee');
-  const S = { tab: 'all', q: '', last: null, mis: '', data: null, channel: CH0, ok: [], reg: [], skip: [], regOn: false, own: {}, sel: new Set(), force: new Set(), redo: new Set(), ack: new Set(), job: null, busy: false, cfg: {} };
-  const act = () => (S.regOn ? S.ok.concat(S.reg) : S.ok);
+  const S = { tab: 'all', q: '', last: null, mis: '', data: null, channel: CH0, ok: [], reg: [], skip: [], regOn: false, own: {}, pick: {}, fixed: {}, draft: {}, uerr: {}, openG: null, sel: new Set(), force: new Set(), redo: new Set(), ack: new Set(), job: null, busy: false, cfg: {} };
+  const act = () => S.ok.concat(S.reg.filter((r) => S.regOn || S.own[r.row]));
   // 매칭 불가 = CLIA 가 건드리지 않는 행: 제품을 못 정한 행 + (등록을 켜지 않았으면) CLIA 에 없는 행
-  const noMatch = () => S.skip.concat(S.regOn ? [] : S.reg.map((r) => ({ ...r, why: 'rReg' })));
+  const noMatch = () => S.skip.concat(S.regOn ? [] : S.reg.filter((r) => !S.own[r.row]).map((r) => ({ ...r, why: 'rReg' })));
 
   document.documentElement.lang = L;
   document.documentElement.dir = L === 'ar' ? 'rtl' : 'ltr';
@@ -99,7 +99,7 @@
       S.mis = CH0 && d.channel && d.channel !== CH0 ? d.channel : '';
       S.channel = S.mis ? '' : (CH0 || d.channel || '');
       chTag();
-      Object.assign(S, { job: null, q: '', last: null, regOn: false, own: {}, force: new Set(), redo: new Set(), ack: new Set() });
+      Object.assign(S, { job: null, q: '', last: null, regOn: false, own: {}, pick: {}, fixed: {}, draft: {}, uerr: {}, openG: null, force: new Set(), redo: new Set(), ack: new Set() });
       $('q').value = '';
       setData(d, true);
       askRegister();
@@ -114,6 +114,16 @@
   const bundleP = (r) => { const ps = r.bundleParts; return { slug: null, isBundle: true, parts: ps, model: ps.map((x) => x.model || '?').join(' + '),
     dv: ps[0].dv, grp: ps[0].grp, title: r.name, thumb: (ps.find((x) => x.thumb) || {}).thumb || '', isNew: ps.some((x) => x.register), fuzzy: ps.some((x) => x.fuzzy) }; };
   const newP = (r, lg) => ({ slug: null, url: lg.url, model: lg.model, dv: lg.dv, grp: lg.grp, title: r.name, thumb: '', isNew: true, alts: lg.alts || 0, fuzzy: !!lg.fuzzy });
+  // 사은품 묶음 행 ('본 제품 … ฟรี 사은품 …'): 'ฟรี/free' 앞에 모델명이 있는 후보가 딱 하나면 그 제품이 본 제품 (2026-11-23)
+  const norm = (x) => String(x || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  function giftMain(r, c) {
+    const m = String(r.name || '').match(/^(.*?)(?:ฟรี|\bfree\b)/i);
+    if (!m || !m[1].trim()) return null;
+    const before = norm(m[1]);
+    const hit = c.filter((p) => p.model && before.includes(norm(p.model)));
+    const best = hit.filter((p) => !hit.some((q) => q !== p && norm(q.model).includes(norm(p.model)) && norm(q.model) !== norm(p.model)));
+    return best.length === 1 ? best[0] : null;
+  }
   function setData(d, fresh) {
     S.data = d;
     if (!home) {   // 법인 나라를 모르면 매칭된 제품이 가장 많은 나라
@@ -129,7 +139,7 @@
       if (r.bundle && r.bundleParts) (r.bundleParts.some((x) => x.register) ? S.reg : S.ok).push({ ...r, kind: 'bundle', p: bundleP(r) });
       else if (r.bundle) S.skip.push({ ...r, why: 'rBundle' });
       else if (c.length === 1) S.ok.push({ ...r, p: c[0], kind: 'clia' });
-      else if (c.length > 1) S.skip.push({ ...r, why: 'rMulti' });
+      else if (c.length > 1) { const pk = c.find((p) => p.slug === S.pick[r.row]) || giftMain(r, c); if (pk) S.ok.push({ ...r, p: pk, kind: 'clia', gift: !S.pick[r.row] }); else S.skip.push({ ...r, why: 'rMulti' }); }
       else if (own || r.lg) S.reg.push({ ...r, kind: 'new', p: newP(r, own || r.lg) });
       else S.skip.push({ ...r, why: 'rNone' });
     }
@@ -158,33 +168,33 @@
   const reviewRows = () => act().filter((r) => openFlags(r.row).length);
   // 다시 돌리면 고쳐지는 것: LG.com 페이지 · 이미지 누락은 다시 가져오고, 설명 · 요약은 다시 만든다
   const RETRY = { crawl: 'a_retry', content: 'a_retry', summary: 'a_retry', qa: 'a_refetch' };
-  function flagHtml(r) {
-    const it = itemOf(r.row);
-    const fl = openFlags(r.row);
-    let h = flagsOf(r.row).filter((f) => f.sev === 'info' && !S.ack.has(`${r.row}:${f.code}`)).map((f) => `<div class="nrow"><span class="note">${esc(flagText(f))}</span>` +
-      (f.code === 'frame' ? `<button class="mini" data-a="frame" data-slug="${esc(it.slug)}">${esc(t('a_frame'))}</button>` : '') + `</div>`).join('');
-    // 동영상이 있는 제품은 자동 선택 안내가 없어도 장면을 바꿀 수 있다 (빌더와 같은 기능)
-    if (it && it.status === 'ok' && it.videos && !h.includes('data-a="frame"'))
-      h += `<div class="nrow"><span class="note">${esc(t('f_videos', it.videos))}</span><button class="mini" data-a="frame" data-slug="${esc(it.slug)}">${esc(t('a_frame'))}</button></div>`;
-    if (!fl.length) return h;
-    return h + `<div class="fl">` + fl.map((f) => `<div class="fx"><span${f.files && f.files.length ? ` title="${esc(f.files.join(', '))}"` : ''}>${esc(flagText(f))}</span>` +   // 마우스를 올리면 빠진 이미지 파일 이름
-      (RETRY[f.code] ? `<button class="mini" data-a="retry" data-row="${r.row}" data-code="${f.code}">${esc(t(RETRY[f.code]))}</button>` : '') +
-      (['qa', 'fuzzy'].includes(f.code) ? `<a class="mini" target="_blank" rel="noopener" href="${esc(builderUrl(r.p.url))}">${esc(t('a_builder'))}</a>` : '') +
-      (f.sev === 'warn' ? `<button class="mini" data-a="ack" data-row="${r.row}" data-code="${f.code}">${esc(t('a_ack'))}</button>` : '') +
-      `</div>`).join('') + `</div>`;
+  // 행 오른쪽 (2026-11-23 단순화): 문제없는 행은 비워 둔다. 확인 필요는 짧은 이유 한 줄 + [고치기][문제없음],
+  // 그 오른쪽 끝에는 모든 행 같은 자리에 아이콘 버튼 [장면](동영상 있을 때) [빌더 ↗]
+  function rowActs(r) {
+    const it = itemOf(r.row), fl = openFlags(r.row);
+    let why = '', btns = '';
+    if (fl.length) {
+      const f = fl[0];
+      why = `<span class="why"${f.files && f.files.length ? ` title="${esc(f.files.join(', '))}"` : ''}>${esc(flagText(f))}</span>`;
+      if (RETRY[f.code]) btns += `<button class="mini" data-a="retry" data-row="${r.row}" data-code="${f.code}">${esc(t(RETRY[f.code]))}</button>`;
+      if (f.sev === 'warn') btns += `<button class="mini" data-a="ack" data-row="${r.row}" data-code="${f.code}">${esc(t('a_ack'))}</button>`;
+    }
+    const scene = it && it.status === 'ok' && it.slug && (it.videos || flagsOf(r.row).some((f) => f.code === 'frame'))
+      ? `<button class="ib" data-a="frame" data-slug="${esc(it.slug)}" title="${esc(t('a_frame'))}" aria-label="${esc(t('a_frame'))}"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg></button>` : '<span class="ib0"></span>';
+    const bld = r.p && r.p.url ? `<a class="ib" target="_blank" rel="noopener" href="${esc(builderUrl(r.p.url))}" title="${esc(t('a_builder'))}" aria-label="${esc(t('a_builder'))}"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>` : '<span class="ib0"></span>';
+    return `${why}${btns}<span class="ics">${scene}${bld}</span>`;
   }
   function itemStatus(r) {
     const it = itemOf(r.row);
     let h = '';
     if (S.force.has(r.row) || S.redo.has(r.row)) h = `<span class="note">${esc(t('a_retryNote'))}</span>`;
-    else if (!it) h = r.descLen > 0 ? `<span class="note">${esc(t('repNote'))}</span>` : '';
+    else if (!it) h = '';
     else if (it.status === 'queued') h = `<span class="badge b-q">${esc(it.register && !it.crawled ? t('st_regq') : t('q'))}</span>`;
     else if (it.status === 'crawling') h = `<span class="badge b-run">${esc(t('st_crawl'))}</span>`;
     else if (it.status === 'working') h = `<span class="badge b-run">${esc(t('w'))}</span>`;
-    else if (it.status === 'failed') h = `<span class="badge b-bad">${esc(t('bad'))}</span>`;
+    else if (it.status === 'failed') h = openFlags(r.row).length ? '' : `<span class="badge b-bad">${esc(t('bad'))}</span>`;   // 이유가 있으면 이유만 (같은 말 두 번 X)
     else if (it.status === 'cancelled') h = `<span class="badge b-q">${esc(t('st_stop'))}</span>`;
-    else h = `<span class="badge b-ok">${esc(t('ok'))}</span>` + (it.prevLen > 0 ? `<span class="note">${esc(t('okRep'))}</span>` : '') + `<span class="note">${esc(t('imgs', it.images))}</span>`;
-    return h + flagHtml(r);
+    return `<span class="acts">${h}${rowActs(r)}</span>`;
   }
 
   // ── 3. 목록 ──
@@ -203,14 +213,12 @@
     }
     const rows = act();
     // CLIA 에 없지만 같은 나라 LG.com 에 있는 상품 → 한 줄 + 버튼 하나 (켜면 등록하고 함께 채운다)
-    const nReg = S.reg.length;
+    const nReg = S.reg.filter((r) => !S.own[r.row]).length;
     $('regCard').classList.toggle('hidden', !nReg || !d.site);
     if (nReg && d.site) {
       $('regCard').classList.toggle('on', S.regOn);
-      $('regCard').querySelector('.regi path').setAttribute('d', S.regOn ? 'M5 12.5l4.5 4.5L19 7.5' : 'M12 5v14M5 12h14');   // 켜면 ✓
-      $('regT').textContent = t(S.regOn ? 'regOn' : 'regOff', nReg, d.site);
-      $('regBtn').textContent = S.regOn ? t('regUndo') : t('regDo', nReg);
-      $('regBtn').className = 'clia-btn' + (S.regOn ? '' : ' primary');
+      $('regT').textContent = t('regSw', nReg);
+      $('regBtn').setAttribute('aria-checked', String(S.regOn));
       $('regBtn').disabled = S.busy;
     }
     $('noMatch').classList.toggle('hidden', rows.length > 0 || S.reg.length > 0);
@@ -218,23 +226,75 @@
     $('askDesc').classList.toggle('hidden', !!d.cols.desc);
     if (!d.cols.desc) $('descSel').innerHTML = '<option value="">—</option>' + d.columns.map((c) => `<option value="${c.col}">${c.letter} · ${esc(c.label)}</option>`).join('');
     $('pFile').textContent = d.fileName || '';
-    $('pMatch').textContent = t('rowsN', d.rows.length);
     const rv = new Set(reviewRows().map((r) => r.row));   // 확인 필요는 맨 위
     const ordered = rows.slice().sort((a, b) => (rv.has(b.row) - rv.has(a.row)));
     $('list').innerHTML = ordered.map((r, i) => `<label class="item${rv.has(r.row) ? ' rv' : ''}" style="${animate ? `animation-delay:${Math.min(i, 30) * 45}ms` : 'animation:none'}">` +
       `<input type="checkbox" data-row="${r.row}">` +
       ((r.p.thumb || (itemOf(r.row) || {}).thumb) ? `<img src="${esc(r.p.thumb || itemOf(r.row).thumb)}" alt="" loading="lazy">` : `<div class="ph">${esc(grpName(r.p.grp))}</div>`) +
-      `<div style="min-width:0"><div class="m">${rv.has(r.row) ? `<span class="badge b-bad rvt">${esc(t('rvTag'))}</span>` : ''}${r.p.isBundle ? `<span class="badge b-q">${esc(t('bundleTag'))}</span> ` : ''}${esc(r.p.model)}<span class="dv">${esc(r.p.dv || '')} · ${esc(grpName(r.p.grp))}</span>${r.p.isNew ? `<span class="badge b-new">${esc(t('newTag'))}</span>` : ''}</div>` +
+      `<div style="min-width:0"><div class="m">${r.p.isBundle ? `<span class="badge b-q">${esc(t('bundleTag'))}</span> ` : ''}${esc(r.p.model)}<span class="dv">${esc(r.p.dv || '')} · ${esc(grpName(r.p.grp))}</span>${r.p.isNew ? `<span class="badge b-new">${esc(t('newTag'))}</span>` : ''}${r.gift ? `<span class="badge b-q">${esc(t('giftTag'))}</span>` : ''}</div>` +
       `<div class="s">${esc(r.name || r.p.title)}</div></div><div class="r"></div></label>`).join('');
     if (!rows.length && noMatch().length) S.tab = 'skip';
-    // 매칭 불가: 다른 탭과 같은 행 — SKU · 상품명 · 이유 (CLIA·LG.com 어디에도 없으면 주소를 직접 넣는 칸)
-    $('skip').innerHTML = noMatch().map((r) => { const none = r.why === 'rNone' && d.site;
-      return `<div class="item"><span></span><div class="ph">—</div>` +
-        `<div style="min-width:0"><div class="m">${esc(r.parentSku || r.sku || '—')}</div><div class="s">${esc(r.name)}</div></div>` +
-        `<div class="r"><span class="badge b-q">${esc(none ? t('notFound') : t(r.why))}</span>` +
-        (none ? `<span class="urlin"><input type="url" data-urow="${r.row}" placeholder="${esc(t('urlPh'))}"><button class="mini" data-uadd="${r.row}">${esc(t('urlAdd'))}</button></span><span class="err2" data-uerr="${r.row}"></span>` : '') +
-        `</div></div>`; }).join('');
+    // 매칭 불가 (2026-11-23): 이유별로 묶는다 — 묶음마다 이유 · 남은 수 · 무엇을 하면 되는지 한 줄, 행마다 바로 할 수 있는 일.
+    //   주소 칸은 붙여 넣기 · Enter · 칸을 떠날 때 바로 확인 (추가 버튼 없음), 'LG.com 에서 찾기'는 그 모델로 LG.com 검색.
+    //   해결한 행은 그 자리에 ✓ 로 남고(되돌리기), 다음 빈 칸으로 넘어간다.
+    $('skip').innerHTML = skipHtml();
     refresh();
+  }
+
+  const hasSku = (r) => /[\p{L}\p{N}]/u.test(r.parentSku || r.sku || '');
+  const G_ORDER = ['gUrl', 'gNoSku', 'gMulti', 'gReg', 'gBundle', 'gNone'];
+  const groupOf = (r) => (r.why === 'rNone' ? (S.data.site ? (hasSku(r) ? 'gUrl' : 'gNoSku') : 'gNone')
+    : ({ rMulti: 'gMulti', rReg: 'gReg', rBundle: 'gBundle' }[r.why] || 'gNone'));
+  const candsOf = (r) => r.candidates.map((x) => S.data.products[x]).filter((p) => p && (!home || p.country === home));
+  // 한 줄 행: SKU · 상품명(한 줄, 마우스를 올리면 전체) · 할 일(주소 칸 / 후보 버튼 / 해결 표시)
+  const skuCell = (r) => (hasSku(r) ? `<span class="k">${esc(r.parentSku || r.sku)}</span>` : `<span class="k nosku">${esc(t('skuEmpty'))}</span>`);
+  function skipRowHtml(r, g) {
+    let act = '';
+    if (g === 'gUrl' || g === 'gNoSku') {
+      act = `<input type="url" inputmode="url" autocomplete="off" spellcheck="false" data-urow="${r.row}" value="${esc(S.draft[r.row] || '')}" placeholder="${esc(t('urlPh'))}" aria-label="${esc(t('urlPh'))} — ${esc(r.parentSku || r.sku || r.name)}">` +
+        `<span class="ust" data-ust="${r.row}" role="status" aria-live="polite">${S.uerr[r.row] ? esc(t('urlBad', S.data.site || home)) : ''}</span>`;
+    } else if (g === 'gMulti') {
+      // 같은 모델이 LG.com 카테고리 두 곳에 있으면(예: 2-door-refrigerator · top-freezer) 버튼이 똑같아 보인다 — 카테고리를 붙인다
+      const cs = candsOf(r), dupe = (p) => cs.filter((x) => x.model === p.model).length > 1;
+      const cat = (p) => { const seg = String(p.url || '').split('/').filter(Boolean); return seg.length > 2 ? seg[seg.length - 2] : ''; };
+      act = cs.map((p) => `<button type="button" class="pick" data-pick="${r.row}" data-slug="${esc(p.slug)}" title="${esc((p.title || p.model) + (p.url ? '\n' + p.url : ''))}">` +
+        `${p.thumb ? `<img src="${esc(p.thumb)}" alt="" loading="lazy">` : ''}${esc(p.model)}${dupe(p) && cat(p) ? `<span class="pc">${esc(cat(p))}</span>` : ''}</button>`).join('');
+    }
+    return `<div class="srow${S.uerr[r.row] ? ' bad' : ''}" data-srow="${r.row}">${skuCell(r)}<span class="n" title="${esc(r.name)}">${esc(r.name)}</span><span class="a">${act}</span></div>`;
+  }
+  function fixedRowHtml(f, now) {
+    const r = f.r, p = now.p || {};
+    return `<div class="srow fixed">${skuCell(r)}<span class="n" title="${esc(r.name)}">${esc(r.name)}</span>` +
+      `<span class="a"><span class="okt">✓ ${esc(p.model || '')}</span><button type="button" class="mini" data-undo="${r.row}">${esc(t('undo'))}</button></span></div>`;
+  }
+  function skipHtml() {
+    const by = {};
+    for (const r of noMatch()) (by[groupOf(r)] = by[groupOf(r)] || { open: [], done: [] }).open.push(r);
+    const all = act();
+    for (const [row, f] of Object.entries(S.fixed)) {
+      const now = all.find((x) => x.row === +row);
+      if (now) (by[f.g] = by[f.g] || { open: [], done: [] }).done.push([f, now]);
+    }
+    const gs = G_ORDER.filter((g) => by[g]);
+    if (!gs.includes(S.openG)) S.openG = gs.find((x) => by[x].open.length) || gs[0] || null;   // 처음엔 남은 행이 있는 첫 묶음
+    const nAuto = S.reg.filter((r) => !S.own[r.row]).length;
+    const ci = S.data.cols.parentSku || S.data.cols.sku, cc = (S.data.columns || []).find((c) => c.col === ci);
+    const skuCol = (S.data.cols.parentSku ? 'Parent SKU' : 'SKU') + (cc ? ` (${cc.letter})` : '');
+    // 이유별 칩 = 그 안의 작은 탭. 고른 칩의 행만, 칩 아래 짧은 안내 한 줄 (2026-11-23 단순화)
+    const g = S.openG && by[S.openG] ? S.openG : gs[0];
+    if (!g) return '';
+    const chips = `<div class="schips" role="tablist">${gs.map((x) => `<button type="button" class="schip${x === g ? ' on' : ''}" role="tab" aria-selected="${x === g}" data-g="${x}">` +
+      `${esc(t(x))}<b>${by[x].open.length}</b>${by[x].done.length ? `<i>✓${by[x].done.length}</i>` : ''}</button>`).join('')}</div>`;
+    const { open, done } = by[g];
+    const btn = g === 'gReg' && open.length ? ` <button type="button" class="mini" data-regon="1"${S.busy ? ' disabled' : ''}>${esc(t('regDo', nAuto))}</button>` : '';
+    return chips + `<div class="shint">${esc(t(g + 'D', skuCol))}${btn}</div>` +
+      `<div class="sgrows">${open.map((r) => skipRowHtml(r, g)).join('')}${done.map(([f, now]) => fixedRowHtml(f, now)).join('')}</div>`;
+  }
+  // 해결한 뒤: 다음 빈 주소 칸으로 (없으면 그대로)
+  function focusNext(afterRow) {
+    const ins = [...document.querySelectorAll('#skip input[data-urow]')];
+    const next = ins.find((x) => +x.dataset.urow > afterRow && !x.value) || ins.find((x) => !x.value);
+    if (next) next.focus({ preventScroll: false });
   }
 
   function refresh() {
@@ -268,7 +328,6 @@
     if ((S.tab === 'review' && !rvN) || (S.tab === 'ok' && !okN) || (S.tab === 'skip' && !noN)) S.tab = 'all';
     const tabs = [['all', t('tabAll'), rows.length + noN, ''], ['review', t('tabReview'), rvN, 'rv'], ['ok', t('tabOk'), okN, ''], ['skip', t('tabSkip'), noN, '']]
       .filter(([k, , n]) => k === 'all' || n);
-    $('tabD').textContent = t({ all: 'td_all', review: 'td_review', ok: 'td_ok', skip: 'td_skip' }[S.tab] || 'td_all');
     $('tabs').innerHTML = tabs.map(([k, label, n, cls]) => `<button class="tab ${cls}${S.tab === k ? ' on' : ''}" role="tab" aria-selected="${S.tab === k}" data-tab="${k}">${esc(label)}<b>${n}</b></button>`).join('');
     const inTab = (r) => S.tab === 'all' || (S.tab === 'review' && rvSet.has(r.row)) || (S.tab === 'ok' && !rvSet.has(r.row));
     // 전체 선택 ↔ 해제: 버튼 하나 (지금 보이는 상품 — 탭 · 검색 결과 — 에만)
@@ -294,7 +353,6 @@
     $('skipHead').classList.toggle('hidden', !(S.tab === 'all' && noN && rows.length));
     $('skipHead').innerHTML = `${esc(t('tabSkip'))}<b>${noN}</b>`;
     $('selbar').classList.toggle('hidden', skipTab || !rows.length);
-    $('shiftTip').classList.toggle('hidden', skipTab || !rows.length);
     // 상황판
     const c = rows.filter((r) => S.sel.has(r.row)), rep = c.filter((r) => r.descLen > 0).length;
     const nNew = c.filter((r) => r.kind === 'new').length;
@@ -303,21 +361,31 @@
       const crawling = j.crawlTotal && j.crawlDone < j.crawlTotal;
       $('info').textContent = crawling ? t('progCrawl', j.crawlDone, j.crawlTotal) : t('progMake', j.done, j.total);
       $('prog').firstElementChild.style.width = (100 * (crawling ? j.crawlDone / j.crawlTotal : j.done / Math.max(1, j.total))) + '%';
-    } else if (j && j.status === 'ready') $('info').innerHTML = t('done', j.ok, j.replaced, j.failed) + (rvN ? ` <button class="lnk" data-tab="review">${esc(t('rvLink', rvN))}</button>` : '');
+    } else if (j && j.status === 'ready' && sameAsJob()) $('info').innerHTML = `<span class="okline">${esc(t('doneShort', j.ok))}</span>`;
     else if (j && j.status === 'cancelled') $('info').innerHTML = `<span>${esc(t('stopped', j.ok || 0, j.total || (j.items || []).length))}</span>`;
     else if (j && j.status === 'failed') $('info').innerHTML = `<span style="color:var(--bad)">${esc(t('expFail') + (j.error || ''))}</span>`;
-    else $('info').innerHTML = `<span>${t('info', c.length, rep)}</span>` + (rvN ? ` <button class="lnk" data-tab="review">${esc(t('rvLink', rvN))}</button>` : '');
+    else $('info').innerHTML = `<span>${t('info', c.length, rep)}</span>`;
     $('prog').classList.toggle('hidden', !running);
     $('stop').classList.toggle('hidden', !running); $('stop').textContent = t('stop');   // 진행 중일 때만 중단
     // 알림 고르기: 오래 걸릴 작업(새로 등록 포함 또는 상품 40개 초과)에만
+    // 버튼 하나: 끝났고 선택이 그대로면 '엑셀 받기', 아니면 '내보내기 / 다시 내보내기 (N)' — 늘 같은 자리
+    const dlNow = !!(j && j.status === 'ready' && !S.busy && sameAsJob());
+    $('export').classList.toggle('hidden', dlNow || running);
     $('export').textContent = S.busy ? t('exporting') : (j && !running ? t('expAgain', c.length) : t('exp', c.length));
     $('export').disabled = S.busy || !c.length || !S.channel || !S.data.cols.desc;
-    $('dl').classList.toggle('hidden', !(j && j.status === 'ready' && !S.busy));
+    $('dl').classList.toggle('hidden', !dlNow);
     if (j && j.file) { $('dl').href = j.file; $('dl').setAttribute('download', j.fileName || 'clia-bulk.xlsx'); }
     $('again').disabled = S.busy;
   }
 
-  // 탭 · 상황판의 "확인 필요 보기"
+  // 끝난 작업과 지금 선택이 같은지 (같으면 다시 만들 필요 없이 받기만)
+  function sameAsJob() {
+    const j = S.job;
+    if (!j || !j.items || S.force.size || S.redo.size) return false;
+    const rows = new Set(j.items.map((x) => x.row));
+    return rows.size === S.sel.size && [...S.sel].every((r) => rows.has(r));
+  }
+  // 탭
   const goTab = (e) => { const b = e.target.closest('[data-tab]'); if (!b) return; S.tab = b.dataset.tab; refresh(); };
   $('tabs').onclick = goTab;
   $('info').addEventListener('click', (e) => { goTab(e); if (e.target.closest('[data-tab]')) $('tabs').scrollIntoView({ block: 'nearest' }); });
@@ -387,17 +455,52 @@
   $('rgNo').onclick = rgClose;
   $('rg').onclick = (e) => { if (e.target === $('rg')) rgClose(); };
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('rg').classList.contains('hidden')) rgClose(); });
-  $('skip').addEventListener('click', async (e) => {
-    const b = e.target.closest('button[data-uadd]');
-    if (!b) return;
-    e.preventDefault();
-    const row = +b.dataset.uadd, inp = document.querySelector(`input[data-urow="${row}"]`), err = document.querySelector(`[data-uerr="${row}"]`);
+  // 매칭 불가 행에서 바로 해결하기 (2026-11-23)
+  const skipRowOf = (row) => noMatch().find((x) => x.row === row);
+  async function tryUrl(inp) {
+    const row = +inp.dataset.urow, v = inp.value.trim(), el = inp.closest('.srow'), st = document.querySelector(`[data-ust="${row}"]`);
+    if (!v || inp.dataset.tried === v) return;
+    inp.dataset.tried = v;
+    el.classList.remove('bad'); delete S.uerr[row]; st.textContent = t('checking');
     try {
-      const c = await api(`/api/v1/bulk/classify?url=${encodeURIComponent(inp.value.trim())}&country=${encodeURIComponent(home)}`);
+      const c = await api(`/api/v1/bulk/classify?url=${encodeURIComponent(v)}&country=${encodeURIComponent(home)}`);
+      const r = skipRowOf(row);
+      if (!r) return;
       S.own[row] = { ...c, alts: 0, fuzzy: false };
-      S.regOn = true; S.sel.add(row);
+      S.fixed[row] = { g: groupOf(r), r };
+      delete S.draft[row];
+      S.sel.add(row);
       setData(S.data, false);
-    } catch (_) { err.textContent = t('urlBad', S.data.site || home); }
+      focusNext(row);
+    } catch (_) {
+      S.uerr[row] = 1; el.classList.add('bad'); st.textContent = t('urlBad', S.data.site || home);
+      inp.select();
+    }
+  }
+  $('skip').addEventListener('input', (e) => {
+    const inp = e.target.closest('input[data-urow]');
+    if (!inp) return;
+    S.draft[+inp.dataset.urow] = inp.value;
+    if (!inp.value.trim()) { delete S.uerr[+inp.dataset.urow]; inp.closest('.srow').classList.remove('bad'); document.querySelector(`[data-ust="${inp.dataset.urow}"]`).textContent = ''; delete inp.dataset.tried; }
+  });
+  $('skip').addEventListener('paste', (e) => { const inp = e.target.closest('input[data-urow]'); if (inp) setTimeout(() => tryUrl(inp), 0); });
+  $('skip').addEventListener('keydown', (e) => { const inp = e.target.closest('input[data-urow]'); if (inp && e.key === 'Enter') { e.preventDefault(); delete inp.dataset.tried; tryUrl(inp); } });
+  $('skip').addEventListener('change', (e) => { const inp = e.target.closest('input[data-urow]'); if (inp) tryUrl(inp); });
+  $('skip').addEventListener('click', (e) => {
+    const pk = e.target.closest('button[data-pick]'), un = e.target.closest('button[data-undo]'), ro = e.target.closest('button[data-regon]');
+    const gb = e.target.closest('.schip');
+    if (gb) { S.openG = gb.dataset.g; $('skip').innerHTML = skipHtml(); return; }
+    if (pk) {
+      const row = +pk.dataset.pick, r = skipRowOf(row);
+      if (!r) return;
+      S.pick[row] = pk.dataset.slug; S.fixed[row] = { g: 'gMulti', r }; S.sel.add(row);
+      setData(S.data, false);
+      focusNext(row);
+    } else if (un) {
+      const row = +un.dataset.undo;
+      delete S.own[row]; delete S.pick[row]; delete S.fixed[row]; S.sel.delete(row);
+      setData(S.data, false);
+    } else if (ro) { S.regOn = true; render(true); }
   });
 
   // 보기 · 검색
@@ -411,7 +514,7 @@
   document.querySelectorAll('#view button').forEach((b) => { b.title = t(b.dataset.v === 'grid' ? 'viewGrid' : 'viewList'); });
   $('view').onclick = (e) => { const b = e.target.closest('button'); if (b) setView(b.dataset.v); };
   setView(VIEW);
-  $('q').placeholder = t('search'); $('shiftTip').textContent = t('shift');
+  $('q').placeholder = t('search'); $('selAll').title = t('shift');   // Shift 범위 선택 안내는 마우스를 올렸을 때만
   $('q').oninput = () => { S.q = $('q').value.trim().toLowerCase(); refresh(); };
 
   // ── 동영상 장면 고르기 — 빌더와 같은 팝업(shared/clia-frame-picker.js) · 같은 저장(제품 데이터) ──
@@ -553,6 +656,7 @@
       chTag();
       const d = await api('/api/v1/bulk/analyze', { id: j.upload, country: home });
       S.own = {};
+      for (const it of j.items) if (!it.register && !it.bundle && it.slug) S.pick[it.row] = it.slug;   // 여러 후보 중 골랐던 제품
       for (const it of j.items) if (it.register) S.own[it.row] = { ...((d.rows.find((r) => r.row === it.row) || {}).lg || {}), url: it.url, model: it.model, alts: it.alts, fuzzy: it.fuzzy };
       S.regOn = j.items.some((x) => x.register);
       S.ack = new Set(store.get('clia-bulk-ack-' + id) || []);
