@@ -202,12 +202,13 @@ button.eb { cursor: pointer; }
   .lhead:not(.hidden) { display: grid; grid-template-columns: 22px 48px minmax(0, 1fr) 250px 150px 92px; gap: 14px; padding: 9px 16px; border-bottom: 1px solid var(--line); background: var(--clia-gray-50); color: var(--clia-gray-900); font-size: 11px; font-weight: 600; letter-spacing: .02em; }
   .lhead .he { text-align: end; }
   /* Next step 열 하이라이트 — 머리부터 행 끝까지 같은 색 띠 (행 위아래 여백까지 채움) */
-  .lhead .hn { color: var(--bad); font-weight: 800; }
+  .lhead .hn { color: var(--clia-brand); font-weight: 800; }
 }
 .c-st { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; min-width: 0; }
 .c-ac { display: flex; align-items: center; }
-.c-ac .mini { color: var(--bad); border-color: var(--bad); font-weight: 800; }
-.c-ac .mini:hover { background: #FDE8E7; }
+/* Next step 버튼 = 다른 주요 버튼(엑셀 받기 · 내보내기)과 같은 브랜드 빨강 채움 */
+.c-ac .mini { color: #fff; background: var(--clia-brand); border-color: var(--clia-brand); font-weight: 700; }
+.c-ac .mini:hover { background: var(--clia-brand-hover); border-color: var(--clia-brand-hover); color: #fff; }
 .c-ed { display: flex; justify-content: flex-end; }
 .why { display: inline-flex; align-items: center; gap: 4px; color: var(--clia-gray-900); font-weight: 500; font-size: 12px; line-height: 1.35; }
 .why .x { flex: none; width: 18px; height: 18px; border-radius: 50%; border: 0; background: var(--clia-gray-100); color: var(--clia-gray-600); font: 700 13px/1 var(--clia-font), sans-serif; cursor: pointer; padding: 0; }
