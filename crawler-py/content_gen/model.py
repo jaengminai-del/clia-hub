@@ -27,6 +27,7 @@ model.py — [A] 공통 컨텐츠 모델 (1차 컨텐츠 생성)
 import re
 
 from make_mirror import _section_signature
+from text_filters import spec_tab_label_only
 
 try:
     from component_parser import AWARD_FILE_RE
@@ -221,6 +222,8 @@ def build_blocks(mirror: dict, rules: dict) -> list:
     """mirror → 블록 목록 (화면 순서)."""
     skip_layouts = set(rules.get("skip_layouts") or [])
     sections = [s for s in mirror.get("sections", []) if s.get("layout_type") not in skip_layouts]
+    # 표 없는 규격 영역(치수 도면만)에 남은 탭 이름('สรุป' 등)은 그리지 않는다 — 이미 크롤한 결과에도 적용
+    sections = [dict(s, text="", text_roles=[]) if spec_tab_label_only(s) else s for s in sections]
     sections = _drop_gallery_media(sections, bool(rules.get("legacy_gallery_path_filter")))
     sections = _dedupe(sections)
     sections = _merge_card_rows(sections, int(rules.get("max_card_columns") or 4),
