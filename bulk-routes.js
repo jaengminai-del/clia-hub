@@ -13,7 +13,7 @@
  *   POST /api/v1/bulk/build {id, channel, sheet, descCol, country, lang, notify:{email},
  *                            items:[{row, slug} | {row, url, register:true, alts, fuzzy} | {row, slug, force:true}]} → 작업
  *   GET  /api/v1/bulk/jobs/:job · /api/v1/bulk/jobs/:job/file · /api/v1/bulk/config
- *   GET  /api/v1/bulk/frames?slug= · POST /api/v1/bulk/frame {slug, video, src}   (자동 동영상 장면 확인·바꾸기)
+ *   동영상 장면 바꾸기는 빌더와 같은 API — GET /api/v1/product-videos?slug= · POST /api/v1/video-frame {url, t, slug} (video-frames.js)
  * 실행·보관·알림: bulk-jobs.js / 제품 목록·매칭: bulk-catalog.js / LG.com 주소: bulk-sitemap.js
  */
 const express = require('express');
@@ -300,18 +300,6 @@ router.get('/api/v1/bulk/jobs/:job/file', async (req, res) => {
   }
   res.set('Content-Disposition', `attachment; filename="clia-bulk.xlsx"; filename*=UTF-8''${encodeURIComponent(j.outName)}`);
   res.type('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet').sendFile(fp);
-});
-
-// 자동으로 고른 동영상 대표 장면: 후보 보기 · 고르기 (고른 장면은 제품 데이터에 저장 → 다음 내보내기부터 반영)
-router.get('/api/v1/bulk/frames', (req, res) => {
-  const slug = path.basename(String(req.query.slug || ''));
-  if (!slug) return res.status(400).json({ error: 'slug required' });
-  res.json({ slug, videos: bulkJobs.framesOf(slug) });
-});
-router.post('/api/v1/bulk/frame', async (req, res) => {
-  const { slug, video, src } = req.body || {};
-  try { res.json({ slug, videos: await bulkJobs.saveFrame(String(slug || ''), String(video || ''), String(src || '')) }); }
-  catch (e) { res.status(e.status || 500).json({ error: e.message }); }
 });
 
 module.exports = { router, analyze, matchRow, skuKeys, addLgUrls };
