@@ -88,12 +88,23 @@ def _walk(o, pred):
         for v in o: yield from _walk(v, pred)
 
 
-def _page_path(url: str) -> str:
-    """https://www.lg.com/th/laundry/x/t2515vbtb/ → /content/lge/th/th/laundry/x/t2515vbtb/"""
+def _site_lang(cc: str, html: str = "") -> str:
+    """AEM 경로의 언어 칸: 태국 /content/lge/th/th/ · 싱가포르 /content/lge/sg/en/ (2026-11-23 실측).
+    페이지에 실린 경로에서 가장 많이 쓰인 것을 고르고, 페이지가 없으면 국가 코드 그대로 (예전 동작)."""
+    if html:
+        found = re.findall(rf"/content/lge/{re.escape(cc)}/([a-z_]{{2,5}})/", html[:3000000].replace("\\/", "/"))
+        if found:
+            return max(set(found), key=found.count)
+    return cc
+
+
+def _page_path(url: str, html: str = "") -> str:
+    """https://www.lg.com/th/laundry/x/t2515vbtb/ → /content/lge/th/th/laundry/x/t2515vbtb/
+    (싱가포르는 /content/lge/sg/en/… — 언어 칸은 html 에서 읽는다)"""
     parts = [p for p in urlparse(url).path.split("/") if p]
     if not parts: return ""
     cc = parts[0]
-    return f"/content/lge/{cc}/{cc}/" + "/".join(parts[1:]).lower() + "/"
+    return f"/content/lge/{cc}/{_site_lang(cc, html)}/" + "/".join(parts[1:]).lower() + "/"
 
 
 def _canonical(html: str) -> str:
@@ -105,7 +116,7 @@ def _canonical(html: str) -> str:
 
 def _product_and_overview(html: str, url: str):
     """(제품 컨테이너, 그 안의 기능 영역 키) — 기능 영역 앞뒤에 직접 놓인 히어로·텍스트도 컨텐츠라서."""
-    want = _page_path(_canonical(html) or url)
+    want = _page_path(_canonical(html) or url, html)
     for row in _flight_rows(_flight_text(html)):
         for d in _walk(row, lambda d: isinstance(d.get("resourcePath"), str) and ":items" in d
                        and d["resourcePath"].lower().startswith(want)
@@ -116,7 +127,7 @@ def _product_and_overview(html: str, url: str):
 
 
 def _overview(html: str, url: str):
-    want = _page_path(_canonical(html) or url)   # 옮겨진 제품은 새 주소의 컴포넌트 경로
+    want = _page_path(_canonical(html) or url, html)   # 옮겨진 제품은 새 주소의 컴포넌트 경로
     for row in _flight_rows(_flight_text(html)):
         for d in _walk(row, lambda d: isinstance(d.get("resourcePath"), str) and ":items" in d
                        and d["resourcePath"].lower().startswith(want)
@@ -161,7 +172,7 @@ def page_check(html: str, url: str):
     if BLOCK_RE.search(html[:20000]) and "__next_f" not in html:
         return False, "LG bot-block page (Access Denied)"
     # 요청한 페이지인가: canonical / og:url 의 경로가 요청 경로와 같아야 한다 (나라 무관).
-    # 둘 다 없으면 AEM 경로(/content/lge/<cc>/<cc>/…)로, 그것도 없으면 주소 마지막 조각(모델)으로 확인.
+    # 둘 다 없으면 AEM 경로(/content/lge/<cc>/<언어>/…)로, 그것도 없으면 주소 마지막 조각(모델)으로 확인.
     want = urlparse(url).path.rstrip("/").lower()
     for pat in (r'<link[^>]+rel="canonical"[^>]*href="([^"]+)"', r'<link[^>]+href="([^"]+)"[^>]*rel="canonical"',
                 r'property="og:url"\s+content="([^"]+)"', r'content="([^"]+)"\s+property="og:url"'):
@@ -175,7 +186,7 @@ def page_check(html: str, url: str):
                 return True, ""
             return False, f"different page (canonical {got} ≠ requested {want})"
     low = html.lower().replace("\\/", "/")
-    if _page_path(url) in low:
+    if _page_path(url, low) in low:
         return True, ""
     seg = (want.rsplit("/", 1)[-1] or "")
     if seg and low.count(seg) >= 3:
