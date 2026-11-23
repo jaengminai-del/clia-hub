@@ -141,7 +141,8 @@ async function post(p, body, timeoutMs) {
 }
 async function contentFor(channel, url) {
   const listing = channel === 'lazada';
-  const summaryP = channel === 'lazada' ? post('/api/v1/pdp-summary', { url }, 7 * 60 * 1000).catch((e) => ({ error: e.message })) : null;
+  // PDP 요약(태국어)은 태국 제품만 — 싱가포르 등은 요약 없이 이미지만 (2026-11-23)
+  const summaryP = channel === 'lazada' && /lg\.com\/th\//i.test(url) ? post('/api/v1/pdp-summary', { url }, 7 * 60 * 1000).catch((e) => ({ error: e.message })) : null;
   const g = await post('/api/ebay-generate', { url, medium: 'shopee_lazada', listing }, 5 * 60 * 1000);
   if (!g.html) throw new Error('generate returned no HTML');
   const sl = await post('/api/v1/slice-html', { html: g.html, medium: 'shopee_lazada' }, 12 * 60 * 1000);
