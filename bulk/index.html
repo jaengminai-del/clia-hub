@@ -184,25 +184,38 @@ a.clia-btn { text-decoration: none; }
 .pick:focus-visible, .schip:focus-visible, .mini:focus-visible { outline: 2px solid var(--clia-gray-900); outline-offset: 2px; }
 .srow.fixed { background: #F3FAF6; }
 .okt { color: var(--ok); font-weight: 700; font-size: 12px; }
-/* 목록 행 오른쪽 (2026-11-23 단순화): [상태 · 이유][고치기][문제없음] … [장면][빌더] — 아이콘은 모든 행 같은 자리 */
-.acts { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
-.acts .why { color: var(--bad); font-weight: 700; font-size: 12px; }
-.ics { display: inline-flex; gap: 4px; margin-inline-start: 4px; }
-.ib, .ib0 { width: 30px; height: 30px; flex: none; }
-.ib { display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--clia-gray-200); border-radius: 8px; background: #fff; color: var(--clia-gray-600); cursor: pointer; text-decoration: none; }
-.ib:hover { border-color: var(--clia-gray-700); color: var(--clia-gray-900); }
-.ib svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.ib:focus-visible { outline: 2px solid var(--clia-gray-900); outline-offset: 2px; }
 .eb { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 11px 0 9px; border: 1px solid var(--clia-gray-300); border-radius: 8px; background: #fff; color: var(--clia-gray-900); font: 600 12px var(--clia-font), sans-serif; text-decoration: none; white-space: nowrap; }
 .eb:hover { border-color: var(--clia-gray-900); }
 .eb svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .eb:focus-visible { outline: 2px solid var(--clia-gray-900); outline-offset: 2px; }
 button.eb { cursor: pointer; }
 .b-ed { background: #EDE7FB; color: #5B3DB5; margin-inline-start: 6px; }
+.b-edx { background: #FFF1D6; color: #8A5300; margin-inline-start: 6px; }
 /* 편집(빌더) 덮개 — 벌크 화면 전체 위 */
 .edov { position: fixed; inset: 0; z-index: 50; background: #fff; }
 .edov iframe { width: 100%; height: 100%; border: 0; display: block; }
-.list.grid .acts { justify-content: flex-start; }
+/* 목록 머리 · 세 칸 (2026-11-23): 상태 · 할 일 · 편집 — 넓은 화면의 리스트 보기에서만 */
+.lhead { display: none; }
+@media (min-width: 641px) {
+  .list:not(.grid) .item { grid-template-columns: 22px 48px minmax(0, 1fr) 250px 150px 92px; }
+  .list:not(.grid) .item .r { display: contents; }
+  .lhead:not(.hidden) { display: grid; grid-template-columns: 22px 48px minmax(0, 1fr) 250px 150px 92px; gap: 14px; padding: 9px 16px; border-bottom: 1px solid var(--line); background: var(--clia-gray-50); color: var(--clia-gray-900); font-size: 11px; font-weight: 600; letter-spacing: .02em; }
+  .lhead .he { text-align: end; }
+  /* Next step 열 하이라이트 — 머리부터 행 끝까지 같은 색 띠 (행 위아래 여백까지 채움) */
+  .lhead .hn { color: var(--bad); font-weight: 800; }
+}
+.c-st { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; min-width: 0; }
+.c-ac { display: flex; align-items: center; }
+.c-ac .mini { color: var(--bad); border-color: var(--bad); font-weight: 800; }
+.c-ac .mini:hover { background: #FDE8E7; }
+.c-ed { display: flex; justify-content: flex-end; }
+.why { display: inline-flex; align-items: center; gap: 4px; color: var(--clia-gray-900); font-weight: 500; font-size: 12px; line-height: 1.35; }
+.why .x { flex: none; width: 18px; height: 18px; border-radius: 50%; border: 0; background: var(--clia-gray-100); color: var(--clia-gray-600); font: 700 13px/1 var(--clia-font), sans-serif; cursor: pointer; padding: 0; }
+.why .x:hover { background: var(--clia-gray-700); color: #fff; }
+.why .x:focus-visible { outline: 2px solid var(--clia-gray-900); outline-offset: 2px; }
+.list.grid .item .r { display: flex; flex-direction: column; gap: 6px; }
+.list.grid .c-ed { justify-content: flex-start; }
+.shead { display: grid; grid-template-columns: minmax(140px, 220px) minmax(0, 1fr) minmax(280px, 420px); gap: 14px; padding: 7px 16px; border-bottom: 1px solid var(--clia-gray-100); color: var(--clia-gray-900); font-size: 11px; font-weight: 600; }
 .shint { padding: 8px 16px; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--clia-gray-100); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .err2 { color: var(--bad); font-size: 12px; }
 /* 작업 상황판 · 탭 · 한 줄 도구 (2026-11-19 UI 정리) */
@@ -256,7 +269,7 @@ button.eb { cursor: pointer; }
 .skiplist .item { cursor: default; }
 .skiplist .item:hover { background: none; }
 .skiplist .item .r { align-items: flex-end; }
-@media (max-width: 640px) { .skiplist .item { grid-template-columns: 0 48px minmax(0, 1fr); } .skiplist .item .r { grid-column: 2 / -1; align-items: flex-start; } .srow { grid-template-columns: minmax(0, 1fr); gap: 4px; padding: 8px 14px; } .srow .a { justify-content: flex-start; } .ust { text-align: start; } .schips { padding: 10px 14px; } .shint { padding: 8px 14px; } }
+@media (max-width: 640px) { .skiplist .item { grid-template-columns: 0 48px minmax(0, 1fr); } .skiplist .item .r { grid-column: 2 / -1; align-items: flex-start; } .srow { grid-template-columns: minmax(0, 1fr); gap: 4px; padding: 8px 14px; } .shead { display: none; } .item .r { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px; } .srow .a { justify-content: flex-start; } .ust { text-align: start; } .schips { padding: 10px 14px; } .shint { padding: 8px 14px; } }
 /* CLIA 에 없는 상품 등록: 상황판 안의 눈에 띄는 한 줄 + 올리자마자 묻는 팝업 (2026-11-19) */
 .p-reg { display: flex; gap: 12px; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--clia-gray-100); }
 .p-reg .regt { flex: 0 1 auto; font-size: 13px; font-weight: 600; color: var(--clia-gray-700); }
@@ -366,7 +379,8 @@ button.eb { cursor: pointer; }
         <label class="sbox"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="q" autocomplete="off"></label>
         <span class="view" id="view" role="group"><button data-v="list" type="button"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span class="sr" id="vList"></span></button><button data-v="grid" type="button"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="sr" id="vGrid"></span></button></span>
       </div>
-      <div class="list" id="list"></div>
+      <div class="lhead hidden" id="lhead" aria-hidden="true"></div>
+<div class="list" id="list"></div>
       <!-- 매칭 불가: 다른 탭과 같은 행 모양 (2026-11-19) -->
       <div class="sech hidden" id="skipHead"></div>
       <div class="list skiplist hidden" id="skip"></div>
