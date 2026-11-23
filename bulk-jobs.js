@@ -119,6 +119,15 @@ function currentFlags(j, it) {
   return flagsFor(j, it, { allImages: it.allImages, summaryErr: it.summaryErr });
 }
 
+// 작업의 나라 (2026-11-23): 벌크는 나라별로 완전히 나눈다 — 태국 작업이 싱가포르 화면에 보이지 않게.
+// 이 기능 전에 만든 작업은 나라 기록이 없어 행의 LG.com 주소(lg.com/<cc>/…)에서 가장 많은 나라로 정한다
+function countryOf(j) {
+  if (j.country) return j.country;
+  const n = {};
+  for (const it of j.items || []) { const c = (/lg\.com\/([a-z]{2})(?:_[a-z]{2})?\//i.exec(it.url || '') || [])[1]; if (c) n[c.toLowerCase()] = (n[c.toLowerCase()] || 0) + 1; }
+  return Object.keys(n).sort((a, b) => n[b] - n[a])[0] || '';
+}
+
 function jobView(j) {
   const done = j.status !== 'running' && j.status !== 'queued';
   // 동영상 수(장면 바꾸기 버튼)는 이 기능 전에 끝난 작업 기록에 없어서 다시 열 때 센다
@@ -126,7 +135,7 @@ function jobView(j) {
     ? { ...it, videos: productVideos(readJson(path.join(OUT_DIR(), it.slug, 'mirror.json'))).length } : it);
   const its = done ? j.items.map((it) => { const flags = currentFlags(j, it); return withVideos(flags === it.flags ? it : { ...it, flags }); }) : j.items;
   const fin = (x) => x.status === 'ok' || x.status === 'failed';
-  return { id: j.id, upload: j.upload, status: j.status, error: j.error, channel: j.channel, phase: j.phase,
+  return { id: j.id, upload: j.upload, status: j.status, error: j.error, channel: j.channel, country: countryOf(j), phase: j.phase,
     total: its.length, done: its.filter(fin).length,
     ok: its.filter((x) => x.status === 'ok').length, failed: its.filter((x) => x.status === 'failed').length,
     replaced: its.filter((x) => x.status === 'ok' && x.prevLen > 0).length,
@@ -284,8 +293,8 @@ function start(j) {
   return j;
 }
 
-function create({ upload, channel, sheet, descCol, items, outName, base, notify: nt, lang }) {
-  const j = { id: crypto.randomBytes(8).toString('hex'), upload, channel, sheet, descCol, items, outName, base, lang,
+function create({ upload, channel, country, sheet, descCol, items, outName, base, notify: nt, lang }) {
+  const j = { id: crypto.randomBytes(8).toString('hex'), upload, channel, country: country || countryOf({ items }), sheet, descCol, items, outName, base, lang,
     notify: nt && nt.email ? { email: nt.email, lang } : null, status: 'running', phase: 'queued', error: '', at: Date.now() };
   for (const [k, x] of jobs) if (Date.now() - (x.at || 0) > KEEP_MS) jobs.delete(k);
   cleanup();
@@ -369,4 +378,4 @@ function emailOk(e) {
   return !allow.length || allow.some((d) => String(e).toLowerCase().endsWith('@' + d) || String(e).toLowerCase().endsWith('.' + d));
 }
 
-module.exports = { create, cancel, setNotify, getJob, jobView, resumeAll, saveUpload, readUpload, mailReady, emailOk, CRAWL_CONC, DIR };
+module.exports = { countryOf, create, cancel, setNotify, getJob, jobView, resumeAll, saveUpload, readUpload, mailReady, emailOk, CRAWL_CONC, DIR };
