@@ -114,7 +114,10 @@ function currentFlags(j, it) {
 
 function jobView(j) {
   const done = j.status !== 'running' && j.status !== 'queued';
-  const its = done ? j.items.map((it) => { const flags = currentFlags(j, it); return flags === it.flags ? it : { ...it, flags }; }) : j.items;
+  // 동영상 수(장면 바꾸기 버튼)는 이 기능 전에 끝난 작업 기록에 없어서 다시 열 때 센다
+  const withVideos = (it) => (it.status === 'ok' && it.slug && it.videos == null
+    ? { ...it, videos: productVideos(readJson(path.join(OUT_DIR(), it.slug, 'mirror.json'))).length } : it);
+  const its = done ? j.items.map((it) => { const flags = currentFlags(j, it); return withVideos(flags === it.flags ? it : { ...it, flags }); }) : j.items;
   const fin = (x) => x.status === 'ok' || x.status === 'failed';
   return { id: j.id, upload: j.upload, status: j.status, error: j.error, channel: j.channel, phase: j.phase,
     total: its.length, done: its.filter(fin).length,
