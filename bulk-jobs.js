@@ -160,6 +160,7 @@ const imgKey = (u) => {
   try { k = decodeURIComponent(k); } catch (_) {}
   return k.replace(/[._-]\d{2,4}x\d{2,4}/g, '');
 };
+const NON_CONTENT = new Set(['ST0018', 'PD0016']);   // 누락으로 세지 않는 영역: 바로가기 링크(ST0018) · 구매처(PD0016)
 const DUP_DAM = /(?:\/content\/dam\/channel\/wcms){2,}/;   // LG 페이지가 경로를 두 번 붙인 주소 — 이미지가 실제로 있어서 크롤러가 바로잡는다
 function flagsFor(j, it, c) {
   const f = [];
@@ -167,9 +168,10 @@ function flagsFor(j, it, c) {
   const mirror = readJson(path.join(dir, 'mirror.json'));
   const qa = readJson(path.join(dir, 'qa_report.json')) || (mirror && mirror._qa) || {};
   // 원문 누락: 일부러 빼는 것(바로가기 링크 영역 ST0018 · 탭 카드 안 글)은 세지 않는다 — 그대로 세면 거의 모든 제품이 걸린다.
+  // 구매처 영역(PD0016 Where to buy)도 컨텐츠가 아니다 — 이 규칙 전에 크롤한 제품의 검사 기록에는 그 썸네일이 누락으로 들어 있다
   // 실제로 빠진 이미지가 있거나, 본문 글이 5개 이상 빠졌을 때만
   const cov = qa.coverage || {}, chk = qa.checks || {};
-  const real = (x) => x && x.component_id !== 'ST0018';
+  const real = (x) => x && !NON_CONTENT.has(x.component_id);
   const texts = (cov.missing_texts || []).filter((x) => real(x) && !x.only_in_cards).length;
   // 예전에 크롤한 결과의 검사 기록에는 '크롤러가 일부러 뺀 이미지(LG 가 404·자리표시를 내줌)'가 누락으로 들어 있다 — 그것은 빼고 센다.
   // 새 크롤은 검사가 이미 제외한다. 주소가 겹쳐 있던 것은 실제로 이미지를 잃은 것이라 그대로 센다 (다시 가져오면 고쳐진다).
