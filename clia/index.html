@@ -965,7 +965,7 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 <div class="lh-ctrl">
 <div class="crawl-url-row"><input class="sbox" id="newCrawlUrl" placeholder="🔗 LG.com product URL" onkeydown="if(event.key==='Enter')crawlNewUrl()"><button class="crawl-url-btn" id="newCrawlBtn" onclick="crawlNewUrl()">Crawl</button></div>
 <!-- 벌크 엑셀 (2026-11-19): 빌더를 거치지 않고 여기서 바로 연다 — 채널을 정해서 /bulk/ 를 이 화면 위에 띄운다
-     태국 전용 (2026-11-23): Shopee/Lazada 벌크 업로드는 태국 법인만 쓴다 — 다른 법인은 applyCorpUI 에서 숨긴다 -->
+     Shopee/Lazada 법인 전용 (2026-11-23): 태국 · 싱가포르(테스트)만 쓴다 — 다른 법인은 applyCorpUI 에서 숨긴다 -->
 <div class="bulk-row" id="bulkRow" style="display:none"><button class="ch-btn ch-main" style="--ch-color:#EE4D2D" id="bulkShopee" onclick="openBulkExcel('shopee')">Shopee bulk upload</button><button class="ch-btn ch-main" style="--ch-color:#0F146D" id="bulkLazada" onclick="openBulkExcel('lazada')">Lazada bulk upload</button></div>
 <div class="list-warn" id="listWarn"></div>
 </div>
@@ -1008,6 +1008,7 @@ const CORPS={
   uk:{flag:'🇬🇧',name:'United Kingdom',lang:'en'},
   de:{flag:'🇩🇪',name:'Germany',lang:'de'},
   th:{flag:'🇹🇭',name:'Thailand',lang:'th'},
+  sg:{flag:'🇸🇬',name:'Singapore',lang:'en'},   // 2026-11-23 테스트: 태국과 같은 Shopee/Lazada 방식 (영어, PDP 요약 없음)
   sa:{flag:'🇸🇦',name:'Saudi Arabia',lang:'ar'},
 };
 let CORP=CORPS[sessionStorage.getItem('clia_corp')]?sessionStorage.getItem('clia_corp'):'uk';
@@ -1235,9 +1236,11 @@ function startI18n(){
   _i18nObs.observe(document.body,{childList:true,subtree:true});
 }
 // 법인 국가명(현재 UI 언어)
-const CORP_NAMES={uk:{en:'United Kingdom',de:'Vereinigtes Königreich',th:'สหราชอาณาจักร',ar:'المملكة المتحدة'},de:{en:'Germany',de:'Deutschland',th:'เยอรมนี',ar:'ألمانيا'},th:{en:'Thailand',de:'Thailand',th:'ประเทศไทย',ar:'تايلاند'},sa:{en:'Saudi Arabia',de:'Saudi-Arabien',th:'ซาอุดีอาระเบีย',ar:'المملكة العربية السعودية'}};
+const CORP_NAMES={uk:{en:'United Kingdom',de:'Vereinigtes Königreich',th:'สหราชอาณาจักร',ar:'المملكة المتحدة'},de:{en:'Germany',de:'Deutschland',th:'เยอรมนี',ar:'ألمانيا'},th:{en:'Thailand',de:'Thailand',th:'ประเทศไทย',ar:'تايلاند'},sg:{en:'Singapore',de:'Singapur',th:'สิงคโปร์',ar:'سنغافورة'},sa:{en:'Saudi Arabia',de:'Saudi-Arabien',th:'ซาอุดีอาระเบีย',ar:'المملكة العربية السعودية'}};
 function corpLabel(c){const n=CORP_NAMES[c];return n?(CORPS[c].flag+' '+(n[_txLang()]||n.en)):String(c||'').toUpperCase();}
-const CORP_SITE={uk:'uk',de:'de',th:'th',sa:'sa_en'};
+// Shopee/Lazada 를 쓰는 법인 — 벌크 엑셀 버튼 (crawler-py CRAWLER_SL_COUNTRIES 와 같은 목록)
+const SL_CORPS=['th','sg'];
+const CORP_SITE={uk:'uk',de:'de',th:'th',sg:'sg',sa:'sa_en'};
 const LANG_NAMES={th:{en:'Thai',th:'ภาษาไทย'},de:{en:'German',de:'Deutsch'},ar:{en:'Arabic',ar:'العربية'}};
 // 국가 버튼: 화면 언어만 영어 ↔ 법인 언어 (국가·제품 목록·결과물 언어는 그대로)
 function toggleUiLang(){
@@ -1267,7 +1270,7 @@ function applyCorpUI(){
   document.getElementById('listSubtitle').textContent='LG.com/'+CORP_SITE[CORP];
   document.getElementById('prodSearch').placeholder=t('list.search');
   [['bulkShopee','shopee','Shopee'],['bulkLazada','lazada','Lazada']].forEach(([id,k,ch])=>{const b=document.getElementById(id);b.textContent=t('bulk.'+k);b.title=t('bulk.tip',{ch});});
-  document.getElementById('bulkRow').style.display=CORP==='th'?'':'none';   // 벌크 업로드는 태국 전용
+  document.getElementById('bulkRow').style.display=SL_CORPS.includes(CORP)?'':'none';   // 벌크 업로드는 Shopee/Lazada 법인 전용
   const u=sessionStorage.getItem('clia_user')||'';
   document.getElementById('tbAvatar').textContent=(u.replace(/[^\p{L}\p{N}]/gu,'').slice(0,2)||'JJ').toUpperCase();
   startI18n();
@@ -2344,7 +2347,7 @@ Object.assign(I18N.th,{'tab.all':'ทั้งหมด','tab.md':'เฉพา�
 Object.assign(I18N.ar,{'tab.all':'الكل','tab.md':'MD فقط','flt.dv':'BU','flt.grp':'فئة المنتج','flt.all':'الكل','flt.none':'لا شيء','flt.n':'{n} محدد','flt.grpHint':'يمكن اختيار فئات BU المحددة فقط','list.search':'ابحث عن اسم المنتج...','bulk.shopee':'رفع جماعي إلى Shopee','bulk.lazada':'رفع جماعي إلى Lazada','bulk.tip':'ارفع ملف Excel المجمّع لـ {ch} — يملأ CLIA أوصاف المنتجات ويزحف إلى LG.com للمنتجات غير الموجودة'});
 // 벌크 엑셀: 이 화면 위에 /bulk/ 를 띄운다 (채널·법인·언어를 넘긴다). 닫으면 벌크가 새로 크롤한 제품까지 목록을 다시 불러온다
 function openBulkExcel(ch){
-  if(CORP!=='th')return;   // 태국 전용
+  if(!SL_CORPS.includes(CORP))return;   // Shopee/Lazada 법인 전용
   const p=new URLSearchParams({embed:'1',channel:ch,lang:_txLang(),corp:CORP});
   document.getElementById('bulkFrame').src=CRAWLER_API+'/bulk/?'+p;
   document.getElementById('bulkOverlay').style.display='block';
@@ -2947,7 +2950,7 @@ function geoHTML(p){
   if(p._crawledEntry){
     delete schema.aggregateRating;
     schema.sku=p.id;schema.url=p.url;
-    if(p.pr)schema.offers.priceCurrency={uk:'GBP',de:'EUR',th:'THB',sa:'SAR'}[productCorp(p)]||'';else delete schema.offers;
+    if(p.pr)schema.offers.priceCurrency={uk:'GBP',de:'EUR',th:'THB',sg:'SGD',sa:'SAR'}[productCorp(p)]||'';else delete schema.offers;
   }
 
   let h=`<div class="geo-sec">`;
