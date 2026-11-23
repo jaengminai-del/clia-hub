@@ -7,12 +7,18 @@
  *
  *   GET  /api/v1/video?url=               → 동영상 (서버에 받아 둔 사본 — 구간 재생 지원, 같은 출처라 재생 막대 이동 가능)
  *   GET  /api/v1/video-frames?url=&n=8    → { duration, frames: [{ t, src }] }  미리보기 장면 n 장
- *   POST /api/v1/video-frame { url, t }   → { src, width, height }             고른 장면 (원본 해상도, 공개 주소)
+ *   POST /api/v1/video-frame { url, t, slug?|page? } → { src, width, height, saved } 고른 장면 (원본 해상도, 공개 주소)
+ *        slug(또는 제품 페이지 주소 page)를 주면 그 제품 데이터(mirror.json)의 포스터도 이 장면으로 바꾼다
+ *        → 빌더에서 고르든 벌크에서 고르든 같은 제품이면 다음 생성·내보내기부터 같은 장면 (2026-11-23 통합)
+ *   GET  /api/v1/product-videos?slug=|page= → { slug, videos: [{ video, poster, auto, chosen }] }  제품의 동영상 섹션 목록
  *   GET  /media/frames/:vh/:file          → 장면 이미지 (로컬 media-cache/frames, 없으면 버킷 media-frames/)
  *
  * 크롤 직후 자동 장면 (autoFrame, 2026-11-17): 텍스트 v2 크롤 결과(mirror _gen >= 2)에서 LG 포스터가 검은 화면이거나 없는
  * 동영상 섹션만, 전체 장면 중 비주얼이 가장 많은 장면(crawler-py/video_pick.py)을 포스터로 넣는다. 2·3위는 빌더 장면 고르기의 빠른 선택지.
  * 예전 크롤 결과·정상 포스터는 건드리지 않는다.
+ *
+ * 장면 고르기 화면은 하나 (shared/clia-frame-picker.js) — 빌더 카드 목록과 벌크 엑셀 화면이 같이 쓴다.
+ * 포스터를 바꾸는 규칙도 하나 (setPoster) — 자동 장면(autoFrame)과 사람이 고른 장면(chooseFrame)이 같이 쓴다.
  *
  * 동영상은 lg.com 에서 Node 로 받는다 (배포 서버의 Python 직접 요청은 lg.com 이 막음). 장면 추출은 ffmpeg (Dockerfile 에 설치).
  */
@@ -135,25 +141,29 @@ router.get('/api/v1/video-frames', async (req, res) => {
 });
 
 router.post('/api/v1/video-frame', async (req, res) => {
-  const { url = '', t = 0 } = req.body || {};
+  const { url = '', t = 0, slug = '', page = '' } = req.body || {};
   if (!allowed(url)) return res.status(400).json({ error: 'LG video url required' });
+  const dir = (slug || page) ? productDir({ slug, page }) : '';
+  if ((slug || page) && !dir) return res.status(400).json({ error: 'bad product' });
   try {
     const { vh, file } = await ensureVideo(url);
-    const ms = Math.max(0, Math.round(Number(t) * 1000));
-    const name = `frame-${ms}.jpg`;
-    const abs = path.join(FRAME_DIR, vh, name);
-    fs.mkdirSync(path.dirname(abs), { recursive: true });
-    if (!fs.existsSync(abs)) {
-      await grab(file, ms / 1000, abs, 0);
-      await store.putBuffer(`media-frames/${vh}/${name}`, fs.readFileSync(abs), 'image/jpeg')
-        .catch((e) => console.warn('[video-frame] 버킷 업로드 실패', e.message));
-    }
-    const meta = await probe(abs).catch(() => ({}));
-    res.json({ src: `${publicBase(req)}/media/frames/${vh}/${name}`, width: meta.width || 0, height: meta.height || 0 });
+    const sec = Math.max(0, Math.round(Number(t) * 1000)) / 1000;
+    const src = `${publicBase(req)}${await frameAt(vh, file, sec)}`;
+    const meta = await probe(path.join(FRAME_DIR, vh, path.basename(src))).catch(() => ({}));
+    // 빌더(page): 아직 저장된 제품이 아니거나 그 제품의 동영상이 아니면 화면만 바꾼다 · 벌크(slug): 오류로 알린다
+    const saved = dir ? await chooseFrame(dir, url, src, sec).catch((e) => { if (page && !slug && e.status === 404) return 0; throw e; }) : 0;
+    res.json({ src, width: meta.width || 0, height: meta.height || 0, saved });
   } catch (e) {
     console.warn('[video-frame]', e.message);
-    res.status(502).json({ error: e.message });
+    res.status(e.status || 502).json({ error: e.message });
   }
+});
+
+router.get('/api/v1/product-videos', (req, res) => {
+  const dir = productDir({ slug: req.query.slug, page: req.query.page });
+  const mirror = dir && readMirror(dir);
+  if (!mirror) return res.status(404).json({ error: 'product not found' });
+  res.json({ slug: path.basename(dir), videos: productVideos(mirror) });
 });
 
 router.get('/media/frames/:vh/:file', async (req, res) => {
@@ -200,9 +210,66 @@ async function frameAt(vh, file, t) {
   if (!fs.existsSync(abs)) {
     await grab(file, ms / 1000, abs, 0);
     await store.putBuffer(`media-frames/${vh}/${name}`, fs.readFileSync(abs), 'image/jpeg')
-      .catch((e) => console.warn('[auto-frame] 버킷 업로드 실패', e.message));
+      .catch((e) => console.warn('[video-frame] 버킷 업로드 실패', e.message));
   }
   return `/media/frames/${vh}/${name}`;
+}
+
+/**
+ * 섹션의 포스터를 장면 이미지(src)로 바꾼다 — 처음 바꿀 때 LG 원래 포스터를 poster_original 에 남기고, 포스터가 없으면 맨 앞에 넣는다.
+ * 포스터에 맞춘 자르기(crop)는 장면 비율이 달라 풀어 준다. extra: auto_frame · chosen_frame 같은 기록
+ */
+function setPoster(s, src, extra = {}) {
+  let poster = posterOf(s);
+  if (!poster) {
+    poster = { pc_url: '', mobile_url: '', unified_url: '', type: 'image', role: 'content' };
+    s.media = [poster, ...(s.media || [])];
+  } else if (!poster.poster_original && !poster.auto_frame && !poster.chosen_frame) {
+    poster.poster_original = { pc_url: poster.pc_url || '', mobile_url: poster.mobile_url || '', unified_url: poster.unified_url || '' };
+  }
+  Object.assign(poster, { pc_url: src, mobile_url: '', unified_url: '' }, extra);
+  delete poster.crop;
+  return poster;
+}
+
+// ── 제품 데이터의 동영상 섹션 (빌더·벌크 공용) ──────────────────────────────
+const outDir = () => require('./crawler-routes').OUT_DIR;   // crawler-routes 가 이 파일을 불러서 늦게 부른다
+function productDir({ slug, page } = {}) {
+  const name = slug ? path.basename(String(slug)) : (page ? require('./crawler-routes').slugify(String(page)) : '');
+  return name && !name.startsWith('_') ? path.join(outDir(), name) : '';
+}
+const readMirror = (dir) => { try { return JSON.parse(fs.readFileSync(path.join(dir, 'mirror.json'), 'utf-8')); } catch (_) { return null; } };
+
+// 제품의 동영상 섹션 → [{ video, poster(지금 쓰는 이미지), auto(자동 장면 기록 · 없으면 null), chosen(사람이 고른 장면 · 없으면 null) }]
+function productVideos(mirror) {
+  const out = [];
+  for (const s of (mirror && mirror.sections) || []) {
+    const video = sectionVideo(s);
+    if (!video || !allowed(video) || out.some((x) => x.video === video)) continue;
+    const p = posterOf(s) || {};
+    out.push({ video, poster: p.pc_url || p.unified_url || p.mobile_url || '', auto: p.auto_frame || null, chosen: p.chosen_frame || null });
+  }
+  return out;
+}
+
+// 사람이 고른 장면을 제품 데이터에 저장 (같은 동영상을 쓰는 섹션 모두) → 바꾼 섹션 수
+async function chooseFrame(dir, video, src, t) {
+  const fp = path.join(dir, 'mirror.json');
+  const mirror = readMirror(dir);
+  if (!mirror) throw Object.assign(new Error('product not found'), { status: 404 });
+  let n = 0;
+  for (const s of mirror.sections || []) {
+    if (sectionVideo(s) !== video) continue;
+    const p = setPoster(s, src, { chosen_frame: { t, at: Date.now() } });
+    if (p.auto_frame) p.auto_frame.confirmed = true;   // 벌크 '자동으로 고른 장면' 안내를 닫는다
+    n++;
+  }
+  if (!n) throw Object.assign(new Error('video not in this product'), { status: 404 });
+  const tmp = `${fp}.pick-${process.pid}`;
+  fs.writeFileSync(tmp, JSON.stringify(mirror, null, 2));
+  fs.renameSync(tmp, fp);
+  await store.pushPaths([fp]).catch((e) => console.warn('[video-frame] 제품 데이터 버킷 업로드 실패', e.message));
+  return n;
 }
 
 /**
@@ -242,13 +309,7 @@ async function autoFrame(outDir, { base = '', budgetMs = 4 * 60 * 1000 } = {}) {
       const rec = Buffer.from(JSON.stringify({ reason, top: shots.map((x) => ({ t: x.t, score: x.score, src: x.src.slice(root.length) })) }));
       fs.writeFileSync(path.join(FRAME_DIR, vh, 'auto.json'), rec);
       await store.putBuffer(`media-frames/${vh}/auto.json`, rec, 'application/json').catch(() => {});
-      if (poster) {
-        poster.poster_original = { pc_url: poster.pc_url || '', mobile_url: poster.mobile_url || '', unified_url: poster.unified_url || '' };
-        Object.assign(poster, { pc_url: shots[0].src, mobile_url: '', unified_url: '', auto_frame: auto });
-        delete poster.crop;
-      } else {
-        s.media = [{ pc_url: shots[0].src, mobile_url: '', unified_url: '', type: 'image', role: 'content', auto_frame: auto }, ...(s.media || [])];
-      }
+      setPoster(s, shots[0].src, { auto_frame: auto });
       changed++;
       console.log(`[auto-frame] ${path.basename(outDir)} #${s.order}: 포스터 ${reason === 'black' ? '검은 화면' : '없음'} → ${shots[0].t}s`);
     } catch (e) {
@@ -263,4 +324,4 @@ async function autoFrame(outDir, { base = '', budgetMs = 4 * 60 * 1000 } = {}) {
   return changed;
 }
 
-module.exports = { router, autoFrame };
+module.exports = { router, autoFrame, productVideos, chooseFrame };

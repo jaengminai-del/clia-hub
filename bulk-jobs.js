@@ -14,6 +14,7 @@ const crypto = require('crypto');
 const xlsx = require('./bulk-xlsx');
 const store = require('./crawl-store');
 const catalog = require('./bulk-catalog');
+const { productVideos } = require('./video-frames');   // 동영상 장면: 빌더와 같은 목록·저장 (video-frames.js)
 
 const DIR = path.join(__dirname, 'media-cache', 'bulk');
 const KEEP_MS = 7 * 24 * 3600 * 1000;
@@ -120,7 +121,10 @@ function currentFlags(j, it) {
 
 function jobView(j) {
   const done = j.status !== 'running' && j.status !== 'queued';
-  const its = done ? j.items.map((it) => { const flags = currentFlags(j, it); return flags === it.flags ? it : { ...it, flags }; }) : j.items;
+  // 동영상 수(장면 바꾸기 버튼)는 이 기능 전에 끝난 작업 기록에 없어서 다시 열 때 센다
+  const withVideos = (it) => (it.status === 'ok' && it.slug && it.videos == null
+    ? { ...it, videos: productVideos(readJson(path.join(OUT_DIR(), it.slug, 'mirror.json'))).length } : it);
+  const its = done ? j.items.map((it) => { const flags = currentFlags(j, it); return withVideos(flags === it.flags ? it : { ...it, flags }); }) : j.items;
   const fin = (x) => x.status === 'ok' || x.status === 'failed';
   return { id: j.id, upload: j.upload, status: j.status, error: j.error, channel: j.channel, phase: j.phase,
     total: its.length, done: its.filter(fin).length,
@@ -239,6 +243,7 @@ async function run(j) {
       texts.set(it.row, c.text);
       Object.assign(it, { status: 'ok', error: '', images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: c.summaryErr });
       it.flags = flagsFor(j, it, c);
+      it.videos = productVideos(readJson(path.join(OUT_DIR(), it.slug, 'mirror.json'))).length;   // 동영상 장면 바꾸기 버튼 (shared/clia-frame-picker.js)
     } catch (e) {
       if (e.cancelled || j.status === 'cancelled') { it.status = 'cancelled'; persist(j); return; }
       const msg = String(e.message || e).slice(0, 300);
@@ -364,32 +369,4 @@ function emailOk(e) {
   return !allow.length || allow.some((d) => String(e).toLowerCase().endsWith('@' + d) || String(e).toLowerCase().endsWith('.' + d));
 }
 
-// ── 동영상 대표 장면 (자동으로 고른 것) 확인·바꾸기 ──
-function framesOf(slug) {
-  const mirror = readJson(path.join(OUT_DIR(), path.basename(slug), 'mirror.json'));
-  return autoFrames(mirror).map((m) => {
-    const a = m.auto_frame;
-    const first = a.first_src || m.pc_url;
-    const options = [first, ...(a.alternatives || []).map((x) => x.src)].filter((v, i, all) => v && all.indexOf(v) === i);
-    return { video: a.video, reason: a.reason, current: m.pc_url, options, confirmed: !!a.confirmed };
-  });
-}
-async function saveFrame(slug, video, src) {
-  const dir = path.join(OUT_DIR(), path.basename(slug));
-  const fp = path.join(dir, 'mirror.json');
-  const mirror = readJson(fp);
-  if (!mirror) throw Object.assign(new Error('product not found'), { status: 404 });
-  const m = autoFrames(mirror).find((x) => x.auto_frame.video === video);
-  if (!m) throw Object.assign(new Error('video not found'), { status: 404 });
-  const first = m.auto_frame.first_src || m.pc_url;
-  const options = [first, ...(m.auto_frame.alternatives || []).map((x) => x.src)];
-  if (!options.includes(src)) throw Object.assign(new Error('choose one of the offered scenes'), { status: 400 });
-  m.auto_frame.first_src = first;
-  m.auto_frame.confirmed = true;
-  Object.assign(m, { pc_url: src, mobile_url: '', unified_url: '' });
-  fs.writeFileSync(fp, JSON.stringify(mirror, null, 2));
-  await store.pushPaths([fp]).catch(() => {});
-  return framesOf(slug);
-}
-
-module.exports = { create, cancel, setNotify, getJob, jobView, resumeAll, saveUpload, readUpload, framesOf, saveFrame, mailReady, emailOk, CRAWL_CONC, DIR };
+module.exports = { create, cancel, setNotify, getJob, jobView, resumeAll, saveUpload, readUpload, mailReady, emailOk, CRAWL_CONC, DIR };

@@ -143,6 +143,9 @@
     const fl = openFlags(r.row);
     let h = flagsOf(r.row).filter((f) => f.sev === 'info' && !S.ack.has(`${r.row}:${f.code}`)).map((f) => `<div class="nrow"><span class="note">${esc(flagText(f))}</span>` +
       (f.code === 'frame' ? `<button class="mini" data-a="frame" data-slug="${esc(it.slug)}">${esc(t('a_frame'))}</button>` : '') + `</div>`).join('');
+    // 동영상이 있는 제품은 자동 선택 안내가 없어도 장면을 바꿀 수 있다 (빌더와 같은 기능)
+    if (it && it.status === 'ok' && it.videos && !h.includes('data-a="frame"'))
+      h += `<div class="nrow"><span class="note">${esc(t('f_videos', it.videos))}</span><button class="mini" data-a="frame" data-slug="${esc(it.slug)}">${esc(t('a_frame'))}</button></div>`;
     if (!fl.length) return h;
     return h + `<div class="fl">` + fl.map((f) => `<div class="fx"><span${f.files && f.files.length ? ` title="${esc(f.files.join(', '))}"` : ''}>${esc(flagText(f))}</span>` +   // 마우스를 올리면 빠진 이미지 파일 이름
       (RETRY[f.code] ? `<button class="mini" data-a="retry" data-row="${r.row}" data-code="${f.code}">${esc(t(RETRY[f.code]))}</button>` : '') +
@@ -391,28 +394,33 @@
   $('q').placeholder = t('search'); $('shiftTip').textContent = t('shift');
   $('q').oninput = () => { S.q = $('q').value.trim().toLowerCase(); refresh(); };
 
-  // ── 동영상 장면 고르기 (자동으로 고른 장면의 1~3위 후보) ──
+  // ── 동영상 장면 고르기 — 빌더와 같은 팝업(shared/clia-frame-picker.js) · 같은 저장(제품 데이터) ──
+  //   이 팝업은 제품의 동영상 목록. 하나를 누르면 동영상을 보며 장면을 고른다 (맨 앞은 자동으로 고른 1~3위)
   async function openFrames(slug) {
     $('frm').classList.remove('hidden');
     $('frmT').textContent = t('frT'); $('frmX').textContent = t('frClose'); $('frmMsg').textContent = '';
     $('frmBody').innerHTML = '<div class="bar2"><i></i></div>';
-    try { drawFrames(slug, (await api('/api/v1/bulk/frames?slug=' + encodeURIComponent(slug))).videos); }
+    try { drawFrames(slug, (await api('/api/v1/product-videos?slug=' + encodeURIComponent(slug))).videos); }
     catch (e) { $('frmBody').textContent = e.message; }
   }
   function drawFrames(slug, videos) {
     if (!videos.length) { $('frmBody').textContent = t('frNone'); return; }
-    $('frmBody').innerHTML = videos.map((v, i) => `<div class="fv"><div class="fvh">#${i + 1}</div><div class="fo">` +
-      v.options.map((o) => `<button class="fopt${o === v.current ? ' on' : ''}" data-v="${esc(v.video)}" data-src="${esc(o)}"><img src="${esc(o)}" alt="" loading="lazy">${o === v.current ? `<span>${esc(t('frCur'))}</span>` : ''}</button>`).join('') + `</div></div>`).join('');
-    $('frmBody').onclick = async (e) => {
+    const tag = (v) => (v.chosen ? t('frCur') : v.auto ? t('frAuto') : '');
+    $('frmBody').innerHTML = `<div class="fo">` + videos.map((v, i) => `<button class="fopt${v.chosen ? ' on' : ''}" data-i="${i}" title="#${i + 1}">` +
+      `<img src="${esc(v.poster)}" alt="" loading="lazy">${tag(v) ? `<span>${esc(tag(v))}</span>` : ''}</button>`).join('') + `</div>`;
+    $('frmBody').onclick = (e) => {
       const b = e.target.closest('.fopt');
       if (!b) return;
-      try {
-        const d = await api('/api/v1/bulk/frame', { slug, video: b.dataset.v, src: b.dataset.src });
-        drawFrames(slug, d.videos);
+      const v = videos[+b.dataset.i];
+      CLIAFramePicker.open({ video: v.video, slug, at: (v.chosen || v.auto || {}).t || 0, onPicked: async () => {
         $('frmMsg').textContent = t('frSaved');
-        if (d.videos.every((v) => v.confirmed) && S.job) S.job.items.filter((x) => x.slug === slug).forEach((x) => S.ack.add(`${x.row}:frame`));
+        const d = await api('/api/v1/product-videos?slug=' + encodeURIComponent(slug)).catch(() => null);
+        if (!d) return;
+        drawFrames(slug, d.videos);
+        // 자동으로 고른 장면을 모두 확인했으면 '동영상 장면을 자동으로 고름' 안내를 닫는다
+        if (d.videos.every((x) => !x.auto || x.auto.confirmed) && S.job) S.job.items.filter((x) => x.slug === slug).forEach((x) => S.ack.add(`${x.row}:frame`));
         saveAck(); render(false);
-      } catch (err) { $('frmMsg').textContent = err.message; }
+      } });
     };
   }
   $('frmX').onclick = () => $('frm').classList.add('hidden');
