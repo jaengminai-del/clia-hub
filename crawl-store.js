@@ -212,6 +212,17 @@ function pushCrawlerOut(slug) {
   return pushPaths(names.map((f) => path.join(dir, f)));
 }
 
+/** 지정한 로컬 파일들의 버킷 사본을 지운다 (빌더 편집본 '원본으로', 2026-11-23). 실패해도 예외를 던지지 않는다. */
+async function removePaths(absPaths) {
+  if (!enabled()) return 0;
+  const keys = absPaths.map(keyFor).filter(Boolean);
+  if (!keys.length) return 0;
+  const { DeleteObjectsCommand } = require('@aws-sdk/client-s3');
+  try { await client().send(new DeleteObjectsCommand({ Bucket: config().bucket, Delete: { Objects: keys.map((Key) => ({ Key })) } })); }
+  catch (e) { console.warn(`[crawl-store] 삭제 실패 ${keys.join(', ')}: ${e.message}`); return 0; }
+  return keys.length;
+}
+
 /** 크롤 제품 삭제 (허브 목록의 삭제 버튼, 2026-11-05) — 버킷의 crawler-py-out/<slug>/ · crawler-out/<slug>.* 를
  *  trash/<stamp>/<원래 키> 로 복사해 둔 뒤 지운다 (되돌리기: trash 에서 원래 키로 복사). 반환: 지운 객체 수. */
 async function deleteProduct(slug, stamp) {
@@ -260,7 +271,7 @@ async function getToFile(key, abs) {
   try { await download(key, abs); return true; } catch (e) { return false; }
 }
 
-module.exports = { enabled, listRemote, pullAll, whenPulled, pushAll, pushPaths, pushProduct, pushCrawlerOut, putBuffer, getBuffer, putFile, getToFile, deleteProduct };
+module.exports = { enabled, listRemote, pullAll, whenPulled, pushAll, pushPaths, removePaths, pushProduct, pushCrawlerOut, putBuffer, getBuffer, putFile, getToFile, deleteProduct };
 
 if (require.main === module) {
   require('dotenv').config({ path: path.join(__dirname, '.env') });

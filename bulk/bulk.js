@@ -30,7 +30,7 @@
   const grpName = (g) => (T.grp || TX.en.grp)[g] || g;
   const CH0 = ['shopee', 'lazada'].includes(qs.get('channel')) ? qs.get('channel') : '';
   const chName = (c) => (c === 'lazada' ? 'Lazada' : 'Shopee');
-  const S = { tab: 'all', q: '', last: null, mis: '', data: null, channel: CH0, ok: [], reg: [], skip: [], regOn: false, own: {}, pick: {}, fixed: {}, draft: {}, uerr: {}, openG: null, sel: new Set(), force: new Set(), redo: new Set(), ack: new Set(), job: null, busy: false, cfg: {} };
+  const S = { tab: 'all', q: '', last: null, mis: '', data: null, channel: CH0, ok: [], reg: [], skip: [], regOn: false, own: {}, pick: {}, fixed: {}, draft: {}, uerr: {}, openG: null, edits: {}, editsLoaded: false, sel: new Set(), force: new Set(), redo: new Set(), ack: new Set(), job: null, busy: false, cfg: {} };
   const act = () => S.ok.concat(S.reg.filter((r) => S.regOn || S.own[r.row]));
   // 매칭 불가 = CLIA 가 건드리지 않는 행: 제품을 못 정한 행 + (등록을 켜지 않았으면) CLIA 에 없는 행
   const noMatch = () => S.skip.concat(S.regOn ? [] : S.reg.filter((r) => !S.own[r.row]).map((r) => ({ ...r, why: 'rReg' })));
@@ -99,7 +99,7 @@
       S.mis = CH0 && d.channel && d.channel !== CH0 ? d.channel : '';
       S.channel = S.mis ? '' : (CH0 || d.channel || '');
       chTag();
-      Object.assign(S, { job: null, q: '', last: null, regOn: false, own: {}, pick: {}, fixed: {}, draft: {}, uerr: {}, openG: null, force: new Set(), redo: new Set(), ack: new Set() });
+      Object.assign(S, { job: null, q: '', last: null, regOn: false, own: {}, pick: {}, fixed: {}, draft: {}, uerr: {}, openG: null, edits: {}, editsLoaded: false, force: new Set(), redo: new Set(), ack: new Set() });
       $('q').value = '';
       setData(d, true);
       askRegister();
@@ -144,6 +144,7 @@
       else S.skip.push({ ...r, why: 'rNone' });
     }
     if (fresh) S.sel = new Set(S.ok.map((r) => r.row).concat(S.reg.map((r) => r.row)));
+    if (!S.editsLoaded) { S.editsLoaded = true; loadEdits(); }
     show('s3');
     render(fresh);
   }
@@ -183,7 +184,7 @@
       ? `<button class="ib" data-a="frame" data-slug="${esc(it.slug)}" title="${esc(t('a_frame'))}" aria-label="${esc(t('a_frame'))}"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg></button>` : '<span class="ib0"></span>';
     // 편집 = 빌더 (그 제품을 빌더로 열어 고친다). 모든 행 맨 오른쪽 같은 자리
     const pen = '<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>';
-    const bld = r.p && r.p.url ? `<a class="eb" target="_blank" rel="noopener" href="${esc(builderUrl(r.p.url))}" title="${esc(t('a_editTip'))}">${pen}${esc(t('a_edit'))}</a>`
+    const bld = r.p && r.p.url && !r.p.isBundle ? `<button type="button" class="eb" data-a="edit" data-url="${esc(r.p.url)}" title="${esc(t('a_editTip'))}">${pen}${esc(t('a_edit'))}</button>`
       : `<span class="eb" aria-hidden="true" style="visibility:hidden">${pen}${esc(t('a_edit'))}</span>`;
     return `${why}${btns}<span class="ics">${scene}${bld}</span>`;
   }
@@ -234,7 +235,7 @@
     $('list').innerHTML = ordered.map((r, i) => `<label class="item${rv.has(r.row) ? ' rv' : ''}" style="${animate ? `animation-delay:${Math.min(i, 30) * 45}ms` : 'animation:none'}">` +
       `<input type="checkbox" data-row="${r.row}">` +
       ((r.p.thumb || (itemOf(r.row) || {}).thumb) ? `<img src="${esc(r.p.thumb || itemOf(r.row).thumb)}" alt="" loading="lazy">` : `<div class="ph">${esc(grpName(r.p.grp))}</div>`) +
-      `<div style="min-width:0"><div class="m">${r.p.isBundle ? `<span class="badge b-q">${esc(t('bundleTag'))}</span> ` : ''}${esc(r.p.model)}<span class="dv">${esc(r.p.dv || '')} · ${esc(grpName(r.p.grp))}</span>${r.p.isNew ? `<span class="badge b-new">${esc(t('newTag'))}</span>` : ''}${r.gift ? `<span class="badge b-q">${esc(t('giftTag'))}</span>` : ''}</div>` +
+      `<div style="min-width:0"><div class="m">${r.p.isBundle ? `<span class="badge b-q">${esc(t('bundleTag'))}</span> ` : ''}${esc(r.p.model)}<span class="dv">${esc(r.p.dv || '')} · ${esc(grpName(r.p.grp))}</span>${r.p.isNew ? `<span class="badge b-new">${esc(t('newTag'))}</span>` : ''}${r.gift ? `<span class="badge b-q">${esc(t('giftTag'))}</span>` : ''}${r.p.slug && S.edits[r.p.slug] ? `<span class="badge b-ed">${esc(t('editedTag'))}</span>` : ''}</div>` +
       `<div class="s">${esc(r.name || r.p.title)}</div></div><div class="r"></div></label>`).join('');
     if (!rows.length && noMatch().length) S.tab = 'skip';
     // 매칭 불가 (2026-11-23): 이유별로 묶는다 — 묶음마다 이유 · 남은 수 · 무엇을 하면 되는지 한 줄, 행마다 바로 할 수 있는 일.
@@ -439,7 +440,33 @@
     if (b.dataset.a === 'ack') { S.ack.add(`${row}:${b.dataset.code}`); saveAck(); render(false); }
     if (b.dataset.a === 'retry') { if (['crawl', 'qa'].includes(b.dataset.code)) S.force.add(row); else S.redo.add(row); S.ack.add(`${row}:${b.dataset.code}`); S.sel.add(row); saveAck(); render(false); }   // crawl · qa: LG.com 에서 다시 가져옴 / 그 밖: 다시 만듦
     if (b.dataset.a === 'frame') openFrames(b.dataset.slug);
+    if (b.dataset.a === 'edit') openEditor(b.dataset.url);
   });
+
+  // ── 편집 = 빌더 (2026-11-23): 이 화면 위에 빌더를 띄운다. 빌더 위쪽 막대의 [저장] · [← 벌크 업로드로 돌아가기].
+  //    저장한 편집본은 다음 내보내기부터 엑셀에 들어가고, 그 행에 '편집됨' 표시
+  async function loadEdits() {
+    if (!S.channel) return;
+    try { S.edits = (await api('/api/v1/edits/list?channel=' + encodeURIComponent(S.channel))).edits || {}; } catch (_) { return; }
+    render(false);
+  }
+  const scroller = () => document.querySelector('.body') || document.scrollingElement;
+  let edScroll = 0;   // 돌아왔을 때 보던 자리 그대로
+  function openEditor(url) {
+    edScroll = scroller().scrollTop;
+    $('edFrame').src = builderUrl(url) + '&from=bulk';
+    $('edov').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  async function closeEditor() {
+    $('edov').classList.add('hidden');
+    $('edFrame').src = 'about:blank';
+    document.body.style.overflow = '';
+    scroller().scrollTop = edScroll;
+    await loadEdits();   // 저장했으면 그 행에 '편집됨'
+    scroller().scrollTop = edScroll;
+  }
+  window.addEventListener('message', (e) => { if (e.data && e.data.type === 'clia-edit-back' && e.source === $('edFrame').contentWindow) closeEditor(); });
 
   // 등록 스위치 · 주소 직접 넣기
   $('regBtn').onclick = () => { S.regOn = !S.regOn; render(true); };

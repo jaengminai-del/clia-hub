@@ -118,11 +118,29 @@ body{font-family:'LGEIText', 'LINESeedSansTH',Arial,sans-serif;background:#F6F3E
 <style>
 /* 태국어 글꼴(LINE Seed Sans TH)은 이 화면에서만 — 공용 파일(shared/clia-ui.css · clia-card-list.js)은 원본 그대로 둔다 */
 :root{ --clia-font: 'LGEIHeadline', 'LG EI Headline', 'LGEIText', 'LINESeedSansTH', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif; }
+/* 편집 저장 (2026-11-23) */
+.bulk-back-bar{display:none}
+body.from-bulk .bulk-back-bar{display:flex;position:fixed;top:0;left:0;right:0;z-index:1000;height:56px;align-items:center;gap:12px;padding:0 16px;background:#fff;border-bottom:1px solid #E5E3DF;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+body.from-bulk{padding-top:56px}
+body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
+.bb-sp{flex:1}
+.bb-back{height:38px;padding:0 16px;border-radius:999px;border:1px solid #CFCCC6;background:#fff;color:#262626;font:600 14px var(--clia-font);cursor:pointer}
+.bb-back:hover{border-color:#262626}
+.bb-save{height:38px;padding:0 20px;border-radius:999px;border:0;background:#EA1917;color:#fff;font:700 14px var(--clia-font);cursor:pointer}
+.bb-save:disabled{opacity:.45;cursor:default}
+.edit-note{display:flex;align-items:center;gap:10px;padding:8px 16px;background:#F1EDFB;border-bottom:1px solid #DCD3F5;color:#4A3394;font-size:12px;font-weight:600}
+.edit-note .btn-sm{margin-inline-start:auto}
 .clia-cap-title{ font-family:'LGEIHeadline', 'LINESeedSansTH', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif !important; }
 </style>
 </head>
 <body class="clia-skin-pdp">
-<script>if(window.self!==window.top)document.body.classList.add('clia-embedded');</script>
+<script>if(window.self!==window.top)document.body.classList.add('clia-embedded');if(new URLSearchParams(location.search).get('from')==='bulk')document.body.classList.add('from-bulk');</script>
+<!-- 벌크 엑셀에서 '편집'으로 열었을 때만 (2026-11-23): 어디로 가는지 글자 그대로 쓴 버튼 두 개 -->
+<div class="bulk-back-bar" id="bulkBackBar">
+  <button type="button" class="bb-back" onclick="backToBulk()">← Back to bulk upload</button>
+  <span class="bb-sp"></span>
+  <button type="button" class="bb-save" id="bbSave" onclick="saveEdit()" disabled>💾 Save</button>
+</div>
 
 <!-- Intro -->
 <div class="intro-view" id="introView">
@@ -165,6 +183,7 @@ body{font-family:'LGEIText', 'LINESeedSansTH',Arial,sans-serif;background:#F6F3E
       </div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;min-width:0">
         <button class="btn-sm" id="btnEditMode" onclick="toggleEdit()">✏ Edit</button>
+        <button class="btn-sm primary" id="btnSave" onclick="saveEdit()" disabled style="display:none" title="Save this edit — the bulk Excel uses it for this product">💾 Save</button>
         <button class="btn-sm primary" id="btnDownload" onclick="downloadImages()" disabled>⬇ Download Images (ZIP)</button>
         <button class="btn-sm primary" id="btnDownload12" onclick="downloadImages(SHOPEE_MAX_IMAGES)" disabled style="display:none" title="Shopee: only the first 12 images (Shopee description limit)">⬇ 12 images (ZIP)</button>
         <button class="btn-sm" id="btnCopyHtml" onclick="copyHTML()" disabled>📋 Copy HTML</button>
@@ -177,7 +196,8 @@ body{font-family:'LGEIText', 'LINESeedSansTH',Arial,sans-serif;background:#F6F3E
     <div class="compliance-bar" id="complianceBar" style="display:none">
       ✓ Ready — preview below is what gets rendered into the downloaded images
     </div>
-    <div class="edit-banner" id="editBanner">✏ Edit Mode — click text in preview to edit. Click Lock to save.</div>
+    <div class="edit-note" id="editNote" style="display:none"><span id="editNoteT"></span><button type="button" class="btn-sm" onclick="revertEdit()">Back to original</button></div>
+    <div class="edit-banner" id="editBanner">✏ Edit Mode — click text in preview to edit. Click Save to keep your changes.</div>
     <div class="preview-scroll" id="previewScroll">
       <div class="preview-empty" id="previewEmpty">
         <div class="preview-empty-icon">🛒</div>
@@ -441,8 +461,13 @@ async function analyzePDP() {
         });
         const gd = await gen.json();
         if (!gen.ok) throw new Error(gd.error || `generate ${gen.status}`);
+        originalHTML = gd.html;
         generatedHTML = gd.html;
+        const saved = await loadSavedEdit(url);   // 저장한 편집본이 있으면 그것으로 (원본으로 되돌리기 가능)
+        if (saved && saved.html) generatedHTML = saved.html;
+        savedBase = generatedHTML;
         showPreview(generatedHTML);
+        showEditNote(saved && saved.at);
         // 빠른 컴포넌트 경로(_qa.checks)는 AI 점수 대신 데이터 점검 결과, 기존 Gemini 경로는 시각 QA 점수
         const qa = !mir._qa ? ''
           : mir._qa.checks ? ` · gallery ${mir._qa.checks.gallery_images} images${(mir._qa.issues || []).length ? ` · ⚠ ${mir._qa.issues.length} check(s)` : ''}`
@@ -648,7 +673,7 @@ function updateContentInfo() {
     const capCss = Math.min(3000, outW * 1.95) * (cw / outW);   // 한 장에 담기는 미리보기 높이 (CSS px)
     const n = Math.max(1, Math.ceil(frame.scrollHeight / capCss));
     bar.textContent = '📏 Total content height: ' + Math.round(frame.scrollHeight).toLocaleString() + 'px · '
-      + n + ' slices (auto)' + ' · Use Edit to delete unnecessary content or modify the text. When you finish editing, be sure to Lock.';
+      + n + ' slices (auto)' + ' · Use Edit to delete unnecessary content or modify the text. When you finish editing, click Save.';
     // Shopee: 12장 제한 — 넘으면 얼마나 줄여야 하는지 빨간 경고 (자동 장수는 섹션 경계에 맞춰 자르므로 실제로는 1~2장 더 나올 수 있음)
     bar.classList.remove('shp-over');
     if (shopeeLimit()) {
@@ -876,7 +901,7 @@ function toggleEdit() {
     removeEditControls(frame);
     if (window.CLIACardEdit) CLIACardEdit.detach(frame);   // 카드 삭제 버튼 제거 + 빈 카드 정리
     // ── 이미지 수정 bake (크롭 반영) → 정리 ──
-    bakeAllImageEdits(frame).then(() => {
+    window._bakeP = bakeAllImageEdits(frame).then(() => {
       generatedHTML = frame.innerHTML;
       const cc = document.getElementById('charCount');
       if (cc) cc.textContent = generatedHTML.length.toLocaleString();
@@ -1374,6 +1399,77 @@ function syncBulkBtn() {
   if (b) b.style.display = SL_CORPS.includes(bulkCorp()) ? '' : 'none';
 }
 syncBulkBtn();
+// ══════════════════════════════════════════
+// 편집 저장 (2026-11-23) — 고친 설명을 제품 + 채널별로 서버에 저장 (/api/v1/edits). 벌크 엑셀은 저장한 편집본으로 채운다.
+// 벌크에서 열면(?from=bulk) 위쪽 막대: [← 벌크 업로드로 돌아가기] [저장]
+// ══════════════════════════════════════════
+let originalHTML = '';   // 크롤 데이터로 만든 원본 (원본으로 되돌리기)
+let savedBase = null;    // 마지막으로 저장했거나 불러온 상태 — 이것과 다르면 저장하지 않은 편집이 있음
+const canSave = () => /^(shopee|lazada)$/.test(CHANNEL);
+const txT = (s) => (window.CLIA_I18N && CLIA_I18N.tx && CLIA_I18N.tx(s)) || s;
+const curUrl = () => (document.getElementById('pdpUrl').value || '').trim();
+function setSaveEnabled(on) {
+  ['btnSave', 'bbSave'].forEach((id) => { const b = document.getElementById(id); if (b) b.disabled = !on; });
+  const b = document.getElementById('btnSave');
+  if (b) b.style.display = canSave() ? '' : 'none';
+}
+async function loadSavedEdit(url) {
+  if (!canSave()) return null;
+  try {
+    const r = await fetch(`${API_BASE}/api/v1/edits?url=${encodeURIComponent(url)}&channel=${CHANNEL}`);
+    return r.ok ? await r.json() : null;
+  } catch (_) { return null; }
+}
+function showEditNote(at) {
+  const n = document.getElementById('editNote');
+  if (!n) return;
+  n.style.display = at ? 'flex' : 'none';
+  if (at) {
+    const d = new Date(at), p = (x) => String(x).padStart(2, '0');
+    document.getElementById('editNoteT').textContent = `Showing your saved edit · ${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  }
+  setSaveEnabled(!!generatedHTML);
+}
+async function bakeNow() {   // 편집 중이면 잠가서(이미지 자르기 반영) 결과 HTML 을 확정
+  if (typeof editMode !== 'undefined' && editMode) { toggleEdit(); await (window._bakeP || Promise.resolve()); }
+}
+const isDirty = () => (typeof editMode !== 'undefined' && editMode) || (savedBase !== null && generatedHTML !== savedBase);
+async function saveEdit() {
+  if (!canSave() || !generatedHTML) return;
+  await bakeNow();
+  const btns = ['btnSave', 'bbSave'].map((id) => document.getElementById(id)).filter(Boolean);
+  const labels = btns.map((b) => b.textContent);
+  btns.forEach((b) => { b.disabled = true; b.textContent = txT('⏳ Saving…'); });
+  try {
+    const r = await fetch(`${API_BASE}/api/v1/edits`, { method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: curUrl(), channel: CHANNEL, html: generatedHTML }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
+    savedBase = generatedHTML;
+    showEditNote(j.at);
+    btns.forEach((b) => { b.textContent = txT('✓ Saved'); });
+    setTimeout(() => btns.forEach((b, i) => { b.textContent = labels[i]; b.disabled = false; }), 1600);
+  } catch (e) {
+    btns.forEach((b, i) => { b.textContent = labels[i]; b.disabled = false; });
+    setStatus('✕ ' + txT('Could not save') + ': ' + (e.message || e), 'error');
+  }
+}
+async function revertEdit() {
+  if (!confirm(txT('Delete the saved edit and go back to the original content?'))) return;
+  try {
+    const r = await fetch(`${API_BASE}/api/v1/edits?url=${encodeURIComponent(curUrl())}&channel=${CHANNEL}`, { method: 'DELETE' });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  } catch (e) { setStatus('✕ ' + (e.message || e), 'error'); return; }
+  if (typeof editMode !== 'undefined' && editMode) toggleEdit();
+  generatedHTML = originalHTML;
+  savedBase = originalHTML;
+  showPreview(generatedHTML);
+  showEditNote(0);
+}
+function backToBulk() {
+  if (isDirty() && !confirm(txT('You have unsaved edits. Go back without saving?'))) return;
+  window.parent.postMessage({ type: 'clia-edit-back', url: curUrl(), channel: CHANNEL }, location.origin);
+}
 function openBulkExcel() {
   if (!SL_CORPS.includes(bulkCorp())) return;
   const qs = new URLSearchParams(location.search);

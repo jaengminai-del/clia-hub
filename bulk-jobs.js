@@ -156,16 +156,18 @@ async function contentFor(channel, url) {
   const listing = channel === 'lazada';
   // PDP 요약(태국어)은 태국 제품만 — 싱가포르 등은 요약 없이 이미지만 (2026-11-23)
   const summaryP = channel === 'lazada' && /lg\.com\/th\//i.test(url) ? post('/api/v1/pdp-summary', { url }, 7 * 60 * 1000).catch((e) => ({ error: e.message })) : null;
-  const g = await post('/api/ebay-generate', { url, medium: 'shopee_lazada', listing }, 5 * 60 * 1000);
+  // 빌더에서 저장한 편집본이 있으면 그것으로 (edits.js) — 없으면 크롤 데이터로 새로 만든다
+  const ed = require('./edits').getEdit(require('./crawler-routes').slugify(url), channel);
+  const g = ed ? { html: ed.html } : await post('/api/ebay-generate', { url, medium: 'shopee_lazada', listing }, 5 * 60 * 1000);
   if (!g.html) throw new Error('generate returned no HTML');
   const sl = await post('/api/v1/slice-html', { html: g.html, medium: 'shopee_lazada' }, 12 * 60 * 1000);
   if (channel === 'shopee') {
     const urls = (sl.urls || []).slice(0, SHOPEE_MAX_IMAGES);
     if (!urls.length) throw new Error('no images');
-    return { text: urls.join('\n'), images: urls.length, allImages: sl.count, summaryErr: '' };
+    return { text: urls.join('\n'), images: urls.length, allImages: sl.count, summaryErr: '', edited: !!ed };
   }
   const sm = await summaryP;
-  return { text: (sm && sm.html ? sm.html + '\n' : '') + sl.html, images: sl.count, allImages: sl.count, summaryErr: sm && sm.error ? sm.error.slice(0, 200) : '' };
+  return { text: (sm && sm.html ? sm.html + '\n' : '') + sl.html, images: sl.count, allImages: sl.count, summaryErr: sm && sm.error ? sm.error.slice(0, 200) : '', edited: !!ed };
 }
 
 // 묶음 상품 ('A + B' 행, 2026-11-23): 구성품 크롤 결과를 빌더 번들과 같은 모양으로 합쳐(crawler-py/bundle_pto.py combine)
@@ -304,7 +306,7 @@ async function run(j) {
       stop();
       if (c.text.length > CELL_MAX) throw Object.assign(new Error(`too long for one Excel cell (${c.text.length} chars)`), { stage: 'content' });
       texts.set(it.row, c.text);
-      Object.assign(it, { status: 'ok', error: '', images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: c.summaryErr });
+      Object.assign(it, { status: 'ok', error: '', images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: c.summaryErr, edited: !!c.edited });
       it.flags = flagsFor(j, it, c);
       it.videos = productVideos(readJson(path.join(OUT_DIR(), it.slug, 'mirror.json'))).length;   // 동영상 장면 바꾸기 버튼 (shared/clia-frame-picker.js)
     } catch (e) {

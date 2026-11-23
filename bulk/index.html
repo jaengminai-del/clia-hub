@@ -197,6 +197,11 @@ a.clia-btn { text-decoration: none; }
 .eb:hover { border-color: var(--clia-gray-900); }
 .eb svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .eb:focus-visible { outline: 2px solid var(--clia-gray-900); outline-offset: 2px; }
+button.eb { cursor: pointer; }
+.b-ed { background: #EDE7FB; color: #5B3DB5; margin-inline-start: 6px; }
+/* 편집(빌더) 덮개 — 벌크 화면 전체 위 */
+.edov { position: fixed; inset: 0; z-index: 50; background: #fff; }
+.edov iframe { width: 100%; height: 100%; border: 0; display: block; }
 .list.grid .acts { justify-content: flex-start; }
 .shint { padding: 8px 16px; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--clia-gray-100); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .err2 { color: var(--bad); font-size: 12px; }
@@ -392,6 +397,7 @@ a.clia-btn { text-decoration: none; }
   <div class="xpb"><button class="clia-btn" id="cfNo" type="button"></button><button class="clia-btn primary" id="cfYes" type="button"></button></div>
 </div></div>
 <div class="modal hidden" id="frm" role="dialog" aria-modal="true"><div class="mbox"><div class="mh"><b id="frmT"></b><button class="pill" id="frmX"></button></div><div id="frmBody"></div><div class="fmsg" id="frmMsg"></div></div></div>
+<div class="edov hidden" id="edov"><iframe id="edFrame" title="Builder"></iframe></div>
 <script src="../shared/clia-frame-picker.js"></script>
 <script src="bulk-i18n.js"></script>
 <script src="bulk.js"></script>
