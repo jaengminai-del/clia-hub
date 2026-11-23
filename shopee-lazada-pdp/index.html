@@ -129,7 +129,8 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
 .bb-save{height:38px;padding:0 20px;border-radius:999px;border:0;background:#EA1917;color:#fff;font:700 14px var(--clia-font);cursor:pointer}
 .bb-save:disabled{opacity:.45;cursor:default}
 .edit-note{display:flex;align-items:center;gap:10px;padding:8px 16px;background:#F1EDFB;border-bottom:1px solid #DCD3F5;color:#4A3394;font-size:12px;font-weight:600}
-.edit-note .btn-sm{margin-inline-start:auto}
+.edit-note .btn-sm:first-of-type{margin-inline-start:auto}
+.edit-note.changed{background:#FFF4DE;border-color:#F3D7A2;color:#7A4A00}
 .clia-cap-title{ font-family:'LGEIHeadline', 'LINESeedSansTH', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif !important; }
 </style>
 </head>
@@ -196,7 +197,7 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
     <div class="compliance-bar" id="complianceBar" style="display:none">
       ✓ Ready — preview below is what gets rendered into the downloaded images
     </div>
-    <div class="edit-note" id="editNote" style="display:none"><span id="editNoteT"></span><button type="button" class="btn-sm" onclick="revertEdit()">Back to original</button></div>
+    <div class="edit-note" id="editNote" style="display:none"></div>
     <div class="edit-banner" id="editBanner">✏ Edit Mode — click text in preview to edit. Click Save to keep your changes.</div>
     <div class="preview-scroll" id="previewScroll">
       <div class="preview-empty" id="previewEmpty">
@@ -467,7 +468,7 @@ async function analyzePDP() {
         if (saved && saved.html) generatedHTML = saved.html;
         savedBase = generatedHTML;
         showPreview(generatedHTML);
-        showEditNote(saved && saved.at);
+        showEditNote(saved);
         // 빠른 컴포넌트 경로(_qa.checks)는 AI 점수 대신 데이터 점검 결과, 기존 Gemini 경로는 시각 QA 점수
         const qa = !mir._qa ? ''
           : mir._qa.checks ? ` · gallery ${mir._qa.checks.gallery_images} images${(mir._qa.issues || []).length ? ` · ⚠ ${mir._qa.issues.length} check(s)` : ''}`
@@ -1420,16 +1421,35 @@ async function loadSavedEdit(url) {
     return r.ok ? await r.json() : null;
   } catch (_) { return null; }
 }
-function showEditNote(at) {
+// 저장한 편집본 줄: 보통은 '저장한 편집본 · 날짜' [원본으로].
+// 편집한 뒤 LG.com 내용이 바뀌었으면(다시 크롤 — 편집본은 덮어쓰지 않아 새 내용이 묻힘) 눈에 띄게 + 사용자가 고른다:
+// [새 내용으로 다시 편집](편집본 지움) · [편집본 그대로 쓰기](확인함 — 다음에 또 바뀌면 다시 표시)
+const fmtDate = (at) => { const d = new Date(at), p = (x) => String(x).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; };
+function showEditNote(saved) {
   const n = document.getElementById('editNote');
   if (!n) return;
+  const at = saved && (typeof saved === 'object' ? saved.at : saved);
   n.style.display = at ? 'flex' : 'none';
-  if (at) {
-    const d = new Date(at), p = (x) => String(x).padStart(2, '0');
-    document.getElementById('editNoteT').textContent = `Showing your saved edit · ${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  n.classList.toggle('changed', !!(saved && saved.changed));
+  if (at && saved.changed) {
+    n.innerHTML = `<span>⚠ ${esc(txT('LG.com content changed after your edit · re-crawled {d}').replace('{d}', fmtDate(saved.crawledAtNow || Date.now())))}</span>` +
+      `<button type="button" class="btn-sm" onclick="startFresh()">${esc(txT('Start again from the new content'))}</button>` +
+      `<button type="button" class="btn-sm primary" onclick="keepEdit()">${esc(txT('Keep my edit'))}</button>`;
+  } else if (at) {
+    n.innerHTML = `<span>${esc(txT('Showing your saved edit · {d}').replace('{d}', fmtDate(at)))}</span>` +
+      `<button type="button" class="btn-sm" onclick="revertEdit()">${esc(txT('Back to original'))}</button>`;
   }
   setSaveEnabled(!!generatedHTML);
 }
+async function keepEdit() {
+  try {
+    const r = await fetch(`${API_BASE}/api/v1/edits/keep`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: curUrl(), channel: CHANNEL }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
+    showEditNote(j);
+  } catch (e) { setStatus('✕ ' + (e.message || e), 'error'); }
+}
+const startFresh = () => revertEdit(txT('Delete your edit and start again from the new LG.com content? Your changes will be lost.'));
 async function bakeNow() {   // 편집 중이면 잠가서(이미지 자르기 반영) 결과 HTML 을 확정
   if (typeof editMode !== 'undefined' && editMode) { toggleEdit(); await (window._bakeP || Promise.resolve()); }
 }
@@ -1446,7 +1466,7 @@ async function saveEdit() {
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
     savedBase = generatedHTML;
-    showEditNote(j.at);
+    showEditNote(j);
     btns.forEach((b) => { b.textContent = txT('✓ Saved'); });
     setTimeout(() => btns.forEach((b, i) => { b.textContent = labels[i]; b.disabled = false; }), 1600);
   } catch (e) {
@@ -1454,8 +1474,8 @@ async function saveEdit() {
     setStatus('✕ ' + txT('Could not save') + ': ' + (e.message || e), 'error');
   }
 }
-async function revertEdit() {
-  if (!confirm(txT('Delete the saved edit and go back to the original content?'))) return;
+async function revertEdit(question) {
+  if (!confirm(typeof question === 'string' ? question : txT('Delete the saved edit and go back to the original content?'))) return;
   try {
     const r = await fetch(`${API_BASE}/api/v1/edits?url=${encodeURIComponent(curUrl())}&channel=${CHANNEL}`, { method: 'DELETE' });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);

@@ -161,44 +161,41 @@
   const itemOf = (row) => S.job && S.job.items && S.job.items.find((x) => x.row === row);
   // 확인 필요 = 다른 제품일 수 있거나 다시 돌리면 고쳐질 수 있는 것. 그대로 써도 되는 것(장면 자동 선택 · 글 일부 누락)은 작은 안내
   const normFlag = (f) => (f.code === 'frame' ? { ...f, sev: 'info' } : f.code === 'qa' && !f.images ? { ...f, code: 'qaTx', sev: 'info' } : f);   // 예전 작업 기록 호환
-  const flagsOf = (row) => ((itemOf(row) || {}).flags || []).map(normFlag);
+  const slugOfRow = (row) => { const r = S.ok.find((x) => x.row === row) || S.reg.find((x) => x.row === row); return r && r.p && r.p.slug; };
+  const editOf = (row) => { const sl = slugOfRow(row); return (sl && S.edits[sl]) || null; };
+  // 편집본을 저장한 뒤 LG.com 내용이 바뀐 제품 → 확인 필요 (편집본은 덮어쓰지 않으므로 새 내용이 묻힘, 2026-11-23)
+  const flagsOf = (row) => ((itemOf(row) || {}).flags || []).map(normFlag).concat((editOf(row) || {}).changed ? [{ code: 'editChanged', sev: 'warn' }] : []);
   const openFlags = (row) => flagsOf(row).filter((f) => f.sev !== 'info' && !S.ack.has(`${row}:${f.code}`));
-  const flagText = (f) => ({ bundle: () => t('f_bundle', f.n), crawl: () => t('f_crawl'), content: () => t('f_content'), qa: () => t('f_qa', f.images), qaTx: () => t('f_qaTx', f.texts), frame: () => t('f_frame', f.n),
+  const flagText = (f) => ({ editChanged: () => t('f_editChanged'), bundle: () => t('f_bundle', f.n), crawl: () => t('f_crawl'), content: () => t('f_content'), qa: () => t('f_qa', f.images), qaTx: () => t('f_qaTx', f.texts), frame: () => t('f_frame', f.n),
     over12: () => t('f_over12', f.all), summary: () => t('f_summary'), fuzzy: () => t('f_fuzzy'), alts: () => t('f_alts', f.n) }[f.code] || (() => f.code))();
   const builderUrl = (u) => `/shopee-lazada-pdp/index.html?url=${encodeURIComponent(u || '')}&channel=${S.channel || 'shopee'}&lang=${L}`;
   const reviewRows = () => act().filter((r) => openFlags(r.row).length);
   // 다시 돌리면 고쳐지는 것: LG.com 페이지 · 이미지 누락은 다시 가져오고, 설명 · 요약은 다시 만든다
   const RETRY = { crawl: 'a_retry', content: 'a_retry', summary: 'a_retry', qa: 'a_refetch' };
-  // 행 오른쪽 (2026-11-23 단순화): 문제없는 행은 비워 둔다. 확인 필요는 짧은 이유 한 줄 + [고치기][문제없음],
-  // 그 오른쪽 끝에는 모든 행 같은 자리에 아이콘 버튼 [장면](동영상 있을 때) [빌더 ↗]
-  function rowActs(r) {
-    const it = itemOf(r.row), fl = openFlags(r.row);
-    let why = '', btns = '';
-    if (fl.length) {
-      const f = fl[0];
-      why = `<span class="why"${f.files && f.files.length ? ` title="${esc(f.files.join(', '))}"` : ''}>${esc(flagText(f))}</span>`;
-      if (RETRY[f.code]) btns += `<button class="mini" data-a="retry" data-row="${r.row}" data-code="${f.code}">${esc(t(RETRY[f.code]))}</button>`;
-      if (f.sev === 'warn') btns += `<button class="mini" data-a="ack" data-row="${r.row}" data-code="${f.code}">${esc(t('a_ack'))}</button>`;
-    }
-    const scene = it && it.status === 'ok' && it.slug && (it.videos || flagsOf(r.row).some((f) => f.code === 'frame'))
-      ? `<button class="ib" data-a="frame" data-slug="${esc(it.slug)}" title="${esc(t('a_frame'))}" aria-label="${esc(t('a_frame'))}"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg></button>` : '<span class="ib0"></span>';
-    // 편집 = 빌더 (그 제품을 빌더로 열어 고친다). 모든 행 맨 오른쪽 같은 자리
-    const pen = '<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>';
-    const bld = r.p && r.p.url && !r.p.isBundle ? `<button type="button" class="eb" data-a="edit" data-url="${esc(r.p.url)}" title="${esc(t('a_editTip'))}">${pen}${esc(t('a_edit'))}</button>`
-      : `<span class="eb" aria-hidden="true" style="visibility:hidden">${pen}${esc(t('a_edit'))}</span>`;
-    return `${why}${btns}<span class="ics">${scene}${bld}</span>`;
-  }
+  // 행 오른쪽 = 세 칸 (목록 머리: 상태 · 할 일 · 편집, 2026-11-23)
+  //   상태: 이유(빨강) 하나 · 진행 상태 · '편집됨'. 할 일: 버튼은 많아야 하나 (다시 가져오기 · 다시 시도 · 편집본 그대로 · 문제없음).
+  //   고칠 버튼이 있는 경고는 '문제없음'을 이유 옆 ✕ 로. 편집: 모든 행 같은 자리 (동영상 장면 바꾸기도 편집 = 빌더 안에서)
   function itemStatus(r) {
-    const it = itemOf(r.row);
-    let h = '';
-    if (S.force.has(r.row) || S.redo.has(r.row)) h = `<span class="note">${esc(t('a_retryNote'))}</span>`;
-    else if (!it) h = '';
-    else if (it.status === 'queued') h = `<span class="badge b-q">${esc(it.register && !it.crawled ? t('st_regq') : t('q'))}</span>`;
-    else if (it.status === 'crawling') h = `<span class="badge b-run">${esc(t('st_crawl'))}</span>`;
-    else if (it.status === 'working') h = `<span class="badge b-run">${esc(t('w'))}</span>`;
-    else if (it.status === 'failed') h = openFlags(r.row).length ? '' : `<span class="badge b-bad">${esc(t('bad'))}</span>`;   // 이유가 있으면 이유만 (같은 말 두 번 X)
-    else if (it.status === 'cancelled') h = `<span class="badge b-q">${esc(t('st_stop'))}</span>`;
-    return `<span class="acts">${h}${rowActs(r)}</span>`;
+    const it = itemOf(r.row), fl = openFlags(r.row), ed = r.p && r.p.slug && S.edits[r.p.slug];
+    let st = '', ac = '';
+    if (S.force.has(r.row) || S.redo.has(r.row)) st = `<span class="note">${esc(t('a_retryNote'))}</span>`;
+    else if (fl.length) {
+      const f = fl[0];
+      const fix = RETRY[f.code] ? `<button class="mini" data-a="retry" data-row="${r.row}" data-code="${f.code}">${esc(t(RETRY[f.code]))}</button>`
+        : f.code === 'editChanged' ? `<button class="mini" data-a="keepEdit" data-url="${esc(r.p.url)}">${esc(t('a_keepEdit'))}</button>` : '';
+      const ack = f.sev === 'warn' && f.code !== 'editChanged';
+      st = `<span class="why"${f.files && f.files.length ? ` title="${esc(f.files.join(', '))}"` : ''}>${esc(flagText(f))}` +
+        (fix && ack ? `<button class="x" data-a="ack" data-row="${r.row}" data-code="${f.code}" title="${esc(t('a_ack'))}" aria-label="${esc(t('a_ack'))}">×</button>` : '') + '</span>';
+      ac = fix || (ack ? `<button class="mini" data-a="ack" data-row="${r.row}" data-code="${f.code}">${esc(t('a_ack'))}</button>` : '');
+    } else if (it && it.status === 'queued') st = `<span class="badge b-q">${esc(it.register && !it.crawled ? t('st_regq') : t('q'))}</span>`;
+    else if (it && it.status === 'crawling') st = `<span class="badge b-run">${esc(t('st_crawl'))}</span>`;
+    else if (it && it.status === 'working') st = `<span class="badge b-run">${esc(t('w'))}</span>`;
+    else if (it && it.status === 'failed') st = `<span class="badge b-bad">${esc(t('bad'))}</span>`;
+    else if (it && it.status === 'cancelled') st = `<span class="badge b-q">${esc(t('st_stop'))}</span>`;
+    else if (ed) st = `<span class="badge b-ed">${esc(t('editedTag'))}</span>`;
+    const pen = '<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>';
+    const edit = r.p && r.p.url && !r.p.isBundle ? `<button type="button" class="eb" data-a="edit" data-url="${esc(r.p.url)}" title="${esc(t('a_editTip'))}">${pen}${esc(t('a_edit'))}</button>` : '';
+    return `<span class="c-st">${st}</span><span class="c-ac">${ac}</span><span class="c-ed">${edit}</span>`;
   }
 
   // ── 3. 목록 ──
@@ -235,7 +232,7 @@
     $('list').innerHTML = ordered.map((r, i) => `<label class="item${rv.has(r.row) ? ' rv' : ''}" style="${animate ? `animation-delay:${Math.min(i, 30) * 45}ms` : 'animation:none'}">` +
       `<input type="checkbox" data-row="${r.row}">` +
       ((r.p.thumb || (itemOf(r.row) || {}).thumb) ? `<img src="${esc(r.p.thumb || itemOf(r.row).thumb)}" alt="" loading="lazy">` : `<div class="ph">${esc(grpName(r.p.grp))}</div>`) +
-      `<div style="min-width:0"><div class="m">${r.p.isBundle ? `<span class="badge b-q">${esc(t('bundleTag'))}</span> ` : ''}${esc(r.p.model)}<span class="dv">${esc(r.p.dv || '')} · ${esc(grpName(r.p.grp))}</span>${r.p.isNew ? `<span class="badge b-new">${esc(t('newTag'))}</span>` : ''}${r.gift ? `<span class="badge b-q">${esc(t('giftTag'))}</span>` : ''}${r.p.slug && S.edits[r.p.slug] ? `<span class="badge b-ed">${esc(t('editedTag'))}</span>` : ''}</div>` +
+      `<div style="min-width:0"><div class="m">${r.p.isBundle ? `<span class="badge b-q">${esc(t('bundleTag'))}</span> ` : ''}${esc(r.p.model)}<span class="dv">${esc(r.p.dv || '')} · ${esc(grpName(r.p.grp))}</span>${r.p.isNew ? `<span class="badge b-new">${esc(t('newTag'))}</span>` : ''}${r.gift ? `<span class="badge b-q">${esc(t('giftTag'))}</span>` : ''}</div>` +
       `<div class="s">${esc(r.name || r.p.title)}</div></div><div class="r"></div></label>`).join('');
     if (!rows.length && noMatch().length) S.tab = 'skip';
     // 매칭 불가 (2026-11-23): 이유별로 묶는다 — 묶음마다 이유 · 남은 수 · 무엇을 하면 되는지 한 줄, 행마다 바로 할 수 있는 일.
@@ -291,7 +288,9 @@
       `${esc(t(x))}<b>${by[x].open.length}</b>${by[x].done.length ? `<i>✓${by[x].done.length}</i>` : ''}</button>`).join('')}</div>`;
     const { open, done } = by[g];
     const btn = g === 'gReg' && open.length ? ` <button type="button" class="mini" data-regon="1"${S.busy ? ' disabled' : ''}>${esc(t('regDo', nAuto))}</button>` : '';
+    const third = { gUrl: 'hdUrl', gNoSku: 'hdUrl', gMulti: 'hdPick' }[g];
     return chips + `<div class="shint">${esc(t(g + 'D', skuCol))}${btn}</div>` +
+      `<div class="shead"><span>SKU</span><span>${esc(t('hdName'))}</span><span>${third ? esc(t(third)) : ''}</span></div>` +
       `<div class="sgrows">${open.map((r) => skipRowHtml(r, g)).join('')}${done.map(([f, now]) => fixedRowHtml(f, now)).join('')}</div>`;
   }
   // 해결한 뒤: 다음 빈 주소 칸으로 (없으면 그대로)
@@ -352,6 +351,7 @@
       el.querySelector('.r').innerHTML = itemStatus(r);
     });
     const skipTab = S.tab === 'skip';
+    $('lhead').classList.toggle('hidden', skipTab || !rows.length || VIEW === 'grid');
     $('list').classList.toggle('hidden', skipTab || !rows.length);
     $('skip').classList.toggle('hidden', !((skipTab || S.tab === 'all') && noN));   // 전체 탭에서는 목록 아래에 매칭 불가 행도 보인다
     $('skipHead').classList.toggle('hidden', !(S.tab === 'all' && noN && rows.length));
@@ -441,6 +441,7 @@
     if (b.dataset.a === 'retry') { if (['crawl', 'qa'].includes(b.dataset.code)) S.force.add(row); else S.redo.add(row); S.ack.add(`${row}:${b.dataset.code}`); S.sel.add(row); saveAck(); render(false); }   // crawl · qa: LG.com 에서 다시 가져옴 / 그 밖: 다시 만듦
     if (b.dataset.a === 'frame') openFrames(b.dataset.slug);
     if (b.dataset.a === 'edit') openEditor(b.dataset.url);
+    if (b.dataset.a === 'keepEdit') keepEdit(b.dataset.url, b);
   });
 
   // ── 편집 = 빌더 (2026-11-23): 이 화면 위에 빌더를 띄운다. 빌더 위쪽 막대의 [저장] · [← 벌크 업로드로 돌아가기].
@@ -452,6 +453,11 @@
   }
   const scroller = () => document.querySelector('.body') || document.scrollingElement;
   let edScroll = 0;   // 돌아왔을 때 보던 자리 그대로
+  async function keepEdit(url, b) {   // 편집본 그대로 쓰기 (바뀐 LG.com 내용을 확인함)
+    b.disabled = true;
+    try { await api('/api/v1/edits/keep', { url, channel: S.channel }); } catch (e) { b.disabled = false; alert(e.message); return; }
+    await loadEdits();
+  }
   function openEditor(url) {
     edScroll = scroller().scrollTop;
     $('edFrame').src = builderUrl(url) + '&from=bulk';
@@ -538,8 +544,10 @@
   function setView(v) {
     VIEW = v === 'grid' ? 'grid' : 'list';
     $('list').classList.toggle('grid', VIEW === 'grid');
+    $('lhead').classList.toggle('hidden', VIEW === 'grid' || S.tab === 'skip');
     document.querySelectorAll('#view button').forEach((b) => { b.classList.toggle('on', b.dataset.v === VIEW); b.setAttribute('aria-pressed', b.dataset.v === VIEW); });
   }
+  $('lhead').innerHTML = `<span></span><span></span><span>${esc(t('hdProduct'))}</span><span>${esc(t('hdStatus'))}</span><span class="hn">${esc(t('hdAction'))}</span><span class="he">${esc(t('hdEdit'))}</span>`;
   $('vList').textContent = t('viewList'); $('vGrid').textContent = t('viewGrid');
   document.querySelectorAll('#view button').forEach((b) => { b.title = t(b.dataset.v === 'grid' ? 'viewGrid' : 'viewList'); });
   $('view').onclick = (e) => { const b = e.target.closest('button'); if (b) setView(b.dataset.v); };
