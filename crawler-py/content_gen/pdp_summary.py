@@ -25,6 +25,9 @@ PROMPT_FILE = Path(__file__).parent / "prompts" / "pdp_summary_th.md"
 MIN_CHARS = 600          # 지시문: 600자 초과
 import os as _os
 MAX_CHARS = int(_os.getenv("SUMMARY_MAX_CHARS", "2000"))   # 사용자 결정(2026-11-10): 복사용 글 전체 2,000자 이내 (Shopee 설명 3,000자 제한보다 여유)
+# 지시문에는 한도보다 TARGET_MARGIN 자 짧게 쓰라고 한다 — 모델이 몇십~200자 넘기곤 해서 (2026-11-24 운영: 번들 2,016~2,237자로 실패).
+# 받아들이는 한도는 그대로 MAX_CHARS.
+TARGET_MARGIN = 200
 # 사용자 결정(2026-11-10): 길이 한도는 모든 제품 2,000자로 통일. 대신 PDP 의 USP 는 하나도 빼지 않는다 —
 # 줄이는 건 각 USP 의 설명 글뿐 (usp_list → 지시문에 번호 목록, 장점 bullet 수 = USP 수 검사).
 NAME_MAX = 120           # Shopee 상품명 최대 120자
@@ -343,13 +346,13 @@ def generate(slug_dir: Path, url: str, model: str = "") -> dict:
         la = [{"title": t, "desc": ""} for t in kf[:BUNDLE_SPLIT_USPS]] if kf else usps
         lb = [{"title": t, "desc": ""} for t in gkf[:BUNDLE_SPLIT_USPS]] if gkf else gift_usps
         k1, k2 = min(len(la), BUNDLE_SPLIT_USPS), min(len(lb), BUNDLE_SPLIT_USPS)
-        prompt = (build_prompt(url, src, checked, limit)
+        prompt = (build_prompt(url, src, checked, limit - TARGET_MARGIN)
                   + f"\n\n<lg_product_page url=\"{bundle['gift_url']}\">\n{source_text(gmirror, bundle['gift_url'], gdir)}\n</lg_product_page>"
                   + bundle_prompt(bundle, la, lb, k1, k2, ka=bool(kf), kb=bool(gkf)))
         plans = [("key_features" if kf or gkf else "usps", prompt, k1 + k2, 4, k1)]
         usp_titles = [u["title"] for u in la] + [u["title"] for u in lb]
     else:              # 단품 · 스피커 번들(본 제품만)
-        base = build_prompt(url, src, checked, limit) + (bundle_prompt(bundle, usps, [], 0, 0) if bundle else "")
+        base = build_prompt(url, src, checked, limit - TARGET_MARGIN) + (bundle_prompt(bundle, usps, [], 0, 0) if bundle else "")
         # 사용자 결정(2026-11-24): USP 를 다 넣는 것이 좋지만 2,000자에 안 들어가면 lg.com 에 Key features 로 등록된 것만.
         #   USP 가 KF_DIRECT_USPS 개를 넘으면 처음부터 Key features (어차피 안 들어감 — 유료 호출을 아낀다), 아니면 USP 다 넣기 2번 → Key features 2번
         plans = []
@@ -361,7 +364,7 @@ def generate(slug_dir: Path, url: str, model: str = "") -> dict:
             plans.append(("usps", base, 0, 4, 0))
         usp_titles = None
     split = bool(bundle and bundle["kind"] == "split")
-    d, basis, good, last = None, "", None, ""
+    d, basis, good, last, over = None, "", None, "", None
     for basis, prompt, need_h, tries, k1 in plans:
         share = (lambda d, k1=k1: sum(len(h) for h in d["highlights"][:k1]) / max(1, sum(len(h) for h in d["highlights"]))) if split else (lambda d: 0.5)
         ask = prompt
@@ -375,9 +378,11 @@ def generate(slug_dir: Path, url: str, model: str = "") -> dict:
                 break
             if core and good is None:
                 good = (r, basis)        # 반반 비율만 못 맞춘 결과 — 끝까지 못 맞추면 이것을 쓴다
+            if n > limit and nn <= NAME_MAX and (not need_h or nh == need_h) and (over is None or n < over[2]):
+                over = (r, basis, n)     # 길이만 넘은 결과 (장점 수 · 상품명은 맞음) — 끝까지 안 되면 정보 행을 줄여 쓴다
             last = f"{basis}: {n} chars, name {nn}, highlights {nh}/{need_h}"
             ask = (prompt + f"\n\nผลครั้งก่อน: เนื้อหาพร้อมคัดลอกยาว {n:,} ตัวอักษร ชื่อสินค้ายาว {nn} ตัวอักษร จุดเด่นสินค้า {nh} ข้อ "
-                   f"— ต้องยาวมากกว่า {MIN_CHARS} และไม่เกิน {limit:,} ตัวอักษร ชื่อสินค้าไม่เกิน {NAME_MAX} ตัวอักษร "
+                   f"— ต้องยาวมากกว่า {MIN_CHARS} และไม่เกิน {limit - TARGET_MARGIN:,} ตัวอักษร ชื่อสินค้าไม่เกิน {NAME_MAX} ตัวอักษร "
                    + (f"และจุดเด่นสินค้าต้องมี {need_h} ข้อพอดี " if need_h else "")
                    + (f"และจุดเด่นของสินค้าหลักยาว {round(sh * 100)}% ของจุดเด่นทั้งหมด — ต้องแบ่งความยาวให้สองสินค้าใกล้เคียงกัน (ประมาณครึ่งต่อครึ่ง) " if split else "")
                    + "เขียนใหม่ให้อยู่ในเกณฑ์ โดยย่อเฉพาะคำอธิบาย และยังใช้เฉพาะข้อมูลที่ยืนยันได้")
@@ -385,6 +390,14 @@ def generate(slug_dir: Path, url: str, model: str = "") -> dict:
             break
     if d is None and good is not None:
         d, basis = good
+    if d is None and over is not None:   # 길이만 넘음 → 제품 정보 행을 뒤에서부터 빼서 맞춘다 (장점 · 상품명 · 소개는 그대로, 정보 행은 3개까지 남김)
+        r, b, _ = over
+        r = dict(r, product_info=list(r["product_info"]))
+        while len(plain_text(r)) > limit and len(r["product_info"]) > 3:
+            r["product_info"].pop()
+        if MIN_CHARS < len(plain_text(r)) <= limit:
+            d, basis = r, b
+            print(f"[pdp-summary] 길이 맞추려 제품 정보 행을 줄임 → {len(plain_text(r))}자", file=sys.stderr)
     if d is None:
         raise RuntimeError(f"rule not met after retries: {last}" + (f" (bundle {bundle['kind']})" if bundle else ""))
     if usp_titles is None:
