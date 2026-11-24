@@ -96,20 +96,24 @@ def slugify(url: str) -> str:
 # ═════════════════════════════════════════════════════════════════════
 # Step 1. Firecrawl — PC / 모바일 교차 수집
 # ═════════════════════════════════════════════════════════════════════
-def firecrawl_scrape(url: str, mobile: bool) -> dict:
+def firecrawl_scrape(url: str, mobile: bool, screenshot: bool = False) -> dict:
+    """screenshot=True: 같은 요청에서 lg.com 전체 화면 캡처도 받는다 (screenshot@fullPage — 검토·승인 화면 왼쪽, 빌더 「전체 lg.com 페이지」).
+    lg.com(Akamai)은 서버의 Playwright 를 페이지·CSS 까지 막아서(2026-11-24 시험: 403, 다시 그리면 디자인 없이 글자만)
+    캡처는 크롤을 받는 이 Firecrawl 요청에서 함께 받는다 — Firecrawl 호출 수는 그대로."""
     device = "mobile" if mobile else "pc"
-    print(f"→ [Step1] Firecrawl {device.upper()} scrape (최적화 모드)...")
-    # 최적화: 스크롤 대기 및 고정 지연 시간 단축 (속도 향상)
+    print(f"→ [Step1] Firecrawl {device.upper()} scrape (최적화 모드{' · 전체 화면 캡처' if screenshot else ''})...")
+    # 최적화: 스크롤 대기 및 고정 지연 시간 단축 (속도 향상). 캡처도 받을 때는 지연 로드가 다 찍히게 끝까지 천천히 (24번)
     actions = [{"type": "wait", "milliseconds": 1500}]
-    for _ in range(4):                              # lazy-load 전체 트리거 (10회 -> 4회)
+    for _ in range(24 if screenshot else 4):
         actions.append({"type": "scroll", "direction": "down"})
-        actions.append({"type": "wait", "milliseconds": 400})
+        actions.append({"type": "wait", "milliseconds": 350 if screenshot else 400})
     actions.append({"type": "executeJavascript", "script": "window.scrollTo(0,0);"})
     actions.append({"type": "wait", "milliseconds": 1000})
 
     body = {
         "url": url,
-        "formats": ["markdown", "html", "rawHtml"],   # rawHtml: 페이지 컴포넌트 모델(스크립트) 포함 — aem_model 용
+        # rawHtml: 페이지 컴포넌트 모델(스크립트) 포함 — aem_model 용
+        "formats": ["markdown", "html", "rawHtml"] + (["screenshot@fullPage"] if screenshot else []),
         "onlyMainContent": False,
         "waitFor": 3000,                              # 대기 시간 최적화 (8000ms -> 3000ms)
         "timeout": 120000,
@@ -1203,6 +1207,30 @@ def direct_fetch(url: str) -> str:
     return r.text if r.ok else ""
 
 
+LAST_SHOT = {"data": None}   # 마지막으로 받은 제품 페이지의 lg.com 전체 화면 캡처 (Firecrawl screenshot — 주소 또는 base64)
+
+
+def save_page_shot(shot, out_jpg: Path, width: int = 960, quality: int = 80) -> bool:
+    """Firecrawl 전체 화면 캡처 → 폭 960 JPEG (fullshot.py 와 같은 꼴). 80KB 미만(차단 화면)은 버린다."""
+    import base64
+    import io
+    from PIL import Image
+    try:
+        data = requests.get(shot, timeout=60).content if str(shot).startswith("http") else base64.b64decode(str(shot).split(",", 1)[-1])
+        im = Image.open(io.BytesIO(data)).convert("RGB")
+        if im.width != width:
+            im = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
+        im.save(out_jpg, "JPEG", quality=quality)
+        if out_jpg.stat().st_size < 80 * 1024:
+            out_jpg.unlink()
+            return False
+        print(f"   ✓ lg.com 전체 화면 캡처 저장: {out_jpg.name} {im.width}x{im.height} ({out_jpg.stat().st_size // 1024}KB)")
+        return True
+    except Exception as e:
+        print(f"   ! lg.com 전체 화면 캡처 저장 실패: {str(e)[:120]}")
+        return False
+
+
 def fetch_product_html(url: str):
     """요청한 제품 페이지 HTML 을 확실히 받는다 → (md, html, raw).
     Firecrawl 이 차단 화면이나 LG 홈/프로모션 페이지를 돌려주는 경우가 있어(TH 배치), 받을 때마다
@@ -1211,10 +1239,11 @@ def fetch_product_html(url: str):
     reasons = []
     for attempt in range(3):
         try:
-            d = firecrawl_scrape(url, mobile=False)
+            d = firecrawl_scrape(url, mobile=False, screenshot=True)
             md, html, raw = d.get("markdown", ""), d.get("html", ""), d.get("rawHtml", "")
             ok, why = aem_model.page_check(raw or html, url)
             if ok:
+                LAST_SHOT["data"] = d.get("screenshot")
                 return md, html or raw, raw
             reasons.append(f"firecrawl#{attempt + 1}: {why}")
         except Exception as e:
@@ -1383,6 +1412,9 @@ def main():
         md, html, raw = fetch_product_html(args.url)
         if raw:
             (out / "pc_raw.html").write_text(raw, encoding="utf-8")
+        # 같은 요청에서 받은 lg.com 전체 화면 캡처 → out/lgcom_full.jpg (크롤이 끝나면 서버가 캡처 저장소에 올린다 — crawler-routes.js)
+        if LAST_SHOT["data"]:
+            save_page_shot(LAST_SHOT["data"], out / "lgcom_full.jpg")
         (out / "pc.md").write_text(md, encoding="utf-8")
         (out / "pc.html").write_text(html, encoding="utf-8")
         write_progress(35, "1단계 완료: 원본 웹페이지 마크다운 수집 성공", "fetched")
