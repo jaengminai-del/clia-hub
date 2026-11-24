@@ -14,6 +14,17 @@ CLIA_I18N.init({
   '🔒 Lock': { de: '🔒 Sperren', th: '🔒 ล็อก', ar: '🔒 قفل' },
   '⬇ Download Images (ZIP)': { de: '⬇ Bilder herunterladen (ZIP)', th: '⬇ ดาวน์โหลดภาพ (ZIP)', ar: '⬇ تنزيل الصور (ZIP)' },
   'Download Images (ZIP)': { de: 'Bilder herunterladen (ZIP)', th: 'ดาวน์โหลดภาพ (ZIP)', ar: 'تنزيل الصور (ZIP)' },
+  // 완료 팝업 (2026-11-24)
+  'Copied': { de: 'Kopiert', th: 'คัดลอกแล้ว', ar: 'تم النسخ' },
+  'Saved': { de: 'Gespeichert', th: 'บันทึกแล้ว', ar: 'تم الحفظ' },
+  'Downloaded': { de: 'Heruntergeladen', th: 'ดาวน์โหลดแล้ว', ar: 'تم التنزيل' },
+  'HTML copied to the clipboard.': { de: 'HTML wurde in die Zwischenablage kopiert.', th: 'คัดลอก HTML ไปยังคลิปบอร์ดแล้ว', ar: 'تم نسخ HTML إلى الحافظة.' },
+  'HTML copied without the product summary.': { de: 'HTML ohne Produktzusammenfassung kopiert.', th: 'คัดลอก HTML แล้ว แต่ไม่มีสรุปสินค้า', ar: 'تم نسخ HTML بدون ملخص المنتج.' },
+  'Description text copied.': { de: 'Beschreibungstext kopiert.', th: 'คัดลอกข้อความคำอธิบายแล้ว', ar: 'تم نسخ نص الوصف.' },
+  'The bulk Excel uses this edit for this product.': { de: 'Die Bulk-Excel verwendet diese Bearbeitung für dieses Produkt.', th: 'Bulk Excel จะใช้การแก้ไขนี้สำหรับสินค้านี้', ar: 'سيستخدم ملف Excel المجمّع هذا التعديل لهذا المنتج.' },
+  '{n} images in a ZIP file': { de: '{n} Bilder in einer ZIP-Datei', th: 'รูปภาพ {n} รูปในไฟล์ ZIP', ar: '{n} صورة في ملف ZIP' },
+  '{a} of {b} images in a ZIP file': { de: '{a} von {b} Bildern in einer ZIP-Datei', th: 'รูปภาพ {a} จาก {b} รูปในไฟล์ ZIP', ar: '{a} من {b} صورة في ملف ZIP' },
+  'Shopee takes up to 12 images — use “Download 12 images” for the first 12.': { de: 'Shopee nimmt bis zu 12 Bilder — für die ersten 12 „12 Bilder herunterladen“ verwenden.', th: 'Shopee รับได้สูงสุด 12 รูป — ใช้ "ดาวน์โหลดภาพ 12 ภาพ" สำหรับ 12 รูปแรก', ar: 'يقبل Shopee حتى 12 صورة — استخدم «تنزيل 12 صورة» لأول 12 صورة.' },
   // 내보내기 메뉴 (2026-11-24)
   '⬇ Export': { de: '⬇ Exportieren', th: '⬇ ส่งออก', ar: '⬇ تصدير' },
   '⬇ Export ▾': { de: '⬇ Exportieren ▾', th: '⬇ ส่งออก ▾', ar: '⬇ تصدير ▾' },
