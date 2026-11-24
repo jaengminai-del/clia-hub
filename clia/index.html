@@ -1249,6 +1249,11 @@ const CORP_NAMES={uk:{en:'United Kingdom',de:'Vereinigtes Königreich',th:'ส�
 function corpLabel(c){const n=CORP_NAMES[c];return n?(CORPS[c].flag+' '+(n[_txLang()]||n.en)):String(c||'').toUpperCase();}
 // Shopee/Lazada 를 쓰는 법인 — 벌크 엑셀 버튼 (crawler-py CRAWLER_SL_COUNTRIES 와 같은 목록)
 const SL_CORPS=['th','sg'];
+// 나라마다 쓰는 3P 마켓플레이스 (2026-11-24): 아시아는 Shopee · Lazada, 영국 · 독일은 Amazon · eBay.
+//   상품 상세의 채널 버튼은 이 목록만 보인다. 목록에 없는 법인(사우디)은 네 개 모두
+const CORP_MARKETS={th:['shopee','lazada'],sg:['shopee','lazada'],uk:['amazon','ebay'],de:['amazon','ebay']};
+const MARKET_INFO={amazon:['Amazon','#FF9900'],ebay:['eBay','#E53238'],shopee:['Shopee','#EE4D2D'],lazada:['Lazada','#0F146D']};
+function marketsOf(c){return CORP_MARKETS[c]||['amazon','ebay','shopee','lazada'];}
 const CORP_SITE={uk:'uk',de:'de',th:'th',sg:'sg',sa:'sa_en'};
 const LANG_NAMES={th:{en:'Thai',th:'ภาษาไทย'},de:{en:'German',de:'Deutsch'},ar:{en:'Arabic',ar:'العربية'}};
 // 국가 버튼: 화면 언어만 영어 ↔ 법인 언어 (국가·제품 목록·결과물 언어는 그대로)
@@ -2894,10 +2899,7 @@ function showDetail(p){
       <div class="ch-label">${t('dp.channel')}</div>
       <div class="ch-btns">
         <div class="ch-main-row">
-          <button class="ch-btn ch-main" style="--ch-color:#E53238" onclick="openChannel('ebay','${p.id}')">eBay</button>
-          <button class="ch-btn ch-main" style="--ch-color:#FF9900" onclick="openChannel('amazon','${p.id}')">Amazon</button>
-          <button class="ch-btn ch-main" style="--ch-color:#EE4D2D" onclick="openChannel('shopee','${p.id}')">Shopee</button>
-          <button class="ch-btn ch-main" style="--ch-color:#0F146D" onclick="openChannel('lazada','${p.id}')">Lazada</button>
+          ${marketsOf(productCorp(p)).map(k=>`<button class="ch-btn ch-main" style="--ch-color:${MARKET_INFO[k][1]}" onclick="openChannel('${k}','${p.id}')">${MARKET_INFO[k][0]}</button>`).join('')}
         </div>
         <div class="ch-sub-label">${t('ch.comingSoon')}</div>
         ${[['ch-lgcom',t('ch.lgcom')],['ch-meli','Mercado Libre'],['ch-md',t('ch.md')],['ch-ig','Instagram'],['ch-fb','Facebook'],['ch-shorts','Shorts']].map(([c,l])=>`<button class="ch-btn ${c} ch-disabled" data-tip="${t('ch.comingSoon')}" aria-disabled="true">${l}</button>`).join('')}
