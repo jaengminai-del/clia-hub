@@ -332,7 +332,7 @@ function prewarm() {
       if (j && (j.state === 'pending' || (j.state === 'error' && Date.now() - j.at < 6 * 3600 * 1000))) continue;
       const { state, rec } = prepState(p.slug, ch, p);
       // 캡처를 비워 두고 준비한 것(lg.com 이 막던 때) — 차단이 풀렸으면 다시 (1시간 지난 것만, 한 번 훑을 때 최대 40개)
-      const refill = state === 'ready' && !PREWARM_EXISTING_ONLY && rec && !rec.shot && isBlockErr(rec.shotErr) && !captureBlocked() && refills < 40
+      const refill = state === 'ready' && !PREWARM_EXISTING_ONLY && rec && !rec.shot && (isBlockErr(rec.shotErr) || movedBack(rec)) && !captureBlocked() && refills < 40
         && Date.now() - (rec.prepared_at || 0) > 60 * 60 * 1000;
       if (state === 'none' || state === 'stale' || state === 'error' || refill) {
         enqueue(p.slug, ch, { existingOnly: PREWARM_EXISTING_ONLY }, true); n++;
@@ -408,10 +408,18 @@ function readPrep(slug, ch) {
   return rec;
 }
 /** 준비한 뒤 lg.com 을 다시 캡처했는지 (같은 key 에 다른 파일 — 크기로 본다. 로컬에 없으면(재배포 직후) 모른다 → 그대로) */
+// 「페이지가 없음」으로 캡처를 뺐는데, 다시 보니 카테고리만 옮긴 같은 제품(2026-11-24 GN-F392PXAK) → 다시 준비해 캡처를 채운다
+function movedBack(rec) {
+  if (!/페이지가 없음/.test(rec.shotErr || '')) return false;
+  const key = require('crypto').createHash('sha1').update(String(rec.url).trim().replace(/\/+$/, '').toLowerCase()).digest('hex').slice(0, 20);
+  const m = readJson(path.join(FULLSHOT_DIR, `${key}.json`));
+  return !!(m && m.gone && m.final && lastSeg(m.final) === lastSeg(rec.url));
+}
+const lastSeg = (u) => String(u || '').replace(/[?#].*$/, '').replace(/\/+$/, '').toLowerCase().split('/').pop();
 function shotChanged(rec) {
   if (!rec.shot || !rec.shot.bytes) return false;
   const m = readJson(path.join(FULLSHOT_DIR, `${rec.shot.key}.json`));
-  if (m && m.gone) return true;   // 확인해 보니 홈 화면을 찍은 것 (제품 페이지 없음) → 다시 준비해 캡처를 뺀다
+  if (m && m.gone && !(m.final && m.url && lastSeg(m.final) === lastSeg(m.url))) return true;   // 확인해 보니 홈 화면을 찍은 것 (제품 페이지 없음) → 다시 준비해 캡처를 뺀다
   try { return fs.statSync(path.join(FULLSHOT_DIR, `${rec.shot.key}.jpg`)).size !== rec.shot.bytes; } catch (_) { return false; }
 }
 function prepState(slug, ch, sum) {

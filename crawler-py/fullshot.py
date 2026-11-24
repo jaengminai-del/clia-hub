@@ -77,9 +77,12 @@ class Gone(Exception):
 
 
 def same_page(final: str, url: str) -> bool:
+    """같은 제품 페이지인지 — 주소가 같거나, 카테고리만 옮겨 마지막 부분(모델)이 같으면 같은 제품
+    (2026-11-24 운영: GN-F392PXAK 가 2-door-refrigerator → top-freezer 로 옮겨 간 것을 「없음」으로 봤다)."""
     from urllib.parse import urlparse
     norm = lambda u: urlparse(str(u or "")).path.rstrip("/").lower()
-    return norm(final) == norm(url)
+    a, b = norm(final), norm(url)
+    return a == b or (a.rsplit("/", 1)[-1] == b.rsplit("/", 1)[-1] and a.count("/") >= 3)
 
 
 def gone_message(final: str) -> str:
