@@ -148,6 +148,81 @@ def usp_prompt(usps: list) -> str:
             "และให้บทนำกับข้อมูลสินค้ากระชับ")
 
 
+# ── 번들(세트 판매) 제품 (2026-11-24 사용자 결정) ──
+#   lg.com 번들 페이지에는 본 제품 내용만 있고 사은품은 제품명에만 나온다 (예: 「ทีวี … 86QNED80TSA ฟรี ตู้เย็น … GC-F20FFBFB」).
+#   · 사은품이 스피커(사운드바 · xboom 등): 본 제품만 — 사은품은 한 줄로만 언급
+#   · 그 밖(냉장고 · 세탁기 · 전자레인지 · 청소기 등 두 제품): 반반 — 사은품 내용은 그 제품의 크롤(같은 out 폴더)에서.
+#     두 제품 USP 를 2,000자 안에 다 넣을 수 없어, 제품마다 가장 중요한 USP 를 BUNDLE_SPLIT_USPS 개까지 고른다.
+#   · 사은품 크롤이 없으면 본 제품만 (사은품 한 줄) — bundle.gift_missing 으로 알린다.
+BUNDLE_SPLIT_USPS = 6
+_BUNDLE_CONN = re.compile(r"\s(ฟรี|และ|ซื้อคู่)")
+_SPEAKER = re.compile(r"soundbar|sound bar|ซาวด์บาร์|ลำโพง|xboom|\bgrab\b|\bbounce\b|speaker", re.I)
+_CODE = re.compile(r"(?<![A-Za-z0-9])(?=[A-Za-z0-9.\-]*\d)(?=[A-Za-z0-9.\-]*[A-Za-z])[A-Za-z0-9][A-Za-z0-9.\-]{3,}[A-Za-z0-9](?![A-Za-z0-9])")
+
+
+def _codes(t: str) -> list:
+    return [c.upper() for c in _CODE.findall(t or "") if not re.fullmatch(r"\d+(HZ|K|GB|TB|CH|L|KG|W|MM|CM)", c.upper())]
+
+
+def bundle_info_title_only(title: str):
+    return bundle_info(title, None)
+
+
+def bundle_info(title: str, slug_dir: Path = None):
+    """제품명이 「본 제품 ฟรี/และ/ซื้อคู่ 사은품」 꼴이고 두 쪽에 서로 다른 모델(또는 사은품이 스피커)이면 번들."""
+    m = _BUNDLE_CONN.search(title or "")
+    if not m:
+        return None
+    main, gift = title[:m.start()].strip(), title[m.end():].strip()
+    mc, gc = _codes(main), _codes(gift)
+    speaker = bool(_SPEAKER.search(gift))
+    if not mc or not (gc or speaker) or (gc and gc[0].split(".")[0] == mc[0].split(".")[0]):
+        return None
+    info = {"kind": "speaker" if speaker else "split", "conn": m.group(1), "main_title": main, "gift_title": gift,
+            "main_model": mc[0].split(".")[0], "gift_model": gc[0] if gc else ""}
+    if info["kind"] == "split":
+        gdir = None
+        if slug_dir and gc:
+            code = gc[0].lower()
+            pat = re.compile(r"-" + re.escape(code) + r"[a-z0-9]{0,2}$")
+            def single(d):   # 다른 번들 페이지(예: …-wtbg-r5-max)는 사은품 내용으로 쓰지 않는다
+                try:
+                    t = json.loads((d / "mirror.json").read_text(encoding="utf-8")).get("product_title") or ""
+                except Exception:
+                    return False
+                return not _BUNDLE_CONN.search(t) or bundle_info_title_only(t) is None
+            cands = sorted((d for d in slug_dir.parent.iterdir() if d.is_dir() and d != slug_dir and pat.search(d.name)
+                            and (d / "mirror.json").exists() and single(d)), key=lambda d: (not d.name.endswith("-" + code), len(d.name)))
+            gdir = cands[0] if cands else None
+        if gdir:
+            info["gift_dir"] = gdir
+            try:
+                info["gift_url"] = json.loads((gdir / "source.json").read_text(encoding="utf-8")).get("url", "")
+            except Exception:
+                info["gift_url"] = ""
+        else:
+            info["kind"], info["gift_missing"] = "main", True   # 사은품 크롤 없음 → 본 제품만
+    return info
+
+
+def bundle_prompt(info: dict, main_usps: list, gift_usps: list, k1: int, k2: int) -> str:
+    rows = lambda us: "\n".join(f"{i}. {u['title']}" + (f" — {u['desc'][:300]}" if u["desc"] else "") for i, u in enumerate(us, 1))
+    if info["kind"] != "split":
+        return (f"\n\nสินค้านี้เป็นชุดโปรโมชัน: สินค้าหลักคือ {info['main_title']} และมีของแถม/สินค้าคู่คือ {info['gift_title']} "
+                "ให้เขียนเนื้อหาเฉพาะสินค้าหลัก กล่าวถึงของแถมเพียงสั้นๆ ครั้งเดียว (ในบทนำ หรือ 1 แถวในข้อมูลสินค้า) "
+                "ห้ามเขียนจุดเด่นหรือสเปคของของแถมที่ไม่มีในข้อมูล ชื่อสินค้าให้ระบุของแถมต่อท้ายได้")
+    return (f"\n\nสินค้านี้เป็นชุดโปรโมชัน 2 รายการ: (1) สินค้าหลัก {info['main_title']} (2) {info['conn']} {info['gift_title']} "
+            "ข้อมูลของสินค้าที่ 2 อยู่ในแท็ก <lg_product_page> ชุดที่สอง ให้ใช้ข้อมูลแต่ละสินค้าจากหน้าของสินค้านั้นเท่านั้น ห้ามสลับกัน\n"
+            "ให้แบ่งเนื้อหาครึ่งต่อครึ่งระหว่างสองสินค้า: บทนำกล่าวถึงทั้งสองสินค้าอย่างสมดุล "
+            "ความยาวรวมของจุดเด่นสินค้าหลักกับของสินค้าที่ 2 ต้องใกล้เคียงกัน (ถ้าสินค้าใดมี USP น้อยข้อ ให้อธิบายแต่ละข้อละเอียดขึ้น) "
+            f"จุดเด่นสินค้า (highlights) ต้องมี {k1 + k2} ข้อพอดี — {k1} ข้อแรกเป็นของสินค้าหลัก เลือก USP ที่สำคัญที่สุด {k1} ข้อจากรายการ A "
+            f"แล้วตามด้วย {k2} ข้อของสินค้าที่ 2 เลือก USP ที่สำคัญที่สุด {k2} ข้อจากรายการ B (เรียงตามลำดับในรายการ) "
+            "แต่ละข้อขึ้นต้นด้วยชื่อ USP แล้วตามด้วยประโยชน์สั้นๆ "
+            "ข้อมูลสินค้า (product_info) ให้มีของทั้งสองสินค้า โดยขึ้นต้นป้ายกำกับด้วยชื่อรุ่นของสินค้านั้น "
+            f"ชื่อสินค้า: LG + สินค้าหลัก + รุ่น + {info['conn']} + สินค้าที่ 2 + รุ่น\n"
+            f"รายการ A (USP ของสินค้าหลัก):\n{rows(main_usps)}\n\nรายการ B (USP ของสินค้าที่ 2):\n{rows(gift_usps)}")
+
+
 def checked_date(mirror_path: Path) -> str:
     return _dt.datetime.fromtimestamp(mirror_path.stat().st_mtime, _dt.timezone(_dt.timedelta(hours=7))).strftime("%Y-%m-%d")
 
@@ -226,23 +301,50 @@ def generate(slug_dir: Path, url: str, model: str = "") -> dict:
     checked = checked_date(mp)
     usps = usp_list(mirror)
     limit = MAX_CHARS
-    prompt = build_prompt(url, source_text(mirror, url, slug_dir), checked, limit) + (usp_prompt(usps) if usps else "")
+    bundle = bundle_info(mirror.get("product_title") or "", slug_dir)
+    src = source_text(mirror, url, slug_dir)
+    if bundle and bundle["kind"] == "split":   # 반반: 사은품 내용은 그 제품의 크롤에서, 제품마다 핵심 USP 몇 개씩
+        gdir = bundle["gift_dir"]
+        gmirror = json.loads((gdir / "mirror.json").read_text(encoding="utf-8"))
+        gift_usps = usp_list(gmirror)
+        k1, k2 = min(len(usps), BUNDLE_SPLIT_USPS), min(len(gift_usps), BUNDLE_SPLIT_USPS)
+        prompt = (build_prompt(url, src, checked, limit)
+                  + f"\n\n<lg_product_page url=\"{bundle['gift_url']}\">\n{source_text(gmirror, bundle['gift_url'], gdir)}\n</lg_product_page>"
+                  + bundle_prompt(bundle, usps, gift_usps, k1, k2))
+        need_h, usp_titles = k1 + k2, [u["title"] for u in usps] + [u["title"] for u in gift_usps]
+    else:              # 단품 · 스피커 번들(본 제품만): PDP 의 USP 를 하나도 빼지 않는다
+        prompt = build_prompt(url, src, checked, limit) + (usp_prompt(usps) if usps else "") \
+            + (bundle_prompt(bundle, usps, [], 0, 0) if bundle else "")
+        need_h, usp_titles = (len(usps) if usps else 0), [u["title"] for u in usps]
     ask, d = prompt, None
+    split = bool(bundle and bundle["kind"] == "split")
+    share = lambda d: (sum(len(h) for h in d["highlights"][:k1]) / max(1, sum(len(h) for h in d["highlights"]))) if split else 0.5
+    good = None             # 반반 비율만 못 맞춘 결과 (다른 조건은 다 맞음) — 마지막까지 못 맞추면 이것을 쓴다
     for attempt in range(4):                # 조건: 600 초과 · 2,000 이하 · 상품명 120 이하 · 장점 수 = USP 수 — 벗어나면 다시 쓰게
         d = _fix(ask_llm(ask, attempt), url)
         n, nn = len(plain_text(d)), len(d["product_name"])
         nh = len(d["highlights"])
-        if MIN_CHARS < n <= limit and nn <= NAME_MAX and (not usps or nh == len(usps)):
+        core = MIN_CHARS < n <= limit and nn <= NAME_MAX and (not need_h or nh == need_h)
+        sh = share(d)
+        if core and 0.35 <= sh <= 0.65:     # 번들 반반: 두 제품의 장점 글자 수가 35~65% 안
             break
+        if core:
+            good = d
         ask = (prompt + f"\n\nผลครั้งก่อน: เนื้อหาพร้อมคัดลอกยาว {n:,} ตัวอักษร ชื่อสินค้ายาว {nn} ตัวอักษร จุดเด่นสินค้า {nh} ข้อ "
                f"— ต้องยาวมากกว่า {MIN_CHARS} และไม่เกิน {limit:,} ตัวอักษร ชื่อสินค้าไม่เกิน {NAME_MAX} ตัวอักษร "
-               + (f"และจุดเด่นสินค้าต้องมี {len(usps)} ข้อพอดี (1 ข้อต่อ 1 USP) " if usps else "")
+               + (f"และจุดเด่นสินค้าต้องมี {need_h} ข้อพอดี " if need_h else "")
+               + (f"และจุดเด่นของสินค้าหลักยาว {round(sh * 100)}% ของจุดเด่นทั้งหมด — ต้องแบ่งความยาวให้สองสินค้าใกล้เคียงกัน (ประมาณครึ่งต่อครึ่ง) " if split else "")
                + "เขียนใหม่ให้อยู่ในเกณฑ์ โดยย่อเฉพาะคำอธิบาย และยังใช้เฉพาะข้อมูลที่ยืนยันได้")
     else:
-        raise RuntimeError(f"rule not met after retries: {n} chars, name {nn}, highlights {nh}/{len(usps)} USPs")
+        if good is not None:
+            d = good
+        else:
+            raise RuntimeError(f"rule not met after retries: {n} chars, name {nn}, highlights {nh}/{need_h}"
+                               + (f" (bundle {bundle['kind']})" if bundle else " USPs"))
     d = _fix(d, url)
-    return {**d, "chars": len(plain_text(d)), "max_chars": limit, "usps": [u["title"] for u in usps], "ref_url": url, "checked_at": checked, "model": model,
-            "prompt_file": PROMPT_FILE.name}
+    meta_b = {**{k: v for k, v in bundle.items() if k != "gift_dir"}, **({"main_share": round(share(d), 2)} if split else {})} if bundle else None
+    return {**d, "chars": len(plain_text(d)), "max_chars": limit, "usps": usp_titles, "ref_url": url, "checked_at": checked, "model": model,
+            "prompt_file": PROMPT_FILE.name, **({"bundle": meta_b} if meta_b else {})}
 
 
 def plain_text(d: dict) -> str:

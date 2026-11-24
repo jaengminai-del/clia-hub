@@ -2688,7 +2688,9 @@ app.get('/media/exports/:hash/:file', async (req, res) => {
    만드는 곳: crawler-py/content_gen/pdp_summary.py (지시문 content_gen/prompts/pdp_summary_th.md + 그 제품의 크롤 결과)
    제품 폴더의 summary.json 에 보관 (버킷에도) — 다시 부르면 그대로, refresh:true 면 새로 만든다
 ────────────────────────────────────────── */
-const summaryJobs = new Map();   // slug → Promise (같은 제품 동시 요청은 한 번만 만든다)
+const summaryJobs = new Map();
+// 요약 규칙이 바뀌면 올린다 — 예전 규칙으로 실패한 기억(summary-fail.json)을 버리고 다시 만든다 (2: 번들 반반 · 스피커는 본 제품만)
+const SUMMARY_RULE_V = 2;   // slug → Promise (같은 제품 동시 요청은 한 번만 만든다)
 app.post('/api/v1/pdp-summary', async (req, res) => {
   const path = require('path'), fs = require('fs');
   const { url, refresh = false } = req.body || {};
@@ -2711,7 +2713,7 @@ app.post('/api/v1/pdp-summary', async (req, res) => {
   if (!refresh && !model && !fs.existsSync(path.join(slugDir, 'summary.json'))) {
     let f = null;
     try { f = JSON.parse(fs.readFileSync(failFp, 'utf8')); } catch (_) {}
-    if (f && f.mirror === mirrorSig() && Date.now() - f.at < (f.rule ? 24 * 3600 * 1000 : 30 * 60 * 1000)) {
+    if (f && f.v === SUMMARY_RULE_V && f.mirror === mirrorSig() && Date.now() - f.at < (f.rule ? 24 * 3600 * 1000 : 30 * 60 * 1000)) {
       return res.status(500).json({ error: f.error, cached: true, failed_at: f.at });
     }
   }
@@ -2736,7 +2738,7 @@ app.post('/api/v1/pdp-summary', async (req, res) => {
     }, (e) => {
       if (!model) {   // 실패 기억 (위) — 재배포해도 남게 버킷에도
         try {
-          fs.writeFileSync(failFp, JSON.stringify({ at: Date.now(), error: String(e.message).slice(0, 300), rule: /rule not met/.test(e.message), mirror: mirrorSig() }));
+          fs.writeFileSync(failFp, JSON.stringify({ v: SUMMARY_RULE_V, at: Date.now(), error: String(e.message).slice(0, 300), rule: /rule not met/.test(e.message), mirror: mirrorSig() }));
           sliceStore.pushPaths([failFp]).catch(() => {});
         } catch (_) {}
       }
