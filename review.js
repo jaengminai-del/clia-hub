@@ -87,7 +87,7 @@ async function sliceManifest(hash) {
 }
 
 /** lg.com 전체 화면 캡처 — 있으면 그것, 없으면(또는 recapture) 캡처하고 기다린다 (최대 4분) */
-async function fullshot(url, recapture, step, existingOnly = false) {
+async function fullshot(url, recapture, step, existingOnly = false, directOnly = false) {
   const q = '/api/v1/fullshot?url=' + encodeURIComponent(url);
   let st = await getJ(q);
   if (st.status === 'ready' && !recapture) return st;
@@ -95,7 +95,7 @@ async function fullshot(url, recapture, step, existingOnly = false) {
   if (st.status !== 'pending') {
     step('fullshot');
     // recapture: 있는 캡처도 다시 찍는다 (지연 로드가 덜 찍힌 캡처 — 새 캡처가 성공해야 바뀐다)
-    st = await post('/api/v1/fullshot', { url, retry: true, force: !!recapture }, 30000);
+    st = await post('/api/v1/fullshot', { url, retry: true, force: !!recapture, ...(directOnly ? { via: 'direct' } : {}) }, 30000);
   }
   for (let i = 0; i < 120 && st.status === 'pending'; i++) { await sleep(2000); st = await getJ(q); }
   return st;
@@ -116,7 +116,8 @@ function runPrep(input) {
 
 // existingOnly (미리 준비): 크롤 데이터와 이미 있는 것만으로 — PDP 요약(AI)·lg.com 캡처(Firecrawl)를 새로 만들지 않는다.
 //   빠진 것은 사람이 그 제품을 열 때 채운다 (화면이 force 로 다시 준비 → 아래 existingOnly=false)
-async function prepare(slug, ch, { recapture = false, existingOnly = false } = {}) {
+// bg (미리 준비): lg.com 캡처는 직접(Playwright)만 — 막히면 Firecrawl 로 넘기지 않고 비워 두고, 사람이 열 때 채운다
+async function prepare(slug, ch, { recapture = false, existingOnly = false, bg = false } = {}) {
   const key = `${slug}|${ch}`, job = jobs.get(key);
   const step = (s) => { job.step = s; };
   const sum = cr.productSummary(slug);
@@ -185,7 +186,7 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false } = {
   step('fullshot-check');
   let fsErr = '', st = null;
   const shoot = async (re) => {
-    try { st = await fullshot(sum.url, re, step, existingOnly && !re); fsErr = ''; } catch (e) { fsErr = String(e.message).slice(0, 200); }
+    try { st = await fullshot(sum.url, re, step, existingOnly && !re, bg); fsErr = ''; } catch (e) { fsErr = String(e.message).slice(0, 200); }
     if (st && st.status === 'none') fsErr = existingOnly ? 'not captured yet' : 'no capture';
     if (st && st.status === 'error') fsErr = String(st.error || 'capture failed').slice(0, 200);
   };
@@ -203,7 +204,7 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false } = {
     usps: a.usps, sliceUsps: a.sliceUsps, secs: a.secs, kind: a.kind, lead: a.lead, align: a.align || null, alignErr: a.alignErr || '',
     sum: ch === 'lazada' && sm && sm.html ? sm.html : '', sumText: ch === 'shopee' && sm && sm.text ? sm.text.trim() : '', summaryErr,
     // 미리 준비에서 빈 것 — 화면이 제품을 열 때 채운다
-    missing: [...(isTh(sum.url) && !sm && !summaryErr ? ['summary'] : []), ...(!a.shot ? ['fullshot'] : [])],
+    missing: [...(isTh(sum.url) && !sm && !summaryErr ? ['summary'] : []), ...(!a.shot || (bg && a.shot.incomplete) ? ['fullshot'] : [])],
     shopeeN, shopeeChars,
     shot: a.shot ? { key: st.key, src: `/media/fullshot/${st.key}.jpg`, bytes: fs.statSync(shotPath).size, ...a.shot } : null, shotErr: a.shot ? '' : (fsErr || 'no capture'),
   };
@@ -223,7 +224,7 @@ function pump() {
     const { slug, ch, opts, bg } = queue.splice(i, 1)[0];
     const key = `${slug}|${ch}`;
     running++; if (bg) runningBg++;
-    prepare(slug, ch, opts).then(() => jobs.delete(key)).catch((e) => {
+    prepare(slug, ch, { ...opts, bg }).then(() => jobs.delete(key)).catch((e) => {
       console.warn('[review] 준비 실패', slug, ch, e.message);
       jobs.set(key, { state: 'error', error: String(e.message).slice(0, 300), at: Date.now(), bg });
     }).finally(() => { running--; if (bg) runningBg--; pump(); });
