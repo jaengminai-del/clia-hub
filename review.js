@@ -149,6 +149,7 @@ async function fullshot(url, recapture, step, existingOnly = false, directOnly =
 //   막힌 동안 4개가 동시에 계속 부딪히지 않게. 사람이 연 제품은 상관없이 찍는다 (Firecrawl 로 넘어감).
 const BLOCK_MS = (parseInt(process.env.REVIEW_CAPTURE_BLOCK_MINUTES, 10) || 30) * 60 * 1000;
 const breaker = { until: 0, probing: false, trips: 0, streak: 0 };   // streak: 서로 다른 제품에서 연달아 막힌 수 (2번이면 쉼)
+const isTransientErr = (m) => /thread|crash|has been closed|Target |Timeout|timed out|ECONN|EAGAIN|ENOMEM|exit \d|SIGKILL|socket hang up|fetch failed/i.test(String(m || ''));
 const isBlockErr = (m) => /막음|막는 중|blocked|stylesheet|\b403\b|access denied/i.test(String(m || ''));
 function captureGate() {   // 미리 준비만: false = 건너뜀, 'probe' = 풀렸는지 시험하는 한 건, true = 찍음
   if (Date.now() < breaker.until || breaker.probing) return false;
@@ -373,17 +374,19 @@ function prewarm() {
       if (j && (j.state === 'pending' || (j.state === 'error' && Date.now() - j.at < 6 * 3600 * 1000))) continue;
       const { state, rec } = prepState(p.slug, ch, p);
       // 캡처를 비워 두고 준비한 것(lg.com 이 막던 때) — 차단이 풀렸으면 다시 (1시간 지난 것만, 한 번 훑을 때 최대 40개)
-      const refill = state === 'ready' && !PREWARM_EXISTING_ONLY && rec && !rec.shot && (isBlockErr(rec.shotErr) || movedBack(rec)) && !captureBlocked() && refills < 40
-        && Date.now() - (rec.prepared_at || 0) > 60 * 60 * 1000;
+      // 일시 오류(브라우저 · 스레드 부족 · 시간 초과)로 캡처 없이 준비된 것은 5분 뒤에 (2026-11-24 운영: 동시 실행이 많아 「can't start new thread」 · 「Target crashed」)
+      const transient = rec && ((!rec.shot && isTransientErr(rec.shotErr)) || (rec.shot && !rec.align && isTransientErr(rec.alignErr)));
+      const refill = state === 'ready' && !PREWARM_EXISTING_ONLY && rec && (transient || (!rec.shot && (isBlockErr(rec.shotErr) || movedBack(rec)))) && !captureBlocked() && refills < 40
+        && Date.now() - (rec.prepared_at || 0) > (transient ? 5 : 60) * 60 * 1000;
       if (state === 'none' || state === 'stale' || state === 'error' || refill) {
         enqueue(p.slug, ch, { existingOnly: PREWARM_EXISTING_ONLY }, true); n++;
         if (refill) refills++;
         continue;
       }
       // 위치 기록 없이 찍은 예전 캡처 → 다시 찍어(위치 기록 포함) 주소로 맞춘다 (2026-11-24 — 그림 맞추기는 느리고 덜 정확).
-      //   새 일이 거의 없을 때만(대기 50개 미만), 한 번 훑을 때 30개까지, 한 채널만 (다른 채널은 그 결과를 그대로 씀)
+      //   새 일이 거의 없을 때만(대기 50개 미만), 한 번 훑을 때 60개까지, 한 채널만 (다른 채널은 그 결과를 그대로 씀)
       if (state === 'ready' && !PREWARM_EXISTING_ONLY && ch === 'shopee' && rec && rec.shot && rec.align && rec.align.mode !== 'url'
-          && !upgraded.has(p.slug) && upgrades < 30 && queue.length < 50 && !captureBlocked()) {
+          && !upgraded.has(p.slug) && upgrades < 60 && queue.length < 50 && !captureBlocked()) {
         upgraded.add(p.slug); upgrades++; n++;
         enqueue(p.slug, ch, { recapture: true }, true);
       }
