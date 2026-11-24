@@ -222,8 +222,9 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false, bg =
 }
 
 const runningSlugs = new Map();   // slug → 돌고 있는 채널 수
+let paused = false;   // 재배포로 끝나는 중 (drain.js) — 새 준비는 시작하지 않고 돌고 있는 것만 마친다
 function pump() {
-  while (running < CONC && queue.length) {
+  while (!paused && running < CONC && queue.length) {
     // 사람이 연 것 먼저 · 미리 준비는 BG_CONC 개까지만 동시에.
     // 미리 준비는 같은 제품의 다른 채널이 돌고 있으면 건너뛴다 — 끝난 뒤에 돌아야 그 분석(같은 이미지면 그대로)·요약·캡처를 다시 쓴다
     let i = queue.findIndex((q) => !q.bg);
@@ -263,7 +264,7 @@ function enqueue(slug, ch, opts = {}, bg = false) {
 
 /** 미리 준비: Shopee/Lazada 법인 제품 중 준비 안 됨 · 내용 바뀜인 채널을 미리 준비 차례에 넣는다 (최근 크롤 먼저) */
 function prewarm() {
-  if (!PREWARM) return 0;
+  if (!PREWARM || paused) return 0;
   let n = 0;
   try {
     const idx = require('./bulk-catalog').productIndex();
@@ -283,11 +284,13 @@ if (PREWARM) {
   // whenPulled 는 동기화가 시작되기 전에 부르면 바로 끝나므로(2026-11-24 운영: 첫 훑기가 제품 0개) 30초 뒤에 묻고 최대 30분 기다린다
   setTimeout(async () => {
     await Promise.resolve(store.whenPulled ? store.whenPulled(30 * 60 * 1000) : null).catch(() => {});
+    await require('./drain').gate();   // 재배포: 이전 서버가 마무리 중이면 끝난 뒤에 (그 서버가 마친 준비를 다시 하지 않게)
     try { require('./bulk-catalog').invalidate(); } catch (_) {}   // 동기화 중에 만든 빈 제품 색인을 버린다
     prewarm();
   }, 30 * 1000);
   setInterval(prewarm, 10 * 60 * 1000).unref();
 }
+require('./drain').register({ name: 'review', pause: () => { paused = true; }, busy: () => running });
 function queueStats() {
   return { queued: queue.length, queuedBg: queue.filter((q) => q.bg).length, running, runningBg, prewarm: PREWARM ? [...PREWARM_COUNTRIES] : [],
     mode: PREWARM_EXISTING_ONLY ? 'existing' : 'full', conc: BG_CONC };
