@@ -249,6 +249,13 @@
   const candsOf = (r) => r.candidates.map((x) => S.data.products[x]).filter((p) => p && (!home || p.country === home));
   // 한 줄 행: SKU · 상품명(한 줄, 마우스를 올리면 전체) · 할 일(주소 칸 / 후보 버튼 / 해결 표시)
   const skuCell = (r) => (hasSku(r) ? `<span class="k">${esc(r.parentSku || r.sku)}</span>` : `<span class="k nosku">${esc(t('skuEmpty'))}</span>`);
+  // 표 (2026-11-24): 제품(SKU · 상품명) · 확인 필요 내용(이유) · Next step(주소 칸 / 후보 / 등록하고 채우기 / 그대로 둠)
+  const prodCell = (r) => `<span class="pd">${skuCell(r)}<span class="n" title="${esc(r.name)}">${esc(r.name)}</span></span>`;
+  const whyCell = (g) => `<span class="sw2">${esc(t(g))}${g === 'gNoSku' ? `<i>${esc(skuColName())}</i>` : ''}</span>`;
+  function skuColName() {
+    const ci = S.data.cols.parentSku || S.data.cols.sku, cc = (S.data.columns || []).find((c) => c.col === ci);
+    return (S.data.cols.parentSku ? 'Parent SKU' : 'SKU') + (cc ? ` (${cc.letter})` : '');
+  }
   function skipRowHtml(r, g) {
     let act = '';
     if (g === 'gUrl' || g === 'gNoSku') {
@@ -260,12 +267,14 @@
       const cat = (p) => { const seg = String(p.url || '').split('/').filter(Boolean); return seg.length > 2 ? seg[seg.length - 2] : ''; };
       act = cs.map((p) => `<button type="button" class="pick" data-pick="${r.row}" data-slug="${esc(p.slug)}" title="${esc((p.title || p.model) + (p.url ? '\n' + p.url : ''))}">` +
         `${p.thumb ? `<img src="${esc(p.thumb)}" alt="" loading="lazy">` : ''}${esc(p.model)}${dupe(p) && cat(p) ? `<span class="pc">${esc(cat(p))}</span>` : ''}</button>`).join('');
-    }
-    return `<div class="srow${S.uerr[r.row] ? ' bad' : ''}" data-srow="${r.row}">${skuCell(r)}<span class="n" title="${esc(r.name)}">${esc(r.name)}</span><span class="a">${act}</span></div>`;
+    } else if (g === 'gReg' && r.lg) {
+      act = `<button type="button" class="mini go" data-regrow="${r.row}"${S.busy ? ' disabled' : ''}>${esc(t('regRow'))}</button>`;
+    } else act = `<span class="leave">${esc(t('leaveAs'))}</span>`;
+    return `<div class="srow${S.uerr[r.row] ? ' bad' : ''}" data-srow="${r.row}">${prodCell(r)}${whyCell(g)}<span class="a">${act}</span></div>`;
   }
   function fixedRowHtml(f, now) {
     const r = f.r, p = now.p || {};
-    return `<div class="srow fixed">${skuCell(r)}<span class="n" title="${esc(r.name)}">${esc(r.name)}</span>` +
+    return `<div class="srow fixed">${prodCell(r)}${whyCell(f.g)}` +
       `<span class="a"><span class="okt">✓ ${esc(p.model || '')}</span><button type="button" class="mini" data-undo="${r.row}">${esc(t('undo'))}</button></span></div>`;
   }
   function skipHtml() {
@@ -278,19 +287,13 @@
     }
     const gs = G_ORDER.filter((g) => by[g]);
     if (!gs.includes(S.openG)) S.openG = gs.find((x) => by[x].open.length) || gs[0] || null;   // 처음엔 남은 행이 있는 첫 묶음
-    const nAuto = S.reg.filter((r) => !S.own[r.row]).length;
-    const ci = S.data.cols.parentSku || S.data.cols.sku, cc = (S.data.columns || []).find((c) => c.col === ci);
-    const skuCol = (S.data.cols.parentSku ? 'Parent SKU' : 'SKU') + (cc ? ` (${cc.letter})` : '');
     // 이유별 칩 = 그 안의 작은 탭. 고른 칩의 행만, 칩 아래 짧은 안내 한 줄 (2026-11-23 단순화)
     const g = S.openG && by[S.openG] ? S.openG : gs[0];
     if (!g) return '';
     const chips = `<div class="schips" role="tablist">${gs.map((x) => `<button type="button" class="schip${x === g ? ' on' : ''}" role="tab" aria-selected="${x === g}" data-g="${x}">` +
       `${esc(t(x))}<b>${by[x].open.length}</b>${by[x].done.length ? `<i>✓${by[x].done.length}</i>` : ''}</button>`).join('')}</div>`;
     const { open, done } = by[g];
-    const btn = g === 'gReg' && open.length ? ` <button type="button" class="mini" data-regon="1"${S.busy ? ' disabled' : ''}>${esc(t('regDo', nAuto))}</button>` : '';
-    const third = { gUrl: 'hdUrl', gNoSku: 'hdUrl', gMulti: 'hdPick' }[g];
-    return chips + `<div class="shint">${esc(t(g + 'D', skuCol))}${btn}</div>` +
-      `<div class="shead"><span>SKU</span><span>${esc(t('hdName'))}</span><span>${third ? esc(t(third)) : ''}</span></div>` +
+    return chips + `<div class="shead"><span>${esc(t('hdProduct'))}</span><span>${esc(t('hdStatus'))}</span><span class="hn">${esc(t('hdAction'))}</span></div>` +
       `<div class="sgrows">${open.map((r) => skipRowHtml(r, g)).join('')}${done.map(([f, now]) => fixedRowHtml(f, now)).join('')}</div>`;
   }
   // 해결한 뒤: 다음 빈 주소 칸으로 (없으면 그대로)
@@ -352,6 +355,9 @@
     });
     const skipTab = S.tab === 'skip';
     $('lhead').classList.toggle('hidden', skipTab || !rows.length || VIEW === 'grid');
+    // 확인할 행이 없는 목록(매칭 완료 탭 · 확인 필요 0 인 전체 탭)은 '확인 필요 내용 · Next step' 열 없이 제품 · 편집만
+    const noAct = S.tab === 'ok' || (S.tab === 'all' && !rvN);
+    $('lhead').classList.toggle('noact', noAct); $('list').classList.toggle('noact', noAct);
     $('list').classList.toggle('hidden', skipTab || !rows.length);
     $('skip').classList.toggle('hidden', !((skipTab || S.tab === 'all') && noN));   // 전체 탭에서는 목록 아래에 매칭 불가 행도 보인다
     $('skipHead').classList.toggle('hidden', !(S.tab === 'all' && noN && rows.length));
@@ -523,7 +529,7 @@
   $('skip').addEventListener('keydown', (e) => { const inp = e.target.closest('input[data-urow]'); if (inp && e.key === 'Enter') { e.preventDefault(); delete inp.dataset.tried; tryUrl(inp); } });
   $('skip').addEventListener('change', (e) => { const inp = e.target.closest('input[data-urow]'); if (inp) tryUrl(inp); });
   $('skip').addEventListener('click', (e) => {
-    const pk = e.target.closest('button[data-pick]'), un = e.target.closest('button[data-undo]'), ro = e.target.closest('button[data-regon]');
+    const pk = e.target.closest('button[data-pick]'), un = e.target.closest('button[data-undo]'), rr = e.target.closest('button[data-regrow]');
     const gb = e.target.closest('.schip');
     if (gb) { S.openG = gb.dataset.g; $('skip').innerHTML = skipHtml(); return; }
     if (pk) {
@@ -536,7 +542,13 @@
       const row = +un.dataset.undo;
       delete S.own[row]; delete S.pick[row]; delete S.fixed[row]; S.sel.delete(row);
       setData(S.data, false);
-    } else if (ro) { S.regOn = true; render(true); }
+    } else if (rr) {
+      // 그 행만 등록하고 채우기 (파일 전체 스위치는 위 한 줄)
+      const row = +rr.dataset.regrow, r = skipRowOf(row);
+      if (!r || !r.lg) return;
+      S.own[row] = { ...r.lg }; S.fixed[row] = { g: 'gReg', r }; S.sel.add(row);
+      setData(S.data, false);
+    }
   });
 
   // 보기 · 검색
@@ -547,7 +559,7 @@
     $('lhead').classList.toggle('hidden', VIEW === 'grid' || S.tab === 'skip');
     document.querySelectorAll('#view button').forEach((b) => { b.classList.toggle('on', b.dataset.v === VIEW); b.setAttribute('aria-pressed', b.dataset.v === VIEW); });
   }
-  $('lhead').innerHTML = `<span></span><span></span><span>${esc(t('hdProduct'))}</span><span>${esc(t('hdStatus'))}</span><span class="hn">${esc(t('hdAction'))}</span><span class="he">${esc(t('hdEdit'))}</span>`;
+  $('lhead').innerHTML = `<span></span><span></span><span>${esc(t('hdProduct'))}</span><span class="hs">${esc(t('hdStatus'))}</span><span class="hn">${esc(t('hdAction'))}</span><span class="he">${esc(t('hdEdit'))}</span>`;
   $('vList').textContent = t('viewList'); $('vGrid').textContent = t('viewGrid');
   document.querySelectorAll('#view button').forEach((b) => { b.title = t(b.dataset.v === 'grid' ? 'viewGrid' : 'viewList'); });
   $('view').onclick = (e) => { const b = e.target.closest('button'); if (b) setView(b.dataset.v); };
