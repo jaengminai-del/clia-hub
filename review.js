@@ -60,6 +60,9 @@ const CONC = 2;
 const PREWARM = process.env.REVIEW_PREWARM !== '0';
 const PREWARM_COUNTRIES = new Set(String(process.env.REVIEW_PREWARM_COUNTRIES || 'th,sg').split(',').map((x) => x.trim().toLowerCase()).filter(Boolean));
 const BG_CONC = Math.max(1, Math.min(CONC, parseInt(process.env.REVIEW_PREWARM_CONC, 10) || 1));
+// 기본은 전부 준비 — lg.com 캡처 · 상세 이미지 · PDP 요약까지 (검토 화면에서 누르면 바로 보이게, 2026-11-24 사용자 결정).
+//   REVIEW_PREWARM_MODE=existing 이면 크롤 데이터와 이미 있는 요약·캡처만으로 (AI 요약 · Firecrawl 캡처를 새로 만들지 않음 — 빈 것은 사람이 열 때 채움)
+const PREWARM_EXISTING_ONLY = process.env.REVIEW_PREWARM_MODE === 'existing';
 
 async function post(p, body, timeoutMs) {
   const r = await fetch(LOCAL() + p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(timeoutMs) });
@@ -84,10 +87,11 @@ async function sliceManifest(hash) {
 }
 
 /** lg.com 전체 화면 캡처 — 있으면 그것, 없으면(또는 recapture) 캡처하고 기다린다 (최대 4분) */
-async function fullshot(url, recapture, step) {
+async function fullshot(url, recapture, step, existingOnly = false) {
   const q = '/api/v1/fullshot?url=' + encodeURIComponent(url);
   let st = await getJ(q);
   if (st.status === 'ready' && !recapture) return st;
+  if (existingOnly && st.status !== 'pending') return st;   // 미리 준비: 있는 캡처만 (새로 찍지 않는다)
   if (st.status !== 'pending') {
     step('fullshot');
     // recapture: 있는 캡처도 다시 찍는다 (지연 로드가 덜 찍힌 캡처 — 새 캡처가 성공해야 바뀐다)
@@ -110,7 +114,9 @@ function runPrep(input) {
   });
 }
 
-async function prepare(slug, ch, { recapture = false } = {}) {
+// existingOnly (미리 준비): 크롤 데이터와 이미 있는 것만으로 — PDP 요약(AI)·lg.com 캡처(Firecrawl)를 새로 만들지 않는다.
+//   빠진 것은 사람이 그 제품을 열 때 채운다 (화면이 force 로 다시 준비 → 아래 existingOnly=false)
+async function prepare(slug, ch, { recapture = false, existingOnly = false } = {}) {
   const key = `${slug}|${ch}`, job = jobs.get(key);
   const step = (s) => { job.step = s; };
   const sum = cr.productSummary(slug);
@@ -131,7 +137,10 @@ async function prepare(slug, ch, { recapture = false } = {}) {
   let sm = null, summaryErr = '';
   if (isTh(sum.url)) {
     step('summary');
-    sm = await post('/api/v1/pdp-summary', { url: sum.url }, 7 * 60 * 1000).catch((e) => { summaryErr = String(e.message).slice(0, 200); return null; });
+    sm = await post('/api/v1/pdp-summary', { url: sum.url, cachedOnly: existingOnly }, 7 * 60 * 1000).catch((e) => {
+      if (!(existingOnly && /no summary yet/.test(e.message))) summaryErr = String(e.message).slice(0, 200);
+      return null;
+    });
   }
   let shopeeN = slices.length, shopeeChars = 0;
   if (ch === 'shopee') {   // bulk-jobs.contentFor 와 같은 자르기: 앞 12장, 요약 + 주소가 3,000자를 넘으면 뒤에서부터 뺀다
@@ -176,12 +185,13 @@ async function prepare(slug, ch, { recapture = false } = {}) {
   step('fullshot-check');
   let fsErr = '', st = null;
   const shoot = async (re) => {
-    try { st = await fullshot(sum.url, re, step); fsErr = ''; } catch (e) { fsErr = String(e.message).slice(0, 200); }
+    try { st = await fullshot(sum.url, re, step, existingOnly && !re); fsErr = ''; } catch (e) { fsErr = String(e.message).slice(0, 200); }
+    if (st && st.status === 'none') fsErr = existingOnly ? 'not captured yet' : 'no capture';
     if (st && st.status === 'error') fsErr = String(st.error || 'capture failed').slice(0, 200);
   };
   await shoot(recapture);
   let { shotPath, a } = await analyze(st, true);
-  if (thin(a) && !recapture) {   // 덜 찍혔으면 한 번 다시 캡처하고 다시 본다
+  if (thin(a) && !recapture && !existingOnly) {   // 덜 찍혔으면 한 번 다시 캡처하고 다시 본다
     console.log(`[review] ${slug}: lg.com 캡처가 덜 찍힘 (PDP ${a.shot.bottom - a.shot.top}px / 상세 이미지 ${sliceTotal}px) → 다시 캡처`);
     await shoot(true);
     ({ shotPath, a } = await analyze(st, false));
@@ -192,6 +202,8 @@ async function prepare(slug, ch, { recapture = false } = {}) {
     slices: slices.map(({ src, w, h }) => ({ src, w, h })), images_loaded: man.images_loaded || sl.images_loaded || '',
     usps: a.usps, sliceUsps: a.sliceUsps, secs: a.secs, kind: a.kind, lead: a.lead, align: a.align || null, alignErr: a.alignErr || '',
     sum: ch === 'lazada' && sm && sm.html ? sm.html : '', sumText: ch === 'shopee' && sm && sm.text ? sm.text.trim() : '', summaryErr,
+    // 미리 준비에서 빈 것 — 화면이 제품을 열 때 채운다
+    missing: [...(isTh(sum.url) && !sm && !summaryErr ? ['summary'] : []), ...(!a.shot ? ['fullshot'] : [])],
     shopeeN, shopeeChars,
     shot: a.shot ? { key: st.key, src: `/media/fullshot/${st.key}.jpg`, bytes: fs.statSync(shotPath).size, ...a.shot } : null, shotErr: a.shot ? '' : (fsErr || 'no capture'),
   };
@@ -222,7 +234,7 @@ function enqueue(slug, ch, opts = {}, bg = false) {
   if (j && j.state === 'pending') {
     // 미리 준비 차례를 기다리던 것을 사람이 열면 → 사람 차례로 (맨 앞)
     const q = queue.findIndex((x) => x.slug === slug && x.ch === ch);
-    if (!bg && q >= 0 && queue[q].bg) { const [it] = queue.splice(q, 1); it.bg = false; it.opts = { ...it.opts, ...opts }; queue.unshift(it); j.bg = false; pump(); }
+    if (!bg && q >= 0 && queue[q].bg) { const [it] = queue.splice(q, 1); it.bg = false; it.opts = { ...it.opts, ...opts, existingOnly: false }; queue.unshift(it); j.bg = false; pump(); }
     return j;
   }
   const nj = { state: 'pending', step: 'queued', at: Date.now(), bg };
@@ -243,7 +255,7 @@ function prewarm() {
       const j = jobs.get(`${p.slug}|${ch}`);
       if (j && (j.state === 'pending' || (j.state === 'error' && Date.now() - j.at < 6 * 3600 * 1000))) continue;
       const { state } = prepState(p.slug, ch, p);
-      if (state === 'none' || state === 'stale' || state === 'error') { enqueue(p.slug, ch, {}, true); n++; }
+      if (state === 'none' || state === 'stale' || state === 'error') { enqueue(p.slug, ch, { existingOnly: PREWARM_EXISTING_ONLY }, true); n++; }
     }
   } catch (e) { console.warn('[review] 미리 준비 목록 실패', e.message); }
   if (n) console.log(`[review] 미리 준비 ${n}개 차례에 넣음 (대기 ${queue.length} · 동시 ${BG_CONC})`);
@@ -255,7 +267,8 @@ if (PREWARM) {
   setInterval(prewarm, 10 * 60 * 1000).unref();
 }
 function queueStats() {
-  return { queued: queue.length, queuedBg: queue.filter((q) => q.bg).length, running, runningBg, prewarm: PREWARM ? [...PREWARM_COUNTRIES] : [] };
+  return { queued: queue.length, queuedBg: queue.filter((q) => q.bg).length, running, runningBg, prewarm: PREWARM ? [...PREWARM_COUNTRIES] : [],
+    mode: PREWARM_EXISTING_ONLY ? 'existing' : 'full', conc: BG_CONC };
 }
 
 /** 준비 결과 + 사람이 고친 lg.com 범위 */

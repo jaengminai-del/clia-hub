@@ -44,14 +44,16 @@ if (/railway\.app|lgecreativehub/i.test(base)) { console.error('운영 주소에
     }
     // 이름표: 지금 구간의 이름이 양쪽에 같게
     sc.scrollTop = G.segs[Math.min(2, G.segs.length - 1)].S + 5; update();
-    const tags = [$('segTagL').textContent, $('segTagR').textContent];
+    const tags = [$('segTagL').querySelector('b').textContent, $('segTagR').querySelector('b').textContent];
+    const inList = items(C.ch).some((it) => it.title === tags[1]);
     const im = [...document.querySelectorAll('#mvR img.sl')].filter((e) => e.complete && e.naturalWidth);
     const distorted = im.filter((e) => Math.abs(e.clientHeight / e.clientWidth - e.naturalHeight / e.naturalWidth) > 0.01).length;
-    return { bad, distorted, loaded: im.length, segs: G.segs.length, aligned: G.aligned, tags };
+    return { bad, distorted, loaded: im.length, segs: G.segs.length, aligned: G.aligned, tags, inList };
   });
   console.log('     segments', r.segs, 'anchors', r.aligned, 'tags', JSON.stringify(r.tags));
   check(r.segs >= 3 && r.aligned >= 1, `same-area anchors used (${r.aligned} anchors, ${r.segs} segments)`);
-  check(r.tags[0].split(' · ')[0] === r.tags[1].split(' · ')[0], 'same segment number on both sides');
+  check(r.tags[0] === r.tags[1], 'same area label on both sides');
+  check(r.inList, 'area label is exactly a checklist item name');
   check(!r.bad.length, `same-area scroll rule (${r.bad.length} mismatches ${r.bad.slice(0, 5).join(',')})`);
   check(!r.distorted, `slice aspect ratio (${r.distorted} distorted of ${r.loaded} loaded)`);
   check(await page.locator('#bOk').isDisabled(), 'approve locked before checklist');

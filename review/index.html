@@ -104,6 +104,7 @@ td .m,.cb .m{font-weight:700}td .s{font-size:12px;color:var(--g500);max-width:42
 .mk .nosum{padding:12px;font-size:12px;color:#999;background:#fafafa}
 .segbox{position:absolute;pointer-events:none;border:3px solid var(--red);border-radius:6px;box-shadow:0 0 0 9999px rgba(31,29,26,.06) inset}
 .segbox.pop{animation:segpop .35s ease-out}@keyframes segpop{from{border-width:6px}to{border-width:3px}}
+.segtag i{font-style:normal;font-weight:400;opacity:.85;margin-left:8px}
 .segtag{position:absolute;left:18px;max-width:calc(100% - 36px);pointer-events:none;color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 8px rgba(0,0,0,.18);z-index:3}
 .prep{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#F8F7F5;z-index:5}.prep[hidden]{display:none}
 .prep .box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 26px;min-width:380px;max-width:560px}
@@ -400,6 +401,8 @@ async function fetchItems(start){
   if(!C)return;const slug=C.p.slug;clearTimeout(itemTimer);
   await Promise.all(CHS.map(async ch=>{
     try{let j=await api(`/api/v1/review/item/${encodeURIComponent(slug)}?channel=${ch}`);
+      // 미리 준비가 비워 둔 것(PDP 요약 · lg.com 캡처)이 있으면 이 제품을 열 때 채운다
+      if(start&&j.state==='ready'&&j.data&&(j.data.missing||[]).length){await api(`/api/v1/review/item/${encodeURIComponent(slug)}/prepare`,{channel:ch,force:true});j={...j,state:'pending',job:{step:'queued'}};}
       if(start&&(j.state==='none'||(j.state==='pending'&&j.job&&j.job.bg))){   // 미리 준비 차례를 기다리던 것은 사람 차례(맨 앞)로
         await api(`/api/v1/review/item/${encodeURIComponent(slug)}/prepare`,{channel:ch});j={...j,state:'pending',job:{step:'queued'}};}
       if(!C||C.p.slug!==slug)return;
@@ -546,23 +549,33 @@ function update(){
   $('mvR').style.transform=`translate3d(0,${-r}px,0)`;$('mvL').style.transform=`translate3d(0,${-l}px,0)`;
   const doneL=tt>=g.dl||posL>=G.lmax,doneR=tt>=g.dr||posR>=G.rmax;
   for(const im of G.imgs)if(!im.e.src&&im.top<r+G.vh*2.5)im.e.src=im.e.dataset.src;   // 보이는 근처만 읽기
+  track(r);   // 지금 체크리스트 항목을 먼저 정해 두고 → 이름표가 그 항목 이름을 쓴다
   segMark(g,l,r,doneL&&!doneR,doneR&&!doneL);
-  track(r);
 }
 // 같은 영역 표시: 지금 구간을 양쪽에 같은 색 테두리 + 같은 이름표(번호 · 섹션 제목)로
 let lastSeg=-1;
 function segMark(g,l,r,waitL,waitR){
   if(g.n!==lastSeg){lastSeg=g.n;['segL','segR'].forEach(id=>{const e=$(id);e.classList.remove('pop');void e.offsetWidth;e.classList.add('pop');});}
-  const col=SEG_COLOR,num=g.n+1;
+  const col=SEG_COLOR,label=segLabel(g);
   [['L',g.l-l,g.dl],['R',g.r-r,g.dr]].forEach(([k,y,h])=>{
     const box=$('seg'+k),tag=$('segTag'+k);
     box.hidden=h<2;box.style.borderColor=col;box.style.top=y+'px';box.style.height=h+'px';
     tag.style.background=col;tag.style.top=Math.max(6,Math.min(y+6,G.vh-30))+'px';
-    // 기다리는 쪽은 이름표에 「기다리는 중」 (따로 배지를 두지 않는다)
-    tag.textContent=h<2?`${num} · ${g.label} — ${t(k==='L'?'segNoneL':'segNoneR')}`:`${num} · ${g.label}`+((k==='L'?waitL:waitR)?` · ${t('waitShort')}`:'');
+    // 이름표 = 오른쪽 체크리스트 항목 이름 그대로. 기다리는 쪽 · 없는 쪽은 옆에 작은 글씨로 (이름 글자는 그대로)
+    const note=h<2?t(k==='L'?'segNoneL':'segNoneR'):(k==='L'?waitL:waitR)?t('waitShort'):'';
+    tag.innerHTML=`<b>${esc(label)}</b>${note?`<i>${esc(note)}</i>`:''}`;
   });
   const mkR=$('mvR').querySelector('.mk');$('segR').style.left=mkR.offsetLeft+'px';$('segR').style.width=mkR.clientWidth+'px';
   const cr=$('mvL').querySelector('.crop');if(cr){$('segL').style.left=cr.offsetLeft+'px';$('segL').style.width=cr.clientWidth+'px';}
+}
+// 같은 영역 이름표: 오른쪽 체크리스트 항목 이름과 똑같이 — 지금 항목이 이 구간 안이면 그 항목, 아니면 구간이 시작하는 자리의 항목
+function segLabel(g){
+  const list=items(C.ch),inSeg=it=>{const y=G.anchors[it.anchor];return y!=null&&y>=g.r-8&&y<g.r+Math.max(g.dr,1);};
+  const cur=list.find(it=>it.id===curId);
+  if(cur&&inSeg(cur))return cur.title;
+  const first=list.find(inSeg);if(first)return first.title;
+  let last=null;for(const it of list){const y=G.anchors[it.anchor];if(y!=null&&y<=g.r)last=it;}
+  return (last||list[0]||{title:g.label}).title;
 }
 // 체크리스트: 지금 보는 항목(화면 위에서 35% 선을 지난 마지막 항목), 화면 55% 선을 지난 항목은 「봤음」
 let curId=null;
