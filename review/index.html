@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CLIA · Review / Approve</title>
+<link rel="icon" href="/shared/assets/clia-icon.svg">
+<link rel="stylesheet" href="/css/fonts.css">
+<!--
+  검토·승인 화면 (2026-11-24, docs/clia-pdp-review/mockups/v12 를 운영으로)
+  · 목록: CLIA 크롤 제품 전체 (법인별) — BU·제품군 필터, 리스트/갤러리, 전체 선택 → 선택 승인 · 선택 준비
+  · 비교: 왼쪽 lg.com 전체 화면 캡처(PDP 첫 섹션 ~ 스펙 끝), 오른쪽 빌더·벌크가 내려받는 것과 같은 Shopee/Lazada 이미지.
+          스크롤 막대 하나로 같은 영역을 같이 움직이고, 짧은 쪽은 끝에서 기다린다. 체크리스트를 다 보면 승인.
+  · 데이터: /api/v1/review/* (review.js) · 승인 기록: /api/v1/approvals (approvals.js)
+  주소: /review/?lang=th|en|ko&country=th[&url=<LG.com 주소> — 그 제품 비교 화면으로][&embed=1 — 허브 위에 띄움]
+-->
+<style>
+:root{--f:'LGEIHeadline','LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Neo',sans-serif;
+--g50:#FAF9F5;--g100:#F6F3EB;--g200:#E8E4DC;--g300:#D6D1C7;--g400:#A8A29A;--g500:#7A746C;--g700:#4A4540;--g900:#1F1D1A;
+--red:#FD312E;--ok:#1E7F4F;--okb:#E3F4EA;--bad:#C8241F;--badb:#FDE8E7;--warn:#7A5A00;--warnb:#FFF3C4;--line:#ECE8E0}
+*{box-sizing:border-box}html,body{margin:0;height:100%}[hidden]{display:none!important}
+body{font:14px/1.45 var(--f);color:var(--g900);background:#F8F7F5;overflow:hidden}
+html[lang=th] body{font-family:'LINESeedSansTH','LGEIHeadline',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+button{font:inherit;cursor:pointer}button:disabled{cursor:not-allowed}
+.top{height:56px;display:flex;align-items:center;gap:12px;padding:0 20px;background:#fff;border-bottom:1px solid var(--line)}
+.top img{height:22px}.top .t{font-weight:600}.top .sp{flex:1}
+.who{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--g500)}
+.who input{border:1px solid var(--g300);border-radius:999px;padding:5px 10px;font:inherit;font-size:12px;width:150px}.who input.err{border-color:var(--bad)}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap}
+.b-q{background:var(--g100);color:var(--g500)}.b-ok{background:var(--okb);color:var(--ok)}.b-bad{background:var(--badb);color:var(--bad)}
+.b-warn{background:var(--warnb);color:var(--warn)}.b-lock{background:#2b2926;color:#fff}
+.btn{border:1px solid var(--g300);background:#fff;border-radius:999px;padding:7px 14px;font-size:13px;white-space:nowrap}
+.btn:hover:not(:disabled){border-color:var(--g500)}.btn.pri{background:var(--red);border-color:var(--red);color:#fff;font-weight:600}
+.btn.sm{padding:3px 10px;font-size:12px}.btn:disabled{opacity:.45}
+.sel{border:1px solid var(--g300);border-radius:999px;padding:5px 10px;font:inherit;font-size:12px;background:#fff}
+.view{position:fixed;top:56px;left:0;right:0;bottom:0;display:none;flex-direction:column}.view.on{display:flex}
+/* 목록 */
+.lhd{display:flex;align-items:center;gap:10px;padding:18px 24px 8px}.lhd h2{margin:0;font-size:22px}.lhd .sp{flex:1}.cnt{font-size:13px;color:var(--g500)}.cnt b{color:var(--g900)}
+.note{padding:0 24px 8px;font-size:12px;color:var(--g500)}
+.flt{display:flex;align-items:center;gap:8px;padding:6px 24px 10px;flex-wrap:wrap}.flt .sp{flex:1}
+.tabs{display:flex;gap:16px;margin-right:10px}.tab{border:0;background:none;padding:6px 0;color:var(--g500);border-bottom:2px solid transparent;font-weight:600}
+.tab.on{color:var(--g900);border-color:var(--g900)}.tab b{font-weight:400;margin-left:4px}
+details.dd{position:relative}details.dd summary{list-style:none;border:1px solid var(--g300);border-radius:999px;padding:6px 12px;font-size:13px;background:#fff;cursor:pointer}
+details.dd summary::-webkit-details-marker{display:none}details.dd[open] summary{border-color:var(--g700)}
+.ddp{position:absolute;z-index:20;top:36px;left:0;background:#fff;border:1px solid var(--g200);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:8px;min-width:220px}
+.ddp label{display:flex;gap:8px;align-items:center;padding:5px 8px;border-radius:8px;font-size:13px}.ddp label:hover{background:var(--g50)}
+.ddp .n{margin-left:auto;color:var(--g400);font-size:12px}.ddp .hint{font-size:11px;color:var(--g400);padding:4px 8px}
+.ddp .row{display:flex;gap:6px;padding:4px 8px}.ddp .row button{border:0;background:none;color:var(--g500);font-size:12px;padding:0}
+.search{border:1px solid var(--g300);border-radius:999px;padding:7px 14px;width:240px;font:inherit;font-size:13px;margin-left:8px}
+.selall{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--g700);margin-left:6px;cursor:pointer}
+.seg{display:inline-flex;border:1px solid var(--g300);border-radius:999px;overflow:hidden;background:#fff}
+.seg button{border:0;background:none;padding:6px 14px;font-size:13px;color:var(--g500)}.seg button.on{background:var(--g900);color:#fff}
+.tbl,.gal{flex:1;overflow:auto;padding:0 24px 90px}.tbl[hidden],.gal[hidden]{display:none}
+table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
+th{font-size:12px;color:var(--g500);font-weight:600;background:var(--g50);position:sticky;top:0;z-index:2}
+tr.r{cursor:pointer}tr.r:hover td{background:var(--g50)}tr.r.sel td{background:#FFF6F5}
+td.th img{width:44px;height:44px;object-fit:cover;object-position:top;background:#fff;border:1px solid var(--line);border-radius:6px;display:block}
+td .m,.cb .m{font-weight:700}td .s{font-size:12px;color:var(--g500);max-width:420px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prog{display:inline-block;width:70px;height:6px;border-radius:3px;background:var(--g100);vertical-align:middle;margin-right:6px;overflow:hidden}.prog i{display:block;height:100%;background:var(--ok)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column}
+.card:hover{border-color:var(--g400);box-shadow:0 4px 16px rgba(0,0,0,.06)}.card.sel{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
+.cimg{position:relative;height:200px;background:var(--g50);border-bottom:1px solid var(--line)}
+.cimg img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.cimg input{position:absolute;top:10px;left:10px;width:18px;height:18px;accent-color:var(--red)}.cimg .cst{position:absolute;top:8px;right:8px}
+.cb{padding:10px 12px 12px;display:grid;gap:5px}.cb .s{font-size:12px;color:var(--g500);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:34px}
+.cb .meta{font-size:12px;color:var(--g700)}
+.empty{text-align:center;color:#999;padding:30px}
+.more{text-align:center;padding:14px}
+.selbar{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);background:var(--g900);color:#fff;border-radius:999px;padding:8px 10px 8px 18px;display:none;gap:10px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.selbar.on{display:flex}.selbar small{color:#cfc9bf}
+/* 비교 */
+.chd{display:flex;align-items:center;gap:12px;padding:10px 20px;background:#fff;border-bottom:1px solid var(--line)}
+.chd .id .m{font-weight:700;font-size:16px}.chd .id .s{font-size:12px;color:var(--g500);max-width:460px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chd .sp{flex:1}.chd a{font-size:12px;color:var(--g500)}
+.bar{display:flex;align-items:center;gap:8px;padding:8px 20px;background:#fff;border-bottom:1px solid var(--line)}
+.bar input{flex:1;border:1px solid var(--g300);border-radius:999px;padding:7px 14px;font:inherit;font-size:13px}.bar input.err{border-color:var(--bad)}
+.banner{padding:8px 20px;font-size:13px;background:var(--warnb);color:var(--warn);display:flex;gap:10px;align-items:center}.banner[hidden]{display:none}
+.main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 340px}
+.sc{position:relative;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
+.stage{position:sticky;top:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1px;background:var(--line)}
+.pane{display:flex;flex-direction:column;min-height:0;background:#EFEDE8}
+.ph{flex:none;min-height:34px;display:flex;align-items:center;gap:8px;padding:0 14px;font-size:12px;font-weight:700;color:var(--g700);background:#fff;border-bottom:1px solid var(--line)}
+.ph small{font-weight:400;color:var(--g400)}.ph .r{margin-left:auto;display:flex;gap:6px;align-items:center}.wait[hidden]{display:none}
+.crop-ed{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:6px 14px;background:#fff;border-bottom:1px solid var(--line);font-size:12px;font-weight:400}.crop-ed[hidden]{display:none}
+.crop-ed input{width:74px;border:1px solid var(--g300);border-radius:6px;padding:3px 6px;font:inherit;font-size:12px}
+.vp{flex:1;min-height:0;overflow:hidden;position:relative}
+.mv{position:absolute;left:0;right:0;top:0;will-change:transform}
+.lg{padding:10px 14px}.lg .crop{width:100%;overflow:hidden;background:#fff}.lg .crop img{width:100%;height:auto;display:block}
+.noshot{margin:20px;padding:16px;background:#fff;border-radius:10px;font-size:13px;color:var(--g700)}
+.mk{width:min(390px,calc(100% - 24px));margin:10px auto;background:#fff}
+.mk .h{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;font-size:13px;font-weight:700;border-bottom:1px solid #eee}
+.mk .h small{font-weight:400;color:#999;font-size:11px}
+.mk .stxt{white-space:pre-wrap;margin:0;padding:12px;font:14px/1.55 Roboto,'Helvetica Neue',Arial,'LINESeedSansTH',sans-serif;color:#222}
+.mk .lsum{padding:0 0 4px}.mk .lsum .lg-pdp-summary{padding:14px 12px!important}
+.mk .lsum h2{font-size:18px!important;line-height:1.35!important}.mk .lsum h3{font-size:15px!important}.mk .lsum p,.mk .lsum li{font-size:14px!important}
+.mk img.sl{width:100%;height:auto;display:block;background:#f4f4f4}.mk img.sl.cut{opacity:.3}
+.cutnote{padding:10px 12px;font-size:12px;color:#757575;background:#fafafa;border-top:1px dashed #ddd;border-bottom:1px dashed #ddd}
+.mk .nosum{padding:12px;font-size:12px;color:#999;background:#fafafa}
+.hl{position:absolute;left:0;right:0;pointer-events:none;border:2px solid var(--red);border-radius:4px;opacity:.85;transition:top .12s,height .12s}
+.prep{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#F8F7F5;z-index:5}.prep[hidden]{display:none}
+.prep .box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 26px;min-width:380px;max-width:560px}
+.prep h3{margin:0 0 10px;font-size:16px}.prep ol{margin:0 0 12px;padding-left:20px;font-size:13px;color:var(--g500)}.prep li.on{color:var(--g900);font-weight:700}.prep li.done{color:var(--ok)}
+.prep .err{color:var(--bad);font-size:13px;margin:0 0 10px;word-break:break-word}.prep p{font-size:12px;color:var(--g500);margin:0 0 12px}
+aside{display:flex;flex-direction:column;min-height:0;background:#fff;border-left:1px solid var(--line)}
+.ckh{padding:12px 16px 8px;border-bottom:1px solid var(--line)}.ckh b{font-size:14px}.ckh .p{font-size:12px;color:var(--g500);margin-top:2px}
+.ckh .prog{width:100%;height:6px;margin:8px 0 0}
+.ckl{flex:1;overflow:auto;padding:6px 8px 40px}
+.it{border-radius:10px;padding:8px 10px;margin:2px 0;cursor:pointer;border:1px solid transparent}
+.it:hover{background:var(--g50)}.it.cur{border-color:var(--red);background:#FFF8F7}
+.it .t{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600}
+.it .ic{flex:none;width:18px;height:18px;border-radius:50%;border:2px solid var(--g300);display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#fff}
+.it.seen .ic{background:var(--ok);border-color:var(--ok)}.it.seen .ic::after{content:'✓'}
+.it.flag .ic{background:var(--bad);border-color:var(--bad)}.it.flag .ic::after{content:'!'}
+.it .t .x{margin-left:auto}.it .t .x button{border:1px solid var(--g300);background:#fff;border-radius:999px;font-size:11px;padding:1px 8px;color:var(--g500);white-space:nowrap}
+.it.flag .t .x button{border-color:var(--bad);color:var(--bad)}
+.it .look{display:none;margin:6px 0 2px 26px;font-size:12px;color:var(--g700)}.it.cur .look,.it.flag .look{display:block}
+.it .look ul{margin:2px 0 6px;padding-left:16px}.it .look li{margin:1px 0}.it .look .sec{color:var(--g500);font-size:11.5px}
+.it .look .sec li{font-family:'LINESeedSansTH',var(--f)}
+.it .t small.sub{display:block;font-size:11px;font-weight:400;color:var(--g400)}.it .est{font-size:10.5px;color:var(--warn);background:var(--warnb);border-radius:999px;padding:0 6px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--g900);color:#fff;padding:9px 16px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50}.toast.on{opacity:1}
+</style></head>
+<body>
+<div class="top"><img src="/shared/assets/lg-logo.svg" alt="LG"><span class="t">CLIA Content Hub</span><span class="badge b-q" data-t="appTag"></span><span class="sp"></span>
+ <label class="who"><span data-t="who"></span><input id="who" data-tp="whoPh" autocomplete="name" onchange="setWho(this.value)"></label>
+ <select class="sel" id="country" onchange="setCountry(this.value)" aria-label="Country"></select>
+ <select class="sel" id="lang" onchange="setLang(this.value)" aria-label="Language"><option value="th">ไทย</option><option value="en">English</option><option value="ko">한국어</option></select>
+ <button class="btn" id="closeBtn" hidden onclick="parent.postMessage('clia-review-close','*')">✕</button></div>
+
+<main class="view on" id="vList">
+ <div class="lhd"><h2 data-t="h"></h2><span class="sp"></span><span class="cnt" id="okCnt"></span></div>
+ <div class="note" id="gateNote"></div>
+ <div class="flt">
+  <div class="tabs" id="tabs"></div>
+  <details class="dd" id="ddDv"><summary id="sDv"></summary><div class="ddp" id="pDv"></div></details>
+  <details class="dd" id="ddGrp"><summary id="sGrp"></summary><div class="ddp" id="pGrp"></div></details>
+  <label class="selall"><input type="checkbox" id="selAll" onchange="selAll(this.checked)"><span data-t="selAll"></span></label>
+  <span class="sp"></span>
+  <div class="seg" id="viewSeg"><button data-v="list" onclick="setView('list')" data-t="viewList"></button><button data-v="grid" onclick="setView('grid')" data-t="viewGrid"></button></div>
+  <input class="search" id="q" type="search" data-tp="search" oninput="S.q=this.value;S.page=1;renderList()">
+ </div>
+ <div class="tbl" id="listBox"><table><thead><tr>
+  <th style="width:36px"></th><th style="width:56px"></th><th data-t="thProd"></th><th data-t="thGrp"></th><th data-t="thImgs"></th><th data-t="thCk"></th><th data-t="thBuild"></th><th data-t="thSt"></th></tr></thead>
+  <tbody id="rows"></tbody></table><div class="more" id="moreL"></div></div>
+ <div class="gal" id="galBox" hidden><div class="cards" id="cards"></div><div class="more" id="moreG"></div></div>
+ <div class="selbar" id="selbar"><span id="selN"></span><small data-t="selNote"></small><button class="btn" onclick="bulkPrepare()" data-t="prepSel"></button><button class="btn pri" onclick="bulkApprove()" data-t="approveSel"></button><button class="btn" onclick="S.sel.clear();renderList()" data-t="cancel"></button></div>
+</main>
+
+<main class="view" id="vCmp">
+ <div class="chd"><button class="btn" onclick="closeCmp()">←</button><div class="id"><div class="m" id="cModel"></div><div class="s" id="cTitle" lang="th"></div></div>
+  <span id="cSt"></span><span id="cBuild"></span><a id="cLink" target="_blank" rel="noopener" data-t="openLg"></a><span class="sp"></span>
+  <div class="tabs"><button class="tab" data-c="shopee" onclick="setCh('shopee')">Shopee</button><button class="tab" data-c="lazada" onclick="setCh('lazada')">Lazada</button></div></div>
+ <div class="bar"><input id="cmt" data-tp="cmtPh"><button class="btn" id="bUndo" hidden onclick="unapprove()" data-t="unapprove"></button><button class="btn" id="bRej" onclick="reject()" data-t="reject"></button><span class="badge b-q" id="bWhy"></span><button class="btn pri" id="bOk" onclick="approve()" data-t="approve"></button></div>
+ <div class="banner" id="banner" hidden><span id="bannerTx"></span><button class="btn sm" onclick="prepareCur(false)" data-t="reprep"></button></div>
+ <div class="main">
+  <div class="sc" id="sc">
+   <div class="stage" id="stage">
+    <section class="pane"><div class="ph"><span data-t="lgHead"></span> <small data-t="lgSub"></small><span class="r"><span class="badge b-warn" id="cropWarn" hidden></span><span class="badge b-warn wait" id="wL" hidden data-t="waitL"></span><button class="btn sm" id="cropBtn" onclick="toggleCrop()" data-t="cropBtn"></button></span></div>
+     <div class="crop-ed" id="cropEd" hidden><span data-t="cropTop"></span><button class="btn sm" onclick="nudge('top',-100)">−100</button><button class="btn sm" onclick="nudge('top',-10)">−10</button><input id="cTop" type="number" onchange="cropInput()"><button class="btn sm" onclick="nudge('top',10)">+10</button><button class="btn sm" onclick="nudge('top',100)">+100</button>
+      <span data-t="cropBottom" style="margin-left:8px"></span><button class="btn sm" onclick="nudge('bottom',-100)">−100</button><button class="btn sm" onclick="nudge('bottom',-10)">−10</button><input id="cBot" type="number" onchange="cropInput()"><button class="btn sm" onclick="nudge('bottom',10)">+10</button><button class="btn sm" onclick="nudge('bottom',100)">+100</button>
+      <span class="sp" style="flex:1"></span><button class="btn sm" onclick="cropAuto()" data-t="cropAuto"></button><button class="btn sm" onclick="recapture()" data-t="recapture"></button><button class="btn sm pri" onclick="cropSave()" data-t="cropSave"></button></div>
+     <div class="vp" id="vpL"><div class="mv" id="mvL"></div></div></section>
+    <section class="pane"><div class="ph"><span id="rTitle"></span> <small id="rSub"></small><span class="r"><span class="badge b-warn wait" id="wR" hidden data-t="waitR"></span></span></div><div class="vp" id="vpR"><div class="mv" id="mvR"></div><div class="hl" id="hl" hidden></div></div></section>
+   </div>
+   <div id="spacer"></div>
+   <div class="prep" id="prep"><div class="box" id="prepBox"></div></div>
+  </div>
+  <aside><div class="ckh"><b data-t="ck"></b><div class="p" id="ckP"></div><div class="prog"><i id="ckBar"></i></div></div><div class="ckl" id="ckl"></div></aside>
+ </div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── 화면 문구 (한국어 · English · ไทย). 제품군 이름은 벌크 엑셀(bulk/bulk-i18n.js)과 같은 낱말. 태국어는 태국 법인 확인 전 ──
+const TX={
+ ko:{appTag:'검토 / 승인',who:'검토자',whoPh:'이름 (승인 기록에 남음)',whoNeed:'검토자 이름을 먼저 넣어 주세요',h:'검토 / 승인',
+  gateOn:'승인 전 제품은 빌더의 이미지 ZIP·HTML 복사와 벌크 엑셀 받기가 잠깁니다.',gateOff:'지금 서버는 다운로드 잠금이 꺼져 있어, 승인 전에도 빌더·벌크에서 받을 수 있습니다(빌더에는 「승인 전」 배지만 보임). 제품군 분류는 벌크 엑셀·허브 목록과 같은 규칙.',
+  tabAll:'전체',tabUnrev:'미검토',tabOk:'승인',tabRej:'반려',stUnrev:'미검토',stStale:'다시 확인',stOk:'승인',stRej:'반려',
+  grpBtn:'제품군',all:'전체',none:'선택 안 함',grpHint:'선택한 BU의 제품군만 고를 수 있습니다',search:'모델명·상품명 검색',viewList:'리스트',viewGrid:'갤러리',selAll:'전체 선택',
+  thProd:'제품',thGrp:'BU · 제품군',thImgs:'상세 이미지',thCk:'체크리스트',thBuild:'빌더 다운로드',thSt:'상태',
+  nImgs:n=>`${n}장`,shopeeN:n=>`Shopee ${n}장`,shopeeNT:n=>`Shopee에는 앞 ${n}장만`,bulkTag:'일괄 승인 · 체크 생략',diffN:n=>`다름 ${n}`,lock:'🔒 승인 전',lockOff:'승인 전 (잠금 꺼짐)',open:'열림',empty:'조건에 맞는 제품이 없어요',moreN:n=>`${n}개 더 보기`,
+  prepNone:'준비 전',prepPending:'준비 중…',prepStale:'내용 바뀜',prepError:'준비 실패',
+  selN:n=>`${n}개 선택`,selNote:'선택 승인은 체크리스트를 건너뛴 일괄 승인으로 기록됩니다',approveSel:'선택 승인',prepSel:'선택 준비',cancel:'취소',okCnt:(n,a)=>`승인 <b>${n}</b>/${a}`,
+  bulkToast:n=>`${n}개 일괄 승인`,bulkAsk:n=>`${n}개를 체크리스트 없이 승인할까요? 승인 기록에 「일괄 승인」으로 남습니다.`,prepToast:n=>`${n}개 준비 시작 (한 번에 2개씩)`,saveErr:e=>`저장하지 못함: ${e}`,loadErr:e=>`불러오지 못함: ${e}`,
+  cmtPh:'코멘트 (반려할 때 필요)',reject:'반려',approve:'승인',unapprove:'승인 취소',lgHead:'LG.COM 원본',lgSub:'PDP 첫 섹션 ~ 스펙 끝 · 전체 화면 캡처',waitL:'LG.com 끝 · 기다리는 중',waitR:'결과 끝 · 기다리는 중',openLg:'LG.com 열기 ↗',
+  rTitle:c=>`${c} 상세 설명`,rSub:'모바일 390 (폭 추정)',srcEdit:'빌더 편집본',srcCrawl:'크롤 결과로 만든 것',ck:'체크리스트',ckP:(c,a,b,n,all)=>`${c} 항목 ${a}/${b} 봤음 · 두 채널 합계 ${n}/${all}`,flag:'다름',flagOn:'다름 ✕',flagNote:'다름',
+  uspHead:'이 이미지의 lg.com USP',est:(a,b)=>`추정 ${a}~${b}장`,estT:'이미지 글에서 이 USP 이름을 찾지 못해 앞뒤 USP 사이로 추정',more:n=>`… ${n}개 더`,
+  whyDone:'이미 승인됨',whyFlag:n=>`다름 ${n}건 — 반려하세요`,whyProg:(n,a)=>`체크리스트 ${n}/${a} — 두 채널 끝까지 보기`,whyPrep:'두 채널 준비가 끝나야 승인할 수 있어요',whyStale:'내용이 바뀌었어요 — 다시 준비',
+  bLock:'빌더 🔒 승인 전',bLockOff:'빌더: 승인 전 (잠금 꺼짐)',bLockT:'승인 전에는 빌더 다운로드·복사 잠김',bOpen:'빌더 다운로드 열림',okToast:'승인했어요',rejPh:'반려 사유를 입력하세요',rejToast:'반려했어요',undoToast:'승인을 취소했어요',
+  mkShopee:(n,a)=>`이미지 ${n}/${a}장 · 글은 태그 없음`,mkLazada:a=>`이미지 ${a}장 · HTML`,noSum:'PDP 요약 없음',noSumErr:e=>`PDP 요약을 만들지 못함 — ${e}`,cutNote:k=>`아래 ${k}장은 Shopee 설명에 넣지 않음 (앞 12장·3,000자)`,
+  sumTitle:s=>s?'PDP 요약 (태그 없는 글)':'PDP 요약 (HTML)',lkBreak:'줄바꿈·글머리표(•)가 깨지지 않았는지',lkAi:'lg.com에 없는 내용·과장이 없는지 (AI가 쓴 글)',lkNum:'숫자·스펙 값이 lg.com과 같은지',
+  cutTitle:(a,b)=>`Shopee에 안 들어가는 이미지 ${a}~${b}`,cutSub:'앞 12장 · 설명 3,000자 규칙',cutLk1:c=>`Shopee는 앞 12장·설명 3,000자까지만 (요약 포함 ${c}자)`,cutLk2:'빠지는 USP·스펙·주의 문구 중 꼭 필요한 것이 없는지',
+  sub:i=>`상세 이미지 ${i}`,leadTag:' · 이미지 첫 글',plus:(t,n)=>`${t} 외 ${n}`,spec:'스펙 표',cont:' (계속)',intro:'도입 이미지 (대표 배너)',imgOnly:'이미지만 있는 부분',
+  lkUsp:['USP 이름·설명·숫자가 왼쪽 lg.com과 같은지','이미지가 잘리거나 빠진 곳이 없는지'],lkSpec:['스펙 값이 lg.com 스펙 표와 같은지','빠진 줄이 없는지'],lkOther:['왼쪽 lg.com 같은 부분과 같은지','이미지가 잘리거나 빠진 곳이 없는지'],
+  prepTitle:'비교 화면 준비 중',prepNote:'빌더·벌크 엑셀이 내려받는 것과 같은 이미지를 만듭니다. 처음이면 몇 분 걸릴 수 있어요.',prepErrT:'준비하지 못했어요',retry:'다시 시도',
+  steps:{queued:'차례 기다리는 중',html:'설명 HTML (편집본 또는 크롤 결과)',slices:'상세 이미지 만들기',summary:'PDP 요약',['fullshot-check']:'lg.com 캡처 찾기',fullshot:'lg.com 캡처하기',analyze:'PDP 범위 · USP 이름 찾기'},
+  staleTx:'준비한 뒤 크롤·편집본·요약 또는 lg.com 캡처가 바뀌었어요. 보이는 것은 예전 내용입니다.',reprep:'다시 준비',imgFail:s=>`이미지 일부를 못 불러온 채 만들어짐 (${s})`,
+  cropBtn:'범위 맞추기',cropTop:'시작(px)',cropBottom:'끝(px)',cropAuto:'자동으로',cropSave:'저장',recapture:'다시 캡처',cropSaved:'lg.com 범위를 저장했어요',cropAutoT:'자동 범위로 돌렸어요',
+  cropWarnTop:'시작 자동 감지 못 함',cropWarnBot:'끝 자동 감지 못 함',cropManual:'사람이 맞춘 범위',noShot:e=>`lg.com 캡처가 없어요 (${e}). 「다시 캡처」를 눌러 주세요.`,recapToast:'lg.com을 다시 캡처하고 있어요 (1~2분)'},
+ en:{appTag:'Review / Approve',who:'Reviewer',whoPh:'Name (saved with approvals)',whoNeed:'Enter the reviewer name first',h:'Review / Approve',
+  gateOn:'Products that are not approved cannot be downloaded from the builder (image ZIP, HTML copy) or bulk Excel.',gateOff:'The download lock is off on this server, so builder and bulk downloads still work before approval (the builder only shows a “Not approved” badge). Product groups follow the same rules as Bulk Excel and the hub list.',
+  tabAll:'All',tabUnrev:'To review',tabOk:'Approved',tabRej:'Rejected',stUnrev:'To review',stStale:'Check again',stOk:'Approved',stRej:'Rejected',
+  grpBtn:'Product group',all:'All',none:'None',grpHint:'Only groups in the selected BUs can be chosen',search:'Search model or product name',viewList:'List',viewGrid:'Gallery',selAll:'Select all',
+  thProd:'Product',thGrp:'BU · Group',thImgs:'Detail images',thCk:'Checklist',thBuild:'Builder download',thSt:'Status',
+  nImgs:n=>`${n} images`,shopeeN:n=>`Shopee ${n}`,shopeeNT:n=>`Only the first ${n} go to Shopee`,bulkTag:'Bulk approved · checklist skipped',diffN:n=>`${n} different`,lock:'🔒 Not approved',lockOff:'Not approved (lock off)',open:'Open',empty:'No products match',moreN:n=>`Show ${n} more`,
+  prepNone:'Not prepared',prepPending:'Preparing…',prepStale:'Changed',prepError:'Failed',
+  selN:n=>`${n} selected`,selNote:'Approve selected is saved as a bulk approval without the checklist',approveSel:'Approve selected',prepSel:'Prepare selected',cancel:'Cancel',okCnt:(n,a)=>`Approved <b>${n}</b>/${a}`,
+  bulkToast:n=>`${n} approved in bulk`,bulkAsk:n=>`Approve ${n} products without the checklist? The record will say “bulk approval”.`,prepToast:n=>`Preparing ${n} (2 at a time)`,saveErr:e=>`Could not save: ${e}`,loadErr:e=>`Could not load: ${e}`,
+  cmtPh:'Comment (required to reject)',reject:'Reject',approve:'Approve',unapprove:'Undo approval',lgHead:'LG.COM ORIGINAL',lgSub:'First PDP section to end of specs · full-page capture',waitL:'End of LG.com · waiting',waitR:'End of result · waiting',openLg:'Open LG.com ↗',
+  rTitle:c=>`${c} DESCRIPTION`,rSub:'Mobile 390 (estimated width)',srcEdit:'Builder edit',srcCrawl:'Made from the crawl',ck:'Checklist',ckP:(c,a,b,n,all)=>`${c}: ${a}/${b} viewed · both channels ${n}/${all}`,flag:'Different',flagOn:'Different ✕',flagNote:'different',
+  uspHead:'lg.com USPs in this image',est:(a,b)=>`est. image ${a}–${b}`,estT:'This USP name was not found in the image text, so it is placed between the USPs before and after it',more:n=>`… ${n} more`,
+  whyDone:'Already approved',whyFlag:n=>`${n} marked different — reject`,whyProg:(n,a)=>`Checklist ${n}/${a} — scroll both channels to the end`,whyPrep:'Both channels must be prepared before approval',whyStale:'The content changed — prepare again',
+  bLock:'Builder 🔒 not approved',bLockOff:'Builder: not approved (lock off)',bLockT:'Builder downloads and copies are locked until approval',bOpen:'Builder downloads open',okToast:'Approved',rejPh:'Enter a reason to reject',rejToast:'Rejected',undoToast:'Approval undone',
+  mkShopee:(n,a)=>`${n}/${a} images · text without tags`,mkLazada:a=>`${a} images · HTML`,noSum:'No PDP summary',noSumErr:e=>`Could not make the PDP summary — ${e}`,cutNote:k=>`The ${k} images below are not added to the Shopee description (first 12 · 3,000 characters)`,
+  sumTitle:s=>s?'PDP summary (plain text)':'PDP summary (HTML)',lkBreak:'Line breaks and bullets (•) are intact',lkAi:'Nothing that is not on lg.com, no exaggeration (written by AI)',lkNum:'Numbers and spec values match lg.com',
+  cutTitle:(a,b)=>`Images ${a}–${b} not sent to Shopee`,cutSub:'Rule: first 12 · 3,000-character description',cutLk1:c=>`Shopee takes the first 12 images and 3,000 characters (${c} with the summary)`,cutLk2:'No essential USP, spec or caution text is left out',
+  sub:i=>`Detail image ${i}`,leadTag:' · first text in the image',plus:(t,n)=>`${t} +${n}`,spec:'Spec table',cont:' (cont.)',intro:'Intro image (main banner)',imgOnly:'Image-only part',
+  lkUsp:['USP name, description and numbers match lg.com on the left','Nothing is cut off or missing in the image'],lkSpec:['Spec values match the lg.com spec table','No rows are missing'],lkOther:['Matches the same part of lg.com on the left','Nothing is cut off or missing in the image'],
+  prepTitle:'Preparing the comparison',prepNote:'Making the same images that the builder and bulk Excel download. The first time can take a few minutes.',prepErrT:'Could not prepare',retry:'Try again',
+  steps:{queued:'Waiting in line',html:'Description HTML (builder edit or crawl)',slices:'Making the detail images',summary:'PDP summary',['fullshot-check']:'Finding the lg.com capture',fullshot:'Capturing lg.com',analyze:'Finding the PDP range and USP names'},
+  staleTx:'The crawl, builder edit, summary or lg.com capture changed after this was prepared. You are looking at the old content.',reprep:'Prepare again',imgFail:s=>`Made while some images failed to load (${s})`,
+  cropBtn:'Adjust range',cropTop:'Start (px)',cropBottom:'End (px)',cropAuto:'Automatic',cropSave:'Save',recapture:'Capture again',cropSaved:'lg.com range saved',cropAutoT:'Back to the automatic range',
+  cropWarnTop:'Start not detected',cropWarnBot:'End not detected',cropManual:'Range set by a person',noShot:e=>`No lg.com capture (${e}). Press “Capture again”.`,recapToast:'Capturing lg.com again (1–2 minutes)'},
+ th:{appTag:'ตรวจสอบ / อนุมัติ',who:'ผู้ตรวจ',whoPh:'ชื่อ (บันทึกพร้อมการอนุมัติ)',whoNeed:'กรุณาใส่ชื่อผู้ตรวจก่อน',h:'ตรวจสอบ / อนุมัติ',
+  gateOn:'สินค้าที่ยังไม่อนุมัติจะดาวน์โหลด ZIP รูปภาพ คัดลอก HTML ในตัวสร้าง และ Bulk Excel ไม่ได้',gateOff:'เซิร์ฟเวอร์นี้ปิดการล็อกดาวน์โหลดอยู่ จึงยังดาวน์โหลดจากตัวสร้างและ Bulk ได้ก่อนอนุมัติ (ตัวสร้างแสดงแค่ป้าย “ยังไม่อนุมัติ”) กลุ่มสินค้าใช้กฎเดียวกับ Bulk Excel และรายการในฮับ',
+  tabAll:'ทั้งหมด',tabUnrev:'รอตรวจ',tabOk:'อนุมัติแล้ว',tabRej:'ปฏิเสธ',stUnrev:'รอตรวจ',stStale:'ตรวจอีกครั้ง',stOk:'อนุมัติแล้ว',stRej:'ปฏิเสธ',
+  grpBtn:'กลุ่มสินค้า',all:'ทั้งหมด',none:'ไม่ได้เลือก',grpHint:'เลือกได้เฉพาะกลุ่มสินค้าของ BU ที่เลือก',search:'ค้นหารุ่นหรือชื่อสินค้า',viewList:'รายการ',viewGrid:'แกลเลอรี',selAll:'เลือกทั้งหมด',
+  thProd:'สินค้า',thGrp:'BU · กลุ่ม',thImgs:'ภาพรายละเอียด',thCk:'เช็กลิสต์',thBuild:'ดาวน์โหลดในตัวสร้าง',thSt:'สถานะ',
+  nImgs:n=>`${n} ภาพ`,shopeeN:n=>`Shopee ${n} ภาพ`,shopeeNT:n=>`Shopee ใส่ได้เฉพาะ ${n} ภาพแรก`,bulkTag:'อนุมัติแบบกลุ่ม · ข้ามเช็กลิสต์',diffN:n=>`ไม่ตรง ${n}`,lock:'🔒 ยังไม่อนุมัติ',lockOff:'ยังไม่อนุมัติ (ปิดล็อก)',open:'เปิดแล้ว',empty:'ไม่มีสินค้าที่ตรงเงื่อนไข',moreN:n=>`ดูเพิ่มอีก ${n} รายการ`,
+  prepNone:'ยังไม่ได้เตรียม',prepPending:'กำลังเตรียม…',prepStale:'เนื้อหาเปลี่ยน',prepError:'เตรียมไม่สำเร็จ',
+  selN:n=>`เลือก ${n} รายการ`,selNote:'อนุมัติที่เลือกจะบันทึกเป็นการอนุมัติแบบกลุ่มโดยไม่ผ่านเช็กลิสต์',approveSel:'อนุมัติที่เลือก',prepSel:'เตรียมที่เลือก',cancel:'ยกเลิก',okCnt:(n,a)=>`อนุมัติแล้ว <b>${n}</b>/${a}`,
+  bulkToast:n=>`อนุมัติแบบกลุ่ม ${n} รายการ`,bulkAsk:n=>`อนุมัติ ${n} รายการโดยไม่ผ่านเช็กลิสต์หรือไม่? บันทึกจะแสดงว่า “อนุมัติแบบกลุ่ม”`,prepToast:n=>`เริ่มเตรียม ${n} รายการ (ครั้งละ 2)`,saveErr:e=>`บันทึกไม่สำเร็จ: ${e}`,loadErr:e=>`โหลดไม่สำเร็จ: ${e}`,
+  cmtPh:'ความคิดเห็น (จำเป็นเมื่อปฏิเสธ)',reject:'ปฏิเสธ',approve:'อนุมัติ',unapprove:'ยกเลิกการอนุมัติ',lgHead:'ต้นฉบับ LG.COM',lgSub:'ตั้งแต่ส่วนแรกของ PDP ถึงท้ายสเปค · ภาพหน้าจอทั้งหน้า',waitL:'สุดหน้า LG.com · รออยู่',waitR:'สุดผลลัพธ์ · รออยู่',openLg:'เปิด LG.com ↗',
+  rTitle:c=>`รายละเอียดสินค้า ${c}`,rSub:'มือถือ 390 (ความกว้างโดยประมาณ)',srcEdit:'ฉบับแก้ไขในตัวสร้าง',srcCrawl:'สร้างจากข้อมูลที่ครอว์ล',ck:'เช็กลิสต์',ckP:(c,a,b,n,all)=>`${c}: ดูแล้ว ${a}/${b} · รวม 2 ช่องทาง ${n}/${all}`,flag:'ไม่ตรง',flagOn:'ไม่ตรง ✕',flagNote:'ไม่ตรง',
+  uspHead:'USP ของ lg.com ในภาพนี้',est:(a,b)=>`ประมาณภาพที่ ${a}–${b}`,estT:'ไม่พบชื่อ USP นี้ในข้อความของภาพ จึงประมาณว่าอยู่ระหว่าง USP ก่อนและหลัง',more:n=>`… อีก ${n} รายการ`,
+  whyDone:'อนุมัติแล้ว',whyFlag:n=>`ไม่ตรง ${n} รายการ — กรุณาปฏิเสธ`,whyProg:(n,a)=>`เช็กลิสต์ ${n}/${a} — เลื่อนดูทั้ง 2 ช่องทางจนจบ`,whyPrep:'ต้องเตรียมทั้ง 2 ช่องทางให้เสร็จก่อนอนุมัติ',whyStale:'เนื้อหาเปลี่ยน — เตรียมใหม่',
+  bLock:'ตัวสร้าง 🔒 ยังไม่อนุมัติ',bLockOff:'ตัวสร้าง: ยังไม่อนุมัติ (ปิดล็อก)',bLockT:'ล็อกการดาวน์โหลดและคัดลอกในตัวสร้างจนกว่าจะอนุมัติ',bOpen:'เปิดการดาวน์โหลดในตัวสร้างแล้ว',okToast:'อนุมัติแล้ว',rejPh:'กรุณาใส่เหตุผลที่ปฏิเสธ',rejToast:'ปฏิเสธแล้ว',undoToast:'ยกเลิกการอนุมัติแล้ว',
+  mkShopee:(n,a)=>`${n}/${a} ภาพ · ข้อความไม่มีแท็ก`,mkLazada:a=>`${a} ภาพ · HTML`,noSum:'ไม่มีสรุป PDP',noSumErr:e=>`สร้างสรุป PDP ไม่สำเร็จ — ${e}`,cutNote:k=>`${k} ภาพด้านล่างจะไม่ใส่ในคำอธิบาย Shopee (12 ภาพแรก · 3,000 ตัวอักษร)`,
+  sumTitle:s=>s?'สรุป PDP (ข้อความไม่มีแท็ก)':'สรุป PDP (HTML)',lkBreak:'การขึ้นบรรทัดและสัญลักษณ์ (•) ไม่เพี้ยน',lkAi:'ไม่มีเนื้อหาที่ไม่มีใน lg.com หรือเกินจริง (เขียนโดย AI)',lkNum:'ตัวเลขและค่าสเปคตรงกับ lg.com',
+  cutTitle:(a,b)=>`ภาพ ${a}–${b} ที่ไม่ใส่ใน Shopee`,cutSub:'กฎ: 12 ภาพแรก · คำอธิบาย 3,000 ตัวอักษร',cutLk1:c=>`Shopee รับได้ 12 ภาพแรกและ 3,000 ตัวอักษร (รวมสรุป ${c} ตัวอักษร)`,cutLk2:'ไม่มี USP สเปค หรือข้อความคำเตือนที่จำเป็นถูกตัดออก',
+  sub:i=>`ภาพรายละเอียด ${i}`,leadTag:' · ข้อความแรกในภาพ',plus:(t,n)=>`${t} +${n}`,spec:'ตารางสเปค',cont:' (ต่อ)',intro:'ภาพแนะนำ (แบนเนอร์หลัก)',imgOnly:'ส่วนที่มีแต่ภาพ',
+  lkUsp:['ชื่อ USP คำอธิบาย และตัวเลขตรงกับ lg.com ด้านซ้าย','ภาพไม่ถูกตัดหรือขาดหาย'],lkSpec:['ค่าสเปคตรงกับตารางสเปคของ lg.com','ไม่มีแถวที่ขาดหาย'],lkOther:['ตรงกับส่วนเดียวกันของ lg.com ด้านซ้าย','ภาพไม่ถูกตัดหรือขาดหาย'],
+  prepTitle:'กำลังเตรียมหน้าเปรียบเทียบ',prepNote:'สร้างภาพชุดเดียวกับที่ตัวสร้างและ Bulk Excel ดาวน์โหลด ครั้งแรกอาจใช้เวลาหลายนาที',prepErrT:'เตรียมไม่สำเร็จ',retry:'ลองอีกครั้ง',
+  steps:{queued:'รอคิว',html:'HTML คำอธิบาย (ฉบับแก้ไขหรือข้อมูลครอว์ล)',slices:'สร้างภาพรายละเอียด',summary:'สรุป PDP',['fullshot-check']:'หาภาพหน้าจอ lg.com',fullshot:'ถ่ายภาพหน้าจอ lg.com',analyze:'หาช่วง PDP และชื่อ USP'},
+  staleTx:'ข้อมูลครอว์ล ฉบับแก้ไข สรุป หรือภาพหน้าจอ lg.com เปลี่ยนหลังจากเตรียมแล้ว สิ่งที่เห็นเป็นเนื้อหาเก่า',reprep:'เตรียมใหม่',imgFail:s=>`สร้างขณะที่บางภาพโหลดไม่ได้ (${s})`,
+  cropBtn:'ปรับช่วง',cropTop:'เริ่ม (px)',cropBottom:'สิ้นสุด (px)',cropAuto:'อัตโนมัติ',cropSave:'บันทึก',recapture:'ถ่ายใหม่',cropSaved:'บันทึกช่วง lg.com แล้ว',cropAutoT:'กลับไปใช้ช่วงอัตโนมัติแล้ว',
+  cropWarnTop:'หาจุดเริ่มอัตโนมัติไม่ได้',cropWarnBot:'หาจุดสิ้นสุดอัตโนมัติไม่ได้',cropManual:'ช่วงที่คนปรับ',noShot:e=>`ไม่มีภาพหน้าจอ lg.com (${e}) กรุณากด “ถ่ายใหม่”`,recapToast:'กำลังถ่ายภาพหน้าจอ lg.com ใหม่ (1–2 นาที)'}};
+const GRP={ko:{TV:'TV',Audio:'오디오',Monitor:'모니터',Laptop:'노트북',Projector:'프로젝터',Fridge:'냉장고',Washer:'세탁기',Dryer:'건조기',Vacuum:'청소기',Dishwasher:'식기세척기',Cooking:'조리기기',Styler:'스타일러',AC:'에어컨',Purifier:'공기청정기',Dehumidifier:'제습기',Other:'기타'},
+ en:{TV:'TV',Audio:'Audio',Monitor:'Monitor',Laptop:'Laptop',Projector:'Projector',Fridge:'Fridge',Washer:'Washer',Dryer:'Dryer',Vacuum:'Vacuum',Dishwasher:'Dishwasher',Cooking:'Cooking',Styler:'Styler',AC:'Air conditioner',Purifier:'Air purifier',Dehumidifier:'Dehumidifier',Other:'Other'},
+ th:{TV:'ทีวี',Audio:'เครื่องเสียง',Monitor:'จอมอนิเตอร์',Laptop:'แล็ปท็อป',Projector:'โปรเจกเตอร์',Fridge:'ตู้เย็น',Washer:'เครื่องซักผ้า',Dryer:'เครื่องอบผ้า',Vacuum:'เครื่องดูดฝุ่น',Dishwasher:'เครื่องล้างจาน',Cooking:'เครื่องครัว',Styler:'สไตเลอร์',AC:'เครื่องปรับอากาศ',Purifier:'เครื่องฟอกอากาศ',Dehumidifier:'เครื่องลดความชื้น',Other:'อื่น ๆ'}};
+const GRP_ORDER={MS:['TV','Audio','Monitor','Laptop','Projector','Other'],HS:['Fridge','Washer','Dryer','Vacuum','Dishwasher','Cooking','Styler','Other'],ES:['AC','Purifier','Dehumidifier']};
+const STEPS=['queued','html','slices','summary','fullshot-check','fullshot','analyze'];
+const CHS=['shopee','lazada'];
+const PAGE=120;   // 목록은 120개씩 그린다 (제품이 많아도 가볍게)
+
+const qs=new URLSearchParams(location.search);
+const ls={get:k=>{try{return localStorage.getItem(k);}catch(_){return null;}},set:(k,v)=>{try{localStorage.setItem(k,v);}catch(_){}}};
+const qLang=(qs.get('lang')||ls.get('clia-review-lang')||'').slice(0,2);
+const S={lang:TX[qLang]?qLang:(qLang==='ko'?'ko':'en'),country:(qs.get('country')||qs.get('corp')||'th').toLowerCase(),view:ls.get('clia-review-view')==='grid'?'grid':'list',
+  tab:'all',q:'',dv:new Set(['MS','HS','ES']),grp:null,sel:new Set(),page:1,who:ls.get('clia-review-who')||'',gate:false,countries:{}};
+let DATA=[];        // 목록 (/api/v1/review/list)
+let C=null;         // 비교 화면: { p, ch, d: { shopee, lazada }, st: { shopee, lazada }, seen, flags }
+const t=(k,...a)=>{const v=TX[S.lang][k]??TX.en[k];return typeof v==='function'?v(...a):v;};
+const gname=g=>GRP[S.lang][g]||g;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){const x=$('toast');x.textContent=m;x.classList.add('on');clearTimeout(x._h);x._h=setTimeout(()=>x.classList.remove('on'),2600);}
+async function api(path,body){
+  const r=await fetch(path,body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j.error||j.detail||('HTTP '+r.status));
+  return j;
+}
+// Lazada 요약은 서버가 만든 HTML — 혹시 모를 스크립트·이벤트 속성은 빼고 넣는다
+function safeHtml(h){const d=new DOMParser().parseFromString(String(h||''),'text/html');d.querySelectorAll('script,iframe,object,embed,link,meta').forEach(e=>e.remove());
+  d.querySelectorAll('*').forEach(e=>[...e.attributes].forEach(a=>{if(/^on/i.test(a.name)||/^\s*javascript:/i.test(a.value))e.removeAttribute(a.name);}));return d.body.innerHTML;}
+
+function applyStatic(){document.documentElement.lang=S.lang;$('lang').value=S.lang;
+  document.querySelectorAll('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));document.querySelectorAll('[data-tp]').forEach(e=>e.placeholder=t(e.dataset.tp));
+  $('who').value=S.who;$('gateNote').textContent=S.gate?t('gateOn'):t('gateOff');}
+function setLang(l){S.lang=TX[l]?l:'en';ls.set('clia-review-lang',S.lang);try{const u=new URL(location.href);u.searchParams.set('lang',S.lang);history.replaceState(null,'',u);}catch(_){}
+  applyStatic();if(C)renderCmp(false,G?G.s:0);else renderList();}
+function setWho(v){S.who=String(v||'').trim().slice(0,120);ls.set('clia-review-who',S.who);$('who').classList.remove('err');}
+function needWho(){if(S.who)return false;const w=$('who');w.classList.add('err');w.focus();toast(t('whoNeed'));return true;}
+function setView(v){S.view=v;ls.set('clia-review-view',v);renderList();}
+function setCountry(c){S.country=c;S.sel.clear();S.page=1;try{const u=new URL(location.href);u.searchParams.set('country',c);history.replaceState(null,'',u);}catch(_){}load();}
+
+// ── 상태 ──
+const stOf=p=>({approved:'ok',rejected:'rej',stale:'stale'}[p.approval.status]||'unrev');
+const ST={unrev:['stUnrev','b-q'],stale:['stStale','b-warn'],ok:['stOk','b-ok'],rej:['stRej','b-bad']};
+const stBadge=p=>{const s=stOf(p);return `<span class="badge ${ST[s][1]}" title="${esc([p.approval.by,p.approval.comment].filter(Boolean).join(' · '))}">${t(ST[s][0])}</span>`;};
+const lockBadge=p=>stOf(p)==='ok'?`<span class="badge b-ok">${t('open')}</span>`:S.gate?`<span class="badge b-lock">${t('lock')}</span>`:`<span class="badge b-q">${t('lockOff')}</span>`;
+// 체크리스트 진행은 이 브라우저에 남긴다 (본 이미지 묶음 해시가 같을 때만 이어서) — 승인 기록은 서버
+const progKey=slug=>'clia-review-prog:'+slug;
+const savedProg=p=>{try{const x=JSON.parse(ls.get(progKey(p.slug))||'null');if(x&&CHS.every(ch=>x.h[ch]===(p.prep[ch].hash||'')))return x;}catch(_){}return null;};
+function prepCell(p){
+  const ss=CHS.map(ch=>p.prep[ch].state);
+  if(ss.includes('pending'))return `<span class="badge b-q">${t('prepPending')}</span>`;
+  if(ss.includes('error'))return `<span class="badge b-bad" title="${esc(CHS.map(ch=>p.prep[ch].error).filter(Boolean).join(' · '))}">${t('prepError')}</span>`;
+  const s=p.prep.shopee.n?p.prep.shopee:p.prep.lazada;
+  if(!s.n)return `<span class="badge b-q">${t('prepNone')}</span>`;
+  return `${t('nImgs',s.n)}${p.prep.shopee.n&&p.prep.shopee.shopeeN<p.prep.shopee.n?` <span class="badge b-warn" title="${esc(t('shopeeNT',p.prep.shopee.shopeeN))}">${t('shopeeN',p.prep.shopee.shopeeN)}</span>`:''}${ss.includes('stale')?` <span class="badge b-warn">${t('prepStale')}</span>`:''}`;
+}
+function ckCell(p){if(stOf(p)==='ok'&&p.approval.via==='bulk')return `<span class="badge b-warn">${t('bulkTag')}</span>`;
+  const x=savedProg(p);if(!x)return '<span style="color:var(--g400)">—</span>';
+  return `<span class="prog"><i style="width:${x.all?x.n/x.all*100:0}%"></i></span>${x.n}/${x.all}${x.flags?` <span class="badge b-bad">${t('diffN',x.flags)}</span>`:''}`;}
+const thumbOf=p=>p.prep.shopee.first||p.prep.lazada.first||p.thumb||'';
+
+// ── 목록 (리스트 · 갤러리) ──
+const TABS=[['all','tabAll',p=>1],['unrev','tabUnrev',p=>['unrev','stale'].includes(stOf(p))],['ok','tabOk',p=>stOf(p)==='ok'],['rej','tabRej',p=>stOf(p)==='rej']];
+const matchQ=p=>!S.q||(p.model+' '+p.title).toLowerCase().includes(S.q.toLowerCase());
+function inFilter(p){return S.dv.has(p.dv)&&(!S.grp||S.grp.has(p.grp))&&matchQ(p);}
+function visible(){const f=TABS.find(x=>x[0]===S.tab)[2];return DATA.filter(p=>inFilter(p)&&f(p));}
+function renderFilters(){
+  const base=DATA.filter(matchQ);
+  $('tabs').innerHTML=TABS.map(([k,l,f])=>`<button class="tab ${S.tab===k?'on':''}" onclick="S.tab='${k}';S.page=1;renderList()">${t(l)}<b>${DATA.filter(p=>inFilter(p)&&f(p)).length}</b></button>`).join('');
+  const dvs=['MS','HS','ES'];
+  $('sDv').textContent='BU: '+(S.dv.size===3?t('all'):S.dv.size?[...S.dv].join(', '):t('none'));
+  $('pDv').innerHTML=`<div class="row"><button onclick="S.dv=new Set(['MS','HS','ES']);S.grp=null;renderList()">${t('all')}</button><button onclick="S.dv=new Set();renderList()">${t('none')}</button></div>`+
+    dvs.map(d=>`<label><input type="checkbox" ${S.dv.has(d)?'checked':''} onchange="tgDv('${d}',this.checked)">${d}<span class="n">${base.filter(p=>p.dv===d).length}</span></label>`).join('');
+  const grps=dvs.filter(d=>S.dv.has(d)).flatMap(d=>GRP_ORDER[d].map(g=>[d,g])).filter(([d,g])=>base.some(p=>p.dv===d&&p.grp===g));
+  $('sGrp').textContent=t('grpBtn')+': '+(!S.grp?t('all'):S.grp.size?[...S.grp].map(gname).join(', '):t('none'));
+  $('pGrp').innerHTML=`<div class="row"><button onclick="S.grp=null;renderList()">${t('all')}</button><button onclick="S.grp=new Set();renderList()">${t('none')}</button></div>`+
+    grps.map(([d,g])=>`<label><input type="checkbox" ${!S.grp||S.grp.has(g)?'checked':''} onchange="tgGrp('${g}',this.checked)">${gname(g)} <span class="n">${d} · ${base.filter(p=>p.dv===d&&p.grp===g).length}</span></label>`).join('')+
+    `<div class="hint">${t('grpHint')}</div>`;
+  document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.view));
+}
+function tgDv(d,on){on?S.dv.add(d):S.dv.delete(d);S.page=1;renderList();}
+function tgGrp(g,on){if(!S.grp)S.grp=new Set(DATA.map(p=>p.grp));on?S.grp.add(g):S.grp.delete(g);S.page=1;renderList();}
+function renderList(){
+  renderFilters();const all=visible(),rows=all.slice(0,S.page*PAGE),grid=S.view==='grid',rest=all.length-rows.length;
+  $('listBox').hidden=grid;$('galBox').hidden=!grid;
+  const box=p=>`<input type="checkbox" ${S.sel.has(p.slug)?'checked':''} onclick="event.stopPropagation()" onchange="sel('${p.slug}',this.checked)">`;
+  const img=p=>thumbOf(p)?`<img loading="lazy" src="${esc(thumbOf(p))}" alt="">`:'';
+  const more=rest>0?`<button class="btn" onclick="S.page++;renderList()">${t('moreN',Math.min(rest,PAGE))}</button>`:'';
+  if(!grid){$('rows').innerHTML=rows.map(p=>`<tr class="r ${S.sel.has(p.slug)?'sel':''}" onclick="openCmp('${p.slug}')">
+    <td>${box(p)}</td><td class="th">${img(p)}</td>
+    <td><div class="m">${esc(p.model)}</div><div class="s" lang="th">${esc(p.title)}</div></td>
+    <td>${p.dv} · ${gname(p.grp)}</td><td>${prepCell(p)}</td><td>${ckCell(p)}</td><td>${lockBadge(p)}</td><td>${stBadge(p)}</td></tr>`).join('')||`<tr><td colspan="8" class="empty">${t('empty')}</td></tr>`;$('moreL').innerHTML=more;}
+  else{$('cards').innerHTML=rows.map(p=>`<div class="card ${S.sel.has(p.slug)?'sel':''}" onclick="openCmp('${p.slug}')">
+    <div class="cimg">${img(p)}${box(p)}<span class="cst">${stBadge(p)}</span></div>
+    <div class="cb"><div class="m">${esc(p.model)}</div><div class="s" lang="th">${esc(p.title)}</div>
+    <div class="meta">${p.dv} · ${gname(p.grp)} · ${prepCell(p)}</div><div class="meta">${ckCell(p)}</div><div class="meta">${lockBadge(p)}</div></div></div>`).join('')||`<div class="empty">${t('empty')}</div>`;$('moreG').innerHTML=more;}
+  $('selAll').checked=all.length>0&&all.every(p=>S.sel.has(p.slug));$('selAll').disabled=!all.length;
+  $('selbar').classList.toggle('on',S.sel.size>0);$('selN').textContent=t('selN',S.sel.size);
+  const n=DATA.filter(p=>stOf(p)==='ok').length;$('okCnt').innerHTML=t('okCnt',n,DATA.length);
+}
+function sel(slug,on){on?S.sel.add(slug):S.sel.delete(slug);renderList();}
+function selAll(on){visible().forEach(p=>on?S.sel.add(p.slug):S.sel.delete(p.slug));renderList();}
+async function bulkApprove(){
+  if(needWho())return;
+  const ps=DATA.filter(p=>S.sel.has(p.slug)&&stOf(p)!=='ok');if(!ps.length){S.sel.clear();renderList();return;}
+  if(!confirm(t('bulkAsk',ps.length)))return;
+  const hashes={};ps.forEach(p=>{hashes[p.slug]={shopee:p.prep.shopee.hash,lazada:p.prep.lazada.hash};});
+  try{const j=await api('/api/v1/approvals',{slugs:ps.map(p=>p.slug),state:'approved',via:'bulk',by:S.who,hashes});
+    ps.forEach(p=>{if(j.items[p.slug])p.approval={...p.approval,...j.items[p.slug]};});S.sel.clear();renderList();toast(t('bulkToast',Object.keys(j.items).length));}
+  catch(e){toast(t('saveErr',e.message));}
+}
+async function bulkPrepare(){
+  const ps=DATA.filter(p=>S.sel.has(p.slug));let n=0;
+  for(const p of ps)for(const ch of CHS){if(['ready','pending'].includes(p.prep[ch].state))continue;
+    try{await api(`/api/v1/review/item/${encodeURIComponent(p.slug)}/prepare`,{channel:ch});p.prep[ch].state='pending';n++;}catch(e){toast(t('saveErr',e.message));return;}}
+  S.sel.clear();renderList();toast(t('prepToast',ps.length));pollList();
+}
+let listTimer=null;
+function pollList(){clearTimeout(listTimer);if(DATA.some(p=>CHS.some(ch=>p.prep[ch].state==='pending')))listTimer=setTimeout(()=>{if(!C)load(true);else pollList();},5000);}
+async function load(quiet){
+  try{const j=await api('/api/v1/review/list?country='+encodeURIComponent(S.country));
+    S.gate=!!j.gate;S.countries=j.countries||{};DATA=j.products||[];
+    const cs=Object.entries(S.countries).sort((a,b)=>b[1]-a[1]);if(!S.countries[S.country])cs.unshift([S.country,0]);
+    $('country').innerHTML=cs.map(([c,n])=>`<option value="${esc(c)}">${esc(c.toUpperCase())} · ${n}</option>`).join('');$('country').value=S.country;
+    applyStatic();if(!C)renderList();pollList();
+    if(!quiet&&qs.get('url')){const u=qs.get('url').replace(/\/+$/,'').toLowerCase(),p=DATA.find(x=>x.url.replace(/\/+$/,'').toLowerCase()===u);if(p)openCmp(p.slug);}
+  }catch(e){if(!quiet){$('rows').innerHTML=`<tr><td colspan="8" class="empty">${esc(t('loadErr',e.message))}</td></tr>`;}}
+}
+
+// ── 비교 화면 ──
+let G=null,itemTimer=null;
+function closeCmp(){C=null;G=null;clearTimeout(itemTimer);$('vList').classList.add('on');$('vCmp').classList.remove('on');try{const u=new URL(location.href);u.searchParams.delete('url');history.replaceState(null,'',u);}catch(_){}load(true);renderList();}
+async function openCmp(slug){
+  const p=DATA.find(x=>x.slug===slug);if(!p)return;
+  C={p,ch:'shopee',d:{},st:{},err:{},seen:new Set(),flags:new Set()};
+  try{const x=JSON.parse(ls.get(progKey(slug))||'null');if(x&&x.seen)C.seen=new Set(x.seen);}catch(_){}
+  const c=$('cmt');c.value='';c.classList.remove('err');
+  $('vList').classList.remove('on');$('vCmp').classList.add('on');$('cropEd').hidden=true;
+  try{const u=new URL(location.href);u.searchParams.set('url',p.url);history.replaceState(null,'',u);}catch(_){}
+  $('mvL').innerHTML='';$('mvR').innerHTML='';$('ckl').innerHTML='';
+  await fetchItems(true);
+}
+// 두 채널을 읽고, 준비 안 된 채널은 준비를 시작한다. 준비 중이면 2초마다 다시 읽는다
+async function fetchItems(start){
+  if(!C)return;const slug=C.p.slug;clearTimeout(itemTimer);
+  await Promise.all(CHS.map(async ch=>{
+    try{let j=await api(`/api/v1/review/item/${encodeURIComponent(slug)}?channel=${ch}`);
+      if(start&&j.state==='none'){await api(`/api/v1/review/item/${encodeURIComponent(slug)}/prepare`,{channel:ch});j={...j,state:'pending',job:{step:'queued'}};}
+      if(!C||C.p.slug!==slug)return;
+      C.st[ch]=j;C.err[ch]='';if(j.data)C.d[ch]=j.data;C.p.approval=j.approval;S.gate=!!j.gate;
+      C.p.prep[ch]={...C.p.prep[ch],state:j.state,hash:j.data?j.data.hash:'',n:j.data?j.data.slices.length:0,shopeeN:j.data?j.data.shopeeN:0,first:j.data&&j.data.slices[0]?j.data.slices[0].src:''};
+    }catch(e){if(C)C.err[ch]=e.message;}
+  }));
+  if(!C||C.p.slug!==slug)return;
+  // 바뀐 게 없으면(준비 중 다른 채널을 다시 읽은 것뿐) 오른쪽 이미지를 다시 그리지 않는다 — 깜빡임·다시 받기 없이
+  const key=CHS.map(ch=>(C.d[ch]?C.d[ch].prepared_at+'/'+(C.d[ch].shot?C.d[ch].shot.top+'-'+C.d[ch].shot.bottom:''):'')+':'+(C.st[ch]&&C.st[ch].state)+':'+(C.err[ch]||'')).join('|');
+  if(C.key===key&&G){renderPrep();renderBar();renderCk();}
+  else{C.key=key;renderCmp(!G,G?G.s:0);}
+  if(CHS.some(ch=>C.st[ch]&&C.st[ch].state==='pending'))itemTimer=setTimeout(()=>fetchItems(false),2000);
+}
+async function prepareCur(recap){
+  if(!C)return;const slug=C.p.slug;
+  try{for(const ch of CHS){
+      // 다시 캡처는 한 채널에서만 찍고, 다른 채널은 그 캡처를 기다렸다가 쓴다 (review.js fullshot)
+      await api(`/api/v1/review/item/${encodeURIComponent(slug)}/prepare`,{channel:ch,force:true,recapture:recap&&ch==='shopee'});}
+    C.d={};G=null;await fetchItems(false);}catch(e){toast(t('saveErr',e.message));}
+}
+function setCh(c){if(!C)return;const keep=G?G.s:0;C.ch=c;CROP=null;$('cropEd').hidden=true;renderCmp(false,keep);}
+const ready=ch=>C&&C.st[ch]&&C.st[ch].state==='ready'&&C.d[ch];
+// 체크리스트 항목 (채널별). 상세 이미지 id 는 이미지 묶음 해시 + 번호 → 두 채널이 같은 이미지면 한 번 보면 둘 다 봄
+function items(ch){
+  const d=C.d[ch];if(!d)return [];const shp=ch==='shopee',n=shp?d.shopeeN:d.slices.length,out=[];
+  if(shp?d.sumText:d.sum)out.push({id:'sum@'+ch,anchor:'sum',title:t('sumTitle',shp),look:[...(shp?[t('lkBreak')]:[]),t('lkAi'),t('lkNum')]});
+  d.slices.forEach((s,i)=>{if(shp&&i>=n)return;out.push(sliceItem(d,i));});
+  if(shp&&n<d.slices.length)out.push({id:d.hash+':cut',anchor:'cut',title:t('cutTitle',n+1,d.slices.length),sub:t('cutSub'),
+    usps:(d.sliceUsps||[]).slice(n).flat(),look:[t('cutLk1',d.shopeeChars.toLocaleString()),t('cutLk2')]});
+  return out;
+}
+function sliceItem(d,i){const us=(d.sliceUsps||[])[i]||[],sec=(d.secs||[])[i]||[],kind=(d.kind||[])[i]||'',lead=(d.lead||[])[i]||'';
+  const title=us.length?(us.length>1?t('plus',us[0].t,us.length-1):us[0].t):kind==='spec'?t('spec'):kind==='spec+'?t('spec')+t('cont'):lead?lead:sec.length?sec[0]:i===0?t('intro'):t('imgOnly');
+  const look=us.length?t('lkUsp'):kind.startsWith('spec')?t('lkSpec'):t('lkOther');
+  return {id:d.hash+':s'+i,anchor:'s'+i,title,sub:t('sub',i+1)+(!us.length&&!kind&&lead?t('leadTag'):''),usps:us,look};}
+const allItems=()=>{const m=new Map();CHS.forEach(ch=>items(ch).forEach(it=>m.set(it.id,it)));return [...m.values()];};
+function progress(){const a=allItems();return {n:a.filter(it=>C.seen.has(it.id)).length,all:a.length,flags:C.flags.size};}
+function saveProg(){if(!C)return;const pr=progress();ls.set(progKey(C.p.slug),JSON.stringify({seen:[...C.seen],n:pr.n,all:pr.all,flags:pr.flags,h:{shopee:C.d.shopee?C.d.shopee.hash:'',lazada:C.d.lazada?C.d.lazada.hash:''}}));}
+
+function renderPrep(){
+  const ch=C.ch,st=C.st[ch],box=$('prepBox'),err=C.err[ch]||(st&&st.state==='error'&&st.job&&st.job.error);
+  const showing=!!C.d[ch];
+  $('prep').hidden=showing&&!err;
+  if(showing&&!err)return;
+  if(err){box.innerHTML=`<h3>${t('prepErrT')}</h3><div class="err">${esc(err)}</div><button class="btn pri" onclick="prepareCur(false)">${t('retry')}</button>`;return;}
+  const cur=st&&st.job?st.job.step:'queued',k=STEPS.indexOf(cur);
+  box.innerHTML=`<h3>${t('prepTitle')} · ${ch==='shopee'?'Shopee':'Lazada'}</h3><p>${t('prepNote')}</p><ol>${STEPS.filter(s=>s!=='fullshot'||cur==='fullshot').map(s=>`<li class="${s===cur?'on':STEPS.indexOf(s)<k?'done':''}">${esc(t('steps')[s])}</li>`).join('')}</ol>`;
+}
+function renderCmp(fresh,keepS){
+  if(!C)return;const p=C.p,ch=C.ch,shp=ch==='shopee',d=C.d[ch];
+  $('cModel').textContent=p.model;$('cTitle').textContent=p.title;$('cLink').href=p.url;
+  document.querySelectorAll('#vCmp .tabs .tab').forEach(b=>b.classList.toggle('on',b.dataset.c===ch));
+  $('rTitle').textContent=t('rTitle',shp?'SHOPEE':'LAZADA');
+  renderPrep();
+  const stale=CHS.some(c=>C.st[c]&&C.st[c].state==='stale');$('banner').hidden=!stale;$('bannerTx').textContent=t('staleTx');
+  renderBar();
+  if(!d){$('mvL').innerHTML='';$('mvR').innerHTML='';$('ckl').innerHTML='';$('ckP').textContent='';G=null;$('spacer').style.height='0px';return;}
+  $('rSub').textContent=t('rSub')+' · '+(d.source==='edit'?t('srcEdit'):t('srcCrawl'))+(d.images_loaded&&/^(\d+)\/(\d+)$/.test(d.images_loaded)&&RegExp.$1!==RegExp.$2?' · ⚠ '+t('imgFail',d.images_loaded):'');
+  renderLeft();
+  const n=shp?d.shopeeN:d.slices.length,hasSum=shp?d.sumText:d.sum;
+  const sum=!hasSum?`<div class="nosum" data-a="sum">${esc(d.summaryErr?t('noSumErr',d.summaryErr):t('noSum'))}</div>`:shp?`<pre class="stxt" data-a="sum" lang="th">${esc(d.sumText)}</pre>`:`<div class="lsum" data-a="sum" lang="th">${safeHtml(d.sum)}</div>`;
+  $('mvR').innerHTML=`<div class="mk"><div class="h">${shp?'Shopee':'Lazada'} · รายละเอียดสินค้า<small>${shp?t('mkShopee',n,d.slices.length):t('mkLazada',d.slices.length)}</small></div>${sum}`+
+    d.slices.map((s,i)=>`${shp&&i===n?`<div class="cutnote" data-a="cut">${t('cutNote',d.slices.length-n)}</div>`:''}<img class="sl ${shp&&i>=n?'cut':''}" data-a="s${i}" data-src="${esc(s.src)}" width="${s.w}" height="${s.h}" alt="">`).join('')+'<div data-a="end" style="height:1px"></div></div>';
+  renderCk();
+  requestAnimationFrame(()=>{if(!C||!C.d[C.ch])return;layout();const sc=$('sc');sc.scrollTop=fresh?0:Math.min(keepS||0,G.sMax);update();});
+}
+// 왼쪽 lg.com: 전체 화면 캡처를 PDP 범위(top~bottom)만 보이게 자른다 — CSS 로만 (비율 그대로)
+let CROP=null;   // 범위 맞추는 중: { top, bottom }
+function shotOf(){const d=C.d[C.ch]||C.d.shopee||C.d.lazada;return d&&d.shot?d.shot:null;}
+function renderLeft(){
+  const f=shotOf(),d=C.d[C.ch];
+  $('cropBtn').hidden=!f&&!d;
+  if(!f){$('mvL').innerHTML=`<div class="noshot">${esc(t('noShot',(d&&d.shotErr)||'—'))} <button class="btn sm" onclick="recapture()">${t('recapture')}</button></div>`;$('cropWarn').hidden=true;return;}
+  const top=CROP?CROP.top:f.top,bottom=CROP?CROP.bottom:f.bottom;
+  $('mvL').innerHTML=`<div class="lg"><div class="crop" style="aspect-ratio:${f.w}/${Math.max(1,bottom-top)}"><img src="${esc(f.src)}" width="${f.w}" height="${f.h}" style="margin-top:-${(top/f.w*100).toFixed(4)}%" alt="lg.com"></div></div>`;
+  const w=$('cropWarn'),miss=!f.manual&&f.auto&&(!f.auto.top||!f.auto.bottom);
+  w.hidden=!(miss||f.manual);w.className='badge '+(f.manual?'b-q':'b-warn');
+  w.textContent=f.manual?t('cropManual')+(f.manual.by?' · '+f.manual.by:''):!f.auto.top?t('cropWarnTop'):t('cropWarnBot');
+  w.title=[f.topHow,f.bottomHow].filter(Boolean).join(' · ');
+}
+function toggleCrop(){const ed=$('cropEd'),f=shotOf();if(!ed.hidden){ed.hidden=true;CROP=null;relayout();return;}
+  if(!f){recapture();return;}ed.hidden=false;CROP={top:f.top,bottom:f.bottom};$('cTop').value=CROP.top;$('cBot').value=CROP.bottom;$('cTop').max=$('cBot').max=f.h;relayout();}
+function clampCrop(){const f=shotOf();CROP.top=Math.max(0,Math.min(CROP.top,f.h-200));CROP.bottom=Math.max(CROP.top+200,Math.min(CROP.bottom,f.h));$('cTop').value=CROP.top;$('cBot').value=CROP.bottom;}
+function nudge(k,v){if(!CROP)return;CROP[k]+=v;clampCrop();relayout(k);}
+function cropInput(){if(!CROP)return;CROP.top=Math.round(+$('cTop').value||0);CROP.bottom=Math.round(+$('cBot').value||0);clampCrop();relayout();}
+// 고친 쪽이 보이게: 시작을 고치면 맨 위, 끝을 고치면 맨 아래
+function relayout(which){if(!C||!C.d[C.ch])return;renderLeft();layout();const sc=$('sc');sc.scrollTop=which==='bottom'?G.sMax:which==='top'?0:Math.min(G.s,G.sMax);update();}
+async function cropSave(){if(!CROP||needWho())return;
+  try{await api(`/api/v1/review/item/${encodeURIComponent(C.p.slug)}/crop`,{top:CROP.top,bottom:CROP.bottom,by:S.who});
+    const v={...CROP};CHS.forEach(ch=>{const d=C.d[ch];if(d&&d.shot)d.shot={...d.shot,top:v.top,bottom:v.bottom,manual:{by:S.who,at:Date.now()/1000}};});
+    CROP=null;$('cropEd').hidden=true;relayout();toast(t('cropSaved'));}catch(e){toast(t('saveErr',e.message));}}
+async function cropAuto(){try{await api(`/api/v1/review/item/${encodeURIComponent(C.p.slug)}/crop`,{top:null});CROP=null;$('cropEd').hidden=true;await fetchItems(false);toast(t('cropAutoT'));}catch(e){toast(t('saveErr',e.message));}}
+async function recapture(){CROP=null;$('cropEd').hidden=true;toast(t('recapToast'));await prepareCur(true);}
+
+// ── 같은 영역 동시 스크롤 (목업 v11·v12 와 같음) ──
+// 스크롤 막대는 하나(#sc). 양쪽 내용은 transform 으로 같은 프레임에 같이 움직인다.
+//  s = 스크롤량(오른쪽 결과 px). 오른쪽 = min(s, 오른쪽 끝), 왼쪽 = min(s × 왼쪽폭/오른쪽폭, 왼쪽 끝) — 짧은 쪽은 끝에서 기다린다
+function layout(){
+  const sc=$('sc'),st=$('stage');st.style.height=sc.clientHeight+'px';
+  const vpL=$('vpL'),vpR=$('vpR'),mvL=$('mvL'),mvR=$('mvR'),mk=mvR.querySelector('.mk'),crop=mvL.querySelector('.crop');
+  const rw=mk.clientWidth,lw=crop?crop.clientWidth:rw;
+  const lmax=Math.max(0,mvL.offsetHeight-vpL.clientHeight),rmax=Math.max(0,mvR.offsetHeight-vpR.clientHeight);
+  const anchors={};mvR.querySelectorAll('[data-a]').forEach(e=>anchors[e.dataset.a]=e.offsetTop+mk.offsetTop);
+  const imgs=[...mvR.querySelectorAll('img[data-src]')].map(e=>({e,top:e.offsetTop+mk.offsetTop}));
+  const k=lw/rw,sMax=Math.max(rmax,lmax/k);
+  $('spacer').style.height=sMax+'px';
+  G={lw,rw,k,lmax,rmax,sMax,vh:vpR.clientHeight,anchors,imgs,s:G?G.s:0};
+}
+function update(){
+  if(!G||!C)return;const s=$('sc').scrollTop;G.s=s;
+  const r=Math.min(s,G.rmax),l=Math.min(s*G.k,G.lmax);
+  $('mvR').style.transform=`translate3d(0,${-r}px,0)`;$('mvL').style.transform=`translate3d(0,${-l}px,0)`;
+  $('wL').hidden=!(s*G.k>G.lmax+1);$('wR').hidden=!(s>G.rmax+1);
+  for(const im of G.imgs)if(!im.e.src&&im.top<r+G.vh*2.5)im.e.src=im.e.dataset.src;   // 보이는 근처만 읽기
+  track(r);
+}
+// 체크리스트: 지금 보는 항목(화면 위에서 35% 선을 지난 마지막 항목), 화면 55% 선을 지난 항목은 「봤음」
+let curId=null;
+function track(r){
+  const list=items(C.ch);if(!list.length)return;let cur=null,ch=false;
+  for(const it of list){const y=G.anchors[it.anchor];if(y==null)continue;
+    if(y<=r+G.vh*0.35)cur=it;
+    if(y<=r+G.vh*0.55&&!C.seen.has(it.id)){C.seen.add(it.id);ch=true;}}
+  if(G.s>=G.sMax-2)list.forEach(it=>{if(!C.seen.has(it.id)){C.seen.add(it.id);ch=true;}});   // 끝까지 내리면 남은 것도 봄
+  if(!cur)cur=list[0];
+  if(ch)saveProg();
+  if(ch||cur.id!==curId){curId=cur.id;renderCk();renderBar();}
+  const y=G.anchors[cur.anchor],nx=list[list.indexOf(cur)+1],y2=nx?G.anchors[nx.anchor]:y+80,hl=$('hl'),mk=$('mvR').querySelector('.mk');
+  hl.hidden=false;hl.style.left=mk.offsetLeft+'px';hl.style.width=mk.clientWidth+'px';hl.style.top=(y-r)+'px';hl.style.height=Math.max(24,Math.min(y2,y+G.vh*3)-y)+'px';
+}
+function renderCk(){
+  const list=items(C.ch),pr=progress();
+  $('ckP').innerHTML=t('ckP',C.ch==='shopee'?'Shopee':'Lazada',list.filter(it=>C.seen.has(it.id)).length,list.length,pr.n,pr.all)+(pr.flags?` · <b style="color:var(--bad)">${t('diffN',pr.flags)}</b>`:'');
+  $('ckBar').style.width=(pr.all?pr.n/pr.all*100:0)+'%';
+  $('ckl').innerHTML=list.map(it=>`<div class="it ${C.seen.has(it.id)?'seen':''} ${C.flags.has(it.id)?'flag':''} ${it.id===curId?'cur':''}" onclick="jumpTo('${it.anchor}')">
+    <div class="t"><span class="ic"></span><span>${esc(it.title)}${it.sub?`<small class="sub">${esc(it.sub)}</small>`:''}</span><span class="x"><button onclick="event.stopPropagation();flag('${it.id}')">${C.flags.has(it.id)?t('flagOn'):t('flag')}</button></span></div>
+    <div class="look"><ul>${it.look.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>${it.usps&&it.usps.length?`<div class="sec">${t('uspHead')}<ul lang="th">${it.usps.slice(0,10).map(u=>`<li>${esc(u.t)}${u.est?` <span class="est" title="${esc(t('estT'))}">${t('est',u.range[0],u.range[1])}</span>`:''}</li>`).join('')}${it.usps.length>10?`<li>${t('more',it.usps.length-10)}</li>`:''}</ul></div>`:''}</div></div>`).join('');
+  const c=$('ckl').querySelector('.it.cur');if(c){const L=$('ckl');if(c.offsetTop<L.scrollTop||c.offsetTop+c.offsetHeight>L.scrollTop+L.clientHeight)L.scrollTop=c.offsetTop-40;}
+}
+function jumpTo(a){if(!G)return;const y=G.anchors[a];if(y==null)return;$('sc').scrollTop=Math.max(0,y-16);}
+function flag(id){C.flags.has(id)?C.flags.delete(id):C.flags.add(id);
+  const it=allItems().find(x=>x.id===id),c=$('cmt');if(C.flags.has(id)&&it){c.value=(c.value?c.value+' · ':'')+it.title+': '+t('flagNote');}saveProg();renderCk();renderBar();}
+function renderBar(){
+  if(!C)return;const p=C.p,s=stOf(p),done=s==='ok',both=CHS.every(ready),pr=progress();
+  const stale=CHS.some(ch=>C.st[ch]&&C.st[ch].state==='stale');
+  const why=done?t('whyDone'):stale?t('whyStale'):!both?t('whyPrep'):pr.flags?t('whyFlag',pr.flags):pr.n<pr.all?t('whyProg',pr.n,pr.all):'';
+  $('bWhy').textContent=why;$('bWhy').hidden=!why;$('bOk').disabled=!!why;$('bRej').disabled=done;$('bUndo').hidden=!done;
+  $('cSt').innerHTML=stBadge(p);
+  $('cBuild').innerHTML=done?`<span class="badge b-ok">${t('bOpen')}</span>`:S.gate?`<span class="badge b-lock" title="${esc(t('bLockT'))}">${t('bLock')}</span>`:`<span class="badge b-q">${t('bLockOff')}</span>`;
+}
+async function decide(state,via){
+  const c=$('cmt');
+  const j=await api(`/api/v1/approvals/${encodeURIComponent(C.p.slug)}`,{state,via,by:S.who,comment:c.value.trim(),
+    hashes:{shopee:C.d.shopee?C.d.shopee.hash:'',lazada:C.d.lazada?C.d.lazada.hash:''}});
+  const it=j.items[C.p.slug];if(it)C.p.approval={...it};renderBar();
+}
+async function approve(){if($('bOk').disabled||needWho())return;try{await decide('approved','checklist');toast(t('okToast'));}catch(e){toast(t('saveErr',e.message));}}
+async function reject(){const c=$('cmt');if(!c.value.trim()){c.classList.add('err');c.placeholder=t('rejPh');c.focus();return;}if(needWho())return;
+  try{await decide('rejected','checklist');c.classList.remove('err');toast(t('rejToast'));}catch(e){toast(t('saveErr',e.message));}}
+async function unapprove(){if(needWho())return;try{await decide('pending','checklist');toast(t('undoToast'));}catch(e){toast(t('saveErr',e.message));}}
+
+$('sc').addEventListener('scroll',update,{passive:true});
+addEventListener('resize',()=>{if(C&&C.d[C.ch]&&G){const s=G.s;layout();$('sc').scrollTop=Math.min(s,G.sMax);update();}});
+document.querySelectorAll('details.dd').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)document.querySelectorAll('details.dd').forEach(o=>o!==d&&(o.open=false));}));
+document.addEventListener('click',e=>{document.querySelectorAll('details.dd[open]').forEach(d=>{if(!d.contains(e.target))d.open=false;});});
+document.fonts&&document.fonts.ready.then(()=>{if(C&&C.d[C.ch]&&G){const s=G.s;layout();$('sc').scrollTop=Math.min(s,G.sMax);update();}});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&qs.get('embed')==='1'&&!C)parent.postMessage('clia-review-close','*');});
+if(qs.get('embed')==='1')$('closeBtn').hidden=false;
+applyStatic();load();
+</script>
+</body></html>
