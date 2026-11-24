@@ -12,10 +12,36 @@ v9 에서 바뀌는 것 (2026-11-24 사용자 결정: 「갤러리는 필요 없
 - 목록 썸네일 = 상세 첫 슬라이스(위쪽)
 - Shopee·Lazada 실제 페이지(모바일 웹·PC 웹) 모양 맞추기는 사용자와 실제 페이지를 같이 본 뒤로 미룸
 """
-import argparse, base64, json, os, re, sys
+import argparse, base64, html as _html, json, os, re, sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'v8'))
 from build_v8 import match_sections, sections_to_O, V7_FABRICATED_BLOCK, NEW_SKU  # noqa: E402
+
+SHOPEE_MAX_IMAGES = 12      # bulk-jobs.js SHOPEE_MAX_IMAGES (main 8bc6c6d)
+SHOPEE_DESC_LIMIT = 3000    # shared/clia-image-html.js: 설명 한도 3,000자를 넘으면 뒤 이미지부터 뺀다
+
+
+def summary_text(h):
+    """요약 HTML(content_gen/pdp_summary.py to_html) → 같은 파일 plain_text() 와 같은 글.
+    to_html: h2 제품명, p 소개, h3 「จุดเด่นสินค้า」, li…, h3 「ข้อมูลสินค้า」, li… → plain_text: 줄바꿈 + 빈 줄 + '• ' 목록"""
+    if not h:
+        return None
+    t = lambda x: _html.unescape(re.sub(r'<[^>]+>', '', x)).strip()
+    name = t(re.search(r'<h2[^>]*>(.*?)</h2>', h, re.S).group(1))
+    intro = t(re.search(r'<p[^>]*>(.*?)</p>', h, re.S).group(1))
+    heads = [t(x) for x in re.findall(r'<h3[^>]*>(.*?)</h3>', h, re.S)]
+    lists = [[t(li) for li in re.findall(r'<li[^>]*>(.*?)</li>', ul, re.S)] for ul in re.findall(r'<ul[^>]*>(.*?)</ul>', h, re.S)]
+    out = [name, '', intro, '', heads[0]] + ['• ' + x for x in lists[0]] + ['', heads[1]] + ['• ' + x for x in lists[1]]
+    return '\n'.join(out)
+
+
+def shopee_cut(text, urls):
+    """clia-image-html.js build(urlsOnly): 요약 글 + 빈 줄 + 이미지 주소 앞 12장, 3,000자 넘으면 뒤 이미지부터 뺌"""
+    top = (text.strip() + '\n\n') if text else ''
+    u = urls[:SHOPEE_MAX_IMAGES]
+    while len(u) > 1 and len(top + '\n'.join(u)) > SHOPEE_DESC_LIMIT:
+        u.pop()
+    return len(u), len(top + '\n'.join(u))
 
 
 def main():
@@ -23,6 +49,7 @@ def main():
     ap.add_argument('--v7', required=True)
     ap.add_argument('--sources', required=True)
     ap.add_argument('--logo', required=True)
+    ap.add_argument('--fullshots', default='fullshots.json')
     ap.add_argument('--out', default='mockup-v9.html')
     ap.add_argument('--report', default='v9-match.json')
     a = ap.parse_args()
@@ -32,6 +59,7 @@ def main():
     V7 = json.loads(re.match(r'\s*const DATA=(.*);\s*$', lines[di]).group(1))
     SRC = json.load(open(a.sources, encoding='utf-8'))
     v7_by_slug = {p['slug']: p for p in V7}
+    FS = json.load(open(a.fullshots, encoding='utf-8')) if os.path.exists(a.fullshots) else {'products': {}}
 
     DATA, report = [], []
     for src in SRC['products']:
@@ -65,8 +93,14 @@ def main():
         p['sum'] = (src['batch']['shopee'] or {}).get('summary')
         p['summary'] = p['sum']
         p['url'] = src['url']
+        p['sumText'] = summary_text(p['sum'])
+        p['shopeeN'], p['shopeeChars'] = shopee_cut(p['sumText'], slices)
+        p['shopeeNsg'], _ = shopee_cut(None, slices)          # 싱가포르: 요약 없이 이미지 주소만
+        fs = FS['products'].get(src['slug']) or {}
+        p['fullshot'] = {k: fs[k] for k in ('src', 'width', 'height')} if fs.get('status') == 'ready' and fs.get('width') else None
         DATA.append(p)
-        report.append({'model': p['model'], 'slug': src['slug'], 'slices': len(slices), 'summary': bool(p['sum']), 'sections': mrep})
+        report.append({'model': p['model'], 'slug': src['slug'], 'slices': len(slices), 'summary': bool(p['sum']),
+                       'shopee_images': p['shopeeN'], 'shopee_chars': p['shopeeChars'], 'fullshot': bool(p['fullshot']), 'sections': mrep})
 
     html = lines[:]
     html[di] = 'const DATA=' + json.dumps(DATA, ensure_ascii=False) + ';'
@@ -100,7 +134,12 @@ def main():
 .imgfail small{font-weight:400;font-size:10px;color:var(--clia-gray-400)}
 .card .imgfail{height:150px;border-radius:10px}.os .imgfail{height:140px}
 .os .nomatch{display:block;padding:8px 16px;font-size:11px;color:var(--clia-gray-400);background:var(--clia-gray-50);border-bottom:1px dashed var(--clia-gray-200)}
-.slices img{height:auto}/* width·height 속성은 자리만 잡고 비율은 이미지 그대로 */
+.slices img{height:auto}
+.fullshot img{width:100%;height:auto;display:block}.fullshot{background:#fff}
+.ohsw{display:inline-flex;gap:4px;margin-left:8px}.ohsw button{border:1px solid var(--clia-gray-200);background:#fff;border-radius:999px;padding:2px 9px;font-size:11px;cursor:pointer;color:var(--clia-gray-500)}.ohsw button.on{background:var(--clia-gray-900);color:#fff;border-color:var(--clia-gray-900)}
+.ohnote{font-size:11px;color:var(--clia-gray-400);font-weight:500;margin-left:8px}
+.shopee-text{white-space:pre-wrap;font:14px/1.55 Roboto,"Helvetica Neue",Helvetica,Arial,"LINESeedSansTH",sans-serif;color:#222;margin:0;padding:4px 0 10px}
+.desc-head{flex-wrap:wrap}.desc-head h3{white-space:nowrap}.desc-head span{white-space:normal}.pdp-head small{white-space:normal}\n.slice.cut{opacity:.35}.cutnote{padding:10px 12px;font-size:12px;color:#757575;background:#fafafa;border-top:1px dashed #ddd;border-bottom:1px dashed #ddd}/* width·height 속성은 자리만 잡고 비율은 이미지 그대로 */
 .v8note{position:fixed;left:80px;bottom:12px;z-index:50;max-width:560px;background:#1F1E1C;color:#fff;border-radius:12px;padding:10px 36px 10px 14px;font-size:12px;line-height:1.5;box-shadow:0 6px 24px rgba(0,0,0,.25)}
 .v8note b{color:#FFD86B}.v8note button{position:absolute;top:6px;right:8px;background:none;border:0;color:#fff;font-size:14px;cursor:pointer}
 """
@@ -150,6 +189,31 @@ def main():
             sys.exit(f'{fn}() not found')
     if re.search(r'\bgallery\(|galleryMove\(', text.split('<script>', 1)[1].split('const DATA=', 1)[0] + text.split('const DATA=', 1)[1].split('\n', 1)[1]):
         sys.exit('gallery call left over')
+
+    # ── 왼쪽: lg.com 전체 화면 캡처(운영 /media/fullshot) 가 있으면 화면 그대로 ──
+    rep('<div class="ph">LG.COM 원본</div>', '<div class="ph" id="oH">LG.COM 원본</div>')
+    rep("const S={corp:'th',tab:'all',q:'',sel:new Set(),cur:0,ch:'shopee'};",
+        "const S={corp:'th',tab:'all',q:'',sel:new Set(),cur:0,ch:'shopee',lg:'shot'};")
+    a_ = "  $('pO').innerHTML=p.O.map("
+    rep(a_, "  const shot=p.fullshot&&S.lg==='shot';\n"
+            "  $('oH').innerHTML='LG.COM 원본'+(p.fullshot?`<span class=\"ohsw\"><button class=\"${shot?'on':''}\" onclick=\"S.lg='shot';renderCmp()\">화면 그대로</button><button class=\"${shot?'':'on'}\" onclick=\"S.lg='sec';renderCmp()\">섹션</button></span><span class=\"ohnote\">전체 화면 캡처 · PC 1920px → 폭 ${p.fullshot.width}px · 동기 스크롤 안 됨</span>`:'<span class=\"ohnote\">전체 화면 캡처 없음 · 운영 저장본 섹션으로 표시</span>');\n"
+            "  $('pO').innerHTML=shot?`<div class=\"fullshot\"><img src=\"${p.fullshot.src}\" width=\"${p.fullshot.width}\" height=\"${p.fullshot.height}\" alt=\"lg.com 전체 화면\"></div>`:p.O.map(")
+    rep("if(!stack||!p.blocks.length)return;", "if(!stack||!p.blocks.length||$('pO').querySelector('.fullshot'))return;")
+
+    # ── 오른쪽 Shopee: 설명 칸은 HTML 을 받지 않음 → 요약은 태그 없는 글, 이미지는 앞 12장(3,000자 한도) ──
+    m2 = re.search(r"^function market\(p,sum\)\{const laz=S.ch==='lazada';", text, re.M)
+    if not m2:
+        sys.exit('market() head not found')
+    text = text[:m2.end()] + (
+        "const shp=!laz,nUse=shp?(sumOn()?p.shopeeN:p.shopeeNsg):p.slices.length;"
+        "if(shp&&sumOn()&&p.hasSum)sum=sum.replace(`<div class=\"sumbody\">${p.sum}</div>`,`<pre class=\"shopee-text\" lang=\"th\">${esc(p.sumText)}</pre>`);"
+    ) + text[m2.end():]
+    rep("<span>상세 이미지 ${p.slices.length}장${p.slicesSame?' · Shopee·Lazada 같은 슬라이스':''}</span>",
+        "<span>${shp?`이미지 ${nUse}/${p.slices.length}장 · 글은 태그 없음`:`상세 이미지 ${p.slices.length}장 · HTML`}</span>")
+    rep("${p.slices.map((src,i)=>`<div class=\"slice\" onclick=\"lbOpen(${i})\">",
+        "${p.slices.map((src,i)=>`${i===nUse&&nUse<p.slices.length?`<div class=\"cutnote\">아래 ${p.slices.length-nUse}장은 Shopee 설명에 넣지 않음 (앞 12장·3,000자 규칙) — 흐리게 표시</div>`:''}<div class=\"slice ${i>=nUse?'cut':''}\" onclick=\"lbOpen(${i})\">")
+    rep("<small>실제 페이지 모양 대조 전</small>",
+        "<small>${shp?'이미지 주소 표시 방식 확인 전':'실제 페이지 모양 대조 전'}</small>")
 
     open(a.out, 'w', encoding='utf-8').write(text)
     json.dump(report, open(a.report, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)

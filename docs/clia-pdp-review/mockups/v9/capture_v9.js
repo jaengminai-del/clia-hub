@@ -37,6 +37,11 @@ const out = path.resolve(process.argv[3] || '.');
   await page.evaluate(() => { const o = document.getElementById('pO'), k = o.querySelector('.os[data-k="6"]'); o.scrollTop = k.offsetTop - 20; o.dispatchEvent(new Event('scroll')); });
   await page.waitForTimeout(600); await settle(); await shot('compare-v9-sync.png');
   await open('OLED83G4PSA', 'shopee'); await shot('compare-v9-no-blocks.png');
+  await open('A9-ACE', 'lazada'); await shot('compare-v9-lgcom-fullshot.png');
+  await open('AS10GDBY0', 'shopee'); await shot('compare-v9-shopee-text.png');
+  await open('SCQ13A', 'shopee');
+  await page.evaluate(() => { const r = document.getElementById('pR'), c = r.querySelector('.cutnote'); if (c) r.scrollTop = c.offsetTop - 300; });
+  await page.waitForTimeout(500); await settle(); await shot('compare-v9-shopee-cut.png');
   await open('MS2032GAS', 'shopee');
   await page.evaluate(() => lbOpen(1)); await settle(); await shot('compare-v9-zoom.png');
   const ratio = await page.evaluate(async () => {

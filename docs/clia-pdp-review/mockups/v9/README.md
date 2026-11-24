@@ -28,6 +28,38 @@
   - 고친 뒤: 0장
   - lg.com 이미지는 이 환경에서 열리지 않아 검사하지 못했습니다(미확인). 왼쪽 원본 이미지는 `width:100%; height:auto`라 비율이 바뀌지 않는 구조입니다.
 
+## LG.com 화면 그대로 · Shopee 실제 규칙 (2026-11-24 오후 추가)
+
+### 왼쪽: lg.com 전체 화면 캡처 (있는 제품만)
+
+- 운영 서버에 이미 있는 lg.com 전체 화면 캡처를 `GET /api/v1/fullshot?url=`로 조회했습니다([collect_fullshots.py](./collect_fullshots.py) → [fullshots.json](./fullshots.json)). 새로 찍는 `POST`는 쓰지 않았습니다.
+- 캡처가 있는 제품은 **13개 중 3개**입니다: A9-ACE(960×9142), GC-B187JBAM(960×6184), RV10VHP2B(960×8202).
+  - 이 3개는 왼쪽이 기본으로 「화면 그대로」입니다. 헤더부터 푸터까지 lg.com 화면을 원본 비율로 보여 주고, 「섹션」으로 바꿔 볼 수 있습니다.
+  - 캡처 화면에는 섹션 위치가 없어서 동기 스크롤이 꺼집니다.
+- 나머지 10개는 「전체 화면 캡처 없음 · 운영 저장본 섹션으로 표시」입니다. 이 10개를 만들려면 `POST /api/v1/fullshot`로 운영 서버에서 캡처를 돌려야 합니다(장혁님 승인 필요).
+- 캡처 시각은 확인하지 못했습니다(미확인). 파일 `Last-Modified`가 11-24 12:00 KST인데, 서버가 버킷에서 복원한 시각일 수 있습니다.
+
+### 오른쪽 Shopee: 실제로 들어가는 모양 (main 8bc6c6d, PR #39)
+
+- 근거: `shared/clia-image-html.js`, `bulk-jobs.js`(`SHOPEE_MAX_IMAGES = 12`), `crawler-py/content_gen/pdp_summary.py`(`plain_text`).
+- **Shopee 설명 칸은 HTML을 받지 않습니다.** 그래서 태국 제품은 맨 위에 요약을 **태그 없는 글**로 넣고, 빈 줄 하나 뒤에 이미지 주소를 한 줄에 하나씩 넣습니다.
+  - 이미지는 **앞 12장**까지만 넣습니다.
+  - 전체가 **3,000자**를 넘으면 뒤 이미지부터 뺍니다.
+- 프리뷰도 이 규칙대로 계산했습니다. 요약 글은 `plain_text()`와 같은 모양으로 만들고, 넣지 않는 이미지는 흐리게 표시하며 「아래 n장은 Shopee 설명에 넣지 않음」 줄을 붙입니다.
+  - SCQ13A: 13장 중 **11장**. 3,000자 한도 때문이고, 빠지는 2장이 스펙 표입니다.
+  - OLED83G4PSA: 39장 중 **12장**.
+- Lazada는 HTML이 들어가므로 요약 HTML과 이미지 전체가 그대로입니다.
+- **미확인:** Shopee가 설명 안의 이미지 주소를 실제 화면에서 이미지로 보여 주는지, 주소 글자로 보여 주는지는 확인하지 못했습니다. 프리뷰는 이미지로 그렸고 머리글에 「이미지 주소 표시 방식 확인 전」이라고 적었습니다.
+
+### 이전 작업에서 Shopee·Lazada 페이지 캡처 찾기 (결과: 없음)
+
+다음 곳을 찾아봤지만 Shopee·Lazada 실제 상품 페이지 캡처는 없었습니다.
+
+- clia-hub·clia-hub-temporary·clia-th-batch의 모든 브랜치: 파일 이름과 문서 내용. 이미지는 eBay 캡처와 이 목업 캡처뿐이었습니다.
+- Slack, Google Drive.
+- 팀 KB, 그리고 KB가 가리킨 「27년 운영방향 논의」 PPT(Airtable 문서): Shopee 리뷰 화면과 프로모션 배너만 있었습니다.
+- 11-23 문서에도 「캡차에 막혀 기준 캡처가 없음, 장혁님 휴대폰 캡처가 오면 맞춤」이라고 적혀 있습니다.
+
 ## 아직 안 된 것 (사용자 요구, 2026-11-24)
 
 - **LG.com은 LG.com 페이지 그대로:** 지금 왼쪽은 운영 저장본 섹션(이미지 + 텍스트)을 카드로 다시 짠 것이라 lg.com 화면 그대로가 아닙니다.
@@ -40,6 +72,7 @@
 | 파일 | 내용 |
 |---|---|
 | [mockup-v9.html](./mockup-v9.html) | 인터랙티브 목업 (1.6MB). 이미지는 주소 직접 링크 — 인터넷 필요 |
+| [collect_fullshots.py](./collect_fullshots.py) · [fullshots.json](./fullshots.json) | 운영에 있는 lg.com 전체 화면 캡처 조회 결과 (GET만) |
 | [build_v9.py](./build_v9.py) | v7 HTML + `../v8/v8-sources.json` → `mockup-v9.html` (섹션 매칭은 `../v8/build_v8.py` 함수 재사용) |
 | [capture_v9.js](./capture_v9.js) | 캡처 |
 | [v9-match.json](./v9-match.json) | 제품별 슬라이스 장수·요약 유무·섹션 매칭 |
@@ -64,6 +97,9 @@ node capture_v9.js mockup-v9.html .
 | [compare-v9-sync.png](./compare-v9-sync.png) | F2515RNEW 섹션 동기 스크롤 |
 | [compare-v9-no-blocks.png](./compare-v9-no-blocks.png) | OLED83G4PSA — 슬라이스 39장, 위치표 없음 |
 | [compare-v9-zoom.png](./compare-v9-zoom.png) | MS2032GAS 1000px 확대 보기 |
+| [compare-v9-lgcom-fullshot.png](./compare-v9-lgcom-fullshot.png) | A9-ACE — 왼쪽 lg.com 전체 화면 캡처 그대로 |
+| [compare-v9-shopee-text.png](./compare-v9-shopee-text.png) | AS10GDBY0 Shopee — 요약을 태그 없는 글로 |
+| [compare-v9-shopee-cut.png](./compare-v9-shopee-cut.png) | SCQ13A Shopee — 3,000자 한도로 마지막 2장(스펙 표) 빠짐 |
 
 ## 다음 (사용자와 같이)
 
