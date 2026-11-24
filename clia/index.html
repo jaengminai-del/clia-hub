@@ -61,7 +61,8 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 .dp-name{font-size:18px;font-weight:700;line-height:1.3;margin-bottom:6px;}
 .dp-meta{font-size:11px;color:#888;margin-bottom:6px;}.dp-meta code{background:#f0f0f0;padding:1px 6px;border-radius:3px;font-size:10px;}
 .dp-price{font-size:24px;font-weight:800;color:#A50034;margin-bottom:2px;}.dp-price del{font-size:14px;color:#999;font-weight:400;margin-left:8px;}
-.dp-link{font-size:11px;margin-bottom:16px;}.dp-link a{color:#1D4ED8;text-decoration:none;}
+.dp-link{font-size:11px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.dp-del{all:unset;cursor:pointer;color:#8a8780;font-size:12px;}.dp-del:hover{color:#C8241F;text-decoration:underline;}.dp-del:disabled{opacity:.5;cursor:default;}.dp-link a{color:#1D4ED8;text-decoration:none;}
 .dp-main-img{width:100%;aspect-ratio:1;background:#fff;border:1px solid #eee;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
 .dp-main-img img{max-width:100%;max-height:100%;object-fit:contain;}
 .dp-thumbs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;}
@@ -998,7 +999,7 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
   <div class="coffee-bar"><div class="coffee-bar-fill" id="coffeeBar"></div></div>
   <div class="coffee-status"><span id="coffeeStep"></span><span id="coffeeTime">0:00</span></div>
 </div></div>
-<div class="right" id="rp"><div class="empty"><div class="ico">📋</div><div style="font-size:14px;font-weight:600;">Select a product</div><div style="font-size:11px;color:#aaa;">Click "Detail →" to view</div></div></div>
+<div class="right" id="rp"><div class="empty"><div class="ico">📋</div><div style="font-size:14px;font-weight:600;">Select a product</div><div style="font-size:11px;color:#aaa;">Click a product to view</div></div></div>
 <div id="bulkOverlay" style="display:none;position:fixed;inset:0;z-index:2147483000;background:rgba(38,38,38,.45)">
   <iframe id="bulkFrame" title="Bulk Excel" style="position:absolute;inset:16px;width:calc(100% - 32px);height:calc(100% - 32px);border:0;border-radius:16px;background:#F8F7F5;box-shadow:0 12px 48px rgba(0,0,0,.25)"></iframe>
 </div>
@@ -1181,6 +1182,7 @@ const UI_TX={
  'STATUS':{de:'STATUS',th:'สถานะ',ar:'الحالة'},
  'Detail →':{de:'Details →',th:'รายละเอียด →',ar:'التفاصيل ←'},
  'Select a product':{de:'Produkt auswählen',th:'เลือกสินค้า',ar:'اختر منتجًا'},
+ 'Click a product to view':{de:'Zum Anzeigen ein Produkt anklicken',th:'คลิกสินค้าเพื่อดู',ar:'انقر على منتج للعرض'},
  'Click "Detail →" to view':{de:'Zum Anzeigen auf „Details →“ klicken',th:'คลิก "รายละเอียด →" เพื่อดู',ar:'انقر على "التفاصيل ←" للعرض'},
  'Close':{de:'Schließen',th:'ปิด',ar:'إغلاق'},
  'eBay Listing Content Builder':{de:'eBay-Listing-Content-Builder',th:'ตัวสร้างคอนเทนต์ลิสติ้ง eBay',ar:'أداة إنشاء محتوى قوائم eBay'},
@@ -1315,7 +1317,7 @@ function cliaLogin(){
 function cliaGoHome(){
   selId=null;
   ['ebbOverlay','chbOverlay'].forEach(id=>{const o=document.getElementById(id);if(o)o.classList.remove('show');});
-  document.getElementById('rp').innerHTML=`<div class="empty"><div class="ico">📋</div><div style="font-size:16px;font-weight:600;color:#4A4946;">Select a product</div><div style="font-size:13px;">Click "Detail →" to view</div></div>`;
+  document.getElementById('rp').innerHTML=`<div class="empty"><div class="ico">📋</div><div style="font-size:16px;font-weight:600;color:#4A4946;">Select a product</div><div style="font-size:13px;">Click a product to view</div></div>`;
   if(typeof renderList==='function')renderList();
 }
 // 크롤 제품 삭제 → 다시 크롤할 수 있게 (2026-11-05). 서버는 지운 결과를 보관함(trash)에 남겨 되돌릴 수 있다.
@@ -2449,7 +2451,7 @@ function renderList(){
     const s=curSearch;
     return p.id.toLowerCase().includes(s)||p.nm.toLowerCase().includes(s)||p.cat.toLowerCase().includes(s)||p.sub.toLowerCase().includes(s);
   });
-  tb.innerHTML=fp.map(p=>{const th=p.gal.length?I(p.gal[0].p,80):'';return`<tr class="${p.id===selId?'sel':''}" onclick="sel('${p.id}')"><td>${th?`<img class="thumb" src="${th}" onerror="this.outerHTML='<div class=thumb-ph>${p.ico}</div>'">`:`<div class="thumb-ph">${p.ico}</div>`}</td><td><span class="dt dt-${String(p.dv||'').toLowerCase()}">${p.dv}</span></td><td><b>${p.id}</b><div class="lt-sub">${p.sub}</div></td><td><span class="st ${p.crawled?'st-ok':p.md?'st-md':'st-pend'}">${p.crawled?t('st.ready'):p.md?t('st.md'):t('st.pend')}</span></td><td><div class="lt-act"><button class="det-btn" onclick="event.stopPropagation();sel('${p.id}')">${t('dp.open')}</button>${p._slug?`<button class="del-btn" title="${t('list.delete')}" aria-label="${t('list.delete')}" onclick="event.stopPropagation();deleteCrawled('${p.id}',this)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/></svg></button>`:''}</div></td></tr>`;}).join('');
+  tb.innerHTML=fp.map(p=>{const th=p.gal.length?I(p.gal[0].p,80):'';return`<tr class="${p.id===selId?'sel':''}" onclick="sel('${p.id}')"><td>${th?`<img class="thumb" src="${th}" onerror="this.outerHTML='<div class=thumb-ph>${p.ico}</div>'">`:`<div class="thumb-ph">${p.ico}</div>`}</td><td><span class="dt dt-${String(p.dv||'').toLowerCase()}">${p.dv}</span></td><td><b>${p.id}</b><div class="lt-sub">${p.sub}</div></td><td><span class="st ${p.crawled?'st-ok':p.md?'st-md':'st-pend'}">${p.crawled?t('st.ready'):p.md?t('st.md'):t('st.pend')}</span></td></tr>`;}).join('');
   document.getElementById('countLabel').textContent=t('list.count',{n:fp.length});
   const pc=document.getElementById('prodCount');if(pc)pc.textContent=P.filter(x=>productCorp(x)===CORP).length;   // 상단 배지 = 법인 전체 제품 수
 }
@@ -2894,15 +2896,14 @@ function showDetail(p){
     <div class="dp-name" data-no-i18n>${p.nm}</div>
     <div class="dp-meta">${t('dp.model')}: <code>${p.id}</code> | ${corpLabel(productCorp(p))}</div>
     ${p.pr?`<div class="dp-price">${p.pr} ${p.op?'<del>'+p.op+'</del>':''}</div>`:''}
-    <div class="dp-link"><a href="${p.url}" target="_blank">${t('dp.view')}</a></div>
+    <div class="dp-link"><a href="${p.url}" target="_blank">${t('dp.view')}</a>${p._slug?`<button type="button" class="dp-del" onclick="deleteCrawled('${p.id}',this)">${t('list.delete')}</button>`:''}</div>
     <div class="ch-section">
       <div class="ch-label">${t('dp.channel')}</div>
       <div class="ch-btns">
         <div class="ch-main-row">
           ${marketsOf(productCorp(p)).map(k=>`<button class="ch-btn ch-main" style="--ch-color:${MARKET_INFO[k][1]}" onclick="openChannel('${k}','${p.id}')">${MARKET_INFO[k][0]}</button>`).join('')}
         </div>
-        <div class="ch-sub-label">${t('ch.comingSoon')}</div>
-        ${[['ch-lgcom',t('ch.lgcom')],['ch-meli','Mercado Libre'],['ch-md',t('ch.md')],['ch-ig','Instagram'],['ch-fb','Facebook'],['ch-shorts','Shorts']].map(([c,l])=>`<button class="ch-btn ${c} ch-disabled" data-tip="${t('ch.comingSoon')}" aria-disabled="true">${l}</button>`).join('')}
+        <div class="ch-sub-label">${t('ch.comingSoon')}: ${[t('ch.lgcom'),'Mercado Libre',t('ch.md'),'Instagram','Facebook','Shorts'].join(' · ')}</div>
       </div>
     </div>
     <div class="lx-row">
