@@ -288,10 +288,20 @@ router.post('/api/v1/bulk/build', async (req, res) => {
   const sheetOut = analyze(wb, up.meta.fileName, { sheet: b.sheet });
   const bad = await wrongCountry(sheetOut, country);   // 화면을 거치지 않은 요청도 막는다
   if (bad) return res.status(400).json(bad);
+  // SKU 번호가 비어 있던 행에 사용자가 넣은 SKU (2026-11-24) — 그 행의 SKU 칸이 정말 비어 있을 때만, SKU 칸(Parent SKU 우선)에 적는다
+  const skuCol = sheetOut.cols.parentSku || sheetOut.cols.sku || null;
+  const skus = [];
+  if (skuCol && b.skus && typeof b.skus === 'object') {
+    const empty = new Set(sheetOut.rows.filter((r) => !/[\p{L}\p{N}]/u.test(r.parentSku || r.sku || '')).map((r) => r.row));
+    for (const [k, v] of Object.entries(b.skus).slice(0, 5000)) {
+      const row = parseInt(k, 10), sku = String(v == null ? '' : v).trim();
+      if (empty.has(row) && sku && sku.length <= 100 && !/[\x00-\x1f]/.test(sku)) skus.push({ row, sku });
+    }
+  }
   const email = b.notify && b.notify.email ? String(b.notify.email).trim() : '';
   if (email && !bulkJobs.emailOk(email)) return res.status(400).json({ error: 'email address not allowed', code: 'bad_email' });
   const base = `${req.get('x-forwarded-proto') || req.protocol}://${req.get('host')}`;
-  const j = bulkJobs.create({ upload: b.id, channel: b.channel, country, sheet: b.sheet, descCol, items, base,
+  const j = bulkJobs.create({ upload: b.id, channel: b.channel, country, sheet: b.sheet, descCol, items, base, skus, skuCol,
     outName: `${up.meta.fileName.replace(/\.xlsx$/i, '')}-clia-${b.channel}.xlsx`,
     notify: email && bulkJobs.mailReady() ? { email } : null, lang: /^[a-z]{2}$/.test(b.lang || '') ? b.lang : 'en' });
   // 내보낸 엑셀의 상품 ID 를 그 나라 히스토리에 (다음 업로드 확인용)
@@ -306,6 +316,25 @@ router.get('/api/v1/bulk/classify', (req, res) => {
   const country = /^[a-z]{2}$/.test(req.query.country || '') ? req.query.country : '';
   if (!lgUrlOk(url, country)) return res.status(400).json({ error: 'LG.com product URL of the same country required', code: 'bad_url' });
   res.json(classifyUrl(url));
+});
+
+// SKU 번호로 같은 나라 제품 찾기 (SKU 번호가 비어 있던 행에 넣은 SKU) → { url } — CLIA 제품 하나, 없으면 LG.com 사이트맵
+router.get('/api/v1/bulk/match-sku', async (req, res) => {
+  const sku = String(req.query.sku || '').trim().slice(0, 100);
+  const country = /^[a-z]{2}$/.test(req.query.country || '') ? req.query.country : '';
+  const site = String(req.query.site || '');
+  if (!sku || !country) return res.status(400).json({ error: 'sku and country required' });
+  const idx = productIndex();
+  const cands = matchRow({ sku }, idx).candidates.map((s) => idx.products[s]).filter((p) => p && p.country === country);
+  if (cands.length === 1) return res.json({ url: cands[0].url, model: cands[0].model });
+  if (cands.length > 1) return res.status(404).json({ error: 'several products match', code: 'multi' });
+  if (!sitemap.siteOk(site) || site.slice(0, 2) !== country) return res.status(404).json({ error: 'not found', code: 'none' });
+  try {
+    const keys = skuKeys(sku);
+    const hit = keys.length ? await sitemap.lookup(site, keys) : null;
+    if (hit && lgUrlOk(hit.url, country)) return res.json({ url: hit.url, model: (classifyUrl(hit.url) || {}).model });
+  } catch (_) {}
+  res.status(404).json({ error: 'not found', code: 'none' });
 });
 
 router.get('/api/v1/bulk/config', (req, res) => res.json({ mail: bulkJobs.mailReady(), crawlConc: bulkJobs.CRAWL_CONC, secPerCrawl: 55, secPerItem: 15 }));

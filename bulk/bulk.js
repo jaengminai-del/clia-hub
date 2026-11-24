@@ -30,7 +30,7 @@
   const grpName = (g) => (T.grp || TX.en.grp)[g] || g;
   const CH0 = ['shopee', 'lazada'].includes(qs.get('channel')) ? qs.get('channel') : '';
   const chName = (c) => (c === 'lazada' ? 'Lazada' : 'Shopee');
-  const S = { tab: 'all', q: '', last: null, mis: '', data: null, channel: CH0, ok: [], reg: [], skip: [], regOn: false, own: {}, pick: {}, fixed: {}, draft: {}, uerr: {}, openG: null, edits: {}, editsLoaded: false, sel: new Set(), force: new Set(), redo: new Set(), ack: new Set(), job: null, busy: false, cfg: {} };
+  const S = { tab: 'all', q: '', last: null, mis: '', data: null, channel: CH0, ok: [], reg: [], skip: [], regOn: false, own: {}, pick: {}, fixed: {}, draft: {}, uerr: {}, skuIn: {}, openG: null, edits: {}, editsLoaded: false, sel: new Set(), force: new Set(), redo: new Set(), ack: new Set(), job: null, busy: false, cfg: {} };
   const act = () => S.ok.concat(S.reg.filter((r) => S.regOn || S.own[r.row]));
   // 매칭 불가 = CLIA 가 건드리지 않는 행: 제품을 못 정한 행 + (등록을 켜지 않았으면) CLIA 에 없는 행
   const noMatch = () => S.skip.concat(S.regOn ? [] : S.reg.filter((r) => !S.own[r.row]).map((r) => ({ ...r, why: 'rReg' })));
@@ -99,7 +99,7 @@
       S.mis = CH0 && d.channel && d.channel !== CH0 ? d.channel : '';
       S.channel = S.mis ? '' : (CH0 || d.channel || '');
       chTag();
-      Object.assign(S, { job: null, q: '', last: null, regOn: false, own: {}, pick: {}, fixed: {}, draft: {}, uerr: {}, openG: null, edits: {}, editsLoaded: false, force: new Set(), redo: new Set(), ack: new Set() });
+      Object.assign(S, { job: null, q: '', last: null, regOn: false, own: {}, pick: {}, fixed: {}, draft: {}, uerr: {}, skuIn: {}, openG: null, edits: {}, editsLoaded: false, force: new Set(), redo: new Set(), ack: new Set() });
       $('q').value = '';
       setData(d, true);
       askRegister();
@@ -140,6 +140,8 @@
       else if (r.bundle) S.skip.push({ ...r, why: 'rBundle' });
       else if (c.length === 1) S.ok.push({ ...r, p: c[0], kind: 'clia' });
       else if (c.length > 1) { const pk = c.find((p) => p.slug === S.pick[r.row]) || giftMain(r, c); if (pk) S.ok.push({ ...r, p: pk, kind: 'clia', gift: !S.pick[r.row] }); else S.skip.push({ ...r, why: 'rMulti' }); }
+      // 'SKU 번호가 비어 있음' 행을 여기서 주소로 해결했으면 SKU 번호도 넣어야 끝 (상품명으로 자동으로 찾은 행 · 예전 작업은 그대로)
+      else if (own && S.fixed[r.row] && !r.lg && !hasSku(r) && !S.skuIn[r.row]) S.skip.push({ ...r, why: 'rNone', half: own });
       else if (own || r.lg) S.reg.push({ ...r, kind: 'new', p: newP(r, own || r.lg) });
       else S.skip.push({ ...r, why: 'rNone' });
     }
@@ -172,30 +174,32 @@
   const reviewRows = () => act().filter((r) => openFlags(r.row).length);
   // 다시 돌리면 고쳐지는 것: LG.com 페이지 · 이미지 누락은 다시 가져오고, 설명 · 요약은 다시 만든다
   const RETRY = { crawl: 'a_retry', content: 'a_retry', summary: 'a_retry', qa: 'a_refetch' };
-  // 행 오른쪽 = 세 칸 (목록 머리: 상태 · 할 일 · 편집, 2026-11-23)
-  //   상태: 이유(빨강) 하나 · 진행 상태 · '편집됨'. 할 일: 버튼은 많아야 하나 (다시 가져오기 · 다시 시도 · 편집본 그대로 · 문제없음).
-  //   고칠 버튼이 있는 경고는 '문제없음'을 이유 옆 ✕ 로. 편집: 모든 행 같은 자리 (동영상 장면 바꾸기도 편집 = 빌더 안에서)
-  function itemStatus(r) {
-    const it = itemOf(r.row), fl = openFlags(r.row), ed = r.p && r.p.slug && S.edits[r.p.slug];
-    let st = '', ac = '';
-    if (S.force.has(r.row) || S.redo.has(r.row)) st = `<span class="note">${esc(t('a_retryNote'))}</span>`;
+  // 행 오른쪽 = 네 칸 (목록 머리: 상태 · 확인 필요 내용 · Next step · 직접 편집하기, 2026-11-24)
+  //   상태: 매칭 완료 / 확인 필요 (작업 중이면 대기 · 가져오는 중 · 만드는 중 · 실패). 확인 필요 내용: 이유 하나.
+  //   Next step: 버튼은 많아야 하나 (다시 가져오기 · 다시 시도 · 편집본 그대로 · 문제없음 · 되돌리기). 편집: 모든 행 같은 자리
+  function itemStatus(r, isRv) {
+    const it = itemOf(r.row), fl = openFlags(r.row);
+    let state = `<span class="badge ${isRv ? 'b-bad' : 'b-ok'}">${esc(t(isRv ? 'tabReview' : 'tabOk'))}</span>`, why = '', ac = '';
+    if (it && it.status === 'queued') state = `<span class="badge b-q">${esc(it.register && !it.crawled ? t('st_regq') : t('q'))}</span>`;
+    else if (it && it.status === 'crawling') state = `<span class="badge b-run">${esc(t('st_crawl'))}</span>`;
+    else if (it && it.status === 'working') state = `<span class="badge b-run">${esc(t('w'))}</span>`;
+    else if (it && it.status === 'failed') state = `<span class="badge b-bad">${esc(t('bad'))}</span>`;
+    else if (it && it.status === 'cancelled') state = `<span class="badge b-q">${esc(t('st_stop'))}</span>`;
+    if (S.force.has(r.row) || S.redo.has(r.row)) why = `<span class="note">${esc(t('a_retryNote'))}</span>`;
     else if (fl.length) {
       const f = fl[0];
       const fix = RETRY[f.code] ? `<button class="mini" data-a="retry" data-row="${r.row}" data-code="${f.code}">${esc(t(RETRY[f.code]))}</button>`
         : f.code === 'editChanged' ? `<button class="mini" data-a="keepEdit" data-url="${esc(r.p.url)}">${esc(t('a_keepEdit'))}</button>` : '';
       const ack = f.sev === 'warn' && f.code !== 'editChanged';
-      st = `<span class="why"${f.files && f.files.length ? ` title="${esc(f.files.join(', '))}"` : ''}>${esc(flagText(f))}` +
+      why = `<span class="why"${f.files && f.files.length ? ` title="${esc(f.files.join(', '))}"` : ''}>${esc(flagText(f))}` +
         (fix && ack ? `<button class="x" data-a="ack" data-row="${r.row}" data-code="${f.code}" title="${esc(t('a_ack'))}" aria-label="${esc(t('a_ack'))}">×</button>` : '') + '</span>';
       ac = fix || (ack ? `<button class="mini" data-a="ack" data-row="${r.row}" data-code="${f.code}">${esc(t('a_ack'))}</button>` : '');
-    } else if (it && it.status === 'queued') st = `<span class="badge b-q">${esc(it.register && !it.crawled ? t('st_regq') : t('q'))}</span>`;
-    else if (it && it.status === 'crawling') st = `<span class="badge b-run">${esc(t('st_crawl'))}</span>`;
-    else if (it && it.status === 'working') st = `<span class="badge b-run">${esc(t('w'))}</span>`;
-    else if (it && it.status === 'failed') st = `<span class="badge b-bad">${esc(t('bad'))}</span>`;
-    else if (it && it.status === 'cancelled') st = `<span class="badge b-q">${esc(t('st_stop'))}</span>`;
-    else if (ed) st = `<span class="badge b-ed">${esc(t('editedTag'))}</span>`;
+    }
+    // 매칭 불가에서 해결한 행(주소 · 후보 · 등록): 되돌리기
+    if (!ac && S.fixed[r.row]) ac = `<button type="button" class="mini un" data-undo="${r.row}">${esc(t('undo'))}</button>`;
     const pen = '<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>';
     const edit = r.p && r.p.url && !r.p.isBundle ? `<button type="button" class="eb" data-a="edit" data-url="${esc(r.p.url)}" title="${esc(t('a_editTip'))}">${pen}${esc(t('a_edit'))}</button>` : '';
-    return `<span class="c-st">${st}</span><span class="c-ac">${ac}</span><span class="c-ed">${edit}</span>`;
+    return `<span class="c-state">${state}</span><span class="c-why">${why}</span><span class="c-ac">${ac}</span><span class="c-ed">${edit}</span>`;
   }
 
   // ── 3. 목록 ──
@@ -227,18 +231,21 @@
     $('askDesc').classList.toggle('hidden', !!d.cols.desc);
     if (!d.cols.desc) $('descSel').innerHTML = '<option value="">—</option>' + d.columns.map((c) => `<option value="${c.col}">${c.letter} · ${esc(c.label)}</option>`).join('');
     $('pFile').textContent = d.fileName || '';
-    const rv = new Set(reviewRows().map((r) => r.row));   // 확인 필요는 맨 위
+    // 표 하나 (2026-11-24): 확인 필요 → 매칭 불가(이유 순서로 모음) → 매칭 완료. 탭은 이 표를 거르기만 한다
+    const rv = new Set(reviewRows().map((r) => r.row));
     const ordered = rows.slice().sort((a, b) => (rv.has(b.row) - rv.has(a.row)));
-    $('list').innerHTML = ordered.map((r, i) => `<label class="item${rv.has(r.row) ? ' rv' : ''}" style="${animate ? `animation-delay:${Math.min(i, 30) * 45}ms` : 'animation:none'}">` +
+    const nRv = ordered.filter((r) => rv.has(r.row)).length;
+    const nm = noMatch().slice().sort((a, b) => G_ORDER.indexOf(groupOf(a)) - G_ORDER.indexOf(groupOf(b)));
+    const anim = (i) => (animate ? `animation-delay:${Math.min(i, 30) * 45}ms` : 'animation:none');
+    const rowHtml = (r, i) => `<label class="item${rv.has(r.row) ? ' rv' : ''}" style="${anim(i)}">` +
       `<input type="checkbox" data-row="${r.row}">` +
       ((r.p.thumb || (itemOf(r.row) || {}).thumb) ? `<img src="${esc(r.p.thumb || itemOf(r.row).thumb)}" alt="" loading="lazy">` : `<div class="ph">${esc(grpName(r.p.grp))}</div>`) +
-      `<div style="min-width:0"><div class="m">${r.p.isBundle ? `<span class="badge b-q">${esc(t('bundleTag'))}</span> ` : ''}${esc(r.p.model)}<span class="dv">${esc(r.p.dv || '')} · ${esc(grpName(r.p.grp))}</span>${r.p.isNew ? `<span class="badge b-new">${esc(t('newTag'))}</span>` : ''}${r.gift ? `<span class="badge b-q">${esc(t('giftTag'))}</span>` : ''}</div>` +
-      `<div class="s">${esc(r.name || r.p.title)}</div></div><div class="r"></div></label>`).join('');
+      `<div class="m">${r.p.isBundle ? `<span class="badge b-q">${esc(t('bundleTag'))}</span> ` : ''}${esc(r.p.model)}${r.gift ? `<span class="badge b-q">${esc(t('giftTag'))}</span>` : ''}${r.p.slug && S.edits[r.p.slug] ? `<span class="badge b-ed">${esc(t('editedTag'))}</span>` : ''}</div>` +
+      `<div class="bu">${esc([r.p.dv, grpName(r.p.grp)].filter(Boolean).join(' · ') || '—')}</div>` +
+      `<div class="s pn" title="${esc(r.name || r.p.title)}">${esc(r.name || r.p.title)}</div><div class="r"></div></label>`;
+    $('list').innerHTML = ordered.slice(0, nRv).map(rowHtml).join('') + nm.map((r, i) => nmRowHtml(r, anim(nRv + i))).join('') +
+      ordered.slice(nRv).map((r, i) => rowHtml(r, nRv + nm.length + i)).join('');
     if (!rows.length && noMatch().length) S.tab = 'skip';
-    // 매칭 불가 (2026-11-23): 이유별로 묶는다 — 묶음마다 이유 · 남은 수 · 무엇을 하면 되는지 한 줄, 행마다 바로 할 수 있는 일.
-    //   주소 칸은 붙여 넣기 · Enter · 칸을 떠날 때 바로 확인 (추가 버튼 없음), 'LG.com 에서 찾기'는 그 모델로 LG.com 검색.
-    //   해결한 행은 그 자리에 ✓ 로 남고(되돌리기), 다음 빈 칸으로 넘어간다.
-    $('skip').innerHTML = skipHtml();
     refresh();
   }
 
@@ -247,55 +254,41 @@
   const groupOf = (r) => (r.why === 'rNone' ? (S.data.site ? (hasSku(r) ? 'gUrl' : 'gNoSku') : 'gNone')
     : ({ rMulti: 'gMulti', rReg: 'gReg', rBundle: 'gBundle' }[r.why] || 'gNone'));
   const candsOf = (r) => r.candidates.map((x) => S.data.products[x]).filter((p) => p && (!home || p.country === home));
-  // 한 줄 행: SKU · 상품명(한 줄, 마우스를 올리면 전체) · 할 일(주소 칸 / 후보 버튼 / 해결 표시)
-  const skuCell = (r) => (hasSku(r) ? `<span class="k">${esc(r.parentSku || r.sku)}</span>` : `<span class="k nosku">${esc(t('skuEmpty'))}</span>`);
-  function skipRowHtml(r, g) {
-    let act = '';
+  // 매칭 불가 행: 제품 칸 = 엑셀 SKU (비어 있으면 넣은 SKU 또는 'SKU 번호 없음')
+  const skuCell = (r) => (hasSku(r) ? `<span class="k">${esc(r.parentSku || r.sku)}</span>`
+    : S.skuIn[r.row] ? `<span class="k">${esc(S.skuIn[r.row])}</span>` : `<span class="k nosku">${esc(t('skuEmpty'))}</span>`);
+  // SKU 번호가 비어 있는 행: SKU 번호 칸 (엑셀 SKU 칸에 적는다 · 그 SKU 로 LG.com 제품도 찾는다)
+  const skuInput = (r) => `<input type="text" class="skuin" autocomplete="off" spellcheck="false" data-skurow="${r.row}" value="${esc(S.skuIn[r.row] || '')}" placeholder="${esc(t('skuPh'))}" aria-label="${esc(t('skuPh'))} — ${esc(r.name)}">`;
+  const whyCell = (g) => `<span class="sw2">${esc(t(g))}${g === 'gNoSku' ? `<i>${esc(skuColName())}</i>` : ''}</span>`;
+  function skuColName() {
+    const ci = S.data.cols.parentSku || S.data.cols.sku, cc = (S.data.columns || []).find((c) => c.col === ci);
+    return (S.data.cols.parentSku ? 'Parent SKU' : 'SKU') + (cc ? ` (${cc.letter})` : '');
+  }
+  function nmRowHtml(r, style) {
+    const g = groupOf(r);
+    let ac = '';
     if (g === 'gUrl' || g === 'gNoSku') {
-      act = `<input type="url" inputmode="url" autocomplete="off" spellcheck="false" data-urow="${r.row}" value="${esc(S.draft[r.row] || '')}" placeholder="${esc(t('urlPh'))}" aria-label="${esc(t('urlPh'))} — ${esc(r.parentSku || r.sku || r.name)}">` +
+      // SKU 번호가 비어 있음: SKU 번호 칸 + 주소 칸 (주소로 제품을 이미 찾았으면 ✓ 제품 · 되돌리기)
+      ac = (g === 'gNoSku' ? skuInput(r) : '') +
+        (r.half ? `<span class="okt">✓ ${esc(r.half.model || '')} <button type="button" class="lnk" data-undo="${r.row}">${esc(t('undo'))}</button></span>`
+          : `<input type="url" inputmode="url" autocomplete="off" spellcheck="false" data-urow="${r.row}" value="${esc(S.draft[r.row] || '')}" placeholder="${esc(t('urlPh'))}" aria-label="${esc(t('urlPh'))} — ${esc(r.parentSku || r.sku || r.name)}">`) +
         `<span class="ust" data-ust="${r.row}" role="status" aria-live="polite">${S.uerr[r.row] ? esc(t('urlBad', S.data.site || home)) : ''}</span>`;
     } else if (g === 'gMulti') {
       // 같은 모델이 LG.com 카테고리 두 곳에 있으면(예: 2-door-refrigerator · top-freezer) 버튼이 똑같아 보인다 — 카테고리를 붙인다
       const cs = candsOf(r), dupe = (p) => cs.filter((x) => x.model === p.model).length > 1;
       const cat = (p) => { const seg = String(p.url || '').split('/').filter(Boolean); return seg.length > 2 ? seg[seg.length - 2] : ''; };
-      act = cs.map((p) => `<button type="button" class="pick" data-pick="${r.row}" data-slug="${esc(p.slug)}" title="${esc((p.title || p.model) + (p.url ? '\n' + p.url : ''))}">` +
+      ac = cs.map((p) => `<button type="button" class="pick" data-pick="${r.row}" data-slug="${esc(p.slug)}" title="${esc((p.title || p.model) + (p.url ? '\n' + p.url : ''))}">` +
         `${p.thumb ? `<img src="${esc(p.thumb)}" alt="" loading="lazy">` : ''}${esc(p.model)}${dupe(p) && cat(p) ? `<span class="pc">${esc(cat(p))}</span>` : ''}</button>`).join('');
-    }
-    return `<div class="srow${S.uerr[r.row] ? ' bad' : ''}" data-srow="${r.row}">${skuCell(r)}<span class="n" title="${esc(r.name)}">${esc(r.name)}</span><span class="a">${act}</span></div>`;
-  }
-  function fixedRowHtml(f, now) {
-    const r = f.r, p = now.p || {};
-    return `<div class="srow fixed">${skuCell(r)}<span class="n" title="${esc(r.name)}">${esc(r.name)}</span>` +
-      `<span class="a"><span class="okt">✓ ${esc(p.model || '')}</span><button type="button" class="mini" data-undo="${r.row}">${esc(t('undo'))}</button></span></div>`;
-  }
-  function skipHtml() {
-    const by = {};
-    for (const r of noMatch()) (by[groupOf(r)] = by[groupOf(r)] || { open: [], done: [] }).open.push(r);
-    const all = act();
-    for (const [row, f] of Object.entries(S.fixed)) {
-      const now = all.find((x) => x.row === +row);
-      if (now) (by[f.g] = by[f.g] || { open: [], done: [] }).done.push([f, now]);
-    }
-    const gs = G_ORDER.filter((g) => by[g]);
-    if (!gs.includes(S.openG)) S.openG = gs.find((x) => by[x].open.length) || gs[0] || null;   // 처음엔 남은 행이 있는 첫 묶음
-    const nAuto = S.reg.filter((r) => !S.own[r.row]).length;
-    const ci = S.data.cols.parentSku || S.data.cols.sku, cc = (S.data.columns || []).find((c) => c.col === ci);
-    const skuCol = (S.data.cols.parentSku ? 'Parent SKU' : 'SKU') + (cc ? ` (${cc.letter})` : '');
-    // 이유별 칩 = 그 안의 작은 탭. 고른 칩의 행만, 칩 아래 짧은 안내 한 줄 (2026-11-23 단순화)
-    const g = S.openG && by[S.openG] ? S.openG : gs[0];
-    if (!g) return '';
-    const chips = `<div class="schips" role="tablist">${gs.map((x) => `<button type="button" class="schip${x === g ? ' on' : ''}" role="tab" aria-selected="${x === g}" data-g="${x}">` +
-      `${esc(t(x))}<b>${by[x].open.length}</b>${by[x].done.length ? `<i>✓${by[x].done.length}</i>` : ''}</button>`).join('')}</div>`;
-    const { open, done } = by[g];
-    const btn = g === 'gReg' && open.length ? ` <button type="button" class="mini" data-regon="1"${S.busy ? ' disabled' : ''}>${esc(t('regDo', nAuto))}</button>` : '';
-    const third = { gUrl: 'hdUrl', gNoSku: 'hdUrl', gMulti: 'hdPick' }[g];
-    return chips + `<div class="shint">${esc(t(g + 'D', skuCol))}${btn}</div>` +
-      `<div class="shead"><span>SKU</span><span>${esc(t('hdName'))}</span><span>${third ? esc(t(third)) : ''}</span></div>` +
-      `<div class="sgrows">${open.map((r) => skipRowHtml(r, g)).join('')}${done.map(([f, now]) => fixedRowHtml(f, now)).join('')}</div>`;
+    } else if (g === 'gReg' && r.lg) {
+      ac = `<button type="button" class="mini" data-regrow="${r.row}"${S.busy ? ' disabled' : ''}>${esc(t('regRow'))}</button>`;
+    } else ac = `<span class="leave">${esc(t('leaveAs'))}</span>`;
+    return `<div class="item nm${S.uerr[r.row] ? ' bad' : ''}" data-nm="${r.row}" style="${style}"><span class="cbx"></span><div class="ph">—</div>` +
+      `<div class="m">${skuCell(r)}</div><div class="bu">—</div><div class="s pn" title="${esc(r.name)}">${esc(r.name)}</div>` +
+      `<div class="r"><span class="c-state"><span class="badge b-q">${esc(t('tabSkip'))}</span></span><span class="c-why">${whyCell(g)}</span><span class="c-ac">${ac}</span><span class="c-ed"></span></div></div>`;
   }
   // 해결한 뒤: 다음 빈 주소 칸으로 (없으면 그대로)
   function focusNext(afterRow) {
-    const ins = [...document.querySelectorAll('#skip input[data-urow]')];
+    const ins = [...document.querySelectorAll('#list .item:not(.hidden) input[data-urow]')];
     const next = ins.find((x) => +x.dataset.urow > afterRow && !x.value) || ins.find((x) => !x.value);
     if (next) next.focus({ preventScroll: false });
   }
@@ -333,6 +326,8 @@
       .filter(([k, , n]) => k === 'all' || n);
     $('tabs').innerHTML = tabs.map(([k, label, n, cls]) => `<button class="tab ${cls}${S.tab === k ? ' on' : ''}" role="tab" aria-selected="${S.tab === k}" data-tab="${k}">${esc(label)}<b>${n}</b></button>`).join('');
     const inTab = (r) => S.tab === 'all' || (S.tab === 'review' && rvSet.has(r.row)) || (S.tab === 'ok' && !rvSet.has(r.row));
+    const nmBy = new Map(noMatch().map((r) => [r.row, r]));
+    const hitNm = (r) => !S.q || [r.name, r.sku, r.parentSku, r.id, S.skuIn[r.row]].join(' ').toLowerCase().includes(S.q);
     // 전체 선택 ↔ 해제: 버튼 하나 (지금 보이는 상품 — 탭 · 검색 결과 — 에만)
     const vis = rows.filter((r) => hit(r) && inTab(r)), vk = nSel(vis);
     $('selCb').className = 'cb ' + cbOf(vk, vis.length);
@@ -341,22 +336,23 @@
     $('selAll').setAttribute('aria-pressed', String(vis.length > 0 && vk === vis.length));
     $('selAll').disabled = S.busy || !vis.length;
     document.querySelectorAll('#list .item').forEach((el) => {
-      const row = +el.querySelector('input').dataset.row;
+      if (el.dataset.nm) { const r = nmBy.get(+el.dataset.nm); el.classList.toggle('hidden', !r || !hitNm(r) || !(S.tab === 'all' || S.tab === 'skip')); return; }
+      const cb = el.querySelector('input[data-row]'), row = +cb.dataset.row;
       const r = rows.find((x) => x.row === row);
       if (!r) return;
-      el.querySelector('input').checked = S.sel.has(row);
-      el.querySelector('input').disabled = S.busy;
+      cb.checked = S.sel.has(row);
+      cb.disabled = S.busy;
       el.classList.toggle('off', !S.sel.has(row));
-      el.classList.toggle('hidden', !hit(r) || !inTab(r));
-      el.querySelector('.r').innerHTML = itemStatus(r);
+      el.classList.toggle('hidden', !hit(r) || !inTab(r) || S.tab === 'skip');
+      el.querySelector('.r').innerHTML = itemStatus(r, rvSet.has(row));
     });
-    const skipTab = S.tab === 'skip';
-    $('lhead').classList.toggle('hidden', skipTab || !rows.length || VIEW === 'grid');
-    $('list').classList.toggle('hidden', skipTab || !rows.length);
-    $('skip').classList.toggle('hidden', !((skipTab || S.tab === 'all') && noN));   // 전체 탭에서는 목록 아래에 매칭 불가 행도 보인다
-    $('skipHead').classList.toggle('hidden', !(S.tab === 'all' && noN && rows.length));
-    $('skipHead').innerHTML = `${esc(t('tabSkip'))}<b>${noN}</b>`;
-    $('selbar').classList.toggle('hidden', skipTab || !rows.length);
+    const anyRow = rows.length + noN > 0;
+    $('lhead').classList.toggle('hidden', !anyRow || VIEW === 'grid');
+    // 확인할 행이 없는 목록(매칭 완료 탭 · 확인 필요 · 매칭 불가가 없는 전체 탭)은 '확인 필요 내용 · Next step' 열을 뺀다
+    const noAct = S.tab === 'ok' || (S.tab === 'all' && !rvN && !noN);
+    $('lhead').classList.toggle('noact', noAct); $('list').classList.toggle('noact', noAct);
+    $('list').classList.toggle('hidden', !anyRow);
+    $('selbar').classList.toggle('hidden', !anyRow);
     // 상황판
     const c = rows.filter((r) => S.sel.has(r.row)), rep = c.filter((r) => r.descLen > 0).length;
     const nNew = c.filter((r) => r.kind === 'new').length;
@@ -382,12 +378,15 @@
     $('again').disabled = S.busy;
   }
 
+  // 넣은 SKU 번호 (SKU 번호가 비어 있던 행) → 엑셀 SKU 칸에
+  const skuList = () => Object.entries(S.skuIn).filter(([, v]) => v);
   // 끝난 작업과 지금 선택이 같은지 (같으면 다시 만들 필요 없이 받기만)
   function sameAsJob() {
     const j = S.job;
     if (!j || !j.items || S.force.size || S.redo.size) return false;
     const rows = new Set(j.items.map((x) => x.row));
-    return rows.size === S.sel.size && [...S.sel].every((r) => rows.has(r));
+    const js = (j.skus || []).map((x) => `${x.row}:${x.sku}`).sort().join('|'), ns = skuList().map(([r, v]) => `${r}:${v}`).sort().join('|');
+    return js === ns && rows.size === S.sel.size && [...S.sel].every((r) => rows.has(r));
   }
   // 탭
   const goTab = (e) => { const b = e.target.closest('[data-tab]'); if (!b) return; S.tab = b.dataset.tab; refresh(); };
@@ -413,7 +412,7 @@
   $('ctl2').addEventListener('click', pickDv);
   $('selAll').onclick = () => {
     if (S.busy) return;
-    const vis = [...document.querySelectorAll('#list .item:not(.hidden) input')].map((x) => +x.dataset.row);
+    const vis = [...document.querySelectorAll('#list .item:not(.hidden) input[data-row]')].map((x) => +x.dataset.row);
     const all = vis.length && vis.every((r) => S.sel.has(r));
     vis.forEach((r) => (all ? S.sel.delete(r) : S.sel.add(r)));
     refresh();
@@ -424,7 +423,7 @@
     const el = e.target;
     if (!el.dataset.row) return;
     const row = +el.dataset.row;
-    const vis = [...document.querySelectorAll('#list .item:not(.hidden) input')].map((x) => +x.dataset.row);
+    const vis = [...document.querySelectorAll('#list .item:not(.hidden) input[data-row]')].map((x) => +x.dataset.row);
     const a = vis.indexOf(S.last), z = vis.indexOf(row);
     (shiftDown && a >= 0 && z >= 0 ? vis.slice(Math.min(a, z), Math.max(a, z) + 1) : [row]).forEach((x) => (el.checked ? S.sel.add(x) : S.sel.delete(x)));
     S.last = row;
@@ -494,7 +493,7 @@
   // 매칭 불가 행에서 바로 해결하기 (2026-11-23)
   const skipRowOf = (row) => noMatch().find((x) => x.row === row);
   async function tryUrl(inp) {
-    const row = +inp.dataset.urow, v = inp.value.trim(), el = inp.closest('.srow'), st = document.querySelector(`[data-ust="${row}"]`);
+    const row = +inp.dataset.urow, v = inp.value.trim(), el = inp.closest('.item'), st = document.querySelector(`[data-ust="${row}"]`);
     if (!v || inp.dataset.tried === v) return;
     inp.dataset.tried = v;
     el.classList.remove('bad'); delete S.uerr[row]; st.textContent = t('checking');
@@ -513,19 +512,43 @@
       inp.select();
     }
   }
-  $('skip').addEventListener('input', (e) => {
+  // SKU 번호: 쓰는 대로 기억하고, 칸을 떠나거나 Enter · 붙여 넣기 하면 그 SKU 로 제품을 찾아 주소 칸을 채운다
+  async function commitSku(inp) {
+    const row = +inp.dataset.skurow, v = inp.value.trim();
+    if (v) S.skuIn[row] = v; else delete S.skuIn[row];
+    const urlIn = document.querySelector(`#list input[data-urow="${row}"]`), st = document.querySelector(`[data-ust="${row}"]`);
+    const r = skipRowOf(row);
+    if (r && r.half) { if (v) { setData(S.data, false); focusNext(row); } return; }   // 제품은 이미 찾음 → SKU 를 넣으면 매칭 완료로
+    if (!v || !urlIn || urlIn.value.trim() || inp.dataset.tried === v) return;
+    inp.dataset.tried = v;
+    if (st) st.textContent = t('checking');
+    try {
+      const m = await api(`/api/v1/bulk/match-sku?sku=${encodeURIComponent(v)}&country=${encodeURIComponent(home)}&site=${encodeURIComponent(S.data.site || '')}`);
+      urlIn.value = m.url; S.draft[row] = m.url;
+      await tryUrl(urlIn);
+    } catch (_) { if (st) st.textContent = t('skuNoHit'); }
+  }
+  $('list').addEventListener('input', (e) => {
+    const sk = e.target.closest('input[data-skurow]');
+    if (sk) { if (sk.value.trim()) S.skuIn[+sk.dataset.skurow] = sk.value.trim(); else delete S.skuIn[+sk.dataset.skurow]; return; }
     const inp = e.target.closest('input[data-urow]');
     if (!inp) return;
     S.draft[+inp.dataset.urow] = inp.value;
-    if (!inp.value.trim()) { delete S.uerr[+inp.dataset.urow]; inp.closest('.srow').classList.remove('bad'); document.querySelector(`[data-ust="${inp.dataset.urow}"]`).textContent = ''; delete inp.dataset.tried; }
+    if (!inp.value.trim()) { delete S.uerr[+inp.dataset.urow]; inp.closest('.item').classList.remove('bad'); document.querySelector(`[data-ust="${inp.dataset.urow}"]`).textContent = ''; delete inp.dataset.tried; }
   });
-  $('skip').addEventListener('paste', (e) => { const inp = e.target.closest('input[data-urow]'); if (inp) setTimeout(() => tryUrl(inp), 0); });
-  $('skip').addEventListener('keydown', (e) => { const inp = e.target.closest('input[data-urow]'); if (inp && e.key === 'Enter') { e.preventDefault(); delete inp.dataset.tried; tryUrl(inp); } });
-  $('skip').addEventListener('change', (e) => { const inp = e.target.closest('input[data-urow]'); if (inp) tryUrl(inp); });
-  $('skip').addEventListener('click', (e) => {
-    const pk = e.target.closest('button[data-pick]'), un = e.target.closest('button[data-undo]'), ro = e.target.closest('button[data-regon]');
-    const gb = e.target.closest('.schip');
-    if (gb) { S.openG = gb.dataset.g; $('skip').innerHTML = skipHtml(); return; }
+  $('list').addEventListener('paste', (e) => { const inp = e.target.closest('input[data-urow]'); if (inp) setTimeout(() => tryUrl(inp), 0); });
+  $('list').addEventListener('keydown', (e) => {
+    const sk = e.target.closest('input[data-skurow]');
+    if (sk && e.key === 'Enter') { e.preventDefault(); sk.blur(); return; }   // 칸을 떠나면 change → commitSku
+    const inp = e.target.closest('input[data-urow]'); if (inp && e.key === 'Enter') { e.preventDefault(); delete inp.dataset.tried; tryUrl(inp); }
+  });
+  $('list').addEventListener('change', (e) => {
+    const sk = e.target.closest('input[data-skurow]'); if (sk) { commitSku(sk); return; }
+    const inp = e.target.closest('input[data-urow]'); if (inp) tryUrl(inp);
+  });
+  $('list').addEventListener('click', (e) => {
+    const pk = e.target.closest('button[data-pick]'), un = e.target.closest('button[data-undo]'), rr = e.target.closest('button[data-regrow]');
+    if (pk || un || rr) e.preventDefault();   // 되돌리기는 매칭 완료 행(체크 칸이 있는 줄) 안에도 있다
     if (pk) {
       const row = +pk.dataset.pick, r = skipRowOf(row);
       if (!r) return;
@@ -536,7 +559,13 @@
       const row = +un.dataset.undo;
       delete S.own[row]; delete S.pick[row]; delete S.fixed[row]; S.sel.delete(row);
       setData(S.data, false);
-    } else if (ro) { S.regOn = true; render(true); }
+    } else if (rr) {
+      // 그 행만 등록하고 채우기 (파일 전체 스위치는 위 한 줄)
+      const row = +rr.dataset.regrow, r = skipRowOf(row);
+      if (!r || !r.lg) return;
+      S.own[row] = { ...r.lg }; S.fixed[row] = { g: 'gReg', r }; S.sel.add(row);
+      setData(S.data, false);
+    }
   });
 
   // 보기 · 검색
@@ -544,10 +573,10 @@
   function setView(v) {
     VIEW = v === 'grid' ? 'grid' : 'list';
     $('list').classList.toggle('grid', VIEW === 'grid');
-    $('lhead').classList.toggle('hidden', VIEW === 'grid' || S.tab === 'skip');
+    $('lhead').classList.toggle('hidden', VIEW === 'grid' || !S.data);
     document.querySelectorAll('#view button').forEach((b) => { b.classList.toggle('on', b.dataset.v === VIEW); b.setAttribute('aria-pressed', b.dataset.v === VIEW); });
   }
-  $('lhead').innerHTML = `<span></span><span></span><span>${esc(t('hdProduct'))}</span><span>${esc(t('hdStatus'))}</span><span class="hn">${esc(t('hdAction'))}</span><span class="he">${esc(t('hdEdit'))}</span>`;
+  $('lhead').innerHTML = `<span></span><span></span><span>${esc(t('hdProduct'))}</span><span>${esc(t('hdBu'))}</span><span>${esc(t('hdName'))}</span><span>${esc(t('hdState'))}</span><span class="hs">${esc(t('hdStatus'))}</span><span class="hn">${esc(t('hdAction'))}</span><span class="he">${esc(t('hdEdit'))}</span>`;
   $('vList').textContent = t('viewList'); $('vGrid').textContent = t('viewGrid');
   document.querySelectorAll('#view button').forEach((b) => { b.title = t(b.dataset.v === 'grid' ? 'viewGrid' : 'viewList'); });
   $('view').onclick = (e) => { const b = e.target.closest('button'); if (b) setView(b.dataset.v); };
@@ -675,7 +704,7 @@
     S.autoDl = !longJob;   // 오래 걸리는 작업은 자동 다운로드 대신 '다시 받기' 버튼 · 메일
     S.busy = true; refresh();
     try {
-      const j = await api('/api/v1/bulk/build', { id: S.data.id, channel: S.channel, sheet: S.data.sheet, descCol: S.data.cols.desc, country: home, lang: L, items });
+      const j = await api('/api/v1/bulk/build', { id: S.data.id, channel: S.channel, sheet: S.data.sheet, descCol: S.data.cols.desc, country: home, lang: L, items, skus: Object.fromEntries(skuList()) });
       S.force = new Set(); S.redo = new Set(); S.ack = new Set();
       store.set(lastKey, { job: j.id, file: S.data.fileName, at: Date.now() });
       S.job = j; openXp(est, longJob);
@@ -697,6 +726,7 @@
       for (const it of j.items) if (!it.register && !it.bundle && it.slug) S.pick[it.row] = it.slug;   // 여러 후보 중 골랐던 제품
       for (const it of j.items) if (it.register) S.own[it.row] = { ...((d.rows.find((r) => r.row === it.row) || {}).lg || {}), url: it.url, model: it.model, alts: it.alts, fuzzy: it.fuzzy };
       S.regOn = j.items.some((x) => x.register);
+      S.skuIn = Object.fromEntries((j.skus || []).map((x) => [x.row, x.sku]));
       S.ack = new Set(store.get('clia-bulk-ack-' + id) || []);
       setData(d, false);
       S.sel = new Set(j.items.map((x) => x.row));
