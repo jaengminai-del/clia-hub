@@ -150,7 +150,7 @@ async function fullshot(url, recapture, step, existingOnly = false, via = '') { 
 const BLOCK_MS = (parseInt(process.env.REVIEW_CAPTURE_BLOCK_MINUTES, 10) || 30) * 60 * 1000;
 const FIRECRAWL_FALLBACK = process.env.REVIEW_FIRECRAWL_FALLBACK !== '0';
 const breaker = { until: 0, probing: false, trips: 0, streak: 0 };   // streak: 서로 다른 제품에서 연달아 막힌 수 (2번이면 쉼)
-const isTransientErr = (m) => /thread|crash|has been closed|Target |Timeout|timed out|ECONN|EAGAIN|ENOMEM|exit \d|SIGKILL|socket hang up|fetch failed|KeyboardInterrupt|Chromium|Command failed|worker exited|context was destroyed|exit null/i.test(String(m || ''));
+const isTransientErr = (m) => /thread|crash|has been closed|Target |Timeout|timed out|ECONN|EAGAIN|ENOMEM|exit \d|SIGKILL|socket hang up|fetch failed|KeyboardInterrupt|Chromium|Command failed|worker exited|context was destroyed|exit null|Expecting value|Clipped area/i.test(String(m || ''));
 const isBlockErr = (m) => /막음|막는 중|blocked|stylesheet|\b403\b|access denied/i.test(String(m || ''));
 function captureGate() {   // 미리 준비만: false = 건너뜀, 'probe' = 풀렸는지 시험하는 한 건, true = 찍음
   if (Date.now() < breaker.until || breaker.probing) return false;
@@ -306,6 +306,7 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false, bg =
       if (st && st.status === 'ready') console.log(`[review] ${slug}: lg.com 이 직접 캡처를 막음 → Firecrawl 로 찍음`);
       else if (st && st.status === 'error') st = { ...st, error: `${blockedErr} · Firecrawl: ${st.error}` };
     }
+    if (fc && st && st.status === 'ready' && tried) console.log(`[review] ${slug}: lg.com 이 막는 중 → Firecrawl 로 찍음`);
     if (st && st.status === 'none') fsErr = skipped ? 'lg.com 이 막는 중 — 나중에 채움' : existingOnly ? 'not captured yet' : 'no capture';
     if (st && (st.status === 'error' || st.status === 'gone')) fsErr = String(st.error || 'capture failed').slice(0, 200);
     if (gate && bg && !existingOnly && !directBlocked) {
