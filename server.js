@@ -2938,6 +2938,8 @@ process.on('uncaughtException', (e) => {
 process.on('unhandledRejection', (e) => {
   console.error('unhandledRejection:', e && e.stack || e);
 });
+// 재배포: Railway 가 새 서버를 켠 뒤 이 서버에 SIGTERM — 돌고 있는 크롤 · 미리 준비 · 벌크 행을 마치고 끝낸다 (drain.js)
+process.on('SIGTERM', () => require('./drain').drainAndExit('SIGTERM'));
 
 app.listen(PORT, () => {
   console.log(`\n✅ A+ Content Generator Server`);
@@ -2950,8 +2952,9 @@ app.listen(PORT, () => {
     store.pullAll()
       .then((s) => { console.log(`[crawl-store] 동기화 완료: 다운로드 ${s.downloaded}, 같음 ${s.unchanged}, 실패 ${s.failed}`); require('./crawler-routes').stripNonContent(); })
       .catch((e) => console.error('[crawl-store] 동기화 실패:', e.message))
-      // 재배포 전에 진행 중이던 벌크 엑셀 작업을 이어서 (제품 목록을 다 받은 뒤 — 크롤이 끝난 제품은 다시 크롤하지 않는다)
-      .finally(() => require('./bulk-jobs').resumeAll().catch((e) => console.warn('[bulk] resume', e.message)));
+      // 재배포 전에 진행 중이던 벌크 엑셀 작업을 이어서 (제품 목록을 다 받은 뒤 — 크롤이 끝난 제품은 다시 크롤하지 않는다).
+      // 이전 서버가 아직 마무리 중이면 끝난 뒤에 (drain.js — 같은 행을 두 서버가 동시에 하지 않게)
+      .finally(() => require('./drain').gate().then(() => require('./bulk-jobs').resumeAll()).catch((e) => console.warn('[bulk] resume', e.message)));
   } else {
     require('./bulk-jobs').resumeAll().catch((e) => console.warn('[bulk] resume', e.message));
   }

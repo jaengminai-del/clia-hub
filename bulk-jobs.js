@@ -246,6 +246,10 @@ function flagsFor(j, it, c) {
 }
 
 // ── 실행 ──
+// 재배포로 끝나는 중 (drain.js): 다음 행은 시작하지 않고 돌고 있는 행만 마친다. 작업은 「진행 중」으로 남겨 새 서버가 이어 한다
+let paused = false, runningJobs = 0;
+require('./drain').register({ name: 'bulk', pause: () => { paused = true; }, busy: () => runningJobs });
+
 async function run(j) {
   const cr = require('./crawler-routes');
   const wbUp = await readUpload(j.upload);
@@ -265,7 +269,10 @@ async function run(j) {
   j.phase = j.items.some((x) => (x.register || x.force) && !x.crawled) ? 'crawl' : 'content';
   persist(j);
   // 중단(cancel): 아직 시작 안 한 크롤·내용 만들기는 하지 않는다. 이미 돌고 있는 것은 끝나도 결과를 버린다
-  const stop = () => { if (j.status === 'cancelled') throw Object.assign(new Error('cancelled'), { cancelled: true }); };
+  const stop = () => {
+    if (j.status === 'cancelled') throw Object.assign(new Error('cancelled'), { cancelled: true });
+    if (paused) throw Object.assign(new Error('paused for redeploy'), { paused: true });
+  };
   await Promise.all(j.items.map(async (it) => {
     if (it.status === 'failed' && !it.retry) return;      // 이어서 할 때: 이미 실패한 것은 그대로
     try {
@@ -317,6 +324,7 @@ async function run(j) {
       it.videos = productVideos(readJson(path.join(OUT_DIR(), it.slug, 'mirror.json'))).length;   // 동영상 장면 바꾸기 버튼 (shared/clia-frame-picker.js)
     } catch (e) {
       if (e.cancelled || j.status === 'cancelled') { it.status = 'cancelled'; persist(j); return; }
+      if (e.paused) { it.status = 'queued'; return; }   // 새 서버가 이어서 (크롤이 끝난 것은 crawled 로 남아 다시 크롤하지 않는다)
       const msg = String(e.message || e).slice(0, 300);
       const stage = (it.register || it.force) && !it.crawled ? 'crawl' : 'content';
       Object.assign(it, { status: 'failed', error: msg, flags: [{ code: stage, sev: 'error', msg }] });
@@ -324,6 +332,7 @@ async function run(j) {
     persist(j);
   }));
   if (j.status === 'cancelled') return;   // 중단했으면 엑셀을 만들지 않는다
+  if (paused) return;                      // 재배포: 새 서버가 이어서 엑셀까지 만든다
   j.phase = 'write';
   for (const it of j.items) {
     if (it.status !== 'ok') continue;
@@ -343,10 +352,18 @@ function start(j) {
   jobs.set(j.id, j);
   j.status = 'running';
   activeList((ids) => [...new Set([...ids, j.id])]).catch(() => {});
+  runningJobs++;
   run(j)
-    .then(() => { if (j.status !== 'cancelled') j.status = 'ready'; })
+    .then(() => { if (j.status !== 'cancelled' && !paused) j.status = 'ready'; })
     .catch((e) => { if (j.status === 'cancelled') return; j.status = 'failed'; j.error = e.message; console.error('[bulk] failed', j.id, e.message); })
     .finally(async () => {
+      if (paused && j.status === 'running') {   // 재배포로 멈춤 — 「진행 중」으로 남겨 두고 새 서버가 이어 한다
+        await persist(j, true).catch(() => {});
+        console.log(`[bulk] paused for redeploy ${j.id} (${j.items.filter((x) => x.status === 'ok').length} ok so far)`);
+        runningJobs--;
+        return;
+      }
+      runningJobs--;
       j.finishedAt = Date.now(); j.phase = 'done';
       console.log(`[bulk] ${j.status} ${j.outName}: ok ${j.items.filter((x) => x.status === 'ok').length}, failed ${j.items.filter((x) => x.status === 'failed').length}`);
       if (j.status !== 'cancelled') await notify(j).catch((e) => console.warn('[bulk] notify', e.message));   // 중단한 작업은 메일을 보내지 않는다

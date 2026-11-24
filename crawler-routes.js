@@ -562,6 +562,9 @@ router.get('/api/v1/jobs/:id/stream', (req, res) => {
   req.on('close', () => clearInterval(timer));
 });
 
+// 재배포 마무리 (drain.js): 돌고 있는 크롤(파이프라인 · 동영상 장면 고르기)이 끝날 때까지 이전 서버가 기다린다
+require('./drain').register({ name: 'crawl', pause: () => {}, busy: () => [...jobs.values()].filter((j) => (j.proc && !j.exited) || j.post).length });
+
 module.exports = router;
 module.exports.crawl = crawl;
 module.exports.cleanUrl = cleanUrl;
