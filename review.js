@@ -268,9 +268,19 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false, bg =
     fs.writeFileSync(htmlTmp, html);
     try {
       const boxes = shotPath && fs.existsSync(shotPath) ? await boxesFor(st.key, shotPath) : null;
-      return { shotPath, a: await LANES.analyze(() => runPrep({ fullshot: shotPath && fs.existsSync(shotPath) ? shotPath : null, boxes, mirror: path.join(dirOf(slug), 'mirror.json'),
+      // 상세 이미지 HTML 의 섹션 · 이미지 위치 (같은 해시면 같다) — 한 번 재면 다시 쓴다 (브라우저 없이 분석, 버킷에도)
+      const layoutCache = path.join(SLICE_CACHE, sl.hash, 'align-layout.json');
+      let hadLayout = fs.existsSync(layoutCache);
+      if (!hadLayout && boxes) {
+        const buf = await store.getBuffer(`media-slices/${sl.hash}/align-layout.json`).catch(() => null);
+        if (buf) { fs.mkdirSync(path.dirname(layoutCache), { recursive: true }); fs.writeFileSync(layoutCache, buf); hadLayout = true; }
+      }
+      const pushLayout = () => { if (!hadLayout && fs.existsSync(layoutCache)) store.putBuffer(`media-slices/${sl.hash}/align-layout.json`, fs.readFileSync(layoutCache), 'application/json').catch(() => {}); };
+      const res = { shotPath, a: await LANES.analyze(() => runPrep({ fullshot: shotPath && fs.existsSync(shotPath) ? shotPath : null, boxes, layoutCache, mirror: path.join(dirOf(slug), 'mirror.json'),
         slices: slices.map((s) => ({ text: s.text })), html: htmlTmp, medium: 'shopee_lazada',
         fontsCss: `http://127.0.0.1:${process.env.PORT || 3001}/css/fonts.css`, sliceWidth: slices[0].w }), !bg) };
+      pushLayout();
+      return res;
     } finally { fs.rmSync(htmlTmp, { force: true }); }
   };
   step('fullshot-check');
