@@ -203,9 +203,12 @@ button.eb { cursor: pointer; }
 .dw-page { border: 1px solid var(--clia-gray-200); border-radius: 10px; overflow: hidden; background: #fff; }
 .dw-page img { display: block; width: 100%; height: auto; }
 .dw-sum { white-space: pre-wrap; font-size: 13px; line-height: 1.6; color: var(--clia-gray-900); padding: 16px 18px; border-bottom: 1px solid var(--clia-gray-100); }
-.dw-frame { border: 1px solid var(--clia-gray-100); border-radius: 10px; overflow: hidden; height: 640px; }
-.dw-frame iframe { width: 1000px; height: calc(640px / .498); border: 0; transform: scale(.498); transform-origin: 0 0; }
-@media (max-width: 640px) { .dw-p { width: 100vw; } .dw-frame iframe { transform: scale(.35); height: calc(640px / .35); } }
+/* HTML 한 페이지: 1000px 폭을 패널 폭에 맞춰 줄이고 높이는 내용만큼 (bulk.js fitFrames) */
+.dw-frame { border: 1px solid var(--clia-gray-100); border-radius: 10px; overflow: hidden; height: 480px; }
+.dw-page .dw-frame { border: 0; border-radius: 0; }
+.dw-frame iframe { display: block; width: 1000px; height: 2000px; border: 0; transform: scale(.48); transform-origin: 0 0; }
+[dir=rtl] .dw-frame iframe { transform-origin: 100% 0; }
+@media (max-width: 640px) { .dw-p { width: 100vw; } }
 /* 표 하나 (2026-11-24): 제품 · 상품명 · 상태 · 확인 필요 내용 · Next step · 직접 편집하기 — 매칭 완료 · 확인 필요 · 매칭 불가 모두.
    탭은 거르기만. 넓은 화면의 리스트 보기에서만 칸으로, 휴대폰 · 갤러리 보기는 카드 */
 .lhead { display: none; }
