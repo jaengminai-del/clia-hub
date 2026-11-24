@@ -263,8 +263,13 @@ function prewarm() {
   return n;
 }
 if (PREWARM) {
-  // 시작 직후에는 버킷 → 로컬 동기화가 끝난 뒤에 (없는 제품을 비었다고 보지 않게)
-  Promise.resolve(store.whenPulled ? store.whenPulled() : null).catch(() => {}).then(() => setTimeout(prewarm, 60 * 1000));
+  // 시작 직후에는 버킷 → 로컬 동기화가 끝난 뒤에 (없는 제품을 비었다고 보지 않게).
+  // whenPulled 는 동기화가 시작되기 전에 부르면 바로 끝나므로(2026-11-24 운영: 첫 훑기가 제품 0개) 30초 뒤에 묻고 최대 30분 기다린다
+  setTimeout(async () => {
+    await Promise.resolve(store.whenPulled ? store.whenPulled(30 * 60 * 1000) : null).catch(() => {});
+    try { require('./bulk-catalog').invalidate(); } catch (_) {}   // 동기화 중에 만든 빈 제품 색인을 버린다
+    prewarm();
+  }, 30 * 1000);
   setInterval(prewarm, 10 * 60 * 1000).unref();
 }
 function queueStats() {
