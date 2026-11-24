@@ -42,12 +42,26 @@ const isTh = (url) => /lg\.com\/th\//i.test(url || '');
 function sigOf(slug, ch, sum = cr.productSummary(cleanSlug(slug))) {   // sum: { url, crawled_at } (목록은 제품 색인 값 — mirror.json 을 다시 읽지 않게)
   const d = dirOf(slug);
   const e = readJson(path.join(d, `edit-${ch}.json`));
-  let sumAt = 0;
-  try { sumAt = Math.round(fs.statSync(path.join(d, 'summary.json')).mtimeMs); } catch (_) {}
+  const sumAt = summaryHash(path.join(d, 'summary.json'));
   return { crawled_at: sum ? Number(sum.crawled_at) || 0 : 0, edit_at: e && fs.existsSync(path.join(d, `edit-${ch}.html`)) ? Number(e.at) || 0 : 0,
            sum_at: sum && isTh(sum.url) ? sumAt : 0 };
 }
-const sameSig = (a, b) => !!a && !!b && Math.abs(a.crawled_at - b.crawled_at) <= 1 && a.edit_at === b.edit_at && a.sum_at === b.sum_at;
+// 요약 지문 = summary.json 내용의 해시 (2026-11-24). 예전에는 파일 시각이었는데, 재배포 뒤 버킷에서 다시 받으면 시각이 바뀌어
+//   준비한 것이 모두 「내용 바뀜」이 됐다. 시각·크기가 같으면 다시 읽지 않는다. 요약이 없으면 0.
+const sumHashes = new Map();   // 파일 → { m, z, h }
+function summaryHash(fp) {
+  let st;
+  try { st = fs.statSync(fp); } catch (_) { return 0; }
+  const c = sumHashes.get(fp);
+  if (c && c.m === st.mtimeMs && c.z === st.size) return c.h;
+  let h = 0;
+  try { h = require('crypto').createHash('sha1').update(fs.readFileSync(fp)).digest('hex').slice(0, 16); } catch (_) {}
+  sumHashes.set(fp, { m: st.mtimeMs, z: st.size, h });
+  return h;
+}
+// 예전 준비 결과(요약 지문이 파일 시각 숫자)는 지금 요약이 있으면 같다고 본다 — 배포하자마자 전부 다시 준비하지 않게
+const sameSum = (a, b) => a === b || (typeof a === 'number' && a > 0 && typeof b === 'string' && !!b);
+const sameSig = (a, b) => !!a && !!b && Math.abs(a.crawled_at - b.crawled_at) <= 1 && a.edit_at === b.edit_at && sameSum(a.sum_at, b.sum_at);
 
 // ── 준비 작업 (한 번에 2개) ──
 const jobs = new Map();   // `${slug}|${ch}` → { state: 'pending'|'error', step, at, error, bg }
@@ -92,7 +106,13 @@ async function sliceManifest(hash) {
 async function fullshot(url, recapture, step, existingOnly = false, directOnly = false) {
   const q = '/api/v1/fullshot?url=' + encodeURIComponent(url);
   let st = await getJ(q);
-  if (st.status === 'ready' && !recapture) return st;
+  // 기록 없는 예전 캡처 → 주소만 확인 (4초) — 없어진 제품 페이지(홈으로 넘어감)를 찍은 것이면 gone (2026-11-24)
+  if (st.status === 'ready' && st.verified === false && !recapture) {
+    step('fullshot-verify');
+    st = await post('/api/v1/fullshot', { url, verify: true }, 30000);
+    for (let i = 0; i < 60 && st.status === 'pending'; i++) { await sleep(2000); st = await getJ(q); }
+  }
+  if ((st.status === 'ready' || st.status === 'gone') && !recapture) return st;   // gone: lg.com 에 제품 페이지 없음 — 다시 찍지 않는다
   if (existingOnly && st.status !== 'pending') return st;   // 미리 준비: 있는 캡처만 (새로 찍지 않는다)
   if (st.status !== 'pending') {
     step('fullshot');
@@ -102,6 +122,36 @@ async function fullshot(url, recapture, step, existingOnly = false, directOnly =
   for (let i = 0; i < 120 && st.status === 'pending'; i++) { await sleep(2000); st = await getJ(q); }
   return st;
 }
+
+// lg.com 차단 차단기 (2026-11-24): 미리 준비의 직접 캡처가 「lg.com 이 막음」(CSS 가 막힘 등)으로 실패하면 30분 동안
+//   미리 준비는 캡처를 건너뛴다 — 이미지·요약·분석은 그대로 준비하고 캡처만 비워 둔다(missing: fullshot).
+//   30분 뒤 한 건만 먼저 시험해 보고(probe), 풀렸으면 다시 찍고 비워 둔 캡처를 채운다 (prewarm 이 다시 차례에 넣음).
+//   막힌 동안 4개가 동시에 계속 부딪히지 않게. 사람이 연 제품은 상관없이 찍는다 (Firecrawl 로 넘어감).
+const BLOCK_MS = (parseInt(process.env.REVIEW_CAPTURE_BLOCK_MINUTES, 10) || 30) * 60 * 1000;
+const breaker = { until: 0, probing: false, trips: 0, streak: 0 };   // streak: 서로 다른 제품에서 연달아 막힌 수 (2번이면 쉼)
+const isBlockErr = (m) => /막음|막는 중|blocked|stylesheet|\b403\b|access denied/i.test(String(m || ''));
+function captureGate() {   // 미리 준비만: false = 건너뜀, 'probe' = 풀렸는지 시험하는 한 건, true = 찍음
+  if (Date.now() < breaker.until || breaker.probing) return false;
+  if (breaker.until) { breaker.probing = true; return 'probe'; }
+  return true;
+}
+function captureResult(gate, err) {
+  if (gate === 'probe') breaker.probing = false;
+  if (err && isBlockErr(err)) {
+    breaker.streak++;
+    if (gate !== 'probe' && breaker.streak < 2) return;   // 한 제품만 막힌 것은 그 제품 문제일 수 있다
+    if (!breaker.until || gate === 'probe' || Date.now() >= breaker.until) {
+      breaker.trips++;
+      console.warn(`[review] lg.com 이 캡처를 막음 → 미리 준비 캡처 ${BLOCK_MS / 60000}분 쉼 (캡처만 비워 두고 나중에 채움): ${String(err).slice(0, 120)}`);
+    }
+    breaker.until = Date.now() + BLOCK_MS;
+  } else if (!err) breaker.streak = 0;
+  if (gate === 'probe' && !err) {
+    console.log('[review] lg.com 캡처 다시 됨 → 미리 준비 캡처 다시 시작 (비워 둔 캡처 채우기)');
+    breaker.until = 0;
+  }
+}
+const captureBlocked = () => Date.now() < breaker.until || breaker.probing;
 
 function runPrep(input) {
   return new Promise((resolve, reject) => {
@@ -186,18 +236,26 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false, bg =
     } finally { fs.rmSync(htmlTmp, { force: true }); }
   };
   step('fullshot-check');
-  let fsErr = '', st = null;
+  let fsErr = '', st = null, skipped = false;
   const shoot = async (re) => {
-    try { st = await fullshot(sum.url, re, step, existingOnly && !re, bg); fsErr = ''; } catch (e) { fsErr = String(e.message).slice(0, 200); }
-    if (st && st.status === 'none') fsErr = existingOnly ? 'not captured yet' : 'no capture';
-    if (st && st.status === 'error') fsErr = String(st.error || 'capture failed').slice(0, 200);
+    const gate = bg && !existingOnly ? captureGate() : true;   // 미리 준비: lg.com 이 막는 중이면 있는 캡처만 (새로 찍지 않음)
+    skipped = !gate;
+    let tried = false;   // 실제로 새로 찍었는지 (있는 캡처를 그대로 쓰면 풀렸는지 알 수 없다)
+    const stp = (x) => { if (x === 'fullshot') tried = true; step(x); };
+    try { st = await fullshot(sum.url, re && !skipped, stp, (existingOnly && !re) || skipped, bg); fsErr = ''; } catch (e) { fsErr = String(e.message).slice(0, 200); tried = true; }
+    if (st && st.status === 'none') fsErr = skipped ? 'lg.com 이 막는 중 — 나중에 채움' : existingOnly ? 'not captured yet' : 'no capture';
+    if (st && (st.status === 'error' || st.status === 'gone')) fsErr = String(st.error || 'capture failed').slice(0, 200);
+    if (gate && bg && !existingOnly) {
+      if (tried) captureResult(gate, st && st.status === 'ready' ? '' : fsErr);
+      else if (gate === 'probe') breaker.probing = false;   // 시험할 기회를 다음 건에 넘긴다
+    }
   };
   await shoot(recapture);
   let { shotPath, a } = await analyze(st, true);
   // 미리 준비는 최근(24시간 안) 찍은 캡처를 다시 찍지 않는다 — lg.com 페이지가 원래 짧은 제품(TH 일부, 기능 섹션 없음)을
   // 두 채널이 번갈아 계속 다시 찍던 것 (2026-11-24 운영: T2312VSPB · T2313VSPB · T2314VS2B · ISC10E)
   const shotAge = shotPath && fs.existsSync(shotPath) ? Date.now() - fs.statSync(shotPath).mtimeMs : Infinity;
-  if (thin(a) && !recapture && !existingOnly && !(bg && shotAge < 24 * 3600 * 1000)) {   // 덜 찍혔으면 한 번 다시 캡처하고 다시 본다
+  if (thin(a) && !recapture && !existingOnly && !(bg && (shotAge < 24 * 3600 * 1000 || captureBlocked()))) {   // 덜 찍혔으면 한 번 다시 캡처하고 다시 본다
     console.log(`[review] ${slug}: lg.com 캡처가 덜 찍힘 (PDP ${a.shot.bottom - a.shot.top}px / 상세 이미지 ${sliceTotal}px) → 다시 캡처`);
     await shoot(true);
     ({ shotPath, a } = await analyze(st, false));
@@ -265,18 +323,25 @@ function enqueue(slug, ch, opts = {}, bg = false) {
 /** 미리 준비: Shopee/Lazada 법인 제품 중 준비 안 됨 · 내용 바뀜인 채널을 미리 준비 차례에 넣는다 (최근 크롤 먼저) */
 function prewarm() {
   if (!PREWARM || paused) return 0;
-  let n = 0;
+  let n = 0, refills = 0;
   try {
     const idx = require('./bulk-catalog').productIndex();
     const ps = Object.values(idx.products).filter((p) => PREWARM_COUNTRIES.has(p.country)).sort((a, b) => b.crawled_at - a.crawled_at);
     for (const p of ps) for (const ch of CHANNELS) {
       const j = jobs.get(`${p.slug}|${ch}`);
       if (j && (j.state === 'pending' || (j.state === 'error' && Date.now() - j.at < 6 * 3600 * 1000))) continue;
-      const { state } = prepState(p.slug, ch, p);
-      if (state === 'none' || state === 'stale' || state === 'error') { enqueue(p.slug, ch, { existingOnly: PREWARM_EXISTING_ONLY }, true); n++; }
+      const { state, rec } = prepState(p.slug, ch, p);
+      // 캡처를 비워 두고 준비한 것(lg.com 이 막던 때) — 차단이 풀렸으면 다시 (1시간 지난 것만, 한 번 훑을 때 최대 40개)
+      const refill = state === 'ready' && !PREWARM_EXISTING_ONLY && rec && !rec.shot && isBlockErr(rec.shotErr) && !captureBlocked() && refills < 40
+        && Date.now() - (rec.prepared_at || 0) > 60 * 60 * 1000;
+      if (state === 'none' || state === 'stale' || state === 'error' || refill) {
+        enqueue(p.slug, ch, { existingOnly: PREWARM_EXISTING_ONLY }, true); n++;
+        if (refill) refills++;
+      }
     }
+    verifySweep(ps);
   } catch (e) { console.warn('[review] 미리 준비 목록 실패', e.message); }
-  if (n) console.log(`[review] 미리 준비 ${n}개 차례에 넣음 (대기 ${queue.length} · 동시 ${BG_CONC})`);
+  if (n) console.log(`[review] 미리 준비 ${n}개 차례에 넣음 (대기 ${queue.length} · 동시 ${BG_CONC}${refills ? ` · 캡처 채우기 ${refills}` : ''})`);
   return n;
 }
 if (PREWARM) {
@@ -290,10 +355,46 @@ if (PREWARM) {
   }, 30 * 1000);
   setInterval(prewarm, 10 * 60 * 1000).unref();
 }
-require('./drain').register({ name: 'review', pause: () => { paused = true; }, busy: () => running });
+// 예전 캡처 확인 (2026-11-24): 기록 없이 찍힌 캡처(이 변경 전)가 제품 페이지인지 한 번씩 주소만 확인한다 — 한 번에 하나, 4초쯤.
+//   없어진 제품(단종 · 번들)은 lg.com 이 홈으로 보내 홈 화면이 「LG.com」으로 찍혀 있었다 → 그 제품을 다시 준비해 캡처를 뺀다.
+const verifyQ = [], verifyDone = new Set();
+let verifying = false;
+async function verifyPump() {
+  if (verifying) return;
+  verifying = true;
+  try {
+    while (verifyQ.length && !paused) {
+      const { url, key, slug } = verifyQ.shift();
+      try {
+        const q = '/api/v1/fullshot?url=' + encodeURIComponent(url);
+        let st = await getJ(q);
+        if (st.status === 'ready' && st.verified === false) {
+          st = await post('/api/v1/fullshot', { url, verify: true }, 30000);
+          for (let i = 0; i < 60 && st.status === 'pending'; i++) { await sleep(2000); st = await getJ(q); }
+        }
+        if (st.status === 'gone') {
+          console.log(`[review] ${slug}: 예전 lg.com 캡처는 홈 화면 (제품 페이지 없음) → 캡처 빼고 다시 준비`);
+          for (const ch of CHANNELS) enqueue(slug, ch, { existingOnly: PREWARM_EXISTING_ONLY }, true);
+        }
+      } catch (e) { console.warn('[review] 캡처 확인 실패', slug, e.message); }
+      verifyDone.add(key);
+    }
+  } finally { verifying = false; }
+}
+function verifySweep(ps) {
+  for (const p of ps) for (const ch of CHANNELS) {
+    const rec = readJson(fileOf(p.slug, ch));
+    const key = rec && rec.shot && rec.shot.key;
+    if (!key || verifyDone.has(key) || verifyQ.some((x) => x.key === key) || fs.existsSync(path.join(FULLSHOT_DIR, `${key}.json`))) continue;
+    verifyQ.push({ url: rec.url, key, slug: p.slug });
+  }
+  if (verifyQ.length) { console.log(`[review] 예전 lg.com 캡처 주소 확인 ${verifyQ.length}개 차례에 넣음`); verifyPump(); }
+}
+require('./drain').register({ name: 'review', pause: () => { paused = true; }, busy: () => running + (verifying ? 1 : 0) });
 function queueStats() {
   return { queued: queue.length, queuedBg: queue.filter((q) => q.bg).length, running, runningBg, prewarm: PREWARM ? [...PREWARM_COUNTRIES] : [],
-    mode: PREWARM_EXISTING_ONLY ? 'existing' : 'full', conc: BG_CONC };
+    mode: PREWARM_EXISTING_ONLY ? 'existing' : 'full', conc: BG_CONC,
+    captureBlockedUntil: captureBlocked() ? breaker.until : 0, captureBlockTrips: breaker.trips };
 }
 
 /** 준비 결과 + 사람이 고친 lg.com 범위 */
@@ -309,6 +410,8 @@ function readPrep(slug, ch) {
 /** 준비한 뒤 lg.com 을 다시 캡처했는지 (같은 key 에 다른 파일 — 크기로 본다. 로컬에 없으면(재배포 직후) 모른다 → 그대로) */
 function shotChanged(rec) {
   if (!rec.shot || !rec.shot.bytes) return false;
+  const m = readJson(path.join(FULLSHOT_DIR, `${rec.shot.key}.json`));
+  if (m && m.gone) return true;   // 확인해 보니 홈 화면을 찍은 것 (제품 페이지 없음) → 다시 준비해 캡처를 뺀다
   try { return fs.statSync(path.join(FULLSHOT_DIR, `${rec.shot.key}.jpg`)).size !== rec.shot.bytes; } catch (_) { return false; }
 }
 function prepState(slug, ch, sum) {

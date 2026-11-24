@@ -3,7 +3,12 @@
 fullshot.py — lg.com 제품 페이지 전체 화면 캡처 (빌더의 "전체 lg.com 컨텐츠 확인하기" 팝업용, 2026-10-26)
 
     python fullshot.py <url> <out.jpg>
-    → stdout: {"width": 960, "height": ..., "bytes": ..., "seconds": ...}
+    → stdout: {"width": 960, "height": ..., "bytes": ..., "seconds": ..., "final": <열린 주소>}
+    python fullshot.py --check <url>
+    → stdout: {"final": <열린 주소>, "gone": true|false}   (찍지 않고 주소만 — 예전 캡처 확인용, 5~10초)
+
+· 없어진 제품 페이지(단종 · 번들 등)는 lg.com 이 홈(https://www.lg.com/th/)으로 보낸다 → 「페이지가 없음」으로 실패 (2026-11-24)
+  홈 화면을 제품 페이지로 찍지 않게. Firecrawl 로 넘기지도 않는다 (같은 홈 화면에 유료 호출).
 
 · PC 화면(1920px)으로 열고 배율 0.5 로 찍어 폭 960px JPEG 로 바로 저장 (원본 PNG 는 20MB 넘게 커져 서버 메모리 부담)
 · 페이지 로드는 모든 네트워크 요청이 끝날 때까지 기다리지 않는다 (lg.com 은 60초 넘게 안 끝나는 경우가 있음)
@@ -66,6 +71,21 @@ class Blocked(Exception):
     pass
 
 
+class Gone(Exception):
+    """제품 페이지가 없어 lg.com 이 다른 주소(홈 등)로 보냄"""
+    pass
+
+
+def same_page(final: str, url: str) -> bool:
+    from urllib.parse import urlparse
+    norm = lambda u: urlparse(str(u or "")).path.rstrip("/").lower()
+    return norm(final) == norm(url)
+
+
+def gone_message(final: str) -> str:
+    return f"lg.com 에 이 제품 페이지가 없음 → {final} 로 넘어감"
+
+
 def capture_firecrawl(url: str, out: Path, width: int = 960, quality: int = 80) -> dict:
     """Firecrawl 의 전체 화면 캡처(screenshot@fullPage) → 폭 width JPEG."""
     import io
@@ -87,6 +107,9 @@ def capture_firecrawl(url: str, out: Path, width: int = 960, quality: int = 80) 
     j = r.json()
     if not (r.ok and j.get("success") and (j.get("data") or {}).get("screenshot")):
         raise RuntimeError(f"Firecrawl 캡처 실패: {str(j)[:200]}")
+    final = ((j["data"].get("metadata") or {}).get("url") or "")
+    if final and not same_page(final, url):
+        raise Gone(gone_message(final))
     shot = j["data"]["screenshot"]
     data = requests.get(shot, timeout=60).content if shot.startswith("http") else \
         __import__("base64").b64decode(shot.split(",", 1)[-1])
@@ -95,7 +118,8 @@ def capture_firecrawl(url: str, out: Path, width: int = 960, quality: int = 80) 
         im = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
     out.parent.mkdir(parents=True, exist_ok=True)
     im.save(out, "JPEG", quality=quality)
-    return {"width": im.width, "height": im.height, "bytes": out.stat().st_size, "seconds": round(time.time() - t0, 1), "via": "firecrawl"}
+    return {"width": im.width, "height": im.height, "bytes": out.stat().st_size, "seconds": round(time.time() - t0, 1), "via": "firecrawl",
+            "final": final or url}
 
 
 def capture(url: str, out: Path, scale: float = 0.5, quality: int = 80) -> dict:
@@ -111,14 +135,51 @@ def capture(url: str, out: Path, scale: float = 0.5, quality: int = 80) -> dict:
     return capture_firecrawl(url, out, round(1920 * scale), quality)
 
 
+def _launch(p):
+    try:   # 실제 Chrome (봇 차단 회피), 없으면 Playwright Chromium
+        return p.chromium.launch(channel="chrome", headless=True, args=BROWSER_ARGS)
+    except Exception:
+        return p.chromium.launch(headless=True, args=BROWSER_ARGS)
+
+
+def check(url: str) -> dict:
+    """찍지 않고 열린 주소만 — 예전 캡처가 제품 페이지였는지 확인 (없어진 제품은 홈으로 넘어간다)."""
+    from playwright.sync_api import sync_playwright
+    t0 = time.time()
+    with sync_playwright() as p:
+        browser = _launch(p)
+        try:
+            ctx = browser.new_context(viewport={"width": 1920, "height": 1080}, user_agent=UA, locale="en-US",
+                                      extra_http_headers={k: v for k, v in HEADERS.items() if k.startswith("Sec-CH-UA") or k == "Accept-Language"})
+            ctx.add_init_script(f"({STEALTH})()")
+            page = ctx.new_page()
+
+            def route(r):
+                if r.request.resource_type in ("image", "media", "font", "stylesheet") or any(k in r.request.url.lower() for k in BLOCKED_REQUESTS):
+                    return r.abort()
+                if r.request.resource_type == "document" and r.request.frame == page.main_frame:
+                    return r.continue_(headers={**r.request.headers, **HEADERS})
+                return r.continue_()
+
+            page.route("**/*", route)
+            resp = page.goto(url, wait_until="domcontentloaded", timeout=45000)
+            if (resp and resp.status == 403) or "access denied" in (page.title() or "").lower():
+                page.wait_for_timeout(3000)
+                resp = page.goto(url, wait_until="domcontentloaded", timeout=45000)
+            if (resp and resp.status == 403) or "access denied" in (page.title() or "").lower():
+                raise Blocked("access denied")
+            page.wait_for_timeout(2500)   # 스크립트로 넘기는 경우
+            final = page.url
+        finally:
+            browser.close()
+    return {"final": final, "gone": not same_page(final, url), "seconds": round(time.time() - t0, 1)}
+
+
 def capture_direct(url: str, out: Path, scale: float = 0.5, quality: int = 80) -> dict:
     from playwright.sync_api import sync_playwright
     t0 = time.time()
     with sync_playwright() as p:
-        try:   # 실제 Chrome (봇 차단 회피), 없으면 Playwright Chromium
-            browser = p.chromium.launch(channel="chrome", headless=True, args=BROWSER_ARGS)
-        except Exception:
-            browser = p.chromium.launch(headless=True, args=BROWSER_ARGS)
+        browser = _launch(p)
         try:
             # 요청 머리글은 페이지 문서에만 — CSS·JS 요청에 문서용 머리글(Sec-Fetch-Dest: document 등)이 붙으면 lg.com 이 그 파일들을 막아
             # 디자인 없이 글자만 찍힌다 (2026-11-24 시험). 클라이언트 힌트·언어만 모든 요청에 (위장한 UA 와 맞게)
@@ -153,6 +214,9 @@ def capture_direct(url: str, out: Path, scale: float = 0.5, quality: int = 80) -
             except Exception:
                 pass
             title = (page.title() or "").lower()
+            final = page.url
+            if "access denied" not in title and not same_page(final, url):
+                raise Gone(gone_message(final))         # 없어진 제품 페이지 → 홈으로 넘어감 (홈 화면의 CSS 가 막혀 「막음」으로 보이던 것)
             if "access denied" in title or page.evaluate("document.body.scrollHeight") < 1500:
                 raise Blocked(title)                    # lg.com 보안 장치가 막은 화면
             if css_bad:
@@ -174,13 +238,19 @@ def capture_direct(url: str, out: Path, scale: float = 0.5, quality: int = 80) -
     from PIL import Image
     with Image.open(out) as im:
         w, h = im.size
-    return {"width": w, "height": h, "bytes": out.stat().st_size, "seconds": round(time.time() - t0, 1), "via": "direct"}
+    return {"width": w, "height": h, "bytes": out.stat().st_size, "seconds": round(time.time() - t0, 1), "via": "direct", "final": final}
 
 
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
     try:
-        sys.stdout.write(json.dumps(capture(sys.argv[1], Path(sys.argv[2]))))
+        if sys.argv[1] == "--check":
+            sys.stdout.write(json.dumps(check(sys.argv[2])))
+        else:
+            sys.stdout.write(json.dumps(capture(sys.argv[1], Path(sys.argv[2]))))
+    except Gone as e:
+        sys.stdout.write(json.dumps({"error": str(e)[:300], "gone": True}))
+        sys.exit(1)
     except Exception as e:
         sys.stdout.write(json.dumps({"error": str(e)[:300]}))
         sys.exit(1)

@@ -115,6 +115,10 @@ function publishPageShot(url, out) {
     const dst = path.join(__dirname, 'media-cache', 'fullshot', `${key}.jpg`);
     fs.mkdirSync(path.dirname(dst), { recursive: true });
     fs.copyFileSync(src, dst);
+    // 캡처 기록 (server.js fullshotMeta) — 크롤이 제품 페이지인지 확인한 뒤 받은 캡처라 확인된 것으로
+    const meta = JSON.stringify({ url, final: url, at: Date.now(), via: 'crawl' });
+    fs.writeFileSync(dst.replace(/\.jpg$/, '.json'), meta);
+    store.putBuffer(`media-fullshot/${key}.json`, Buffer.from(meta), 'application/json').catch(() => {});
     store.putBuffer(`media-fullshot/${key}.jpg`, fs.readFileSync(dst), 'image/jpeg')
       .then(() => console.log(`[crawl] lg.com 전체 화면 캡처 → 캡처 저장소 ${key} (${Math.round(fs.statSync(dst).size / 1024)}KB)`))
       .catch((e) => console.warn('[crawl] 캡처 버킷 업로드 실패', e.message));
