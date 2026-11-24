@@ -49,6 +49,28 @@ def classify(url):
     return dv, 'Other'
 
 
+def spec_kinds(p):
+    """USP 가 없는 상세 이미지 중 스펙 표 — alt 에 스펙 제목이 있거나, 바로 앞이 스펙 표인 이미지(표가 이어짐)."""
+    out = []
+    for i, s in enumerate(p['slices']):
+        if p['sliceUsps'][i]:
+            out.append(''); continue
+        kv = len(re.findall(r':\s*(มี|ไม่มี|ใช่|ไม่|\d)', s['alt']))     # 「항목: 값」 줄 (스펙 표)
+        if re.search(r'สเปค|ข้อมูลจำเพาะ|คุณลักษณะเด่น', s['alt']) or kv >= 3:
+            out.append('spec')
+        elif out and out[-1] in ('spec', 'spec+'):
+            out.append('spec+')
+        else:
+            out.append('')
+    return out
+
+
+def lead(alt):
+    """이미지 글(alt)의 첫머리 — USP 로 이름을 못 붙인 이미지의 이름. 첫 제목 줄이 보통 맨 앞에 온다."""
+    t = re.sub(r'\s+', ' ', alt or '').strip()
+    return (t[:38] + '…') if len(t) > 40 else t
+
+
 def b64(path):
     return base64.b64encode(open(path, 'rb').read()).decode()
 
@@ -70,7 +92,10 @@ def main():
             'model': p['model'], 'title': p['title'], 'url': p['url'], 'dv': dv, 'grp': grp,
             'shot': {'src': f['src'], 'w': f['width'], 'h': f['height'], 'top': f['top'], 'bottom': f['bottom']},
             'slices': [[s['src'], s['w'], s['h']] for s in p['slices']],
-            'secs': p['sliceSections'], 'miss': p['unmatchedSections'],
+            'usps': p['sliceUsps'], 'nUsp': len(p['usps']),
+            'kind': spec_kinds(p),
+            'lead': [lead(s['alt']) for s in p['slices']],
+            'secs': p['sliceSections'],
             'sum': p['sum'], 'sumText': p['sumText'], 'shopeeN': p['shopeeN'], 'shopeeChars': p['shopeeChars'],
         })
     fonts = ''.join(

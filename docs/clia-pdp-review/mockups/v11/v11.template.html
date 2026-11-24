@@ -84,6 +84,7 @@ aside{display:flex;flex-direction:column;min-height:0;background:#fff;border-lef
 .it .look{display:none;margin:6px 0 2px 26px;font-size:12px;color:var(--g700)}.it.cur .look,.it.flag .look{display:block}
 .it .look ul{margin:2px 0 6px;padding-left:16px}.it .look li{margin:1px 0}.it .look .sec{color:var(--g500);font-size:11.5px}
 .it .look .sec li{font-family:'LINESeedSansTH',var(--f)}
+.it .t small.sub{display:block;font-size:11px;font-weight:400;color:var(--g400)}.it .est{font-size:10.5px;color:var(--warn);background:var(--warnb);border-radius:999px;padding:0 6px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--g900);color:#fff;padding:9px 16px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50}.toast.on{opacity:1}
 .v11note{position:fixed;left:16px;bottom:16px;z-index:40;max-width:520px;background:#1F1E1C;color:#fff;border-radius:12px;padding:10px 34px 10px 14px;font-size:12px;line-height:1.5}
 .v11note b{color:#FFD86B}.v11note button{position:absolute;top:6px;right:8px;background:none;border:0;color:#fff}
@@ -145,15 +146,16 @@ function items(p,ch){
   const shp=ch==='shopee',n=shp?p.shopeeN:p.slices.length,out=[];
   if(p.sum)out.push({id:'sum@'+ch,anchor:'sum',title:'PDP 요약 '+(shp?'(태그 없는 글)':'(HTML)'),
     look:[...(shp?['줄바꿈·글머리표(•)가 깨지지 않았는지']:[]),'lg.com에 없는 내용·과장이 없는지 (AI가 쓴 글)','숫자·스펙 값이 lg.com과 같은지']});
-  p.slices.forEach((s,i)=>{if(shp&&i>=n)return;
-    out.push({id:'s'+i,anchor:'s'+i,title:`상세 이미지 ${i+1}`,secs:p.secs[i],
-      look:['왼쪽 lg.com 같은 부분과 문구·숫자가 같은지','이미지가 잘리거나 빠진 곳이 없는지']});});
-  if(shp&&n<p.slices.length)out.push({id:'cut@shopee',anchor:'cut',title:`상세 이미지 ${n+1}~${p.slices.length} — Shopee에 안 들어감`,
-    secs:p.secs.slice(n).flat(),look:[`Shopee는 앞 12장·설명 3,000자까지만 (요약 포함 ${p.shopeeChars.toLocaleString()}자)`,'빠지는 이미지에 꼭 필요한 내용(스펙·주의 문구)이 없는지']});
-  if(p.miss.length)out.push({id:'miss',anchor:'end',title:`자동 대조로 못 찾은 lg.com 섹션 ${p.miss.length}개`,secs:p.miss,
-    look:['결과 이미지 어딘가에 들어 있는지 (이미지 안 글은 자동 대조가 안 될 수 있음)','정말 빠졌다면 「다름」 표시 후 반려']});
+  p.slices.forEach((s,i)=>{if(shp&&i>=n)return;out.push(sliceItem(p,i));});
+  if(shp&&n<p.slices.length)out.push({id:'cut@shopee',anchor:'cut',title:`Shopee에 안 들어가는 이미지 ${n+1}~${p.slices.length}`,sub:'앞 12장 · 설명 3,000자 규칙',
+    usps:p.usps.slice(n).flat(),look:[`Shopee는 앞 12장·설명 3,000자까지만 (요약 포함 ${p.shopeeChars.toLocaleString()}자)`,'빠지는 USP·스펙·주의 문구 중 꼭 필요한 것이 없는지']});
   return out;
 }
+// 상세 이미지 항목: 이름 = 그 이미지에 든 lg.com USP (운영 usp_list, PDP 요약 「จุดเด่นสินค้า」와 같은 목록)
+function sliceItem(p,i){const us=p.usps[i]||[],sec=(p.secs[i]||[]).filter(x=>!x.startsWith('각주'));
+  const title=us.length?us[0].t+(us.length>1?` 외 ${us.length-1}`:''):p.kind[i]==='spec'?'สเปคทั้งหมด · 스펙 표':p.kind[i]==='spec+'?'สเปคทั้งหมด · 스펙 표 (계속)':p.lead[i]?p.lead[i]:sec.length?sec[0]:i===0?'도입 이미지 (대표 배너)':'이미지만 있는 부분';
+  const look=us.length?['USP 이름·설명·숫자가 왼쪽 lg.com과 같은지','이미지가 잘리거나 빠진 곳이 없는지']:p.kind[i].startsWith('spec')?['스펙 값이 lg.com 스펙 표와 같은지','빠진 줄이 없는지']:['왼쪽 lg.com 같은 부분과 같은지','이미지가 잘리거나 빠진 곳이 없는지'];
+  return {id:'s'+i,anchor:'s'+i,title,sub:`상세 이미지 ${i+1}`+(!us.length&&!p.kind[i]&&p.lead[i]?' · 이미지 첫 글':''),usps:us,look};}
 const allItems=p=>{const m=new Map();['shopee','lazada'].forEach(ch=>items(p,ch).forEach(it=>m.set(it.id,it)));return [...m.values()];};
 const progress=p=>{const a=allItems(p);return {n:a.filter(it=>p.seen.has(it.id)).length,all:a.length,flags:p.flags.size};};
 const buildLocked=p=>p.st!=='ok';
@@ -258,8 +260,8 @@ function renderCk(){
   $('ckP').innerHTML=`${S.ch==='shopee'?'Shopee':'Lazada'} 항목 ${list.filter(it=>p.seen.has(it.id)).length}/${list.length} 봤음 · 두 채널 합계 ${pr.n}/${pr.all}${pr.flags?` · <b style="color:var(--bad)">다름 ${pr.flags}</b>`:''}`;
   $('ckBar').style.width=(pr.n/pr.all*100)+'%';
   $('ckl').innerHTML=list.map(it=>`<div class="it ${p.seen.has(it.id)?'seen':''} ${p.flags.has(it.id)?'flag':''} ${it.id===curId?'cur':''}" id="ck_${it.id.replace(/[@]/g,'_')}" onclick="jumpTo('${it.anchor}')">
-    <div class="t"><span class="ic"></span><span>${esc(it.title)}</span><span class="x"><button onclick="event.stopPropagation();flag('${it.id}')">${p.flags.has(it.id)?'다름 ✕':'다름'}</button></span></div>
-    <div class="look"><ul>${it.look.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>${it.secs&&it.secs.length?`<div class="sec">이 부분 lg.com 섹션<ul lang="th">${it.secs.slice(0,8).map(x=>`<li>${esc(x)}</li>`).join('')}${it.secs.length>8?`<li>… ${it.secs.length-8}개 더</li>`:''}</ul></div>`:''}</div></div>`).join('');
+    <div class="t"><span class="ic"></span><span lang="th">${esc(it.title)}${it.sub?`<small class="sub">${esc(it.sub)}</small>`:''}</span><span class="x"><button onclick="event.stopPropagation();flag('${it.id}')">${p.flags.has(it.id)?'다름 ✕':'다름'}</button></span></div>
+    <div class="look"><ul>${it.look.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>${it.usps&&it.usps.length?`<div class="sec">이 이미지의 lg.com USP<ul lang="th">${it.usps.slice(0,10).map(u=>`<li>${esc(u.t)}${u.est?` <span class="est" title="이미지 설명(alt)이 앞 250자에서 잘려 정확한 장을 모름">추정 ${u.range[0]}~${u.range[1]}장</span>`:''}</li>`).join('')}${it.usps.length>10?`<li>… ${it.usps.length-10}개 더</li>`:''}</ul></div>`:''}</div></div>`).join('');
   const c=$('ckl').querySelector('.it.cur');if(c){const L=$('ckl');if(c.offsetTop<L.scrollTop||c.offsetTop+c.offsetHeight>L.scrollTop+L.clientHeight)L.scrollTop=c.offsetTop-40;}
 }
 function jumpTo(a){const y=G.anchors[a];if(y==null)return;$('sc').scrollTop=Math.max(0,y-16);}
