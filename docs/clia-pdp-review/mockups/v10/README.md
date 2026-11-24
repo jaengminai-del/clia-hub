@@ -39,7 +39,7 @@
   - RV10VHP2B 976: 액세서리 아래 프로모션 띠까지 건너뜀
   - 98NU855BPSB · 65QNED70BSA · OLED42C6PSA-GRAB 488: 탭 바 바로 아래에서 검은 섹션이 시작해 자동 감지가 첫 제목을 자름
 - **끝(bottom):** 리뷰 섹션 제목 「รีวิวจากผู้ใช้สินค้า」 바로 위입니다. 스펙 카드와 「ดูสเปคทั้งหมด」 링크까지만 보입니다.
-  - 제목은 모든 캡처에서 같은 글꼴·크기·x 위치라, A9-ACE에서 자른 견본([review-heading-template.png](./review-heading-template.png))을 정규화 상관으로 찾습니다.
+  - 제목은 모든 캡처에서 같은 글꼴·크기·x 위치라, A9-ACE에서 자른 견본([review-heading-template.jpg](./review-heading-template.jpg))을 정규화 상관으로 찾습니다.
   - 28개 모두 상관 0.85 이상이고, 자른 선을 모아 눈으로 확인했습니다.
   - 리뷰·FAQ·추천 제품·지원·푸터는 숨깁니다.
   - 노란색(별점)으로 찾는 방식도 해 봤지만 기능 이미지의 노란색과 섞여 28개 중 9개만 잡혀서 쓰지 않았습니다.
@@ -82,7 +82,7 @@
 | [build_v10.py](./build_v10.py) | `../v9/mockup-v9.html`을 틀로 → `mockup-v10.html` |
 | [capture_v10.js](./capture_v10.js) | 캡처 + 모든 제품·보기의 이미지 비율 검사 |
 | [fullshot_scan.jsonl](./fullshot_scan.jsonl) | 540개 캡처 조회 원본 결과 |
-| [review-heading-template.png](./review-heading-template.png) | PDP 끝을 찾는 리뷰 제목 견본 (A9-ACE 캡처에서 220×40) |
+| [review-heading-template.jpg](./review-heading-template.jpg) | PDP 끝을 찾는 리뷰 제목 견본 (A9-ACE 캡처에서 220×40) |
 | [v10-sources.json](./v10-sources.json) | 쓴 28개 + 뺀 9개와 이유 |
 
 ```bash
@@ -101,14 +101,14 @@ node capture_v10.js mockup-v10.html .
 
 | 파일 | 화면 |
 |---|---|
-| [list-v10.png](./list-v10.png) | 목록 28개 |
-| [compare-v10-all-mobile.png](./compare-v10-all-mobile.png) | A9-ACE 세 줄 보기 · 전체 페이지 · 모바일 390 |
-| [compare-v10-all-pc.png](./compare-v10-all-pc.png) | 같은 제품 · PC 1000 |
-| [compare-v10-all-long.png](./compare-v10-all-long.png) | OLED48C6PSA (슬라이스 33장, 캡처 24,352px) |
-| [compare-v10-all-images.png](./compare-v10-all-images.png) | WT2116SHEG 세 줄 보기 · 상세 이미지만 |
-| [compare-v10-side-top.png](./compare-v10-side-top.png) | A9-ACE 나란히 보기 · 처음 (lg.com PDP 첫 섹션 ↔ Shopee 요약 글) |
-| [compare-v10-side-sync.png](./compare-v10-side-sync.png) | 같은 제품 · 결과 30% 지점, 양쪽 같은 영역 |
-| [compare-v10-side-wait.png](./compare-v10-side-wait.png) | 같은 제품 · 결과 80% 지점, lg.com은 스펙 끝에서 「기다리는 중」 |
-| [compare-v10-side-lazada-sync.png](./compare-v10-side-lazada-sync.png) | A9-ACE Lazada · 결과 20% 지점 |
-| [compare-v10-side-shopee.png](./compare-v10-side-shopee.png) | GC-X257CMEW 나란히 보기 · Shopee |
-| [compare-v10-side-lazada.png](./compare-v10-side-lazada.png) | 45GX950A-B 나란히 보기 · Lazada |
+| [list-v10.jpg](./list-v10.jpg) | 목록 28개 |
+| [compare-v10-all-mobile.jpg](./compare-v10-all-mobile.jpg) | A9-ACE 세 줄 보기 · 전체 페이지 · 모바일 390 |
+| [compare-v10-all-pc.jpg](./compare-v10-all-pc.jpg) | 같은 제품 · PC 1000 |
+| [compare-v10-all-long.jpg](./compare-v10-all-long.jpg) | OLED48C6PSA (슬라이스 33장, 캡처 24,352px) |
+| [compare-v10-all-images.jpg](./compare-v10-all-images.jpg) | WT2116SHEG 세 줄 보기 · 상세 이미지만 |
+| [compare-v10-side-top.jpg](./compare-v10-side-top.jpg) | A9-ACE 나란히 보기 · 처음 (lg.com PDP 첫 섹션 ↔ Shopee 요약 글) |
+| [compare-v10-side-sync.jpg](./compare-v10-side-sync.jpg) | 같은 제품 · 결과 30% 지점, 양쪽 같은 영역 |
+| [compare-v10-side-wait.jpg](./compare-v10-side-wait.jpg) | 같은 제품 · 결과 80% 지점, lg.com은 스펙 끝에서 「기다리는 중」 |
+| [compare-v10-side-lazada-sync.jpg](./compare-v10-side-lazada-sync.jpg) | A9-ACE Lazada · 결과 20% 지점 |
+| [compare-v10-side-shopee.jpg](./compare-v10-side-shopee.jpg) | GC-X257CMEW 나란히 보기 · Shopee |
+| [compare-v10-side-lazada.jpg](./compare-v10-side-lazada.jpg) | 45GX950A-B 나란히 보기 · Lazada |

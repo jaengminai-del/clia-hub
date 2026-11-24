@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CLIA · 검토/승인 — 목업 v11</title>
+<style>
+/*__FONTS__*/
+:root{--f:'LGEIHeadline','LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Neo',sans-serif;
+--g50:#FAF9F5;--g100:#F6F3EB;--g200:#E8E4DC;--g300:#D6D1C7;--g400:#A8A29A;--g500:#7A746C;--g700:#4A4540;--g900:#1F1D1A;
+--red:#FD312E;--ok:#1E7F4F;--okb:#E3F4EA;--bad:#C8241F;--badb:#FDE8E7;--warn:#7A5A00;--warnb:#FFF3C4;--line:#ECE8E0}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{font:14px/1.45 var(--f);color:var(--g900);background:#F8F7F5;overflow:hidden}
+button{font:inherit;cursor:pointer}button:disabled{cursor:not-allowed}
+.top{height:56px;display:flex;align-items:center;gap:14px;padding:0 20px;background:#fff;border-bottom:1px solid var(--line)}
+.top img{height:22px}.top .t{font-weight:600}.top .sp{flex:1}.top .who{font-size:12px;color:var(--g500)}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap}
+.b-q{background:var(--g100);color:var(--g500)}.b-ok{background:var(--okb);color:var(--ok)}.b-bad{background:var(--badb);color:var(--bad)}
+.b-warn{background:var(--warnb);color:var(--warn)}.b-lock{background:#2b2926;color:#fff}
+.btn{border:1px solid var(--g300);background:#fff;border-radius:999px;padding:7px 14px;font-size:13px}
+.btn:hover:not(:disabled){border-color:var(--g500)}.btn.pri{background:var(--red);border-color:var(--red);color:#fff;font-weight:600}
+.btn:disabled{opacity:.45}
+.view{position:fixed;top:56px;left:0;right:0;bottom:0;display:none;flex-direction:column}.view.on{display:flex}
+/* 목록 */
+.lhd{display:flex;align-items:center;gap:10px;padding:18px 24px 8px}.lhd h2{margin:0;font-size:22px}.lhd .sp{flex:1}.cnt{font-size:13px;color:var(--g500)}.cnt b{color:var(--g900)}
+.note{padding:0 24px 8px;font-size:12px;color:var(--g500)}
+.flt{display:flex;align-items:center;gap:8px;padding:6px 24px 10px;flex-wrap:wrap}
+.tabs{display:flex;gap:16px;margin-right:10px}.tab{border:0;background:none;padding:6px 0;color:var(--g500);border-bottom:2px solid transparent;font-weight:600}
+.tab.on{color:var(--g900);border-color:var(--g900)}.tab b{font-weight:400;margin-left:4px}
+details.dd{position:relative}details.dd summary{list-style:none;border:1px solid var(--g300);border-radius:999px;padding:6px 12px;font-size:13px;background:#fff;cursor:pointer}
+details.dd summary::-webkit-details-marker{display:none}details.dd[open] summary{border-color:var(--g700)}
+.ddp{position:absolute;z-index:20;top:36px;left:0;background:#fff;border:1px solid var(--g200);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:8px;min-width:220px}
+.ddp label{display:flex;gap:8px;align-items:center;padding:5px 8px;border-radius:8px;font-size:13px}.ddp label:hover{background:var(--g50)}
+.ddp label.off{opacity:.4}.ddp .n{margin-left:auto;color:var(--g400);font-size:12px}.ddp .hint{font-size:11px;color:var(--g400);padding:4px 8px}
+.ddp .row{display:flex;gap:6px;padding:4px 8px}.ddp .row button{border:0;background:none;color:var(--g500);font-size:12px;padding:0}
+.search{margin-left:auto;border:1px solid var(--g300);border-radius:999px;padding:7px 14px;width:240px;font:inherit;font-size:13px}
+.tbl{flex:1;overflow:auto;padding:0 24px 80px}
+table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
+th{font-size:12px;color:var(--g500);font-weight:600;background:var(--g50);position:sticky;top:0;z-index:2}
+tr.r{cursor:pointer}tr.r:hover td{background:var(--g50)}tr.r.sel td{background:#FFF6F5}
+td.th img{width:44px;height:44px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:6px;display:block}
+td .m{font-weight:700}td .s{font-size:12px;color:var(--g500);max-width:420px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prog{display:inline-block;width:70px;height:6px;border-radius:3px;background:var(--g100);vertical-align:middle;margin-right:6px;overflow:hidden}.prog i{display:block;height:100%;background:var(--ok)}
+.selbar{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);background:var(--g900);color:#fff;border-radius:999px;padding:8px 10px 8px 18px;display:none;gap:12px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.selbar.on{display:flex}.selbar small{color:#cfc9bf}
+/* 비교 */
+.chd{display:flex;align-items:center;gap:12px;padding:10px 20px;background:#fff;border-bottom:1px solid var(--line)}
+.chd .id .m{font-weight:700;font-size:16px}.chd .id .s{font-size:12px;color:var(--g500);max-width:460px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chd .sp{flex:1}
+.bar{display:flex;align-items:center;gap:8px;padding:8px 20px;background:#fff;border-bottom:1px solid var(--line)}
+.bar input{flex:1;border:1px solid var(--g300);border-radius:999px;padding:7px 14px;font:inherit;font-size:13px}.bar input.err{border-color:var(--bad)}
+.main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 340px}
+.sc{position:relative;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
+.stage{position:sticky;top:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1px;background:var(--line)}
+.pane{display:flex;flex-direction:column;min-height:0;background:#EFEDE8}
+.ph{flex:none;height:34px;display:flex;align-items:center;gap:8px;padding:0 14px;font-size:12px;font-weight:700;color:var(--g700);background:#fff;border-bottom:1px solid var(--line)}
+.ph small{font-weight:400;color:var(--g400)}.ph .wait{margin-left:auto}.wait[hidden]{display:none}
+.vp{flex:1;min-height:0;overflow:hidden;position:relative}
+.mv{position:absolute;left:0;right:0;top:0;will-change:transform}
+.lg{padding:10px 14px}.lg .crop{width:100%;overflow:hidden;background:#fff}.lg .crop img{width:100%;height:auto;display:block}
+.mk{width:min(390px,calc(100% - 24px));margin:10px auto;background:#fff}
+.mk .h{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;font-size:13px;font-weight:700;border-bottom:1px solid #eee}
+.mk .h small{font-weight:400;color:#999;font-size:11px}
+.mk .stxt{white-space:pre-wrap;margin:0;padding:12px;font:14px/1.55 Roboto,'Helvetica Neue',Arial,'LINESeedSansTH',sans-serif;color:#222}
+.mk .lsum{padding:0 0 4px}.mk .lsum .lg-pdp-summary{padding:14px 12px!important}
+.mk .lsum h2{font-size:18px!important;line-height:1.35!important}.mk .lsum h3{font-size:15px!important}
+.mk .lsum p,.mk .lsum li{font-size:14px!important}
+.mk img.sl{width:100%;height:auto;display:block;background:#f4f4f4}
+.mk img.sl.cut{opacity:.3}
+.cutnote{padding:10px 12px;font-size:12px;color:#757575;background:#fafafa;border-top:1px dashed #ddd;border-bottom:1px dashed #ddd}
+.mk .nosum{padding:12px;font-size:12px;color:#999;background:#fafafa}
+.hl{position:absolute;left:0;right:0;pointer-events:none;border:2px solid var(--red);border-radius:4px;opacity:.85;transition:top .12s,height .12s}
+/* 체크리스트 */
+aside{display:flex;flex-direction:column;min-height:0;background:#fff;border-left:1px solid var(--line)}
+.ckh{padding:12px 16px 8px;border-bottom:1px solid var(--line)}.ckh b{font-size:14px}.ckh .p{font-size:12px;color:var(--g500);margin-top:2px}
+.ckh .prog{width:100%;height:6px;margin:8px 0 0}
+.ckl{flex:1;overflow:auto;padding:6px 8px 40px}
+.it{border-radius:10px;padding:8px 10px;margin:2px 0;cursor:pointer;border:1px solid transparent}
+.it:hover{background:var(--g50)}.it.cur{border-color:var(--red);background:#FFF8F7}
+.it .t{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600}
+.it .ic{flex:none;width:18px;height:18px;border-radius:50%;border:2px solid var(--g300);display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#fff}
+.it.seen .ic{background:var(--ok);border-color:var(--ok)}.it.seen .ic::after{content:'✓'}
+.it.flag .ic{background:var(--bad);border-color:var(--bad)}.it.flag .ic::after{content:'!'}
+.it .t .x{margin-left:auto}.it .t .x button{border:1px solid var(--g300);background:#fff;border-radius:999px;font-size:11px;padding:1px 8px;color:var(--g500)}
+.it.flag .t .x button{border-color:var(--bad);color:var(--bad)}
+.it .look{display:none;margin:6px 0 2px 26px;font-size:12px;color:var(--g700)}.it.cur .look,.it.flag .look{display:block}
+.it .look ul{margin:2px 0 6px;padding-left:16px}.it .look li{margin:1px 0}.it .look .sec{color:var(--g500);font-size:11.5px}
+.it .look .sec li{font-family:'LINESeedSansTH',var(--f)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--g900);color:#fff;padding:9px 16px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50}.toast.on{opacity:1}
+.v11note{position:fixed;left:16px;bottom:16px;z-index:40;max-width:520px;background:#1F1E1C;color:#fff;border-radius:12px;padding:10px 34px 10px 14px;font-size:12px;line-height:1.5}
+.v11note b{color:#FFD86B}.v11note button{position:absolute;top:6px;right:8px;background:none;border:0;color:#fff}
+</style></head>
+<body>
+<div class="top"><img src="__LOGO__" alt="LG"><span class="t">CLIA Content Hub</span><span class="badge b-q">검토 / 승인 · TH</span><span class="sp"></span><span class="who">Nattapong · <span class="badge b-warn">미검증</span></span></div>
+
+<main class="view on" id="vList">
+ <div class="lhd"><h2>검토 / 승인</h2><span class="sp"></span><span class="cnt" id="okCnt"></span>
+  <button class="btn" id="zipBtn" onclick="toast('승인된 결과 ZIP (목업)')">승인된 결과 ZIP</button>
+  <button class="btn" id="xlsBtn" onclick="xls()">엑셀 결과</button></div>
+ <div class="note">승인 전 제품은 빌더에도 「승인 전」으로 보이고 이미지 ZIP·HTML 복사·벌크 엑셀 다운로드가 잠깁니다(운영 반영은 별도 — 목업). 제품군 분류는 벌크 엑셀·허브 목록과 같은 규칙.</div>
+ <div class="flt">
+  <div class="tabs" id="tabs"></div>
+  <details class="dd" id="ddDv"><summary id="sDv"></summary><div class="ddp" id="pDv"></div></details>
+  <details class="dd" id="ddGrp"><summary id="sGrp"></summary><div class="ddp" id="pGrp"></div></details>
+  <input class="search" id="q" type="search" placeholder="모델·제품명 검색" oninput="S.q=this.value;renderList()">
+ </div>
+ <div class="tbl"><table><thead><tr>
+  <th style="width:36px"><input type="checkbox" id="selAll" title="보이는 제품 전체 선택" onchange="selAll(this.checked)"></th>
+  <th style="width:56px"></th><th>제품</th><th>BU · 제품군</th><th>상세 이미지</th><th>체크리스트</th><th>빌더 다운로드</th><th>상태</th></tr></thead>
+  <tbody id="rows"></tbody></table></div>
+ <div class="selbar" id="selbar"><span id="selN"></span><small>체크리스트를 건너뛴 일괄 승인으로 표시됩니다</small><button class="btn pri" onclick="bulkApprove()">선택 승인</button><button class="btn" onclick="S.sel.clear();renderList()">취소</button></div>
+</main>
+
+<main class="view" id="vCmp">
+ <div class="chd"><button class="btn" onclick="go('list')">←</button><div class="id"><div class="m" id="cModel"></div><div class="s" id="cTitle"></div></div>
+  <span id="cSt"></span><span id="cBuild"></span><span class="sp"></span>
+  <div class="tabs"><button class="tab" data-c="shopee" onclick="setCh('shopee')">Shopee</button><button class="tab" data-c="lazada" onclick="setCh('lazada')">Lazada</button></div></div>
+ <div class="bar"><input id="cmt" placeholder="코멘트 (반려할 때 필요)"><button class="btn" id="bRej" onclick="reject()">반려</button><span class="badge b-q" id="bWhy"></span><button class="btn pri" id="bOk" onclick="approve()">승인</button></div>
+ <div class="main">
+  <div class="sc" id="sc">
+   <div class="stage" id="stage">
+    <section class="pane"><div class="ph">LG.COM 원본 <small>PDP 첫 섹션 ~ 스펙 끝 · 전체 화면 캡처</small><span class="badge b-warn wait" id="wL" hidden>LG.com 끝 · 기다리는 중</span></div><div class="vp" id="vpL"><div class="mv" id="mvL"></div></div></section>
+    <section class="pane"><div class="ph"><span id="rTitle"></span> <small>모바일 390 (폭 추정)</small><span class="badge b-warn wait" id="wR" hidden>결과 끝 · 기다리는 중</span></div><div class="vp" id="vpR"><div class="mv" id="mvR"></div><div class="hl" id="hl" hidden></div></div></section>
+   </div>
+   <div id="spacer"></div>
+  </div>
+  <aside><div class="ckh"><b>체크리스트</b><div class="p" id="ckP"></div><div class="prog"><i id="ckBar"></i></div></div><div class="ckl" id="ckl"></div></aside>
+ </div>
+</main>
+<div class="toast" id="toast"></div>
+<div class="v11note" id="note"><b>목업 v11</b> · lg.com 캡처와 CLIA 결과가 둘 다 있는 TH 제품. 이미지는 운영 주소에서 보이는 근처만 읽습니다(인터넷 필요). 승인은 이 화면 안에서만(저장 안 됨). 데이터 __GENERATED__.<button onclick="this.parentElement.remove()">✕</button></div>
+
+<script>
+const DATA=/*__DATA__*/[];
+const GRP_ORDER={MS:['TV','Audio','Monitor','Laptop','Projector','Other'],HS:['Fridge','Washer','Dryer','Vacuum','Dishwasher','Cooking','Styler','Other'],ES:['AC','Purifier','Dehumidifier']};
+const GRP_KO={TV:'TV',Audio:'오디오',Monitor:'모니터',Laptop:'노트북',Projector:'프로젝터',Fridge:'냉장고',Washer:'세탁기',Dryer:'건조기',Vacuum:'청소기',Dishwasher:'식기세척기',Cooking:'조리기기',Styler:'스타일러',AC:'에어컨',Purifier:'공기청정기',Dehumidifier:'제습기',Other:'기타'};
+const SHOPEE_MAX=12;
+const S={tab:'all',q:'',dv:new Set(['MS','HS','ES']),grp:null,sel:new Set(),cur:0,ch:'shopee'};
+DATA.forEach((p,i)=>{p.i=i;p.st='unrev';p.via='';p.seen=new Set();p.flags=new Set();});
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2400);}
+function go(v){$('vList').classList.toggle('on',v==='list');$('vCmp').classList.toggle('on',v==='cmp');if(v==='list')renderList();}
+
+// ── 체크리스트 항목 (채널별) ── 상세 이미지 항목은 두 채널이 같은 슬라이스라 한 번 보면 둘 다 봄
+function items(p,ch){
+  const shp=ch==='shopee',n=shp?p.shopeeN:p.slices.length,out=[];
+  if(p.sum)out.push({id:'sum@'+ch,anchor:'sum',title:'PDP 요약 '+(shp?'(태그 없는 글)':'(HTML)'),
+    look:[...(shp?['줄바꿈·글머리표(•)가 깨지지 않았는지']:[]),'lg.com에 없는 내용·과장이 없는지 (AI가 쓴 글)','숫자·스펙 값이 lg.com과 같은지']});
+  p.slices.forEach((s,i)=>{if(shp&&i>=n)return;
+    out.push({id:'s'+i,anchor:'s'+i,title:`상세 이미지 ${i+1}`,secs:p.secs[i],
+      look:['왼쪽 lg.com 같은 부분과 문구·숫자가 같은지','이미지가 잘리거나 빠진 곳이 없는지']});});
+  if(shp&&n<p.slices.length)out.push({id:'cut@shopee',anchor:'cut',title:`상세 이미지 ${n+1}~${p.slices.length} — Shopee에 안 들어감`,
+    secs:p.secs.slice(n).flat(),look:[`Shopee는 앞 12장·설명 3,000자까지만 (요약 포함 ${p.shopeeChars.toLocaleString()}자)`,'빠지는 이미지에 꼭 필요한 내용(스펙·주의 문구)이 없는지']});
+  if(p.miss.length)out.push({id:'miss',anchor:'end',title:`자동 대조로 못 찾은 lg.com 섹션 ${p.miss.length}개`,secs:p.miss,
+    look:['결과 이미지 어딘가에 들어 있는지 (이미지 안 글은 자동 대조가 안 될 수 있음)','정말 빠졌다면 「다름」 표시 후 반려']});
+  return out;
+}
+const allItems=p=>{const m=new Map();['shopee','lazada'].forEach(ch=>items(p,ch).forEach(it=>m.set(it.id,it)));return [...m.values()];};
+const progress=p=>{const a=allItems(p);return {n:a.filter(it=>p.seen.has(it.id)).length,all:a.length,flags:p.flags.size};};
+const buildLocked=p=>p.st!=='ok';
+
+// ── 목록 ──
+const TABS=[['all','전체',p=>1],['unrev','미검토',p=>p.st==='unrev'],['ok','승인',p=>p.st==='ok'],['rej','반려',p=>p.st==='rej']];
+const ST={unrev:['미검토','b-q'],ok:['승인','b-ok'],rej:['반려','b-bad']};
+function inFilter(p){return S.dv.has(p.dv)&&(!S.grp||S.grp.has(p.grp))&&(!S.q||(p.model+' '+p.title).toLowerCase().includes(S.q.toLowerCase()));}
+function visible(){const f=TABS.find(t=>t[0]===S.tab)[2];return DATA.filter(p=>inFilter(p)&&f(p));}
+function renderFilters(){
+  const base=DATA.filter(p=>!S.q||(p.model+' '+p.title).toLowerCase().includes(S.q.toLowerCase()));
+  $('tabs').innerHTML=TABS.map(([k,l,f])=>`<button class="tab ${S.tab===k?'on':''}" onclick="S.tab='${k}';renderList()">${l}<b>${DATA.filter(p=>inFilter(p)&&f(p)).length}</b></button>`).join('');
+  const dvs=['MS','HS','ES'];
+  $('sDv').textContent='BU: '+(S.dv.size===3?'전체':S.dv.size?[...S.dv].join(', '):'없음');
+  $('pDv').innerHTML=`<div class="row"><button onclick="S.dv=new Set(['MS','HS','ES']);S.grp=null;renderList()">전체</button><button onclick="S.dv=new Set();renderList()">없음</button></div>`+
+    dvs.map(d=>`<label><input type="checkbox" ${S.dv.has(d)?'checked':''} onchange="tgDv('${d}',this.checked)">${d}<span class="n">${base.filter(p=>p.dv===d).length}</span></label>`).join('');
+  const grps=dvs.filter(d=>S.dv.has(d)).flatMap(d=>GRP_ORDER[d].map(g=>[d,g])).filter(([d,g])=>base.some(p=>p.dv===d&&p.grp===g));
+  $('sGrp').textContent='제품군: '+(!S.grp?'전체':S.grp.size?[...S.grp].map(g=>GRP_KO[g]).join(', '):'없음');
+  $('pGrp').innerHTML=`<div class="row"><button onclick="S.grp=null;renderList()">전체</button><button onclick="S.grp=new Set();renderList()">없음</button></div>`+
+    grps.map(([d,g])=>`<label><input type="checkbox" ${!S.grp||S.grp.has(g)?'checked':''} onchange="tgGrp('${g}',this.checked)">${GRP_KO[g]} <span class="n">${d} · ${base.filter(p=>p.dv===d&&p.grp===g).length}</span></label>`).join('')+
+    '<div class="hint">고른 BU 안에 있는 제품군만 보여요</div>';
+}
+function tgDv(d,on){on?S.dv.add(d):S.dv.delete(d);renderList();}
+function tgGrp(g,on){if(!S.grp)S.grp=new Set(DATA.map(p=>p.grp));on?S.grp.add(g):S.grp.delete(g);renderList();}
+function renderList(){
+  renderFilters();const rows=visible();
+  $('rows').innerHTML=rows.map(p=>{const pr=progress(p),lock=buildLocked(p);
+    return `<tr class="r ${S.sel.has(p.i)?'sel':''}" onclick="openCmp(${p.i})">
+    <td onclick="event.stopPropagation()"><input type="checkbox" ${S.sel.has(p.i)?'checked':''} ${p.st==='ok'?'disabled':''} onchange="sel(${p.i},this.checked)"></td>
+    <td class="th"><img loading="lazy" src="${p.slices[0][0]}" alt=""></td>
+    <td><div class="m">${esc(p.model)}</div><div class="s" lang="th">${esc(p.title)}</div></td>
+    <td>${p.dv} · ${GRP_KO[p.grp]||p.grp}</td><td>${p.slices.length}장${p.shopeeN<p.slices.length?` <span class="badge b-warn" title="Shopee에는 앞 ${p.shopeeN}장만">Shopee ${p.shopeeN}장</span>`:''}</td>
+    <td>${p.via==='bulk'?'<span class="badge b-warn">일괄 승인 · 체크 생략</span>':`<span class="prog"><i style="width:${pr.n/pr.all*100}%"></i></span>${pr.n}/${pr.all}${pr.flags?` <span class="badge b-bad">다름 ${pr.flags}</span>`:''}`}</td>
+    <td>${lock?'<span class="badge b-lock">🔒 승인 전</span>':'<span class="badge b-ok">열림</span>'}</td>
+    <td><span class="badge ${ST[p.st][1]}">${ST[p.st][0]}</span></td></tr>`;}).join('')||'<tr><td colspan="8" style="text-align:center;color:#999;padding:30px">조건에 맞는 제품이 없어요</td></tr>';
+  const can=rows.filter(p=>p.st!=='ok');$('selAll').checked=can.length>0&&can.every(p=>S.sel.has(p.i));$('selAll').disabled=!can.length;
+  $('selbar').classList.toggle('on',S.sel.size>0);$('selN').textContent=S.sel.size+'개 선택';
+  const n=DATA.filter(p=>p.st==='ok').length,all=n===DATA.length;
+  $('okCnt').innerHTML=`승인 <b>${n}</b>/${DATA.length}`;$('zipBtn').disabled=!n;
+  $('xlsBtn').disabled=!all;$('xlsBtn').textContent=(all?'':'🔒 ')+'엑셀 결과';$('xlsBtn').title=all?'':'전체 승인 전에는 잠김';
+}
+function sel(i,on){on?S.sel.add(i):S.sel.delete(i);renderList();}
+function selAll(on){visible().filter(p=>p.st!=='ok').forEach(p=>on?S.sel.add(p.i):S.sel.delete(p.i));renderList();}
+function bulkApprove(){const n=S.sel.size;S.sel.forEach(i=>{const p=DATA[i];p.st='ok';p.via='bulk';});S.sel.clear();renderList();toast(n+'개 일괄 승인 — 빌더 다운로드 열림');}
+function xls(){const n=DATA.filter(p=>p.st==='ok').length;if(n!==DATA.length){toast(`전체 승인 후 엑셀을 받을 수 있어요 (${n}/${DATA.length})`);return;}toast('엑셀 결과 다운로드 (목업)');}
+
+// ── 비교: 같은 영역 동시 스크롤 ───────────────────────────────
+// 스크롤 막대는 하나(#sc). 양쪽 내용은 transform 으로 같은 프레임에 같이 움직인다.
+//  s = 스크롤량(오른쪽 결과 px). 오른쪽 = min(s, 오른쪽 끝), 왼쪽 = min(s × 왼쪽폭/오른쪽폭, 왼쪽 끝)
+//  → 콘텐츠 폭 기준 같은 거리. 짧은 쪽은 끝에서 멈춰 기다리고, 다시 올리면 같이 움직인다.
+let G=null;
+function openCmp(i){S.cur=i;S.ch='shopee';const c=$('cmt');c.value='';c.classList.remove('err');go('cmp');renderCmp(true);}
+function setCh(c){const keep=G?G.s:0;S.ch=c;renderCmp(false,keep);}
+function renderCmp(fresh,keepS){
+  const p=DATA[S.cur],shp=S.ch==='shopee',n=shp?p.shopeeN:p.slices.length;
+  $('cModel').textContent=p.model;$('cTitle').textContent=p.title;
+  document.querySelectorAll('#vCmp .tabs .tab').forEach(b=>b.classList.toggle('on',b.dataset.c===S.ch));
+  $('rTitle').textContent=(shp?'SHOPEE':'LAZADA')+' 상세 설명';
+  const f=p.shot;
+  $('mvL').innerHTML=`<div class="lg"><div class="crop" style="aspect-ratio:${f.w}/${f.bottom-f.top}"><img src="${f.src}" width="${f.w}" height="${f.h}" style="margin-top:-${(f.top/f.w*100).toFixed(4)}%" alt="lg.com"></div></div>`;
+  const sum=!p.sum?'<div class="nosum" data-a="sum">PDP 요약 없음 — 요약 대기</div>':shp?`<pre class="stxt" data-a="sum" lang="th">${esc(p.sumText)}</pre>`:`<div class="lsum" data-a="sum">${p.sum}</div>`;
+  $('mvR').innerHTML=`<div class="mk"><div class="h">${shp?'Shopee':'Lazada'} · รายละเอียดสินค้า<small>${shp?`이미지 ${n}/${p.slices.length}장 · 글은 태그 없음`:`이미지 ${p.slices.length}장 · HTML`}</small></div>${sum}`+
+    p.slices.map(([src,w,h],i)=>`${shp&&i===n?`<div class="cutnote" data-a="cut">아래 ${p.slices.length-n}장은 Shopee 설명에 넣지 않음 (앞 12장·3,000자)</div>`:''}<img class="sl ${shp&&i>=n?'cut':''}" data-a="s${i}" data-src="${src}" width="${w}" height="${h}" alt="">`).join('')+'<div data-a="end" style="height:1px"></div></div>';
+  renderCk();
+  requestAnimationFrame(()=>{layout();const sc=$('sc');sc.scrollTop=fresh?0:Math.min(keepS||0,G.sMax);update();});
+  renderBar();
+}
+function layout(){
+  const sc=$('sc'),st=$('stage');st.style.height=sc.clientHeight+'px';
+  const vpL=$('vpL'),vpR=$('vpR'),mvL=$('mvL'),mvR=$('mvR'),mk=mvR.querySelector('.mk');
+  const lw=mvL.querySelector('.crop').clientWidth,rw=mk.clientWidth;
+  const lmax=Math.max(0,mvL.offsetHeight-vpL.clientHeight),rmax=Math.max(0,mvR.offsetHeight-vpR.clientHeight);
+  const anchors={};mvR.querySelectorAll('[data-a]').forEach(e=>anchors[e.dataset.a]=e.offsetTop+mk.offsetTop);
+  const imgs=[...mvR.querySelectorAll('img[data-src]')].map(e=>({e,top:e.offsetTop+mk.offsetTop}));
+  const k=lw/rw,sMax=Math.max(rmax,lmax/k);
+  $('spacer').style.height=sMax+'px';
+  G={lw,rw,k,lmax,rmax,sMax,vh:vpR.clientHeight,anchors,imgs,s:0};
+}
+function update(){
+  if(!G)return;const s=$('sc').scrollTop;G.s=s;
+  const r=Math.min(s,G.rmax),l=Math.min(s*G.k,G.lmax);
+  $('mvR').style.transform=`translate3d(0,${-r}px,0)`;$('mvL').style.transform=`translate3d(0,${-l}px,0)`;
+  $('wL').hidden=!(s*G.k>G.lmax+1);$('wR').hidden=!(s>G.rmax+1);
+  for(const im of G.imgs)if(!im.e.src&&im.top<r+G.vh*2.5)im.e.src=im.e.dataset.src;   // 보이는 근처만 읽기
+  track(r);
+}
+// 체크리스트: 지금 보는 항목(화면 위에서 35% 선을 지난 마지막 항목), 화면 55% 선을 지난 항목은 「봤음」
+let curId=null;
+function track(r){
+  const p=DATA[S.cur],list=items(p,S.ch);let cur=null,ch=false;
+  for(const it of list){const y=G.anchors[it.anchor];if(y==null)continue;
+    if(y<=r+G.vh*0.35)cur=it;
+    if(y<=r+G.vh*0.55&&!p.seen.has(it.id)){p.seen.add(it.id);ch=true;}}
+  if(G.s>=G.sMax-2)list.forEach(it=>{if(!p.seen.has(it.id)){p.seen.add(it.id);ch=true;}});  // 끝까지 내리면 남은 것도 봄
+  if(!cur)cur=list[0];
+  if(ch||cur.id!==curId){curId=cur.id;renderCk();renderBar();}
+  const y=G.anchors[cur.anchor],nx=list[list.indexOf(cur)+1],y2=nx?G.anchors[nx.anchor]:y+80,hl=$('hl'),mk=$('mvR').querySelector('.mk');
+  hl.hidden=false;hl.style.left=mk.offsetLeft+'px';hl.style.width=mk.clientWidth+'px';hl.style.top=(y-r)+'px';hl.style.height=Math.max(24,Math.min(y2,y+G.vh*3)-y)+'px';
+}
+function renderCk(){
+  const p=DATA[S.cur],list=items(p,S.ch),pr=progress(p);
+  $('ckP').innerHTML=`${S.ch==='shopee'?'Shopee':'Lazada'} 항목 ${list.filter(it=>p.seen.has(it.id)).length}/${list.length} 봤음 · 두 채널 합계 ${pr.n}/${pr.all}${pr.flags?` · <b style="color:var(--bad)">다름 ${pr.flags}</b>`:''}`;
+  $('ckBar').style.width=(pr.n/pr.all*100)+'%';
+  $('ckl').innerHTML=list.map(it=>`<div class="it ${p.seen.has(it.id)?'seen':''} ${p.flags.has(it.id)?'flag':''} ${it.id===curId?'cur':''}" id="ck_${it.id.replace(/[@]/g,'_')}" onclick="jumpTo('${it.anchor}')">
+    <div class="t"><span class="ic"></span><span>${esc(it.title)}</span><span class="x"><button onclick="event.stopPropagation();flag('${it.id}')">${p.flags.has(it.id)?'다름 ✕':'다름'}</button></span></div>
+    <div class="look"><ul>${it.look.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>${it.secs&&it.secs.length?`<div class="sec">이 부분 lg.com 섹션<ul lang="th">${it.secs.slice(0,8).map(x=>`<li>${esc(x)}</li>`).join('')}${it.secs.length>8?`<li>… ${it.secs.length-8}개 더</li>`:''}</ul></div>`:''}</div></div>`).join('');
+  const c=$('ckl').querySelector('.it.cur');if(c){const L=$('ckl');if(c.offsetTop<L.scrollTop||c.offsetTop+c.offsetHeight>L.scrollTop+L.clientHeight)L.scrollTop=c.offsetTop-40;}
+}
+function jumpTo(a){const y=G.anchors[a];if(y==null)return;$('sc').scrollTop=Math.max(0,y-16);}
+function flag(id){const p=DATA[S.cur];p.flags.has(id)?p.flags.delete(id):p.flags.add(id);
+  const it=allItems(p).find(x=>x.id===id),c=$('cmt');if(p.flags.has(id)&&it){c.value=(c.value?c.value+' · ':'')+it.title+': 다름';}renderCk();renderBar();}
+function renderBar(){
+  const p=DATA[S.cur],pr=progress(p),done=p.st==='ok';
+  const why=done?'이미 승인됨':pr.flags?`다름 ${pr.flags}건 — 반려하세요`:pr.n<pr.all?`체크리스트 ${pr.n}/${pr.all} — 두 채널 끝까지 보기`:'';
+  $('bWhy').textContent=why;$('bWhy').hidden=!why;$('bOk').disabled=!!why;$('bRej').disabled=done;
+  $('cSt').innerHTML=`<span class="badge ${ST[p.st][1]}">${ST[p.st][0]}</span>`;
+  $('cBuild').innerHTML=buildLocked(p)?'<span class="badge b-lock" title="승인 전에는 빌더 다운로드·복사 잠김">빌더 🔒 승인 전</span>':'<span class="badge b-ok">빌더 다운로드 열림</span>';
+}
+function approve(){const p=DATA[S.cur];if($('bOk').disabled)return;p.st='ok';p.via='check';renderBar();toast('승인 — 빌더 다운로드 열림');}
+function reject(){const c=$('cmt');if(!c.value.trim()){c.classList.add('err');c.placeholder='반려 사유를 입력하세요';c.focus();return;}const p=DATA[S.cur];p.st='rej';renderBar();toast('반려');}
+$('sc').addEventListener('scroll',update,{passive:true});
+addEventListener('resize',()=>{if($('vCmp').classList.contains('on')){const s=G?G.s:0;layout();$('sc').scrollTop=Math.min(s,G.sMax);update();}});
+document.querySelectorAll('details.dd').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)document.querySelectorAll('details.dd').forEach(o=>o!==d&&(o.open=false));}));
+document.fonts&&document.fonts.ready.then(()=>{if($('vCmp').classList.contains('on')&&G){const s=G.s;layout();$('sc').scrollTop=Math.min(s,G.sMax);update();}});
+renderList();
+</script>
+</body></html>

@@ -97,15 +97,15 @@ node capture_v9.js mockup-v9.html .
 
 | 파일 | 화면 |
 |---|---|
-| [list-v9.png](./list-v9.png) | 목록 — 썸네일이 상세 첫 슬라이스 |
-| [compare-v9-shopee.png](./compare-v9-shopee.png) | IHQ18R Shopee (요약 없음 → 「요약 대기」) |
-| [compare-v9-lazada-summary.png](./compare-v9-lazada-summary.png) | AS10GDBY0 Lazada — PDP 요약 + 슬라이스 |
-| [compare-v9-sync.png](./compare-v9-sync.png) | F2515RNEW 섹션 동기 스크롤 |
-| [compare-v9-no-blocks.png](./compare-v9-no-blocks.png) | OLED83G4PSA — 슬라이스 39장, 위치표 없음 |
-| [compare-v9-zoom.png](./compare-v9-zoom.png) | MS2032GAS 1000px 확대 보기 |
-| [compare-v9-lgcom-fullshot.png](./compare-v9-lgcom-fullshot.png) | A9-ACE — 왼쪽 lg.com 전체 화면 캡처 그대로 |
-| [compare-v9-shopee-text.png](./compare-v9-shopee-text.png) | AS10GDBY0 Shopee — 요약을 태그 없는 글로 |
-| [compare-v9-shopee-cut.png](./compare-v9-shopee-cut.png) | SCQ13A Shopee — 3,000자 한도로 마지막 2장(스펙 표) 빠짐 |
+| [list-v9.jpg](./list-v9.jpg) | 목록 — 썸네일이 상세 첫 슬라이스 |
+| [compare-v9-shopee.jpg](./compare-v9-shopee.jpg) | IHQ18R Shopee (요약 없음 → 「요약 대기」) |
+| [compare-v9-lazada-summary.jpg](./compare-v9-lazada-summary.jpg) | AS10GDBY0 Lazada — PDP 요약 + 슬라이스 |
+| [compare-v9-sync.jpg](./compare-v9-sync.jpg) | F2515RNEW 섹션 동기 스크롤 |
+| [compare-v9-no-blocks.jpg](./compare-v9-no-blocks.jpg) | OLED83G4PSA — 슬라이스 39장, 위치표 없음 |
+| [compare-v9-zoom.jpg](./compare-v9-zoom.jpg) | MS2032GAS 1000px 확대 보기 |
+| [compare-v9-lgcom-fullshot.jpg](./compare-v9-lgcom-fullshot.jpg) | A9-ACE — 왼쪽 lg.com 전체 화면 캡처 그대로 |
+| [compare-v9-shopee-text.jpg](./compare-v9-shopee-text.jpg) | AS10GDBY0 Shopee — 요약을 태그 없는 글로 |
+| [compare-v9-shopee-cut.jpg](./compare-v9-shopee-cut.jpg) | SCQ13A Shopee — 3,000자 한도로 마지막 2장(스펙 표) 빠짐 |
 
 ## 다음 (사용자와 같이)
 

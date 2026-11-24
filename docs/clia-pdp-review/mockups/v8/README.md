@@ -15,7 +15,7 @@
 | [capture_v8.js](./capture_v8.js) | Playwright 캡처 |
 | [v8-sources.json](./v8-sources.json) | 13개 제품의 운영 저장본 요약(갤러리 주소, 섹션 텍스트·첫 이미지, 죽은 미디어), 라이브 장수, 슬라이스 주소 |
 | [v8-match.json](./v8-match.json) | 왼쪽 원본: v7 섹션 ↔ 운영 `mirror.sections` 매칭 결과 |
-| `*.png` | 화면 캡처 (아래) |
+| `*.jpg` | 화면 캡처 (아래, 1배 JPEG로 줄임) |
 
 다시 만들기:
 
@@ -72,15 +72,15 @@ SKU(`예시`), 상태(승인·반려·수정요청), IHQ18R의 별표 경고와 
 
 | 파일 | 화면 |
 |---|---|
-| [list-v8.png](./list-v8.png) | 목록 (13개, 갤러리 범례, 승인 2/13) |
-| [list-v8-gallery-chips.png](./list-v8-gallery-chips.png) | 목록 카드의 갤러리 칩 3종 확대 |
-| [compare-v8-gallery-none.png](./compare-v8-gallery-none.png) | `gc-b257sqyl` — 승인 잠금, 「갤러리 없음」 |
-| [compare-v8-gallery-short.png](./compare-v8-gallery-short.png) | `t2313vspm` Shopee — 노란 경고 「원본 10장 · 저장 6장」, 승인 가능 |
-| [compare-v8-gallery-short-lazada.png](./compare-v8-gallery-short-lazada.png) | `oled83g4psa` Lazada — 「원본 9장 · 저장 3장」 |
-| [compare-v8-shopee.png](./compare-v8-shopee.png) | IHQ18R Shopee |
-| [compare-v8-lazada.png](./compare-v8-lazada.png) | AS10GDBY0 Lazada (v7 「승인 불가」 → 미검토) |
-| [compare-v8-gallery-dropped.png](./compare-v8-gallery-dropped.png) | F2515RNEW 10번째 사진 — 「마켓에서 빠짐 · 기준 미확인」 |
-| [compare-v8-sync.png](./compare-v8-sync.png) | F2515RNEW 동기 스크롤 — 오른쪽 실제 슬라이스 |
+| [list-v8.jpg](./list-v8.jpg) | 목록 (13개, 갤러리 범례, 승인 2/13) |
+| [list-v8-gallery-chips.jpg](./list-v8-gallery-chips.jpg) | 목록 카드의 갤러리 칩 3종 확대 |
+| [compare-v8-gallery-none.jpg](./compare-v8-gallery-none.jpg) | `gc-b257sqyl` — 승인 잠금, 「갤러리 없음」 |
+| [compare-v8-gallery-short.jpg](./compare-v8-gallery-short.jpg) | `t2313vspm` Shopee — 노란 경고 「원본 10장 · 저장 6장」, 승인 가능 |
+| [compare-v8-gallery-short-lazada.jpg](./compare-v8-gallery-short-lazada.jpg) | `oled83g4psa` Lazada — 「원본 9장 · 저장 3장」 |
+| [compare-v8-shopee.jpg](./compare-v8-shopee.jpg) | IHQ18R Shopee |
+| [compare-v8-lazada.jpg](./compare-v8-lazada.jpg) | AS10GDBY0 Lazada (v7 「승인 불가」 → 미검토) |
+| [compare-v8-gallery-dropped.jpg](./compare-v8-gallery-dropped.jpg) | F2515RNEW 10번째 사진 — 「마켓에서 빠짐 · 기준 미확인」 |
+| [compare-v8-sync.jpg](./compare-v8-sync.jpg) | F2515RNEW 동기 스크롤 — 오른쪽 실제 슬라이스 |
 
 ## 이번에 새로 확인한 사실 (2026-11-24 11:35 KST 전후, GET만)
 
