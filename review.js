@@ -384,9 +384,9 @@ function prewarm() {
         continue;
       }
       // 위치 기록 없이 찍은 예전 캡처 → 다시 찍어(위치 기록 포함) 주소로 맞춘다 (2026-11-24 — 그림 맞추기는 느리고 덜 정확).
-      //   새 일이 거의 없을 때만(대기 50개 미만), 한 번 훑을 때 30개까지, 한 채널만 (다른 채널은 그 결과를 그대로 씀)
+      //   새 일이 거의 없을 때만(대기 50개 미만), 한 번 훑을 때 60개까지, 한 채널만 (다른 채널은 그 결과를 그대로 씀)
       if (state === 'ready' && !PREWARM_EXISTING_ONLY && ch === 'shopee' && rec && rec.shot && rec.align && rec.align.mode !== 'url'
-          && !upgraded.has(p.slug) && upgrades < 30 && queue.length < 50 && !captureBlocked()) {
+          && !upgraded.has(p.slug) && upgrades < 60 && queue.length < 50 && !captureBlocked()) {
         upgraded.add(p.slug); upgrades++; n++;
         enqueue(p.slug, ch, { recapture: true }, true);
       }
