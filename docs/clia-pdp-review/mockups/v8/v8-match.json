@@ -1,0 +1,915 @@
+[
+ {
+  "model": "IHQ18R",
+  "slug": "www-lg-com-th-air-conditioner-inverter-air-conditioner-with-air-purifier-ihq18r",
+  "mirror_path": "aem",
+  "gallery": {
+   "stored": 13,
+   "live": 13,
+   "split": 13,
+   "spaced": 0,
+   "pct": 0,
+   "path": "aem",
+   "checked": "2026-11-24 11:35 KST",
+   "truncDead": false,
+   "crawled": 1794020196.833
+  },
+  "slices": 8,
+  "sections": [
+   {
+    "v7_key": 1,
+    "text": "",
+    "mirror_order": 1,
+    "how": "order",
+    "img": "LG_RAC-IHQ_WebBanner_1600x600-3.jpg"
+   },
+   {
+    "v7_key": 2,
+    "text": "ดักจับฝุ่นขนาดใหญ่ตั้งแต่เริ่มกระบวนการ",
+    "mirror_order": 2,
+    "how": "order+text",
+    "img": "RAC-Standard-Plus-02-1-2-Pre-Filter-D.jpg"
+   },
+   {
+    "v7_key": 3,
+    "text": "ดักจับฝุ่นละอองขนาดเล็ก PM2.5",
+    "mirror_order": 3,
+    "how": "order+text",
+    "img": "RAC-Standard-Plus-03-1-2-Fine-Dust-Filter-D.jpg"
+   },
+   {
+    "v7_key": 4,
+    "text": "เพื่อให้ห้องของคุณสะอาดปราศจากแบคทีเรีย",
+    "mirror_order": 4,
+    "how": "order+text",
+    "img": "RAC-Standard-Plus-06-1-Plasmaster-Ionizer-D.jpg"
+   },
+   {
+    "v7_key": null,
+    "text": "*ได้รับการรับรองจากสถาบัน TUV (ประเทศเกา",
+    "mirror_order": "1 - disclaimer",
+    "how": "order+text",
+    "img": ""
+   },
+   {
+    "v7_key": 5,
+    "text": "การทำความสะอาดเครื่องปรับอากาศอัตโนมัติ",
+    "mirror_order": 5,
+    "how": "order+text",
+    "img": "RAC-Standard-Plus-05-Auto-Cleaning-D.jpg"
+   },
+   {
+    "v7_key": 6,
+    "text": "",
+    "mirror_order": 6,
+    "how": "order",
+    "img": "LG-RAC-Localize-Banner-Apr_1600x600-01-fe.jpg"
+   },
+   {
+    "v7_key": 7,
+    "text": "ประสิทธิภาพเหนือกว่า เร็ว ทนทาน และเงียบ",
+    "mirror_order": 7,
+    "how": "order+text",
+    "img": "rac-artcool-green-2022-07-1-dual-inverter-desktop.jpg"
+   },
+   {
+    "v7_key": 8,
+    "text": "",
+    "mirror_order": 8,
+    "how": "order",
+    "img": "LG_RAC-IHQ_WebBanner-1600x800-ThinQ.png"
+   },
+   {
+    "v7_key": 9,
+    "text": "สเปคทั้งหมด",
+    "mirror_order": 9,
+    "how": "order+text",
+    "img": "ihq18r-d.jpg"
+   }
+  ]
+ },
+ {
+  "model": "F2515RNEW",
+  "slug": "www-lg-com-th-laundry-front-load-washing-machine-f2515rnew",
+  "mirror_path": "component-first",
+  "gallery": {
+   "stored": 15,
+   "live": 15,
+   "split": 15,
+   "spaced": 0,
+   "pct": 0,
+   "path": "component-first",
+   "checked": "2026-11-24 11:35 KST",
+   "truncDead": false,
+   "crawled": 1794282569.987
+  },
+  "slices": 12,
+  "sections": [
+   {
+    "v7_key": 1,
+    "text": "ดีไซน์เพรียวบาง ทันสมัย ​​พร้อมความจุที่",
+    "mirror_order": 1,
+    "how": "text",
+    "img": "HA-WM-NT-Slim-LED-GP1-01-desktop(thumbnail).jpg"
+   },
+   {
+    "v7_key": 2,
+    "text": "คุณสมบัติหลักของเครื่องซักผ้าใหม่ของคุณ",
+    "mirror_order": 2,
+    "how": "text 1/3",
+    "img": "HA-WM-NT-Slim-LED-GP1-03-01-desktop.jpg"
+   },
+   {
+    "v7_key": 3,
+    "text": "ประหยัดพื้นที่",
+    "mirror_order": 6,
+    "how": "text",
+    "img": "HA-WM-NT-Slim-LED-GP1-04-desktop(thumbnail).jpg"
+   },
+   {
+    "v7_key": 4,
+    "text": "ความจุขนาดใหญ่",
+    "mirror_order": 7,
+    "how": "text",
+    "img": "HA-WM-NT-Slim-LED-GP1-05-desktop(thumbnail).jpg"
+   },
+   {
+    "v7_key": 5,
+    "text": "AI DD™ ดูแลเสื้อผ้าของคุณ",
+    "mirror_order": 8,
+    "how": "text",
+    "img": "HA-WM-NT-Slim-LED-GP1-06-desktop(thumbnail).jpg"
+   },
+   {
+    "v7_key": 6,
+    "text": "TurboWash™ 360ᵒ",
+    "mirror_order": 9,
+    "how": "text",
+    "img": "HA-WM-NT-Slim-LED-GP1-07-desktop(thumbnail).jpg"
+   },
+   {
+    "v7_key": 7,
+    "text": "การทำงานที่ราบรื่น",
+    "mirror_order": 10,
+    "how": "text",
+    "img": "HA-WM-NT-Slim-LED-GP1-08-desktop(thumbnail).jpg"
+   },
+   {
+    "v7_key": 8,
+    "text": "Steam™",
+    "mirror_order": 11,
+    "how": "text",
+    "img": "HA-WM-NT-Slim-LED-GP1-09-desktop.jpg"
+   },
+   {
+    "v7_key": 9,
+    "text": "Pet care",
+    "mirror_order": 12,
+    "how": "text",
+    "img": "HA-WM-NT-Slim-LED-GP1-10-desktop.jpg"
+   },
+   {
+    "v7_key": 10,
+    "text": "การทำงานระยะไกล",
+    "mirror_order": 13,
+    "how": "text 1/3",
+    "img": "HA-WM-NT-Slim-LED-GP1-12-01-desktop.jpg"
+   },
+   {
+    "v7_key": 11,
+    "text": "การออกแบบที่เป็นมิตรกับผู้ใช้และกะทัดรัด",
+    "mirror_order": 16,
+    "how": "text",
+    "img": "HA-WM-NT-Slim-LED-GP1-14-01-desktop.jpg"
+   },
+   {
+    "v7_key": 12,
+    "text": "สเปคทั้งหมด",
+    "mirror_order": 20,
+    "how": "text",
+    "img": "05bfb3f4_F2515RNEW-800x453.jpg"
+   }
+  ]
+ },
+ {
+  "model": "T2109NBTB",
+  "slug": "www-lg-com-th-laundry-top-load-washing-machine-t2109nbtb",
+  "mirror_path": "aem",
+  "gallery": {
+   "stored": 15,
+   "live": 15,
+   "split": 15,
+   "spaced": 0,
+   "pct": 0,
+   "path": "aem",
+   "checked": "2026-11-24 11:35 KST",
+   "truncDead": false,
+   "crawled": 1794020814.189
+  },
+  "slices": 6,
+  "sections": [
+   {
+    "v7_key": 1,
+    "text": "",
+    "mirror_order": 1,
+    "how": "order",
+    "img": "Desktop_HA Feature Card_Lifestyle-06.jpg"
+   },
+   {
+    "v7_key": 2,
+    "text": "",
+    "mirror_order": 2,
+    "how": "order",
+    "img": "Desktop_HA_Feature_Card_Auto_Restart.jpg"
+   },
+   {
+    "v7_key": 3,
+    "text": "",
+    "mirror_order": 3,
+    "how": "order",
+    "img": "Desktop_HA Feature Card_Cover-07.jpeg"
+   },
+   {
+    "v7_key": 4,
+    "text": "ประตูปิดนุ่มนวลป้องกันรอยขีดข่วน",
+    "mirror_order": 4,
+    "how": "order+text",
+    "img": "HA-WM-VB-T-PDP-09-GP1-desktop(thumbnail).jpg"
+   },
+   {
+    "v7_key": 5,
+    "text": "สเปคทั้งหมด",
+    "mirror_order": 5,
+    "how": "order+text",
+    "img": "1d024083_T2109NBTB-800x453-D.jpg"
+   }
+  ]
+ },
+ {
+  "model": "AS10GDBY0",
+  "slug": "www-lg-com-th-air-puricare-puricare-360-as10gdby0",
+  "mirror_path": "component-first",
+  "gallery": {
+   "stored": 15,
+   "live": 15,
+   "split": 15,
+   "spaced": 0,
+   "pct": 0,
+   "path": "component-first",
+   "checked": "2026-11-24 11:35 KST",
+   "truncDead": false,
+   "crawled": 1794282527.664
+  },
+  "slices": 7,
+  "sections": [
+   {
+    "v7_key": 1,
+    "text": "อากาศสะอาดด้วยระบบ Multi Filtration (ระบ",
+    "mirror_order": 1,
+    "how": "text",
+    "img": "puricare360-alpha-pet-02-1-key-benefit-d.jpg"
+   },
+   {
+    "v7_key": 2,
+    "text": "ได้รับการรับรองจาก BAF",
+    "mirror_order": 5,
+    "how": "text",
+    "img": "puricare360-alpha-pet-03-1-certification-d.jpg"
+   },
+   {
+    "v7_key": 3,
+    "text": "ฟอกอากาศ รอบตัวคุณ",
+    "mirror_order": 6,
+    "how": "text",
+    "img": "puricare360-alpha-pet-04-360-purification-d-thumbnail.jpg"
+   },
+   {
+    "v7_key": 4,
+    "text": "สูดอากาศบริสุทธิ์ด้วยระบบ Multi-Filtrati",
+    "mirror_order": 7,
+    "how": "text 2/3",
+    "img": "puricare360-alpha-pet-07-1-multi-filtration-system-d.jpg"
+   },
+   {
+    "v7_key": 5,
+    "text": "กำจัดกลิ่นไม่พึงประสงค์ ที่เกิดจากสัตว์เ",
+    "mirror_order": 9,
+    "how": "text",
+    "img": "puricare360-alpha-pet-09-pet-care-d.jpg"
+   },
+   {
+    "v7_key": 6,
+    "text": "อากาศดีขึ้น ขนสัตว์เลี้ยงน้อยลง",
+    "mirror_order": 10,
+    "how": "text 2/3",
+    "img": "puricare360-alpha-pet-10-1-pet-mode-d.jpg"
+   },
+   {
+    "v7_key": 7,
+    "text": "กำจัดสารก่อภูมิแพ้",
+    "mirror_order": 12,
+    "how": "text",
+    "img": "puricare360-alpha-pet-13-allergy-care-d-thumbnail.jpg"
+   },
+   {
+    "v7_key": 8,
+    "text": "การออกแบบ 360 องศา",
+    "mirror_order": 13,
+    "how": "text",
+    "img": "puricare360-alpha-pet-14-360-degree-design-d.jpg"
+   },
+   {
+    "v7_key": 9,
+    "text": "",
+    "mirror_order": 14,
+    "how": "gap(앞뒤 사이 이미지만 있는 섹션)",
+    "img": "puricare360-alpha-pet-15-360-degree-design-2-d.jpg"
+   },
+   {
+    "v7_key": 10,
+    "text": "สมาร์ทแอร์แคร์",
+    "mirror_order": 15,
+    "how": "text",
+    "img": "puricare360-alpha-pet-16-thinq-d.jpg"
+   },
+   {
+    "v7_key": 11,
+    "text": "สเปคทั้งหมด",
+    "mirror_order": 16,
+    "how": "text",
+    "img": "AP-Pet2025-Dimention-Double-1200-513.jpg"
+   }
+  ]
+ },
+ {
+  "model": "A9-ACE",
+  "slug": "www-lg-com-th-vacuum-cleaner-cordless-vacuum-cleaner-a9-ace",
+  "mirror_path": "component-first",
+  "gallery": {
+   "stored": 15,
+   "live": 15,
+   "split": 15,
+   "spaced": 0,
+   "pct": 0,
+   "path": "component-first",
+   "checked": "2026-11-24 11:35 KST",
+   "truncDead": false,
+   "crawled": 1794282666.403
+  },
+  "slices": 8,
+  "sections": [
+   {
+    "v7_key": 1,
+    "text": "",
+    "mirror_order": 1,
+    "how": "gap(앞뒤 사이 이미지만 있는 섹션)",
+    "img": "vac-codezero-a9-air-2024-01-intro-d.jpg"
+   },
+   {
+    "v7_key": 2,
+    "text": "น้ำหนักเบา แต่ทรงพลัง",
+    "mirror_order": 2,
+    "how": "text",
+    "img": "vac-codezero-a9-air-2024-03-2-lightweight-yet-powerful-d.jpg"
+   },
+   {
+    "v7_key": 3,
+    "text": "Dual Turbo Cyclone",
+    "mirror_order": 3,
+    "how": "text",
+    "img": "vac-codezero-a9-air-2024-04-2-dual-turbo-cyclone-d.jpg"
+   },
+   {
+    "v7_key": 4,
+    "text": "ดีไซน์กะทัดรัด",
+    "mirror_order": 4,
+    "how": "text",
+    "img": "vac-codezero-a9-air-2024-05-2-slim-design-d.jpg"
+   },
+   {
+    "v7_key": 5,
+    "text": "หัวแปรงและอุปกรณ์สำหรับซอกมุม",
+    "mirror_order": 5,
+    "how": "text",
+    "img": "vac-codezero-a9-air-2024-06-2-crevice-tips-and-tools-d.jpg"
+   },
+   {
+    "v7_key": 6,
+    "text": "",
+    "mirror_order": 6,
+    "how": "gap(앞뒤 사이 이미지만 있는 섹션)",
+    "img": "vac-codezero-a9-air-2024-06-3-crevice-tips-and-tools-d.jpg"
+   },
+   {
+    "v7_key": 7,
+    "text": "ระบบกรอง 5 ขั้นตอน",
+    "mirror_order": 7,
+    "how": "text",
+    "img": "vac-codezero-a9-air-2024-07-2-5-step-filtration-system-d.jpg"
+   },
+   {
+    "v7_key": 8,
+    "text": "ตัวกรองถอดออกได้ง่าย",
+    "mirror_order": 8,
+    "how": "text",
+    "img": "vac-codezero-a9-air-2024-08-easy-detachable-filters.jpg"
+   },
+   {
+    "v7_key": 9,
+    "text": "สะดวกสบาย",
+    "mirror_order": 9,
+    "how": "text",
+    "img": "vac-codezero-a9-air-2024-09-2-convenience-d.jpg"
+   },
+   {
+    "v7_key": 10,
+    "text": "ดีไซน์กะทัดรัดสามารถเข้าได้กับทุกพื้นที่",
+    "mirror_order": 10,
+    "how": "text",
+    "img": "vac-codezero-a9-air-2024-10-1-design-1-d.jpg"
+   },
+   {
+    "v7_key": 11,
+    "text": "สเปคทั้งหมด",
+    "mirror_order": 14,
+    "how": "text",
+    "img": "443a3d22_A9-ACE-800x453-D.jpg"
+   }
+  ]
+ },
+ {
+  "model": "GC-B41FPGAM",
+  "slug": "www-lg-com-th-refrigerators-multi-door-refrigerator-gc-b41fpgam",
+  "mirror_path": "component-first",
+  "gallery": {
+   "stored": 11,
+   "live": 11,
+   "split": 11,
+   "spaced": 0,
+   "pct": 0,
+   "path": "component-first",
+   "checked": "2026-11-24 11:35 KST",
+   "truncDead": false,
+   "crawled": 1794284141.082
+  },
+  "slices": 5,
+  "sections": [
+   {
+    "v7_key": 1,
+    "text": "บานประตูกระจกเรียบหรู",
+    "mirror_order": 1,
+    "how": "text",
+    "img": "multi-door-richome-2026-gcfb41fpgam-blackglass-feature-01-flat-glass-door-d.jpg"
+   },
+   {
+    "v7_key": 2,
+    "text": "FRESH Converter+",
+    "mirror_order": 2,
+    "how": "text",
+    "img": "multi-door-richome-2026-gcfb41fpgam-blackglass-feature-02-fresh-converter-d.jpg"
+   },
+   {
+    "v7_key": 3,
+    "text": "Multi Air Flow",
+    "mirror_order": 3,
+    "how": "text",
+    "img": "multi-door-richome-2026-gcfb41fpgam-blackglass-feature-03-multi-air-flow-d.jpg"
+   },
+   {
+    "v7_key": 4,
+    "text": "Total No Frost",
+    "mirror_order": 4,
+    "how": "text",
+    "img": "multi-door-richome-2026-gcfb41fpgam-blackglass-feature-04-total-no-frost.jpg"
+   },
+   {
+    "v7_key": 5,
+    "text": "คอมเพรสเซอร์ Inverter",
+    "mirror_order": 5,
+    "how": "text",
+    "img": "multi-door-richome-2026-gcfb41fpgam-blackglass-feature-05-inverter-compressor.jp"
+   },
+   {
+    "v7_key": 6,
+    "text": "หน้าจอสัมผัส",
+    "mirror_order": 6,
+    "how": "text 2/3",
+    "img": "multi-door-richome-2026-gcfb41fpgam-blackglass-feature-06-touch-display-d.jpg"
+   },
+   {
+    "v7_key": 7,
+    "text": "สเปคทั้งหมด",
+    "mirror_order": 8,
+    "how": "text",
+    "img": "0e7d531f_GC-B41FPGAM-800x453.jpg"
+   }
+  ]
+ },
+ {
+  "model": "MS2032GAS",
+  "slug": "www-lg-com-th-microwave-ovens-solo-microwave-ms2032gas",
+  "mirror_path": "component-first",
+  "gallery": {
+   "stored": 13,
+   "live": 13,
+   "split": 13,
+   "spaced": 0,
+   "pct": 0,
+   "path": "component-first",
+   "checked": "2026-11-24 11:35 KST",
+   "truncDead": false,
+   "crawled": 1794282614.188
+  },
+  "slices": 4,
+  "sections": [
+   {
+    "v7_key": 1,
+    "text": "",
+    "mirror_order": 1,
+    "how": "gap(앞뒤 사이 이미지만 있는 섹션)",
+    "img": "slim-neochef-ms2032jas-01-summary-d1.jpg"
+   },
+   {
+    "v7_key": 2,
+    "text": "ทำความสะอาดได้ง่ายดาย และผลลัพธ์ไร้ที่ติ",
+    "mirror_order": 2,
+    "how": "text",
+    "img": "slim-neochef-ms2032jas-02-easyclean-d.jpg"
+   },
+   {
+    "v7_key": 3,
+    "text": "การออกแบบที่เรียบง่าย การใช้พื้นที่ให้เก",
+    "mirror_order": 3,
+    "how": "text",
+    "img": "slim-neochef-ms2032jas-03-design-d.jpg"
+   },
+   {
+    "v7_key": 4,
+    "text": "ฟังก์ชั่นการใช้งานที่เพียบพร้อม",
+    "mirror_order": 4,
+    "how": "text",
+    "img": "slim-neochef-ms2032jas-04-led-d.jpg"
+   },
+   {
+    "v7_key": 5,
+    "text": "สเปคทั้งหมด",
+    "mirror_order": 5,
+    "how": "text",
+    "img": "e5787ec6_MS2032GAS-800x453.jpg"
+   }
+  ]
+ },
+ {
+  "model": "GC-B187JBAM",
+  "slug": "www-lg-com-th-refrigerators-side-by-side-refrigerator-gc-b187jbam",
+  "mirror_path": "component-first",
+  "gallery": {
+   "stored": 14,
+   "live": 14,
+   "split": 1,
+   "spaced": 14,
+   "pct": 14,
+   "path": "component-first",
+   "checked": "2026-11-24 11:35 KST",
+   "truncDead": false,
+   "crawled": 1794284220.31
+  },
+  "slices": 4,
+  "sections": [
+   {
+    "v7_key": 1,
+    "text": "Multi Air Flow",
+    "mirror_order": 3,
+    "how": "text",
+    "img": "ref-vt6-basic-good-ps3-03-multi-air-flow-d.jpg"
+   },
+   {
+    "v7_key": 2,
+    "text": "ประหยัดพลังงานและทนทาน",
+    "mirror_order": 5,
+    "how": "text",
+    "img": "HA-06-Hisense-SxS-ODM-GC-B157PMAV-Smart-Inverter-Compressor-desktop.jpg"
+   },
+   {
+    "v7_key": 3,
+    "text": "สเปคทั้งหมด",
+    "mirror_order": 6,
+    "how": "text",
+    "img": "79926ebd_GC-B187JBAM-D.jpg"
+   }
+  ]
+ },
+ {
+  "model": "RV10VHP2B",
+  "slug": "www-lg-com-th-laundry-dryer-rv10vhp2b",
+  "mirror_path": "component-first",
+  "gallery": {
+   "stored": 13,
+   "live": 13,
+   "split": 13,
+   "spaced": 0,
+   "pct": 0,
+   "path": "component-first",
+   "checked": "2026-11-24 11:35 KST",
+   "truncDead": false,
+   "crawled": 1794222361.311
+  },
+  "slices": 8,
+  "sections": [
+   {
+    "v7_key": 1,
+    "text": "เครื่องอบผ้า DUAL Inverter Heat Pump™",
+    "mirror_order": 1,
+    "how": "text",
+    "img": "Dryer-EU-Vivace-V900-VC2-BlackSteel-01-Intro-D.jpg"
+   },
+   {
+    "v7_key": 2,
+    "text": "เครื่องอบผ้าที่ช่วยให้คุณมั่นใจอย่างเต็ม",
+    "mirror_order": 2,
+    "how": "text",
+    "img": "Dryer-EU-Vivace-V900-VC2-BlackSteel-02-1-Dual-Inverter-Heat-Pump-D-VF.jpg"
+   },
+   {
+    "v7_key": 3,
+    "text": "ฆ่าเชื้อแบคทีเรีย 99.9% ด้วย LG Dryer",
+    "mirror_order": 3,
+    "how": "text",
+    "img": "Dryer-EU-Vivace-V900-VC2-BlackSteel-03-Allergy-Care-D.jpg"
+   },
+   {
+    "v7_key": 4,
+    "text": "Dual Filter เพิ่มความสะอาดสองเท่า",
+    "mirror_order": 4,
+    "how": "text",
+    "img": "Dryer-EU-Vivace-V900-VC2-BlackSteel-04-Dual-Filter-D.jpg"
+   },
+   {
+    "v7_key": 5,
+    "text": "อบผ้าแห้งสนิทตั้งแต่ครั้งแรก",
+    "mirror_order": 5,
+    "how": "text",
+    "img": "Dryer-EU-Vivace-V900-VC2-BlackSteel-05-Sensor-Dry-D.gif"
+   },
+   {
+    "v7_key": 6,
+    "text": "คอนเดนเซอร์ที่มีการทำความสะอาดอย่างง่าย",
+    "mirror_order": 6,
+    "how": "text",
+    "img": "Dryer-EU-Vivace-V900-VC2-BlackSteel-06-Auto-Cleaning-Condenser-D.jpg"
+   },
+   {
+    "v7_key": 7,
+    "text": "โหมดพลังงาน : ประหยัดพลังงานสูงสุด 15%",
+    "mirror_order": 7,
+    "how": "text",
+    "img": "Dryer-EU-Vivace-V900-VC2-BlackSteel-07-1-Energy-Mode.jpg"
+   },
+   {
+    "v7_key": 8,
+    "text": "ผ้าที่ออกมายังคงดูใหม่เหมือนเพิ่งซื้อมา",
+    "mirror_order": 9,
+    "how": "text",
+    "img": "Dryer-EU-Vivace-V900-VC2-BlackSteel-08-Fabric-Care-D.jpg"
+   },
+   {
+    "v7_key": 9,
+    "text": "รีโมทคอนโทรล",
+    "mirror_order": 10,
+    "how": "text 1/3",
+    "img": "Dryer-EU-Vivace-V900-VC2-BlackSteel-09-1-ThinQ-Remote-Control-D.jpg"
+   },
+   {
+    "v7_key": 10,
+    "text": "สเปคทั้งหมด",
+    "mirror_order": 13,
+    "how": "text",
+    "img": "7919569f_RV10VHP2B-800x453-D.jpg"
+   }
+  ]
+ },
+ {
+  "model": "SCQ13A",
+  "slug": "www-lg-com-th-air-conditioner-inverter-wifi-air-air-conditioner-scq13a",
+  "mirror_path": "component-first",
+  "gallery": {
+   "stored": 12,
+   "live": 12,
+   "split": 12,
+   "spaced": 0,
+   "pct": 0,
+   "path": "component-first",
+   "checked": "2026-11-24 11:35 KST",
+   "truncDead": false,
+   "crawled": 1794282930.186
+  },
+  "slices": 13,
+  "sections": [
+   {
+    "v7_key": 1,
+    "text": "iF Design Award",
+    "mirror_order": 1,
+    "how": "text 2/3",
+    "img": "single-split-inverter-air-conditioner-s1-2025-s3nq181l1d0-feature-01-1-award-if-"
+   },
+   {
+    "v7_key": 2,
+    "text": "",
+    "mirror_order": 4,
+    "how": "gap(앞뒤 사이 이미지만 있는 섹션)",
+    "img": "single-split-inverter-air-conditioner-s0-2024-s3nq090a1da-feature-02-intro-d.jpg"
+   },
+   {
+    "v7_key": 3,
+    "text": "ระบบทำความเย็นอัจฉริยะที่ปรับจูนมาอย่างส",
+    "mirror_order": null,
+    "how": "none(텍스트 불일치)",
+    "img": ""
+   },
+   {
+    "v7_key": 4,
+    "text": "AI Air",
+    "mirror_order": 9,
+    "how": "text",
+    "img": "single-split-inverter-air-conditioner-s0-2024-s3nq090a1da-feature-04-ai-air-d.jp"
+   },
+   {
+    "v7_key": 5,
+    "text": "Soft Air",
+    "mirror_order": 10,
+    "how": "text",
+    "img": "single-split-inverter-air-conditioner-s0-2024-s3nq090a1da-feature-05-soft-air.jp"
+   },
+   {
+    "v7_key": 6,
+    "text": "DUAL Vane",
+    "mirror_order": 11,
+    "how": "text",
+    "img": "single-split-inverter-air-conditioner-s0-2024-s3nq090a1da-feature-06-dual-vane-d"
+   },
+   {
+    "v7_key": 7,
+    "text": "กระแสลมที่ไหลผ่านได้ไกลขึ้น",
+    "mirror_order": 12,
+    "how": "text 2/3",
+    "img": "single-split-inverter-air-conditioner-s0-2024-s3nq090a1da-feature-07-1-longer-ai"
+   },
+   {
+    "v7_key": 8,
+    "text": "Comfort Humidity Control",
+    "mirror_order": 14,
+    "how": "text",
+    "img": "single-split-inverter-air-conditioner-s0-2024-s3nq090a1da-feature-08-comfort-hum"
+   },
+   {
+    "v7_key": 9,
+    "text": "Sleep Timer+",
+    "mirror_order": 15,
+    "how": "text",
+    "img": "single-split-inverter-air-conditioner-s0-2024-s3nq090a1da-feature-09-sleep-timer"
+   },
+   {
+    "v7_key": 10,
+    "text": "kW Manager",
+    "mirror_order": 16,
+    "how": "text",
+    "img": "single-split-inverter-air-conditioner-s0-2024-s3nq090a1da-feature-10-1-kw-manage"
+   },
+   {
+    "v7_key": 11,
+    "text": "Window Open Detection",
+    "mirror_order": 17,
+    "how": "text",
+    "img": "single-split-inverter-air-conditioner-s0-2024-s3nq090a1da-feature-10-2-window-op"
+   },
+   {
+    "v7_key": 12,
+    "text": "All Cleaning",
+    "mirror_order": 18,
+    "how": "text",
+    "img": "single-split-inverter-air-conditioner-s0-2024-s3nq090a1da-feature-11-all-cleanin"
+   },
+   {
+    "v7_key": 13,
+    "text": "Auto Clean+",
+    "mirror_order": 19,
+    "how": "text",
+    "img": "single-split-inverter-air-conditioner-s0-2024-s3nq090a1da-feature-12-auto-clean-"
+   },
+   {
+    "v7_key": 14,
+    "text": "Freeze Cleaning",
+    "mirror_order": 20,
+    "how": "text",
+    "img": "single-split-inverter-air-conditioner-s0-2024-s3nq090a1da-feature-13-freeze-clea"
+   },
+   {
+    "v7_key": 15,
+    "text": "Plasmaster™ Ionizer++",
+    "mirror_order": 21,
+    "how": "text",
+    "img": "single-split-inverter-air-conditioner-s0-2024-s3nq090a1da-feature-14-1-plasmaste"
+   },
+   {
+    "v7_key": 16,
+    "text": "Pre-Filter",
+    "mirror_order": 22,
+    "how": "text",
+    "img": "single-split-inverter-air-conditioner-s0-2024-s3nq090a1da-feature-14-2-pre-filte"
+   },
+   {
+    "v7_key": 17,
+    "text": "ควบคุมง่ายๆ ด้วยผู้ช่วยเสียง",
+    "mirror_order": 23,
+    "how": "text 2/3",
+    "img": "single-split-inverter-air-conditioner-s0-2024-s3nq090a1da-feature-15-1-lg-thinq-"
+   },
+   {
+    "v7_key": 18,
+    "text": "",
+    "mirror_order": 26,
+    "how": "gap(앞뒤 사이 이미지만 있는 섹션)",
+    "img": "Webstite_banner_1600x768.jpg"
+   },
+   {
+    "v7_key": 19,
+    "text": "สเปคทั้งหมด",
+    "mirror_order": 27,
+    "how": "text",
+    "img": "LG_RAC-SCQ-_-SEQ_dimension_89.5-Desktop.jpg"
+   }
+  ]
+ },
+ {
+  "model": "GC-B257SQYL",
+  "slug": "www-lg-com-th-refrigerators-side-by-side-refrigerator-gc-b257sqyl",
+  "mirror_path": "aem",
+  "gallery": {
+   "stored": 0,
+   "live": 11,
+   "split": 1,
+   "spaced": 11,
+   "pct": 0,
+   "path": "aem",
+   "checked": "2026-11-24 11:35 KST",
+   "truncDead": true,
+   "crawled": 1794024817.512
+  },
+  "slices": 6,
+  "sections": [
+   {
+    "v7_key": null,
+    "how": "mirror.sections 그대로",
+    "n": 19
+   }
+  ]
+ },
+ {
+  "model": "T2313VSPM",
+  "slug": "www-lg-com-th-laundry-top-load-washing-machine-t2313vspm",
+  "mirror_path": "aem",
+  "gallery": {
+   "stored": 6,
+   "live": 10,
+   "split": 7,
+   "spaced": 4,
+   "pct": 0,
+   "path": "aem",
+   "checked": "2026-11-24 11:35 KST",
+   "truncDead": true,
+   "crawled": 1794025435.311
+  },
+  "slices": 10,
+  "sections": [
+   {
+    "v7_key": null,
+    "how": "mirror.sections 그대로",
+    "n": 19
+   }
+  ]
+ },
+ {
+  "model": "OLED83G4PSA",
+  "slug": "www-lg-com-th-tv-soundbars-oled-oled83g4psa",
+  "mirror_path": "aem",
+  "gallery": {
+   "stored": 3,
+   "live": 9,
+   "split": 4,
+   "spaced": 6,
+   "pct": 0,
+   "path": "aem",
+   "checked": "2026-11-24 11:35 KST",
+   "truncDead": true,
+   "crawled": 1794025181.056
+  },
+  "slices": 39,
+  "sections": [
+   {
+    "v7_key": null,
+    "how": "mirror.sections 그대로",
+    "n": 89
+   }
+  ]
+ }
+]
