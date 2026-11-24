@@ -2689,8 +2689,8 @@ app.get('/media/exports/:hash/:file', async (req, res) => {
    제품 폴더의 summary.json 에 보관 (버킷에도) — 다시 부르면 그대로, refresh:true 면 새로 만든다
 ────────────────────────────────────────── */
 const summaryJobs = new Map();   // slug → Promise (같은 제품 동시 요청은 한 번만 만든다)
-// 요약 규칙이 바뀌면 올린다 — 예전 규칙으로 실패한 기억(summary-fail.json)을 버리고 다시 만든다 (2: 번들 반반 · 스피커는 본 제품만, 3: 2,000자에 안 들어가면 lg.com Key features 만)
-const SUMMARY_RULE_V = 3;
+// 요약 규칙이 바뀌면 올린다 — 예전 규칙으로 실패한 기억(summary-fail.json)을 버리고 다시 만든다 (2: 번들 반반 · 스피커는 본 제품만, 3: 2,000자에 안 들어가면 lg.com Key features 만, 4: 1,800자 목표 · 넘으면 정보 행 줄이기)
+const SUMMARY_RULE_V = 4;
 app.post('/api/v1/pdp-summary', async (req, res) => {
   const path = require('path'), fs = require('fs');
   const { url, refresh = false } = req.body || {};
@@ -2892,7 +2892,10 @@ function putFullshotMeta(key, m) {
   fullshotMetaCache.delete(key);
   sliceStore.putBuffer(`media-fullshot/${key}.json`, Buffer.from(JSON.stringify(m)), 'application/json').catch((e) => console.warn('[fullshot] 기록 버킷 업로드 실패', e.message));
 }
-const isGone = (m) => !!(m && m.gone && Date.now() - (m.at || 0) < GONE_MS);
+// 카테고리만 옮긴 제품(주소 마지막 부분 = 모델이 같음)은 없어진 것이 아니다 — 예전 판단 기록도 이렇게 다시 본다
+const lastSeg = (u) => String(u || '').replace(/[?#].*$/, '').replace(/\/+$/, '').toLowerCase().split('/').pop();
+const movedOnly = (m) => !!(m && m.final && m.url && lastSeg(m.final) === lastSeg(m.url) && (String(m.final).match(/\//g) || []).length >= 5);
+const isGone = (m) => !!(m && m.gone && !movedOnly(m) && Date.now() - (m.at || 0) < GONE_MS);
 // 찍지 않고 주소만 확인 (예전 캡처) — 제품 페이지면 기록만 남기고, 홈으로 넘어가면 gone
 function verifyFullshot(url, key) {
   const fs = require('fs'), path = require('path');
