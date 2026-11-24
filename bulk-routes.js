@@ -372,16 +372,45 @@ router.post('/api/v1/bulk/jobs/:job/notify', async (req, res) => {
   res.json(bulkJobs.jobView(j));
 });
 
-router.get('/api/v1/bulk/jobs/:job/file', async (req, res) => {
-  const j = await bulkJobs.getJob(req.params.job);
-  if (!j || j.status !== 'ready') return res.status(404).json({ error: 'file not ready' });
+// 끝난 작업의 결과 엑셀 경로 (재배포 뒤면 버킷에서 받아 둔다) — 없으면 null
+async function resultFile(j) {
   const fp = path.join(bulkJobs.DIR, j.upload, `result-${j.id}.xlsx`);
-  if (!fs.existsSync(fp)) {   // 재배포 뒤: 버킷에서
-    const buf = await require('./crawl-store').getBuffer(`bulk/${j.upload}/result-${j.id}.xlsx`);
-    if (!buf) return res.status(404).json({ error: 'file expired' });
+  if (!fs.existsSync(fp)) {
+    const buf = await require('./crawl-store').getBuffer(`bulk/${j.upload}/result-${j.id}.xlsx`).catch(() => null);
+    if (!buf) return null;
     fs.mkdirSync(path.dirname(fp), { recursive: true });
     fs.writeFileSync(fp, buf);
   }
+  return fp;
+}
+
+// 한 행의 설명 칸 (2026-11-24): 벌크 화면에서 행을 눌렀을 때 '엑셀에 들어간 설명' 미리보기
+//   GET /api/v1/bulk/jobs/:job/cell?row= → { row, text }   (끝난 작업만, 그 작업이 채운 행만)
+const cellCache = new Map();   // job id → Map(row → text) — 결과 엑셀을 한 번만 읽는다 (최근 3개 작업)
+router.get('/api/v1/bulk/jobs/:job/cell', async (req, res) => {
+  const j = await bulkJobs.getJob(req.params.job);
+  if (!j || j.status !== 'ready') return res.status(404).json({ error: 'file not ready' });
+  const row = parseInt(req.query.row, 10);
+  if (!(j.items || []).some((x) => x.row === row && x.status === 'ok')) return res.status(404).json({ error: 'row not filled by this job', code: 'not_filled' });
+  let cells = cellCache.get(j.id);
+  if (!cells) {
+    const fp = await resultFile(j);
+    if (!fp) return res.status(404).json({ error: 'file expired' });
+    const wb = await xlsx.load(fs.readFileSync(fp));
+    const sheet = wb.sheets.find((s) => s.path === j.sheet);
+    if (!sheet) return res.status(404).json({ error: 'sheet not found' });
+    cells = new Map(j.items.filter((x) => x.status === 'ok').map((x) => [x.row, String((sheet.rows.get(x.row) || new Map()).get(j.descCol) || '')]));
+    cellCache.set(j.id, cells);
+    while (cellCache.size > 3) cellCache.delete(cellCache.keys().next().value);
+  }
+  res.json({ row, text: cells.get(row) || '' });
+});
+
+router.get('/api/v1/bulk/jobs/:job/file', async (req, res) => {
+  const j = await bulkJobs.getJob(req.params.job);
+  if (!j || j.status !== 'ready') return res.status(404).json({ error: 'file not ready' });
+  const fp = await resultFile(j);
+  if (!fp) return res.status(404).json({ error: 'file expired' });
   res.set('Content-Disposition', `attachment; filename="clia-bulk.xlsx"; filename*=UTF-8''${encodeURIComponent(j.outName)}`);
   res.type('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet').sendFile(fp);
 });

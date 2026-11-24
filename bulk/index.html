@@ -166,6 +166,46 @@ button.eb { cursor: pointer; }
 /* 편집(빌더) 덮개 — 벌크 화면 전체 위 */
 .edov { position: fixed; inset: 0; z-index: 50; background: #fff; }
 .edov iframe { width: 100%; height: 100%; border: 0; display: block; }
+/* 한 건 상세 패널 (2026-11-24) */
+.item.cur { box-shadow: inset 3px 0 0 var(--clia-gray-900); background: var(--clia-gray-50); }
+.dw { position: fixed; inset: 0; z-index: 40; }
+.dw-bg { position: absolute; inset: 0; background: rgba(20,20,20,.28); }
+.dw-p { position: absolute; top: 0; bottom: 0; inset-inline-end: 0; width: min(540px, 100vw); background: #fff; box-shadow: -12px 0 32px rgba(0,0,0,.14); display: flex; flex-direction: column; animation: dwIn .18s ease-out; }
+@keyframes dwIn { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.dw-top { flex: none; display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.dw-top .sp { flex: 1; }
+.dw-nav, .dw-x { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--clia-gray-300); background: #fff; color: var(--clia-gray-900); font: 600 16px/1 var(--clia-font), sans-serif; cursor: pointer; }
+.dw-nav:disabled { opacity: .35; cursor: default; }
+.dw-pos { font-size: 12px; color: var(--muted); min-width: 64px; text-align: center; }
+.dw-inc { display: inline-flex; align-items: center; gap: 6px; margin-inline-start: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.dw-body { flex: 1; overflow: auto; padding: 18px 20px 40px; }
+.dw-hd { display: flex; gap: 14px; align-items: flex-start; padding-bottom: 16px; border-bottom: 1px solid var(--clia-gray-100); }
+.dw-hd img, .dw-hd .ph { width: 88px; height: 88px; border-radius: 10px; object-fit: contain; background: var(--clia-gray-50); flex: none; }
+.dw-m { font-size: 18px; font-weight: 800; overflow-wrap: anywhere; }
+.dw-sub { margin-top: 4px; font-size: 12px; color: var(--clia-gray-700); font-weight: 600; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.dw-acts { margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+.dw-body section { padding: 16px 0; border-bottom: 1px solid var(--clia-gray-100); }
+.dw-body section:last-child { border-bottom: 0; }
+.dw-body h4 { margin: 0 0 10px; font-size: 12px; font-weight: 700; color: var(--clia-gray-600); letter-spacing: .02em; }
+.dw-dl { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 8px 12px; margin: 0; font-size: 13px; }
+.dw-dl dt { color: var(--muted); }
+.dw-dl dd { margin: 0; color: var(--clia-gray-900); overflow-wrap: anywhere; }
+.dw-cur { color: var(--clia-gray-700); font-size: 12px; line-height: 1.5; max-height: 4.5em; overflow: hidden; }
+.dw-note { margin-top: 6px; font-size: 12px; color: var(--warn); }
+.dw-why { font-size: 13px; }
+.dw-ac { margin-top: 10px; display: flex; gap: 6px; }
+.dw-ac .mini { color: #fff; background: var(--clia-brand); border-color: var(--clia-brand); font-weight: 700; }
+.dw-ac .mini.un { color: var(--clia-gray-900); background: #fff; border-color: var(--clia-gray-300); }
+.mut { color: var(--clia-gray-500); }
+.dw-empty { font-size: 13px; color: var(--muted); padding: 14px; border-radius: 10px; background: var(--clia-gray-50); }
+.dw-meta { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+/* 엑셀에 들어갈 설명 = 상세 페이지 한 장: 요약 글 → 이미지를 이어 붙임 (사이 틈 없음) */
+.dw-page { border: 1px solid var(--clia-gray-200); border-radius: 10px; overflow: hidden; background: #fff; }
+.dw-page img { display: block; width: 100%; height: auto; }
+.dw-sum { white-space: pre-wrap; font-size: 13px; line-height: 1.6; color: var(--clia-gray-900); padding: 16px 18px; border-bottom: 1px solid var(--clia-gray-100); }
+.dw-frame { border: 1px solid var(--clia-gray-100); border-radius: 10px; overflow: hidden; height: 640px; }
+.dw-frame iframe { width: 1000px; height: calc(640px / .498); border: 0; transform: scale(.498); transform-origin: 0 0; }
+@media (max-width: 640px) { .dw-p { width: 100vw; } .dw-frame iframe { transform: scale(.35); height: calc(640px / .35); } }
 /* 표 하나 (2026-11-24): 제품 · 상품명 · 상태 · 확인 필요 내용 · Next step · 직접 편집하기 — 매칭 완료 · 확인 필요 · 매칭 불가 모두.
    탭은 거르기만. 넓은 화면의 리스트 보기에서만 칸으로, 휴대폰 · 갤러리 보기는 카드 */
 .lhead { display: none; }
@@ -411,6 +451,19 @@ button.eb { cursor: pointer; }
 </div></div>
 <div class="modal hidden" id="frm" role="dialog" aria-modal="true"><div class="mbox"><div class="mh"><b id="frmT"></b><button class="pill" id="frmX"></button></div><div id="frmBody"></div><div class="fmsg" id="frmMsg"></div></div></div>
 <div class="edov hidden" id="edov"><iframe id="edFrame" title="Builder"></iframe></div>
+<!-- 한 건 상세 (2026-11-24): 행을 누르면 오른쪽 패널 -->
+<div class="dw hidden" id="dw" role="dialog" aria-modal="true" aria-label="Detail">
+  <div class="dw-bg"></div>
+  <div class="dw-p">
+    <div class="dw-top">
+      <button type="button" class="dw-nav" id="dwPrev" aria-label="Previous">‹</button><span class="dw-pos" id="dwPos"></span><button type="button" class="dw-nav" id="dwNext" aria-label="Next">›</button>
+      <label class="dw-inc" id="dwIncW"><input type="checkbox" id="dwInc"><span data-i="dwInclude"></span></label>
+      <span class="sp"></span>
+      <button type="button" class="dw-x" id="dwX" aria-label="Close">✕</button>
+    </div>
+    <div class="dw-body" id="dwBody"></div>
+  </div>
+</div>
 <script src="../shared/clia-frame-picker.js"></script>
 <script src="bulk-i18n.js"></script>
 <script src="bulk.js"></script>
