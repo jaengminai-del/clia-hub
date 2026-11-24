@@ -68,12 +68,32 @@ const jobs = new Map();   // `${slug}|${ch}` → { state: 'pending'|'error', ste
 const queue = [];          // [{ slug, ch, opts, bg }] — 사람이 연 것(bg=false)이 늘 먼저
 let running = 0, runningBg = 0;
 // 미리 준비 (2026-11-24): 검토하는 사람이 기다리지 않게, 서버가 Shopee/Lazada 법인 제품을 차례로 미리 준비한다.
-//   REVIEW_PREWARM=0 이면 끔 · REVIEW_PREWARM_COUNTRIES (기본 th,sg) · REVIEW_PREWARM_CONC (기본 1, 최대 4)
+//   REVIEW_PREWARM=0 이면 끔 · REVIEW_PREWARM_COUNTRIES (기본 th,sg) · REVIEW_PREWARM_CONC (캡처 차선 — 아래 단계별 차선)
 //   준비가 안 됐거나(none) 내용이 바뀐(stale) 채널만. 실패한 것은 6시간 뒤에 다시. 10분마다 다시 훑는다(새로 크롤한 제품 · 편집본 저장).
 const PREWARM = process.env.REVIEW_PREWARM !== '0';
 const PREWARM_COUNTRIES = new Set(String(process.env.REVIEW_PREWARM_COUNTRIES || 'th,sg').split(',').map((x) => x.trim().toLowerCase()).filter(Boolean));
 // 미리 준비 동시 수: 1~4 (운영 4 vCPU · 16GB — 4개면 CPU 한도 가까이, 그 이상은 사용자 작업이 느려지고 lg.com 차단 위험, 2026-11-24)
-const BG_CONC = Math.max(1, Math.min(4, parseInt(process.env.REVIEW_PREWARM_CONC, 10) || 1));
+// 단계별 차선 (2026-11-24): 한 제품의 단계(그리기 · 요약 · 캡처 · 분석)는 쓰는 자원이 달라 차선을 따로 둔다 —
+//   요약(Gemini)·캡처(lg.com)는 기다리는 시간이 대부분이라 CPU 를 거의 안 쓰는데, 한 작업이 단계를 차례로 돌면 그동안 자리를 잡고 있었다
+//   (운영 CPU 평균 1.1 / 4). 그래서 동시에 도는 제품(BG_CONC)은 늘리고, 단계마다 차선 수로 묶는다. 사람이 연 제품은 차선에서도 먼저.
+//   REVIEW_PREWARM_CONC = 캡처 차선 수(기본 1, 최대 8) · 동시 제품 수 = 캡처 차선 × 3 (REVIEW_PREWARM_JOBS 로 바꿈, 최대 24)
+//   REVIEW_LANE_RENDER(2) · REVIEW_LANE_SUMMARY(6) · REVIEW_LANE_ANALYZE(3)
+const envInt = (k, d, lo, hi) => Math.max(lo, Math.min(hi, parseInt(process.env[k], 10) || d));
+const CAPTURE_LANES = envInt('REVIEW_PREWARM_CONC', 1, 1, 8);
+const BG_CONC = envInt('REVIEW_PREWARM_JOBS', CAPTURE_LANES * 3, 1, 24);
+function lane(name, n) {
+  let active = 0;
+  const waiting = [];   // [{ hi, go }]
+  const run = async (fn, hi = false) => {
+    if (active >= n) await new Promise((go) => { const w = { hi, go }; if (hi) { const i = waiting.findIndex((x) => !x.hi); waiting.splice(i < 0 ? waiting.length : i, 0, w); } else waiting.push(w); });
+    active++;
+    try { return await fn(); } finally { active--; const w = waiting.shift(); if (w) w.go(); }
+  };
+  run.stats = () => ({ n, active, waiting: waiting.length });
+  return run;
+}
+const LANES = { render: lane('render', envInt('REVIEW_LANE_RENDER', 2, 1, 8)), summary: lane('summary', envInt('REVIEW_LANE_SUMMARY', 6, 1, 16)),
+  capture: lane('capture', CAPTURE_LANES), analyze: lane('analyze', envInt('REVIEW_LANE_ANALYZE', 3, 1, 8)) };
 // 전체 동시 수 = 미리 준비 + 1 — 미리 준비가 꽉 차 있어도 사람이 연 제품은 바로 시작한다
 const CONC = Math.max(2, BG_CONC + 1);
 // 기본은 전부 준비 — lg.com 캡처 · 상세 이미지 · PDP 요약까지 (검토 화면에서 누르면 바로 보이게, 2026-11-24 사용자 결정).
@@ -194,11 +214,11 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false, bg =
   // 1) 설명 HTML — 벌크 엑셀과 같은 순서 (편집본 → 크롤 데이터로 새로)
   step('html');
   const ed = require('./edits').getEdit(slug, ch);
-  const html = ed ? ed.html : (await post('/api/ebay-generate', { url: sum.url, medium: 'shopee_lazada', listing: ch === 'lazada' }, 5 * 60 * 1000)).html;
+  const html = ed ? ed.html : (await LANES.render(() => post('/api/ebay-generate', { url: sum.url, medium: 'shopee_lazada', listing: ch === 'lazada' }, 5 * 60 * 1000), !bg)).html;
   if (!html) throw new Error('generate returned no HTML');
   // 2) 슬라이스 이미지 (빌더 이미지 ZIP·이미지형 HTML·벌크 엑셀과 같은 해시)
   step('slices');
-  const sl = await post('/api/v1/slice-html', { html, medium: 'shopee_lazada' }, 12 * 60 * 1000);
+  const sl = await LANES.render(() => post('/api/v1/slice-html', { html, medium: 'shopee_lazada' }, 12 * 60 * 1000), !bg);
   const man = await sliceManifest(sl.hash);
   if (!man || !(man.images || []).length) throw new Error('slice manifest missing');
   const slices = man.images.map((im) => ({ src: `/media/slices/${sl.hash}/${im.file}`, w: im.width, h: im.height, text: im.text || '' }));
@@ -206,7 +226,7 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false, bg =
   let sm = null, summaryErr = '';
   if (isTh(sum.url)) {
     step('summary');
-    sm = await post('/api/v1/pdp-summary', { url: sum.url, cachedOnly: existingOnly }, 7 * 60 * 1000).catch((e) => {
+    sm = await LANES.summary(() => post('/api/v1/pdp-summary', { url: sum.url, cachedOnly: existingOnly }, 7 * 60 * 1000), !bg).catch((e) => {
       if (!(existingOnly && /no summary yet/.test(e.message))) summaryErr = String(e.message).slice(0, 200);
       return null;
     });
@@ -247,9 +267,9 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false, bg =
     fs.writeFileSync(htmlTmp, html);
     try {
       const boxes = shotPath && fs.existsSync(shotPath) ? await boxesFor(st.key, shotPath) : null;
-      return { shotPath, a: await runPrep({ fullshot: shotPath && fs.existsSync(shotPath) ? shotPath : null, boxes, mirror: path.join(dirOf(slug), 'mirror.json'),
+      return { shotPath, a: await LANES.analyze(() => runPrep({ fullshot: shotPath && fs.existsSync(shotPath) ? shotPath : null, boxes, mirror: path.join(dirOf(slug), 'mirror.json'),
         slices: slices.map((s) => ({ text: s.text })), html: htmlTmp, medium: 'shopee_lazada',
-        fontsCss: `http://127.0.0.1:${process.env.PORT || 3001}/css/fonts.css`, sliceWidth: slices[0].w }) };
+        fontsCss: `http://127.0.0.1:${process.env.PORT || 3001}/css/fonts.css`, sliceWidth: slices[0].w }), !bg) };
     } finally { fs.rmSync(htmlTmp, { force: true }); }
   };
   step('fullshot-check');
@@ -259,7 +279,7 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false, bg =
     skipped = !gate;
     let tried = false;   // 실제로 새로 찍었는지 (있는 캡처를 그대로 쓰면 풀렸는지 알 수 없다)
     const stp = (x) => { if (x === 'fullshot') tried = true; step(x); };
-    try { st = await fullshot(sum.url, re && !skipped, stp, (existingOnly && !re) || skipped, bg); fsErr = ''; } catch (e) { fsErr = String(e.message).slice(0, 200); tried = true; }
+    try { st = await LANES.capture(() => fullshot(sum.url, re && !skipped, stp, (existingOnly && !re) || skipped, bg), !bg); fsErr = ''; } catch (e) { fsErr = String(e.message).slice(0, 200); tried = true; }
     if (st && st.status === 'none') fsErr = skipped ? 'lg.com 이 막는 중 — 나중에 채움' : existingOnly ? 'not captured yet' : 'no capture';
     if (st && (st.status === 'error' || st.status === 'gone')) fsErr = String(st.error || 'capture failed').slice(0, 200);
     if (gate && bg && !existingOnly) {
@@ -423,6 +443,7 @@ require('./drain').register({ name: 'review', pause: () => { paused = true; }, b
 function queueStats() {
   return { queued: queue.length, queuedBg: queue.filter((q) => q.bg).length, running, runningBg, prewarm: PREWARM ? [...PREWARM_COUNTRIES] : [],
     mode: PREWARM_EXISTING_ONLY ? 'existing' : 'full', conc: BG_CONC,
+    lanes: Object.fromEntries(Object.entries(LANES).map(([k, l]) => [k, l.stats()])),
     captureBlockedUntil: captureBlocked() ? breaker.until : 0, captureBlockTrips: breaker.trips };
 }
 
