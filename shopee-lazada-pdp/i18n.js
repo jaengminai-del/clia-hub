@@ -71,6 +71,8 @@ CLIA_I18N.init({
   'Cloning...': { de: 'Wird geklont...', th: 'กำลังคัดลอก...', ar: 'جارٍ النسخ...' },
   // 크롤 실패 안내 (2026-11-24)
   "✕ Couldn't crawl this page": { de: "✕ Diese Seite konnte nicht gecrawlt werden", th: "✕ ครอว์ลหน้านี้ไม่สำเร็จ", ar: "✕ تعذّر زحف هذه الصفحة" },
+  'OK': { de: 'OK', th: 'ตกลง', ar: 'حسنًا' },
+  "Couldn't crawl this page": { de: "Diese Seite konnte nicht gecrawlt werden", th: "ครอว์ลหน้านี้ไม่สำเร็จ", ar: "تعذّر زحف هذه الصفحة" },
   "Reference #{r}": { de: "Referenz #{r}", th: "หมายเลขอ้างอิง #{r}", ar: "المرجع #{r}" },
   "This address did not open an LG.com product page. Check that it is a product page (not a home or category page) and try again.": { de: "Diese Adresse hat keine LG.com-Produktseite geöffnet. Prüfen Sie, ob es eine Produktseite ist (keine Start- oder Kategorieseite), und versuchen Sie es erneut.", th: "ที่อยู่นี้ไม่ได้เปิดหน้าสินค้าของ LG.com โปรดตรวจสอบว่าเป็นหน้าสินค้า (ไม่ใช่หน้าแรกหรือหน้าหมวดหมู่) แล้วลองอีกครั้ง", ar: "لم يفتح هذا العنوان صفحة منتج على LG.com. تأكد أنها صفحة منتج (وليست الصفحة الرئيسية أو صفحة فئة) ثم حاول مرة أخرى." },
   "LG.com did not respond. Please try again in a few minutes.": { de: "LG.com hat nicht geantwortet. Bitte versuchen Sie es in ein paar Minuten erneut.", th: "LG.com ไม่ตอบสนอง โปรดลองอีกครั้งในอีกสักครู่", ar: "لم يستجب موقع LG.com. يرجى المحاولة بعد بضع دقائق." },

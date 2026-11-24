@@ -2462,7 +2462,7 @@ function sel(id){
     }
   }
   if(!p){alert('Product not found: '+id);return;}
-  if(p._lazy){hydrateCrawled(p).then(()=>{if(selId===id)sel(id);}).catch(e=>alert(t('crawl.failed')+e.message));return;}
+  if(p._lazy){hydrateCrawled(p).then(()=>{if(selId===id)sel(id);}).catch(e=>showCrawlError(e,p.url));return;}
   if(p.md){showMarkdown(p);return;}
   if(!p.crawled){showPending(p);return;}
   showDetail(p);
@@ -6873,9 +6873,12 @@ const CRAWLER_API = /^https?:$/.test(location.protocol) ? location.origin : 'htt
 function cleanCrawlUrl(u){try{const x=new URL(String(u).trim());x.hash='';for(const k of [...x.searchParams.keys()])if(/^(utm_[a-z_]+|srsltid|gclid|gbraid|wbraid|dclid|fbclid|msclkid|yclid|igshid|mc_cid|mc_eid|_ga|_gl|_hsenc|_hsmi)$/i.test(k))x.searchParams.delete(k);return x.toString().replace(/\?$/,'');}catch(_){return String(u||'').trim();}}
 // 크롤 실패 알림: 쉬운 말 + 문의 번호 (기술 내용은 서버 로그 '[crawl] 실패 #번호'에만)
 const crawlErr=(code,ref)=>Object.assign(new Error(code),{crawlCode:code,crawlRef:ref||''});
-function showCrawlError(e,url){
+// msg 를 주면 그 문구 (예: 잘못된 주소), 아니면 실패 이유 코드의 쉬운 말
+function showCrawlError(e,url,msgText){
   const code=e&&e.crawlCode?e.crawlCode:(/fetch|network|load failed/i.test(String(e&&e.message))?'network':'unknown');
-  const key='crawl.err.'+code,msg=I18N.en[key]!=null?t(key):t('crawl.err.unknown');
+  const key='crawl.err.'+code,msg=msgText||(I18N.en[key]!=null?t(key):t('crawl.err.unknown'));
+  if(!msgText)console.warn('[crawl] 실패',code,e&&e.crawlRef?'#'+e.crawlRef:'',e&&e.message);   // 기술 내용은 콘솔에만
+  document.querySelectorAll('.cerr-ov').forEach(x=>x.remove());   // 팝업은 한 번에 하나
   const ov=document.createElement('div');ov.className='cerr-ov';ov.setAttribute('role','alertdialog');
   ov.innerHTML='<div class="cerr-card"><h3></h3><div class="msg"></div><div class="url"></div><div class="ref"></div><button type="button"></button><div style="clear:both"></div></div>';
   ov.querySelector('h3').textContent=t('crawl.errTitle');ov.querySelector('.msg').textContent=msg;
@@ -7028,7 +7031,7 @@ function hideCoffee(){clearInterval(_coffeeTimer);document.getElementById('coffe
 async function crawlNewUrl(){
   const inp=document.getElementById('newCrawlUrl'),btn=document.getElementById('newCrawlBtn');
   const url=cleanCrawlUrl(inp.value);
-  if(!/^https?:\/\/(www\.)?lg\.com\//i.test(url)){alert(t('crawl.invalid'));return;}
+  if(!/^https?:\/\/(www\.)?lg\.com\//i.test(url)){showCrawlError(null,url,t('crawl.invalid'));return;}
   const m=/lg\.com\/([a-z]{2})/i.exec(url),uc=m?corpOfCountry(m[1]):'';
   if(uc&&uc!==CORP&&!confirm(t('crawl.otherCorp',{c:uc.toUpperCase()})))return;
   btn.disabled=true;showCoffee();
