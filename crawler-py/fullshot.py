@@ -131,9 +131,11 @@ def capture_firecrawl(url: str, out: Path, width: int = 960, quality: int = 80) 
     actions = [{"type": "wait", "milliseconds": 1500}]
     # 지연 로드 이미지: 끝까지 천천히 내린다. 6번(한 화면씩)으로는 긴 PDP 의 기능 섹션이 안 찍혔다
     # (2026-11-24 검토 화면 TH ISC10E 등 — 캡처 3,466px 에 스펙만 남음) → 24번
-    for _ in range(24):
+    # Firecrawl 은 동작(actions)을 50개까지만 받는다 (넘으면 BAD_REQUEST — 2026-11-24 운영: 24번 내리기 = 51개로 모든 Firecrawl 캡처 실패)
+    for _ in range(23):
         actions += [{"type": "scroll", "direction": "down"}, {"type": "wait", "milliseconds": 350}]
     actions += [{"type": "executeJavascript", "script": "window.scrollTo(0,0);"}, {"type": "wait", "milliseconds": 1000}]
+    actions = actions[:48] + actions[-2:] if len(actions) > 50 else actions
     r = requests.post("https://api.firecrawl.dev/v1/scrape", headers={"Authorization": f"Bearer {key}"}, timeout=180,
                       json={"url": url, "formats": ["screenshot@fullPage"], "onlyMainContent": False,
                             "waitFor": 3000, "timeout": 120000, "actions": actions})

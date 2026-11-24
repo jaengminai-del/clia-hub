@@ -150,7 +150,7 @@ async function fullshot(url, recapture, step, existingOnly = false, via = '') { 
 const BLOCK_MS = (parseInt(process.env.REVIEW_CAPTURE_BLOCK_MINUTES, 10) || 30) * 60 * 1000;
 const FIRECRAWL_FALLBACK = process.env.REVIEW_FIRECRAWL_FALLBACK !== '0';
 const breaker = { until: 0, probing: false, trips: 0, streak: 0 };   // streak: 서로 다른 제품에서 연달아 막힌 수 (2번이면 쉼)
-const isTransientErr = (m) => /thread|crash|has been closed|Target |Timeout|timed out|ECONN|EAGAIN|ENOMEM|exit \d|SIGKILL|socket hang up|fetch failed|KeyboardInterrupt|Chromium|Command failed|worker exited/i.test(String(m || ''));
+const isTransientErr = (m) => /thread|crash|has been closed|Target |Timeout|timed out|ECONN|EAGAIN|ENOMEM|exit \d|SIGKILL|socket hang up|fetch failed|KeyboardInterrupt|Chromium|Command failed|worker exited|context was destroyed|exit null/i.test(String(m || ''));
 const isBlockErr = (m) => /막음|막는 중|blocked|stylesheet|\b403\b|access denied/i.test(String(m || ''));
 function captureGate() {   // 미리 준비만: false = 건너뜀, 'probe' = 풀렸는지 시험하는 한 건, true = 찍음
   if (Date.now() < breaker.until || breaker.probing) return false;
@@ -405,7 +405,11 @@ function prewarm() {
       // 캡처를 비워 두고 준비한 것(lg.com 이 막던 때) — 차단이 풀렸으면 다시 (1시간 지난 것만, 한 번 훑을 때 최대 40개)
       // 일시 오류(브라우저 · 스레드 부족 · 시간 초과)로 캡처 없이 준비된 것은 5분 뒤에 (2026-11-24 운영: 동시 실행이 많아 「can't start new thread」 · 「Target crashed」)
       const transient = rec && ((!rec.shot && isTransientErr(rec.shotErr)) || (rec.shot && !rec.align && isTransientErr(rec.alignErr)));
-      const refill = state === 'ready' && !PREWARM_EXISTING_ONLY && rec && (transient || (!rec.shot && (isBlockErr(rec.shotErr) || movedBack(rec)))) && !captureBlocked() && refills < 40
+      // 막힌 동안에도 채운다 — 차단기가 열려 있으면 준비가 바로 Firecrawl 로 찍는다 (REVIEW_FIRECRAWL_FALLBACK)
+      // 요약이 예전 규칙으로 실패한 것도 다시 (규칙이 바뀌면 서버가 새로 만든다 — 같은 규칙으로 실패한 것은 서버가 24시간 기억해 바로 돌려줌)
+      const sumRetry = rec && /rule not met/.test(rec.summaryErr || '');
+      const refill = state === 'ready' && !PREWARM_EXISTING_ONLY && rec && (transient || sumRetry || (!rec.shot && (isBlockErr(rec.shotErr) || movedBack(rec) || /Firecrawl 캡처 실패/.test(rec.shotErr || ''))))
+        && (FIRECRAWL_FALLBACK || !captureBlocked()) && refills < 40
         && Date.now() - (rec.prepared_at || 0) > (transient ? 5 : 60) * 60 * 1000;
       if (state === 'none' || state === 'stale' || state === 'error' || refill) {
         enqueue(p.slug, ch, { existingOnly: PREWARM_EXISTING_ONLY }, true); n++;
