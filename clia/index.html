@@ -864,6 +864,15 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 .list-warn{font-size:10px;color:#E65100;background:#FFF3E0;border:1px solid #FFE0B2;border-radius:4px;padding:4px 8px;margin-top:6px;display:none;width:100%;}
 .coffee-ov{position:fixed;inset:0;background:rgba(17,17,17,.55);display:none;align-items:center;justify-content:center;z-index:99999;backdrop-filter:blur(3px);}
 .coffee-ov.show{display:flex;}
+/* 크롤 실패 알림 (2026-11-24): 브라우저 alert(제목이 늘 사이트 주소) 대신 화면 안에 — 무엇이 · 왜 · 다음에 할 일 · 문의 번호 */
+.cerr-ov{position:fixed;inset:0;background:rgba(17,17,17,.45);display:flex;align-items:center;justify-content:center;z-index:99999;}
+.cerr-card{background:#fff;border-radius:18px;padding:26px 28px 22px;width:min(460px,92vw);box-shadow:0 24px 64px rgba(0,0,0,.25);font-family:'LGEIText',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;}
+.cerr-card h3{margin:0 0 10px;font-size:18px;color:#111;}
+.cerr-card .msg{font-size:14px;line-height:1.55;color:#333;}
+.cerr-card .url{margin-top:10px;font-size:12px;color:#888;word-break:break-all;}
+.cerr-card .ref{margin-top:12px;font-size:12px;color:#666;}
+.cerr-card .ref b{color:#111;font-family:ui-monospace,Menlo,monospace;}
+.cerr-card button{margin-top:18px;float:right;height:38px;padding:0 22px;border:0;border-radius:999px;background:#EA1917;color:#fff;font-weight:700;font-size:14px;cursor:pointer;}
 .coffee-card{background:#fff;border-radius:24px;padding:36px 40px 28px;width:min(440px,92vw);text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.25);font-family:'LGEIText',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;}
 .coffee-cup{position:relative;width:120px;height:120px;margin:0 auto 12px;}
 .coffee-steam{position:absolute;bottom:72px;width:10px;height:34px;border-radius:10px;background:linear-gradient(to top,rgba(160,140,120,.55),rgba(160,140,120,0));filter:blur(2px);opacity:0;animation:coffee-steam 2.6s ease-in-out infinite;}
@@ -1068,7 +1077,7 @@ const I18N={en:{
   'crawl.btn':'Crawl',
   'crawl.invalid':'Please enter an LG.com product page URL.',
   'crawl.otherCorp':'This URL belongs to another country site ({c}). It will be saved under that country and will not appear in this list. Continue?',
-  'crawl.failed':'Crawling failed: ','list.delete':'Delete crawled data','list.deleteConfirm':'Delete the crawled data of {m}?\n{u}\n\nYou can crawl this URL again afterwards.','list.deleteFail':'Delete failed: ',
+  'crawl.failed':'Crawling failed: ',"crawl.errTitle":"Couldn't crawl this page","crawl.errRef":"Reference #{r} — share this number if you contact the administrator.","crawl.errOk":"OK","crawl.err.not_product":"This address did not open an LG.com product page. Check that it is a product page (not a home or category page) and try again.","crawl.err.unreachable":"LG.com did not respond. Please try again in a few minutes.","crawl.err.busy":"The analysis service is busy. Please try again in a few minutes.","crawl.err.incomplete":"This page is very long and the analysis did not finish. Please try again.","crawl.err.declined":"This page could not be analyzed automatically.","crawl.err.stopped":"The crawl stopped midway. Please try again.","crawl.err.setup":"Crawling is not available right now. Please contact the administrator.","crawl.err.network":"Could not reach the CLIA server. Check your connection and try again.","crawl.err.unknown":"Something went wrong while crawling. Please try again.",'list.delete':'Delete crawled data','list.deleteConfirm':'Delete the crawled data of {m}?\n{u}\n\nYou can crawl this URL again afterwards.','list.deleteFail':'Delete failed: ',
   'crawl.done':'Crawling complete',
   // 크롤 진행 단계 (progress.json step 코드)
   'crawl.step.queued':'Queued…','crawl.step.init':'Preparing…','crawl.step.fetch':'Collecting the LG.com product page…','crawl.step.fetched':'Product page collected','crawl.step.parse':'Reading page components and layout…','crawl.step.build':'Building content data…','crawl.step.done':'Analysis complete','crawl.step.screenshot':'Capturing page screenshots…','crawl.step.prepare':'Preparing AI analysis…','crawl.step.ai':'AI is analysing the page layout…','crawl.step.qa':'Checking the analysis result…','crawl.step.working':'Crawling…','ebb.crawling':'Running CLIA Crawler… (new URL about 1 minute, cached URL instant)','ebb.crawlPct':'Crawling {pct}% — {step}','ebb.rendering':'Rendering CCG design…','ebb.serverFail':'Cannot connect to the server. Start server.js first.',
@@ -1098,7 +1107,7 @@ I18N.de={
   'coffee.queued':'In Warteschlange…','crawl.placeholder':'🔗 LG.com-Produkt-URL','crawl.btn':'Crawlen',
   'crawl.invalid':'Bitte geben Sie die URL einer LG.com-Produktseite ein.',
   'crawl.otherCorp':'Diese URL gehört zu einer anderen Länderseite ({c}). Sie wird unter diesem Land gespeichert und erscheint nicht in dieser Liste. Fortfahren?',
-  'crawl.failed':'Crawlen fehlgeschlagen: ','list.delete':'Crawl-Daten löschen','list.deleteConfirm':'Crawl-Daten von {m} löschen?\n{u}\n\nDanach kannst du diese URL erneut crawlen.','list.deleteFail':'Löschen fehlgeschlagen: ','crawl.done':'Crawlen abgeschlossen',
+  'crawl.failed':'Crawlen fehlgeschlagen: ',"crawl.errTitle":"Diese Seite konnte nicht gecrawlt werden","crawl.errRef":"Referenz #{r} — nennen Sie diese Nummer, wenn Sie den Administrator kontaktieren.","crawl.errOk":"OK","crawl.err.not_product":"Diese Adresse hat keine LG.com-Produktseite geöffnet. Prüfen Sie, ob es eine Produktseite ist (keine Start- oder Kategorieseite), und versuchen Sie es erneut.","crawl.err.unreachable":"LG.com hat nicht geantwortet. Bitte versuchen Sie es in ein paar Minuten erneut.","crawl.err.busy":"Der Analysedienst ist ausgelastet. Bitte versuchen Sie es in ein paar Minuten erneut.","crawl.err.incomplete":"Diese Seite ist sehr lang und die Analyse wurde nicht fertig. Bitte versuchen Sie es erneut.","crawl.err.declined":"Diese Seite konnte nicht automatisch analysiert werden.","crawl.err.stopped":"Das Crawlen wurde unterbrochen. Bitte versuchen Sie es erneut.","crawl.err.setup":"Crawlen ist gerade nicht verfügbar. Bitte wenden Sie sich an den Administrator.","crawl.err.network":"Der CLIA-Server ist nicht erreichbar. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.","crawl.err.unknown":"Beim Crawlen ist etwas schiefgelaufen. Bitte versuchen Sie es erneut.",'list.delete':'Crawl-Daten löschen','list.deleteConfirm':'Crawl-Daten von {m} löschen?\n{u}\n\nDanach kannst du diese URL erneut crawlen.','list.deleteFail':'Löschen fehlgeschlagen: ','crawl.done':'Crawlen abgeschlossen',
   // 크롤 진행 단계 (progress.json step 코드)
   'crawl.step.queued':'In Warteschlange…','crawl.step.init':'Wird vorbereitet…','crawl.step.fetch':'LG.com-Produktseite wird abgerufen…','crawl.step.fetched':'Produktseite abgerufen','crawl.step.parse':'Seitenkomponenten und Layout werden gelesen…','crawl.step.build':'Content-Daten werden erstellt…','crawl.step.done':'Analyse abgeschlossen','crawl.step.screenshot':'Screenshots der Seite werden erstellt…','crawl.step.prepare':'KI-Analyse wird vorbereitet…','crawl.step.ai':'KI analysiert das Seitenlayout…','crawl.step.qa':'Analyseergebnis wird geprüft…','crawl.step.working':'Crawlen läuft…','ebb.crawling':'CLIA Crawler läuft… (neue URL ca. 1 Minute, gespeicherte URL sofort)','ebb.crawlPct':'Crawlen {pct}% — {step}','ebb.rendering':'CCG-Design wird gerendert…','ebb.serverFail':'Keine Verbindung zum Server. Starten Sie zuerst server.js.',
   'list.serverDown':'Der Crawler-Server (localhost:3001) antwortet nicht — gecrawlte Produkte können nicht geladen werden.',
@@ -1124,7 +1133,7 @@ I18N.th={
   'coffee.queued':'อยู่ในคิว…','crawl.placeholder':'🔗 URL สินค้า LG.com','crawl.btn':'ครอว์ล',
   'crawl.invalid':'กรุณากรอก URL หน้าสินค้าของ LG.com',
   'crawl.otherCorp':'URL นี้เป็นของเว็บไซต์ประเทศอื่น ({c}) ระบบจะบันทึกไว้ในประเทศนั้นและจะไม่แสดงในรายการนี้ ดำเนินการต่อหรือไม่?',
-  'crawl.failed':'ครอว์ลไม่สำเร็จ: ','crawl.done':'ครอว์ลเสร็จสมบูรณ์',
+  'crawl.failed':'ครอว์ลไม่สำเร็จ: ',"crawl.errTitle":"ครอว์ลหน้านี้ไม่สำเร็จ","crawl.errRef":"หมายเลขอ้างอิง #{r} — แจ้งหมายเลขนี้เมื่อติดต่อผู้ดูแลระบบ","crawl.errOk":"ตกลง","crawl.err.not_product":"ที่อยู่นี้ไม่ได้เปิดหน้าสินค้าของ LG.com โปรดตรวจสอบว่าเป็นหน้าสินค้า (ไม่ใช่หน้าแรกหรือหน้าหมวดหมู่) แล้วลองอีกครั้ง","crawl.err.unreachable":"LG.com ไม่ตอบสนอง โปรดลองอีกครั้งในอีกสักครู่","crawl.err.busy":"บริการวิเคราะห์กำลังยุ่ง โปรดลองอีกครั้งในอีกสักครู่","crawl.err.incomplete":"หน้านี้ยาวมากและการวิเคราะห์ยังไม่เสร็จ โปรดลองอีกครั้ง","crawl.err.declined":"ไม่สามารถวิเคราะห์หน้านี้โดยอัตโนมัติได้","crawl.err.stopped":"การครอว์ลหยุดกลางคัน โปรดลองอีกครั้ง","crawl.err.setup":"ขณะนี้ยังใช้การครอว์ลไม่ได้ โปรดติดต่อผู้ดูแลระบบ","crawl.err.network":"เชื่อมต่อเซิร์ฟเวอร์ CLIA ไม่ได้ โปรดตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง","crawl.err.unknown":"เกิดข้อผิดพลาดระหว่างครอว์ล โปรดลองอีกครั้ง",'crawl.done':'ครอว์ลเสร็จสมบูรณ์',
   // 크롤 진행 단계 (progress.json step 코드)
   'crawl.step.queued':'อยู่ในคิว…','crawl.step.init':'กำลังเตรียมการ…','crawl.step.fetch':'กำลังดึงหน้าสินค้า LG.com…','crawl.step.fetched':'ดึงหน้าสินค้าเรียบร้อย','crawl.step.parse':'กำลังอ่านคอมโพเนนต์และเลย์เอาต์ของหน้า…','crawl.step.build':'กำลังสร้างข้อมูลคอนเทนต์…','crawl.step.done':'วิเคราะห์เสร็จสมบูรณ์','crawl.step.screenshot':'กำลังจับภาพหน้าจอของหน้า…','crawl.step.prepare':'กำลังเตรียมการวิเคราะห์ด้วย AI…','crawl.step.ai':'AI กำลังวิเคราะห์เลย์เอาต์ของหน้า…','crawl.step.qa':'กำลังตรวจสอบผลการวิเคราะห์…','crawl.step.working':'กำลังครอว์ล…','ebb.crawling':'กำลังรัน CLIA Crawler… (URL ใหม่ประมาณ 1 นาที, URL ที่บันทึกไว้แสดงทันที)','ebb.crawlPct':'ครอว์ล {pct}% — {step}','ebb.rendering':'กำลังเรนเดอร์ดีไซน์ CCG…','ebb.serverFail':'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาเริ่ม server.js ก่อน',
   'list.serverDown':'เซิร์ฟเวอร์ครอว์เลอร์ (localhost:3001) ไม่ตอบสนอง — ไม่สามารถโหลดสินค้าที่ครอว์ลไว้ได้',
@@ -1150,7 +1159,7 @@ I18N.ar={
   'coffee.queued':'في قائمة الانتظار…','crawl.placeholder':'🔗 رابط منتج LG.com','crawl.btn':'زحف',
   'crawl.invalid':'يرجى إدخال رابط صفحة منتج على LG.com.',
   'crawl.otherCorp':'هذا الرابط تابع لموقع دولة أخرى ({c}). سيتم حفظه ضمن تلك الدولة ولن يظهر في هذه القائمة. هل تريد المتابعة؟',
-  'crawl.failed':'فشل الزحف: ','crawl.done':'اكتمل الزحف',
+  'crawl.failed':'فشل الزحف: ',"crawl.errTitle":"تعذّر زحف هذه الصفحة","crawl.errRef":"المرجع #{r} — اذكر هذا الرقم عند التواصل مع المسؤول.","crawl.errOk":"حسنًا","crawl.err.not_product":"لم يفتح هذا العنوان صفحة منتج على LG.com. تأكد أنها صفحة منتج (وليست الصفحة الرئيسية أو صفحة فئة) ثم حاول مرة أخرى.","crawl.err.unreachable":"لم يستجب موقع LG.com. يرجى المحاولة بعد بضع دقائق.","crawl.err.busy":"خدمة التحليل مشغولة. يرجى المحاولة بعد بضع دقائق.","crawl.err.incomplete":"هذه الصفحة طويلة جدًا ولم يكتمل التحليل. يرجى المحاولة مرة أخرى.","crawl.err.declined":"تعذّر تحليل هذه الصفحة تلقائيًا.","crawl.err.stopped":"توقف الزحف في منتصفه. يرجى المحاولة مرة أخرى.","crawl.err.setup":"الزحف غير متاح الآن. يرجى التواصل مع المسؤول.","crawl.err.network":"تعذّر الوصول إلى خادم CLIA. تحقق من الاتصال وحاول مرة أخرى.","crawl.err.unknown":"حدث خطأ أثناء الزحف. يرجى المحاولة مرة أخرى.",'crawl.done':'اكتمل الزحف',
   // 크롤 진행 단계 (progress.json step 코드)
   'crawl.step.queued':'في قائمة الانتظار…','crawl.step.init':'جارٍ التحضير…','crawl.step.fetch':'جارٍ جمع صفحة المنتج من LG.com…','crawl.step.fetched':'تم جمع صفحة المنتج','crawl.step.parse':'جارٍ قراءة مكونات الصفحة وتخطيطها…','crawl.step.build':'جارٍ إنشاء بيانات المحتوى…','crawl.step.done':'اكتمل التحليل','crawl.step.screenshot':'جارٍ التقاط لقطات شاشة للصفحة…','crawl.step.prepare':'جارٍ التحضير لتحليل الذكاء الاصطناعي…','crawl.step.ai':'يقوم الذكاء الاصطناعي بتحليل تخطيط الصفحة…','crawl.step.qa':'جارٍ التحقق من نتيجة التحليل…','crawl.step.working':'جارٍ الزحف…','ebb.crawling':'جارٍ تشغيل CLIA Crawler… (الرابط الجديد حوالي دقيقة واحدة، والرابط المحفوظ فورًا)','ebb.crawlPct':'الزحف {pct}% — {step}','ebb.rendering':'جارٍ عرض تصميم CCG…','ebb.serverFail':'تعذّر الاتصال بالخادم. شغّل server.js أولاً.',
   'list.serverDown':'خادم الزاحف (localhost:3001) لا يستجيب — لا يمكن تحميل المنتجات التي تم الزحف إليها.',
@@ -6860,24 +6869,42 @@ const CRAWLER_API = /^https?:$/.test(location.protocol) ? location.origin : 'htt
 
 // 크롤 등록 → 완료까지 폴링. onProgress(percent, message, step). 캐시된 URL은 즉시 반환.
 // step(단계 코드)은 crawlStepText()로 법인 언어 문구로 바꿔 보여준다 — message는 한국어 로그용.
+// 주소 뒤 추적값(?srsltid= · utm_* · gclid …)과 #뒤는 뗀다 — 붙은 채로 크롤하면 같은 제품이 따로 저장된다 (서버도 같은 규칙)
+function cleanCrawlUrl(u){try{const x=new URL(String(u).trim());x.hash='';for(const k of [...x.searchParams.keys()])if(/^(utm_[a-z_]+|srsltid|gclid|gbraid|wbraid|dclid|fbclid|msclkid|yclid|igshid|mc_cid|mc_eid|_ga|_gl|_hsenc|_hsmi)$/i.test(k))x.searchParams.delete(k);return x.toString().replace(/\?$/,'');}catch(_){return String(u||'').trim();}}
+// 크롤 실패 알림: 쉬운 말 + 문의 번호 (기술 내용은 서버 로그 '[crawl] 실패 #번호'에만)
+const crawlErr=(code,ref)=>Object.assign(new Error(code),{crawlCode:code,crawlRef:ref||''});
+function showCrawlError(e,url){
+  const code=e&&e.crawlCode?e.crawlCode:(/fetch|network|load failed/i.test(String(e&&e.message))?'network':'unknown');
+  const key='crawl.err.'+code,msg=I18N.en[key]!=null?t(key):t('crawl.err.unknown');
+  const ov=document.createElement('div');ov.className='cerr-ov';ov.setAttribute('role','alertdialog');
+  ov.innerHTML='<div class="cerr-card"><h3></h3><div class="msg"></div><div class="url"></div><div class="ref"></div><button type="button"></button><div style="clear:both"></div></div>';
+  ov.querySelector('h3').textContent=t('crawl.errTitle');ov.querySelector('.msg').textContent=msg;
+  ov.querySelector('.url').textContent=url||'';
+  if(e&&e.crawlRef){const [a,b]=t('crawl.errRef').split('{r}');ov.querySelector('.ref').append(a,Object.assign(document.createElement('b'),{textContent:e.crawlRef}),b||'');}
+  const btn=ov.querySelector('button');btn.textContent=t('crawl.errOk');
+  const close=()=>{ov.remove();document.removeEventListener('keydown',esc);};const esc=(ev)=>{if(ev.key==='Escape')close();};
+  btn.onclick=close;ov.onclick=(ev)=>{if(ev.target===ov)close();};document.addEventListener('keydown',esc);
+  document.body.appendChild(ov);btn.focus();
+}
 async function crawlerRun(url, { force = false, onProgress } = {}) {
+  url = cleanCrawlUrl(url);
   const r = await fetch(CRAWLER_API + '/api/v1/crawl', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ url, force_refresh: force }),
   });
   const job = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(job.detail || ('HTTP ' + r.status));
+  if (!r.ok) throw crawlErr(r.status >= 500 ? 'unknown' : 'not_product');
   const deadline = Date.now() + 20 * 60 * 1000;   // 신규 크롤은 약 1분 (컴포넌트 구조가 부족한 예전 형식 페이지는 Gemini 분석으로 10~15분)
   while (Date.now() < deadline) {
     const sr = await fetch(CRAWLER_API + '/api/v1/jobs/' + job.job_id);
     const snap = await sr.json().catch(() => ({}));
-    if (!sr.ok) throw new Error(snap.detail || ('HTTP ' + sr.status));
+    if (!sr.ok) throw crawlErr('stopped');   // 서버가 재시작돼 작업을 잃었을 때 등
     if (snap.status === 'completed') return { jobId: job.job_id, result: snap.result, cached: !!job.cached };
-    if (snap.status === 'failed') throw new Error((snap.error || 'pipeline failed').slice(-300));
+    if (snap.status === 'failed') throw crawlErr(snap.code || 'unknown', snap.ref);
     if (onProgress) onProgress(snap.progress_percent || 0, snap.log_message || '', snap.step || '');
     await new Promise(res => setTimeout(res, 3000));
   }
-  throw new Error('crawl timeout (20분)');
+  throw crawlErr('stopped');
 }
 
 // 크롤러의 CCG 디자인(배경색·프레임·텍스트 스타일) 그대로 렌더한 eBay HTML fragment
@@ -7000,7 +7027,7 @@ function updateCoffee(pct,msg,step){document.getElementById('coffeeBar').style.w
 function hideCoffee(){clearInterval(_coffeeTimer);document.getElementById('coffeeOv').classList.remove('show');}
 async function crawlNewUrl(){
   const inp=document.getElementById('newCrawlUrl'),btn=document.getElementById('newCrawlBtn');
-  const url=inp.value.trim();
+  const url=cleanCrawlUrl(inp.value);
   if(!/^https?:\/\/(www\.)?lg\.com\//i.test(url)){alert(t('crawl.invalid'));return;}
   const m=/lg\.com\/([a-z]{2})/i.exec(url),uc=m?corpOfCountry(m[1]):'';
   if(uc&&uc!==CORP&&!confirm(t('crawl.otherCorp',{c:uc.toUpperCase()})))return;
@@ -7015,7 +7042,7 @@ async function crawlNewUrl(){
     const np=P.find(x=>x._slug&&norm(x.url)===norm(url));
     hideCoffee();
     if(np&&productCorp(np)===CORP)sel(np.id);
-  }catch(e){hideCoffee();alert(t('crawl.failed')+e.message);}
+  }catch(e){hideCoffee();showCrawlError(e,url);}
   finally{btn.disabled=false;}
 }
 
@@ -7036,7 +7063,7 @@ async function ensureCrawled(p){
     await geoAfterCrawl(p.url);
     hideCoffee();
     return p.url;
-  }catch(e){hideCoffee();alert(t('crawl.failed')+e.message);return null;}
+  }catch(e){hideCoffee();showCrawlError(e,p.url);return null;}
 }
 async function openChannel(ch,pid){
   const p=P.find(x=>x.id===pid);
