@@ -253,7 +253,8 @@
   // SKU 번호가 비어 있는 행: SKU 번호 칸 (엑셀 SKU 칸에 적는다 · 그 SKU 로 LG.com 제품도 찾는다)
   const skuInput = (r) => `<input type="text" class="skuin" autocomplete="off" spellcheck="false" data-skurow="${r.row}" value="${esc(S.skuIn[r.row] || '')}" placeholder="${esc(t('skuPh'))}" aria-label="${esc(t('skuPh'))} — ${esc(r.name)}">`;
   // 표 (2026-11-24): 제품(SKU · 상품명) · 확인 필요 내용(이유) · Next step(주소 칸 / 후보 / 등록하고 채우기 / 그대로 둠)
-  const prodCell = (r) => `<span class="pd">${skuCell(r)}<span class="n" title="${esc(r.name)}">${esc(r.name)}</span></span>`;
+  // SKU · 상품명(엑셀 상품명 칸, 두 줄까지) 을 따로 칸으로 (2026-11-24)
+  const prodCell = (r) => `${skuCell(r)}<span class="n" title="${esc(r.name)}">${esc(r.name)}</span>`;
   const whyCell = (g) => `<span class="sw2">${esc(t(g))}${g === 'gNoSku' ? `<i>${esc(skuColName())}</i>` : ''}</span>`;
   function skuColName() {
     const ci = S.data.cols.parentSku || S.data.cols.sku, cc = (S.data.columns || []).find((c) => c.col === ci);
@@ -298,7 +299,7 @@
     const chips = `<div class="schips" role="tablist">${gs.map((x) => `<button type="button" class="schip${x === g ? ' on' : ''}" role="tab" aria-selected="${x === g}" data-g="${x}">` +
       `${esc(t(x))}<b>${by[x].open.length + half(x)}</b>${by[x].done.length - half(x) ? `<i>✓${by[x].done.length - half(x)}</i>` : ''}</button>`).join('')}</div>`;
     const { open, done } = by[g];
-    return chips + `<div class="shead"><span>${esc(t('hdProduct'))}</span><span>${esc(t('hdStatus'))}</span><span class="hn">${esc(t('hdAction'))}</span></div>` +
+    return chips + `<div class="shead"><span>SKU</span><span>${esc(t('hdName'))}</span><span>${esc(t('hdStatus'))}</span><span class="hn">${esc(t('hdAction'))}</span></div>` +
       `<div class="sgrows">${open.map((r) => skipRowHtml(r, g)).join('')}${done.map(([f, now]) => fixedRowHtml(f, now)).join('')}</div>`;
   }
   // 해결한 뒤: 다음 빈 주소 칸으로 (없으면 그대로)
