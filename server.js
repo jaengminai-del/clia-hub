@@ -2688,6 +2688,8 @@ const summaryJobs = new Map();   // slug → Promise (같은 제품 동시 요�
 app.post('/api/v1/pdp-summary', async (req, res) => {
   const path = require('path'), fs = require('fs');
   const { url, refresh = false } = req.body || {};
+  // cachedOnly: 이미 만든 요약만 (없으면 404 — 새로 만들지 않는다. 벌크 상세 패널 미리보기용, 2026-11-24)
+  const cachedOnly = !!(req.body || {}).cachedOnly;
   if (!isLgUrl(url)) return res.status(400).json({ error: 'LG.com url required' });
   // 모델 지정은 배치(내보내기 토큰)만 — 화면 요청은 서버 기본(SUMMARY_MODEL → CLAUDE_MODEL)
   const tok = (process.env.EXPORT_TOKEN || '').trim();
@@ -2695,6 +2697,7 @@ app.post('/api/v1/pdp-summary', async (req, res) => {
   const slug = url.replace(/https?:\/\//, '').replace(/[^\w]+/g, '-').replace(/-+$/, '');
   const slugDir = path.join(__dirname, 'crawler-py', 'out', slug);
   if (!fs.existsSync(path.join(slugDir, 'mirror.json'))) return res.status(404).json({ error: 'no crawl for this URL — crawl it first' });
+  if (cachedOnly && (refresh || !fs.existsSync(path.join(slugDir, 'summary.json')))) return res.status(404).json({ error: 'no summary yet', code: 'none' });
   const key = slug + (refresh ? '|refresh' : '') + (model ? '|' + model : '');
   let job = summaryJobs.get(key);
   if (!job) {

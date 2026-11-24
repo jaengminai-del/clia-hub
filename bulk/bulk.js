@@ -454,7 +454,7 @@
 
   // ── 한 건 상세 (2026-11-24): 행을 누르면 오른쪽 패널 — 엑셀 정보 · 매칭된 LG.com 제품 · 확인 필요 · 엑셀에 들어갈 설명.
   //    설명은 끝난 작업이면 결과 엑셀의 그 칸 그대로 (/api/v1/bulk/jobs/:job/cell), 아니면 '내보내면 만들어짐'
-  const DW = { row: null, cells: {} };
+  const DW = { row: null, idx: 0, cells: {} };
   const visRows = () => [...document.querySelectorAll('#list .item:not(.hidden)')].map((x) => +(x.dataset.r || x.dataset.nm));
   function openDetail(row) {
     DW.row = row;
@@ -472,9 +472,11 @@
     document.querySelectorAll('#list .item.cur').forEach((x) => x.classList.remove('cur'));
   }
   function stepDetail(d) {
+    // 보던 행이 할 일(문제없음 · 다시 가져오기 등)로 지금 탭에서 빠졌으면, 그 자리에 들어온 행부터 이어서
     const vs = visRows(), i = vs.indexOf(DW.row);
-    if (i >= 0 && vs[i + d] != null) {
-      openDetail(vs[i + d]);
+    const to = i >= 0 ? vs[i + d] : vs[d > 0 ? DW.idx : DW.idx - 1];
+    if (to != null) {
+      openDetail(to);
       const el = document.querySelector(`#list .item.cur`);
       if (el) el.scrollIntoView({ block: 'nearest' });
     }
@@ -492,8 +494,10 @@
     if (!r) { closeDetail(); return; }
     const it = itemOf(row), rvRow = a && openFlags(row).length;
     const vs = visRows(), i = vs.indexOf(row);
-    $('dwPrev').disabled = i <= 0; $('dwNext').disabled = i < 0 || i >= vs.length - 1;
-    $('dwPos').textContent = i >= 0 ? `${i + 1} / ${vs.length}` : '';
+    if (i >= 0) DW.idx = i;
+    $('dwPrev').disabled = i >= 0 ? i <= 0 : DW.idx <= 0;
+    $('dwNext').disabled = i >= 0 ? i >= vs.length - 1 : DW.idx >= vs.length;
+    $('dwPos').textContent = i >= 0 ? `${i + 1} / ${vs.length}` : `– / ${vs.length}`;
     $('dwIncW').classList.toggle('hidden', !a);
     $('dwInc').checked = S.sel.has(row); $('dwInc').disabled = S.busy;
     const p = a ? r.p : {};
@@ -533,8 +537,10 @@
       else out = cellHtml(c);
       if (it.edited) out = `<div class="dw-note">${esc(t('dwEdited'))}</div>` + out;
     } else if (inJob && ['queued', 'crawling', 'working'].includes(it.status)) out = `<div class="dw-empty">${esc(t('dwOutRun'))}</div>`;
+    else if (p.url && !p.isNew && !p.isBundle) out = previewHtml(p.url);   // CLIA 에 있는 제품: 내보내기 전 미리보기
     else out = `<div class="dw-empty">${esc(t('dwOutNot'))}</div>`;
     $('dwBody').innerHTML = head + check + excel + `<section><h4>${esc(t('dwOut'))}</h4>${out}</section>`;
+    fitFrames();
   }
   // 결과 칸: Shopee = (요약 글 + 빈 줄) + 이미지 주소 한 줄에 하나 / Lazada = HTML
   function cellHtml(text) {
@@ -550,8 +556,43 @@
     }
     const n = (text.match(/<img\b/gi) || []).length;
     // Lazada: 결과 HTML 을 그대로 그린다 (스크립트 없이, 1000px 폭을 패널 폭에 맞춰 줄임)
-    return `<div class="dw-meta">${esc(t('dwImgs', n))} · ${esc(t('dwChars', text.length, true))}</div>` +
-      `<div class="dw-frame"><iframe sandbox="" title="preview" srcdoc="${esc('<!doctype html><meta charset="utf-8"><body style="margin:0">' + text)}"></iframe></div>`;
+    return `<div class="dw-meta">${esc(t('dwImgs', n))} · ${esc(t('dwChars', text.length, true))}</div>` + frameHtml(text);
+  }
+  // HTML 을 한 페이지로: 스크립트 없이(sandbox), 1000px 폭을 패널 폭에 맞춰 줄이고 높이는 내용만큼 (fitFrames)
+  const frameHtml = (html) => `<div class="dw-frame"><iframe sandbox="allow-same-origin" title="preview" srcdoc="${esc('<!doctype html><meta charset="utf-8"><body style="margin:0">' + html)}"></iframe></div>`;
+  function fitFrames() {
+    document.querySelectorAll('#dwBody .dw-frame iframe').forEach((f) => {
+      const fit = () => {
+        const w = f.parentElement.clientWidth, sc = w / 1000;
+        let h = 0;
+        try { h = f.contentDocument.documentElement.scrollHeight; } catch (_) {}
+        if (!h) return;
+        f.style.height = h + 'px'; f.style.transform = `scale(${sc})`; f.parentElement.style.height = Math.ceil(h * sc) + 'px';
+      };
+      f.addEventListener('load', () => { fit(); setTimeout(fit, 800); setTimeout(fit, 2500); });   // 이미지가 늦게 뜨면 높이가 바뀐다
+    });
+  }
+  // 내보내기 전 미리보기 (2026-11-24): 저장한 편집본이 있으면 그것, 없으면 빌더와 같은 렌더(/api/ebay-generate — 크롤 데이터로, AI 없음).
+  //   태국 제품은 이미 만들어 둔 PDP 요약만 위에 (새로 만들지 않음 — 없으면 '내보낼 때 만들어짐')
+  const PV = {};
+  function previewHtml(url) {
+    const ch = S.channel || 'shopee', key = ch + ':' + url, v = PV[key];
+    if (!v) {
+      PV[key] = { busy: true };
+      const th = /lg\.com\/th\//i.test(url);
+      const edP = fetch(`/api/v1/edits?url=${encodeURIComponent(url)}&channel=${ch}`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+      const smP = th ? api('/api/v1/pdp-summary', { url, cachedOnly: true }).catch(() => null) : Promise.resolve(null);
+      edP.then((ed) => (ed && ed.html ? { html: ed.html, edited: true } : api('/api/ebay-generate', { url, medium: 'shopee_lazada', listing: ch === 'lazada' })))
+        .then(async (g) => { PV[key] = { html: g.html || '', edited: !!g.edited, sum: await smP, th }; }, () => { PV[key] = { err: true }; })
+        .then(() => { if (DW.row != null) fillDetail(); });
+      return `<div class="dw-empty">${esc(t('dwPvLoading'))}</div>`;
+    }
+    if (v.busy) return `<div class="dw-empty">${esc(t('dwPvLoading'))}</div>`;
+    if (v.err || !v.html) return `<div class="dw-empty">${esc(t('dwOutNot'))}</div>`;
+    const sum = v.sum ? (ch === 'shopee' ? `<div class="dw-sum">${esc(v.sum.text || '')}</div>` : v.sum.html || '') : '';
+    const notes = [t('dwPvNote')].concat(v.edited ? [t('dwEdited')] : [], v.th && !v.sum ? [t('dwPvNoSum')] : [], ch === 'shopee' ? [t('dwPvShopee')] : []);
+    return `<div class="dw-meta">${notes.map(esc).join(' · ')}</div>` +
+      (ch === 'shopee' ? `<div class="dw-page">${sum}${frameHtml(v.html)}</div>` : frameHtml(sum + v.html));
   }
 
   // ── 편집 = 빌더 (2026-11-23): 이 화면 위에 빌더를 띄운다. 빌더 위쪽 막대의 [저장] · [← 벌크 업로드로 돌아가기].
@@ -578,6 +619,9 @@
     $('edov').classList.add('hidden');
     $('edFrame').src = 'about:blank';
     document.body.style.overflow = '';
+    // 키보드 포커스를 빌더 틀에서 되찾는다 (그대로 두면 Esc 같은 키가 이 화면에 오지 않는다)
+    if (DW.row != null) $('dwX').focus({ preventScroll: true });
+    else { $('edFrame').blur(); document.body.focus({ preventScroll: true }); }
     scroller().scrollTop = edScroll;
     await loadEdits();   // 저장했으면 그 행에 '편집됨'
     scroller().scrollTop = edScroll;
