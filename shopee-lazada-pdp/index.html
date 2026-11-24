@@ -72,6 +72,11 @@ body{font-family:'LGEIText', 'LINESeedSansTH',Arial,sans-serif;background:#F6F3E
 .cerr-card h3{margin:0 0 10px;font-size:18px;color:#111}
 .cerr-card .msg{font-size:14px;line-height:1.55;color:#333}
 .cerr-card .ref{margin-top:12px;font-size:12px;color:#666}
+.cerr-card.done{text-align:center;padding:26px 28px 22px}
+.cerr-card.done .ic{width:44px;height:44px;border-radius:50%;background:#E3F4EA;color:#1E7F4F;font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.cerr-card.done h3{margin-bottom:6px}
+.cerr-card.done .msg{color:#555}
+.cerr-card.done button{float:none;margin-top:16px}
 .cerr-card button{margin-top:18px;float:right;height:38px;padding:0 22px;border:0;border-radius:999px;background:#EA1917;color:#fff;font-weight:700;font-size:14px;cursor:pointer}
 .status-msg.ok{color:#22863a}
 
@@ -486,6 +491,23 @@ function showCrawlFail(code, ref, url) {
   document.addEventListener('keydown', esc, true);
   document.body.appendChild(ov); ov.querySelector('button').focus();
 }
+// 완료 안내 (2026-11-24): 복사 · 저장 · 내려받기가 끝나면 화면 가운데 팝업 (버튼 글자를 '✓ Copied!' 로 바꾸던 것 대신).
+// 몇 초 뒤 저절로 닫히고, OK · Esc · 바깥 클릭으로도 닫힌다. 문구는 i18n.js 가 번역
+function showDone(title, detail, ms) {
+  document.querySelectorAll('.cerr-ov').forEach((x) => x.remove());
+  const ov = document.createElement('div'); ov.className = 'cerr-ov'; ov.setAttribute('role', 'status');
+  ov.innerHTML = '<div class="cerr-card done"><div class="ic">✓</div><h3></h3><div class="msg"></div><button type="button">OK</button></div>';
+  ov.querySelector('h3').textContent = title;
+  const m = ov.querySelector('.msg');
+  (Array.isArray(detail) ? detail : [detail]).filter(Boolean).forEach((d) => { const x = document.createElement('div'); x.textContent = d; m.appendChild(x); });
+  let timer = null;
+  const close = () => { clearTimeout(timer); ov.remove(); document.removeEventListener('keydown', esc, true); };
+  const esc = (ev) => { if (ev.key === 'Escape') { ev.stopPropagation(); close(); } };
+  ov.querySelector('button').onclick = close; ov.onclick = (ev) => { if (ev.target === ov) close(); };
+  document.addEventListener('keydown', esc, true);
+  document.body.appendChild(ov);
+  timer = setTimeout(close, ms || 2500);
+}
 function cleanCrawlUrl(u) { try { const x = new URL(String(u).trim()); x.hash = ''; for (const k of [...x.searchParams.keys()]) if (/^(utm_[a-z_]+|srsltid|gclid|gbraid|wbraid|dclid|fbclid|msclkid|yclid|igshid|mc_cid|mc_eid|_ga|_gl|_hsenc|_hsmi)$/i.test(k)) x.searchParams.delete(k); return x.toString().replace(/\?$/, ''); } catch (_) { return String(u || '').trim(); } }
 async function analyzePDP() {
   // 주소 뒤 추적값(?srsltid= 등)을 떼고 입력 칸에도 반영 — 이후 편집본 · 생성 · 요약이 모두 같은 제품을 가리키게
@@ -862,9 +884,11 @@ async function downloadImages(maxImages) {
     // 슬라이스 요약 표시
     const got = lim || ih.count;
     const summary = `${got}${got < ih.count ? ' of ' + ih.count : ''} images · ${ih.width}px wide · ${(blob.size / 1024 / 1024).toFixed(2)}MB zip`;
+    const zipLine = got < ih.count ? `${got} of ${ih.count} images in a ZIP file` : `${got} images in a ZIP file`;
+    if (htmlNote) setStatus('⚠ ' + htmlNote.trim(), 'err');   // HTML 파일을 못 넣은 것만 상태 줄에 (완료는 팝업)
     if (CHANNEL === 'shopee' && !maxImages && ih.count > SHOPEE_MAX_IMAGES) {      // 전체 ZIP: 12장 버전도 있으니 알림만
       if (info) info.textContent = '✓ ' + summary;
-      setStatus(`✓ Downloaded ${summary} — Shopee takes up to ${SHOPEE_MAX_IMAGES}; use “12 images (ZIP)” for the first ${SHOPEE_MAX_IMAGES}.${htmlNote}`, 'ok');
+      showDone('Downloaded', [zipLine, `Shopee takes up to ${SHOPEE_MAX_IMAGES} images — use “Download 12 images” for the first ${SHOPEE_MAX_IMAGES}.`], 5000);
       return;
     }
     if (shopeeLimit() && got > SHOPEE_MAX_IMAGES) {
@@ -875,7 +899,7 @@ async function downloadImages(maxImages) {
       return;
     }
     if (info) info.textContent = '✓ ' + summary;
-    setStatus('✓ Downloaded ' + summary + ' + HTML' + htmlNote, htmlNote ? 'err' : 'ok');
+    showDone('Downloaded', zipLine);
   } catch (e) {
     const hint = /Failed to fetch|NetworkError|abort/i.test(e.message)
       ? 'Cannot reach the render server. Run node server.js first.'
@@ -900,7 +924,8 @@ function imageHtmlOpts(html) {
 function copyImageHTML() {
   if (!window.CLIAImageHTML || approvalBlocks()) return;
   CLIAImageHTML.copy({ ...imageHtmlOpts(() => exportHtml(generatedHTML)),
-                       button: document.getElementById('btnCopyImgHtml'), isEditing: () => editMode });
+                       button: document.getElementById('btnCopyImgHtml'), isEditing: () => editMode,
+                       notify: (label) => showDone('Copied', label) });
 }
 // ZIP 에 HTML 도 같이 넣기 (2026-11-11): 같은 서버의 jszip 을 처음 한 번만 불러온다
 let _jszipP = null;
@@ -929,7 +954,7 @@ function copyListingText() {
   const btn = document.getElementById('btnCopyListing');
   const text = btn && btn.dataset.text;
   if (!text) return;
-  const done = () => { const o = btn.textContent; btn.textContent = '✓ Copied!'; setTimeout(() => btn.textContent = o, 1500); };
+  const done = () => showDone('Copied', 'Description text copied.');
   navigator.clipboard.writeText(text).then(done).catch(() => {
     const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
     document.execCommand('copy'); ta.remove(); done();
@@ -955,11 +980,12 @@ async function copyHTML() {
   let out = exportHtml(generatedHTML), note = '';
   try { const top = await pdpSummaryHtml(); if (top) out = top + '\n' + out; }
   catch (e) { note = e.message; }
-  try { await navigator.clipboard.writeText(out); btn.textContent = note ? '✓ Copied (no summary)' : '✓ Copied!'; }
-  catch (_) { btn.textContent = orig; alert('Copy failed'); }
+  let ok = false;
+  try { await navigator.clipboard.writeText(out); ok = true; }
+  catch (_) { alert('Copy failed'); }
+  btn.textContent = orig; btn.disabled = false;
   if (note) setStatus('⚠ HTML copied without the product summary: ' + note, 'err');
-  btn.disabled = false;
-  setTimeout(() => btn.textContent = orig, 2000);
+  if (ok) showDone('Copied', note ? 'HTML copied without the product summary.' : 'HTML copied to the clipboard.');
 }
 
 // ══════════════════════════════════════════
@@ -1608,8 +1634,8 @@ async function saveEdit() {
     if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
     savedBase = generatedHTML;
     showEditNote(j);
-    btns.forEach((b) => { b.textContent = txT('✓ Saved'); });
-    setTimeout(() => btns.forEach((b, i) => { b.textContent = labels[i]; b.disabled = false; }), 1600);
+    btns.forEach((b, i) => { b.textContent = labels[i]; b.disabled = false; });
+    showDone('Saved', 'The bulk Excel uses this edit for this product.');
   } catch (e) {
     btns.forEach((b, i) => { b.textContent = labels[i]; b.disabled = false; });
     setStatus('✕ ' + txT('Could not save') + ': ' + (e.message || e), 'error');

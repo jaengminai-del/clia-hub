@@ -93,7 +93,8 @@
       if (b.summaryErr) alert(t.summaryFail + b.summaryErr);
       const nOut = nUrls ? (b.n != null ? b.n : Math.min(b.count, nUrls)) : b.count;
       const label = nUrls && b.count > nOut ? t.cut(nOut, b.count) : t.done(nOut);
-      if (btn) { btn.textContent = label; setTimeout(() => { btn.textContent = orig; }, 3500); }
+      if (opts.notify) { if (btn) btn.textContent = orig; opts.notify(label.replace(/^✓\s*/, '')); }
+      else if (btn) { btn.textContent = label; setTimeout(() => { btn.textContent = orig; }, 3500); }
       return b;
     } catch (e) {
       alert(t.fail + e.message);
