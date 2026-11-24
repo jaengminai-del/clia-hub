@@ -144,7 +144,6 @@ a.clia-btn { text-decoration: none; }
 .item.rv { background: #FFF6F5; }
 .list.grid .item.rv { background: #FFF6F5; }
 .rvt { margin-inline-end: 6px; vertical-align: 1px; }
-.b-new { background: #E8EEF9; color: #2A4E8F; margin-inline-start: 6px; vertical-align: 1px; }
 .ph { width: 48px; height: 48px; border-radius: 8px; background: var(--clia-gray-100); color: var(--clia-gray-500); font-size: 10px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2px; overflow: hidden; }
 .list.grid .item .ph { width: 100%; height: 150px; font-size: 13px; }
 .fl { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; align-items: flex-end; }
@@ -185,18 +184,18 @@ button.eb { cursor: pointer; }
   .list:not(.grid) .item .c-ac { flex: 1 1 100%; }
 }
 @media (min-width: 641px) {
-  .list:not(.grid) .item { grid-template-columns: 22px 48px minmax(110px, 170px) 96px minmax(200px, 1fr) 88px 150px minmax(200px, 250px) 80px; gap: 12px; }
+  .list:not(.grid) .item { grid-template-columns: 22px 48px minmax(110px, 170px) 96px minmax(200px, 1fr) 96px 160px minmax(200px, 250px) 80px; gap: 12px; }
   .list:not(.grid) .item .r { display: contents; }
-  .lhead:not(.hidden) { display: grid; grid-template-columns: 22px 48px minmax(110px, 170px) 96px minmax(200px, 1fr) 88px 150px minmax(200px, 250px) 80px; gap: 12px; padding: 9px 16px; border-bottom: 1px solid var(--line); background: var(--clia-gray-50); color: var(--clia-gray-900); font-size: 11px; font-weight: 600; letter-spacing: .02em; }
+  .lhead:not(.hidden) { display: grid; grid-template-columns: 22px 48px minmax(110px, 170px) 96px minmax(200px, 1fr) 96px 160px minmax(200px, 250px) 80px; gap: 12px; padding: 9px 16px; border-bottom: 1px solid var(--line); background: var(--clia-gray-50); color: var(--clia-gray-900); font-size: 11px; font-weight: 600; letter-spacing: .02em; }
   .lhead .he { text-align: end; }
   /* 확인할 행이 없는 목록: 확인 필요 내용 · Next step 열을 뺀다 (진행 상태 · 편집됨 표시는 편집 버튼 앞에 그대로) */
-  .list.noact:not(.grid) .item, .lhead.noact:not(.hidden) { grid-template-columns: 22px 48px minmax(110px, 170px) 96px minmax(200px, 1fr) 88px 80px; }
+  .list.noact:not(.grid) .item, .lhead.noact:not(.hidden) { grid-template-columns: 22px 48px minmax(110px, 170px) 96px minmax(200px, 1fr) 96px 80px; }
   .list.noact:not(.grid) .c-why, .list.noact:not(.grid) .c-ac, .lhead.noact .hs, .lhead.noact .hn { display: none; }
   /* Next step 열 하이라이트 — 머리부터 행 끝까지 같은 색 띠 (행 위아래 여백까지 채움) */
   .lhead .hn { color: var(--clia-brand); font-weight: 800; }
 }
 .c-state { display: flex; align-items: center; }
-.c-state, .c-why, .c-ac { text-align: start; }
+.c-state, .c-why, .c-ac { text-align: start; word-break: keep-all; overflow-wrap: anywhere; }   /* 한국어는 낱말 단위로 줄바꿈 */
 .c-why { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; min-width: 0; }
 .c-ac { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
 /* 매칭 불가 행의 할 일: 주소 칸 · SKU 번호 칸(위아래) · 후보 · 등록하고 채우기 · 그대로 둠 */

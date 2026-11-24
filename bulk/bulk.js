@@ -240,7 +240,7 @@
     const rowHtml = (r, i) => `<label class="item${rv.has(r.row) ? ' rv' : ''}" style="${anim(i)}">` +
       `<input type="checkbox" data-row="${r.row}">` +
       ((r.p.thumb || (itemOf(r.row) || {}).thumb) ? `<img src="${esc(r.p.thumb || itemOf(r.row).thumb)}" alt="" loading="lazy">` : `<div class="ph">${esc(grpName(r.p.grp))}</div>`) +
-      `<div class="m">${r.p.isBundle ? `<span class="badge b-q">${esc(t('bundleTag'))}</span> ` : ''}${esc(r.p.model)}${r.p.isNew ? `<span class="badge b-new">${esc(t('newTag'))}</span>` : ''}${r.gift ? `<span class="badge b-q">${esc(t('giftTag'))}</span>` : ''}${r.p.slug && S.edits[r.p.slug] ? `<span class="badge b-ed">${esc(t('editedTag'))}</span>` : ''}</div>` +
+      `<div class="m">${r.p.isBundle ? `<span class="badge b-q">${esc(t('bundleTag'))}</span> ` : ''}${esc(r.p.model)}${r.gift ? `<span class="badge b-q">${esc(t('giftTag'))}</span>` : ''}${r.p.slug && S.edits[r.p.slug] ? `<span class="badge b-ed">${esc(t('editedTag'))}</span>` : ''}</div>` +
       `<div class="bu">${esc([r.p.dv, grpName(r.p.grp)].filter(Boolean).join(' · ') || '—')}</div>` +
       `<div class="s pn" title="${esc(r.name || r.p.title)}">${esc(r.name || r.p.title)}</div><div class="r"></div></label>`;
     $('list').innerHTML = ordered.slice(0, nRv).map(rowHtml).join('') + nm.map((r, i) => nmRowHtml(r, anim(nRv + i))).join('') +
