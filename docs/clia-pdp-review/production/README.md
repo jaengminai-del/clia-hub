@@ -41,7 +41,7 @@
 - **설정:**
   - `REVIEW_PREWARM=0`: 끔
   - `REVIEW_PREWARM_COUNTRIES`: 법인 (기본 `th,sg`)
-  - `REVIEW_PREWARM_CONC`: 동시에 돌리는 수 (기본 1, 최대 2)
+  - `REVIEW_PREWARM_CONC`: 동시에 돌리는 수 (기본 1, 최대 4 — 운영은 4). 사람이 연 제품용으로 한 자리를 늘 비워 둡니다
   - `REVIEW_PREWARM_MODE`: `existing`이면 있는 것만으로
 - **실패한 것:** 6시간 뒤에 다시 시도합니다.
 - **두 채널이 같은 이미지일 때:** 두 번째 채널은 분석(USP · 같은 영역)을 다시 하지 않고 그대로 씁니다.
