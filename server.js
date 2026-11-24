@@ -2688,9 +2688,9 @@ app.get('/media/exports/:hash/:file', async (req, res) => {
    만드는 곳: crawler-py/content_gen/pdp_summary.py (지시문 content_gen/prompts/pdp_summary_th.md + 그 제품의 크롤 결과)
    제품 폴더의 summary.json 에 보관 (버킷에도) — 다시 부르면 그대로, refresh:true 면 새로 만든다
 ────────────────────────────────────────── */
-const summaryJobs = new Map();
+const summaryJobs = new Map();   // slug → Promise (같은 제품 동시 요청은 한 번만 만든다)
 // 요약 규칙이 바뀌면 올린다 — 예전 규칙으로 실패한 기억(summary-fail.json)을 버리고 다시 만든다 (2: 번들 반반 · 스피커는 본 제품만, 3: 2,000자에 안 들어가면 lg.com Key features 만)
-const SUMMARY_RULE_V = 3;   // slug → Promise (같은 제품 동시 요청은 한 번만 만든다)
+const SUMMARY_RULE_V = 3;
 app.post('/api/v1/pdp-summary', async (req, res) => {
   const path = require('path'), fs = require('fs');
   const { url, refresh = false } = req.body || {};
