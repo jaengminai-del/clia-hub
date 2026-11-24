@@ -409,6 +409,12 @@ router.get('/api/v1/bulk/jobs/:job/cell', async (req, res) => {
 router.get('/api/v1/bulk/jobs/:job/file', async (req, res) => {
   const j = await bulkJobs.getJob(req.params.job);
   if (!j || j.status !== 'ready') return res.status(404).json({ error: 'file not ready' });
+  // 검토·승인 잠금 (APPROVAL_GATE=1): 엑셀은 들어간 제품이 모두 승인돼야 받을 수 있다
+  const approvals = require('./approvals');
+  if (approvals.gateOn()) {
+    const pending = approvals.pendingOf(j.items);
+    if (pending.length) return res.status(409).json({ error: 'not approved', code: 'not_approved', pending: pending.length, models: pending.slice(0, 20).map((x) => x.model || x.slug) });
+  }
   const fp = await resultFile(j);
   if (!fp) return res.status(404).json({ error: 'file expired' });
   res.set('Content-Disposition', `attachment; filename="clia-bulk.xlsx"; filename*=UTF-8''${encodeURIComponent(j.outName)}`);

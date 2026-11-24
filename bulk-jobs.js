@@ -143,7 +143,9 @@ function jobView(j) {
     crawlTotal: its.filter((x) => x.register || x.force).length, crawlDone: its.filter((x) => (x.register || x.force) && (x.crawled || x.status === 'failed')).length,
     review: its.filter((x) => (x.flags || []).some((f) => f.sev !== 'info')).length,
     notify: j.notify ? { email: !!j.notify.email, sent: !!j.notify.sent } : null,
-    skus: j.skus || [], items: its, file: j.status === 'ready' ? `/api/v1/bulk/jobs/${j.id}/file` : null, fileName: j.outName, at: j.at, finishedAt: j.finishedAt };
+    skus: j.skus || [], items: its, file: j.status === 'ready' ? `/api/v1/bulk/jobs/${j.id}/file` : null, fileName: j.outName, at: j.at, finishedAt: j.finishedAt,
+    // 검토·승인 (approvals.js): 승인 안 된 제품 수. gate 가 켜져 있으면 엑셀 받기가 잠긴다
+    approval: done ? (() => { const a = require('./approvals'); const p = a.pendingOf(its); return { gate: a.gateOn(), pending: p.length, models: p.slice(0, 20).map((x) => x.model || x.slug) }; })() : null };
 }
 
 // ── 내용 만들기 (같은 서버의 기존 API) ──
