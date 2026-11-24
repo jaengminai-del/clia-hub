@@ -53,13 +53,15 @@ const sameSig = (a, b) => !!a && !!b && Math.abs(a.crawled_at - b.crawled_at) <=
 const jobs = new Map();   // `${slug}|${ch}` → { state: 'pending'|'error', step, at, error, bg }
 const queue = [];          // [{ slug, ch, opts, bg }] — 사람이 연 것(bg=false)이 늘 먼저
 let running = 0, runningBg = 0;
-const CONC = 2;
 // 미리 준비 (2026-11-24): 검토하는 사람이 기다리지 않게, 서버가 Shopee/Lazada 법인 제품을 차례로 미리 준비한다.
-//   REVIEW_PREWARM=0 이면 끔 · REVIEW_PREWARM_COUNTRIES (기본 th,sg) · REVIEW_PREWARM_CONC (기본 1 — 빌더·벌크 사용자를 느리게 하지 않게)
+//   REVIEW_PREWARM=0 이면 끔 · REVIEW_PREWARM_COUNTRIES (기본 th,sg) · REVIEW_PREWARM_CONC (기본 1, 최대 4)
 //   준비가 안 됐거나(none) 내용이 바뀐(stale) 채널만. 실패한 것은 6시간 뒤에 다시. 10분마다 다시 훑는다(새로 크롤한 제품 · 편집본 저장).
 const PREWARM = process.env.REVIEW_PREWARM !== '0';
 const PREWARM_COUNTRIES = new Set(String(process.env.REVIEW_PREWARM_COUNTRIES || 'th,sg').split(',').map((x) => x.trim().toLowerCase()).filter(Boolean));
-const BG_CONC = Math.max(1, Math.min(CONC, parseInt(process.env.REVIEW_PREWARM_CONC, 10) || 1));
+// 미리 준비 동시 수: 1~4 (운영 4 vCPU · 16GB — 4개면 CPU 한도 가까이, 그 이상은 사용자 작업이 느려지고 lg.com 차단 위험, 2026-11-24)
+const BG_CONC = Math.max(1, Math.min(4, parseInt(process.env.REVIEW_PREWARM_CONC, 10) || 1));
+// 전체 동시 수 = 미리 준비 + 1 — 미리 준비가 꽉 차 있어도 사람이 연 제품은 바로 시작한다
+const CONC = Math.max(2, BG_CONC + 1);
 // 기본은 전부 준비 — lg.com 캡처 · 상세 이미지 · PDP 요약까지 (검토 화면에서 누르면 바로 보이게, 2026-11-24 사용자 결정).
 //   REVIEW_PREWARM_MODE=existing 이면 크롤 데이터와 이미 있는 요약·캡처만으로 (AI 요약 · Firecrawl 캡처를 새로 만들지 않음 — 빈 것은 사람이 열 때 채움)
 const PREWARM_EXISTING_ONLY = process.env.REVIEW_PREWARM_MODE === 'existing';
@@ -192,7 +194,10 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false, bg =
   };
   await shoot(recapture);
   let { shotPath, a } = await analyze(st, true);
-  if (thin(a) && !recapture && !existingOnly) {   // 덜 찍혔으면 한 번 다시 캡처하고 다시 본다
+  // 미리 준비는 최근(24시간 안) 찍은 캡처를 다시 찍지 않는다 — lg.com 페이지가 원래 짧은 제품(TH 일부, 기능 섹션 없음)을
+  // 두 채널이 번갈아 계속 다시 찍던 것 (2026-11-24 운영: T2312VSPB · T2313VSPB · T2314VS2B · ISC10E)
+  const shotAge = shotPath && fs.existsSync(shotPath) ? Date.now() - fs.statSync(shotPath).mtimeMs : Infinity;
+  if (thin(a) && !recapture && !existingOnly && !(bg && shotAge < 24 * 3600 * 1000)) {   // 덜 찍혔으면 한 번 다시 캡처하고 다시 본다
     console.log(`[review] ${slug}: lg.com 캡처가 덜 찍힘 (PDP ${a.shot.bottom - a.shot.top}px / 상세 이미지 ${sliceTotal}px) → 다시 캡처`);
     await shoot(true);
     ({ shotPath, a } = await analyze(st, false));
@@ -204,7 +209,7 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false, bg =
     usps: a.usps, sliceUsps: a.sliceUsps, secs: a.secs, kind: a.kind, lead: a.lead, align: a.align || null, alignErr: a.alignErr || '',
     sum: ch === 'lazada' && sm && sm.html ? sm.html : '', sumText: ch === 'shopee' && sm && sm.text ? sm.text.trim() : '', summaryErr,
     // 미리 준비에서 빈 것 — 화면이 제품을 열 때 채운다
-    missing: [...(isTh(sum.url) && !sm && !summaryErr ? ['summary'] : []), ...(!a.shot || (bg && a.shot.incomplete) ? ['fullshot'] : [])],
+    missing: [...(isTh(sum.url) && !sm && !summaryErr ? ['summary'] : []), ...(!a.shot ? ['fullshot'] : [])],
     shopeeN, shopeeChars,
     shot: a.shot ? { key: st.key, src: `/media/fullshot/${st.key}.jpg`, bytes: fs.statSync(shotPath).size, ...a.shot } : null, shotErr: a.shot ? '' : (fsErr || 'no capture'),
   };
@@ -216,18 +221,29 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false, bg =
   return rec;
 }
 
+const runningSlugs = new Map();   // slug → 돌고 있는 채널 수
 function pump() {
   while (running < CONC && queue.length) {
-    // 사람이 연 것 먼저 · 미리 준비는 BG_CONC 개까지만 동시에
+    // 사람이 연 것 먼저 · 미리 준비는 BG_CONC 개까지만 동시에.
+    // 미리 준비는 같은 제품의 다른 채널이 돌고 있으면 건너뛴다 — 끝난 뒤에 돌아야 그 분석(같은 이미지면 그대로)·요약·캡처를 다시 쓴다
     let i = queue.findIndex((q) => !q.bg);
-    if (i < 0) { if (runningBg >= BG_CONC) break; i = 0; }
+    if (i < 0) {
+      if (runningBg >= BG_CONC) break;
+      i = queue.findIndex((q) => !runningSlugs.has(q.slug));
+      if (i < 0) break;
+    }
     const { slug, ch, opts, bg } = queue.splice(i, 1)[0];
     const key = `${slug}|${ch}`;
     running++; if (bg) runningBg++;
+    runningSlugs.set(slug, (runningSlugs.get(slug) || 0) + 1);
     prepare(slug, ch, { ...opts, bg }).then(() => jobs.delete(key)).catch((e) => {
       console.warn('[review] 준비 실패', slug, ch, e.message);
       jobs.set(key, { state: 'error', error: String(e.message).slice(0, 300), at: Date.now(), bg });
-    }).finally(() => { running--; if (bg) runningBg--; pump(); });
+    }).finally(() => {
+      running--; if (bg) runningBg--;
+      const n = (runningSlugs.get(slug) || 1) - 1; if (n) runningSlugs.set(slug, n); else runningSlugs.delete(slug);
+      pump();
+    });
   }
 }
 function enqueue(slug, ch, opts = {}, bg = false) {
@@ -263,8 +279,13 @@ function prewarm() {
   return n;
 }
 if (PREWARM) {
-  // 시작 직후에는 버킷 → 로컬 동기화가 끝난 뒤에 (없는 제품을 비었다고 보지 않게)
-  Promise.resolve(store.whenPulled ? store.whenPulled() : null).catch(() => {}).then(() => setTimeout(prewarm, 60 * 1000));
+  // 시작 직후에는 버킷 → 로컬 동기화가 끝난 뒤에 (없는 제품을 비었다고 보지 않게).
+  // whenPulled 는 동기화가 시작되기 전에 부르면 바로 끝나므로(2026-11-24 운영: 첫 훑기가 제품 0개) 30초 뒤에 묻고 최대 30분 기다린다
+  setTimeout(async () => {
+    await Promise.resolve(store.whenPulled ? store.whenPulled(30 * 60 * 1000) : null).catch(() => {});
+    try { require('./bulk-catalog').invalidate(); } catch (_) {}   // 동기화 중에 만든 빈 제품 색인을 버린다
+    prewarm();
+  }, 30 * 1000);
   setInterval(prewarm, 10 * 60 * 1000).unref();
 }
 function queueStats() {
