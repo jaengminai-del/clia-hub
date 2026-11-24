@@ -725,6 +725,9 @@ async function refreshApproval() {
   badge.textContent = L[0];
   badge.className = 'ap-badge ' + L[1];
   badge.style.display = L[0] ? '' : 'none';
+  // 배지를 누르면 검토·승인 화면에서 이 제품을 연다 (2026-11-24, /review/)
+  badge.style.cursor = 'pointer';
+  badge.onclick = () => window.open(`${API_BASE}/review/?url=${encodeURIComponent(url)}&country=${(/lg\.com\/([a-z]{2})/i.exec(url) || [, 'th'])[1].toLowerCase()}&lang=${encodeURIComponent((document.documentElement.lang || 'en').slice(0, 2))}`, '_blank', 'noopener');
   badge.title = approvalLocked() ? 'Not approved yet — images and HTML can be downloaded after review and approval.'
     : st === 'approved' ? '' : 'Not approved yet. The download lock is off on this server, so downloads still work.';
   APPROVAL_LOCK_IDS.forEach(id => {
