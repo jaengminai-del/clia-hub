@@ -237,12 +237,12 @@
     const nRv = ordered.filter((r) => rv.has(r.row)).length;
     const nm = noMatch().slice().sort((a, b) => G_ORDER.indexOf(groupOf(a)) - G_ORDER.indexOf(groupOf(b)));
     const anim = (i) => (animate ? `animation-delay:${Math.min(i, 30) * 45}ms` : 'animation:none');
-    const rowHtml = (r, i) => `<label class="item${rv.has(r.row) ? ' rv' : ''}" style="${anim(i)}">` +
+    const rowHtml = (r, i) => `<div class="item${rv.has(r.row) ? ' rv' : ''}${DW.row === r.row ? ' cur' : ''}" data-r="${r.row}" style="${anim(i)}">` +
       `<input type="checkbox" data-row="${r.row}">` +
       ((r.p.thumb || (itemOf(r.row) || {}).thumb) ? `<img src="${esc(r.p.thumb || itemOf(r.row).thumb)}" alt="" loading="lazy">` : `<div class="ph">${esc(grpName(r.p.grp))}</div>`) +
       `<div class="m">${r.p.isBundle ? `<span class="badge b-q">${esc(t('bundleTag'))}</span> ` : ''}${esc(r.p.model)}${r.gift ? `<span class="badge b-q">${esc(t('giftTag'))}</span>` : ''}${r.p.slug && S.edits[r.p.slug] ? `<span class="badge b-ed">${esc(t('editedTag'))}</span>` : ''}</div>` +
       `<div class="bu">${esc([r.p.dv, grpName(r.p.grp)].filter(Boolean).join(' · ') || '—')}</div>` +
-      `<div class="s pn" title="${esc(r.name || r.p.title)}">${esc(r.name || r.p.title)}</div><div class="r"></div></label>`;
+      `<div class="s pn" title="${esc(r.name || r.p.title)}">${esc(r.name || r.p.title)}</div><div class="r"></div></div>`;
     $('list').innerHTML = ordered.slice(0, nRv).map(rowHtml).join('') + nm.map((r, i) => nmRowHtml(r, anim(nRv + i))).join('') +
       ordered.slice(nRv).map((r, i) => rowHtml(r, nRv + nm.length + i)).join('');
     if (!rows.length && noMatch().length) S.tab = 'skip';
@@ -282,7 +282,7 @@
     } else if (g === 'gReg' && r.lg) {
       ac = `<button type="button" class="mini" data-regrow="${r.row}"${S.busy ? ' disabled' : ''}>${esc(t('regRow'))}</button>`;
     } else ac = `<span class="leave">${esc(t('leaveAs'))}</span>`;
-    return `<div class="item nm${S.uerr[r.row] ? ' bad' : ''}" data-nm="${r.row}" style="${style}"><span class="cbx"></span><div class="ph">—</div>` +
+    return `<div class="item nm${S.uerr[r.row] ? ' bad' : ''}${DW.row === r.row ? ' cur' : ''}" data-nm="${r.row}" style="${style}"><span class="cbx"></span><div class="ph">—</div>` +
       `<div class="m">${skuCell(r)}</div><div class="bu">—</div><div class="s pn" title="${esc(r.name)}">${esc(r.name)}</div>` +
       `<div class="r"><span class="c-state"><span class="badge b-q">${esc(t('tabSkip'))}</span></span><span class="c-why">${whyCell(g)}</span><span class="c-ac">${ac}</span><span class="c-ed"></span></div></div>`;
   }
@@ -376,6 +376,7 @@
     $('dl').classList.toggle('hidden', !dlNow);
     if (j && j.file) { $('dl').href = j.file; $('dl').setAttribute('download', j.fileName || 'clia-bulk.xlsx'); }
     $('again').disabled = S.busy;
+    if (DW.row != null) fillDetail();
   }
 
   // 넣은 SKU 번호 (SKU 번호가 비어 있던 행) → 엑셀 SKU 칸에
@@ -431,7 +432,7 @@
   };
   // 확인 필요 항목의 할 일
   const saveAck = () => { if (S.job && S.job.id) store.set('clia-bulk-ack-' + S.job.id, [...S.ack]); };
-  $('list').addEventListener('click', (e) => {
+  const onAct = (e) => {
     const b = e.target.closest('button[data-a]');
     if (!b) return;
     e.preventDefault();
@@ -441,7 +442,117 @@
     if (b.dataset.a === 'frame') openFrames(b.dataset.slug);
     if (b.dataset.a === 'edit') openEditor(b.dataset.url);
     if (b.dataset.a === 'keepEdit') keepEdit(b.dataset.url, b);
+  };
+  $('list').addEventListener('click', onAct);
+  $('dwBody').addEventListener('click', onAct);
+  // 행을 누르면 상세 (체크 칸 · 버튼 · 입력 칸 · 링크는 그대로)
+  $('list').addEventListener('click', (e) => {
+    if (e.target.closest('input, button, a, select, textarea, label, .c-ac')) return;
+    const el = e.target.closest('.item');
+    if (el) openDetail(+(el.dataset.r || el.dataset.nm));
   });
+
+  // ── 한 건 상세 (2026-11-24): 행을 누르면 오른쪽 패널 — 엑셀 정보 · 매칭된 LG.com 제품 · 확인 필요 · 엑셀에 들어갈 설명.
+  //    설명은 끝난 작업이면 결과 엑셀의 그 칸 그대로 (/api/v1/bulk/jobs/:job/cell), 아니면 '내보내면 만들어짐'
+  const DW = { row: null, cells: {} };
+  const visRows = () => [...document.querySelectorAll('#list .item:not(.hidden)')].map((x) => +(x.dataset.r || x.dataset.nm));
+  function openDetail(row) {
+    DW.row = row;
+    document.querySelectorAll('#list .item.cur').forEach((x) => x.classList.remove('cur'));
+    const el = document.querySelector(`#list .item[data-r="${row}"], #list .item[data-nm="${row}"]`);
+    if (el) el.classList.add('cur');
+    $('dw').classList.remove('hidden');
+    fillDetail();
+    $('dwBody').scrollTop = 0;
+    $('dwX').focus({ preventScroll: true });
+  }
+  function closeDetail() {
+    DW.row = null;
+    $('dw').classList.add('hidden');
+    document.querySelectorAll('#list .item.cur').forEach((x) => x.classList.remove('cur'));
+  }
+  function stepDetail(d) {
+    const vs = visRows(), i = vs.indexOf(DW.row);
+    if (i >= 0 && vs[i + d] != null) {
+      openDetail(vs[i + d]);
+      const el = document.querySelector(`#list .item.cur`);
+      if (el) el.scrollIntoView({ block: 'nearest' });
+    }
+  }
+  $('dwX').onclick = closeDetail;
+  $('dw').querySelector('.dw-bg').onclick = closeDetail;
+  $('dwPrev').onclick = () => stepDetail(-1);
+  $('dwNext').onclick = () => stepDetail(1);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && DW.row != null && $('edov').classList.contains('hidden')) closeDetail(); });
+  $('dwInc').onchange = () => { if (DW.row == null) return; if ($('dwInc').checked) S.sel.add(DW.row); else S.sel.delete(DW.row); refresh(); };
+  const dl = (pairs) => `<dl class="dw-dl">${pairs.filter(Boolean).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('')}</dl>`;
+  function fillDetail() {
+    const row = DW.row, a = act().find((x) => x.row === row), nm = a ? null : noMatch().find((x) => x.row === row);
+    const r = a || nm;
+    if (!r) { closeDetail(); return; }
+    const it = itemOf(row), rvRow = a && openFlags(row).length;
+    const vs = visRows(), i = vs.indexOf(row);
+    $('dwPrev').disabled = i <= 0; $('dwNext').disabled = i < 0 || i >= vs.length - 1;
+    $('dwPos').textContent = i >= 0 ? `${i + 1} / ${vs.length}` : '';
+    $('dwIncW').classList.toggle('hidden', !a);
+    $('dwInc').checked = S.sel.has(row); $('dwInc').disabled = S.busy;
+    const p = a ? r.p : {};
+    const thumb = (p && p.thumb) || (it && it.thumb);
+    const state = nm ? `<span class="badge b-q">${esc(t('tabSkip'))}</span>` : rvRow ? `<span class="badge b-bad">${esc(t('tabReview'))}</span>` : `<span class="badge b-ok">${esc(t('tabOk'))}</span>`;
+    const pen = '<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>';
+    const head = `<div class="dw-hd">${thumb ? `<img src="${esc(thumb)}" alt="">` : '<div class="ph">—</div>'}<div class="dw-ht">` +
+      `<div class="dw-m">${a ? esc(p.model) : skuCell(r)}</div>` +
+      `<div class="dw-sub">${a ? esc([p.dv, grpName(p.grp)].filter(Boolean).join(' · ')) : ''} ${state}${a && p.slug && S.edits[p.slug] ? ` <span class="badge b-ed">${esc(t('editedTag'))}</span>` : ''}</div>` +
+      `<div class="dw-acts">${a && p.url ? `<a class="eb" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(t('dwLg'))} ↗</a>` : ''}` +
+      `${a && p.url && !p.isBundle ? `<button type="button" class="eb" data-a="edit" data-url="${esc(p.url)}">${pen}${esc(t('a_edit'))}</button>` : ''}</div></div></div>`;
+    // 엑셀 정보
+    const sku = r.parentSku || r.sku ? esc(r.parentSku || r.sku) : S.skuIn[row] ? esc(S.skuIn[row]) : `<i class="mut">${esc(t('skuEmpty'))}</i>`;
+    const cur = r.descLen ? `<div class="dw-cur">${esc(r.descHead || '')}${r.descLen > (r.descHead || '').length ? '…' : ''}</div>${nm ? '' : `<div class="dw-note">${esc(t('dwDescRep', r.descLen))}</div>`}` : `<i class="mut">${esc(t('dwDescNone'))}</i>`;
+    const excel = `<section><h4>${esc(t('dwExcel'))}</h4>` + dl([[t('dwRow'), String(row)], r.id ? [t('dwId'), esc(r.id)] : null, ['SKU', sku], [t('hdName'), esc(r.name || '')], [t('dwDesc'), cur]]) + '</section>';
+    // 확인 필요
+    let check = '';
+    if (nm) {
+      check = `<section><h4>${esc(t('hdStatus'))}</h4><div class="dw-why">${whyCell(groupOf(nm))}</div><div class="dw-note">${esc(t('dwNmHint'))}</div></section>`;
+    } else if (rvRow || S.force.has(row) || S.redo.has(row)) {
+      const tmp = document.createElement('div'); tmp.innerHTML = itemStatus(r, !!rvRow);
+      check = `<section><h4>${esc(t('hdStatus'))}</h4><div class="dw-why">${tmp.querySelector('.c-why').innerHTML}</div><div class="dw-ac">${tmp.querySelector('.c-ac').innerHTML}</div></section>`;
+    }
+    // 엑셀에 들어갈 설명
+    let out;
+    const j = S.job, inJob = it && j;
+    if (nm) out = `<div class="dw-empty">${esc(t('dwOutNm'))}</div>`;
+    else if (inJob && it.status === 'ok' && j.status === 'ready') {
+      const c = DW.cells[`${j.id}:${row}`];
+      if (c == null) {
+        out = `<div class="dw-empty">${esc(t('checking'))}</div>`;
+        DW.cells[`${j.id}:${row}`] = false;
+        api(`/api/v1/bulk/jobs/${j.id}/cell?row=${row}`).then((d) => { DW.cells[`${j.id}:${row}`] = d.text || ''; }, () => { DW.cells[`${j.id}:${row}`] = 'ERR'; })
+          .then(() => { if (DW.row === row) fillDetail(); });
+      } else if (c === false) out = `<div class="dw-empty">${esc(t('checking'))}</div>`;
+      else if (c === 'ERR') out = `<div class="dw-empty">${esc(t('dwOutFail'))}</div>`;
+      else out = cellHtml(c);
+      if (it.edited) out = `<div class="dw-note">${esc(t('dwEdited'))}</div>` + out;
+    } else if (inJob && ['queued', 'crawling', 'working'].includes(it.status)) out = `<div class="dw-empty">${esc(t('dwOutRun'))}</div>`;
+    else out = `<div class="dw-empty">${esc(t('dwOutNot'))}</div>`;
+    $('dwBody').innerHTML = head + check + excel + `<section><h4>${esc(t('dwOut'))}</h4>${out}</section>`;
+  }
+  // 결과 칸: Shopee = (요약 글 + 빈 줄) + 이미지 주소 한 줄에 하나 / Lazada = HTML
+  function cellHtml(text) {
+    const lines = String(text).split('\n');
+    const isUrls = !/<[a-z][\s\S]*>/i.test(text);
+    if (isUrls) {
+      const urls = lines.filter((l) => /^https?:\/\/\S+$/.test(l.trim())).map((l) => l.trim());
+      const words = lines.filter((l) => !/^https?:\/\/\S+$/.test(l.trim())).join('\n').trim();
+      // 마켓 상세 페이지처럼 한 장으로: 요약 글 → 이미지를 위에서 아래로 이어 붙임 (2026-11-24)
+      return `<div class="dw-meta">${esc(t('dwImgs', urls.length))} · ${esc(t('dwChars', text.length))}</div>` +
+        `<div class="dw-page">${words ? `<div class="dw-sum">${esc(words)}</div>` : ''}` +
+        `${urls.map((u) => `<img src="${esc(u)}" alt="" loading="lazy">`).join('')}</div>`;
+    }
+    const n = (text.match(/<img\b/gi) || []).length;
+    // Lazada: 결과 HTML 을 그대로 그린다 (스크립트 없이, 1000px 폭을 패널 폭에 맞춰 줄임)
+    return `<div class="dw-meta">${esc(t('dwImgs', n))} · ${esc(t('dwChars', text.length, true))}</div>` +
+      `<div class="dw-frame"><iframe sandbox="" title="preview" srcdoc="${esc('<!doctype html><meta charset="utf-8"><body style="margin:0">' + text)}"></iframe></div>`;
+  }
 
   // ── 편집 = 빌더 (2026-11-23): 이 화면 위에 빌더를 띄운다. 빌더 위쪽 막대의 [저장] · [← 벌크 업로드로 돌아가기].
   //    저장한 편집본은 다음 내보내기부터 엑셀에 들어가고, 그 행에 '편집됨' 표시
