@@ -240,7 +240,8 @@
     const rowHtml = (r, i) => `<label class="item${rv.has(r.row) ? ' rv' : ''}" style="${anim(i)}">` +
       `<input type="checkbox" data-row="${r.row}">` +
       ((r.p.thumb || (itemOf(r.row) || {}).thumb) ? `<img src="${esc(r.p.thumb || itemOf(r.row).thumb)}" alt="" loading="lazy">` : `<div class="ph">${esc(grpName(r.p.grp))}</div>`) +
-      `<div class="m">${r.p.isBundle ? `<span class="badge b-q">${esc(t('bundleTag'))}</span> ` : ''}${esc(r.p.model)}<span class="dv">${esc(r.p.dv || '')} · ${esc(grpName(r.p.grp))}</span>${r.p.isNew ? `<span class="badge b-new">${esc(t('newTag'))}</span>` : ''}${r.gift ? `<span class="badge b-q">${esc(t('giftTag'))}</span>` : ''}${r.p.slug && S.edits[r.p.slug] ? `<span class="badge b-ed">${esc(t('editedTag'))}</span>` : ''}</div>` +
+      `<div class="m">${r.p.isBundle ? `<span class="badge b-q">${esc(t('bundleTag'))}</span> ` : ''}${esc(r.p.model)}${r.p.isNew ? `<span class="badge b-new">${esc(t('newTag'))}</span>` : ''}${r.gift ? `<span class="badge b-q">${esc(t('giftTag'))}</span>` : ''}${r.p.slug && S.edits[r.p.slug] ? `<span class="badge b-ed">${esc(t('editedTag'))}</span>` : ''}</div>` +
+      `<div class="bu">${esc([r.p.dv, grpName(r.p.grp)].filter(Boolean).join(' · ') || '—')}</div>` +
       `<div class="s pn" title="${esc(r.name || r.p.title)}">${esc(r.name || r.p.title)}</div><div class="r"></div></label>`;
     $('list').innerHTML = ordered.slice(0, nRv).map(rowHtml).join('') + nm.map((r, i) => nmRowHtml(r, anim(nRv + i))).join('') +
       ordered.slice(nRv).map((r, i) => rowHtml(r, nRv + nm.length + i)).join('');
@@ -282,7 +283,7 @@
       ac = `<button type="button" class="mini" data-regrow="${r.row}"${S.busy ? ' disabled' : ''}>${esc(t('regRow'))}</button>`;
     } else ac = `<span class="leave">${esc(t('leaveAs'))}</span>`;
     return `<div class="item nm${S.uerr[r.row] ? ' bad' : ''}" data-nm="${r.row}" style="${style}"><span class="cbx"></span><div class="ph">—</div>` +
-      `<div class="m">${skuCell(r)}</div><div class="s pn" title="${esc(r.name)}">${esc(r.name)}</div>` +
+      `<div class="m">${skuCell(r)}</div><div class="bu">—</div><div class="s pn" title="${esc(r.name)}">${esc(r.name)}</div>` +
       `<div class="r"><span class="c-state"><span class="badge b-q">${esc(t('tabSkip'))}</span></span><span class="c-why">${whyCell(g)}</span><span class="c-ac">${ac}</span><span class="c-ed"></span></div></div>`;
   }
   // 해결한 뒤: 다음 빈 주소 칸으로 (없으면 그대로)
@@ -575,7 +576,7 @@
     $('lhead').classList.toggle('hidden', VIEW === 'grid' || !S.data);
     document.querySelectorAll('#view button').forEach((b) => { b.classList.toggle('on', b.dataset.v === VIEW); b.setAttribute('aria-pressed', b.dataset.v === VIEW); });
   }
-  $('lhead').innerHTML = `<span></span><span></span><span>${esc(t('hdProduct'))}</span><span>${esc(t('hdName'))}</span><span>${esc(t('hdState'))}</span><span class="hs">${esc(t('hdStatus'))}</span><span class="hn">${esc(t('hdAction'))}</span><span class="he">${esc(t('hdEdit'))}</span>`;
+  $('lhead').innerHTML = `<span></span><span></span><span>${esc(t('hdProduct'))}</span><span>${esc(t('hdBu'))}</span><span>${esc(t('hdName'))}</span><span>${esc(t('hdState'))}</span><span class="hs">${esc(t('hdStatus'))}</span><span class="hn">${esc(t('hdAction'))}</span><span class="he">${esc(t('hdEdit'))}</span>`;
   $('vList').textContent = t('viewList'); $('vGrid').textContent = t('viewGrid');
   document.querySelectorAll('#view button').forEach((b) => { b.title = t(b.dataset.v === 'grid' ? 'viewGrid' : 'viewList'); });
   $('view').onclick = (e) => { const b = e.target.closest('button'); if (b) setView(b.dataset.v); };
