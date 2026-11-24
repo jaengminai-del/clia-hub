@@ -59,14 +59,14 @@ function cleanUrl(url) {
 // 크롤 실패 이유 (2026-11-24): 화면에는 쉬운 말(code → 화면 문구) + 문의 번호(ref), 기술 내용(detail)은 서버 로그에만.
 //   전에는 pipeline.log 의 마지막 오류 줄(Firecrawl · RuntimeError …)을 그대로 사용자에게 보였다
 const CRAWL_FAIL = {
-  not_product: 'This address did not open an LG.com product page. Check that it is a product page (not a home or category page) and try again.',
-  unreachable: 'LG.com did not respond. Please try again in a few minutes.',
-  busy: 'The analysis service is busy. Please try again in a few minutes.',
-  incomplete: 'This page is very long and the analysis did not finish. Please try again.',
-  declined: 'This page could not be analyzed automatically.',
-  stopped: 'The crawl stopped midway. Please try again.',
-  setup: 'Crawling is not available right now. Please contact the administrator.',
-  unknown: 'Something went wrong while crawling. Please try again.',
+  not_product: "This isn't an LG.com product page.",
+  unreachable: "LG.com isn't responding. Try again later.",
+  busy: "The server is busy. Try again in a few minutes.",
+  incomplete: "The page is too long. Try again.",
+  declined: "This page can't be crawled.",
+  stopped: "The crawl stopped. Try again.",
+  setup: "Crawling is unavailable. Contact the admin.",
+  unknown: "Something went wrong. Try again.",
 };
 function failureOf(job) {
   let detail = job.spawnError || '';

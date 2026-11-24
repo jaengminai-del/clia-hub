@@ -70,7 +70,6 @@ body{font-family:'LGEIText', 'LINESeedSansTH',Arial,sans-serif;background:#F6F3E
 .cerr-card{background:#fff;border-radius:18px;padding:26px 28px 22px;width:min(460px,92vw);box-shadow:0 24px 64px rgba(0,0,0,.25);text-align:left}
 .cerr-card h3{margin:0 0 10px;font-size:18px;color:#111}
 .cerr-card .msg{font-size:14px;line-height:1.55;color:#333}
-.cerr-card .url{margin-top:10px;font-size:12px;color:#888;word-break:break-all}
 .cerr-card .ref{margin-top:12px;font-size:12px;color:#666}
 .cerr-card button{margin-top:18px;float:right;height:38px;padding:0 22px;border:0;border-radius:999px;background:#EA1917;color:#fff;font-weight:700;font-size:14px;cursor:pointer}
 .status-msg.ok{color:#22863a}
@@ -448,27 +447,26 @@ function mirrorToEbayFeatures(mirror) {
 // ══════════════════════════════════════════
 // 크롤 실패 문구 (2026-11-24): 사용자에게는 쉬운 말 + 문의 번호, 기술 내용은 서버 로그 '[crawl] 실패 #번호'에만
 const CRAWL_FAIL_TEXT = {
-  not_product: 'This address did not open an LG.com product page. Check that it is a product page (not a home or category page) and try again.',
-  unreachable: 'LG.com did not respond. Please try again in a few minutes.',
-  busy: 'The analysis service is busy. Please try again in a few minutes.',
-  incomplete: 'This page is very long and the analysis did not finish. Please try again.',
-  declined: 'This page could not be analyzed automatically.',
-  stopped: 'The crawl stopped midway. Please try again.',
-  setup: 'Crawling is not available right now. Please contact the administrator.',
-  network: 'Could not reach the CLIA server. Check your connection and try again.',
-  unknown: 'Something went wrong while crawling. Please try again.',
+  not_product: "This isn't an LG.com product page.",
+  unreachable: "LG.com isn't responding. Try again later.",
+  busy: "The server is busy. Try again in a few minutes.",
+  incomplete: "The page is too long. Try again.",
+  declined: "This page can't be crawled.",
+  stopped: "The crawl stopped. Try again.",
+  setup: "Crawling is unavailable. Contact the admin.",
+  network: "Can't reach CLIA. Check your connection.",
+  unknown: "Something went wrong. Try again.",
 };
-// 크롤 실패는 화면 정중앙 팝업 (제목 · 쉬운 말 · 제품 주소 · 문의 번호 · OK) + 상태 줄에는 짧게. 문구는 i18n.js 가 번역
+// 크롤 실패는 화면 정중앙 팝업 (제목 · 짧은 한 문장 · 오류 코드 · OK) + 상태 줄에는 짧게. 문구는 i18n.js 가 번역
 function showCrawlFail(code, ref, url) {
-  setStatus("✕ Couldn't crawl this page", 'error');
+  setStatus('✕ Crawl failed', 'error');
   document.querySelectorAll('.cerr-ov').forEach((x) => x.remove());
   const ov = document.createElement('div'); ov.className = 'cerr-ov'; ov.setAttribute('role', 'alertdialog');
-  ov.innerHTML = '<div class="cerr-card"><h3></h3><div class="msg"></div><div class="url"></div><div class="ref"></div><button type="button">OK</button><div style="clear:both"></div></div>';
-  ov.querySelector('h3').textContent = "Couldn't crawl this page";
+  ov.innerHTML = '<div class="cerr-card"><h3></h3><div class="msg"></div><div class="ref"></div><button type="button">OK</button><div style="clear:both"></div></div>';
+  ov.querySelector('h3').textContent = 'Crawl failed';
   ov.querySelector('.msg').textContent = CRAWL_FAIL_TEXT[code] || CRAWL_FAIL_TEXT.unknown;
-  ov.querySelector('.url').textContent = url || '';
   const r = String(ref || '').replace(/[^\w-]/g, '');
-  if (r) ov.querySelector('.ref').textContent = `Reference #${r}`;
+  if (r) ov.querySelector('.ref').textContent = `Error code: ${r}`;
   const close = () => { ov.remove(); document.removeEventListener('keydown', esc, true); };
   const esc = (ev) => { if (ev.key === 'Escape') { ev.stopPropagation(); close(); } };
   ov.querySelector('button').onclick = close; ov.onclick = (ev) => { if (ev.target === ov) close(); };
