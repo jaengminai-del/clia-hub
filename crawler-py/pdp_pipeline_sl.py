@@ -104,11 +104,14 @@ def firecrawl_scrape(url: str, mobile: bool, screenshot: bool = False) -> dict:
     print(f"→ [Step1] Firecrawl {device.upper()} scrape (최적화 모드{' · 전체 화면 캡처' if screenshot else ''})...")
     # 최적화: 스크롤 대기 및 고정 지연 시간 단축 (속도 향상). 캡처도 받을 때는 지연 로드가 다 찍히게 끝까지 천천히 (24번)
     actions = [{"type": "wait", "milliseconds": 1500}]
-    for _ in range(24 if screenshot else 4):
+    # Firecrawl 은 동작(actions)을 50개까지만 받는다 — 24번 내리면 51개라 캡처를 받는 크롤이 모두 BAD_REQUEST 였다 (2026-11-24) → 23번
+    for _ in range(23 if screenshot else 4):
         actions.append({"type": "scroll", "direction": "down"})
         actions.append({"type": "wait", "milliseconds": 350 if screenshot else 400})
     actions.append({"type": "executeJavascript", "script": "window.scrollTo(0,0);"})
     actions.append({"type": "wait", "milliseconds": 1000})
+    if len(actions) > 50:
+        actions = actions[:48] + actions[-2:]
 
     body = {
         "url": url,
