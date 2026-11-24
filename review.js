@@ -192,7 +192,10 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false, bg =
   };
   await shoot(recapture);
   let { shotPath, a } = await analyze(st, true);
-  if (thin(a) && !recapture && !existingOnly) {   // 덜 찍혔으면 한 번 다시 캡처하고 다시 본다
+  // 미리 준비는 최근(24시간 안) 찍은 캡처를 다시 찍지 않는다 — lg.com 페이지가 원래 짧은 제품(TH 일부, 기능 섹션 없음)을
+  // 두 채널이 번갈아 계속 다시 찍던 것 (2026-11-24 운영: T2312VSPB · T2313VSPB · T2314VS2B · ISC10E)
+  const shotAge = shotPath && fs.existsSync(shotPath) ? Date.now() - fs.statSync(shotPath).mtimeMs : Infinity;
+  if (thin(a) && !recapture && !existingOnly && !(bg && shotAge < 24 * 3600 * 1000)) {   // 덜 찍혔으면 한 번 다시 캡처하고 다시 본다
     console.log(`[review] ${slug}: lg.com 캡처가 덜 찍힘 (PDP ${a.shot.bottom - a.shot.top}px / 상세 이미지 ${sliceTotal}px) → 다시 캡처`);
     await shoot(true);
     ({ shotPath, a } = await analyze(st, false));
@@ -204,7 +207,7 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false, bg =
     usps: a.usps, sliceUsps: a.sliceUsps, secs: a.secs, kind: a.kind, lead: a.lead, align: a.align || null, alignErr: a.alignErr || '',
     sum: ch === 'lazada' && sm && sm.html ? sm.html : '', sumText: ch === 'shopee' && sm && sm.text ? sm.text.trim() : '', summaryErr,
     // 미리 준비에서 빈 것 — 화면이 제품을 열 때 채운다
-    missing: [...(isTh(sum.url) && !sm && !summaryErr ? ['summary'] : []), ...(!a.shot || (bg && a.shot.incomplete) ? ['fullshot'] : [])],
+    missing: [...(isTh(sum.url) && !sm && !summaryErr ? ['summary'] : []), ...(!a.shot ? ['fullshot'] : [])],
     shopeeN, shopeeChars,
     shot: a.shot ? { key: st.key, src: `/media/fullshot/${st.key}.jpg`, bytes: fs.statSync(shotPath).size, ...a.shot } : null, shotErr: a.shot ? '' : (fsErr || 'no capture'),
   };
