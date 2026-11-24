@@ -150,7 +150,7 @@ async function fullshot(url, recapture, step, existingOnly = false, via = '') { 
 const BLOCK_MS = (parseInt(process.env.REVIEW_CAPTURE_BLOCK_MINUTES, 10) || 30) * 60 * 1000;
 const FIRECRAWL_FALLBACK = process.env.REVIEW_FIRECRAWL_FALLBACK !== '0';
 const breaker = { until: 0, probing: false, trips: 0, streak: 0 };   // streak: 서로 다른 제품에서 연달아 막힌 수 (2번이면 쉼)
-const isTransientErr = (m) => /thread|crash|has been closed|Target |Timeout|timed out|ECONN|EAGAIN|ENOMEM|exit \d|SIGKILL|socket hang up|fetch failed/i.test(String(m || ''));
+const isTransientErr = (m) => /thread|crash|has been closed|Target |Timeout|timed out|ECONN|EAGAIN|ENOMEM|exit \d|SIGKILL|socket hang up|fetch failed|KeyboardInterrupt|Chromium|Command failed|worker exited/i.test(String(m || ''));
 const isBlockErr = (m) => /막음|막는 중|blocked|stylesheet|\b403\b|access denied/i.test(String(m || ''));
 function captureGate() {   // 미리 준비만: false = 건너뜀, 'probe' = 풀렸는지 시험하는 한 건, true = 찍음
   if (Date.now() < breaker.until || breaker.probing) return false;
@@ -309,7 +309,8 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false, bg =
     if (st && st.status === 'none') fsErr = skipped ? 'lg.com 이 막는 중 — 나중에 채움' : existingOnly ? 'not captured yet' : 'no capture';
     if (st && (st.status === 'error' || st.status === 'gone')) fsErr = String(st.error || 'capture failed').slice(0, 200);
     if (gate && bg && !existingOnly && !directBlocked) {
-      if (tried) captureResult(gate, st && st.status === 'ready' ? '' : fsErr);
+      // 다시 찍기가 막혀 예전 캡처가 남은 것(상태는 ready)도 막힘으로 센다 — 차단기가 열려야 막힌 동안 다시 찍기를 멈춘다
+      if (tried) captureResult(gate, st && st.status === 'ready' ? (st.lastError || '') : fsErr);
       else if (gate === 'probe') breaker.probing = false;   // 시험할 기회를 다음 건에 넘긴다
     }
   };
@@ -363,7 +364,8 @@ function pump() {
     runningSlugs.set(slug, (runningSlugs.get(slug) || 0) + 1);
     prepare(slug, ch, { ...opts, bg }).then(() => jobs.delete(key)).catch((e) => {
       console.warn('[review] 준비 실패', slug, ch, e.message);
-      jobs.set(key, { state: 'error', error: String(e.message).slice(0, 300), at: Date.now(), bg });
+      const prevTries = (jobs.get(key) || {}).tries || 0;   // 같은 채널이 연달아 실패한 수 (일시 오류 빠른 재시도는 3번까지)
+      jobs.set(key, { state: 'error', error: String(e.message).slice(0, 300), at: Date.now(), bg, tries: prevTries + 1 });
     }).finally(() => {
       running--; if (bg) runningBg--;
       const n = (runningSlugs.get(slug) || 1) - 1; if (n) runningSlugs.set(slug, n); else runningSlugs.delete(slug);
@@ -379,7 +381,7 @@ function enqueue(slug, ch, opts = {}, bg = false) {
     if (!bg && q >= 0 && queue[q].bg) { const [it] = queue.splice(q, 1); it.bg = false; it.opts = { ...it.opts, ...opts, existingOnly: false }; queue.unshift(it); j.bg = false; pump(); }
     return j;
   }
-  const nj = { state: 'pending', step: 'queued', at: Date.now(), bg };
+  const nj = { state: 'pending', step: 'queued', at: Date.now(), bg, tries: j && j.state === 'error' ? j.tries || 0 : 0 };
   jobs.set(key, nj);
   if (bg) queue.push({ slug, ch, opts, bg }); else queue.unshift({ slug, ch, opts, bg });
   pump();
@@ -396,7 +398,9 @@ function prewarm() {
     const ps = Object.values(idx.products).filter((p) => PREWARM_COUNTRIES.has(p.country)).sort((a, b) => b.crawled_at - a.crawled_at);
     for (const p of ps) for (const ch of CHANNELS) {
       const j = jobs.get(`${p.slug}|${ch}`);
-      if (j && (j.state === 'pending' || (j.state === 'error' && Date.now() - j.at < 6 * 3600 * 1000))) continue;
+      // 실패한 준비는 6시간 뒤 다시 — 단, 일시 오류(프로세스 · 스레드 부족, 브라우저 충돌, 연결)는 5분 뒤 (2026-11-24 운영: EAGAIN · KeyboardInterrupt)
+      const retryMs = j && j.state === 'error' && isTransientErr(j.error) && (j.tries || 0) <= 3 ? 5 * 60 * 1000 : 6 * 3600 * 1000;
+      if (j && (j.state === 'pending' || (j.state === 'error' && Date.now() - j.at < retryMs))) continue;
       const { state, rec } = prepState(p.slug, ch, p);
       // 캡처를 비워 두고 준비한 것(lg.com 이 막던 때) — 차단이 풀렸으면 다시 (1시간 지난 것만, 한 번 훑을 때 최대 40개)
       // 일시 오류(브라우저 · 스레드 부족 · 시간 초과)로 캡처 없이 준비된 것은 5분 뒤에 (2026-11-24 운영: 동시 실행이 많아 「can't start new thread」 · 「Target crashed」)

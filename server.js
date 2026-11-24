@@ -3024,7 +3024,8 @@ async function fullshotStatus(url) {
   if (job && job.status === 'pending') return { status: 'pending', key };
   const meta = await fullshotMeta(key);
   if (isGone(meta)) return { status: 'gone', key, error: meta.error || 'lg.com 에 이 제품 페이지가 없음', final: meta.final || '' };
-  if (await fullshotReady(key)) return { status: 'ready', key, src: `/media/fullshot/${key}.jpg`, verified: !!meta };
+  // 다시 찍기가 실패했으면(예전 캡처는 그대로) 그 오류도 알려 준다 — 검토 미리 준비의 차단기가 막힘을 셀 수 있게
+  if (await fullshotReady(key)) return { status: 'ready', key, src: `/media/fullshot/${key}.jpg`, verified: !!meta, ...(job && job.status === 'error' ? { lastError: job.error } : {}) };
   if (job && job.status === 'error') return { status: 'error', key, error: job.error };
   return { status: 'none', key };
 }
