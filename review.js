@@ -123,7 +123,7 @@ async function sliceManifest(hash) {
 }
 
 /** lg.com 전체 화면 캡처 — 있으면 그것, 없으면(또는 recapture) 캡처하고 기다린다 (최대 4분) */
-async function fullshot(url, recapture, step, existingOnly = false, directOnly = false) {
+async function fullshot(url, recapture, step, existingOnly = false, via = '') {   // via: 'direct' (직접만) · 'firecrawl' · '' (직접 → 막히면 Firecrawl)
   const q = '/api/v1/fullshot?url=' + encodeURIComponent(url);
   let st = await getJ(q);
   // 기록 없는 예전 캡처 → 주소만 확인 (4초) — 없어진 제품 페이지(홈으로 넘어감)를 찍은 것이면 gone (2026-11-24)
@@ -137,7 +137,7 @@ async function fullshot(url, recapture, step, existingOnly = false, directOnly =
   if (st.status !== 'pending') {
     step('fullshot');
     // recapture: 있는 캡처도 다시 찍는다 (지연 로드가 덜 찍힌 캡처 — 새 캡처가 성공해야 바뀐다)
-    st = await post('/api/v1/fullshot', { url, retry: true, force: !!recapture, ...(directOnly ? { via: 'direct' } : {}) }, 30000);
+    st = await post('/api/v1/fullshot', { url, retry: true, force: !!recapture, ...(via ? { via } : {}) }, 30000);
   }
   for (let i = 0; i < 120 && st.status === 'pending'; i++) { await sleep(2000); st = await getJ(q); }
   return st;
@@ -148,6 +148,7 @@ async function fullshot(url, recapture, step, existingOnly = false, directOnly =
 //   30분 뒤 한 건만 먼저 시험해 보고(probe), 풀렸으면 다시 찍고 비워 둔 캡처를 채운다 (prewarm 이 다시 차례에 넣음).
 //   막힌 동안 4개가 동시에 계속 부딪히지 않게. 사람이 연 제품은 상관없이 찍는다 (Firecrawl 로 넘어감).
 const BLOCK_MS = (parseInt(process.env.REVIEW_CAPTURE_BLOCK_MINUTES, 10) || 30) * 60 * 1000;
+const FIRECRAWL_FALLBACK = process.env.REVIEW_FIRECRAWL_FALLBACK !== '0';
 const breaker = { until: 0, probing: false, trips: 0, streak: 0 };   // streak: 서로 다른 제품에서 연달아 막힌 수 (2번이면 쉼)
 const isTransientErr = (m) => /thread|crash|has been closed|Target |Timeout|timed out|ECONN|EAGAIN|ENOMEM|exit \d|SIGKILL|socket hang up|fetch failed/i.test(String(m || ''));
 const isBlockErr = (m) => /막음|막는 중|blocked|stylesheet|\b403\b|access denied/i.test(String(m || ''));
@@ -286,14 +287,28 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false, bg =
   step('fullshot-check');
   let fsErr = '', st = null, skipped = false;
   const shoot = async (re) => {
-    const gate = bg && !existingOnly ? captureGate() : true;   // 미리 준비: lg.com 이 막는 중이면 있는 캡처만 (새로 찍지 않음)
-    skipped = !gate;
+    const gate = bg && !existingOnly ? captureGate() : true;   // 미리 준비: lg.com 이 막는 중이면 직접 캡처는 하지 않는다
+    // 사용자 결정(2026-11-24): 직접 캡처가 막히면 Firecrawl 로 (유료). 막힌 동안(차단기)은 바로 Firecrawl — REVIEW_FIRECRAWL_FALLBACK=0 이면 예전처럼 비워 둠.
+    //   Firecrawl 캡처는 이미지 위치 기록이 없어 그림으로 맞춘다 → 풀리면 위치 기록 캡처로 다시 찍는다 (prewarm 의 위치 기록 다시 찍기)
+    const fc = bg && !existingOnly && !gate && FIRECRAWL_FALLBACK;
+    skipped = !gate && !fc;
     let tried = false;   // 실제로 새로 찍었는지 (있는 캡처를 그대로 쓰면 풀렸는지 알 수 없다)
     const stp = (x) => { if (x === 'fullshot') tried = true; step(x); };
-    try { st = await LANES.capture(() => fullshot(sum.url, re && !skipped, stp, (existingOnly && !re) || skipped, bg), !bg); fsErr = ''; } catch (e) { fsErr = String(e.message).slice(0, 200); tried = true; }
+    const viaNow = fc ? 'firecrawl' : bg ? 'direct' : '';
+    // 막힌 동안 「다시 찍기」(위치 기록 · 덜 찍힘)는 하지 않는다 — 직접 찍은 캡처를 위치 기록 없는 Firecrawl 캡처로 바꾸지 않게
+    try { st = await LANES.capture(() => fullshot(sum.url, re && !skipped && !fc, stp, (existingOnly && !re) || skipped, viaNow), !bg); fsErr = ''; } catch (e) { fsErr = String(e.message).slice(0, 200); tried = true; }
+    // 직접 캡처가 막혔으면 바로 Firecrawl 로 한 번 더 (차단기 기록은 직접 캡처 결과로)
+    const directBlocked = viaNow === 'direct' && FIRECRAWL_FALLBACK && st && st.status === 'error' && isBlockErr(st.error);
+    if (directBlocked) {
+      if (gate) captureResult(gate, st.error);
+      const blockedErr = st.error;
+      try { st = await LANES.capture(() => fullshot(sum.url, false, stp, false, 'firecrawl'), !bg); } catch (e) { fsErr = String(e.message).slice(0, 200); }
+      if (st && st.status === 'ready') console.log(`[review] ${slug}: lg.com 이 직접 캡처를 막음 → Firecrawl 로 찍음`);
+      else if (st && st.status === 'error') st = { ...st, error: `${blockedErr} · Firecrawl: ${st.error}` };
+    }
     if (st && st.status === 'none') fsErr = skipped ? 'lg.com 이 막는 중 — 나중에 채움' : existingOnly ? 'not captured yet' : 'no capture';
     if (st && (st.status === 'error' || st.status === 'gone')) fsErr = String(st.error || 'capture failed').slice(0, 200);
-    if (gate && bg && !existingOnly) {
+    if (gate && bg && !existingOnly && !directBlocked) {
       if (tried) captureResult(gate, st && st.status === 'ready' ? '' : fsErr);
       else if (gate === 'probe') breaker.probing = false;   // 시험할 기회를 다음 건에 넘긴다
     }
