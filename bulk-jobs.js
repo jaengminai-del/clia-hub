@@ -3,7 +3,7 @@
  *
  * 한 작업 = 고른 행들을 (필요하면 먼저 LG.com 에서 크롤해 CLIA 에 등록하고) 설명 칸 내용을 만들어 엑셀에 쓴다.
  *   크롤: 서버 전체에서 동시에 BULK_CRAWL_CONC(기본 2)개 — 200개를 한 번에 띄우면 서버가 버티지 못한다
- *   내용: 작업마다 동시에 2개 (/api/ebay-generate → /api/v1/slice-html, Lazada 는 /api/v1/pdp-summary 도)
+ *   내용: 작업마다 동시에 2개 (/api/ebay-generate → /api/v1/slice-html, 태국 제품은 /api/v1/pdp-summary 도 — Lazada 는 HTML, Shopee 는 글)
  *   확인 필요(flags): 크롤·생성 실패, 원문 누락, 동영상 장면 자동 선택, Shopee 12장 초과, Lazada 요약 실패, 주소 추정
  *   보관: 작업·올린 파일·결과를 로컬 + 버킷(bulk/…)에 7일 — 재배포·재시작 뒤 진행 중이던 작업을 이어서 한다
  *   알림: 끝나면 메일 (RESEND_API_KEY + CLIA_MAIL_FROM 이 있을 때, lge-d2c.com 발신) · 화면은 브라우저 알림
@@ -19,6 +19,7 @@ const { productVideos } = require('./video-frames');   // 동영상 장면: 빌�
 const DIR = path.join(__dirname, 'media-cache', 'bulk');
 const KEEP_MS = 7 * 24 * 3600 * 1000;
 const SHOPEE_MAX_IMAGES = 12;
+const SHOPEE_DESC_MAX = 3000;   // Shopee 설명 글자 수 한도 — 요약(최대 2,000자) + 이미지 주소가 넘으면 뒤 이미지부터 뺀다
 const CELL_MAX = 32767;
 const CRAWL_CONC = Math.max(1, Math.min(4, parseInt(process.env.BULK_CRAWL_CONC, 10) || 2));
 const LOCAL = () => (process.env.BULK_API_BASE || `http://127.0.0.1:${process.env.PORT || 3001}`).replace(/\/$/, '');
@@ -154,19 +155,22 @@ async function post(p, body, timeoutMs) {
 }
 async function contentFor(channel, url) {
   const listing = channel === 'lazada';
-  // PDP 요약(태국어)은 태국 제품만 — 싱가포르 등은 요약 없이 이미지만 (2026-11-23)
-  const summaryP = channel === 'lazada' && /lg\.com\/th\//i.test(url) ? post('/api/v1/pdp-summary', { url }, 7 * 60 * 1000).catch((e) => ({ error: e.message })) : null;
+  // PDP 요약(태국어)은 태국 제품만 — 싱가포르 등은 요약 없이 이미지만 (2026-11-23). Shopee 도 (2026-11-24, 글로 이미지 주소 위에)
+  const summaryP = /lg\.com\/th\//i.test(url) ? post('/api/v1/pdp-summary', { url }, 7 * 60 * 1000).catch((e) => ({ error: e.message })) : null;
   // 빌더에서 저장한 편집본이 있으면 그것으로 (edits.js) — 없으면 크롤 데이터로 새로 만든다
   const ed = require('./edits').getEdit(require('./crawler-routes').slugify(url), channel);
   const g = ed ? { html: ed.html } : await post('/api/ebay-generate', { url, medium: 'shopee_lazada', listing }, 5 * 60 * 1000);
   if (!g.html) throw new Error('generate returned no HTML');
   const sl = await post('/api/v1/slice-html', { html: g.html, medium: 'shopee_lazada' }, 12 * 60 * 1000);
-  if (channel === 'shopee') {
-    const urls = (sl.urls || []).slice(0, SHOPEE_MAX_IMAGES);
-    if (!urls.length) throw new Error('no images');
-    return { text: urls.join('\n'), images: urls.length, allImages: sl.count, summaryErr: '', edited: !!ed };
-  }
   const sm = await summaryP;
+  if (channel === 'shopee') {
+    // Shopee 설명은 HTML 을 받지 않는다 → 요약은 태그 없는 글로 맨 위, 그 아래 이미지 주소 (한 줄에 하나, 앞 12장)
+    const top = sm && sm.text ? sm.text.trim() + '\n\n' : '';
+    const urls = (sl.urls || []).slice(0, SHOPEE_MAX_IMAGES);
+    while (urls.length > 1 && (top + urls.join('\n')).length > SHOPEE_DESC_MAX) urls.pop();
+    if (!urls.length) throw new Error('no images');
+    return { text: top + urls.join('\n'), images: urls.length, allImages: sl.count, summaryErr: sm && sm.error ? sm.error.slice(0, 200) : '', edited: !!ed };
+  }
   return { text: (sm && sm.html ? sm.html + '\n' : '') + sl.html, images: sl.count, allImages: sl.count, summaryErr: sm && sm.error ? sm.error.slice(0, 200) : '', edited: !!ed };
 }
 
