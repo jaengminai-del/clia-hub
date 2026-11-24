@@ -17,6 +17,17 @@ import argparse, base64, html as _html, json, os, re, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'v8'))
 from build_v8 import match_sections, sections_to_O, V7_FABRICATED_BLOCK, NEW_SKU  # noqa: E402
 
+# lg.com 전체 화면 캡처(폭 960px)에서 PDP 가 시작하는 y (2026-11-24 측정, 첫 내용 행 − 16px 여유)
+#   헤더 · 제품 상단(갤러리·가격) · 앵커 탭 바(คุณสมบัติ·สเปค·รีวิว)는 숨긴다.
+#   RV10VHP2B 는 탭 바 아래 추천 액세서리·프로모션 띠(운영 저장본 섹션에 없음)도 숨기고
+#   저장본 첫 섹션(เครื่องอบผ้า DUAL Inverter Heat Pump™) 부터.
+#   측정: 행별 밝기 분산이 처음 0 을 넘는 행 (오른쪽 채팅 아이콘 영역 x>880 제외) — README 참고
+FULLSHOT_PDP_TOP = {
+    '28d8734d26e3f419404e': 516,   # A9-ACE       첫 내용 532
+    '7c518879f1b5dc3c095b': 540,   # GC-B187JBAM  첫 내용 556 (저장본 1·2번 빈 섹션 자리)
+    'd789c2fd00d7ac761ca2': 976,   # RV10VHP2B    첫 내용 992
+}
+
 SHOPEE_MAX_IMAGES = 12      # bulk-jobs.js SHOPEE_MAX_IMAGES (main 8bc6c6d)
 SHOPEE_DESC_LIMIT = 3000    # shared/clia-image-html.js: 설명 한도 3,000자를 넘으면 뒤 이미지부터 뺀다
 
@@ -98,6 +109,8 @@ def main():
         p['shopeeNsg'], _ = shopee_cut(None, slices)          # 싱가포르: 요약 없이 이미지 주소만
         fs = FS['products'].get(src['slug']) or {}
         p['fullshot'] = {k: fs[k] for k in ('src', 'width', 'height')} if fs.get('status') == 'ready' and fs.get('width') else None
+        if p['fullshot']:
+            p['fullshot']['top'] = FULLSHOT_PDP_TOP.get(fs['key'], 0)
         DATA.append(p)
         report.append({'model': p['model'], 'slug': src['slug'], 'slices': len(slices), 'summary': bool(p['sum']),
                        'shopee_images': p['shopeeN'], 'shopee_chars': p['shopeeChars'], 'fullshot': bool(p['fullshot']), 'sections': mrep})
@@ -135,7 +148,7 @@ def main():
 .card .imgfail{height:150px;border-radius:10px}.os .imgfail{height:140px}
 .os .nomatch{display:block;padding:8px 16px;font-size:11px;color:var(--clia-gray-400);background:var(--clia-gray-50);border-bottom:1px dashed var(--clia-gray-200)}
 .slices img{height:auto}
-.fullshot img{width:100%;height:auto;display:block}.fullshot{background:#fff}
+.fullshot img{width:100%;height:auto;display:block}.fullshot{background:#fff;overflow:hidden}
 .ohsw{display:inline-flex;gap:4px;margin-left:8px}.ohsw button{border:1px solid var(--clia-gray-200);background:#fff;border-radius:999px;padding:2px 9px;font-size:11px;cursor:pointer;color:var(--clia-gray-500)}.ohsw button.on{background:var(--clia-gray-900);color:#fff;border-color:var(--clia-gray-900)}
 .ohnote{font-size:11px;color:var(--clia-gray-400);font-weight:500;margin-left:8px}
 .shopee-text{white-space:pre-wrap;font:14px/1.55 Roboto,"Helvetica Neue",Helvetica,Arial,"LINESeedSansTH",sans-serif;color:#222;margin:0;padding:4px 0 10px}
@@ -196,8 +209,8 @@ def main():
         "const S={corp:'th',tab:'all',q:'',sel:new Set(),cur:0,ch:'shopee',lg:'shot'};")
     a_ = "  $('pO').innerHTML=p.O.map("
     rep(a_, "  const shot=p.fullshot&&S.lg==='shot';\n"
-            "  $('oH').innerHTML='LG.COM 원본'+(p.fullshot?`<span class=\"ohsw\"><button class=\"${shot?'on':''}\" onclick=\"S.lg='shot';renderCmp()\">화면 그대로</button><button class=\"${shot?'':'on'}\" onclick=\"S.lg='sec';renderCmp()\">섹션</button></span><span class=\"ohnote\">전체 화면 캡처 · PC 1920px → 폭 ${p.fullshot.width}px · 동기 스크롤 안 됨</span>`:'<span class=\"ohnote\">전체 화면 캡처 없음 · 운영 저장본 섹션으로 표시</span>');\n"
-            "  $('pO').innerHTML=shot?`<div class=\"fullshot\"><img src=\"${p.fullshot.src}\" width=\"${p.fullshot.width}\" height=\"${p.fullshot.height}\" alt=\"lg.com 전체 화면\"></div>`:p.O.map(")
+            "  $('oH').innerHTML='LG.COM 원본'+(p.fullshot?`<span class=\"ohsw\"><button class=\"${shot?'on':''}\" onclick=\"S.lg='shot';renderCmp()\">화면 그대로</button><button class=\"${shot?'':'on'}\" onclick=\"S.lg='sec';renderCmp()\">섹션</button></span><span class=\"ohnote\">전체 화면 캡처를 PDP부터 (위 ${p.fullshot.top}px 숨김: 헤더·갤러리·탭) · 동기 스크롤 안 됨</span>`:'<span class=\"ohnote\">전체 화면 캡처 없음 · 운영 저장본 섹션으로 표시</span>');\n"
+            "  $('pO').innerHTML=shot?`<div class=\"fullshot\" style=\"aspect-ratio:${p.fullshot.width}/${p.fullshot.height-p.fullshot.top}\"><img src=\"${p.fullshot.src}\" width=\"${p.fullshot.width}\" height=\"${p.fullshot.height}\" style=\"margin-top:-${(p.fullshot.top/p.fullshot.width*100).toFixed(4)}%\" alt=\"lg.com 화면 (PDP부터)\"></div>`:p.O.map(")
     rep("if(!stack||!p.blocks.length)return;", "if(!stack||!p.blocks.length||$('pO').querySelector('.fullshot'))return;")
 
     # ── 오른쪽 Shopee: 설명 칸은 HTML 을 받지 않음 → 요약은 태그 없는 글, 이미지는 앞 12장(3,000자 한도) ──
