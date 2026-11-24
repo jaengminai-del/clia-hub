@@ -211,9 +211,12 @@ def box_index(boxes_path):
     return idx
 
 
-def align(capture_path, top, bottom, html, medium, fonts_css, slice_width, boxes=None):
+def align(capture_path, top, bottom, html, medium, fonts_css, slice_width, boxes=None, layout_cache=None):
     """섹션 앵커 [{label, L (캡처 px), R (슬라이스 출력 px), score}] — 위에서 아래 순서, L·R 모두 늘어난다.
-    boxes (캡처 때 적은 이미지 위치) 가 있으면 이미지 주소로 먼저 찾고, 못 찾은 이미지만 그림으로 찾는다 (2026-11-24)."""
+    boxes (캡처 때 적은 이미지 위치) 가 있으면 이미지 주소로만 찾는다 — 주소가 같으면 같은 이미지라 틀릴 수 없다.
+    주소로 못 찾은 이미지는 lg.com 페이지에 없는 것으로 둔다 (그림 맞추기는 닮은 다른 사진을 잘못 고르기도 해서, 2026-11-24).
+    이때는 이미지 조각이 필요 없어 HTML 의 섹션 · 이미지 위치만 재고, layout_cache(같은 HTML 해시)에 두고 다시 쓴다 → 브라우저 없이 끝남.
+    boxes 가 없으면(예전 캡처) 예전처럼 그림으로 찾는다."""
     import numpy as np
     from PIL import Image
     idx = {}
@@ -223,17 +226,39 @@ def align(capture_path, top, bottom, html, medium, fonts_css, slice_width, boxes
         except Exception:   # noqa: BLE001 — 위치 기록이 깨졌으면 그림 맞추기만
             idx = {}
     by_url = lambda src: [b for b in idx.get(stem(src), []) if top - 40 <= b[1] <= bottom]
-    layout, secs = measure(html, medium, fonts_css, need=(lambda src: not by_url(src)) if idx else None)
+    cached = False
+    if idx:
+        import json
+        lc = Path(layout_cache) if layout_cache else None
+        if lc and lc.exists():
+            try:
+                c = json.loads(lc.read_text(encoding="utf-8"))
+                layout, secs, cached = c["layout"], c["secs"], True
+            except Exception:   # noqa: BLE001
+                cached = False
+        if not cached:
+            layout, secs = measure(html, medium, fonts_css, need=lambda src: False)
+            if lc:
+                try:
+                    lc.parent.mkdir(parents=True, exist_ok=True)
+                    lc.write_text(json.dumps({"layout": layout, "secs": secs}), encoding="utf-8")
+                except Exception:   # noqa: BLE001
+                    pass
+    else:
+        layout, secs = measure(html, medium, fonts_css)
     scale = slice_width / max(1, layout["contentWidth"])         # CSS px → 슬라이스 출력 px
-    with Image.open(capture_path) as im:
-        cap = np.asarray(im.convert("L"), dtype=np.float32)
-    cap_w = cap.shape[1]
-    part = cap[top:bottom]
-    hh, ww = (part.shape[0] // DS) * DS, (part.shape[1] // DS) * DS
-    small = part[:hh, :ww].reshape(hh // DS, DS, ww // DS, DS).mean(axis=(1, 3))
+    small = full = None
+    cap_w = 960
+    if not idx:   # 그림 맞추기용 캡처 (주소로 찾을 때는 필요 없다)
+        with Image.open(capture_path) as im:
+            cap = np.asarray(im.convert("L"), dtype=np.float32)
+        cap_w = cap.shape[1]
+        part = cap[top:bottom]
+        hh, ww = (part.shape[0] // DS) * DS, (part.shape[1] // DS) * DS
+        small = part[:hh, :ww].reshape(hh // DS, DS, ww // DS, DS).mean(axis=(1, 3))
+        full = cap[top:bottom]
     # 이미지마다 후보 → 순서를 지키는 최고 점수 조합 (동적 계획법)
     items = [(si, im) for si, s in enumerate(secs) for im in s["imgs"]]
-    full = cap[top:bottom]
     cands, n_url = [], 0
     for _si, im in items:
         u = by_url(im["src"])
@@ -242,7 +267,7 @@ def align(capture_path, top, bottom, html, medium, fonts_css, slice_width, boxes
             cs = sorted(((1.0 if vis else 0.9), max(0.0, y - top), w) for vis, y, _x, w, _h in u)
             cs.sort(key=lambda c: (-c[0], c[1]))
             cands.append(cs[:4])
-        elif "gray" in im:
+        elif not idx and "gray" in im:
             cands.append(find(small, im["gray"], cap_w, full, im["width"]))
         else:
             cands.append([])
@@ -281,7 +306,7 @@ def align(capture_path, top, bottom, html, medium, fonts_css, slice_width, boxes
         anchors.append({"label": s["head"], "L": round(L), "R": round(R), "score": round(sc, 3)})
         lastL, lastR = L, R
     return {"anchors": anchors, "sections": len(secs), "images": len(items), "matched": len(chosen), "by_url": n_url,
-            "mode": "url" if idx else "pixel"}
+            "mode": "url" if idx else "pixel", "layout_cached": cached}
 
 
 if __name__ == "__main__":     # 시험: python review_align.py <캡처> <top> <bottom> <html> <fonts css> <슬라이스 폭>
