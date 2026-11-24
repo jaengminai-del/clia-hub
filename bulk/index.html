@@ -171,6 +171,8 @@ a.clia-btn { text-decoration: none; }
 .srow .pd { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .srow .sw2 { color: var(--clia-gray-900); font-weight: 500; font-size: 12px; line-height: 1.35; }
 .srow .sw2 i { display: block; font-style: normal; color: var(--muted); font-size: 11px; }
+.srow input.skuin { flex: 0 1 38%; }
+.srow input.skuin + input, .srow input.skuin ~ .okt { flex: 1 1 0; }
 .srow .leave { color: var(--muted); font-size: 12px; }
 .srow .mini.go { color: #fff; background: var(--clia-brand); border-color: var(--clia-brand); font-weight: 700; }
 .srow .mini.go:hover { background: var(--clia-brand-hover); border-color: var(--clia-brand-hover); }
@@ -189,6 +191,7 @@ a.clia-btn { text-decoration: none; }
 .pick .pc { color: var(--muted); font-weight: 500; font-size: 11px; }
 .pick:focus-visible, .schip:focus-visible, .mini:focus-visible { outline: 2px solid var(--clia-gray-900); outline-offset: 2px; }
 .srow.fixed { background: #F3FAF6; }
+.srow.fixed.half { background: transparent; }   /* 제품은 찾았지만 SKU 번호가 아직 비어 있음 */
 .okt { color: var(--ok); font-weight: 700; font-size: 12px; }
 .eb { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 11px 0 9px; border: 1px solid var(--clia-gray-300); border-radius: 8px; background: #fff; color: var(--clia-gray-900); font: 600 12px var(--clia-font), sans-serif; text-decoration: none; white-space: nowrap; }
 .eb:hover { border-color: var(--clia-gray-900); }

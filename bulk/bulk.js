@@ -30,7 +30,7 @@
   const grpName = (g) => (T.grp || TX.en.grp)[g] || g;
   const CH0 = ['shopee', 'lazada'].includes(qs.get('channel')) ? qs.get('channel') : '';
   const chName = (c) => (c === 'lazada' ? 'Lazada' : 'Shopee');
-  const S = { tab: 'all', q: '', last: null, mis: '', data: null, channel: CH0, ok: [], reg: [], skip: [], regOn: false, own: {}, pick: {}, fixed: {}, draft: {}, uerr: {}, openG: null, edits: {}, editsLoaded: false, sel: new Set(), force: new Set(), redo: new Set(), ack: new Set(), job: null, busy: false, cfg: {} };
+  const S = { tab: 'all', q: '', last: null, mis: '', data: null, channel: CH0, ok: [], reg: [], skip: [], regOn: false, own: {}, pick: {}, fixed: {}, draft: {}, uerr: {}, skuIn: {}, openG: null, edits: {}, editsLoaded: false, sel: new Set(), force: new Set(), redo: new Set(), ack: new Set(), job: null, busy: false, cfg: {} };
   const act = () => S.ok.concat(S.reg.filter((r) => S.regOn || S.own[r.row]));
   // 매칭 불가 = CLIA 가 건드리지 않는 행: 제품을 못 정한 행 + (등록을 켜지 않았으면) CLIA 에 없는 행
   const noMatch = () => S.skip.concat(S.regOn ? [] : S.reg.filter((r) => !S.own[r.row]).map((r) => ({ ...r, why: 'rReg' })));
@@ -99,7 +99,7 @@
       S.mis = CH0 && d.channel && d.channel !== CH0 ? d.channel : '';
       S.channel = S.mis ? '' : (CH0 || d.channel || '');
       chTag();
-      Object.assign(S, { job: null, q: '', last: null, regOn: false, own: {}, pick: {}, fixed: {}, draft: {}, uerr: {}, openG: null, edits: {}, editsLoaded: false, force: new Set(), redo: new Set(), ack: new Set() });
+      Object.assign(S, { job: null, q: '', last: null, regOn: false, own: {}, pick: {}, fixed: {}, draft: {}, uerr: {}, skuIn: {}, openG: null, edits: {}, editsLoaded: false, force: new Set(), redo: new Set(), ack: new Set() });
       $('q').value = '';
       setData(d, true);
       askRegister();
@@ -248,7 +248,10 @@
     : ({ rMulti: 'gMulti', rReg: 'gReg', rBundle: 'gBundle' }[r.why] || 'gNone'));
   const candsOf = (r) => r.candidates.map((x) => S.data.products[x]).filter((p) => p && (!home || p.country === home));
   // 한 줄 행: SKU · 상품명(한 줄, 마우스를 올리면 전체) · 할 일(주소 칸 / 후보 버튼 / 해결 표시)
-  const skuCell = (r) => (hasSku(r) ? `<span class="k">${esc(r.parentSku || r.sku)}</span>` : `<span class="k nosku">${esc(t('skuEmpty'))}</span>`);
+  const skuCell = (r) => (hasSku(r) ? `<span class="k">${esc(r.parentSku || r.sku)}</span>`
+    : S.skuIn[r.row] ? `<span class="k">${esc(S.skuIn[r.row])}</span>` : `<span class="k nosku">${esc(t('skuEmpty'))}</span>`);
+  // SKU 번호가 비어 있는 행: SKU 번호 칸 (엑셀 SKU 칸에 적는다 · 그 SKU 로 LG.com 제품도 찾는다)
+  const skuInput = (r) => `<input type="text" class="skuin" autocomplete="off" spellcheck="false" data-skurow="${r.row}" value="${esc(S.skuIn[r.row] || '')}" placeholder="${esc(t('skuPh'))}" aria-label="${esc(t('skuPh'))} — ${esc(r.name)}">`;
   // 표 (2026-11-24): 제품(SKU · 상품명) · 확인 필요 내용(이유) · Next step(주소 칸 / 후보 / 등록하고 채우기 / 그대로 둠)
   const prodCell = (r) => `<span class="pd">${skuCell(r)}<span class="n" title="${esc(r.name)}">${esc(r.name)}</span></span>`;
   const whyCell = (g) => `<span class="sw2">${esc(t(g))}${g === 'gNoSku' ? `<i>${esc(skuColName())}</i>` : ''}</span>`;
@@ -259,7 +262,7 @@
   function skipRowHtml(r, g) {
     let act = '';
     if (g === 'gUrl' || g === 'gNoSku') {
-      act = `<input type="url" inputmode="url" autocomplete="off" spellcheck="false" data-urow="${r.row}" value="${esc(S.draft[r.row] || '')}" placeholder="${esc(t('urlPh'))}" aria-label="${esc(t('urlPh'))} — ${esc(r.parentSku || r.sku || r.name)}">` +
+      act = (g === 'gNoSku' ? skuInput(r) : '') + `<input type="url" inputmode="url" autocomplete="off" spellcheck="false" data-urow="${r.row}" value="${esc(S.draft[r.row] || '')}" placeholder="${esc(t('urlPh'))}" aria-label="${esc(t('urlPh'))} — ${esc(r.parentSku || r.sku || r.name)}">` +
         `<span class="ust" data-ust="${r.row}" role="status" aria-live="polite">${S.uerr[r.row] ? esc(t('urlBad', S.data.site || home)) : ''}</span>`;
     } else if (g === 'gMulti') {
       // 같은 모델이 LG.com 카테고리 두 곳에 있으면(예: 2-door-refrigerator · top-freezer) 버튼이 똑같아 보인다 — 카테고리를 붙인다
@@ -274,8 +277,8 @@
   }
   function fixedRowHtml(f, now) {
     const r = f.r, p = now.p || {};
-    return `<div class="srow fixed">${prodCell(r)}${whyCell(f.g)}` +
-      `<span class="a"><span class="okt">✓ ${esc(p.model || '')}</span><button type="button" class="mini" data-undo="${r.row}">${esc(t('undo'))}</button></span></div>`;
+    return `<div class="srow fixed${f.g === 'gNoSku' && !S.skuIn[r.row] ? ' half' : ''}">${prodCell(r)}${whyCell(f.g)}` +
+      `<span class="a">${f.g === 'gNoSku' ? skuInput(r) : ''}<span class="okt">✓ ${esc(p.model || '')}</span><button type="button" class="mini" data-undo="${r.row}">${esc(t('undo'))}</button></span></div>`;
   }
   function skipHtml() {
     const by = {};
@@ -290,8 +293,10 @@
     // 이유별 칩 = 그 안의 작은 탭. 고른 칩의 행만, 칩 아래 짧은 안내 한 줄 (2026-11-23 단순화)
     const g = S.openG && by[S.openG] ? S.openG : gs[0];
     if (!g) return '';
+    // SKU 번호가 비어 있음: 제품(주소)과 SKU 번호를 모두 넣어야 끝 — 제품만 찾은 행은 남은 수에 센다
+    const half = (x) => (x === 'gNoSku' ? by[x].done.filter(([f]) => !S.skuIn[f.r.row]).length : 0);
     const chips = `<div class="schips" role="tablist">${gs.map((x) => `<button type="button" class="schip${x === g ? ' on' : ''}" role="tab" aria-selected="${x === g}" data-g="${x}">` +
-      `${esc(t(x))}<b>${by[x].open.length}</b>${by[x].done.length ? `<i>✓${by[x].done.length}</i>` : ''}</button>`).join('')}</div>`;
+      `${esc(t(x))}<b>${by[x].open.length + half(x)}</b>${by[x].done.length - half(x) ? `<i>✓${by[x].done.length - half(x)}</i>` : ''}</button>`).join('')}</div>`;
     const { open, done } = by[g];
     return chips + `<div class="shead"><span>${esc(t('hdProduct'))}</span><span>${esc(t('hdStatus'))}</span><span class="hn">${esc(t('hdAction'))}</span></div>` +
       `<div class="sgrows">${open.map((r) => skipRowHtml(r, g)).join('')}${done.map(([f, now]) => fixedRowHtml(f, now)).join('')}</div>`;
@@ -388,12 +393,15 @@
     $('again').disabled = S.busy;
   }
 
+  // 넣은 SKU 번호 (SKU 번호가 비어 있던 행) → 엑셀 SKU 칸에
+  const skuList = () => Object.entries(S.skuIn).filter(([, v]) => v);
   // 끝난 작업과 지금 선택이 같은지 (같으면 다시 만들 필요 없이 받기만)
   function sameAsJob() {
     const j = S.job;
     if (!j || !j.items || S.force.size || S.redo.size) return false;
     const rows = new Set(j.items.map((x) => x.row));
-    return rows.size === S.sel.size && [...S.sel].every((r) => rows.has(r));
+    const js = (j.skus || []).map((x) => `${x.row}:${x.sku}`).sort().join('|'), ns = skuList().map(([r, v]) => `${r}:${v}`).sort().join('|');
+    return js === ns && rows.size === S.sel.size && [...S.sel].every((r) => rows.has(r));
   }
   // 탭
   const goTab = (e) => { const b = e.target.closest('[data-tab]'); if (!b) return; S.tab = b.dataset.tab; refresh(); };
@@ -519,15 +527,38 @@
       inp.select();
     }
   }
+  // SKU 번호: 쓰는 대로 기억하고, 칸을 떠나거나 Enter · 붙여 넣기 하면 그 SKU 로 제품을 찾아 주소 칸을 채운다
+  async function commitSku(inp) {
+    const row = +inp.dataset.skurow, v = inp.value.trim();
+    if (v) S.skuIn[row] = v; else delete S.skuIn[row];
+    const urlIn = document.querySelector(`#skip input[data-urow="${row}"]`), st = document.querySelector(`[data-ust="${row}"]`);
+    if (!v || !urlIn || urlIn.value.trim() || inp.dataset.tried === v) { $('skip').innerHTML = skipHtml(); return; }
+    inp.dataset.tried = v;
+    if (st) st.textContent = t('checking');
+    try {
+      const m = await api(`/api/v1/bulk/match-sku?sku=${encodeURIComponent(v)}&country=${encodeURIComponent(home)}&site=${encodeURIComponent(S.data.site || '')}`);
+      urlIn.value = m.url; S.draft[row] = m.url;
+      await tryUrl(urlIn);
+    } catch (_) { if (st) st.textContent = t('skuNoHit'); }
+  }
   $('skip').addEventListener('input', (e) => {
+    const sk = e.target.closest('input[data-skurow]');
+    if (sk) { if (sk.value.trim()) S.skuIn[+sk.dataset.skurow] = sk.value.trim(); else delete S.skuIn[+sk.dataset.skurow]; return; }
     const inp = e.target.closest('input[data-urow]');
     if (!inp) return;
     S.draft[+inp.dataset.urow] = inp.value;
     if (!inp.value.trim()) { delete S.uerr[+inp.dataset.urow]; inp.closest('.srow').classList.remove('bad'); document.querySelector(`[data-ust="${inp.dataset.urow}"]`).textContent = ''; delete inp.dataset.tried; }
   });
   $('skip').addEventListener('paste', (e) => { const inp = e.target.closest('input[data-urow]'); if (inp) setTimeout(() => tryUrl(inp), 0); });
-  $('skip').addEventListener('keydown', (e) => { const inp = e.target.closest('input[data-urow]'); if (inp && e.key === 'Enter') { e.preventDefault(); delete inp.dataset.tried; tryUrl(inp); } });
-  $('skip').addEventListener('change', (e) => { const inp = e.target.closest('input[data-urow]'); if (inp) tryUrl(inp); });
+  $('skip').addEventListener('keydown', (e) => {
+    const sk = e.target.closest('input[data-skurow]');
+    if (sk && e.key === 'Enter') { e.preventDefault(); sk.blur(); return; }   // 칸을 떠나면 change → commitSku
+    const inp = e.target.closest('input[data-urow]'); if (inp && e.key === 'Enter') { e.preventDefault(); delete inp.dataset.tried; tryUrl(inp); }
+  });
+  $('skip').addEventListener('change', (e) => {
+    const sk = e.target.closest('input[data-skurow]'); if (sk) { commitSku(sk); return; }
+    const inp = e.target.closest('input[data-urow]'); if (inp) tryUrl(inp);
+  });
   $('skip').addEventListener('click', (e) => {
     const pk = e.target.closest('button[data-pick]'), un = e.target.closest('button[data-undo]'), rr = e.target.closest('button[data-regrow]');
     const gb = e.target.closest('.schip');
@@ -687,7 +718,7 @@
     S.autoDl = !longJob;   // 오래 걸리는 작업은 자동 다운로드 대신 '다시 받기' 버튼 · 메일
     S.busy = true; refresh();
     try {
-      const j = await api('/api/v1/bulk/build', { id: S.data.id, channel: S.channel, sheet: S.data.sheet, descCol: S.data.cols.desc, country: home, lang: L, items });
+      const j = await api('/api/v1/bulk/build', { id: S.data.id, channel: S.channel, sheet: S.data.sheet, descCol: S.data.cols.desc, country: home, lang: L, items, skus: Object.fromEntries(skuList()) });
       S.force = new Set(); S.redo = new Set(); S.ack = new Set();
       store.set(lastKey, { job: j.id, file: S.data.fileName, at: Date.now() });
       S.job = j; openXp(est, longJob);
@@ -709,6 +740,7 @@
       for (const it of j.items) if (!it.register && !it.bundle && it.slug) S.pick[it.row] = it.slug;   // 여러 후보 중 골랐던 제품
       for (const it of j.items) if (it.register) S.own[it.row] = { ...((d.rows.find((r) => r.row === it.row) || {}).lg || {}), url: it.url, model: it.model, alts: it.alts, fuzzy: it.fuzzy };
       S.regOn = j.items.some((x) => x.register);
+      S.skuIn = Object.fromEntries((j.skus || []).map((x) => [x.row, x.sku]));
       S.ack = new Set(store.get('clia-bulk-ack-' + id) || []);
       setData(d, false);
       S.sel = new Set(j.items.map((x) => x.row));

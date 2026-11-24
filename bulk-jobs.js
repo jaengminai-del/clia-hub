@@ -142,7 +142,7 @@ function jobView(j) {
     crawlTotal: its.filter((x) => x.register || x.force).length, crawlDone: its.filter((x) => (x.register || x.force) && (x.crawled || x.status === 'failed')).length,
     review: its.filter((x) => (x.flags || []).some((f) => f.sev !== 'info')).length,
     notify: j.notify ? { email: !!j.notify.email, sent: !!j.notify.sent } : null,
-    items: its, file: j.status === 'ready' ? `/api/v1/bulk/jobs/${j.id}/file` : null, fileName: j.outName, at: j.at, finishedAt: j.finishedAt };
+    skus: j.skus || [], items: its, file: j.status === 'ready' ? `/api/v1/bulk/jobs/${j.id}/file` : null, fileName: j.outName, at: j.at, finishedAt: j.finishedAt };
 }
 
 // ── 내용 만들기 (같은 서버의 기존 API) ──
@@ -324,6 +324,8 @@ async function run(j) {
     it.prevLen = String((sheet.rows.get(it.row) || new Map()).get(j.descCol) || '').trim().length;
     wb.setCell(j.sheet, it.row, j.descCol, texts.get(it.row));
   }
+  // SKU 번호가 비어 있던 행에 사용자가 넣은 SKU
+  for (const x of j.skus || []) if (j.skuCol) wb.setCell(j.sheet, x.row, j.skuCol, x.sku);
   if (!j.items.some((x) => x.status === 'ok')) throw new Error('no row could be filled');
   const buf = await wb.save();
   fs.mkdirSync(path.join(DIR, j.upload), { recursive: true });
@@ -349,8 +351,9 @@ function start(j) {
   return j;
 }
 
-function create({ upload, channel, country, sheet, descCol, items, outName, base, notify: nt, lang }) {
+function create({ upload, channel, country, sheet, descCol, items, outName, base, notify: nt, lang, skus, skuCol }) {
   const j = { id: crypto.randomBytes(8).toString('hex'), upload, channel, country: country || countryOf({ items }), sheet, descCol, items, outName, base, lang,
+    skus: skus && skus.length && skuCol ? skus : [], skuCol: skuCol || null,
     notify: nt && nt.email ? { email: nt.email, lang } : null, status: 'running', phase: 'queued', error: '', at: Date.now() };
   for (const [k, x] of jobs) if (Date.now() - (x.at || 0) > KEEP_MS) jobs.delete(k);
   cleanup();
