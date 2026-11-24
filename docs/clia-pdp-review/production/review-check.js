@@ -33,19 +33,26 @@ if (/railway\.app|lgecreativehub/i.test(base)) { console.error('운영 주소에
   await page.waitForFunction(() => C && CHS.every((ch) => C.d[ch]) && G, null, { timeout: 120000 });
   await page.waitForTimeout(300); await imgs(); await shot('review-compare-top-ko.jpg');
   const r = await page.evaluate(() => {
-    // 동시 스크롤 규칙: 오른쪽 = min(s, rmax), 왼쪽 = min(s·k, lmax) — 여러 위치에서
-    const sc = $('sc'), bad = [];
-    for (const f of [0, 0.1, 0.33, 0.5, 0.8, 1]) {
-      sc.scrollTop = G.sMax * f; update();
-      const s = sc.scrollTop, ty = (e) => -new DOMMatrix(getComputedStyle(e).transform).m42;
-      const rr = ty($('mvR')), ll = ty($('mvL'));
-      if (Math.abs(rr - Math.min(s, G.rmax)) > 1 || Math.abs(ll - Math.min(s * G.k, G.lmax)) > 1) bad.push(f);
+    // 같은 영역 규칙: 구간 시작 스크롤량에서 두 쪽이 그 구간의 시작 자리에 (끝에 닿아 멈춘 쪽 빼고),
+    // 구간 안에서는 같은 속도, 짧은 쪽은 구간 끝에서 기다림 — 구간마다 시작 · 30% · 끝 직전
+    const sc = $('sc'), bad = [], ty = (e) => -new DOMMatrix(getComputedStyle(e).transform).m42;
+    for (const g of G.segs) for (const f of [0, 0.3, 0.999]) {
+      const s = Math.min(G.sMax, g.S + g.len * f); sc.scrollTop = s; update();
+      const tt = sc.scrollTop - g.S;
+      const wantL = Math.min(g.l + Math.min(tt, g.dl), G.lmax), wantR = Math.min(g.r + Math.min(tt, g.dr), G.rmax);
+      if (Math.abs(ty($('mvL')) - wantL) > 1.5 || Math.abs(ty($('mvR')) - wantR) > 1.5) bad.push(`${g.n}@${f}`);
     }
+    // 이름표: 지금 구간의 이름이 양쪽에 같게
+    sc.scrollTop = G.segs[Math.min(2, G.segs.length - 1)].S + 5; update();
+    const tags = [$('segTagL').textContent, $('segTagR').textContent];
     const im = [...document.querySelectorAll('#mvR img.sl')].filter((e) => e.complete && e.naturalWidth);
     const distorted = im.filter((e) => Math.abs(e.clientHeight / e.clientWidth - e.naturalHeight / e.naturalWidth) > 0.01).length;
-    return { bad, distorted, loaded: im.length };
+    return { bad, distorted, loaded: im.length, segs: G.segs.length, aligned: G.aligned, tags };
   });
-  check(!r.bad.length, `sync scroll rule (${r.bad.length} mismatches)`);
+  console.log('     segments', r.segs, 'anchors', r.aligned, 'tags', JSON.stringify(r.tags));
+  check(r.segs >= 3 && r.aligned >= 1, `same-area anchors used (${r.aligned} anchors, ${r.segs} segments)`);
+  check(r.tags[0].split(' · ')[0] === r.tags[1].split(' · ')[0], 'same segment number on both sides');
+  check(!r.bad.length, `same-area scroll rule (${r.bad.length} mismatches ${r.bad.slice(0, 5).join(',')})`);
   check(!r.distorted, `slice aspect ratio (${r.distorted} distorted of ${r.loaded} loaded)`);
   check(await page.locator('#bOk').isDisabled(), 'approve locked before checklist');
   // 두 채널 끝까지 천천히 내리기 (스크롤 체크리스트)
