@@ -2933,8 +2933,10 @@ function startFullshot(url, key, via = '') {   // via 'direct': 직접 캡처만
     clearTimeout(timer);
     let meta = {};
     try { meta = JSON.parse(out); } catch (_) {}
+    const tmpBoxes = `${tmp}.boxes.json`;   // 이미지 위치 기록 (fullshot.py _save_boxes)
     if (code !== 0 || meta.error || !fs.existsSync(tmp)) {
       fs.rmSync(tmp, { force: true });
+      fs.rmSync(tmpBoxes, { force: true });
       if (meta.gone) {   // 없어진 제품 페이지 — 기록해 두고 다시 찍지 않는다
         putFullshotMeta(key, { url, final: '', at: Date.now(), gone: true, error: meta.error });
         fullshotJobs.delete(key);
@@ -2943,7 +2945,16 @@ function startFullshot(url, key, via = '') {   // via 'direct': 직접 캡처만
       return;
     }
     fs.renameSync(tmp, abs);
-    putFullshotMeta(key, { url, final: meta.final || url, at: Date.now(), via: meta.via || '' });
+    const boxesAbs = path.join(FULLSHOT_DIR, `${key}.boxes.json`);
+    if (fs.existsSync(tmpBoxes)) {
+      try {   // 어떤 캡처의 위치 기록인지 (캡처 파일 크기) — 다시 찍으면 맞지 않는 기록을 쓰지 않게
+        const bx = JSON.parse(fs.readFileSync(tmpBoxes, 'utf8'));
+        fs.writeFileSync(boxesAbs, JSON.stringify({ ...bx, jpg_bytes: fs.statSync(abs).size }));
+        fs.rmSync(tmpBoxes, { force: true });
+      } catch (_) { fs.renameSync(tmpBoxes, boxesAbs); }
+      sliceStore.putBuffer(`media-fullshot/${key}.boxes.json`, fs.readFileSync(boxesAbs), 'application/json').catch((e) => console.warn('[fullshot] 위치 기록 버킷 업로드 실패', e.message));
+    } else fs.rmSync(boxesAbs, { force: true });   // 새 캡처(Firecrawl 등)에 맞지 않는 예전 위치 기록은 지운다
+    putFullshotMeta(key, { url, final: meta.final || url, at: Date.now(), via: meta.via || '', boxes: fs.existsSync(boxesAbs) });
     fullshotJobs.set(key, { status: 'ready' });
     console.log(`[fullshot] ${url} → ${meta.width}x${meta.height} ${Math.round(meta.bytes / 1024)}KB ${meta.seconds}s`);
     await sliceStore.putBuffer(`media-fullshot/${key}.jpg`, fs.readFileSync(abs), 'image/jpeg').catch((e) => console.warn('[fullshot] 버킷 업로드 실패', e.message));

@@ -67,6 +67,36 @@ _SCROLL = """async () => {
 }"""
 
 
+# 이미지 위치 기록 (2026-11-24): 찍을 때 페이지의 이미지 · 동영상마다 주소와 위치(문서 CSS px)를 함께 적는다 → <out>.boxes.json
+#   검토 화면의 「같은 영역」을 이미지 주소로 바로 맞춘다 (상세 이미지 HTML 의 img 도 같은 lg.com 주소) — 그림 맞추기보다 빠르고 정확.
+#   보이지 않는 것(캐러셀의 다른 장 · 탭)은 보이는 가장 가까운 상위 요소의 위치로.
+_JS_BOXES = """() => {
+  const vis = (e) => { const r = e.getBoundingClientRect(); const c = getComputedStyle(e);
+    return r.width > 40 && r.height > 40 && r.left < innerWidth - 20 && r.right > 20   // 화면 옆으로 밀려난 캐러셀 장은 안 보임
+      && c.display !== 'none' && c.visibility !== 'hidden' && +c.opacity !== 0; };
+  const out = [];
+  for (const e of document.querySelectorAll('img, picture source, video')) {
+    const t = e.tagName === 'SOURCE' ? e.parentElement : e;
+    const srcs = [e.currentSrc, e.src, e.getAttribute('data-src'), e.getAttribute('srcset'), e.getAttribute('data-srcset'), e.getAttribute('poster')]
+      .filter(Boolean).join(' ');
+    if (!srcs) continue;
+    let b = t, shown = vis(t);
+    if (!shown) { for (b = t.parentElement; b && b !== document.body && !vis(b); b = b.parentElement); if (!b || b === document.body) continue; }
+    const r = b.getBoundingClientRect();
+    out.push({ srcs: srcs.slice(0, 1500), x: Math.round(r.left + scrollX), y: Math.round(r.top + scrollY), w: Math.round(r.width), h: Math.round(r.height), vis: shown });
+  }
+  return out;
+}"""
+
+
+def _save_boxes(page, out: Path, scale: float):
+    try:
+        boxes = page.evaluate(_JS_BOXES)
+        Path(str(out) + ".boxes.json").write_text(json.dumps({"scale": scale, "items": boxes}), encoding="utf-8")
+    except Exception as e:   # 위치 기록은 덤 — 실패해도 캡처는 그대로
+        print(f"boxes: {e}", file=sys.stderr)
+
+
 class Blocked(Exception):
     pass
 
@@ -235,6 +265,7 @@ def capture_direct(url: str, out: Path, scale: float = 0.5, quality: int = 80) -
             page.evaluate("window.scrollTo(0, 0)")
             page.wait_for_timeout(1200)
             out.parent.mkdir(parents=True, exist_ok=True)
+            _save_boxes(page, out, scale)
             page.screenshot(path=str(out), full_page=True, type="jpeg", quality=quality)
         finally:
             browser.close()

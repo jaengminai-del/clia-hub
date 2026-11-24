@@ -153,6 +153,19 @@ function captureResult(gate, err) {
 }
 const captureBlocked = () => Date.now() < breaker.until || breaker.probing;
 
+/** 캡처의 이미지 위치 기록 (fullshot.py) — 로컬에 없으면 버킷에서. 이 캡처 파일의 것(jpg_bytes)일 때만 경로를 돌려준다 */
+async function boxesFor(key, shotPath) {
+  const fp = path.join(FULLSHOT_DIR, `${key}.boxes.json`);
+  if (!fs.existsSync(fp)) {
+    const buf = await store.getBuffer(`media-fullshot/${key}.boxes.json`).catch(() => null);
+    if (!buf) return null;
+    fs.writeFileSync(fp, buf);
+  }
+  const b = readJson(fp);
+  try { if (!b || !b.jpg_bytes || b.jpg_bytes !== fs.statSync(shotPath).size) return null; } catch (_) { return null; }
+  return fp;
+}
+
 function runPrep(input) {
   return new Promise((resolve, reject) => {
     const p = require('child_process').execFile(python(), ['review_prep.py'], { cwd: PY_DIR, timeout: 5 * 60 * 1000, maxBuffer: 16 * 1024 * 1024,
@@ -171,7 +184,10 @@ function runPrep(input) {
 // bg (미리 준비): lg.com 캡처는 직접(Playwright)만 — 막히면 Firecrawl 로 넘기지 않고 비워 두고, 사람이 열 때 채운다
 async function prepare(slug, ch, { recapture = false, existingOnly = false, bg = false } = {}) {
   const key = `${slug}|${ch}`, job = jobs.get(key);
-  const step = (s) => { job.step = s; };
+  // 단계별 시간 (속도 개선용 — 로그 한 줄에 함께)
+  const T = {}, t0 = Date.now();
+  let cur = '', curT = t0;
+  const step = (s) => { const now = Date.now(); if (cur) T[cur] = (T[cur] || 0) + (now - curT); cur = s; curT = now; job.step = s; };
   const sum = cr.productSummary(slug);
   if (!sum) throw new Error('product not found');
   const sig = sigOf(slug, ch);
@@ -230,7 +246,8 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false, bg =
     const htmlTmp = path.join(require('os').tmpdir(), `review-${process.pid}-${Date.now()}-${ch}.html`);
     fs.writeFileSync(htmlTmp, html);
     try {
-      return { shotPath, a: await runPrep({ fullshot: shotPath && fs.existsSync(shotPath) ? shotPath : null, mirror: path.join(dirOf(slug), 'mirror.json'),
+      const boxes = shotPath && fs.existsSync(shotPath) ? await boxesFor(st.key, shotPath) : null;
+      return { shotPath, a: await runPrep({ fullshot: shotPath && fs.existsSync(shotPath) ? shotPath : null, boxes, mirror: path.join(dirOf(slug), 'mirror.json'),
         slices: slices.map((s) => ({ text: s.text })), html: htmlTmp, medium: 'shopee_lazada',
         fontsCss: `http://127.0.0.1:${process.env.PORT || 3001}/css/fonts.css`, sliceWidth: slices[0].w }) };
     } finally { fs.rmSync(htmlTmp, { force: true }); }
@@ -274,8 +291,11 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false, bg =
   const fp = fileOf(slug, ch);
   fs.writeFileSync(fp, JSON.stringify(rec));
   store.pushPaths([fp]).catch((e) => console.warn('[review] 버킷 업로드 실패', e.message));
+  step('');
+  const secs = Object.entries(T).filter(([, v]) => v >= 100).map(([k, v]) => `${k} ${(v / 1000).toFixed(1)}`).join(' ');
   console.log(`[review] ${slug} ${ch}: 이미지 ${slices.length}장 (${rec.source}) · USP ${a.usps.length} · 캡처 ${a.shot ? `${a.shot.top}~${a.shot.bottom}` : fsErr || '없음'}`
-    + ` · 같은 영역 ${a.align ? `${a.align.anchors.length}곳 (이미지 ${a.align.matched}/${a.align.images})` : a.alignErr || '없음'}`);
+    + ` · 같은 영역 ${a.align ? `${a.align.anchors.length}곳 (이미지 ${a.align.matched}/${a.align.images})` : a.alignErr || '없음'}`
+    + ` · ${((Date.now() - t0) / 1000).toFixed(1)}초 (${secs}${bg ? '' : ' · 사람'})`);
   return rec;
 }
 
@@ -320,10 +340,11 @@ function enqueue(slug, ch, opts = {}, bg = false) {
   return nj;
 }
 
+const upgraded = new Set();   // 위치 기록 캡처로 다시 찍은 제품 (서버가 떠 있는 동안 한 번씩만)
 /** 미리 준비: Shopee/Lazada 법인 제품 중 준비 안 됨 · 내용 바뀜인 채널을 미리 준비 차례에 넣는다 (최근 크롤 먼저) */
 function prewarm() {
   if (!PREWARM || paused) return 0;
-  let n = 0, refills = 0;
+  let n = 0, refills = 0, upgrades = 0;
   try {
     const idx = require('./bulk-catalog').productIndex();
     const ps = Object.values(idx.products).filter((p) => PREWARM_COUNTRIES.has(p.country)).sort((a, b) => b.crawled_at - a.crawled_at);
@@ -337,11 +358,19 @@ function prewarm() {
       if (state === 'none' || state === 'stale' || state === 'error' || refill) {
         enqueue(p.slug, ch, { existingOnly: PREWARM_EXISTING_ONLY }, true); n++;
         if (refill) refills++;
+        continue;
+      }
+      // 위치 기록 없이 찍은 예전 캡처 → 다시 찍어(위치 기록 포함) 주소로 맞춘다 (2026-11-24 — 그림 맞추기는 느리고 덜 정확).
+      //   새 일이 거의 없을 때만(대기 50개 미만), 한 번 훑을 때 30개까지, 한 채널만 (다른 채널은 그 결과를 그대로 씀)
+      if (state === 'ready' && !PREWARM_EXISTING_ONLY && ch === 'shopee' && rec && rec.shot && rec.align && rec.align.mode !== 'url'
+          && !upgraded.has(p.slug) && upgrades < 30 && queue.length < 50 && !captureBlocked()) {
+        upgraded.add(p.slug); upgrades++; n++;
+        enqueue(p.slug, ch, { recapture: true }, true);
       }
     }
     verifySweep(ps);
   } catch (e) { console.warn('[review] 미리 준비 목록 실패', e.message); }
-  if (n) console.log(`[review] 미리 준비 ${n}개 차례에 넣음 (대기 ${queue.length} · 동시 ${BG_CONC}${refills ? ` · 캡처 채우기 ${refills}` : ''})`);
+  if (n) console.log(`[review] 미리 준비 ${n}개 차례에 넣음 (대기 ${queue.length} · 동시 ${BG_CONC}${refills ? ` · 캡처 채우기 ${refills}` : ''}${upgrades ? ` · 위치 기록 캡처 ${upgrades}` : ''})`);
   return n;
 }
 if (PREWARM) {

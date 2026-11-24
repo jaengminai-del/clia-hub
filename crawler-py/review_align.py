@@ -50,8 +50,9 @@ _JS_BLOCKS = """() => {
 }"""
 
 
-def measure(html, medium, fonts_css):
-    """slices.py 와 같은 문서·폭으로 그려 섹션·이미지 위치(CSS px)와 이미지 조각(회색조)을 얻는다."""
+def measure(html, medium, fonts_css, need=None):
+    """slices.py 와 같은 문서·폭으로 그려 섹션·이미지 위치(CSS px)와 이미지 조각(회색조)을 얻는다.
+    need(src) 가 있으면 그것이 True 인 이미지만 잘라 둔다 (주소로 찾은 이미지는 조각이 필요 없다 — 시간이 많이 듦)."""
     import io
     import numpy as np
     from PIL import Image
@@ -67,6 +68,8 @@ def measure(html, medium, fonts_css):
             secs = page.evaluate(_JS_BLOCKS)
             for s in secs:
                 for im in s["imgs"]:
+                    if need is not None and not need(im["src"]):
+                        continue
                     shot = page.screenshot(type="png", full_page=True,
                                            clip={"x": im["left"], "y": im["top"], "width": im["width"], "height": im["bottom"] - im["top"]})
                     im["gray"] = np.asarray(Image.open(io.BytesIO(shot)).convert("L"), dtype=np.float32)
@@ -183,11 +186,44 @@ def refine(cap, tpl_gray, c, ds=2):
     return best
 
 
-def align(capture_path, top, bottom, html, medium, fonts_css, slice_width):
-    """섹션 앵커 [{label, L (캡처 px), R (슬라이스 출력 px), score}] — 위에서 아래 순서, L·R 모두 늘어난다."""
+import re as _re
+
+
+def stem(u: str) -> str:
+    """이미지 주소 → 비교용 이름 (파일 이름, 소문자, ?뒤 · 기기 꼬리표 -d/-m/-pc/-mo 뺌)."""
+    f = str(u or "").split("?")[0].split("#")[0].rstrip("/").rsplit("/", 1)[-1].lower()
+    return _re.sub(r"[-_](d|m|pc|mo|mob|mobile|desktop)(?=\.[a-z0-9]+$)", "", f)
+
+
+def box_index(boxes_path):
+    """캡처 때 적은 이미지 위치 (fullshot.py _save_boxes) → {이름: [(보임, y, x, w, h) 캡처 px]}"""
+    import json
+    b = json.loads(Path(boxes_path).read_text(encoding="utf-8"))
+    sc = float(b.get("scale") or 0.5)
+    idx = {}
+    for it in b.get("items") or []:
+        for u in _re.findall(r"[^\s,]+?\.(?:jpe?g|png|webp|gif|avif|mp4|webm)", it.get("srcs") or "", _re.I):
+            k = stem(u)
+            v = (bool(it.get("vis")), it["y"] * sc, it["x"] * sc, it["w"] * sc, it["h"] * sc)
+            lst = idx.setdefault(k, [])
+            if v not in lst:
+                lst.append(v)
+    return idx
+
+
+def align(capture_path, top, bottom, html, medium, fonts_css, slice_width, boxes=None):
+    """섹션 앵커 [{label, L (캡처 px), R (슬라이스 출력 px), score}] — 위에서 아래 순서, L·R 모두 늘어난다.
+    boxes (캡처 때 적은 이미지 위치) 가 있으면 이미지 주소로 먼저 찾고, 못 찾은 이미지만 그림으로 찾는다 (2026-11-24)."""
     import numpy as np
     from PIL import Image
-    layout, secs = measure(html, medium, fonts_css)
+    idx = {}
+    if boxes and Path(boxes).exists():
+        try:
+            idx = box_index(boxes)
+        except Exception:   # noqa: BLE001 — 위치 기록이 깨졌으면 그림 맞추기만
+            idx = {}
+    by_url = lambda src: [b for b in idx.get(stem(src), []) if top - 40 <= b[1] <= bottom]
+    layout, secs = measure(html, medium, fonts_css, need=(lambda src: not by_url(src)) if idx else None)
     scale = slice_width / max(1, layout["contentWidth"])         # CSS px → 슬라이스 출력 px
     with Image.open(capture_path) as im:
         cap = np.asarray(im.convert("L"), dtype=np.float32)
@@ -198,7 +234,18 @@ def align(capture_path, top, bottom, html, medium, fonts_css, slice_width):
     # 이미지마다 후보 → 순서를 지키는 최고 점수 조합 (동적 계획법)
     items = [(si, im) for si, s in enumerate(secs) for im in s["imgs"]]
     full = cap[top:bottom]
-    cands = [find(small, im["gray"], cap_w, full, im["width"]) for _si, im in items]
+    cands, n_url = [], 0
+    for _si, im in items:
+        u = by_url(im["src"])
+        if u:   # 주소로 찾음 — 보이는 자리를 먼저 (캐러셀의 다른 장 · 숨은 탭은 상위 요소 자리), 점수 1.0 / 0.9
+            n_url += 1
+            cs = sorted(((1.0 if vis else 0.9), max(0.0, y - top), w) for vis, y, _x, w, _h in u)
+            cs.sort(key=lambda c: (-c[0], c[1]))
+            cands.append(cs[:4])
+        elif "gray" in im:
+            cands.append(find(small, im["gray"], cap_w, full, im["width"]))
+        else:
+            cands.append([])
     # best[(i, c)] = (점수 합, 이전 (i, c))
     best = {}
     for i, cs in enumerate(cands):
@@ -233,7 +280,8 @@ def align(capture_path, top, bottom, html, medium, fonts_css, slice_width):
             continue
         anchors.append({"label": s["head"], "L": round(L), "R": round(R), "score": round(sc, 3)})
         lastL, lastR = L, R
-    return {"anchors": anchors, "sections": len(secs), "images": len(items), "matched": len(chosen)}
+    return {"anchors": anchors, "sections": len(secs), "images": len(items), "matched": len(chosen), "by_url": n_url,
+            "mode": "url" if idx else "pixel"}
 
 
 if __name__ == "__main__":     # 시험: python review_align.py <캡처> <top> <bottom> <html> <fonts css> <슬라이스 폭>

@@ -201,7 +201,8 @@ def main():
         try:
             from review_align import align
             al = align(a["fullshot"], shot["top"], shot["bottom"], Path(a["html"]).read_text(encoding="utf-8"),
-                       a.get("medium") or "shopee_lazada", a.get("fontsCss") or "", int(a.get("sliceWidth") or 1000))
+                       a.get("medium") or "shopee_lazada", a.get("fontsCss") or "", int(a.get("sliceWidth") or 1000),
+                       boxes=a.get("boxes"))
         except Exception as e:      # noqa: BLE001 — 맞추기 실패는 준비 실패가 아니다
             al_err = f"{type(e).__name__}: {e}"[:200]
     json.dump({"shot": shot, "usps": usps, "sliceUsps": su, "secs": secs, "kind": spec_kinds(texts, su),
