@@ -1,0 +1,79 @@
+{
+ "checked_at": "2026-11-24 12:01 KST",
+ "products": {
+  "www-lg-com-th-air-conditioner-inverter-air-conditioner-with-air-purifier-ihq18r": {
+   "url": "https://www.lg.com/th/air-conditioner-inverter/air-conditioner-with-air-purifier/ihq18r/",
+   "status": "none",
+   "key": "517b9396d94928157b33"
+  },
+  "www-lg-com-th-laundry-front-load-washing-machine-f2515rnew": {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/f2515rnew/",
+   "status": "none",
+   "key": "15bc1497df47abe69fee"
+  },
+  "www-lg-com-th-laundry-top-load-washing-machine-t2109nbtb": {
+   "url": "https://www.lg.com/th/laundry/top-load-washing-machine/t2109nbtb/",
+   "status": "none",
+   "key": "d62773d4d6ada4fa8f31"
+  },
+  "www-lg-com-th-air-puricare-puricare-360-as10gdby0": {
+   "url": "https://www.lg.com/th/air-puricare/puricare-360/as10gdby0/",
+   "status": "none",
+   "key": "c8e56432c54f1c70fdda"
+  },
+  "www-lg-com-th-vacuum-cleaner-cordless-vacuum-cleaner-a9-ace": {
+   "url": "https://www.lg.com/th/vacuum-cleaner/cordless-vacuum-cleaner/a9-ace/",
+   "status": "ready",
+   "key": "28d8734d26e3f419404e",
+   "src": "https://clia-hub-production-699d.up.railway.app/media/fullshot/28d8734d26e3f419404e.jpg",
+   "width": 960,
+   "height": 9142
+  },
+  "www-lg-com-th-refrigerators-multi-door-refrigerator-gc-b41fpgam": {
+   "url": "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gc-b41fpgam/",
+   "status": "none",
+   "key": "89e9c5b37876eaa31ec0"
+  },
+  "www-lg-com-th-microwave-ovens-solo-microwave-ms2032gas": {
+   "url": "https://www.lg.com/th/microwave-ovens/solo-microwave/ms2032gas/",
+   "status": "none",
+   "key": "87fbf536767fc083501e"
+  },
+  "www-lg-com-th-refrigerators-side-by-side-refrigerator-gc-b187jbam": {
+   "url": "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-b187jbam/",
+   "status": "ready",
+   "key": "7c518879f1b5dc3c095b",
+   "src": "https://clia-hub-production-699d.up.railway.app/media/fullshot/7c518879f1b5dc3c095b.jpg",
+   "width": 960,
+   "height": 6184
+  },
+  "www-lg-com-th-laundry-dryer-rv10vhp2b": {
+   "url": "https://www.lg.com/th/laundry/dryer/rv10vhp2b/",
+   "status": "ready",
+   "key": "d789c2fd00d7ac761ca2",
+   "src": "https://clia-hub-production-699d.up.railway.app/media/fullshot/d789c2fd00d7ac761ca2.jpg",
+   "width": 960,
+   "height": 8202
+  },
+  "www-lg-com-th-air-conditioner-inverter-wifi-air-air-conditioner-scq13a": {
+   "url": "https://www.lg.com/th/air-conditioner-inverter/wifi-air-air-conditioner/scq13a/",
+   "status": "none",
+   "key": "2de679aafa14c1ec299b"
+  },
+  "www-lg-com-th-refrigerators-side-by-side-refrigerator-gc-b257sqyl": {
+   "url": "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-b257sqyl/",
+   "status": "none",
+   "key": "93a48b4947db439edbb4"
+  },
+  "www-lg-com-th-laundry-top-load-washing-machine-t2313vspm": {
+   "url": "https://www.lg.com/th/laundry/top-load-washing-machine/t2313vspm/",
+   "status": "none",
+   "key": "d57a0020aff4f51cf380"
+  },
+  "www-lg-com-th-tv-soundbars-oled-oled83g4psa": {
+   "url": "https://www.lg.com/th/tv-soundbars/oled/oled83g4psa/",
+   "status": "none",
+   "key": "407836b91ac57845b3eb"
+  }
+ }
+}

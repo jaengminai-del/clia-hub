@@ -503,4 +503,5 @@ module.exports.slugify = slugify;
 module.exports.stripNonContent = stripNonContent;
 module.exports.productSummary = productSummary;   // 벌크 엑셀 SKU 연결 (bulk-routes.js)
 module.exports.OUT_DIR = OUT_DIR;
+module.exports.auth = auth;   // 검토·승인 저장 (approvals.js)
 setImmediate(() => { try { stripNonContent(); } catch (e) { console.warn('[crawl] stripNonContent:', e.message); } });
