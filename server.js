@@ -2989,7 +2989,7 @@ function startFullshot(url, key, via = '') {   // via 'direct': 직접 캡처만
   fs.mkdirSync(FULLSHOT_DIR, { recursive: true });
   fullshotJobs.set(key, { status: 'pending' });
   void spawn; void py; void crawlerDir;
-  fsRun({ op: 'capture', url: url.trim(), out: tmp, via: via === 'direct' ? 'direct' : '' }, 3 * 60 * 1000).then(async ({ code, meta }) => {
+  fsRun({ op: 'capture', url: url.trim(), out: tmp, via: via === 'direct' || via === 'firecrawl' ? via : '' }, 3 * 60 * 1000).then(async ({ code, meta }) => {
     const tmpBoxes = `${tmp}.boxes.json`;   // 이미지 위치 기록 (fullshot.py _save_boxes)
     if (code !== 0 || meta.error || !fs.existsSync(tmp)) {
       fs.rmSync(tmp, { force: true });
@@ -3036,8 +3036,8 @@ app.post('/api/v1/fullshot', async (req, res) => {
   const st = await fullshotStatus(url);
   // verify: 기록 없는 예전 캡처의 주소만 확인 (찍지 않음)
   if (verify && st.status === 'ready' && !st.verified) { verifyFullshot(url, st.key); return res.json({ status: 'pending', key: st.key }); }
-  if (st.status === 'gone' && force) { startFullshot(url, st.key, via === 'direct' ? 'direct' : ''); return res.json({ status: 'pending', key: st.key }); }
-  if (st.status === 'none' || (st.status === 'error' && retry) || (force && st.status === 'ready')) { startFullshot(url, st.key, via === 'direct' ? 'direct' : ''); return res.json({ status: 'pending', key: st.key }); }
+  if (st.status === 'gone' && force) { startFullshot(url, st.key, via === 'direct' || via === 'firecrawl' ? via : ''); return res.json({ status: 'pending', key: st.key }); }
+  if (st.status === 'none' || (st.status === 'error' && retry) || (force && st.status === 'ready')) { startFullshot(url, st.key, via === 'direct' || via === 'firecrawl' ? via : ''); return res.json({ status: 'pending', key: st.key }); }
   res.json(st);
 });
 
