@@ -955,6 +955,7 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 </div>
 <nav class="clia-rail"><div class="clia-rail-in">
   <button class="clia-rail-item act" onclick="cliaGoHome()"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span id="railProducts">Products</span></button>
+  <button class="clia-rail-item" id="railReview" onclick="openReview()" style="display:none"><svg viewBox="0 0 24 24"><path d="M9 4H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"/><rect x="9" y="2.5" width="6" height="3.5" rx="1"/><path d="m9 13.5 2 2 4-4"/></svg><span>Review</span></button>
   <div class="clia-rail-bottom">
     <button class="clia-rail-item" onclick="openContentGuide()"><svg viewBox="0 0 24 24"><path d="M2 4h7a3 3 0 0 1 3 3v14a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v14a2 2 0 0 1 2-2h8z"/></svg><span id="railGuide">Content Guide</span></button>
     <button class="clia-rail-item" onclick="cliaLogout()"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span id="tbLogout">Log out</span></button>
@@ -967,7 +968,7 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 <div class="crawl-url-row"><input class="sbox" id="newCrawlUrl" placeholder="🔗 LG.com product URL" onkeydown="if(event.key==='Enter')crawlNewUrl()"><button class="crawl-url-btn" id="newCrawlBtn" onclick="crawlNewUrl()">Crawl</button></div>
 <!-- 벌크 엑셀 (2026-11-19): 빌더를 거치지 않고 여기서 바로 연다 — 채널을 정해서 /bulk/ 를 이 화면 위에 띄운다
      Shopee/Lazada 법인 전용 (2026-11-23): 태국 · 싱가포르(테스트)만 쓴다 — 다른 법인은 applyCorpUI 에서 숨긴다 -->
-<div class="bulk-row" id="bulkRow" style="display:none"><button class="ch-btn ch-main" style="--ch-color:#EE4D2D" id="bulkShopee" onclick="openBulkExcel('shopee')">Shopee bulk upload</button><button class="ch-btn ch-main" style="--ch-color:#0F146D" id="bulkLazada" onclick="openBulkExcel('lazada')">Lazada bulk upload</button><button class="ch-btn ch-main" style="--ch-color:#1F1D1A" id="reviewBtn" onclick="openReview()">Review / Approve</button></div>
+<div class="bulk-row" id="bulkRow" style="display:none"><button class="ch-btn ch-main" style="--ch-color:#EE4D2D" id="bulkShopee" onclick="openBulkExcel('shopee')">Shopee bulk upload</button><button class="ch-btn ch-main" style="--ch-color:#0F146D" id="bulkLazada" onclick="openBulkExcel('lazada')">Lazada bulk upload</button></div>
 <div class="list-warn" id="listWarn"></div>
 </div>
 <!-- 목록 필터 (2026-11-19): 벌크 엑셀 화면과 같은 모양 — 밑줄 탭 · 펼침 버튼(본부 · 제품군) · 검색 -->
@@ -1271,8 +1272,8 @@ function applyCorpUI(){
   document.getElementById('listSubtitle').textContent='LG.com/'+CORP_SITE[CORP];
   document.getElementById('prodSearch').placeholder=t('list.search');
   [['bulkShopee','shopee','Shopee'],['bulkLazada','lazada','Lazada']].forEach(([id,k,ch])=>{const b=document.getElementById(id);b.textContent=t('bulk.'+k);b.title=t('bulk.tip',{ch});});
-  {const b=document.getElementById('reviewBtn');b.textContent=t('review.open');b.title=t('review.tip');}
   document.getElementById('bulkRow').style.display=SL_CORPS.includes(CORP)?'':'none';   // 벌크 업로드는 Shopee/Lazada 법인 전용
+  {const r=document.getElementById('railReview');r.style.display=SL_CORPS.includes(CORP)?'':'none';r.title=t('review.tip');}   // 검토·승인(/review/)도 Shopee/Lazada 법인 전용 — 사이드바 아이콘
   const u=sessionStorage.getItem('clia_user')||'';
   document.getElementById('tbAvatar').textContent=(u.replace(/[^\p{L}\p{N}]/gu,'').slice(0,2)||'JJ').toUpperCase();
   startI18n();
@@ -2347,10 +2348,10 @@ Object.assign(I18N.en,{'tab.all':'All','tab.md':'Only MD','flt.dv':'BU','flt.grp
 Object.assign(I18N.de,{'tab.all':'Alle','tab.md':'Nur MD','flt.dv':'BU','flt.grp':'Produktgruppe','flt.all':'Alle','flt.none':'Keine','flt.n':'{n} gewählt','flt.grpHint':'Nur Gruppen der gewählten BUs sind wählbar','list.search':'Produktname suchen...','bulk.shopee':'Shopee-Bulk-Upload','bulk.lazada':'Lazada-Bulk-Upload','bulk.tip':'{ch}-Bulk-Excel hochladen — CLIA füllt die Produktbeschreibungen und crawlt fehlende Produkte von LG.com'});
 Object.assign(I18N.th,{'tab.all':'ทั้งหมด','tab.md':'เฉพาะ MD','flt.dv':'BU','flt.grp':'กลุ่มสินค้า','flt.all':'ทั้งหมด','flt.none':'ไม่ได้เลือก','flt.n':'เลือก {n}','flt.grpHint':'เลือกได้เฉพาะกลุ่มสินค้าของ BU ที่เลือก','list.search':'ค้นหาชื่อสินค้า...','bulk.shopee':'อัปโหลด Shopee แบบกลุ่ม','bulk.lazada':'อัปโหลด Lazada แบบกลุ่ม','bulk.tip':'อัปโหลดไฟล์ Excel แบบกลุ่มของ {ch} — CLIA จะเติมรายละเอียดสินค้า และครอว์ลสินค้าที่ยังไม่มีจาก LG.com'});
 Object.assign(I18N.ar,{'tab.all':'الكل','tab.md':'MD فقط','flt.dv':'BU','flt.grp':'فئة المنتج','flt.all':'الكل','flt.none':'لا شيء','flt.n':'{n} محدد','flt.grpHint':'يمكن اختيار فئات BU المحددة فقط','list.search':'ابحث عن اسم المنتج...','bulk.shopee':'رفع جماعي إلى Shopee','bulk.lazada':'رفع جماعي إلى Lazada','bulk.tip':'ارفع ملف Excel المجمّع لـ {ch} — يملأ CLIA أوصاف المنتجات ويزحف إلى LG.com للمنتجات غير الموجودة'});
-Object.assign(I18N.en,{'review.open':'Review / Approve','review.tip':'Compare the Shopee/Lazada images with LG.com and approve them — the builder shows “Not approved” until then'});
-Object.assign(I18N.de,{'review.open':'Prüfen / Freigeben','review.tip':'Shopee/Lazada-Bilder mit LG.com vergleichen und freigeben — bis dahin zeigt der Builder „Nicht freigegeben“'});
-Object.assign(I18N.th,{'review.open':'ตรวจสอบ / อนุมัติ','review.tip':'เปรียบเทียบภาพ Shopee/Lazada กับ LG.com แล้วอนุมัติ — ก่อนหน้านั้นตัวสร้างจะแสดง “ยังไม่อนุมัติ”'});
-Object.assign(I18N.ar,{'review.open':'مراجعة / اعتماد','review.tip':'قارن صور Shopee/Lazada مع LG.com واعتمدها — يعرض المنشئ “غير معتمد” حتى ذلك الحين'});
+Object.assign(I18N.en,{'review.tip':'Compare the Shopee/Lazada images with LG.com and approve them — the builder shows “Not approved” until then'});
+Object.assign(I18N.de,{'review.tip':'Shopee/Lazada-Bilder mit LG.com vergleichen und freigeben — bis dahin zeigt der Builder „Nicht freigegeben“'});
+Object.assign(I18N.th,{'review.tip':'เปรียบเทียบภาพ Shopee/Lazada กับ LG.com แล้วอนุมัติ — ก่อนหน้านั้นตัวสร้างจะแสดง “ยังไม่อนุมัติ”'});
+Object.assign(I18N.ar,{'review.tip':'قارن صور Shopee/Lazada مع LG.com واعتمدها — يعرض المنشئ “غير معتمد” حتى ذلك الحين'});
 // 벌크 엑셀: 이 화면 위에 /bulk/ 를 띄운다 (채널·법인·언어를 넘긴다). 닫으면 벌크가 새로 크롤한 제품까지 목록을 다시 불러온다
 function openBulkExcel(ch){
   if(!SL_CORPS.includes(CORP))return;   // Shopee/Lazada 법인 전용
