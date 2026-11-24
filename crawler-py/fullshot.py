@@ -46,8 +46,10 @@ def capture_firecrawl(url: str, out: Path, width: int = 960, quality: int = 80) 
         raise RuntimeError("FIRECRAWL_API_KEY 없음")
     t0 = time.time()
     actions = [{"type": "wait", "milliseconds": 1500}]
-    for _ in range(6):                                  # 지연 로드 이미지
-        actions += [{"type": "scroll", "direction": "down"}, {"type": "wait", "milliseconds": 400}]
+    # 지연 로드 이미지: 끝까지 천천히 내린다. 6번(한 화면씩)으로는 긴 PDP 의 기능 섹션이 안 찍혔다
+    # (2026-11-24 검토 화면 TH ISC10E 등 — 캡처 3,466px 에 스펙만 남음) → 24번
+    for _ in range(24):
+        actions += [{"type": "scroll", "direction": "down"}, {"type": "wait", "milliseconds": 350}]
     actions += [{"type": "executeJavascript", "script": "window.scrollTo(0,0);"}, {"type": "wait", "milliseconds": 1000}]
     r = requests.post("https://api.firecrawl.dev/v1/scrape", headers={"Authorization": f"Bearer {key}"}, timeout=180,
                       json={"url": url, "formats": ["screenshot@fullPage"], "onlyMainContent": False,

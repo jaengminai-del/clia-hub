@@ -179,7 +179,7 @@ aside{display:flex;flex-direction:column;min-height:0;background:#fff;border-lef
 <script>
 // ── 화면 문구 (한국어 · English · ไทย). 제품군 이름은 벌크 엑셀(bulk/bulk-i18n.js)과 같은 낱말. 태국어는 태국 법인 확인 전 ──
 const TX={
- ko:{appTag:'검토 / 승인',waitShort:'기다리는 중',segSum:'PDP 요약',segIntro:'도입 (대표 이미지)',segN:n=>`섹션 ${n}`,segNoneL:'LG.com에 없음 · 기다리는 중',segNoneR:'여기는 없음 · 기다리는 중',segHint:'같은 번호·색 = 같은 영역',who:'검토자',whoPh:'이름 (승인 기록에 남음)',whoNeed:'검토자 이름을 먼저 넣어 주세요',h:'검토 / 승인',
+ ko:{appTag:'검토 / 승인',shotThin:'lg.com 캡처에 상세 내용이 거의 없음 · 다시 캡처',readyCnt:(n,a)=>`준비 <b>${n}</b>/${a}`,waitShort:'기다리는 중',segSum:'PDP 요약',segIntro:'도입 (대표 이미지)',segN:n=>`섹션 ${n}`,segNoneL:'LG.com에 없음 · 기다리는 중',segNoneR:'여기는 없음 · 기다리는 중',segHint:'같은 번호·색 = 같은 영역',who:'검토자',whoPh:'이름 (승인 기록에 남음)',whoNeed:'검토자 이름을 먼저 넣어 주세요',h:'검토 / 승인',
   gateOn:'승인 전 제품은 빌더의 이미지 ZIP·HTML 복사와 벌크 엑셀 받기가 잠깁니다.',gateOff:'지금 서버는 다운로드 잠금이 꺼져 있어, 승인 전에도 빌더·벌크에서 받을 수 있습니다(빌더에는 「승인 전」 배지만 보임). 제품군 분류는 벌크 엑셀·허브 목록과 같은 규칙.',
   tabAll:'전체',tabUnrev:'미검토',tabOk:'승인',tabRej:'반려',stUnrev:'미검토',stStale:'다시 확인',stOk:'승인',stRej:'반려',
   grpBtn:'제품군',all:'전체',none:'선택 안 함',grpHint:'선택한 BU의 제품군만 고를 수 있습니다',search:'모델명·상품명 검색',viewList:'리스트',viewGrid:'갤러리',selAll:'전체 선택',
@@ -203,7 +203,7 @@ const TX={
   staleTx:'준비한 뒤 크롤·편집본·요약 또는 lg.com 캡처가 바뀌었어요. 보이는 것은 예전 내용입니다.',reprep:'다시 준비',imgFail:s=>`이미지 일부를 못 불러온 채 만들어짐 (${s})`,
   cropBtn:'범위 맞추기',cropTop:'시작(px)',cropBottom:'끝(px)',cropAuto:'자동으로',cropSave:'저장',recapture:'다시 캡처',cropSaved:'lg.com 범위를 저장했어요',cropAutoT:'자동 범위로 돌렸어요',
   cropWarnTop:'시작 자동 감지 못 함',cropWarnBot:'끝 자동 감지 못 함',cropManual:'사람이 맞춘 범위',noShot:e=>`lg.com 캡처가 없어요 (${e}). 「다시 캡처」를 눌러 주세요.`,recapToast:'lg.com을 다시 캡처하고 있어요 (1~2분)'},
- en:{appTag:'Review / Approve',waitShort:'waiting',segSum:'PDP summary',segIntro:'Intro (main image)',segN:n=>`Section ${n}`,segNoneL:'not on LG.com · waiting',segNoneR:'not here · waiting',segHint:'Same number and color = same area',who:'Reviewer',whoPh:'Name (saved with approvals)',whoNeed:'Enter the reviewer name first',h:'Review / Approve',
+ en:{appTag:'Review / Approve',shotThin:'lg.com capture shows little detail · capture again',readyCnt:(n,a)=>`Prepared <b>${n}</b>/${a}`,waitShort:'waiting',segSum:'PDP summary',segIntro:'Intro (main image)',segN:n=>`Section ${n}`,segNoneL:'not on LG.com · waiting',segNoneR:'not here · waiting',segHint:'Same number and color = same area',who:'Reviewer',whoPh:'Name (saved with approvals)',whoNeed:'Enter the reviewer name first',h:'Review / Approve',
   gateOn:'Products that are not approved cannot be downloaded from the builder (image ZIP, HTML copy) or bulk Excel.',gateOff:'The download lock is off on this server, so builder and bulk downloads still work before approval (the builder only shows a “Not approved” badge). Product groups follow the same rules as Bulk Excel and the hub list.',
   tabAll:'All',tabUnrev:'To review',tabOk:'Approved',tabRej:'Rejected',stUnrev:'To review',stStale:'Check again',stOk:'Approved',stRej:'Rejected',
   grpBtn:'Product group',all:'All',none:'None',grpHint:'Only groups in the selected BUs can be chosen',search:'Search model or product name',viewList:'List',viewGrid:'Gallery',selAll:'Select all',
@@ -227,7 +227,7 @@ const TX={
   staleTx:'The crawl, builder edit, summary or lg.com capture changed after this was prepared. You are looking at the old content.',reprep:'Prepare again',imgFail:s=>`Made while some images failed to load (${s})`,
   cropBtn:'Adjust range',cropTop:'Start (px)',cropBottom:'End (px)',cropAuto:'Automatic',cropSave:'Save',recapture:'Capture again',cropSaved:'lg.com range saved',cropAutoT:'Back to the automatic range',
   cropWarnTop:'Start not detected',cropWarnBot:'End not detected',cropManual:'Range set by a person',noShot:e=>`No lg.com capture (${e}). Press “Capture again”.`,recapToast:'Capturing lg.com again (1–2 minutes)'},
- th:{appTag:'ตรวจสอบ / อนุมัติ',waitShort:'รออยู่',segSum:'สรุป PDP',segIntro:'ส่วนแนะนำ (ภาพหลัก)',segN:n=>`ส่วนที่ ${n}`,segNoneL:'ไม่มีใน LG.com · รออยู่',segNoneR:'ไม่มีในส่วนนี้ · รออยู่',segHint:'หมายเลขและสีเดียวกัน = ส่วนเดียวกัน',who:'ผู้ตรวจ',whoPh:'ชื่อ (บันทึกพร้อมการอนุมัติ)',whoNeed:'กรุณาใส่ชื่อผู้ตรวจก่อน',h:'ตรวจสอบ / อนุมัติ',
+ th:{appTag:'ตรวจสอบ / อนุมัติ',shotThin:'ภาพ lg.com แทบไม่มีรายละเอียด · ถ่ายใหม่',readyCnt:(n,a)=>`เตรียมแล้ว <b>${n}</b>/${a}`,waitShort:'รออยู่',segSum:'สรุป PDP',segIntro:'ส่วนแนะนำ (ภาพหลัก)',segN:n=>`ส่วนที่ ${n}`,segNoneL:'ไม่มีใน LG.com · รออยู่',segNoneR:'ไม่มีในส่วนนี้ · รออยู่',segHint:'หมายเลขและสีเดียวกัน = ส่วนเดียวกัน',who:'ผู้ตรวจ',whoPh:'ชื่อ (บันทึกพร้อมการอนุมัติ)',whoNeed:'กรุณาใส่ชื่อผู้ตรวจก่อน',h:'ตรวจสอบ / อนุมัติ',
   gateOn:'สินค้าที่ยังไม่อนุมัติจะดาวน์โหลด ZIP รูปภาพ คัดลอก HTML ในตัวสร้าง และ Bulk Excel ไม่ได้',gateOff:'เซิร์ฟเวอร์นี้ปิดการล็อกดาวน์โหลดอยู่ จึงยังดาวน์โหลดจากตัวสร้างและ Bulk ได้ก่อนอนุมัติ (ตัวสร้างแสดงแค่ป้าย “ยังไม่อนุมัติ”) กลุ่มสินค้าใช้กฎเดียวกับ Bulk Excel และรายการในฮับ',
   tabAll:'ทั้งหมด',tabUnrev:'รอตรวจ',tabOk:'อนุมัติแล้ว',tabRej:'ปฏิเสธ',stUnrev:'รอตรวจ',stStale:'ตรวจอีกครั้ง',stOk:'อนุมัติแล้ว',stRej:'ปฏิเสธ',
   grpBtn:'กลุ่มสินค้า',all:'ทั้งหมด',none:'ไม่ได้เลือก',grpHint:'เลือกได้เฉพาะกลุ่มสินค้าของ BU ที่เลือก',search:'ค้นหารุ่นหรือชื่อสินค้า',viewList:'รายการ',viewGrid:'แกลเลอรี',selAll:'เลือกทั้งหมด',
@@ -349,7 +349,8 @@ function renderList(){
     <div class="meta">${p.dv} · ${gname(p.grp)} · ${prepCell(p)}</div></div></div>`).join('')||`<div class="empty">${t('empty')}</div>`;$('moreG').innerHTML=more;}
   $('selAll').checked=all.length>0&&all.every(p=>S.sel.has(p.slug));$('selAll').disabled=!all.length;
   $('selbar').classList.toggle('on',S.sel.size>0);$('selN').textContent=t('selN',S.sel.size);
-  const n=DATA.filter(p=>stOf(p)==='ok').length;$('okCnt').innerHTML=t('okCnt',n,DATA.length);
+  const n=DATA.filter(p=>stOf(p)==='ok').length,rd=DATA.filter(p=>CHS.every(ch=>p.prep[ch].state==='ready')).length;
+  $('okCnt').innerHTML=t('okCnt',n,DATA.length)+' · '+t('readyCnt',rd,DATA.length);
 }
 function sel(slug,on){on?S.sel.add(slug):S.sel.delete(slug);renderList();}
 function selAll(on){visible().forEach(p=>on?S.sel.add(p.slug):S.sel.delete(p.slug));renderList();}
@@ -369,7 +370,8 @@ async function bulkPrepare(){
   S.sel.clear();renderList();toast(t('prepToast',ps.length));pollList();
 }
 let listTimer=null;
-function pollList(){clearTimeout(listTimer);if(DATA.some(p=>CHS.some(ch=>p.prep[ch].state==='pending')))listTimer=setTimeout(()=>{if(!C)load(true);else pollList();},5000);}
+// 준비 중인 것이 있으면 목록을 다시 읽는다 — 사람이 연 것은 5초, 미리 준비만 돌고 있으면 30초마다
+function pollList(){clearTimeout(listTimer);const pend=DATA.flatMap(p=>CHS.map(ch=>p.prep[ch])).filter(x=>x.state==='pending');if(pend.length)listTimer=setTimeout(()=>{if(!C)load(true);else pollList();},pend.some(x=>!x.bg)?5000:30000);}
 async function load(quiet){
   try{const j=await api('/api/v1/review/list?country='+encodeURIComponent(S.country));
     S.gate=!!j.gate;S.countries=j.countries||{};DATA=j.products||[];
@@ -398,7 +400,8 @@ async function fetchItems(start){
   if(!C)return;const slug=C.p.slug;clearTimeout(itemTimer);
   await Promise.all(CHS.map(async ch=>{
     try{let j=await api(`/api/v1/review/item/${encodeURIComponent(slug)}?channel=${ch}`);
-      if(start&&j.state==='none'){await api(`/api/v1/review/item/${encodeURIComponent(slug)}/prepare`,{channel:ch});j={...j,state:'pending',job:{step:'queued'}};}
+      if(start&&(j.state==='none'||(j.state==='pending'&&j.job&&j.job.bg))){   // 미리 준비 차례를 기다리던 것은 사람 차례(맨 앞)로
+        await api(`/api/v1/review/item/${encodeURIComponent(slug)}/prepare`,{channel:ch});j={...j,state:'pending',job:{step:'queued'}};}
       if(!C||C.p.slug!==slug)return;
       C.st[ch]=j;C.err[ch]='';if(j.data)C.d[ch]=j.data;C.p.approval=j.approval;S.gate=!!j.gate;
       C.p.prep[ch]={...C.p.prep[ch],state:j.state,hash:j.data?j.data.hash:'',n:j.data?j.data.slices.length:0,shopeeN:j.data?j.data.shopeeN:0,first:j.data&&j.data.slices[0]?j.data.slices[0].src:''};
@@ -473,8 +476,10 @@ function renderLeft(){
   const top=CROP?CROP.top:f.top,bottom=CROP?CROP.bottom:f.bottom;
   $('mvL').innerHTML=`<div class="lg"><div class="crop" style="aspect-ratio:${f.w}/${Math.max(1,bottom-top)}"><img src="${esc(f.src)}" width="${f.w}" height="${f.h}" style="margin-top:-${(top/f.w*100).toFixed(4)}%" alt="lg.com"></div></div>`;
   const w=$('cropWarn'),miss=!f.manual&&f.auto&&(!f.auto.top||!f.auto.bottom);
-  w.hidden=!(miss||f.manual);w.className='badge '+(f.manual?'b-q':'b-warn');
-  w.textContent=f.manual?t('cropManual')+(f.manual.by?' · '+f.manual.by:''):!f.auto.top?t('cropWarnTop'):t('cropWarnBot');
+  w.hidden=!(miss||f.manual||f.incomplete);w.className='badge '+(f.incomplete?'b-bad':f.manual?'b-q':'b-warn');
+  // 덜 찍힌 캡처(서버가 한 번 다시 찍어도 PDP 가 상세 이미지보다 훨씬 짧음)는 누르면 다시 캡처
+  w.style.cursor=f.incomplete?'pointer':'';w.onclick=f.incomplete?()=>recapture():null;
+  w.textContent=f.incomplete?t('shotThin'):f.manual?t('cropManual')+(f.manual.by?' · '+f.manual.by:''):!f.auto.top?t('cropWarnTop'):t('cropWarnBot');
   w.title=[f.topHow,f.bottomHow].filter(Boolean).join(' · ');
 }
 function toggleCrop(){const ed=$('cropEd'),f=shotOf();if(!ed.hidden){ed.hidden=true;CROP=null;relayout();return;}
@@ -512,7 +517,7 @@ function layout(){
   // lg.com 캡처 px → 왼쪽 화면 px (PDP 범위로 자른 그림 기준)
   const top=f?(CROP?CROP.top:f.top):0,bot=f?(CROP?CROP.bottom:f.bottom):0;
   const lpx=y=>crop?crop.offsetTop+(Math.max(top,Math.min(y,bot))-top)*(crop.clientWidth/f.w):0;
-  const P=[{l:0,r:0,label:t('segSum'),kind:'sum'}];
+  const P=[{l:crop?crop.offsetTop:0,r:0,label:t('segSum'),kind:'sum'}];   // PDP 요약은 lg.com 에 없다 → 왼쪽 길이 0 (기다림)
   const al=(d.align&&d.align.anchors)||[];
   const firstLabel=al[0]&&al[0].L-top<60?al[0].label:'';
   P.push({l:crop?crop.offsetTop:0,r:sl[0]?sl[0].offsetTop:0,label:firstLabel||t('segIntro'),kind:'start'});

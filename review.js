@@ -50,10 +50,16 @@ function sigOf(slug, ch, sum = cr.productSummary(cleanSlug(slug))) {   // sum: {
 const sameSig = (a, b) => !!a && !!b && Math.abs(a.crawled_at - b.crawled_at) <= 1 && a.edit_at === b.edit_at && a.sum_at === b.sum_at;
 
 // ── 준비 작업 (한 번에 2개) ──
-const jobs = new Map();   // `${slug}|${ch}` → { state: 'pending'|'error', step, at, error }
-const queue = [];
-let running = 0;
+const jobs = new Map();   // `${slug}|${ch}` → { state: 'pending'|'error', step, at, error, bg }
+const queue = [];          // [{ slug, ch, opts, bg }] — 사람이 연 것(bg=false)이 늘 먼저
+let running = 0, runningBg = 0;
 const CONC = 2;
+// 미리 준비 (2026-11-24): 검토하는 사람이 기다리지 않게, 서버가 Shopee/Lazada 법인 제품을 차례로 미리 준비한다.
+//   REVIEW_PREWARM=0 이면 끔 · REVIEW_PREWARM_COUNTRIES (기본 th,sg) · REVIEW_PREWARM_CONC (기본 1 — 빌더·벌크 사용자를 느리게 하지 않게)
+//   준비가 안 됐거나(none) 내용이 바뀐(stale) 채널만. 실패한 것은 6시간 뒤에 다시. 10분마다 다시 훑는다(새로 크롤한 제품 · 편집본 저장).
+const PREWARM = process.env.REVIEW_PREWARM !== '0';
+const PREWARM_COUNTRIES = new Set(String(process.env.REVIEW_PREWARM_COUNTRIES || 'th,sg').split(',').map((x) => x.trim().toLowerCase()).filter(Boolean));
+const BG_CONC = Math.max(1, Math.min(CONC, parseInt(process.env.REVIEW_PREWARM_CONC, 10) || 1));
 
 async function post(p, body, timeoutMs) {
   const r = await fetch(LOCAL() + p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(timeoutMs) });
@@ -134,23 +140,53 @@ async function prepare(slug, ch, { recapture = false } = {}) {
     while (urls.length > 1 && (top + urls.join('\n')).length > SHOPEE_DESC_MAX) urls.pop();
     shopeeN = urls.length; shopeeChars = (top + urls.join('\n')).length;
   }
-  // 4) lg.com 전체 화면 캡처
+  // 지문의 요약 시각은 요약을 만든 뒤에 — 처음 만드는 요약 때문에 준비하자마자 「내용 바뀜」이 되지 않게 (2026-11-24 ISC10E)
+  sig.sum_at = sigOf(slug, ch).sum_at;
+  // 4) lg.com 전체 화면 캡처 → 5) PDP 시작·끝 · 이미지마다 USP 이름 · 같은 영역
+  const sliceTotal = slices.reduce((n, x) => n + x.h, 0);
+  // 덜 찍힌 캡처(lg.com 에 기능 섹션이 안 보임): PDP 범위가 상세 이미지 전체의 35% 도 안 되거나,
+  // 상세 이미지의 그림을 lg.com 에서 25% 도 못 찾았는데 PDP 범위도 60% 가 안 될 때 (2026-11-24 TH ISC10E — 캡처에 요약·스펙만)
+  const thin = (an) => {
+    const shot = an && an.shot;
+    if (!shot || sliceTotal <= 3000) return false;
+    const pdp = (Math.min(shot.bottom, shot.h) - shot.top) * (1000 / (shot.w || 960));
+    const al = an.align, few = al && al.images ? al.matched / al.images < 0.25 : false;
+    return pdp < 0.35 * sliceTotal || (few && pdp < 0.6 * sliceTotal);
+  };
+  const analyze = async (st, allowReuse) => {
+    const shotPath = st && st.status === 'ready' ? path.join(FULLSHOT_DIR, `${st.key}.jpg`) : null;
+    step('analyze');
+    // 다른 채널을 이미 같은 이미지 묶음 · 같은 캡처로 준비했으면 분석(USP · 같은 영역)을 그대로 쓴다 — 오래 걸리는 다시 그리기를 건너뜀
+    const other = readJson(fileOf(slug, ch === 'shopee' ? 'lazada' : 'shopee'));
+    if (allowReuse && other && (other.v || 1) >= PREP_V && other.hash === sl.hash && other.shot && shotPath && other.shot.key === st.key
+        && fs.existsSync(shotPath) && other.shot.bytes === fs.statSync(shotPath).size) {
+      const { top, bottom, topHow, bottomHow, auto, w, h } = other.shot;
+      return { shotPath, a: { usps: other.usps, sliceUsps: other.sliceUsps, secs: other.secs, kind: other.kind, lead: other.lead,
+        align: other.align, alignErr: other.alignErr, shot: { w, h, top, bottom, topHow, bottomHow, auto } } };
+    }
+    // 같은 영역 맞추기용: 상세 이미지를 만든 HTML 을 slices.py 와 같은 글꼴로 다시 그려 섹션 위치를 잰다 (review_align.py)
+    const htmlTmp = path.join(require('os').tmpdir(), `review-${process.pid}-${Date.now()}-${ch}.html`);
+    fs.writeFileSync(htmlTmp, html);
+    try {
+      return { shotPath, a: await runPrep({ fullshot: shotPath && fs.existsSync(shotPath) ? shotPath : null, mirror: path.join(dirOf(slug), 'mirror.json'),
+        slices: slices.map((s) => ({ text: s.text })), html: htmlTmp, medium: 'shopee_lazada',
+        fontsCss: `http://127.0.0.1:${process.env.PORT || 3001}/css/fonts.css`, sliceWidth: slices[0].w }) };
+    } finally { fs.rmSync(htmlTmp, { force: true }); }
+  };
   step('fullshot-check');
   let fsErr = '', st = null;
-  try { st = await fullshot(sum.url, recapture, step); } catch (e) { fsErr = String(e.message).slice(0, 200); }
-  if (st && st.status === 'error') fsErr = String(st.error || 'capture failed').slice(0, 200);
-  const shotPath = st && st.status === 'ready' ? path.join(FULLSHOT_DIR, `${st.key}.jpg`) : null;
-  // 5) PDP 시작·끝 · 이미지마다 USP 이름
-  step('analyze');
-  // 같은 영역 맞추기용: 상세 이미지를 만든 HTML 을 slices.py 와 같은 글꼴로 다시 그려 섹션 위치를 잰다 (review_align.py)
-  const htmlTmp = path.join(require('os').tmpdir(), `review-${process.pid}-${Date.now()}-${ch}.html`);
-  fs.writeFileSync(htmlTmp, html);
-  let a;
-  try {
-    a = await runPrep({ fullshot: shotPath && fs.existsSync(shotPath) ? shotPath : null, mirror: path.join(dirOf(slug), 'mirror.json'),
-      slices: slices.map((s) => ({ text: s.text })), html: htmlTmp, medium: 'shopee_lazada',
-      fontsCss: `http://127.0.0.1:${process.env.PORT || 3001}/css/fonts.css`, sliceWidth: slices[0].w });
-  } finally { fs.rmSync(htmlTmp, { force: true }); }
+  const shoot = async (re) => {
+    try { st = await fullshot(sum.url, re, step); fsErr = ''; } catch (e) { fsErr = String(e.message).slice(0, 200); }
+    if (st && st.status === 'error') fsErr = String(st.error || 'capture failed').slice(0, 200);
+  };
+  await shoot(recapture);
+  let { shotPath, a } = await analyze(st, true);
+  if (thin(a) && !recapture) {   // 덜 찍혔으면 한 번 다시 캡처하고 다시 본다
+    console.log(`[review] ${slug}: lg.com 캡처가 덜 찍힘 (PDP ${a.shot.bottom - a.shot.top}px / 상세 이미지 ${sliceTotal}px) → 다시 캡처`);
+    await shoot(true);
+    ({ shotPath, a } = await analyze(st, false));
+  }
+  if (a.shot && thin(a)) a.shot.incomplete = true;   // 다시 찍어도 덜 찍혔으면 화면에 알린다
   const rec = {
     v: PREP_V, slug, channel: ch, url: sum.url, prepared_at: Date.now(), sig, source: ed ? 'edit' : 'crawl', hash: sl.hash,
     slices: slices.map(({ src, w, h }) => ({ src, w, h })), images_loaded: man.images_loaded || sl.images_loaded || '',
@@ -169,23 +205,57 @@ async function prepare(slug, ch, { recapture = false } = {}) {
 
 function pump() {
   while (running < CONC && queue.length) {
-    const { slug, ch, opts } = queue.shift();
+    // 사람이 연 것 먼저 · 미리 준비는 BG_CONC 개까지만 동시에
+    let i = queue.findIndex((q) => !q.bg);
+    if (i < 0) { if (runningBg >= BG_CONC) break; i = 0; }
+    const { slug, ch, opts, bg } = queue.splice(i, 1)[0];
     const key = `${slug}|${ch}`;
-    running++;
+    running++; if (bg) runningBg++;
     prepare(slug, ch, opts).then(() => jobs.delete(key)).catch((e) => {
       console.warn('[review] 준비 실패', slug, ch, e.message);
-      jobs.set(key, { state: 'error', error: String(e.message).slice(0, 300), at: Date.now() });
-    }).finally(() => { running--; pump(); });
+      jobs.set(key, { state: 'error', error: String(e.message).slice(0, 300), at: Date.now(), bg });
+    }).finally(() => { running--; if (bg) runningBg--; pump(); });
   }
 }
-function enqueue(slug, ch, opts = {}) {
+function enqueue(slug, ch, opts = {}, bg = false) {
   const key = `${slug}|${ch}`, j = jobs.get(key);
-  if (j && j.state === 'pending') return j;
-  const nj = { state: 'pending', step: 'queued', at: Date.now() };
+  if (j && j.state === 'pending') {
+    // 미리 준비 차례를 기다리던 것을 사람이 열면 → 사람 차례로 (맨 앞)
+    const q = queue.findIndex((x) => x.slug === slug && x.ch === ch);
+    if (!bg && q >= 0 && queue[q].bg) { const [it] = queue.splice(q, 1); it.bg = false; it.opts = { ...it.opts, ...opts }; queue.unshift(it); j.bg = false; pump(); }
+    return j;
+  }
+  const nj = { state: 'pending', step: 'queued', at: Date.now(), bg };
   jobs.set(key, nj);
-  queue.push({ slug, ch, opts });
+  if (bg) queue.push({ slug, ch, opts, bg }); else queue.unshift({ slug, ch, opts, bg });
   pump();
   return nj;
+}
+
+/** 미리 준비: Shopee/Lazada 법인 제품 중 준비 안 됨 · 내용 바뀜인 채널을 미리 준비 차례에 넣는다 (최근 크롤 먼저) */
+function prewarm() {
+  if (!PREWARM) return 0;
+  let n = 0;
+  try {
+    const idx = require('./bulk-catalog').productIndex();
+    const ps = Object.values(idx.products).filter((p) => PREWARM_COUNTRIES.has(p.country)).sort((a, b) => b.crawled_at - a.crawled_at);
+    for (const p of ps) for (const ch of CHANNELS) {
+      const j = jobs.get(`${p.slug}|${ch}`);
+      if (j && (j.state === 'pending' || (j.state === 'error' && Date.now() - j.at < 6 * 3600 * 1000))) continue;
+      const { state } = prepState(p.slug, ch, p);
+      if (state === 'none' || state === 'stale' || state === 'error') { enqueue(p.slug, ch, {}, true); n++; }
+    }
+  } catch (e) { console.warn('[review] 미리 준비 목록 실패', e.message); }
+  if (n) console.log(`[review] 미리 준비 ${n}개 차례에 넣음 (대기 ${queue.length} · 동시 ${BG_CONC})`);
+  return n;
+}
+if (PREWARM) {
+  // 시작 직후에는 버킷 → 로컬 동기화가 끝난 뒤에 (없는 제품을 비었다고 보지 않게)
+  Promise.resolve(store.whenPulled ? store.whenPulled() : null).catch(() => {}).then(() => setTimeout(prewarm, 60 * 1000));
+  setInterval(prewarm, 10 * 60 * 1000).unref();
+}
+function queueStats() {
+  return { queued: queue.length, queuedBg: queue.filter((q) => q.bg).length, running, runningBg, prewarm: PREWARM ? [...PREWARM_COUNTRIES] : [] };
 }
 
 /** 준비 결과 + 사람이 고친 lg.com 범위 */
@@ -220,14 +290,14 @@ router.get('/api/v1/review/list', (req, res) => {
     const prep = {};
     for (const ch of CHANNELS) {
       const { state, job, rec } = prepState(p.slug, ch, p);
-      prep[ch] = { state, step: job && job.step, error: job && job.error,
+      prep[ch] = { state, step: job && job.step, error: job && job.error, bg: !!(job && job.bg),
         n: rec ? rec.slices.length : 0, shopeeN: rec ? rec.shopeeN : 0, first: rec && rec.slices[0] ? rec.slices[0].src : '', hash: rec ? rec.hash : '' };
     }
     const a = approvals.status(p.slug);
     return { slug: p.slug, url: p.url, country: p.country, model: p.model, title: p.title, thumb: p.thumb, dv: p.dv, grp: p.grp, crawled_at: p.crawled_at,
       approval: { status: a.status, via: a.via || '', by: a.by || '', at: a.at || 0, comment: a.comment || '' }, prep };
   }).sort((a, b) => b.crawled_at - a.crawled_at);
-  res.json({ gate: approvals.gateOn(), countries, products });
+  res.json({ gate: approvals.gateOn(), countries, products, queue: queueStats() });
 });
 
 router.get('/api/v1/review/item/:slug', (req, res) => {
