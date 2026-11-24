@@ -8,8 +8,9 @@ fullshot.py — lg.com 제품 페이지 전체 화면 캡처 (빌더의 "전체 
 · PC 화면(1920px)으로 열고 배율 0.5 로 찍어 폭 960px JPEG 로 바로 저장 (원본 PNG 는 20MB 넘게 커져 서버 메모리 부담)
 · 페이지 로드는 모든 네트워크 요청이 끝날 때까지 기다리지 않는다 (lg.com 은 60초 넘게 안 끝나는 경우가 있음)
   → 기본 HTML 로드 후 끝까지 스크롤해 지연 로드 이미지를 불러온 뒤 캡처
-· 배포 서버(데이터센터 IP)는 lg.com(Akamai)이 "Access Denied" 로 막는다 → 막힌 화면이면 Firecrawl 전체 캡처로 다시 받는다
-  (FULLSHOT_VIA=firecrawl 이면 처음부터 Firecrawl)
+· 배포 서버(데이터센터 IP)는 lg.com(Akamai)이 "Access Denied" 로 막곤 한다 → 스쿼드 허브 배너 캡처와 같은 브라우저 모양
+  (요청 머리글 · 클라이언트 힌트 · 자동화 흔적 숨김 · 403 이면 한 번 더)으로 직접 받고, 그래도 막히면 Firecrawl 전체 캡처로
+  (FULLSHOT_VIA=firecrawl 이면 처음부터 Firecrawl, FULLSHOT_VIA=direct 이면 직접만 — Firecrawl 유료 호출 없음)
 """
 import os
 import json
@@ -18,7 +19,36 @@ import time
 from pathlib import Path
 
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
-      "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+      "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
+
+# lg.com(Akamai) 통과 — 스쿼드 허브 배너 캡처(work-automation src/app/api/banner-capture/route.ts)와 같은 브라우저 모양 (2026-11-24)
+#   실제 Chrome 과 같은 요청 머리글 · 클라이언트 힌트, 자동화 흔적 숨김, 채팅·동의 스크립트 막기, 403 이면 3초 뒤 한 번 더
+HEADERS = {
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache",
+    "Sec-CH-UA": '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+    "Sec-CH-UA-Mobile": "?0",
+    "Sec-CH-UA-Platform": '"macOS"',
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "Upgrade-Insecure-Requests": "1",
+}
+STEALTH = """() => {
+  Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+  Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
+  Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
+  window.chrome = { runtime: {}, loadTimes: () => ({}), csi: () => ({}) };
+  const q = window.navigator.permissions.query;
+  window.navigator.permissions.query = (p) => p.name === 'notifications' ? Promise.resolve({ state: 'denied' }) : q(p);
+}"""
+BLOCKED_REQUESTS = ["genesys", "liveperson", "salesforceliveagent", "adobe-privacy", "chatbot", "proactive-chat"]
+BROWSER_ARGS = ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--disable-extensions", "--disable-background-networking",
+                "--disable-sync", "--disable-translate", "--disable-default-apps", "--disable-blink-features=AutomationControlled"]
 
 _SCROLL = """async () => {
   await new Promise(res => {
@@ -46,8 +76,10 @@ def capture_firecrawl(url: str, out: Path, width: int = 960, quality: int = 80) 
         raise RuntimeError("FIRECRAWL_API_KEY 없음")
     t0 = time.time()
     actions = [{"type": "wait", "milliseconds": 1500}]
-    for _ in range(6):                                  # 지연 로드 이미지
-        actions += [{"type": "scroll", "direction": "down"}, {"type": "wait", "milliseconds": 400}]
+    # 지연 로드 이미지: 끝까지 천천히 내린다. 6번(한 화면씩)으로는 긴 PDP 의 기능 섹션이 안 찍혔다
+    # (2026-11-24 검토 화면 TH ISC10E 등 — 캡처 3,466px 에 스펙만 남음) → 24번
+    for _ in range(24):
+        actions += [{"type": "scroll", "direction": "down"}, {"type": "wait", "milliseconds": 350}]
     actions += [{"type": "executeJavascript", "script": "window.scrollTo(0,0);"}, {"type": "wait", "milliseconds": 1000}]
     r = requests.post("https://api.firecrawl.dev/v1/scrape", headers={"Authorization": f"Bearer {key}"}, timeout=180,
                       json={"url": url, "formats": ["screenshot@fullPage"], "onlyMainContent": False,
@@ -67,12 +99,15 @@ def capture_firecrawl(url: str, out: Path, width: int = 960, quality: int = 80) 
 
 
 def capture(url: str, out: Path, scale: float = 0.5, quality: int = 80) -> dict:
-    """직접 캡처 → 막혔으면(Access Denied·너무 짧음) Firecrawl."""
-    if os.environ.get("FULLSHOT_VIA") != "firecrawl":
+    """직접 캡처 → 막혔으면(Access Denied·너무 짧음) Firecrawl.
+    FULLSHOT_VIA=firecrawl 이면 처음부터 Firecrawl, FULLSHOT_VIA=direct 이면 직접만 (막히면 실패 — Firecrawl 유료 호출 없음)."""
+    via = os.environ.get("FULLSHOT_VIA", "")
+    if via != "firecrawl":
         try:
             return capture_direct(url, out, scale, quality)
-        except Blocked:
-            pass
+        except Blocked as e:
+            if via == "direct":
+                raise RuntimeError(f"lg.com 이 막음 (직접 캡처만): {e}")
     return capture_firecrawl(url, out, round(1920 * scale), quality)
 
 
@@ -80,23 +115,48 @@ def capture_direct(url: str, out: Path, scale: float = 0.5, quality: int = 80) -
     from playwright.sync_api import sync_playwright
     t0 = time.time()
     with sync_playwright() as p:
-        args = ["--disable-blink-features=AutomationControlled", "--no-sandbox"]
         try:   # 실제 Chrome (봇 차단 회피), 없으면 Playwright Chromium
-            browser = p.chromium.launch(channel="chrome", headless=True, args=args)
+            browser = p.chromium.launch(channel="chrome", headless=True, args=BROWSER_ARGS)
         except Exception:
-            browser = p.chromium.launch(headless=True, args=args)
+            browser = p.chromium.launch(headless=True, args=BROWSER_ARGS)
         try:
-            ctx = browser.new_context(viewport={"width": 1920, "height": 1080}, device_scale_factor=scale, user_agent=UA)
-            ctx.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+            # 요청 머리글은 페이지 문서에만 — CSS·JS 요청에 문서용 머리글(Sec-Fetch-Dest: document 등)이 붙으면 lg.com 이 그 파일들을 막아
+            # 디자인 없이 글자만 찍힌다 (2026-11-24 시험). 클라이언트 힌트·언어만 모든 요청에 (위장한 UA 와 맞게)
+            ctx = browser.new_context(viewport={"width": 1920, "height": 1080}, device_scale_factor=scale, user_agent=UA, locale="en-US",
+                                      extra_http_headers={k: v for k, v in HEADERS.items() if k.startswith("Sec-CH-UA") or k == "Accept-Language"})
+            ctx.add_init_script(f"({STEALTH})()")
             page = ctx.new_page()
-            page.goto(url, wait_until="domcontentloaded", timeout=45000)
+            css_bad = []
+
+            def route(r):
+                u = r.request.url.lower()
+                if any(k in u for k in BLOCKED_REQUESTS):
+                    return r.abort()
+                if r.request.resource_type == "document" and r.request.frame == page.main_frame:
+                    return r.continue_(headers={**r.request.headers, **HEADERS})
+                return r.continue_()
+
+            page.route("**/*", route)
+            # lg.com 디자인 파일(CSS)이 막히면 글자만 찍힌다 → 막힌 것으로 본다
+            page.on("requestfailed", lambda q: css_bad.append(q.url) if q.resource_type == "stylesheet" and "lg.com" in q.url else None)
+            page.on("response", lambda q: css_bad.append(q.url) if q.request.resource_type == "stylesheet" and "lg.com" in q.url and q.status >= 400 else None)
+            resp = page.goto(url, wait_until="domcontentloaded", timeout=45000)
+            if (resp and resp.status == 403) or "access denied" in (page.title() or "").lower():
+                page.wait_for_timeout(3000)            # Akamai 차단은 간헐적 — 한 번 더
+                page.goto(url, wait_until="domcontentloaded", timeout=45000)
             try:
                 page.wait_for_selector("footer", timeout=8000)
+            except Exception:
+                pass
+            try:   # 쿠키 동의 띠(OneTrust)가 캡처를 가리지 않게
+                page.click("#onetrust-accept-btn-handler", timeout=1500)
             except Exception:
                 pass
             title = (page.title() or "").lower()
             if "access denied" in title or page.evaluate("document.body.scrollHeight") < 1500:
                 raise Blocked(title)                    # lg.com 보안 장치가 막은 화면
+            if css_bad:
+                raise Blocked(f"stylesheet blocked: {css_bad[0][:100]}")
             prev = 0
             for _ in range(2):                          # 끝까지 스크롤 → 지연 로드 이미지
                 page.evaluate(_SCROLL)

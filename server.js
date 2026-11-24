@@ -2843,7 +2843,7 @@ async function fullshotReady(key) {
   return true;
 }
 
-function startFullshot(url, key) {
+function startFullshot(url, key, via = '') {   // via 'direct': 직접 캡처만 (막히면 실패 — Firecrawl 유료 호출 없음)
   const fs = require('fs'), path = require('path');
   const { spawn } = require('child_process');
   const crawlerDir = path.join(__dirname, 'crawler-py');
@@ -2852,7 +2852,7 @@ function startFullshot(url, key) {
   const abs = path.join(FULLSHOT_DIR, `${key}.jpg`), tmp = `${abs}.part.jpg`;
   fs.mkdirSync(FULLSHOT_DIR, { recursive: true });
   fullshotJobs.set(key, { status: 'pending' });
-  const proc = spawn(py, ['fullshot.py', url.trim(), tmp], { cwd: crawlerDir, env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
+  const proc = spawn(py, ['fullshot.py', url.trim(), tmp], { cwd: crawlerDir, env: { ...process.env, PYTHONIOENCODING: 'utf-8', ...(via === 'direct' ? { FULLSHOT_VIA: 'direct' } : {}) } });
   let out = '';
   const timer = setTimeout(() => proc.kill('SIGKILL'), 3 * 60 * 1000);
   proc.stdout.on('data', (d) => { out += d; });
@@ -2883,10 +2883,10 @@ async function fullshotStatus(url) {
 
 app.post('/api/v1/fullshot', async (req, res) => {
   // force: 있는 캡처도 다시 찍는다 (검토·승인 화면 「다시 캡처」 — 지연 로드가 덜 찍힌 캡처. 새 캡처가 성공해야 바뀐다)
-  const { url, retry = false, force = false } = req.body || {};
+  const { url, retry = false, force = false, via = '' } = req.body || {};
   if (!isLgUrl(url)) return res.status(400).json({ error: 'lg.com url required' });
   const st = await fullshotStatus(url);
-  if (st.status === 'none' || (st.status === 'error' && retry) || (force && st.status === 'ready')) { startFullshot(url, st.key); return res.json({ status: 'pending', key: st.key }); }
+  if (st.status === 'none' || (st.status === 'error' && retry) || (force && st.status === 'ready')) { startFullshot(url, st.key, via === 'direct' ? 'direct' : ''); return res.json({ status: 'pending', key: st.key }); }
   res.json(st);
 });
 
