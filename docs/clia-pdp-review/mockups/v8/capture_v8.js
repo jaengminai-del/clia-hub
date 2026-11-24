@@ -59,6 +59,25 @@ const out = path.resolve(process.argv[3] || '.');
   await page.evaluate(() => { const o = document.getElementById('pO'), k = o.querySelector('.os[data-k="6"]'); o.scrollTop = k.offsetTop - 20; o.dispatchEvent(new Event('scroll')); });
   await page.waitForTimeout(600); await shot('compare-v8-sync.png');
 
+  const ratio = await page.evaluate(async () => {
+    const bad = [], seen = new Set();
+    for (const i of DATA.keys()) {
+      for (const ch of ['shopee', 'lazada']) {
+        openCmp(i); setCh(ch);
+        const imgs = [...document.querySelectorAll('#pO img, #pR img, #grid img')];
+        await Promise.all(imgs.map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
+        for (const im of document.querySelectorAll('#pO img, #pR img')) {
+          if (!im.naturalWidth || seen.has(im.src + ch)) continue; seen.add(im.src + ch);
+          const r = im.getBoundingClientRect(); if (!r.width) continue;
+          const d = Math.abs(r.height / r.width - im.naturalHeight / im.naturalWidth) / (im.naturalHeight / im.naturalWidth);
+          if (d > 0.01) bad.push(`${DATA[i].model} ${ch} ${im.src.split('/').slice(-2).join('/')} 화면 ${Math.round(r.width)}x${Math.round(r.height)} 원본 ${im.naturalWidth}x${im.naturalHeight}`);
+        }
+      }
+    }
+    go('list');
+    return { checked: seen.size, bad };
+  });
+  console.log('image ratio check: checked', ratio.checked, 'distorted', ratio.bad.length); ratio.bad.slice(0, 20).forEach(b => console.log('   ', b));
   const summary = await page.evaluate(() => DATA.map(p => ({ m: p.model, st: p.st, block: p.block, gshort: p.gshort, grisk: p.grisk, g: p.gallery.length, live: p.gal.live, slices: p.slices.length })));
   console.log(JSON.stringify(summary));
   console.log('failed requests:', failed.length); failed.slice(0, 20).forEach(u => console.log('  ', u));

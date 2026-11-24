@@ -635,7 +635,7 @@ body.clia-hub { overflow: hidden; }
 
 
 /* ── v9: 상세(PDP)만 ── */
-.card img.pdp-thumb{object-fit:cover;object-position:top;background:#fff;border:1px solid var(--clia-gray-200)}
+.card img.pdp-thumb{object-fit:contain;object-position:center;background:#fff;border:1px solid var(--clia-gray-200)}
 .card .empty-gallery{height:150px;border-radius:10px;background:var(--clia-gray-100);color:var(--clia-gray-500)}
 .phone.pdp-only{background:#fff}
 .pdp-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;font-size:13px;font-weight:700;color:#222;border-bottom:1px solid #eee}
@@ -646,6 +646,7 @@ body.clia-hub { overflow: hidden; }
 .imgfail small{font-weight:400;font-size:10px;color:var(--clia-gray-400)}
 .card .imgfail{height:150px;border-radius:10px}.os .imgfail{height:140px}
 .os .nomatch{display:block;padding:8px 16px;font-size:11px;color:var(--clia-gray-400);background:var(--clia-gray-50);border-bottom:1px dashed var(--clia-gray-200)}
+.slices img{height:auto}/* width·height 속성은 자리만 잡고 비율은 이미지 그대로 */
 .v8note{position:fixed;left:80px;bottom:12px;z-index:50;max-width:560px;background:#1F1E1C;color:#fff;border-radius:12px;padding:10px 36px 10px 14px;font-size:12px;line-height:1.5;box-shadow:0 6px 24px rgba(0,0,0,.25)}
 .v8note b{color:#FFD86B}.v8note button{position:absolute;top:6px;right:8px;background:none;border:0;color:#fff;font-size:14px;cursor:pointer}
 </style></head>

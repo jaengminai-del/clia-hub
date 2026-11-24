@@ -199,6 +199,7 @@ def main():
 .market-gallery .empty-gallery small{font-weight:500;font-size:12px;color:#9B3B37}
 .imgfail{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:100%;min-height:72px;background:var(--clia-gray-100);color:var(--clia-gray-500);font-size:11px;font-weight:600;text-align:center;line-height:1.3}.imgfail small{font-weight:400;font-size:10px;color:var(--clia-gray-400)}.card .imgfail{height:150px;border-radius:10px}.os .imgfail{height:140px}.market-gallery .imgfail{position:absolute;inset:0;height:auto}.thumb .imgfail{min-height:0;height:100%;font-size:0}.thumb .imgfail small{display:none}.thumb .imgfail::after{content:'✕';font-size:12px}
 .os .nomatch{display:block;padding:8px 16px;font-size:11px;color:var(--clia-gray-400);background:var(--clia-gray-50);border-bottom:1px dashed var(--clia-gray-200)}
+.slices img{height:auto}/* width·height 속성은 자리만 잡고 비율은 이미지 그대로 */
 .v8note{position:fixed;left:80px;bottom:12px;z-index:50;max-width:560px;background:#1F1E1C;color:#fff;border-radius:12px;padding:10px 36px 10px 14px;font-size:12px;line-height:1.5;box-shadow:0 6px 24px rgba(0,0,0,.25)}
 .v8note b{color:#FFD86B}.v8note button{position:absolute;top:6px;right:8px;background:none;border:0;color:#fff;font-size:14px;cursor:pointer}
 """
