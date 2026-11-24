@@ -65,8 +65,10 @@ td .m,.cb .m{font-weight:700}td .s{font-size:12px;color:var(--g500);max-width:42
 .cb .meta{font-size:12px;color:var(--g700)}
 .empty{text-align:center;color:#999;padding:30px}
 .more{text-align:center;padding:14px}
-.selbar{position:absolute;right:24px;bottom:18px;background:var(--g900);color:#fff;border-radius:999px;padding:8px 10px 8px 18px;display:none;gap:10px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.25)}
-.selbar.on{display:flex}.selbar small{color:#cfc9bf}
+.selbar{display:none;gap:8px;align-items:center;font-size:13px;color:var(--g700)}.selbar.on{display:flex}
+.chd .why{font-size:12px;color:var(--g500);max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chd .cmt{width:220px;border:1px solid var(--g300);border-radius:999px;padding:7px 14px;font:inherit;font-size:13px}.chd .cmt.err{border-color:var(--bad)}
+.seg.sm button{padding:3px 12px;font-size:12px}
 /* 비교 */
 .chd{display:flex;align-items:center;gap:12px;padding:10px 20px;background:#fff;border-bottom:1px solid var(--line)}
 .chd .id .m{font-weight:700;font-size:16px}.chd .id .s{font-size:12px;color:var(--g500);max-width:460px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -106,9 +108,6 @@ td .m,.cb .m{font-weight:700}td .s{font-size:12px;color:var(--g500);max-width:42
 .prep .err{color:var(--bad);font-size:13px;margin:0 0 10px;word-break:break-word}.prep p{font-size:12px;color:var(--g500);margin:0 0 12px}
 aside{display:flex;flex-direction:column;min-height:0;background:#fff;border-left:1px solid var(--line)}
 .ckh{padding:12px 16px 10px;border-bottom:1px solid var(--line)}.ckh b{font-size:14px}.ckh .p{font-size:12px;color:var(--g500);margin-left:8px}
-.ckf{border-top:1px solid var(--line);padding:10px 12px 12px;display:grid;gap:8px;background:#fff}.ckf .why{font-size:12px;color:var(--g500);min-height:16px}
-.ckf input{width:100%;border:1px solid var(--g300);border-radius:999px;padding:7px 14px;font:inherit;font-size:13px}.ckf input.err{border-color:var(--bad)}
-.ckf .acts{display:flex;gap:8px;justify-content:flex-end}
 .ckh .prog{width:100%;height:6px;margin:8px 0 0}
 .ckl{flex:1;overflow:auto;padding:6px 8px 40px}
 .it{border-radius:10px;padding:8px 10px;margin:2px 0;cursor:pointer;border:1px solid transparent}
@@ -133,7 +132,8 @@ aside{display:flex;flex-direction:column;min-height:0;background:#fff;border-lef
  <button class="btn" id="closeBtn" hidden onclick="parent.postMessage('clia-review-close','*')">✕</button></div>
 
 <main class="view on" id="vList">
- <div class="lhd"><h2 data-t="h"></h2><span class="sp"></span><span class="cnt" id="okCnt"></span></div>
+ <div class="lhd"><h2 data-t="h"></h2><span class="cnt" id="okCnt"></span><span class="sp"></span>
+  <div class="selbar" id="selbar"><span id="selN"></span><button class="btn" onclick="S.sel.clear();renderList()" data-t="cancel"></button><button class="btn pri" onclick="bulkApprove()" data-t="approveSel"></button></div></div>
  <div class="flt">
   <div class="tabs" id="tabs"></div>
   <details class="dd" id="ddDv"><summary id="sDv"></summary><div class="ddp" id="pDv"></div></details>
@@ -147,13 +147,13 @@ aside{display:flex;flex-direction:column;min-height:0;background:#fff;border-lef
   <th style="width:36px"></th><th style="width:56px"></th><th data-t="thProd"></th><th data-t="thGrp"></th><th data-t="thImgs"></th><th data-t="thSt"></th></tr></thead>
   <tbody id="rows"></tbody></table><div class="more" id="moreL"></div></div>
  <div class="gal" id="galBox" hidden><div class="cards" id="cards"></div><div class="more" id="moreG"></div></div>
- <div class="selbar" id="selbar"><span id="selN"></span><button class="btn" onclick="S.sel.clear();renderList()" data-t="cancel"></button><button class="btn pri" onclick="bulkApprove()" data-t="approveSel"></button></div>
 </main>
 
 <main class="view" id="vCmp">
  <div class="chd"><button class="btn" onclick="closeCmp()">←</button><div class="id"><div class="m" id="cModel"></div><a class="s" id="cTitle" lang="th" target="_blank" rel="noopener"></a></div>
   <span id="cSt"></span><span class="sp"></span>
-  <div class="seg" id="chSeg"><button data-c="shopee" onclick="setCh('shopee')">Shopee</button><button data-c="lazada" onclick="setCh('lazada')">Lazada</button></div></div>
+  <span class="why" id="bWhy"></span><input class="cmt" id="cmt" data-tp="cmtPh">
+  <button class="btn" id="bUndo" hidden onclick="unapprove()" data-t="unapprove"></button><button class="btn" id="bRej" onclick="reject()" data-t="reject"></button><button class="btn pri" id="bOk" onclick="approve()" data-t="approve"></button></div>
  <div class="banner" id="banner" hidden><span id="bannerTx"></span><button class="btn sm" onclick="prepareCur(false)" data-t="reprep"></button></div>
  <div class="main">
   <div class="sc" id="sc">
@@ -163,14 +163,12 @@ aside{display:flex;flex-direction:column;min-height:0;background:#fff;border-lef
       <span data-t="cropBottom" style="margin-left:8px"></span><button class="btn sm" onclick="nudge('bottom',-100)">−100</button><button class="btn sm" onclick="nudge('bottom',-10)">−10</button><input id="cBot" type="number" onchange="cropInput()"><button class="btn sm" onclick="nudge('bottom',10)">+10</button><button class="btn sm" onclick="nudge('bottom',100)">+100</button>
       <span class="sp" style="flex:1"></span><button class="btn sm" onclick="cropAuto()" data-t="cropAuto"></button><button class="btn sm" onclick="recapture()" data-t="recapture"></button><button class="btn sm pri" onclick="cropSave()" data-t="cropSave"></button></div>
      <div class="vp" id="vpL"><div class="mv" id="mvL"></div><div class="segbox" id="segL" hidden></div><span class="segtag" id="segTagL"></span></div></section>
-    <section class="pane"><div class="ph"><span id="rTitle"></span><span class="r"><span class="badge b-warn" id="imgWarn" hidden></span></span></div><div class="vp" id="vpR"><div class="mv" id="mvR"></div><div class="segbox" id="segR" hidden></div><span class="segtag" id="segTagR"></span></div></section>
+    <section class="pane"><div class="ph"><div class="seg sm" id="chSeg"><button data-c="shopee" onclick="setCh('shopee')">Shopee</button><button data-c="lazada" onclick="setCh('lazada')">Lazada</button></div><span class="r"><span class="badge b-warn" id="imgWarn" hidden></span></span></div><div class="vp" id="vpR"><div class="mv" id="mvR"></div><div class="segbox" id="segR" hidden></div><span class="segtag" id="segTagR"></span></div></section>
    </div>
    <div id="spacer"></div><div id="snaps"></div>
    <div class="prep" id="prep"><div class="box" id="prepBox"></div></div>
   </div>
-  <aside><div class="ckh"><b data-t="ck"></b><span class="p" id="ckP"></span><div class="prog"><i id="ckBar"></i></div></div><div class="ckl" id="ckl"></div>
-   <div class="ckf"><div class="why" id="bWhy"></div><input id="cmt" data-tp="cmtPh">
-    <div class="acts"><button class="btn" id="bUndo" hidden onclick="unapprove()" data-t="unapprove"></button><button class="btn" id="bRej" onclick="reject()" data-t="reject"></button><button class="btn pri" id="bOk" onclick="approve()" data-t="approve"></button></div></div></aside>
+  <aside><div class="ckh"><b data-t="ck"></b><span class="p" id="ckP"></span><div class="prog"><i id="ckBar"></i></div></div><div class="ckl" id="ckl"></div></aside>
  </div>
 </main>
 <div class="toast" id="toast"></div>
@@ -449,7 +447,6 @@ function renderCmp(fresh,keepS){
   if(!C)return;const p=C.p,ch=C.ch,shp=ch==='shopee',d=C.d[ch];
   $('cModel').textContent=p.model;$('cTitle').textContent=p.title;$('cTitle').href=p.url;
   document.querySelectorAll('#chSeg button').forEach(b=>b.classList.toggle('on',b.dataset.c===ch));
-  $('rTitle').textContent=t('rTitle',shp?'SHOPEE':'LAZADA');
   renderPrep();
   const stale=CHS.some(c=>C.st[c]&&C.st[c].state==='stale');$('banner').hidden=!stale;$('bannerTx').textContent=t('staleTx');
   renderBar();
@@ -587,8 +584,8 @@ function renderBar(){
   if(!C)return;const p=C.p,s=stOf(p),done=s==='ok',both=CHS.every(ready),pr=progress();
   const stale=CHS.some(ch=>C.st[ch]&&C.st[ch].state==='stale');
   const why=done?t('whyDone'):stale?t('whyStale'):!both?t('whyPrep'):pr.flags?t('whyFlag',pr.flags):pr.n<pr.all?t('whyProg',pr.n,pr.all):'';
-  // 버튼 자리는 늘 같다: 오른쪽 아래 [반려 | 승인 취소] [승인]. 승인을 못 하는 까닭은 버튼 위 한 줄로
-  $('bWhy').textContent=why;$('bOk').disabled=!!why;$('bRej').hidden=done;$('bUndo').hidden=!done;
+  // 버튼 자리는 늘 같다: 오른쪽 위 [반려 | 승인 취소] [승인]. 승인을 못 하는 까닭은 그 왼쪽 한 줄로
+  $('bWhy').textContent=why;$('bWhy').title=why;$('bOk').disabled=!!why;$('bRej').hidden=done;$('bUndo').hidden=!done;
   $('cSt').innerHTML=stBadge(p);
 }
 async function decide(state,via){
