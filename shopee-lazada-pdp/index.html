@@ -54,6 +54,10 @@ body{font-family:'LGEIText', 'LINESeedSansTH',Arial,sans-serif;background:#F6F3E
 .panel-right{width:45%;flex-shrink:0;display:flex;flex-direction:column;min-width:0;background:#F0ECE4}
 
 .input-section{padding:20px 16px;background:#fff;border-bottom:1px solid #E6E1D6;flex-shrink:0}
+/* 허브 · 벌크에서 열면(화면 안 틀) 제품 주소가 이미 정해져 있다 — 주소 칸 · 분석 버튼 · 안내 1번(주소 넣기)은 숨긴다 (2026-11-24) */
+.clia-embedded .input-section .input-label,.clia-embedded .input-section .input-row,.clia-embedded .hint-step1{display:none}
+.clia-embedded .input-section{padding:10px 16px}
+.clia-embedded .input-section:has(.status-area:empty){display:none}
 .input-label{font-size:11px;font-weight:700;color:#7E7C77;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em}
 .input-row{display:flex;gap:8px}
 .url-input{flex:1;height:40px;border:1.5px solid #CBC8C2;border-radius:12px;padding:0 14px;font-size:13px;color:#262626;outline:none;transition:border-color .2s;background:#FDFCFA;font-family:'LGEIText', 'LINESeedSansTH',sans-serif}
@@ -67,6 +71,9 @@ body{font-family:'LGEIText', 'LINESeedSansTH',Arial,sans-serif;background:#F6F3E
 .status-msg .spinner{width:12px;height:12px;border-radius:50%;border:2px solid rgba(0,0,0,.1);border-top-color:#E53238;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .status-msg.error{color:#E53238}
+.hint-fold summary{cursor:pointer;font-weight:700;list-style:none}.hint-fold summary::-webkit-details-marker{display:none}
+.hint-fold summary::after{content:" ?";display:inline-flex;width:16px;height:16px;border-radius:50%;background:#E6E1D6;color:#555;font-size:11px;align-items:center;justify-content:center;margin-left:4px}
+.hint-fold[open] summary{margin-bottom:6px}.hint-fold:not([open]){padding-top:10px;padding-bottom:10px}
 .cerr-ov{position:fixed;inset:0;background:rgba(17,17,17,.45);display:flex;align-items:center;justify-content:center;z-index:99999}
 .cerr-card{background:#fff;border-radius:18px;padding:26px 28px 22px;width:min(460px,92vw);box-shadow:0 24px 64px rgba(0,0,0,.25);text-align:left}
 .cerr-card h3{margin:0 0 10px;font-size:18px;color:#111}
@@ -259,17 +266,14 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
     </div>
 
     <div class="sections-panel" id="sectionsPanel">
-      <div class="hint-box">
-        💡 <strong>How it works:</strong><br>
-        1. Enter an LG.com PDP URL and click <strong>Generate</strong><br>
-        2. Crawled sections are grouped into PDP content automatically<br>
-        3. Result appears in the left preview — review &amp; edit<br>
-        4. Click <strong>Download Images (ZIP)</strong> — the page is rendered and cut into
-        <strong>6 slices</strong> (adjustable) so each file is short enough to upload to
-        Shopee / Lazada<br>
-        &nbsp;&nbsp;&nbsp;Images are cropped to the content edges — no blank side margins.
-        Leave <em>Output width</em> empty for automatic sizing.
-      </div>
+      <!-- 사용 안내 (2026-11-24): 접어 두고 필요할 때 펼친다. 문구는 지금 버튼 이름(Analyze · Edit · Save · Export) -->
+      <details class="hint-box hint-fold">
+        <summary>💡 How it works</summary>
+        <div class="hint-step1">1. Enter an LG.com product page URL and click Analyze.</div>
+        <div>2. The page becomes PDP content automatically. Drag the cards below to reorder.</div>
+        <div>3. Check the preview on the left. Use Edit to change text or delete sections, then Save.</div>
+        <div>4. Open Export to download the images (ZIP) or copy the HTML.</div>
+      </details>
       <div id="sectionsList"></div>
     </div>
   </div>
