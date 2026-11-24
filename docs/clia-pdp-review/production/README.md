@@ -54,6 +54,17 @@
 - **Firecrawl 캡처:** 아래로 내리는 횟수를 6번에서 24번으로 늘렸습니다. 긴 PDP의 지연 로드 섹션을 찍기 위해서입니다.
 - **목록 머리:** 「승인 n/a · 준비 m/a」를 보여 줍니다.
 
+### lg.com 전체 화면 캡처는 크롤할 때 함께 (2026-11-24)
+
+- **Playwright로는 안 됨:** 운영 서버(Railway)의 Playwright는 lg.com(Akamai)에 막힙니다.
+  - 운영 DNS 로그: www.lg.com 접속 9초 뒤 Firecrawl로 넘어감
+  - 기본 Playwright 시험: 403 「Access Denied」
+  - 저장한 페이지 HTML을 Playwright로 다시 그리기: lg.com이 CSS·JS 파일까지 막아(ERR_BLOCKED_BY_ORB) 디자인 없이 글자만 나옴. 상품 이미지만 받아짐
+- **그래서:** 크롤(`pdp_pipeline_sl.py`)이 제품 페이지를 받는 그 Firecrawl 요청에 `screenshot@fullPage`를 더해 같은 요청에서 캡처도 받습니다. Firecrawl 호출 수는 그대로입니다. 지연 로드가 찍히게 끝까지 천천히(24번) 내린 뒤 찍습니다.
+  - `out/<slug>/lgcom_full.jpg`(폭 960)로 저장하고, 크롤이 끝나면 `crawler-routes.js`가 캡처 저장소(`media-cache/fullshot/<key>.jpg`, 버킷 `media-fullshot/`)에 올립니다.
+  - 검토 화면과 빌더 「전체 lg.com 페이지」가 따로 캡처하지 않고 바로 씁니다.
+- **이미 크롤한 제품:** 캡처가 없습니다(TH·SG 577개 중 516개). 다시 크롤하거나, 미리 준비·검토 화면이 따로 캡처해야 합니다.
+
 ### 승인 규칙
 
 - **체크리스트 승인:** 두 채널 모두 준비가 끝나야 하고, 체크리스트를 끝까지 보고, 「다름」 표시가 없어야 합니다. 같은 이미지 묶음이면 한 채널에서 본 것이 다른 채널에도 봤음으로 남습니다.

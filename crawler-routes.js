@@ -58,6 +58,23 @@ function auth(req, res, next) {
   next();
 }
 
+// 크롤이 같은 Firecrawl 요청에서 받은 lg.com 전체 화면 캡처(out/lgcom_full.jpg, 2026-11-24) → 캡처 저장소에 올린다.
+//   server.js /api/v1/fullshot 과 같은 주소 키 · 같은 자리(media-cache/fullshot/<key>.jpg, 버킷 media-fullshot/<key>.jpg)
+//   → 검토·승인 화면 왼쪽과 빌더 「전체 lg.com 페이지」가 따로 캡처(Firecrawl 한 번 더)하지 않고 바로 쓴다.
+function publishPageShot(url, out) {
+  const src = path.join(out, 'lgcom_full.jpg');
+  try {
+    if (!fs.existsSync(src) || fs.statSync(src).mtimeMs < Date.now() - 6 * 3600 * 1000) return;   // 이번 크롤에서 받은 것만
+    const key = crypto.createHash('sha1').update(String(url).trim().replace(/\/+$/, '').toLowerCase()).digest('hex').slice(0, 20);
+    const dst = path.join(__dirname, 'media-cache', 'fullshot', `${key}.jpg`);
+    fs.mkdirSync(path.dirname(dst), { recursive: true });
+    fs.copyFileSync(src, dst);
+    store.putBuffer(`media-fullshot/${key}.jpg`, fs.readFileSync(dst), 'image/jpeg')
+      .then(() => console.log(`[crawl] lg.com 전체 화면 캡처 → 캡처 저장소 ${key} (${Math.round(fs.statSync(dst).size / 1024)}KB)`))
+      .catch((e) => console.warn('[crawl] 캡처 버킷 업로드 실패', e.message));
+  } catch (e) { console.warn('[crawl] 캡처 올리기 실패', e.message); }
+}
+
 function launchPipeline(jobId, url, usePro, geminiKey, fullAi, html = null, base = '') {
   const slug = slugify(url);
   const out = path.join(OUT_DIR, slug);
@@ -90,6 +107,7 @@ function launchPipeline(jobId, url, usePro, geminiKey, fullAi, html = null, base
     if (ok) job.post = true;
     job.exited = true;
     if (!ok) return;
+    publishPageShot(url, out);
     autoFrame(out, { base })
       .catch((e) => console.warn('[auto-frame]', slug, e.message))
       .finally(() => {
@@ -223,7 +241,7 @@ function startCrawl(url, { force = false, pro = false, geminiKey = null, fullAi 
     return { jobId, cached: true };
   }
   if (force && fs.existsSync(out)) {
-    for (const f of ['mirror.json', 'final.json', 'pc.md', 'pc.html', 'pc_raw.html', 'pc_full.png', 'progress.json']) {
+    for (const f of ['mirror.json', 'final.json', 'pc.md', 'pc.html', 'pc_raw.html', 'pc_full.png', 'lgcom_full.jpg', 'progress.json']) {
       try { fs.unlinkSync(path.join(out, f)); } catch {}
     }
   }
@@ -505,3 +523,4 @@ module.exports.productSummary = productSummary;   // 벌크 엑셀 SKU 연결 (b
 module.exports.OUT_DIR = OUT_DIR;
 module.exports.auth = auth;   // 검토·승인 저장 (approvals.js)
 setImmediate(() => { try { stripNonContent(); } catch (e) { console.warn('[crawl] stripNonContent:', e.message); } });
+module.exports.publishPageShot = publishPageShot;   // 크롤이 받은 lg.com 캡처 올리기 (시험·다시 쓰기용)
