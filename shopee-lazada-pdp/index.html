@@ -173,6 +173,8 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
     <!-- 버튼 줄 한 줄로 (2026-11-18): 버튼을 작게, 제목(화면 위 머리글·허브 창 제목과 겹침)은 숨기고, Reset 은 ✕ 만.
          그래도 좁은 화면에서 넘치면 다음 줄로 내려간다 (전에는 오른쪽 패널에 가려졌다) -->
     <style>
+      .ap-badge { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+      .ap-badge.ok { background: #E3F4EA; color: #1E7F4F; } .ap-badge.bad { background: #FDE8E7; color: #C8241F; } .ap-badge.warn { background: #2b2926; color: #fff; }
       .panel-left > .panel-head .panel-head-title { display: none; }
       .panel-left > .panel-head .btn-sm { height: 30px; padding: 0 9px; font-size: 11.5px; }
       .panel-left > .panel-head .btn-sm.danger { padding: 0 10px; }
@@ -182,7 +184,8 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
         Listing Preview
         <span class="badge-ebay">Shopee / Lazada</span>
       </div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;min-width:0">
+      <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;min-width:0;align-items:center">
+        <span class="ap-badge" id="apBadge" style="display:none"></span>
         <button class="btn-sm" id="btnEditMode" onclick="toggleEdit()">✏ Edit</button>
         <button class="btn-sm primary" id="btnSave" onclick="saveEdit()" disabled style="display:none" title="Save this edit — the bulk Excel uses it for this product">💾 Save</button>
         <button class="btn-sm primary" id="btnDownload" onclick="downloadImages()" disabled>⬇ Download Images (ZIP)</button>
@@ -639,6 +642,7 @@ function showPreview(html) {
     const b = document.getElementById(id);
     if (b) b.disabled = false;
   });
+  refreshApproval();
   refreshListingButton();
   // Compliance check
   const bar = document.getElementById('complianceBar');
@@ -694,6 +698,42 @@ function updateContentInfo() {
 }
 
 // ══════════════════════════════════════════
+// ── 검토·승인 상태 (2026-11-24, approvals.js) ─────────────────────────────
+// 제품의 승인 상태를 배지로 보여 준다. 서버 설정 APPROVAL_GATE=1 이면 승인 전에는 ZIP·HTML 복사를 잠근다(기본 꺼짐).
+const APPROVAL_LOCK_IDS = ['btnDownload', 'btnDownload2', 'btnDownload12', 'btnDownload12b', 'btnCopyHtml', 'btnCopyImgHtml'];
+let approvalState = { gate: false, status: 'unknown' };
+const approvalLocked = () => approvalState.gate && approvalState.status !== 'approved';
+function approvalBlocks() {
+  if (!approvalLocked()) return false;
+  setStatus('Not approved yet — images and HTML can be downloaded after review and approval.', 'err');
+  return true;
+}
+async function refreshApproval() {
+  const url = (document.getElementById('pdpUrl').value || '').trim(), badge = document.getElementById('apBadge');
+  if (!url || !badge) return;
+  try {
+    const r = await fetch(`${API_BASE}/api/v1/approvals?url=${encodeURIComponent(url)}`);
+    const j = await r.json();
+    const it = Object.values(j.items || {})[0] || { status: 'pending' };
+    approvalState = { gate: !!j.gate, status: it.status };
+  } catch (_) { approvalState = { gate: false, status: 'unknown' }; }
+  const st = approvalState.status;
+  const off = !approvalState.gate;   // 잠금 꺼짐: 배지만 보이고 다운로드는 된다
+  const L = { approved: ['✓ Approved', 'ok'], rejected: [off ? '✕ Rejected (lock off)' : '✕ Rejected', 'bad'],
+              stale: [off ? 'Changed — approve again (lock off)' : 'Changed — approve again', 'warn'],
+              pending: [off ? 'Not approved (lock off)' : 'Not approved', 'warn'], unknown: ['', ''] }[st] || ['', ''];
+  badge.textContent = L[0];
+  badge.className = 'ap-badge ' + L[1];
+  badge.style.display = L[0] ? '' : 'none';
+  badge.title = approvalLocked() ? 'Not approved yet — images and HTML can be downloaded after review and approval.'
+    : st === 'approved' ? '' : 'Not approved yet. The download lock is off on this server, so downloads still work.';
+  APPROVAL_LOCK_IDS.forEach(id => {
+    const b = document.getElementById(id);
+    if (!b || !generatedHTML) return;
+    if (approvalLocked()) { b.disabled = true; b.title = badge.title; }
+  });
+}
+
 // Download — 이미지 슬라이스 ZIP
 //   Shopee / Lazada 는 상품 상세를 HTML이 아닌 이미지로 업로드한다.
 //   한 장이 너무 길면 업로드가 거부되므로 서버(실제 Chrome)에서 렌더한 뒤
@@ -713,7 +753,7 @@ function slugFromUrl() {
 }
 
 async function downloadImages(maxImages) {
-  if (!generatedHTML || _downloading) return;
+  if (!generatedHTML || _downloading || approvalBlocks()) return;
   maxImages = parseInt(maxImages, 10) || 0;   // Shopee 12장 버전: 앞에서부터 N장만 (2026-11-11)
   const btns = ['btnDownload', 'btnDownload2', 'btnDownload12', 'btnDownload12b'].map(id => document.getElementById(id));
   const info = document.getElementById('sliceInfo');
@@ -800,7 +840,7 @@ function imageHtmlOpts(html) {
            urlsOnly: CHANNEL === 'shopee' ? SHOPEE_MAX_IMAGES : 0 };
 }
 function copyImageHTML() {
-  if (!window.CLIAImageHTML) return;
+  if (!window.CLIAImageHTML || approvalBlocks()) return;
   CLIAImageHTML.copy({ ...imageHtmlOpts(() => exportHtml(generatedHTML)),
                        button: document.getElementById('btnCopyImgHtml'), isEditing: () => editMode });
 }
@@ -851,7 +891,7 @@ function pdpSummaryHtml() {
     .catch((e) => { delete _summaryCache[u]; throw e; }));
 }
 async function copyHTML() {
-  if (!generatedHTML) return;
+  if (!generatedHTML || approvalBlocks()) return;
   const btn = document.getElementById('btnCopyHtml'), orig = btn.textContent;
   btn.disabled = true; btn.textContent = '⏳';
   let out = exportHtml(generatedHTML), note = '';

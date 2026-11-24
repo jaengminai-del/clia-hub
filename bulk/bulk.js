@@ -361,7 +361,7 @@
       const crawling = j.crawlTotal && j.crawlDone < j.crawlTotal;
       $('info').textContent = crawling ? t('progCrawl', j.crawlDone, j.crawlTotal) : t('progMake', j.done, j.total);
       $('prog').firstElementChild.style.width = (100 * (crawling ? j.crawlDone / j.crawlTotal : j.done / Math.max(1, j.total))) + '%';
-    } else if (j && j.status === 'ready' && sameAsJob()) $('info').innerHTML = `<span class="okline">${esc(t('doneShort', j.ok))}</span>`;
+    } else if (j && j.status === 'ready' && sameAsJob()) $('info').innerHTML = `<span class="okline">${esc(t('doneShort', j.ok))}</span>` + apLine(j);
     else if (j && j.status === 'cancelled') $('info').innerHTML = `<span>${esc(t('stopped', j.ok || 0, j.total || (j.items || []).length))}</span>`;
     else if (j && j.status === 'failed') $('info').innerHTML = `<span style="color:var(--bad)">${esc(t('expFail') + (j.error || ''))}</span>`;
     else $('info').innerHTML = `<span>${t('info', c.length, rep)}</span>`;
@@ -369,7 +369,9 @@
     $('stop').classList.toggle('hidden', !running); $('stop').textContent = t('stop');   // 진행 중일 때만 중단
     // 알림 고르기: 오래 걸릴 작업(새로 등록 포함 또는 상품 40개 초과)에만
     // 버튼 하나: 끝났고 선택이 그대로면 '엑셀 받기', 아니면 '내보내기 / 다시 내보내기 (N)' — 늘 같은 자리
-    const dlNow = !!(j && j.status === 'ready' && !S.busy && sameAsJob());
+    // 검토·승인 (approvals.js): 잠금이 켜져 있고 승인 전 상품이 있으면 엑셀 받기를 잠근다
+    const apLock = !!(j && j.approval && j.approval.gate && j.approval.pending > 0);
+    const dlNow = !!(j && j.status === 'ready' && !S.busy && sameAsJob() && !apLock);
     $('export').classList.toggle('hidden', dlNow || running);
     $('export').textContent = S.busy ? t('exporting') : (j && !running ? t('expAgain', c.length) : t('exp', c.length));
     $('export').disabled = S.busy || !c.length || !S.channel || !S.data.cols.desc;
@@ -379,6 +381,12 @@
     if (DW.row != null) fillDetail();
   }
 
+  // 승인 전 상품 안내 줄 (잠금 켜짐: 엑셀 잠김 / 꺼짐: 알림만)
+  function apLine(j) {
+    const a = j && j.approval;
+    if (!a || !a.pending) return '';
+    return ` <span style="color:${a.gate ? 'var(--bad)' : 'var(--muted, #888)'}" title="${esc((a.models || []).join(', '))}">· ${esc(t(a.gate ? 'apPend' : 'apPendOff', a.pending))}</span>`;
+  }
   // 넣은 SKU 번호 (SKU 번호가 비어 있던 행) → 엑셀 SKU 칸에
   const skuList = () => Object.entries(S.skuIn).filter(([, v]) => v);
   // 끝난 작업과 지금 선택이 같은지 (같으면 다시 만들 필요 없이 받기만)

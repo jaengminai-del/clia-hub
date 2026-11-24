@@ -1,6 +1,7 @@
 /* bulk-i18n.js — 벌크 엑셀 화면 문구 (en · th · ko · de · ar). 화면 언어는 법인 언어(?lang=), 확인용 ?lang=ko */
 window.BULK_TX = {
   en: {
+    apPend: (n) => `${n} products not approved yet — the Excel opens when every product is approved`, apPendOff: (n) => `${n} products not approved yet (download lock is off)`,
     title: 'Bulk Excel', drop: 'Attach the Shopee / Lazada bulk Excel', dropSub: 'Drop an .xlsx file here or click to choose',
     reading: 'Reading the Excel', matching: 'Matching products', again: 'Attach another file',
     
@@ -60,6 +61,7 @@ window.BULK_TX = {
     upFail: 'Could not read the file: ', expFail: 'Export failed: ', leave: 'The Excel is still being exported. Close anyway?',
   },
   th: {
+    apPend: (n) => `ยังไม่อนุมัติ ${n} รายการ — ดาวน์โหลด Excel ได้เมื่ออนุมัติครบทุกสินค้า`, apPendOff: (n) => `ยังไม่อนุมัติ ${n} รายการ (ปิดการล็อกการดาวน์โหลด)`,
     title: 'Bulk Excel', drop: 'แนบไฟล์ Excel แบบ bulk ของ Shopee / Lazada', dropSub: 'วางไฟล์ .xlsx ที่นี่ หรือคลิกเพื่อเลือกไฟล์',
     reading: 'กำลังอ่านไฟล์ Excel', matching: 'กำลังจับคู่สินค้า', again: 'แนบไฟล์อื่น',
     
@@ -119,6 +121,7 @@ window.BULK_TX = {
     upFail: 'อ่านไฟล์ไม่ได้: ', expFail: 'ส่งออกไม่สำเร็จ: ', leave: 'กำลังส่งออก Excel อยู่ ต้องการปิดหรือไม่?',
   },
   ko: {
+    apPend: (n) => `승인 전 상품 ${n}개 — 모두 승인되면 엑셀을 받을 수 있어요`, apPendOff: (n) => `승인 전 상품 ${n}개 (다운로드 잠금 꺼짐)`,
     title: '벌크 엑셀', drop: 'Shopee / Lazada 벌크 엑셀을 첨부하세요', dropSub: '.xlsx 파일을 여기에 끌어 놓거나 눌러서 고르세요',
     reading: '엑셀을 읽고 있습니다', matching: '제품을 매칭하고 있습니다', again: '다른 파일 첨부',
     
@@ -178,6 +181,7 @@ window.BULK_TX = {
     upFail: '파일을 읽지 못했습니다: ', expFail: '내보내기 실패: ', leave: '엑셀을 내보내는 중입니다. 닫을까요?',
   },
   de: {
+    apPend: (n) => `${n} Produkte noch nicht freigegeben — die Excel-Datei gibt es, sobald alle freigegeben sind`, apPendOff: (n) => `${n} Produkte noch nicht freigegeben (Download-Sperre aus)`,
     title: 'Bulk-Excel', drop: 'Shopee-/Lazada-Bulk-Excel anhängen', dropSub: '.xlsx-Datei hier ablegen oder zum Auswählen klicken',
     reading: 'Excel wird gelesen', matching: 'Produkte werden zugeordnet', again: 'Andere Datei anhängen',
     
@@ -237,6 +241,7 @@ window.BULK_TX = {
     upFail: 'Datei konnte nicht gelesen werden: ', expFail: 'Export fehlgeschlagen: ', leave: 'Der Export läuft noch. Trotzdem schließen?',
   },
   ar: {
+    apPend: (n) => `${n} منتجات غير معتمدة بعد — يتاح ملف Excel عند اعتماد كل المنتجات`, apPendOff: (n) => `${n} منتجات غير معتمدة بعد (قفل التنزيل متوقف)`,
     title: 'Excel مجمّع', drop: 'أرفق ملف Excel المجمّع من Shopee / Lazada', dropSub: 'أسقط ملف ‎.xlsx هنا أو انقر للاختيار',
     reading: 'جارٍ قراءة الملف', matching: 'جارٍ مطابقة المنتجات', again: 'إرفاق ملف آخر',
     
