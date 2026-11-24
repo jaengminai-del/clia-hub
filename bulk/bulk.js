@@ -264,6 +264,7 @@
     const ci = S.data.cols.parentSku || S.data.cols.sku, cc = (S.data.columns || []).find((c) => c.col === ci);
     return (S.data.cols.parentSku ? 'Parent SKU' : 'SKU') + (cc ? ` (${cc.letter})` : '');
   }
+  const catOf = (p) => { const seg = String(p.url || '').split('/').filter(Boolean); return seg.length > 2 ? seg[seg.length - 2] : ''; };   // LG.com 카테고리
   function nmRowHtml(r, style) {
     const g = groupOf(r);
     let ac = '';
@@ -276,9 +277,8 @@
     } else if (g === 'gMulti') {
       // 같은 모델이 LG.com 카테고리 두 곳에 있으면(예: 2-door-refrigerator · top-freezer) 버튼이 똑같아 보인다 — 카테고리를 붙인다
       const cs = candsOf(r), dupe = (p) => cs.filter((x) => x.model === p.model).length > 1;
-      const cat = (p) => { const seg = String(p.url || '').split('/').filter(Boolean); return seg.length > 2 ? seg[seg.length - 2] : ''; };
       ac = cs.map((p) => `<button type="button" class="pick" data-pick="${r.row}" data-slug="${esc(p.slug)}" title="${esc((p.title || p.model) + (p.url ? '\n' + p.url : ''))}">` +
-        `${p.thumb ? `<img src="${esc(p.thumb)}" alt="" loading="lazy">` : ''}${esc(p.model)}${dupe(p) && cat(p) ? `<span class="pc">${esc(cat(p))}</span>` : ''}</button>`).join('');
+        `${p.thumb ? `<img src="${esc(p.thumb)}" alt="" loading="lazy">` : ''}${esc(p.model)}${dupe(p) && catOf(p) ? `<span class="pc">${esc(catOf(p))}</span>` : ''}</button>`).join('');
     } else if (g === 'gReg' && r.lg) {
       ac = `<button type="button" class="mini" data-regrow="${r.row}"${S.busy ? ' disabled' : ''}>${esc(t('regRow'))}</button>`;
     } else ac = `<span class="leave">${esc(t('leaveAs'))}</span>`;
@@ -524,6 +524,11 @@
     if (st) st.textContent = t('checking');
     try {
       const m = await api(`/api/v1/bulk/match-sku?sku=${encodeURIComponent(v)}&country=${encodeURIComponent(home)}&site=${encodeURIComponent(S.data.site || '')}`);
+      if (m.cands) {   // 여러 제품과 맞음 → 후보 버튼 (고르면 그 주소로)
+        if (st) st.innerHTML = `${esc(t('gMultiD'))}<span class="cands">${m.cands.map((p) => `<button type="button" class="pick" data-skupick="${row}" data-url="${esc(p.url)}" title="${esc(p.url)}">` +
+          `${p.thumb ? `<img src="${esc(p.thumb)}" alt="" loading="lazy">` : ''}${esc(p.model)}${catOf(p) ? `<span class="pc">${esc(catOf(p))}</span>` : ''}</button>`).join('')}</span>`;
+        return;
+      }
       urlIn.value = m.url; S.draft[row] = m.url;
       await tryUrl(urlIn);
     } catch (_) { if (st) st.textContent = t('skuNoHit'); }
@@ -547,6 +552,12 @@
     const inp = e.target.closest('input[data-urow]'); if (inp) tryUrl(inp);
   });
   $('list').addEventListener('click', (e) => {
+    const sp = e.target.closest('button[data-skupick]');
+    if (sp) {   // SKU 로 찾은 후보 중 고르기 → 그 주소로 해결
+      const urlIn = document.querySelector(`#list input[data-urow="${sp.dataset.skupick}"]`);
+      if (urlIn) { urlIn.value = sp.dataset.url; S.draft[+sp.dataset.skupick] = sp.dataset.url; delete urlIn.dataset.tried; tryUrl(urlIn); }
+      return;
+    }
     const pk = e.target.closest('button[data-pick]'), un = e.target.closest('button[data-undo]'), rr = e.target.closest('button[data-regrow]');
     if (pk || un || rr) e.preventDefault();   // 되돌리기는 매칭 완료 행(체크 칸이 있는 줄) 안에도 있다
     if (pk) {

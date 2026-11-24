@@ -327,7 +327,8 @@ router.get('/api/v1/bulk/match-sku', async (req, res) => {
   const idx = productIndex();
   const cands = matchRow({ sku }, idx).candidates.map((s) => idx.products[s]).filter((p) => p && p.country === country);
   if (cands.length === 1) return res.json({ url: cands[0].url, model: cands[0].model });
-  if (cands.length > 1) return res.status(404).json({ error: 'several products match', code: 'multi' });
+  // 같은 모델이 LG.com 카테고리 두 곳에 있는 경우 등 — 후보를 돌려주고 화면에서 고른다
+  if (cands.length > 1) return res.json({ cands: cands.slice(0, 6).map((p) => ({ url: p.url, model: p.model, thumb: p.thumb || '' })) });
   if (!sitemap.siteOk(site) || site.slice(0, 2) !== country) return res.status(404).json({ error: 'not found', code: 'none' });
   try {
     const keys = skuKeys(sku);
