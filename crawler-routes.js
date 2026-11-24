@@ -216,6 +216,15 @@ router.get('/healthz', (req, res) => res.json({
 function startCrawl(url, { force = false, pro = false, geminiKey = null, fullAi = false, html = null, base = '' } = {}) {
   const slug = slugify(url);
   const out = path.join(OUT_DIR, slug);
+  // 같은 제품을 이미 크롤 중이면 새로 띄우지 않고 그 크롤에 합류한다 (2026-11-24).
+  //   두 크롤이 같은 폴더에 동시에 쓰면 결과가 섞이고, '다시 크롤'(force)은 진행 중인 크롤의 결과 파일을 지운다.
+  //   허브 · 빌더 · 벌크 엑셀 모두 이 함수를 거치므로 여러 사람이 같은 제품을 눌러도 크롤은 하나
+  for (const [id, j] of jobs) {
+    if (j.slug === slug && j.proc && (!j.exited || j.post)) {
+      console.log(`[crawl] ${slug}: 이미 크롤 중 → 같은 작업(${id})에 합류`);
+      return { jobId: id, cached: false, joined: true };
+    }
+  }
   if (html) force = true;
   if (fs.existsSync(path.join(out, 'mirror.json')) && !force) {
     const jobId = 'cached_' + crypto.randomBytes(6).toString('hex');
