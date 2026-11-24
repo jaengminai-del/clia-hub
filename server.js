@@ -2689,6 +2689,8 @@ app.get('/media/exports/:hash/:file', async (req, res) => {
    제품 폴더의 summary.json 에 보관 (버킷에도) — 다시 부르면 그대로, refresh:true 면 새로 만든다
 ────────────────────────────────────────── */
 const summaryJobs = new Map();   // slug → Promise (같은 제품 동시 요청은 한 번만 만든다)
+// 요약 규칙이 바뀌면 올린다 — 예전 규칙으로 실패한 기억(summary-fail.json)을 버리고 다시 만든다 (2: 번들 반반 · 스피커는 본 제품만, 3: 2,000자에 안 들어가면 lg.com Key features 만)
+const SUMMARY_RULE_V = 3;
 app.post('/api/v1/pdp-summary', async (req, res) => {
   const path = require('path'), fs = require('fs');
   const { url, refresh = false } = req.body || {};
@@ -2703,6 +2705,18 @@ app.post('/api/v1/pdp-summary', async (req, res) => {
   if (!fs.existsSync(path.join(slugDir, 'mirror.json'))) return res.status(404).json({ error: 'no crawl for this URL — crawl it first' });
   if (cachedOnly && (refresh || !fs.existsSync(path.join(slugDir, 'summary.json')))) return res.status(404).json({ error: 'no summary yet', code: 'none' });
   const key = slug + (refresh ? '|refresh' : '') + (model ? '|' + model : '');
+  // 실패 기억 (2026-11-24): 같은 크롤 내용으로 실패한 요약은 다시 만들지 않는다 — 번들 제품(USP 23~57개)은 2,000자 안에
+  //   USP 를 다 넣을 수 없어 매번 Gemini 4번(약 3분)을 쓰고 실패했고, 두 채널·벌크가 또 같은 일을 했다.
+  //   규칙 미달은 24시간, 다른 오류(일시 장애)는 30분 기억. 다시 크롤해 내용이 바뀌거나 refresh:true 면 새로 만든다.
+  const failFp = path.join(slugDir, 'summary-fail.json');
+  const mirrorSig = () => { try { return require('crypto').createHash('sha1').update(fs.readFileSync(path.join(slugDir, 'mirror.json'))).digest('hex').slice(0, 16); } catch (_) { return ''; } };
+  if (!refresh && !model && !fs.existsSync(path.join(slugDir, 'summary.json'))) {
+    let f = null;
+    try { f = JSON.parse(fs.readFileSync(failFp, 'utf8')); } catch (_) {}
+    if (f && f.v === SUMMARY_RULE_V && f.mirror === mirrorSig() && Date.now() - f.at < (f.rule ? 24 * 3600 * 1000 : 30 * 60 * 1000)) {
+      return res.status(500).json({ error: f.error, cached: true, failed_at: f.at });
+    }
+  }
   let job = summaryJobs.get(key);
   if (!job) {
     job = new Promise((resolve, reject) => {
@@ -2718,8 +2732,17 @@ app.post('/api/v1/pdp-summary', async (req, res) => {
         resolve(d);
       });
     }).then(async (d) => {
+      if (fs.existsSync(failFp)) { fs.rmSync(failFp, { force: true }); Promise.resolve(sliceStore.removePaths && sliceStore.removePaths([failFp])).catch(() => {}); }
       await sliceStore.pushPaths([path.join(slugDir, 'summary.json')]).catch((e) => console.warn('[pdp-summary] 버킷 업로드 실패', e.message));
       return d;
+    }, (e) => {
+      if (!model) {   // 실패 기억 (위) — 재배포해도 남게 버킷에도
+        try {
+          fs.writeFileSync(failFp, JSON.stringify({ v: SUMMARY_RULE_V, at: Date.now(), error: String(e.message).slice(0, 300), rule: /rule not met/.test(e.message), mirror: mirrorSig() }));
+          sliceStore.pushPaths([failFp]).catch(() => {});
+        } catch (_) {}
+      }
+      throw e;
     }).finally(() => summaryJobs.delete(key));
     summaryJobs.set(key, job);
   }
@@ -2845,6 +2868,51 @@ async function fullshotReady(key) {
   return true;
 }
 
+// 캡처 기록 (2026-11-24): media-cache/fullshot/<key>.json (버킷 media-fullshot/<key>.json) { url, final, at, via, gone?, error? }
+//   gone: 제품 페이지가 없어 lg.com 이 홈 등으로 보냄(단종 · 번들) → 7일 동안 다시 찍지 않고 「없음」으로 답한다 (force 면 다시).
+//   기록이 없는 예전 캡처는 verify(찍지 않고 주소만 확인, 4초)로 홈 화면을 찍은 것인지 본다.
+const fullshotMetaCache = new Map();   // key → { m: 기록|null, t }
+const GONE_MS = 7 * 24 * 3600 * 1000;
+async function fullshotMeta(key) {
+  const fs = require('fs'), path = require('path');
+  const fp = path.join(FULLSHOT_DIR, `${key}.json`);
+  try { return JSON.parse(fs.readFileSync(fp, 'utf8')); } catch (_) {}
+  const c = fullshotMetaCache.get(key);
+  if (c && Date.now() - c.t < 10 * 60 * 1000) return c.m;
+  const buf = await sliceStore.getBuffer(`media-fullshot/${key}.json`).catch(() => null);
+  let m = null;
+  try { m = buf ? JSON.parse(buf.toString('utf8')) : null; } catch (_) {}
+  if (m) { fs.mkdirSync(FULLSHOT_DIR, { recursive: true }); fs.writeFileSync(fp, JSON.stringify(m)); } else fullshotMetaCache.set(key, { m: null, t: Date.now() });
+  return m;
+}
+function putFullshotMeta(key, m) {
+  const fs = require('fs'), path = require('path');
+  fs.mkdirSync(FULLSHOT_DIR, { recursive: true });
+  fs.writeFileSync(path.join(FULLSHOT_DIR, `${key}.json`), JSON.stringify(m));
+  fullshotMetaCache.delete(key);
+  sliceStore.putBuffer(`media-fullshot/${key}.json`, Buffer.from(JSON.stringify(m)), 'application/json').catch((e) => console.warn('[fullshot] 기록 버킷 업로드 실패', e.message));
+}
+const isGone = (m) => !!(m && m.gone && Date.now() - (m.at || 0) < GONE_MS);
+// 찍지 않고 주소만 확인 (예전 캡처) — 제품 페이지면 기록만 남기고, 홈으로 넘어가면 gone
+function verifyFullshot(url, key) {
+  const fs = require('fs'), path = require('path');
+  const crawlerDir = path.join(__dirname, 'crawler-py');
+  const venvPy = path.join(crawlerDir, '.venv', 'bin', 'python');
+  const py = process.env.CRAWLER_PYTHON || (fs.existsSync(venvPy) ? venvPy : 'python3');
+  fullshotJobs.set(key, { status: 'pending', verify: true });
+  require('child_process').execFile(py, ['fullshot.py', '--check', url.trim()], { cwd: crawlerDir, timeout: 90 * 1000,
+    env: { ...process.env, PYTHONIOENCODING: 'utf-8' } }, (err, out) => {
+    let d = {};
+    try { d = JSON.parse(String(out || '')); } catch (_) {}
+    if (d.final) {
+      putFullshotMeta(key, d.gone ? { url, final: d.final, at: Date.now(), gone: true, error: `lg.com 에 이 제품 페이지가 없음 → ${d.final} 로 넘어감`, via: 'check' }
+        : { url, final: d.final, at: Date.now(), via: 'check' });
+      if (d.gone) console.warn('[fullshot] 예전 캡처는 홈 화면 — 제품 페이지 없음', url, '→', d.final);
+    } else console.warn('[fullshot] 주소 확인 실패', url, d.error || (err && err.message));
+    fullshotJobs.delete(key);
+  });
+}
+
 function startFullshot(url, key, via = '') {   // via 'direct': 직접 캡처만 (막히면 실패 — Firecrawl 유료 호출 없음)
   const fs = require('fs'), path = require('path');
   const { spawn } = require('child_process');
@@ -2863,11 +2931,16 @@ function startFullshot(url, key, via = '') {   // via 'direct': 직접 캡처만
     let meta = {};
     try { meta = JSON.parse(out); } catch (_) {}
     if (code !== 0 || meta.error || !fs.existsSync(tmp)) {
-      fullshotJobs.set(key, { status: 'error', error: meta.error || `exit ${code}` });
+      fs.rmSync(tmp, { force: true });
+      if (meta.gone) {   // 없어진 제품 페이지 — 기록해 두고 다시 찍지 않는다
+        putFullshotMeta(key, { url, final: '', at: Date.now(), gone: true, error: meta.error });
+        fullshotJobs.delete(key);
+      } else fullshotJobs.set(key, { status: 'error', error: meta.error || `exit ${code}` });
       console.warn('[fullshot] 실패', url, meta.error || code);
       return;
     }
     fs.renameSync(tmp, abs);
+    putFullshotMeta(key, { url, final: meta.final || url, at: Date.now(), via: meta.via || '' });
     fullshotJobs.set(key, { status: 'ready' });
     console.log(`[fullshot] ${url} → ${meta.width}x${meta.height} ${Math.round(meta.bytes / 1024)}KB ${meta.seconds}s`);
     await sliceStore.putBuffer(`media-fullshot/${key}.jpg`, fs.readFileSync(abs), 'image/jpeg').catch((e) => console.warn('[fullshot] 버킷 업로드 실패', e.message));
@@ -2878,16 +2951,21 @@ async function fullshotStatus(url) {
   const key = fullshotKey(url);
   const job = fullshotJobs.get(key);
   if (job && job.status === 'pending') return { status: 'pending', key };
-  if (await fullshotReady(key)) return { status: 'ready', key, src: `/media/fullshot/${key}.jpg` };
+  const meta = await fullshotMeta(key);
+  if (isGone(meta)) return { status: 'gone', key, error: meta.error || 'lg.com 에 이 제품 페이지가 없음', final: meta.final || '' };
+  if (await fullshotReady(key)) return { status: 'ready', key, src: `/media/fullshot/${key}.jpg`, verified: !!meta };
   if (job && job.status === 'error') return { status: 'error', key, error: job.error };
   return { status: 'none', key };
 }
 
 app.post('/api/v1/fullshot', async (req, res) => {
   // force: 있는 캡처도 다시 찍는다 (검토·승인 화면 「다시 캡처」 — 지연 로드가 덜 찍힌 캡처. 새 캡처가 성공해야 바뀐다)
-  const { url, retry = false, force = false, via = '' } = req.body || {};
+  const { url, retry = false, force = false, via = '', verify = false } = req.body || {};
   if (!isLgUrl(url)) return res.status(400).json({ error: 'lg.com url required' });
   const st = await fullshotStatus(url);
+  // verify: 기록 없는 예전 캡처의 주소만 확인 (찍지 않음)
+  if (verify && st.status === 'ready' && !st.verified) { verifyFullshot(url, st.key); return res.json({ status: 'pending', key: st.key }); }
+  if (st.status === 'gone' && force) { startFullshot(url, st.key, via === 'direct' ? 'direct' : ''); return res.json({ status: 'pending', key: st.key }); }
   if (st.status === 'none' || (st.status === 'error' && retry) || (force && st.status === 'ready')) { startFullshot(url, st.key, via === 'direct' ? 'direct' : ''); return res.json({ status: 'pending', key: st.key }); }
   res.json(st);
 });
