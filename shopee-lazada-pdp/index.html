@@ -44,6 +44,7 @@ body{font-family:'LGEIText', 'LINESeedSansTH',Arial,sans-serif;background:#F6F3E
 .preview-empty-text{font-size:12px;line-height:1.7;text-align:center;color:#999}
 
 /* Bottom bar */
+.bottom-bar .btn-sm{display:none!important}
 .bottom-bar{padding:10px 16px;background:#fff;border-top:1px solid #E6E1D6;display:flex;align-items:center;gap:10px;flex-shrink:0}
 .char-count{font-size:11px;color:#888}
 .char-count strong{color:#333;font-size:13px}
@@ -183,7 +184,15 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
       .ap-badge.ok { background: #E3F4EA; color: #1E7F4F; } .ap-badge.bad { background: #FDE8E7; color: #C8241F; } .ap-badge.warn { background: #2b2926; color: #fff; }
       .panel-left > .panel-head .panel-head-title { display: none; }
       .panel-left > .panel-head .btn-sm { height: 30px; padding: 0 9px; font-size: 11.5px; }
-      .panel-left > .panel-head .btn-sm.danger { padding: 0 10px; }
+      .panel-left > .panel-head .ap-badge { height: 30px; padding: 0 12px; font-size: 11.5px; font-weight: 600; }
+      .ex-wrap { position: relative; display: inline-flex; }
+      .ex-menu { position: absolute; right: 0; top: calc(100% + 6px); min-width: 230px; background: #fff; border: 1px solid #E6E1D6; border-radius: 12px;
+                 box-shadow: 0 14px 36px rgba(0,0,0,.16); padding: 6px; z-index: 60; display: flex; flex-direction: column; gap: 2px; }
+      .ex-menu[hidden] { display: none; }
+      .ex-item { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 8px; font-size: 13px; font-weight: 600;
+                 color: #111; cursor: pointer; white-space: nowrap; font-family: inherit; }
+      .ex-item:hover:not(:disabled), .ex-item:focus-visible { background: #FBF0EF; }
+      .ex-item:disabled { color: #B5B1AA; cursor: not-allowed; }
     </style>
     <div class="panel-head" style="height:auto;min-height:52px;padding-top:8px;padding-bottom:8px;justify-content:flex-end">
       <div class="panel-head-title">
@@ -194,13 +203,17 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
         <span class="ap-badge" id="apBadge" style="display:none"></span>
         <button class="btn-sm" id="btnEditMode" onclick="toggleEdit()">✏ Edit</button>
         <button class="btn-sm primary" id="btnSave" onclick="saveEdit()" disabled style="display:none" title="Save this edit — the bulk Excel uses it for this product">💾 Save</button>
-        <button class="btn-sm primary" id="btnDownload" onclick="downloadImages()" disabled>⬇ Download Images (ZIP)</button>
-        <button class="btn-sm primary" id="btnDownload12" onclick="downloadImages(SHOPEE_MAX_IMAGES)" disabled style="display:none" title="Shopee: only the first 12 images (Shopee description limit)">⬇ 12 images (ZIP)</button>
-        <button class="btn-sm" id="btnCopyHtml" onclick="copyHTML()" disabled>📋 Copy HTML</button>
-        <button class="btn-sm" id="btnCopyListing" onclick="copyListingText()" style="display:none" title="Promotion · Product details · Delivery · After care · Return policy written in the CLIA hub product page — paste into the Shopee description">📝 Copy description text</button>
-        <button class="btn-sm" id="btnCopyImgHtml" onclick="copyImageHTML()" disabled title="Images of the preview (1000px wide) + HTML that shows them — looks the same on Lazada/eBay">🖼 Copy image HTML</button>
-        <button class="btn-sm" id="btnBulk" onclick="openBulkExcel()" style="display:none" title="Fill the product description of many products at once in a Shopee / Lazada bulk Excel">📊 Bulk Excel</button>
-        <button class="btn-sm danger" onclick="resetAll()" title="Reset" aria-label="Reset">✕</button>
+        <!-- 내보내기 메뉴 (2026-11-24): 다운로드 · 복사 버튼은 이 메뉴 안에 (id 는 그대로 — 켜기/끄기 · 진행 표시 코드가 같이 쓴다) -->
+        <div class="ex-wrap" id="exWrap">
+          <button class="btn-sm primary" id="btnExport" type="button" onclick="toggleExport()" aria-haspopup="true" aria-expanded="false" disabled>⬇ Export ▾</button>
+          <div class="ex-menu" id="exMenu" role="menu" hidden>
+            <button class="ex-item" role="menuitem" id="btnDownload12" onclick="exRun(() => downloadImages(SHOPEE_MAX_IMAGES))" disabled style="display:none" title="Shopee: only the first 12 images (Shopee description limit)">⬇ Download 12 images</button>
+            <button class="ex-item" role="menuitem" id="btnDownload" onclick="exRun(() => downloadImages())" disabled>⬇ Download all images</button>
+            <button class="ex-item" role="menuitem" id="btnCopyImgHtml" onclick="exRun(copyImageHTML)" disabled title="Images of the preview (1000px wide) + HTML that shows them — looks the same on Lazada/eBay">🖼 Copy image HTML</button>
+            <button class="ex-item" role="menuitem" id="btnCopyHtml" onclick="exRun(copyHTML)" disabled>📋 Copy HTML</button>
+            <button class="ex-item" role="menuitem" id="btnCopyListing" onclick="exRun(copyListingText)" style="display:none" title="Promotion · Product details · Delivery · After care · Return policy written in the CLIA hub product page — paste into the Shopee description">📝 Copy description text</button>
+          </div>
+        </div>
       </div>
     </div>
     <div class="compliance-bar" id="complianceBar" style="display:none">
@@ -286,9 +299,9 @@ const shopeeLimit = () => CHANNEL !== 'lazada';
 if (CHANNEL === 'shopee') {
   // ZIP 은 전체 / 앞 12장 두 가지 (2026-11-11)
   ['btnDownload12', 'btnDownload12b'].forEach(id => { const x = document.getElementById(id); if (x) x.style.display = ''; });
-  ['btnDownload', 'btnDownload2'].forEach(id => { const x = document.getElementById(id); if (x) x.textContent = '⬇ All images (ZIP)'; });
+  ['btnDownload2'].forEach(id => { const x = document.getElementById(id); if (x) x.textContent = '⬇ All images (ZIP)'; });
   const b = document.getElementById('btnCopyImgHtml');
-  if (b) { b.textContent = '🖼 Copy image URLs (max ' + SHOPEE_MAX_IMAGES + ')';
+  if (b) { b.textContent = '🖼 Copy image URLs';
            b.title = 'Image URLs only (first ' + SHOPEE_MAX_IMAGES + ' images, one per line) — no summary, no alt text. Paste into the Shopee description.'; }
 }
 
@@ -761,10 +774,9 @@ async function refreshApproval() {
     approvalState = { gate: !!j.gate, status: it.status };
   } catch (_) { approvalState = { gate: false, status: 'unknown' }; }
   const st = approvalState.status;
-  const off = !approvalState.gate;   // 잠금 꺼짐: 배지만 보이고 다운로드는 된다
-  const L = { approved: ['✓ Approved', 'ok'], rejected: [off ? '✕ Rejected (lock off)' : '✕ Rejected', 'bad'],
-              stale: [off ? 'Changed — approve again (lock off)' : 'Changed — approve again', 'warn'],
-              pending: [off ? 'Not approved (lock off)' : 'Not approved', 'warn'], unknown: ['', ''] }[st] || ['', ''];
+  // 승인 표시는 짧게 (2026-11-24): 잠금이 꺼져 있어도 '(lock off)' 를 붙이지 않는다 — 다운로드가 된다는 설명은 마우스를 올리면(title)
+  const L = { approved: ['✓ Approved', 'ok'], rejected: ['✕ Rejected', 'bad'], stale: ['Approve again', 'warn'],
+              pending: ['Not approved', 'warn'], unknown: ['', ''] }[st] || ['', ''];
   badge.textContent = L[0];
   badge.className = 'ap-badge ' + L[1];
   badge.style.display = L[0] ? '' : 'none';
@@ -1481,6 +1493,49 @@ function bulkCorp() {
 }
 // 벌크 엑셀은 Shopee/Lazada 법인 전용 (2026-11-23): 태국 · 싱가포르(테스트) 제품일 때만 버튼을 보인다
 const SL_CORPS = ['th', 'sg'];
+// ── 내보내기 메뉴 (2026-11-24) ──
+// 메뉴 항목이 하나라도 쓸 수 있으면 [내보내기] 를 켠다. 항목을 누르면 메뉴를 닫고, 그 항목의 진행 표시(⏳ · ✓ Copied …)를
+// [내보내기] 버튼에 대신 보인다 (메뉴가 닫혀도 보이게)
+const EX_IDS = ['btnDownload12', 'btnDownload', 'btnCopyImgHtml', 'btnCopyHtml', 'btnCopyListing'];
+const exItems = () => EX_IDS.map((id) => document.getElementById(id)).filter(Boolean);
+const exLabel = () => '⬇ Export ▾';   // 번역은 i18n.js 가 화면 글자를 바꿀 때
+let exBusy = null;
+function exSync() {
+  const btn = document.getElementById('btnExport');
+  if (!btn) return;
+  const usable = exItems().some((b) => b.style.display !== 'none' && !b.disabled);
+  if (!exBusy) btn.disabled = !usable;
+}
+function toggleExport(force) {
+  const m = document.getElementById('exMenu'), btn = document.getElementById('btnExport');
+  const open = typeof force === 'boolean' ? force : m.hidden;
+  m.hidden = !open; btn.setAttribute('aria-expanded', String(open));
+  if (open) { const f = exItems().find((b) => b.style.display !== 'none' && !b.disabled); if (f) f.focus(); }
+}
+function exRun(fn) {
+  toggleExport(false);
+  fn();
+}
+document.addEventListener('click', (e) => { const w = document.getElementById('exWrap'); if (w && !w.contains(e.target)) toggleExport(false); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !document.getElementById('exMenu').hidden) { toggleExport(false); document.getElementById('btnExport').focus(); } });
+(function watchExport() {
+  const btn = document.getElementById('btnExport');
+  btn.textContent = exLabel();
+  const obs = new MutationObserver((ms) => {
+    for (const m of ms) {
+      const el = m.target.nodeType === 3 ? m.target.parentElement : m.target;
+      if (!el || !EX_IDS.includes(el.id)) continue;
+      if (m.type === 'childList' || m.type === 'characterData') {
+        const tx = el.textContent.trim();
+        if (/^(⏳|✓|✕)/.test(tx)) { exBusy = el.id; btn.textContent = tx; btn.disabled = /^⏳/.test(tx); }
+        else if (exBusy === el.id) { exBusy = null; btn.textContent = exLabel(); }
+      }
+    }
+    exSync();
+  });
+  exItems().forEach((b) => obs.observe(b, { attributes: true, attributeFilter: ['disabled', 'style'], childList: true, characterData: true, subtree: true }));
+  exSync();
+})();
 function syncBulkBtn() {
   const b = document.getElementById('btnBulk');
   if (b) b.style.display = SL_CORPS.includes(bulkCorp()) ? '' : 'none';
