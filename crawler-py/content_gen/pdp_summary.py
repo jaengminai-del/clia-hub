@@ -139,6 +139,37 @@ def usp_list(mirror: dict) -> list:
     return [{"title": u["title"], "desc": u["desc"]} for u in out]
 
 
+KF_DIRECT_USPS = 20   # USP 가 이보다 많으면 처음부터 Key features 로 (2,000자에 다 못 넣음)
+
+
+def key_features(slug_dir: Path) -> list:
+    """lg.com 제품 페이지 위쪽 「คุณลักษณะที่สำคัญ」(Key features, #keyFeatureList) — 크롤 때 받은 원본 HTML 에서. 보통 3~6개."""
+    import html as H
+    for name in ("pc_raw.html", "pc.html"):
+        fp = slug_dir / name
+        if not fp.exists():
+            continue
+        h = fp.read_text(encoding="utf-8", errors="replace")
+        m = re.search(r'id="keyFeatureList"[^>]*>(.*?)</ul>', h, re.S)
+        if not m:
+            continue
+        out = []
+        for x in re.findall(r"<li[^>]*>(.*?)</li>", m.group(1), re.S):
+            t = re.sub(r"\s+", " ", H.unescape(re.sub(r"<[^>]+>", "", x))).strip()
+            if t and t not in out:
+                out.append(t)
+        if out:
+            return out
+    return []
+
+
+def kf_prompt(kf: list) -> str:
+    rows = "\n".join(f"{i}. {t}" for i, t in enumerate(kf, 1))
+    return (f"\n\nคุณลักษณะที่สำคัญ (Key features) ที่ LG.com กำหนดไว้สำหรับสินค้านี้มี {len(kf)} ข้อ:\n{rows}\n\n"
+            f"ข้อกำหนดจุดเด่นสินค้า: highlights ต้องมี {len(kf)} ข้อพอดี — 1 ข้อต่อ 1 คุณลักษณะที่สำคัญ เรียงตามลำดับเลขด้านบน "
+            "แต่ละข้อขึ้นต้นด้วยชื่อคุณลักษณะนั้น แล้วอธิบายประโยชน์สั้นๆ โดยใช้ข้อมูลจากหน้าสินค้า ไม่ต้องใส่ฟีเจอร์อื่นนอกรายการ")
+
+
 def usp_prompt(usps: list) -> str:
     rows = "\n".join(f"{i}. {u['title']}" + (f" — {u['desc'][:400]}" if u["desc"] else "") for i, u in enumerate(usps, 1))
     return (f"\n\nจุดขาย (USP) ทั้งหมดบนหน้าสินค้านี้มี {len(usps)} ข้อ ตามรายการด้านล่าง:\n{rows}\n\n"
@@ -205,7 +236,7 @@ def bundle_info(title: str, slug_dir: Path = None):
     return info
 
 
-def bundle_prompt(info: dict, main_usps: list, gift_usps: list, k1: int, k2: int) -> str:
+def bundle_prompt(info: dict, main_usps: list, gift_usps: list, k1: int, k2: int, ka: bool = False, kb: bool = False) -> str:
     rows = lambda us: "\n".join(f"{i}. {u['title']}" + (f" — {u['desc'][:300]}" if u["desc"] else "") for i, u in enumerate(us, 1))
     if info["kind"] != "split":
         return (f"\n\nสินค้านี้เป็นชุดโปรโมชัน: สินค้าหลักคือ {info['main_title']} และมีของแถม/สินค้าคู่คือ {info['gift_title']} "
@@ -215,8 +246,8 @@ def bundle_prompt(info: dict, main_usps: list, gift_usps: list, k1: int, k2: int
             "ข้อมูลของสินค้าที่ 2 อยู่ในแท็ก <lg_product_page> ชุดที่สอง ให้ใช้ข้อมูลแต่ละสินค้าจากหน้าของสินค้านั้นเท่านั้น ห้ามสลับกัน\n"
             "ให้แบ่งเนื้อหาครึ่งต่อครึ่งระหว่างสองสินค้า: บทนำกล่าวถึงทั้งสองสินค้าอย่างสมดุล "
             "ความยาวรวมของจุดเด่นสินค้าหลักกับของสินค้าที่ 2 ต้องใกล้เคียงกัน (ถ้าสินค้าใดมี USP น้อยข้อ ให้อธิบายแต่ละข้อละเอียดขึ้น) "
-            f"จุดเด่นสินค้า (highlights) ต้องมี {k1 + k2} ข้อพอดี — {k1} ข้อแรกเป็นของสินค้าหลัก เลือก USP ที่สำคัญที่สุด {k1} ข้อจากรายการ A "
-            f"แล้วตามด้วย {k2} ข้อของสินค้าที่ 2 เลือก USP ที่สำคัญที่สุด {k2} ข้อจากรายการ B (เรียงตามลำดับในรายการ) "
+            f"จุดเด่นสินค้า (highlights) ต้องมี {k1 + k2} ข้อพอดี — {k1} ข้อแรกเป็นของสินค้าหลัก {'ตามรายการ A (คุณลักษณะที่สำคัญของ LG.com) ข้อละ 1 ข้อ' if ka else f'เลือก USP ที่สำคัญที่สุด {k1} ข้อจากรายการ A'} "
+            f"แล้วตามด้วย {k2} ข้อของสินค้าที่ 2 {'ตามรายการ B (คุณลักษณะที่สำคัญของ LG.com) ข้อละ 1 ข้อ' if kb else f'เลือก USP ที่สำคัญที่สุด {k2} ข้อจากรายการ B'} (เรียงตามลำดับในรายการ) "
             "แต่ละข้อขึ้นต้นด้วยชื่อ USP แล้วตามด้วยประโยชน์สั้นๆ "
             "ข้อมูลสินค้า (product_info) ให้มีของทั้งสองสินค้า โดยขึ้นต้นป้ายกำกับด้วยชื่อรุ่นของสินค้านั้น "
             f"ชื่อสินค้า: LG + สินค้าหลัก + รุ่น + {info['conn']} + สินค้าที่ 2 + รุ่น\n"
@@ -303,48 +334,65 @@ def generate(slug_dir: Path, url: str, model: str = "") -> dict:
     limit = MAX_CHARS
     bundle = bundle_info(mirror.get("product_title") or "", slug_dir)
     src = source_text(mirror, url, slug_dir)
-    if bundle and bundle["kind"] == "split":   # 반반: 사은품 내용은 그 제품의 크롤에서, 제품마다 핵심 USP 몇 개씩
+    kf = key_features(slug_dir)
+    # 시도 계획: [(근거, 지시문, 장점 수, 시도 횟수, 앞 제품 장점 수(반반))]
+    if bundle and bundle["kind"] == "split":   # 반반: 사은품 내용은 그 제품의 크롤에서 · 제품마다 lg.com Key features (없으면 핵심 USP 6개까지)
         gdir = bundle["gift_dir"]
         gmirror = json.loads((gdir / "mirror.json").read_text(encoding="utf-8"))
-        gift_usps = usp_list(gmirror)
-        k1, k2 = min(len(usps), BUNDLE_SPLIT_USPS), min(len(gift_usps), BUNDLE_SPLIT_USPS)
+        gift_usps, gkf = usp_list(gmirror), key_features(gdir)
+        la = [{"title": t, "desc": ""} for t in kf[:BUNDLE_SPLIT_USPS]] if kf else usps
+        lb = [{"title": t, "desc": ""} for t in gkf[:BUNDLE_SPLIT_USPS]] if gkf else gift_usps
+        k1, k2 = min(len(la), BUNDLE_SPLIT_USPS), min(len(lb), BUNDLE_SPLIT_USPS)
         prompt = (build_prompt(url, src, checked, limit)
                   + f"\n\n<lg_product_page url=\"{bundle['gift_url']}\">\n{source_text(gmirror, bundle['gift_url'], gdir)}\n</lg_product_page>"
-                  + bundle_prompt(bundle, usps, gift_usps, k1, k2))
-        need_h, usp_titles = k1 + k2, [u["title"] for u in usps] + [u["title"] for u in gift_usps]
-    else:              # 단품 · 스피커 번들(본 제품만): PDP 의 USP 를 하나도 빼지 않는다
-        prompt = build_prompt(url, src, checked, limit) + (usp_prompt(usps) if usps else "") \
-            + (bundle_prompt(bundle, usps, [], 0, 0) if bundle else "")
-        need_h, usp_titles = (len(usps) if usps else 0), [u["title"] for u in usps]
-    ask, d = prompt, None
+                  + bundle_prompt(bundle, la, lb, k1, k2, ka=bool(kf), kb=bool(gkf)))
+        plans = [("key_features" if kf or gkf else "usps", prompt, k1 + k2, 4, k1)]
+        usp_titles = [u["title"] for u in la] + [u["title"] for u in lb]
+    else:              # 단품 · 스피커 번들(본 제품만)
+        base = build_prompt(url, src, checked, limit) + (bundle_prompt(bundle, usps, [], 0, 0) if bundle else "")
+        # 사용자 결정(2026-11-24): USP 를 다 넣는 것이 좋지만 2,000자에 안 들어가면 lg.com 에 Key features 로 등록된 것만.
+        #   USP 가 KF_DIRECT_USPS 개를 넘으면 처음부터 Key features (어차피 안 들어감 — 유료 호출을 아낀다), 아니면 USP 다 넣기 2번 → Key features 2번
+        plans = []
+        if usps and not (kf and len(usps) > KF_DIRECT_USPS):
+            plans.append(("usps", base + usp_prompt(usps), len(usps), 2 if kf else 4, 0))
+        if kf:
+            plans.append(("key_features", base + kf_prompt(kf), len(kf), 4 if not plans else 2, 0))
+        if not plans:
+            plans.append(("usps", base, 0, 4, 0))
+        usp_titles = None
     split = bool(bundle and bundle["kind"] == "split")
-    share = lambda d: (sum(len(h) for h in d["highlights"][:k1]) / max(1, sum(len(h) for h in d["highlights"]))) if split else 0.5
-    good = None             # 반반 비율만 못 맞춘 결과 (다른 조건은 다 맞음) — 마지막까지 못 맞추면 이것을 쓴다
-    for attempt in range(4):                # 조건: 600 초과 · 2,000 이하 · 상품명 120 이하 · 장점 수 = USP 수 — 벗어나면 다시 쓰게
-        d = _fix(ask_llm(ask, attempt), url)
-        n, nn = len(plain_text(d)), len(d["product_name"])
-        nh = len(d["highlights"])
-        core = MIN_CHARS < n <= limit and nn <= NAME_MAX and (not need_h or nh == need_h)
-        sh = share(d)
-        if core and 0.35 <= sh <= 0.65:     # 번들 반반: 두 제품의 장점 글자 수가 35~65% 안
+    d, basis, good, last = None, "", None, ""
+    for basis, prompt, need_h, tries, k1 in plans:
+        share = (lambda d, k1=k1: sum(len(h) for h in d["highlights"][:k1]) / max(1, sum(len(h) for h in d["highlights"]))) if split else (lambda d: 0.5)
+        ask = prompt
+        for attempt in range(tries):        # 조건: 600 초과 · 2,000 이하 · 상품명 120 이하 · 장점 수 맞음 (반반: 35~65%) — 벗어나면 다시 쓰게
+            r = _fix(ask_llm(ask, attempt), url)
+            n, nn, nh = len(plain_text(r)), len(r["product_name"]), len(r["highlights"])
+            core = MIN_CHARS < n <= limit and nn <= NAME_MAX and (not need_h or nh == need_h)
+            sh = share(r)
+            if core and 0.35 <= sh <= 0.65:
+                d = r
+                break
+            if core and good is None:
+                good = (r, basis)        # 반반 비율만 못 맞춘 결과 — 끝까지 못 맞추면 이것을 쓴다
+            last = f"{basis}: {n} chars, name {nn}, highlights {nh}/{need_h}"
+            ask = (prompt + f"\n\nผลครั้งก่อน: เนื้อหาพร้อมคัดลอกยาว {n:,} ตัวอักษร ชื่อสินค้ายาว {nn} ตัวอักษร จุดเด่นสินค้า {nh} ข้อ "
+                   f"— ต้องยาวมากกว่า {MIN_CHARS} และไม่เกิน {limit:,} ตัวอักษร ชื่อสินค้าไม่เกิน {NAME_MAX} ตัวอักษร "
+                   + (f"และจุดเด่นสินค้าต้องมี {need_h} ข้อพอดี " if need_h else "")
+                   + (f"และจุดเด่นของสินค้าหลักยาว {round(sh * 100)}% ของจุดเด่นทั้งหมด — ต้องแบ่งความยาวให้สองสินค้าใกล้เคียงกัน (ประมาณครึ่งต่อครึ่ง) " if split else "")
+                   + "เขียนใหม่ให้อยู่ในเกณฑ์ โดยย่อเฉพาะคำอธิบาย และยังใช้เฉพาะข้อมูลที่ยืนยันได้")
+        if d is not None:
             break
-        if core:
-            good = d
-        ask = (prompt + f"\n\nผลครั้งก่อน: เนื้อหาพร้อมคัดลอกยาว {n:,} ตัวอักษร ชื่อสินค้ายาว {nn} ตัวอักษร จุดเด่นสินค้า {nh} ข้อ "
-               f"— ต้องยาวมากกว่า {MIN_CHARS} และไม่เกิน {limit:,} ตัวอักษร ชื่อสินค้าไม่เกิน {NAME_MAX} ตัวอักษร "
-               + (f"และจุดเด่นสินค้าต้องมี {need_h} ข้อพอดี " if need_h else "")
-               + (f"และจุดเด่นของสินค้าหลักยาว {round(sh * 100)}% ของจุดเด่นทั้งหมด — ต้องแบ่งความยาวให้สองสินค้าใกล้เคียงกัน (ประมาณครึ่งต่อครึ่ง) " if split else "")
-               + "เขียนใหม่ให้อยู่ในเกณฑ์ โดยย่อเฉพาะคำอธิบาย และยังใช้เฉพาะข้อมูลที่ยืนยันได้")
-    else:
-        if good is not None:
-            d = good
-        else:
-            raise RuntimeError(f"rule not met after retries: {n} chars, name {nn}, highlights {nh}/{need_h}"
-                               + (f" (bundle {bundle['kind']})" if bundle else " USPs"))
+    if d is None and good is not None:
+        d, basis = good
+    if d is None:
+        raise RuntimeError(f"rule not met after retries: {last}" + (f" (bundle {bundle['kind']})" if bundle else ""))
+    if usp_titles is None:
+        usp_titles = [u["title"] for u in usps] if basis == "usps" else kf
     d = _fix(d, url)
     meta_b = {**{k: v for k, v in bundle.items() if k != "gift_dir"}, **({"main_share": round(share(d), 2)} if split else {})} if bundle else None
-    return {**d, "chars": len(plain_text(d)), "max_chars": limit, "usps": usp_titles, "ref_url": url, "checked_at": checked, "model": model,
-            "prompt_file": PROMPT_FILE.name, **({"bundle": meta_b} if meta_b else {})}
+    return {**d, "chars": len(plain_text(d)), "max_chars": limit, "usps": usp_titles, "basis": basis, "ref_url": url, "checked_at": checked,
+            "model": model, "prompt_file": PROMPT_FILE.name, **({"bundle": meta_b} if meta_b else {})}
 
 
 def plain_text(d: dict) -> str:
