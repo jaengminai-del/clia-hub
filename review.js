@@ -23,6 +23,8 @@ const approvals = require('./approvals');
 
 const router = express.Router();
 const CHANNELS = new Set(['shopee', 'lazada']);
+// 준비 결과 판: 2 = 같은 영역 기준점(align) 추가 (2026-11-24) — 낮은 판은 「내용 바뀜」으로 보고 다시 준비
+const PREP_V = 2;
 const SHOPEE_MAX_IMAGES = 12, SHOPEE_DESC_MAX = 3000;   // bulk-jobs.js 와 같은 규칙
 const LOCAL = () => (process.env.BULK_API_BASE || `http://127.0.0.1:${process.env.PORT || 3001}`).replace(/\/$/, '');
 const PY_DIR = path.join(__dirname, 'crawler-py');
@@ -91,7 +93,7 @@ async function fullshot(url, recapture, step) {
 
 function runPrep(input) {
   return new Promise((resolve, reject) => {
-    const p = require('child_process').execFile(python(), ['review_prep.py'], { cwd: PY_DIR, timeout: 3 * 60 * 1000, maxBuffer: 16 * 1024 * 1024,
+    const p = require('child_process').execFile(python(), ['review_prep.py'], { cwd: PY_DIR, timeout: 5 * 60 * 1000, maxBuffer: 16 * 1024 * 1024,
       env: { ...process.env, PYTHONIOENCODING: 'utf-8' } }, (err, out, stderr) => {
       let d = {};
       try { d = JSON.parse(String(out || '')); } catch (_) {}
@@ -140,12 +142,19 @@ async function prepare(slug, ch, { recapture = false } = {}) {
   const shotPath = st && st.status === 'ready' ? path.join(FULLSHOT_DIR, `${st.key}.jpg`) : null;
   // 5) PDP 시작·끝 · 이미지마다 USP 이름
   step('analyze');
-  const a = await runPrep({ fullshot: shotPath && fs.existsSync(shotPath) ? shotPath : null, mirror: path.join(dirOf(slug), 'mirror.json'),
-    slices: slices.map((s) => ({ text: s.text })) });
+  // 같은 영역 맞추기용: 상세 이미지를 만든 HTML 을 slices.py 와 같은 글꼴로 다시 그려 섹션 위치를 잰다 (review_align.py)
+  const htmlTmp = path.join(require('os').tmpdir(), `review-${process.pid}-${Date.now()}-${ch}.html`);
+  fs.writeFileSync(htmlTmp, html);
+  let a;
+  try {
+    a = await runPrep({ fullshot: shotPath && fs.existsSync(shotPath) ? shotPath : null, mirror: path.join(dirOf(slug), 'mirror.json'),
+      slices: slices.map((s) => ({ text: s.text })), html: htmlTmp, medium: 'shopee_lazada',
+      fontsCss: `http://127.0.0.1:${process.env.PORT || 3001}/css/fonts.css`, sliceWidth: slices[0].w });
+  } finally { fs.rmSync(htmlTmp, { force: true }); }
   const rec = {
-    v: 1, slug, channel: ch, url: sum.url, prepared_at: Date.now(), sig, source: ed ? 'edit' : 'crawl', hash: sl.hash,
+    v: PREP_V, slug, channel: ch, url: sum.url, prepared_at: Date.now(), sig, source: ed ? 'edit' : 'crawl', hash: sl.hash,
     slices: slices.map(({ src, w, h }) => ({ src, w, h })), images_loaded: man.images_loaded || sl.images_loaded || '',
-    usps: a.usps, sliceUsps: a.sliceUsps, secs: a.secs, kind: a.kind, lead: a.lead,
+    usps: a.usps, sliceUsps: a.sliceUsps, secs: a.secs, kind: a.kind, lead: a.lead, align: a.align || null, alignErr: a.alignErr || '',
     sum: ch === 'lazada' && sm && sm.html ? sm.html : '', sumText: ch === 'shopee' && sm && sm.text ? sm.text.trim() : '', summaryErr,
     shopeeN, shopeeChars,
     shot: a.shot ? { key: st.key, src: `/media/fullshot/${st.key}.jpg`, bytes: fs.statSync(shotPath).size, ...a.shot } : null, shotErr: a.shot ? '' : (fsErr || 'no capture'),
@@ -153,7 +162,8 @@ async function prepare(slug, ch, { recapture = false } = {}) {
   const fp = fileOf(slug, ch);
   fs.writeFileSync(fp, JSON.stringify(rec));
   store.pushPaths([fp]).catch((e) => console.warn('[review] 버킷 업로드 실패', e.message));
-  console.log(`[review] ${slug} ${ch}: 이미지 ${slices.length}장 (${rec.source}) · USP ${a.usps.length} · 캡처 ${a.shot ? `${a.shot.top}~${a.shot.bottom}` : fsErr || '없음'}`);
+  console.log(`[review] ${slug} ${ch}: 이미지 ${slices.length}장 (${rec.source}) · USP ${a.usps.length} · 캡처 ${a.shot ? `${a.shot.top}~${a.shot.bottom}` : fsErr || '없음'}`
+    + ` · 같은 영역 ${a.align ? `${a.align.anchors.length}곳 (이미지 ${a.align.matched}/${a.align.images})` : a.alignErr || '없음'}`);
   return rec;
 }
 
@@ -196,7 +206,7 @@ function shotChanged(rec) {
 function prepState(slug, ch, sum) {
   const j = jobs.get(`${slug}|${ch}`);
   const rec = readJson(fileOf(slug, ch));
-  const state = j && j.state === 'pending' ? 'pending' : rec ? (sameSig(rec.sig, sigOf(slug, ch, sum)) && !shotChanged(rec) ? 'ready' : 'stale') : j && j.state === 'error' ? 'error' : 'none';
+  const state = j && j.state === 'pending' ? 'pending' : rec ? (sameSig(rec.sig, sigOf(slug, ch, sum)) && !shotChanged(rec) && (rec.v || 1) >= PREP_V ? 'ready' : 'stale') : j && j.state === 'error' ? 'error' : 'none';
   return { state, job: j || null, rec };
 }
 

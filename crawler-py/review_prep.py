@@ -7,14 +7,16 @@ review_prep.py — 검토·승인 화면 재료 (2026-11-24, 목업 v10~v12 규�
 입력 (stdin JSON)
   { "fullshot": "<lg.com 전체 화면 캡처 JPEG 경로>" | null,
     "mirror":   "<크롤 결과 mirror.json 경로>",
-    "slices":   [{"text": "<슬라이스에 든 글 (slice-html manifest.text, 자르지 않은 전문)>"}, ...] }
+    "slices":   [{"text": "<슬라이스에 든 글 (slice-html manifest.text, 자르지 않은 전문)>"}, ...],
+    "html":     "<상세 이미지를 만든 HTML 파일 경로>", "fontsCss": "<slices.py 와 같은 글꼴 CSS 주소>", "sliceWidth": 1000 }
 출력
   { "shot": {"w", "h", "top", "bottom", "topHow", "bottomHow", "auto": {"top": bool, "bottom": bool}} | null,
     "usps": [USP 이름...],                       # PDP 요약 「จุดเด่นสินค้า」와 같은 목록 (content_gen.pdp_summary.usp_list)
     "sliceUsps": [[{"t", "est"?, "range"?}], ...], # 상세 이미지마다 그 이미지에 든 USP (순서를 지키는 동적 계획법)
     "secs": [[섹션 제목...], ...],               # 상세 이미지마다 그 이미지에서 시작하는 lg.com 섹션 제목
     "kind": ["" | "spec" | "spec+", ...],         # USP 없는 스펙 표 이미지 (spec+ = 앞 장에서 이어지는 표)
-    "lead": [이미지 글 첫머리, ...] }
+    "lead": [이미지 글 첫머리, ...],
+    "align": {"anchors": [{"label", "L" (캡처 px), "R" (슬라이스 출력 px), "score"}], ...} | null }   # review_align.py — 같은 영역 기준점
 
 lg.com 캡처에서 PDP 부분 (폭 960px, fullshot.py)
   시작(top): 갤러리 아래 앵커 탭 바(흰 바탕 → 베이지 띠)를 찾고, 그 아래 빈 띠 뒤 처음 무늬가 생기는 줄 − 16px.
@@ -193,8 +195,17 @@ def main():
     shot = None
     if a.get("fullshot") and Path(a["fullshot"]).exists():
         shot = shot_info(a["fullshot"])
+    # 같은 영역 맞추기 (review_align.py) — 실패해도 나머지는 그대로 (화면은 구간 하나로 움직인다)
+    al, al_err = None, ""
+    if shot and a.get("html") and Path(a["html"]).exists():
+        try:
+            from review_align import align
+            al = align(a["fullshot"], shot["top"], shot["bottom"], Path(a["html"]).read_text(encoding="utf-8"),
+                       a.get("medium") or "shopee_lazada", a.get("fontsCss") or "", int(a.get("sliceWidth") or 1000))
+        except Exception as e:      # noqa: BLE001 — 맞추기 실패는 준비 실패가 아니다
+            al_err = f"{type(e).__name__}: {e}"[:200]
     json.dump({"shot": shot, "usps": usps, "sliceUsps": su, "secs": secs, "kind": spec_kinds(texts, su),
-               "lead": [lead(x) for x in texts]}, sys.stdout, ensure_ascii=False)
+               "lead": [lead(x) for x in texts], "align": al, "alignErr": al_err}, sys.stdout, ensure_ascii=False)
 
 
 if __name__ == "__main__":
