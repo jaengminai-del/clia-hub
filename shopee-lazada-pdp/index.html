@@ -66,6 +66,12 @@ body{font-family:'LGEIText', 'LINESeedSansTH',Arial,sans-serif;background:#F6F3E
 .status-msg .spinner{width:12px;height:12px;border-radius:50%;border:2px solid rgba(0,0,0,.1);border-top-color:#E53238;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .status-msg.error{color:#E53238}
+.cerr-ov{position:fixed;inset:0;background:rgba(17,17,17,.45);display:flex;align-items:center;justify-content:center;z-index:99999}
+.cerr-card{background:#fff;border-radius:18px;padding:26px 28px 22px;width:min(460px,92vw);box-shadow:0 24px 64px rgba(0,0,0,.25);text-align:left}
+.cerr-card h3{margin:0 0 10px;font-size:18px;color:#111}
+.cerr-card .msg{font-size:14px;line-height:1.55;color:#333}
+.cerr-card .ref{margin-top:12px;font-size:12px;color:#666}
+.cerr-card button{margin-top:18px;float:right;height:38px;padding:0 22px;border:0;border-radius:999px;background:#EA1917;color:#fff;font-weight:700;font-size:14px;cursor:pointer}
 .status-msg.ok{color:#22863a}
 
 /* Sections panel */
@@ -439,8 +445,40 @@ function mirrorToEbayFeatures(mirror) {
 // ══════════════════════════════════════════
 // Analyze PDP — CLIA Crawler API 우선 (실패 시 기존 ebay-clone 폴백)
 // ══════════════════════════════════════════
+// 크롤 실패 문구 (2026-11-24): 사용자에게는 쉬운 말 + 문의 번호, 기술 내용은 서버 로그 '[crawl] 실패 #번호'에만
+const CRAWL_FAIL_TEXT = {
+  not_product: "This isn't an LG.com product page.",
+  unreachable: "LG.com isn't responding. Try again later.",
+  busy: "The server is busy. Try again in a few minutes.",
+  incomplete: "The page is too long. Try again.",
+  declined: "This page can't be crawled.",
+  stopped: "The crawl stopped. Try again.",
+  setup: "Crawling is unavailable. Contact the admin.",
+  network: "Can't reach CLIA. Check your connection.",
+  unknown: "Something went wrong. Try again.",
+};
+// 크롤 실패는 화면 정중앙 팝업 (제목 · 짧은 한 문장 · 오류 코드 · OK) + 상태 줄에는 짧게. 문구는 i18n.js 가 번역
+function showCrawlFail(code, ref, url) {
+  setStatus('✕ Crawl failed', 'error');
+  document.querySelectorAll('.cerr-ov').forEach((x) => x.remove());
+  const ov = document.createElement('div'); ov.className = 'cerr-ov'; ov.setAttribute('role', 'alertdialog');
+  ov.innerHTML = '<div class="cerr-card"><h3></h3><div class="msg"></div><div class="ref"></div><button type="button">OK</button><div style="clear:both"></div></div>';
+  ov.querySelector('h3').textContent = 'Crawl failed';
+  ov.querySelector('.msg').textContent = CRAWL_FAIL_TEXT[code] || CRAWL_FAIL_TEXT.unknown;
+  const r = String(ref || '').replace(/[^\w-]/g, '');
+  if (r) ov.querySelector('.ref').textContent = `Error code: ${r}`;
+  const close = () => { ov.remove(); document.removeEventListener('keydown', esc, true); };
+  const esc = (ev) => { if (ev.key === 'Escape') { ev.stopPropagation(); close(); } };
+  ov.querySelector('button').onclick = close; ov.onclick = (ev) => { if (ev.target === ov) close(); };
+  document.addEventListener('keydown', esc, true);
+  document.body.appendChild(ov); ov.querySelector('button').focus();
+}
+function cleanCrawlUrl(u) { try { const x = new URL(String(u).trim()); x.hash = ''; for (const k of [...x.searchParams.keys()]) if (/^(utm_[a-z_]+|srsltid|gclid|gbraid|wbraid|dclid|fbclid|msclkid|yclid|igshid|mc_cid|mc_eid|_ga|_gl|_hsenc|_hsmi)$/i.test(k)) x.searchParams.delete(k); return x.toString().replace(/\?$/, ''); } catch (_) { return String(u || '').trim(); } }
 async function analyzePDP() {
-  const url = document.getElementById('pdpUrl').value.trim();
+  // 주소 뒤 추적값(?srsltid= 등)을 떼고 입력 칸에도 반영 — 이후 편집본 · 생성 · 요약이 모두 같은 제품을 가리키게
+  const pin = document.getElementById('pdpUrl');
+  if (pin.value.trim()) pin.value = cleanCrawlUrl(pin.value);
+  const url = pin.value.trim();
   if (typeof syncBulkBtn === 'function') syncBulkBtn();
   if (!url) return;
   const btn = document.getElementById('btnAnalyze');
@@ -481,6 +519,14 @@ async function analyzePDP() {
         btn.disabled = false; btn.textContent = 'Analyze';
         return;
       }
+    } else {
+      // 크롤 자체가 실패(이유 코드가 있음): 같은 페이지라 복제 폴백도 실패하므로 바로 쉬운 말로 안내
+      const fail = await rv.json().catch(() => ({}));
+      if (fail && fail.code) {
+        showCrawlFail(fail.code, fail.ref, url);
+        btn.disabled = false; btn.textContent = 'Analyze';
+        return;
+      }
     }
     console.warn('[ebay] 크롤러 API 미응답/형식불일치 → clone 폴백');
   } catch (apiErr) {
@@ -516,11 +562,8 @@ async function analyzePDP() {
       </div>`;
   } catch (e) {
     const msg = e.message || String(e);
-    if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('Load failed')) {
-      setStatus('✕ Server not running. Run: <code style="background:#f0f0f0;padding:2px 6px;border-radius:3px">node server.js</code> in terminal first (port 3001)', 'error');
-    } else {
-      setStatus('✕ ' + msg, 'error');
-    }
+    console.warn('[analyze] 실패:', msg);   // 기술 내용은 콘솔에만
+    showCrawlFail(/Failed to fetch|NetworkError|Load failed/i.test(msg) ? 'network' : 'unknown', '', url);
   } finally {
     btn.disabled = false; btn.textContent = 'Analyze';
   }

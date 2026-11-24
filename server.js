@@ -2410,7 +2410,8 @@ app.post('/api/pcg', async (req, res) => {
    — 산출물(final.json)이 이미 있으면 즉시 반환 (force:true 로 재실행)
 ────────────────────────────────────────── */
 app.post('/api/pcg-vision', async (req, res) => {
-  const { url, force = false, cacheOnly = false, pro = false, fullAi = false } = req.body || {};
+  const { force = false, cacheOnly = false, pro = false, fullAi = false } = req.body || {};
+  const url = req.body && req.body.url ? require('./crawler-routes').cleanUrl(req.body.url) : '';   // 추적값(?srsltid= 등) 떼기
   if (!url) return res.status(400).json({ error: 'url required' });
   const path = require('path');
   const fs = require('fs');
@@ -2443,8 +2444,9 @@ app.post('/api/pcg-vision', async (req, res) => {
     const result = await crawl(url, { pro: !!pro, force: !!force, fullAi: !!fullAi, geminiKey });
     res.json({ ...result, _source: 'crawler-py' });
   } catch (e) {
-    console.error('[pcg-vision] 크롤 실패:', e.message);
-    res.status(500).json({ error: e.message.slice(0, 300) });
+    // 쉬운 말 + 문의 번호만 (기술 내용은 [crawl] 실패 #번호 로그에)
+    console.error('[pcg-vision] 크롤 실패:', e.ref ? '#' + e.ref : '', e.code || '', e.message);
+    res.status(500).json({ error: e.message.slice(0, 300), code: e.code || 'unknown', ref: e.ref || '' });
   }
 });
 

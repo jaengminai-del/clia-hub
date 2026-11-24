@@ -44,6 +44,52 @@ function resolvePython() {
 const API_TOKEN = (process.env.CLIA_API_TOKEN || '').trim();
 const jobs = new Map(); // job_id → { url, slug, out, startedAt, proc, exited }
 
+// 광고 · 검색이 주소 뒤에 붙이는 추적값(?srsltid= · utm_* · gclid …)과 #뒤는 뗀다 (2026-11-24).
+//   붙은 채로 크롤하면 같은 제품이 다른 제품으로 따로 저장된다 (예: GT-B2655PY ?srsltid=…). 다른 값은 그대로
+const TRACKING = /^(utm_[a-z_]+|srsltid|gclid|gbraid|wbraid|dclid|fbclid|msclkid|yclid|igshid|mc_cid|mc_eid|_ga|_gl|_hsenc|_hsmi)$/i;
+function cleanUrl(url) {
+  try {
+    const u = new URL(String(url).trim());
+    u.hash = '';
+    for (const k of [...u.searchParams.keys()]) if (TRACKING.test(k)) u.searchParams.delete(k);
+    return u.toString().replace(/\?$/, '');
+  } catch (_) { return String(url || '').trim(); }
+}
+
+// 크롤 실패 이유 (2026-11-24): 화면에는 쉬운 말(code → 화면 문구) + 문의 번호(ref), 기술 내용(detail)은 서버 로그에만.
+//   전에는 pipeline.log 의 마지막 오류 줄(Firecrawl · RuntimeError …)을 그대로 사용자에게 보였다
+const CRAWL_FAIL = {
+  not_product: "This isn't an LG.com product page.",
+  unreachable: "LG.com isn't responding. Try again later.",
+  busy: "The server is busy. Try again in a few minutes.",
+  incomplete: "The page is too long. Try again.",
+  declined: "This page can't be crawled.",
+  stopped: "The crawl stopped. Try again.",
+  setup: "Crawling is unavailable. Contact the admin.",
+  unknown: "Something went wrong. Try again.",
+};
+function failureOf(job) {
+  let detail = job.spawnError || '';
+  if (!detail) {
+    try {
+      const lines = fs.readFileSync(path.join(job.out, 'pipeline.log'), 'utf-8')
+        .replace(/\x1b\[[0-9;]*m/g, '').split('\n').map((l) => l.trim()).filter(Boolean);
+      detail = (lines.slice().reverse().find((l) => /error|exception|✗|failed|실패/i.test(l)) || lines[lines.length - 1] || '').slice(0, 400);
+    } catch {}
+  }
+  const d = detail;
+  const code = job.signal ? 'stopped'   // 프로세스가 강제로 끝남 (메모리 부족 · 재시작 등)
+    : /different page|canonical|errors\/404|not a product|no product|404/i.test(d) ? 'not_product'
+    : /GEMINI_API_KEY|ANTHROPIC_API_KEY|FIRECRAWL_API_KEY|api key|402|payment required|credits/i.test(d) ? 'setup'   // 키 · 크레딧: 다시 해도 안 됨 → 관리자
+    : /429|RESOURCE_EXHAUSTED|quota|overloaded|529|rate.?limit/i.test(d) ? 'busy'
+    : /JSONDecodeError|incomplete|truncated/i.test(d) ? 'incomplete'
+    : /declined|refusal/i.test(d) ? 'declined'
+    : /firecrawl|402|payment required|timeout|timed out|net::|ERR_|403|502|503|connection/i.test(d) ? 'unreachable'
+    : 'unknown';
+  return { code, message: CRAWL_FAIL[code], detail: (job.signal ? `killed by ${job.signal}. ` : '') + d };
+}
+const refOf = (jobId) => String(jobId || '').replace(/^job_/, '').slice(0, 6).toUpperCase();
+
 const slugify = (url) =>
   url.replace(/https?:\/\//, '').replace(/[^\p{L}\p{N}_]+/gu, '-').replace(/-+$/, '');
 
@@ -101,8 +147,13 @@ function launchPipeline(jobId, url, usePro, geminiKey, fullAi, html = null, base
   fs.closeSync(logFd);
   const job = jobs.get(jobId);
   Object.assign(job, { slug, out, proc, exited: false });
-  proc.on('exit', (code) => {
+  proc.on('exit', (code, signal) => {
     const ok = code === 0 && fs.existsSync(path.join(out, 'mirror.json'));
+    if (!ok) {
+      job.signal = signal || null;
+      const f = failureOf(job);
+      console.error(`[crawl] 실패 #${refOf(jobId)} ${url} — ${f.code} · exit ${code}${signal ? ' ' + signal : ''} · ${f.detail}`);
+    }
     // 텍스트 v2 크롤 결과: 검은·없는 동영상 포스터에 자동 장면 (video-frames.js) — 끝날 때까지 작업은 '처리 중'
     if (ok) job.post = true;
     job.exited = true;
@@ -116,7 +167,7 @@ function launchPipeline(jobId, url, usePro, geminiKey, fullAi, html = null, base
         store.pushProduct(slug).then((n) => n && console.log(`[crawl-store] ${slug}: ${n}개 파일 업로드`));
       });
   });
-  proc.on('error', (e) => { job.exited = true; job.spawnError = e.message; });
+  proc.on('error', (e) => { job.exited = true; job.spawnError = e.message; console.error(`[crawl] 실패 #${refOf(jobId)} ${url} — 시작 못 함 · ${e.message}`); });
 }
 
 // 컨텐츠가 아닌 컴포넌트를 캐시된 mirror.json 에서도 뺀다 (crawler-py/component_mirror.py NON_CONTENT_COMPONENTS 와 같은 목록)
@@ -156,24 +207,9 @@ function snapshot(jobId) {
     };
   }
   if (job.exited) {
-    let error = job.spawnError || '';
-    if (!error) {
-      // pipeline.log 의 Python 트레이스백 원문 대신, 사람이 읽을 수 있는 마지막 오류 한 줄만 전달
-      try {
-        const lines = fs.readFileSync(path.join(job.out, 'pipeline.log'), 'utf-8')
-          .replace(/\x1b\[[0-9;]*m/g, '').split('\n').map((l) => l.trim()).filter(Boolean);
-        const last = lines.reverse().find((l) => /error|exception|✗|failed|실패/i.test(l)) || lines[0] || '';
-        error = last.replace(/^[\w.]+(Error|Exception):\s*/, (m) => m.split('.').pop()).slice(0, 300);
-        // 자주 나는 원인은 사용자 문장으로
-        if (/JSONDecodeError/.test(error)) error = 'The AI analysis returned an incomplete response (this page is very long). Please try again.';
-        else if (/GEMINI_API_KEY|ANTHROPIC_API_KEY/.test(error)) error = 'No AI key is set on the server (ANTHROPIC_API_KEY or GEMINI_API_KEY).';
-        else if (/Claude declined|refusal/i.test(error)) error = 'The AI declined to analyze this page. ' + error.slice(0, 120);
-        else if (/FIRECRAWL|402|Payment Required/i.test(error)) error = 'Page collection failed (Firecrawl key or credits). ' + error.slice(0, 120);
-        else if (/429|RESOURCE_EXHAUSTED|quota/i.test(error)) error = 'The AI service quota was exceeded. Please try again later.';
-      } catch {}
-    }
-    return { job_id: jobId, status: 'failed', progress_percent: prog.percent || 0,
-      error: error || 'pipeline exited without result' };
+    // 사용자에게는 쉬운 말과 문의 번호만 — 기술 내용은 실패할 때 서버 로그에 남겼다 ([crawl] 실패 #번호)
+    const f = failureOf(job);
+    return { job_id: jobId, status: 'failed', progress_percent: prog.percent || 0, code: f.code, ref: refOf(jobId), error: f.message };
   }
   return { job_id: jobId, status: 'processing', progress_percent: prog.percent || 0,
     log_message: prog.message || '', step: prog.step || '', updated_at: prog.updated_at };
@@ -232,6 +268,7 @@ router.get('/healthz', (req, res) => res.json({
 
 // 크롤 작업 등록 → { jobId, cached }. 캐시(mirror.json)가 있으면 파이프라인 없이 즉시 완료.
 function startCrawl(url, { force = false, pro = false, geminiKey = null, fullAi = false, html = null, base = '' } = {}) {
+  url = cleanUrl(url);
   const slug = slugify(url);
   const out = path.join(OUT_DIR, slug);
   // 같은 제품을 이미 크롤 중이면 새로 띄우지 않고 그 크롤에 합류한다 (2026-11-24).
@@ -267,10 +304,11 @@ async function crawl(url, opts = {}) {
   while (Date.now() < deadline) {
     const snap = snapshot(jobId);
     if (snap.status === 'completed') return snap.result;
-    if (snap.status === 'failed') throw new Error(snap.error || 'pipeline failed');
+    if (snap.status === 'failed') throw Object.assign(new Error(snap.error || CRAWL_FAIL.unknown), { code: snap.code, ref: snap.ref });
     await new Promise((r) => setTimeout(r, 2000));
   }
-  throw new Error('crawl timeout');
+  console.error(`[crawl] 실패 #${refOf(jobId)} ${url} — 20분 안에 끝나지 않음`);
+  throw Object.assign(new Error(CRAWL_FAIL.stopped), { code: 'stopped', ref: refOf(jobId) });
 }
 
 // lg.com/<국가>/... → 국가 코드 (sa_en·sa_ar → sa). 법인별 제품 목록 필터에 사용.
@@ -397,16 +435,16 @@ router.post('/api/v1/crawl', auth, (req, res) => {
     if (!tok || req.get('x-export-token') !== tok) return res.status(401).json({ detail: 'html requires x-export-token' });
     if (typeof html !== 'string' || html.length < 5000) return res.status(400).json({ detail: 'html too short' });
   }
-  const { jobId, cached } = startCrawl(url, {
+  const { jobId, cached } = startCrawl(cleanUrl(url), {
     force: !!force_refresh, pro: !!use_pro_model, fullAi: !!full_ai, geminiKey: req.get('x-gemini-api-key') || null,
     html: html || null,
     base: `${req.get('x-forwarded-proto') || req.protocol}://${req.get('host')}`,   // 자동 장면 이미지 주소 (PUBLIC_BASE_URL 우선)
   });
   if (cached) {
-    return res.status(202).json({ job_id: jobId, status: 'completed', cached: true,
+    return res.status(202).json({ job_id: jobId, status: 'completed', cached: true, url: cleanUrl(url),
       message: '기분석 캐시 존재 — /api/v1/jobs/{job_id} 로 결과 조회', estimated_duration_seconds: 0 });
   }
-  res.status(202).json({ job_id: jobId, status: 'queued',
+  res.status(202).json({ job_id: jobId, status: 'queued', url: cleanUrl(url),
     message: '크롤링 분석 작업이 대기열에 등록되었습니다. 실시간 상태 조회를 활용하십시오.',
     estimated_duration_seconds: 45 });
 });
@@ -526,6 +564,7 @@ router.get('/api/v1/jobs/:id/stream', (req, res) => {
 
 module.exports = router;
 module.exports.crawl = crawl;
+module.exports.cleanUrl = cleanUrl;
 module.exports.slugify = slugify;
 module.exports.stripNonContent = stripNonContent;
 module.exports.productSummary = productSummary;   // 벌크 엑셀 SKU 연결 (bulk-routes.js)
