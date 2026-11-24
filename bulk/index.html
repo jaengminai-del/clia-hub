@@ -154,44 +154,11 @@ a.clia-btn { text-decoration: none; }
 .list.grid .fl, .list.grid .fx { align-items: flex-start; justify-content: flex-start; text-align: start; }
 .mini { height: 26px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--clia-gray-300); background: #fff; color: var(--clia-gray-900); font: 600 11px/24px var(--clia-font), sans-serif; cursor: pointer; text-decoration: none; white-space: nowrap; }
 .mini:hover { border-color: var(--clia-gray-700); }
-/* 매칭 불가 (2026-11-23): 이유별 칩 + 한 번에 한 묶음만 펼침 + 한 줄 행 (SKU · 상품명 · 할 일) */
-.schips { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 16px; border-bottom: 1px solid var(--clia-gray-100); }
-.schip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--clia-gray-300); background: #fff; color: var(--clia-gray-700); font: 600 12px var(--clia-font), sans-serif; cursor: pointer; }
-.schip b { padding: 0 6px; border-radius: 999px; background: var(--clia-gray-100); font-size: 11px; }
-.schip i { font-style: normal; color: var(--ok); font-size: 11px; }
-.schip:hover { border-color: var(--clia-gray-700); }
-.schip.on { background: var(--clia-gray-900); border-color: var(--clia-gray-900); color: #fff; }
-.schip.on b { background: rgba(255,255,255,.18); }
-.schip.on i { color: #8FE0B4; }
-.srow { display: grid; grid-template-columns: minmax(120px, 220px) minmax(0, 1fr) 190px minmax(280px, 400px); gap: 14px; align-items: center; min-height: 52px; padding: 7px 16px; border-bottom: 1px solid var(--clia-gray-100); font-size: 12px; }
-.srow:last-child { border-bottom: 0; }
-.srow .k { font-weight: 700; font-size: 12px; min-width: 0; overflow-wrap: anywhere; }
-.srow .k.nosku { color: var(--clia-gray-500); font-weight: 600; font-style: italic; }
-.srow .n { color: var(--clia-gray-900); font-size: 12px; line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-word; }
-.srow .sw2 { color: var(--clia-gray-900); font-weight: 500; font-size: 12px; line-height: 1.35; }
-.srow .sw2 i { display: block; font-style: normal; color: var(--muted); font-size: 11px; }
-.srow input.skuin { flex: 0 1 38%; }
-.srow input.skuin + input, .srow input.skuin ~ .okt { flex: 1 1 0; }
-.srow .leave { color: var(--muted); font-size: 12px; }
-.srow .mini.go { color: #fff; background: var(--clia-brand); border-color: var(--clia-brand); font-weight: 700; }
-.srow .mini.go:hover { background: var(--clia-brand-hover); border-color: var(--clia-brand-hover); }
-.srow .a { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; justify-content: flex-start; min-width: 0; }
-.srow input { flex: 1 1 100%; min-width: 0; height: 32px; border: 1px solid var(--clia-gray-300); border-radius: 8px; padding: 0 10px; font: 12px var(--clia-font), sans-serif; background: #fff; color: var(--clia-gray-900); }
-.srow input:hover { border-color: var(--clia-gray-500); }
-.srow input:focus { outline: none; border-color: var(--clia-gray-900); box-shadow: 0 0 0 3px rgba(38,38,38,.08); }
-.srow.bad input { border-color: var(--bad); box-shadow: 0 0 0 3px rgba(200,36,31,.08); }
-.ust { flex: 1 1 100%; font-size: 11px; color: var(--muted); text-align: start; }
-.ust:empty { display: none; }
-.srow.bad .ust { color: var(--bad); }
 .pick { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border: 1px solid var(--clia-gray-300); border-radius: 999px; background: #fff; color: var(--clia-gray-900); font: 600 12px var(--clia-font), sans-serif; cursor: pointer; }
 .pick:has(img) { padding-inline-start: 3px; }
 .pick img { width: 24px; height: 24px; object-fit: contain; border-radius: 999px; background: var(--clia-gray-50); }
 .pick:hover { border-color: var(--clia-gray-900); }
 .pick .pc { color: var(--muted); font-weight: 500; font-size: 11px; }
-.pick:focus-visible, .schip:focus-visible, .mini:focus-visible { outline: 2px solid var(--clia-gray-900); outline-offset: 2px; }
-.srow.fixed { background: #F3FAF6; }
-.srow.fixed.half { background: transparent; }   /* 제품은 찾았지만 SKU 번호가 아직 비어 있음 */
-.okt { color: var(--ok); font-weight: 700; font-size: 12px; }
 .eb { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 11px 0 9px; border: 1px solid var(--clia-gray-300); border-radius: 8px; background: #fff; color: var(--clia-gray-900); font: 600 12px var(--clia-font), sans-serif; text-decoration: none; white-space: nowrap; }
 .eb:hover { border-color: var(--clia-gray-900); }
 .eb svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -202,25 +169,55 @@ button.eb { cursor: pointer; }
 /* 편집(빌더) 덮개 — 벌크 화면 전체 위 */
 .edov { position: fixed; inset: 0; z-index: 50; background: #fff; }
 .edov iframe { width: 100%; height: 100%; border: 0; display: block; }
-/* 목록 머리 · 세 칸 (2026-11-23): 상태 · 할 일 · 편집 — 넓은 화면의 리스트 보기에서만 */
+/* 표 하나 (2026-11-24): 제품 · 상품명 · 상태 · 확인 필요 내용 · Next step · 직접 편집하기 — 매칭 완료 · 확인 필요 · 매칭 불가 모두.
+   탭은 거르기만. 넓은 화면의 리스트 보기에서만 칸으로, 휴대폰 · 갤러리 보기는 카드 */
 .lhead { display: none; }
+.item .pn { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--clia-gray-900); line-height: 1.4; word-break: break-word; margin-top: 0; }
+.item .k { font-weight: 700; min-width: 0; overflow-wrap: anywhere; }
+.item .k.nosku { color: var(--clia-gray-500); font-weight: 600; font-style: italic; }
+.item.nm { cursor: default; }
+.item.nm:hover { background: none; }
+@media (max-width: 640px) {
+  .list:not(.grid) .item { grid-template-columns: 22px 48px minmax(0, 1fr); align-items: start; row-gap: 4px; }
+  .list:not(.grid) .item > input, .list:not(.grid) .item > .cbx, .list:not(.grid) .item > img, .list:not(.grid) .item > .ph { grid-row: 1 / span 3; }
+  .list:not(.grid) .item > .m, .list:not(.grid) .item > .pn, .list:not(.grid) .item > .r { grid-column: 3; }
+  .list:not(.grid) .item .r { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px; text-align: start; }
+  .list:not(.grid) .item .c-ac { flex: 1 1 100%; }
+}
 @media (min-width: 641px) {
-  .list:not(.grid) .item { grid-template-columns: 22px 48px minmax(0, 1fr) 250px 150px 92px; }
+  .list:not(.grid) .item { grid-template-columns: 22px 48px minmax(120px, 190px) minmax(0, 1fr) 96px 170px minmax(210px, 290px) 84px; gap: 12px; }
   .list:not(.grid) .item .r { display: contents; }
-  .lhead:not(.hidden) { display: grid; grid-template-columns: 22px 48px minmax(0, 1fr) 250px 150px 92px; gap: 14px; padding: 9px 16px; border-bottom: 1px solid var(--line); background: var(--clia-gray-50); color: var(--clia-gray-900); font-size: 11px; font-weight: 600; letter-spacing: .02em; }
+  .lhead:not(.hidden) { display: grid; grid-template-columns: 22px 48px minmax(120px, 190px) minmax(0, 1fr) 96px 170px minmax(210px, 290px) 84px; gap: 12px; padding: 9px 16px; border-bottom: 1px solid var(--line); background: var(--clia-gray-50); color: var(--clia-gray-900); font-size: 11px; font-weight: 600; letter-spacing: .02em; }
   .lhead .he { text-align: end; }
   /* 확인할 행이 없는 목록: 확인 필요 내용 · Next step 열을 뺀다 (진행 상태 · 편집됨 표시는 편집 버튼 앞에 그대로) */
-  .list.noact:not(.grid) .item, .lhead.noact:not(.hidden) { grid-template-columns: 22px 48px minmax(0, 1fr) auto 92px; }
-  .list.noact:not(.grid) .c-ac, .lhead.noact .hn { display: none; }
-  .lhead.noact .hs { visibility: hidden; }
+  .list.noact:not(.grid) .item, .lhead.noact:not(.hidden) { grid-template-columns: 22px 48px minmax(120px, 190px) minmax(0, 1fr) 96px 84px; }
+  .list.noact:not(.grid) .c-why, .list.noact:not(.grid) .c-ac, .lhead.noact .hs, .lhead.noact .hn { display: none; }
   /* Next step 열 하이라이트 — 머리부터 행 끝까지 같은 색 띠 (행 위아래 여백까지 채움) */
   .lhead .hn { color: var(--clia-brand); font-weight: 800; }
 }
-.c-st { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; min-width: 0; }
-.c-ac { display: flex; align-items: center; }
+.c-state { display: flex; align-items: center; }
+.c-state, .c-why, .c-ac { text-align: start; }
+.c-why { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; min-width: 0; }
+.c-ac { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+/* 매칭 불가 행의 할 일: 주소 칸 · SKU 번호 칸(위아래) · 후보 · 등록하고 채우기 · 그대로 둠 */
+.c-ac input { flex: 1 1 100%; min-width: 0; height: 32px; border: 1px solid var(--clia-gray-300); border-radius: 8px; padding: 0 10px; font: 12px var(--clia-font), sans-serif; background: #fff; color: var(--clia-gray-900); }
+.c-ac input:hover { border-color: var(--clia-gray-500); }
+.c-ac input:focus { outline: none; border-color: var(--clia-gray-900); box-shadow: 0 0 0 3px rgba(38,38,38,.08); }
+.item.bad .c-ac input[data-urow] { border-color: var(--bad); box-shadow: 0 0 0 3px rgba(200,36,31,.08); }
+.ust { flex: 1 1 100%; font-size: 11px; color: var(--muted); }
+.ust:empty { display: none; }
+.item.bad .ust { color: var(--bad); }
+.okt { color: var(--ok); font-weight: 700; font-size: 12px; }
+.lnk { border: 0; background: none; padding: 0 0 0 6px; color: var(--clia-gray-600); font: 600 11px var(--clia-font), sans-serif; text-decoration: underline; cursor: pointer; }
+.sw2 { color: var(--clia-gray-900); font-weight: 500; font-size: 12px; line-height: 1.35; }
+.sw2 i { display: block; font-style: normal; color: var(--muted); font-size: 11px; }
+.leave { color: var(--muted); font-size: 12px; }
+.pick:focus-visible, .mini:focus-visible, .lnk:focus-visible { outline: 2px solid var(--clia-gray-900); outline-offset: 2px; }
 /* Next step 버튼 = 다른 주요 버튼(엑셀 받기 · 내보내기)과 같은 브랜드 빨강 채움 */
 .c-ac .mini { color: #fff; background: var(--clia-brand); border-color: var(--clia-brand); font-weight: 700; }
 .c-ac .mini:hover { background: var(--clia-brand-hover); border-color: var(--clia-brand-hover); color: #fff; }
+.c-ac .mini.un { color: var(--clia-gray-900); background: #fff; border-color: var(--clia-gray-300); font-weight: 600; }   /* 되돌리기는 회색 */
+.c-ac .mini.un:hover { color: var(--clia-gray-900); background: #fff; border-color: var(--clia-gray-700); }
 .c-ed { display: flex; justify-content: flex-end; }
 .why { display: inline-flex; align-items: center; gap: 4px; color: var(--clia-gray-900); font-weight: 500; font-size: 12px; line-height: 1.35; }
 .why .x { flex: none; width: 18px; height: 18px; border-radius: 50%; border: 0; background: var(--clia-gray-100); color: var(--clia-gray-600); font: 700 13px/1 var(--clia-font), sans-serif; cursor: pointer; padding: 0; }
@@ -228,9 +225,6 @@ button.eb { cursor: pointer; }
 .why .x:focus-visible { outline: 2px solid var(--clia-gray-900); outline-offset: 2px; }
 .list.grid .item .r { display: flex; flex-direction: column; gap: 6px; }
 .list.grid .c-ed { justify-content: flex-start; }
-.shead { display: grid; grid-template-columns: minmax(120px, 220px) minmax(0, 1fr) 190px minmax(280px, 400px); gap: 14px; padding: 9px 16px; border-bottom: 1px solid var(--line); background: var(--clia-gray-50); color: var(--clia-gray-900); font-size: 11px; font-weight: 600; letter-spacing: .02em; }
-.shead .hn { color: var(--clia-brand); font-weight: 800; }
-.shint { padding: 8px 16px; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--clia-gray-100); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .err2 { color: var(--bad); font-size: 12px; }
 /* 작업 상황판 · 탭 · 한 줄 도구 (2026-11-19 UI 정리) */
 .panel { position: sticky; top: 0; z-index: 6; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 14px 18px; margin: 0 0 14px; box-shadow: 0 6px 18px rgba(38,38,38,.06); }
@@ -278,12 +272,6 @@ button.eb { cursor: pointer; }
 /* 탭 설명 한 줄 · 매칭 불가 목록 (2026-11-19) */
 .nrow { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 .list.grid .nrow { justify-content: flex-start; }
-.sech { padding: 10px 20px; border-top: 1px solid var(--clia-gray-200); border-bottom: 1px solid var(--clia-gray-100); background: var(--clia-gray-50); font-size: 13px; font-weight: 700; color: var(--clia-gray-700); }
-.sech b { margin-inline-start: 6px; font-weight: 600; color: var(--clia-gray-400); }
-.skiplist .item { cursor: default; }
-.skiplist .item:hover { background: none; }
-.skiplist .item .r { align-items: flex-end; }
-@media (max-width: 640px) { .skiplist .item { grid-template-columns: 0 48px minmax(0, 1fr); } .skiplist .item .r { grid-column: 2 / -1; align-items: flex-start; } .srow { grid-template-columns: minmax(0, 1fr); gap: 4px; padding: 8px 14px; } .shead { display: none; } .item .r { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px; } .srow .a { justify-content: flex-start; } .ust { text-align: start; } .schips { padding: 10px 14px; } .shint { padding: 8px 14px; } }
 /* CLIA 에 없는 상품 등록: 상황판 안의 눈에 띄는 한 줄 + 올리자마자 묻는 팝업 (2026-11-19) */
 .p-reg { display: flex; gap: 12px; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--clia-gray-100); }
 .p-reg .regt { flex: 0 1 auto; font-size: 13px; font-weight: 600; color: var(--clia-gray-700); }
@@ -395,9 +383,6 @@ button.eb { cursor: pointer; }
       </div>
       <div class="lhead hidden" id="lhead" aria-hidden="true"></div>
 <div class="list" id="list"></div>
-      <!-- 매칭 불가: 다른 탭과 같은 행 모양 (2026-11-19) -->
-      <div class="sech hidden" id="skipHead"></div>
-      <div class="list skiplist hidden" id="skip"></div>
           </div>
   </section>
 
