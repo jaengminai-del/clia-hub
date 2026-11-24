@@ -231,6 +231,8 @@ button.eb { cursor: pointer; }
   .list:not(.grid) .item .r { display: contents; }
   .lhead:not(.hidden) { display: grid; grid-template-columns: 22px 48px minmax(110px, 170px) 96px minmax(200px, 1fr) 96px 160px minmax(200px, 250px) 80px; gap: 12px; padding: 9px 16px; border-bottom: 1px solid var(--line); background: var(--clia-gray-50); color: var(--clia-gray-900); font-size: 11px; font-weight: 600; letter-spacing: .02em; }
   .lhead .he { text-align: end; }
+  /* 표 머리는 내려도 보이게 — 위에 고정된 작업 상황판(.panel) 바로 아래 (높이는 bulk.js 가 --panelH 로) (2026-11-24) */
+  .lhead:not(.hidden) { position: sticky; top: var(--panelH, 0px); z-index: 5; box-shadow: 0 1px 0 var(--line); }
   /* 확인할 행이 없는 목록: 확인 필요 내용 · Next step 열을 뺀다 (진행 상태 · 편집됨 표시는 편집 버튼 앞에 그대로) */
   .list.noact:not(.grid) .item, .lhead.noact:not(.hidden) { grid-template-columns: 22px 48px minmax(110px, 170px) 96px minmax(200px, 1fr) 96px 80px; }
   .list.noact:not(.grid) .c-why, .list.noact:not(.grid) .c-ac, .lhead.noact .hs, .lhead.noact .hn { display: none; }

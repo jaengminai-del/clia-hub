@@ -926,4 +926,10 @@
       }).catch(() => {});
     }
   }
+  // 표 머리 고정 (2026-11-24): 머리는 위에 고정된 작업 상황판(#panel) 바로 아래에 붙는다 — 상황판 높이가 바뀌면(진행 막대 · 등록 줄) 따라간다
+  (function stickHead() {
+    const p = $('panel'); if (!p || typeof ResizeObserver === 'undefined') return;
+    const set = () => document.documentElement.style.setProperty('--panelH', (p.offsetParent ? p.offsetHeight : 0) + 'px');
+    new ResizeObserver(set).observe(p); set();
+  })();
 })();
