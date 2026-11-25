@@ -2906,7 +2906,6 @@ function showDetail(p){
         <div class="ch-main-row">
           ${marketsOf(productCorp(p)).map(k=>`<button class="ch-btn ch-main" style="--ch-color:${MARKET_INFO[k][1]}" onclick="openChannel('${k}','${p.id}')">${MARKET_INFO[k][0]}</button>`).join('')}
         </div>
-        <div class="ch-sub-label">${t('ch.comingSoon')}: ${[t('ch.lgcom'),'Mercado Libre',t('ch.md'),'Instagram','Facebook','Shorts'].join(' · ')}</div>
       </div>
     </div>
     <div class="lx-row">
