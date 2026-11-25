@@ -3035,7 +3035,12 @@ async function fullshotStatus(url) {
   const meta = await fullshotMeta(key);
   if (isGone(meta)) return { status: 'gone', key, error: meta.error || 'lg.com 에 이 제품 페이지가 없음', final: meta.final || '' };
   // 다시 찍기가 실패했으면(예전 캡처는 그대로) 그 오류도 알려 준다 — 검토 미리 준비의 차단기가 막힘을 셀 수 있게
-  if (await fullshotReady(key)) return { status: 'ready', key, src: `/media/fullshot/${key}.jpg`, verified: !!meta, ...(job && job.status === 'error' ? { lastError: job.error } : {}) };
+  if (await fullshotReady(key)) {
+    // 그림 주소에 판을 붙인다 — 다시 찍으면 주소가 같아 브라우저가 예전 그림을 보여 주던 것 (2026-11-25)
+    let v = meta && meta.at ? meta.at : '';
+    try { v = require('fs').statSync(require('path').join(FULLSHOT_DIR, `${key}.jpg`)).size; } catch (_) {}
+    return { status: 'ready', key, src: `/media/fullshot/${key}.jpg?v=${v}`, verified: !!meta, ...(job && job.status === 'error' ? { lastError: job.error } : {}) };
+  }
   if (job && job.status === 'error') return { status: 'error', key, error: job.error };
   return { status: 'none', key };
 }

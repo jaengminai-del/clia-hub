@@ -576,6 +576,9 @@ function queueStats() {
 function readPrep(slug, ch) {
   const rec = readJson(fileOf(slug, ch));
   if (!rec) return null;
+  // 캡처 그림 주소에 판(파일 크기)을 붙인다 — 같은 제품을 다시 찍으면 주소가 같아 브라우저가 하루 동안 예전 그림을 보여 주고,
+  // 새 위치 기록을 예전 그림 위에 그려 영역이 어긋났다 (2026-11-25 SG 27G550B-B)
+  if (rec.shot && rec.shot.key) rec.shot.src = `/media/fullshot/${rec.shot.key}.jpg?v=${rec.shot.bytes || rec.prepared_at || ''}`;
   const c = readJson(cropFile(slug));
   if (rec.shot && c && c.key === rec.shot.key && (!c.bytes || c.bytes === rec.shot.bytes)) {
     rec.shot = { ...rec.shot, top: c.top, bottom: c.bottom, manual: { by: c.by || '', at: c.at } };
