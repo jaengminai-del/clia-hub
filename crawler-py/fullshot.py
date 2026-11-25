@@ -201,7 +201,7 @@ def _save_boxes(page, out: Path, scale: float):
             comps = page.evaluate(_JS_COMPS)
         except Exception:   # noqa: BLE001
             comps = None
-        Path(str(out) + ".boxes.json").write_text(json.dumps({"scale": scale, "doc_h": doc_h, "after": True, "method": "stitch", "items": boxes, "comps": comps}), encoding="utf-8")
+        Path(str(out) + ".boxes.json").write_text(json.dumps({"scale": scale, "doc_h": doc_h, "after": True, "method": "stitch", "v": 2, "items": boxes, "comps": comps}), encoding="utf-8")
     except Exception as e:   # 위치 기록은 덤 — 실패해도 캡처는 그대로
         print(f"boxes: {e}", file=sys.stderr)
 

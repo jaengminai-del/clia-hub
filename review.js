@@ -27,7 +27,8 @@ const CHANNELS = new Set(['shopee', 'lazada']);
 //   3 = 기준점을 섹션 첫 이미지 윗변으로 · lg.com 같은 줄 카드도 짝지음 (2026-11-25) — 캡처 · 요약 · 조각은 그대로 다시 쓰고 맞추기만 새로
 //   4 = 영역 상자(Lt · Rt) · 찍기 전에 적은 위치 기록의 어긋남을 캡처에서 다시 찾아 고침 (2026-11-25)
 //   5 = lg.com 컴포넌트로 영역 나누기 · 영역 카피 비교(copy) (2026-11-25) — 컴포넌트 기록이 있는 캡처만, 없으면 예전처럼
-const PREP_V = 5;
+//   6 = 한 화면씩 찍어 붙인 캡처 판(stitched v2)을 맞춤 결과에 (2026-11-25) — 다시 맞춰야 목록이 v2 캡처만 보여 준다
+const PREP_V = 6;
 const SHOPEE_MAX_IMAGES = 12, SHOPEE_DESC_MAX = 3000;   // bulk-jobs.js 와 같은 규칙
 const LOCAL = () => (process.env.BULK_API_BASE || `http://127.0.0.1:${process.env.PORT || 3001}`).replace(/\/$/, '');
 const PY_DIR = path.join(__dirname, 'crawler-py');
