@@ -191,6 +191,47 @@ async function boxesFor(key, shotPath) {
   return fp;
 }
 
+// lg.com 화면에 기능 섹션이 없는 제품 (2026-11-25 사용자 결정 — lg-visibility.js): 페이지 데이터에서 만든 기능 섹션을 숨기고(스펙만) 다시 준비
+const lgVis = require('./lg-visibility');
+async function lgBoxes(rec) {   // 캡처 이미지 위치 기록 (그 캡처의 것인지 파일 크기로 확인 — 캡처 그림은 받지 않음)
+  const fp = path.join(FULLSHOT_DIR, `${rec.shot.key}.boxes.json`);
+  if (!fs.existsSync(fp)) {
+    const buf = await store.getBuffer(`media-fullshot/${rec.shot.key}.boxes.json`).catch(() => null);
+    if (!buf) return null;
+    fs.mkdirSync(path.dirname(fp), { recursive: true });
+    fs.writeFileSync(fp, buf);
+  }
+  const b = readJson(fp);
+  return b && (!b.jpg_bytes || !rec.shot.bytes || b.jpg_bytes === rec.shot.bytes) ? b : null;
+}
+async function lgVisibilityCheck(slug, rec) {
+  if (!rec || !rec.shot) return false;
+  const boxes = await lgBoxes(rec);
+  if (!boxes) return false;
+  const r = lgVis.applyTo(dirOf(slug), boxes);
+  if (!r) return false;
+  console.log(`[review] ${slug}: lg.com 화면에 기능 섹션이 없음 (페이지 데이터 이미지 ${r.visible}/${r.media} 보임) → 기능 섹션 ${r.aem}개 숨김 · 스펙 등 ${r.kept}개 남김 → 다시 준비`);
+  store.pushPaths([path.join(dirOf(slug), 'mirror.json')]).catch((e) => console.warn('[review] 버킷 업로드 실패', e.message));
+  const again = () => {   // 지금 돌고 있는 준비가 끝난 뒤에
+    if ([...CHANNELS].some((c) => { const j = jobs.get(`${slug}|${c}`); return j && j.state === 'pending'; })) return setTimeout(again, 5000);
+    for (const c of CHANNELS) enqueue(slug, c, {}, true);
+  };
+  setTimeout(again, 3000);
+  return true;
+}
+async function lgVisibilitySweep() {   // 이미 준비한 제품 (시작할 때 한 번)
+  let n = 0;
+  try {
+    const idx = require('./bulk-catalog').productIndex();
+    for (const p of Object.values(idx.products).filter((x) => PREWARM_COUNTRIES.has(x.country))) {
+      const rec = readJson(fileOf(p.slug, 'shopee'));
+      if (rec && rec.shot && rec.source === 'crawl' && await lgVisibilityCheck(p.slug, rec).catch(() => false)) n++;
+    }
+  } catch (e) { console.warn('[review] lg.com 기능 섹션 훑기 실패', e.message); }
+  console.log(`[review] lg.com 화면에 기능 섹션이 없는 제품 ${n}개 — 기능 섹션 숨기고 다시 준비`);
+  return n;
+}
+
 function runPrep(input) {
   return new Promise((resolve, reject) => {
     const p = require('child_process').execFile(python(), ['review_prep.py'], { cwd: PY_DIR, timeout: 5 * 60 * 1000, maxBuffer: 16 * 1024 * 1024,
@@ -345,6 +386,7 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false, bg =
   store.pushPaths([fp]).catch((e) => console.warn('[review] 버킷 업로드 실패', e.message));
   step('');
   const secs = Object.entries(T).filter(([, v]) => v >= 100).map(([k, v]) => `${k} ${(v / 1000).toFixed(1)}`).join(' ');
+  if (rec.shot && rec.source === 'crawl') lgVisibilityCheck(slug, rec).catch((e) => console.warn('[review] lg.com 기능 섹션 확인 실패', slug, e.message));
   console.log(`[review] ${slug} ${ch}: 이미지 ${slices.length}장 (${rec.source}) · USP ${a.usps.length} · 캡처 ${a.shot ? `${a.shot.top}~${a.shot.bottom}` : fsErr || '없음'}`
     + ` · 같은 영역 ${a.align ? `${a.align.anchors.length}곳 (이미지 ${a.align.matched}/${a.align.images})` : a.alignErr || '없음'}`
     + ` · ${((Date.now() - t0) / 1000).toFixed(1)}초 (${secs}${bg ? '' : ' · 사람'})`);
@@ -483,6 +525,7 @@ if (PREWARM) {
     await require('./drain').gate();   // 재배포: 이전 서버가 마무리 중이면 끝난 뒤에 (그 서버가 마친 준비를 다시 하지 않게)
     try { require('./bulk-catalog').invalidate(); } catch (_) {}   // 동기화 중에 만든 빈 제품 색인을 버린다
     prewarm();
+    lgVisibilitySweep();   // lg.com 화면에 기능 섹션이 없는 제품 — 기능 섹션 숨기고 다시 준비 (한 번)
   }, 30 * 1000);
   setInterval(prewarm, 10 * 60 * 1000).unref();
 }
@@ -589,8 +632,13 @@ router.get('/api/v1/review/item/:slug', (req, res) => {
   if (!p) return res.status(404).json({ error: 'product not found' });
   const { state, job } = prepState(slug, ch);
   res.json({ product: { slug, url: p.url, model: p.model || '', title: p.title, dv: p.dv || '', grp: p.grp || '' }, channel: ch,
-    approval: approvals.status(slug), gate: approvals.gateOn(), state, job, data: state === 'ready' || state === 'stale' ? readPrep(slug, ch) : null });
+    approval: approvals.status(slug), gate: approvals.gateOn(), state, job, data: state === 'ready' || state === 'stale' ? readPrep(slug, ch) : null,
+    lgNoFeature: lgNoFeature(slug) });
 });
+function lgNoFeature(slug) {   // lg.com 화면에 기능 섹션이 없어 숨긴 제품 (lg-visibility.js)
+  const m = readJson(path.join(dirOf(slug), 'mirror.json'));
+  return m && m._lg_hidden ? { visible: m._lg_hidden.visible, at: m._lg_hidden.at, hidden: (m._lg_hidden.sections || []).length } : null;
+}
 
 // 같은 영역 맞추기 점검용 (읽기만): lg.com 캡처 때 적은 이미지 위치 + CLIA HTML 의 섹션 · 이미지 위치 — 기준점이 맞는지 밖에서 확인 (2026-11-25)
 router.get('/api/v1/review/item/:slug/align-debug', async (req, res) => {

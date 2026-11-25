@@ -29,6 +29,7 @@ CLIA_I18N.init({
   '✓ Done editing': { de: '✓ Bearbeiten beenden', th: '✓ แก้ไขเสร็จแล้ว', ar: '✓ إنهاء التعديل' },
   '＋ Add ▾': { de: '＋ Hinzufügen ▾', th: '＋ เพิ่ม ▾', ar: '＋ إضافة ▾' },
   '📝 Add product info': { de: '📝 Produktinfo hinzufügen', th: '📝 เพิ่มข้อมูลสินค้า', ar: '📝 إضافة معلومات المنتج' },
+  'This product has no feature section on LG.com, so only the specs are shown, as on LG.com.': { de: 'Dieses Produkt hat auf LG.com keinen Funktionsbereich, daher werden wie auf LG.com nur die technischen Daten gezeigt.', th: 'สินค้านี้ไม่มีส่วนฟีเจอร์บน LG.com จึงแสดงเฉพาะสเปกเหมือนบน LG.com', ar: 'لا يحتوي هذا المنتج على قسم ميزات في LG.com، لذا تُعرض المواصفات فقط كما في LG.com.', ko: '이 제품은 LG.com에 기능 섹션이 없어 LG.com처럼 스펙만 보여 줍니다.' },
   'Shopee only allows 12 images, and this one has {n}. Try removing a few sections with Edit.': { de: 'Shopee erlaubt nur 12 Bilder, hier sind es {n}. Entfernen Sie mit „Bearbeiten“ einfach ein paar Abschnitte.', th: 'Shopee ใส่รูปได้แค่ 12 รูป แต่ตอนนี้มี {n} รูป ลองกด "แก้ไข" แล้วลบบางส่วนออกดูนะ', ar: 'يسمح Shopee بـ 12 صورة فقط، وهنا {n} صورة. جرّب حذف بعض الأقسام عبر «تعديل».' },
   // 내보내기 메뉴 (2026-11-24)
   '⬇ Export': { de: '⬇ Exportieren', th: '⬇ ส่งออก', ar: '⬇ تصدير' },

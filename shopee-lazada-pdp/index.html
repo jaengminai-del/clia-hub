@@ -564,6 +564,8 @@ async function analyzePDP() {
           : mir._qa.checks ? ` · gallery ${mir._qa.checks.gallery_images} images${(mir._qa.issues || []).length ? ` · ⚠ ${mir._qa.issues.length} check(s)` : ''}`
           : mir._qa.match_score != null ? ` · visual QA ${mir._qa.match_score}/100` : '';
         setStatus('', 'ok'); void qa;   // 성공 문구는 없앰 (2026-11-25) — 미리보기가 보이면 충분
+        // lg.com 화면에 기능 섹션이 없는 제품 (2026-11-25): 페이지 데이터에서 만든 기능 섹션을 숨기고 lg.com 처럼 스펙만
+        if (mir._lg_hidden) setStatus('This product has no feature section on LG.com, so only the specs are shown, as on LG.com.', 'warn');   // 번역은 clia-i18n.js 가 화면 글자로
         renderSections();
         btn.disabled = false; btn.textContent = 'Analyze';
         return;
