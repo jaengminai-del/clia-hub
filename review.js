@@ -588,6 +588,12 @@ router.get('/api/v1/review/item/:slug/align-debug', async (req, res) => {
       if (fp) out.boxes = readJson(fp);
       void shotPath;
     }
+    if (rec.shot) {   // 캡처 기록 (언제 · 어떻게 찍었는지)
+      let m = readJson(path.join(FULLSHOT_DIR, `${rec.shot.key}.json`));
+      if (!m) { const buf = await store.getBuffer(`media-fullshot/${rec.shot.key}.json`).catch(() => null); try { m = buf ? JSON.parse(buf.toString('utf8')) : null; } catch (_) { m = null; } }
+      out.shotMeta = m;
+    }
+    if (req.query.lite) { if (out.boxes) out.boxes = { scale: out.boxes.scale, after: !!out.boxes.after, comps: Array.isArray(out.boxes.comps) ? out.boxes.comps.length : 0, items: (out.boxes.items || []).length }; return res.json(out); }
     const lc = path.join(SLICE_CACHE, rec.hash || '_', 'align-layout.json');
     if (!fs.existsSync(lc)) {
       const buf = await store.getBuffer(`media-slices/${rec.hash}/align-layout.json`).catch(() => null);
