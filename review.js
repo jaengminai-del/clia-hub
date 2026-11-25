@@ -570,6 +570,30 @@ router.get('/api/v1/review/item/:slug', (req, res) => {
     approval: approvals.status(slug), gate: approvals.gateOn(), state, job, data: state === 'ready' || state === 'stale' ? readPrep(slug, ch) : null });
 });
 
+// 같은 영역 맞추기 점검용 (읽기만): lg.com 캡처 때 적은 이미지 위치 + CLIA HTML 의 섹션 · 이미지 위치 — 기준점이 맞는지 밖에서 확인 (2026-11-25)
+router.get('/api/v1/review/item/:slug/align-debug', async (req, res) => {
+  const slug = cleanSlug(req.params.slug), ch = CHANNELS.has(req.query.channel) ? req.query.channel : 'shopee';
+  const rec = readJson(fileOf(slug, ch));
+  if (!rec) return res.status(404).json({ error: 'not prepared' });
+  const out = { slug, channel: ch, hash: rec.hash, shot: rec.shot ? { key: rec.shot.key, w: rec.shot.w, h: rec.shot.h, top: rec.shot.top, bottom: rec.shot.bottom } : null,
+    sliceWidth: rec.slices && rec.slices[0] ? rec.slices[0].w : 0, align: rec.align || null, boxes: null, layout: null };
+  try {
+    if (rec.shot) {
+      const shotPath = path.join(FULLSHOT_DIR, `${rec.shot.key}.jpg`);
+      const fp = fs.existsSync(shotPath) ? await boxesFor(rec.shot.key, shotPath) : null;
+      if (fp) out.boxes = readJson(fp);
+    }
+    const lc = path.join(SLICE_CACHE, rec.hash || '_', 'align-layout.json');
+    if (!fs.existsSync(lc)) {
+      const buf = await store.getBuffer(`media-slices/${rec.hash}/align-layout.json`).catch(() => null);
+      if (buf) { fs.mkdirSync(path.dirname(lc), { recursive: true }); fs.writeFileSync(lc, buf); }
+    }
+    const l = readJson(lc);
+    if (l) out.layout = { contentWidth: l.layout && l.layout.contentWidth, secs: (l.secs || []).map((s) => ({ head: s.head, top: s.top, imgs: (s.imgs || []).map((m) => ({ src: m.src, top: m.top, width: m.width })) })) };
+  } catch (e) { out.error = String(e.message).slice(0, 200); }
+  res.json(out);
+});
+
 router.post('/api/v1/review/item/:slug/prepare', cr.auth, (req, res) => {
   const slug = cleanSlug(req.params.slug), b = req.body || {};
   const ch = CHANNELS.has(b.channel) ? b.channel : 'shopee';
