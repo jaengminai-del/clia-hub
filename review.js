@@ -414,7 +414,10 @@ function reviewVisible(p) {
 }
 function upgradeCandidates() {
   const idx = require('./bulk-catalog').productIndex();
-  const rank = (rec) => (!rec.shot ? 0 : rec.align && rec.align.mode === 'pixel' ? 1 : 2);   // 캡처 없음(실패) → 위치 기록 없음 → 나머지
+  // 순서 (2026-11-25 사용자 결정): 캡처 없음(실패) → lg.com 에 기능 섹션이 보이는 제품 → lg.com 에 기능 섹션이 없는 제품
+  //   (lg.com 오류 — 예전 캡처에서 CLIA 이미지를 10% 도 못 찾음: TH 243개, lg.com HTML 에 기능 컴포넌트가 없고 페이지 데이터에만 있음)
+  const lgNoFeature = (rec) => !!(rec.align && (rec.align.images || 0) >= 3 && (rec.align.matched || 0) / rec.align.images < 0.1);
+  const rank = (rec) => (!rec.shot ? 0 : lgNoFeature(rec) ? 2 : 1);
   return Object.values(idx.products).filter((p) => PREWARM_COUNTRIES.has(p.country)).sort((a, b) => b.crawled_at - a.crawled_at)
     .map((p) => ({ p, ...prepState(p.slug, 'shopee', p) }))
     // 컴포넌트 기록이 없는 캡처(2026-11-25 이전) · 캡처를 못 한 것 (lg.com 에 페이지가 없는 것은 빼고)
