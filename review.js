@@ -398,31 +398,45 @@ function enqueue(slug, ch, opts = {}, bg = false) {
 //   lg.com 이 여러 개를 한꺼번에 찍으면 막아서 한꺼번에 하던 것(한 번 훑을 때 60개)은 계속 막혀 진척이 없었다.
 //   차단기가 열려 있어도 시도하고(실패해도 예전 캡처 그대로), 실패한 제품은 6시간 뒤 다시.
 const UPGRADE_EVERY = envInt('REVIEW_UPGRADE_INTERVAL_SEC', 90, 20, 3600) * 1000;
+const UPGRADE_CONC = envInt('REVIEW_UPGRADE_CONC', 2, 1, 4);   // 동시에 다시 찍는 수 (2026-11-25 사용자 결정: 2개씩)
 const upgradeTried = new Map();   // slug → 시도한 시각
-let upgradeKey = '';
+const upgradeKeys = new Set();
+const isGoneRec = (rec) => !!(rec && !rec.shot && /제품 페이지가 없음/.test(rec.shotErr || ''));
+// 검토 화면에 보이는 제품 (2026-11-25 사용자 결정): 두 채널 모두 준비됐고, lg.com 컴포넌트 기록이 있는 캡처로 맞춘 것
+//   (또는 lg.com 에 제품 페이지가 없어 캡처할 것이 없는 것). 다시 찍어야 하는 것은 찍고 준비가 끝나면 차례로 보인다.
+function reviewVisible(p) {
+  for (const ch of CHANNELS) {
+    const { state, rec } = prepState(p.slug, ch, p);
+    if (state !== 'ready' || !rec) return false;
+    if (!(rec.align && rec.align.mode === 'component') && !isGoneRec(rec)) return false;
+  }
+  return true;
+}
 function upgradeCandidates() {
   const idx = require('./bulk-catalog').productIndex();
+  const rank = (rec) => (!rec.shot ? 0 : rec.align && rec.align.mode === 'pixel' ? 1 : 2);   // 캡처 없음(실패) → 위치 기록 없음 → 나머지
   return Object.values(idx.products).filter((p) => PREWARM_COUNTRIES.has(p.country)).sort((a, b) => b.crawled_at - a.crawled_at)
-    .filter((p) => {
-      const { state, rec } = prepState(p.slug, 'shopee', p);
-      // 컴포넌트 기록이 없는 캡처(2026-11-25 이전) — 위치 기록이 없는 것(pixel)부터
-      return state === 'ready' && rec && rec.shot && rec.align && rec.align.mode !== 'component';
-    }).sort((a, b) => (prepState(a.slug, 'shopee', a).rec.align.mode === 'pixel' ? 0 : 1) - (prepState(b.slug, 'shopee', b).rec.align.mode === 'pixel' ? 0 : 1));
+    .map((p) => ({ p, ...prepState(p.slug, 'shopee', p) }))
+    // 컴포넌트 기록이 없는 캡처(2026-11-25 이전) · 캡처를 못 한 것 (lg.com 에 페이지가 없는 것은 빼고)
+    .filter(({ state, rec }) => state === 'ready' && rec && !isGoneRec(rec) && !(rec.shot && rec.align && rec.align.mode === 'component'))
+    .sort((a, b) => rank(a.rec) - rank(b.rec)).map((x) => x.p);
 }
 function upgradeTick() {
   if (!PREWARM || paused || PREWARM_EXISTING_ONLY) return;
-  if (upgradeKey) { const j = jobs.get(upgradeKey); if (j && j.state === 'pending') return; upgradeKey = ''; }
-  if (queue.length || running) return;   // 다른 준비가 먼저
+  for (const k of [...upgradeKeys]) { const j = jobs.get(k); if (!(j && j.state === 'pending')) upgradeKeys.delete(k); }
+  if (queue.length || running > upgradeKeys.size) return;   // 다른 준비가 먼저
   try {
     const now = Date.now();
-    const cands = upgradeCandidates();
-    const p = cands.find((x) => now - (upgradeTried.get(x.slug) || 0) > 6 * 3600 * 1000);
-    if (!p) return;
-    upgradeTried.set(p.slug, now);
-    upgradeKey = `${p.slug}|shopee`;
-    console.log(`[review] 컴포넌트 기록 다시 찍기 (천천히, 남은 ${cands.length}개): ${p.slug}`);
-    enqueue(p.slug, 'shopee', { recapture: true, upgrade: true }, true);
-  } catch (e) { console.warn('[review] 위치 기록 다시 찍기 실패', e.message); }
+    const cands = upgradeCandidates().filter((x) => !upgradeKeys.has(`${x.slug}|shopee`));
+    while (upgradeKeys.size < UPGRADE_CONC) {
+      const p = cands.find((x) => now - (upgradeTried.get(x.slug) || 0) > 6 * 3600 * 1000);
+      if (!p) return;
+      upgradeTried.set(p.slug, now);
+      upgradeKeys.add(`${p.slug}|shopee`);
+      console.log(`[review] 컴포넌트 기록 다시 찍기 (${upgradeKeys.size}/${UPGRADE_CONC}개씩, 남은 ${cands.length}개): ${p.slug}`);
+      enqueue(p.slug, 'shopee', { recapture: true, upgrade: true }, true);
+    }
+  } catch (e) { console.warn('[review] 컴포넌트 기록 다시 찍기 실패', e.message); }
 }
 if (PREWARM) setInterval(upgradeTick, UPGRADE_EVERY).unref();
 /** 미리 준비: Shopee/Lazada 법인 제품 중 준비 안 됨 · 내용 바뀜인 채널을 미리 준비 차례에 넣는다 (최근 크롤 먼저) */
@@ -550,7 +564,9 @@ router.get('/api/v1/review/list', (req, res) => {
   const all = Object.values(idx.products);
   const countries = {};
   for (const p of all) countries[p.country] = (countries[p.country] || 0) + 1;
-  const products = all.filter((p) => !country || p.country === country).map((p) => {
+  const inCountry = all.filter((p) => !country || p.country === country);
+  const shown = req.query.all ? inCountry : inCountry.filter(reviewVisible);
+  const products = shown.map((p) => {
     const prep = {};
     for (const ch of CHANNELS) {
       const { state, job, rec } = prepState(p.slug, ch, p);
@@ -561,7 +577,7 @@ router.get('/api/v1/review/list', (req, res) => {
     return { slug: p.slug, url: p.url, country: p.country, model: p.model, title: p.title, thumb: p.thumb, dv: p.dv, grp: p.grp, crawled_at: p.crawled_at,
       approval: { status: a.status, via: a.via || '', by: a.by || '', at: a.at || 0, comment: a.comment || '' }, prep };
   }).sort((a, b) => b.crawled_at - a.crawled_at);
-  res.json({ gate: approvals.gateOn(), countries, products, queue: queueStats() });
+  res.json({ gate: approvals.gateOn(), countries, products, hidden: inCountry.length - shown.length, queue: queueStats() });
 });
 
 router.get('/api/v1/review/item/:slug', (req, res) => {
