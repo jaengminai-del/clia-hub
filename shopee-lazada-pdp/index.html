@@ -216,12 +216,12 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
       </div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;min-width:0;align-items:center">
         <span class="ap-badge" id="apBadge" style="display:none"></span>
-        <!-- 편집 메뉴 (2026-11-25): 내보내기처럼 펼침 — 글 · 이미지 고치기 / 상품 설명 정보(허브 창). 편집 중이면 버튼이 [✓ Done editing] -->
-        <div class="ex-wrap" id="edWrap">
-          <button class="btn-sm" id="btnEditMode" type="button" onclick="editBtnClick()" aria-haspopup="true" aria-expanded="false">✏ Edit ▾</button>
-          <div class="ex-menu" id="edMenu" role="menu" hidden>
-            <button class="ex-item" role="menuitem" id="edContent" type="button" onclick="edRun(toggleEdit)">✏ Edit text &amp; images</button>
-            <button class="ex-item" role="menuitem" id="edInfo" type="button" onclick="edRun(openProductInfo)">📝 Product description info</button>
+        <button class="btn-sm" id="btnEditMode" type="button" onclick="toggleEdit()">✏ Edit</button>
+        <!-- 추가 메뉴 (2026-11-25): [＋ Add ▾] → 상품 설명 정보(허브 창). 허브 안에서 열었을 때만 -->
+        <div class="ex-wrap" id="adWrap">
+          <button class="btn-sm" id="btnAdd" type="button" onclick="toggleAdd()" aria-haspopup="true" aria-expanded="false">＋ Add ▾</button>
+          <div class="ex-menu" id="adMenu" role="menu" hidden>
+            <button class="ex-item" role="menuitem" id="adInfo" type="button" onclick="adRun(openProductInfo)">📝 Add product info</button>
           </div>
         </div>
         <button class="btn-sm primary" id="btnSave" onclick="saveEdit()" disabled style="display:none" title="Save this edit — the bulk Excel uses it for this product">💾 Save</button>
@@ -779,7 +779,7 @@ function updateContentInfo() {
       tag.className = 'shp-count';
       if (over > 0) {
         bar.classList.add('shp-over');
-        tag.textContent = `⚠ ${auto} images — Shopee allows ${SHOPEE_MAX_IMAGES}`;
+        tag.textContent = `Too long for Shopee: this makes ${auto} images, but Shopee takes only ${SHOPEE_MAX_IMAGES}. Remove some sections with Edit.`;
       } else tag.textContent = '';
       bar.prepend(tag);
     }
@@ -1027,7 +1027,7 @@ function toggleEdit() {
     // ── 카드 단위 삭제 버튼 + 빈 카드 자동 정리 (shared/clia-card-edit.js) ──
     if (window.CLIACardEdit) CLIACardEdit.attach(frame, { onRestore: enableEditIn });   // ↺ 되돌린 카드에 편집 기능 다시
   } else {
-    btn.textContent = '✏ Edit ▾';
+    btn.textContent = '✏ Edit';
     btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
     banner.classList.remove('show');
     frame.querySelectorAll('[contenteditable]').forEach(el => {
@@ -1549,7 +1549,7 @@ function toggleExport(force) {
   const m = document.getElementById('exMenu'), btn = document.getElementById('btnExport');
   const open = typeof force === 'boolean' ? force : m.hidden;
   m.hidden = !open; btn.setAttribute('aria-expanded', String(open));
-  if (open) { const em = document.getElementById('edMenu'); if (em) em.hidden = true; }
+  if (open) { const am = document.getElementById('adMenu'); if (am) am.hidden = true; }
   if (open) { const f = exItems().find((b) => b.style.display !== 'none' && !b.disabled); if (f) f.focus(); }
 }
 function exRun(fn) {
@@ -1576,20 +1576,19 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !documen
   exItems().forEach((b) => obs.observe(b, { attributes: true, attributeFilter: ['disabled', 'style'], childList: true, characterData: true, subtree: true }));
   exSync();
 })();
-// ── 편집 메뉴 (2026-11-25) ──
-function editBtnClick() {
-  if (typeof editMode !== 'undefined' && editMode) { toggleEdit(); return; }   // 편집 중: 끝내기
-  const m = document.getElementById('edMenu'), b = document.getElementById('btnEditMode');
-  const open = m.hidden; m.hidden = !open; b.setAttribute('aria-expanded', String(open));
+// ── 추가 메뉴 (2026-11-25): [＋ Add ▾] → 상품 설명 정보 ──
+function toggleAdd(force) {
+  const m = document.getElementById('adMenu'), b = document.getElementById('btnAdd');
+  const open = typeof force === 'boolean' ? force : m.hidden; m.hidden = !open; b.setAttribute('aria-expanded', String(open));
   if (open) toggleExport(false);
 }
-function edRun(fn) { document.getElementById('edMenu').hidden = true; document.getElementById('btnEditMode').setAttribute('aria-expanded', 'false'); fn(); }
-document.addEventListener('click', (e) => { const w = document.getElementById('edWrap'); if (w && !w.contains(e.target)) document.getElementById('edMenu').hidden = true; });
-document.addEventListener('keydown', (e) => { const m = document.getElementById('edMenu'); if (e.key === 'Escape' && m && !m.hidden) { m.hidden = true; document.getElementById('btnEditMode').focus(); } });
+function adRun(fn) { toggleAdd(false); fn(); }
+document.addEventListener('click', (e) => { const w = document.getElementById('adWrap'); if (w && !w.contains(e.target)) toggleAdd(false); });
+document.addEventListener('keydown', (e) => { const m = document.getElementById('adMenu'); if (e.key === 'Escape' && m && !m.hidden) { toggleAdd(false); document.getElementById('btnAdd').focus(); } });
 // 상품 설명 정보(Promotion · Product details · Delivery · After care · Returns): 허브의 같은 창을 허브에 열어 달라고 한다
 const inHub = () => window.parent !== window && !document.body.classList.contains('from-bulk');
 function openProductInfo() { try { window.parent.postMessage({ type: 'clia-open-listing', url: (document.getElementById('pdpUrl').value || '').trim() }, '*'); } catch (_) {} }
-(function () { const it = document.getElementById('edInfo'); if (it && !inHub()) it.style.display = 'none'; })();
+(function () { const w = document.getElementById('adWrap'); if (w && !inHub()) w.style.display = 'none'; })();
 function syncBulkBtn() {
   const b = document.getElementById('btnBulk');
   if (b) b.style.display = SL_CORPS.includes(bulkCorp()) ? '' : 'none';
