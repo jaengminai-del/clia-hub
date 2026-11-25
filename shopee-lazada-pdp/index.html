@@ -162,7 +162,7 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
 <div class="bulk-back-bar" id="bulkBackBar">
   <button type="button" class="bb-back" onclick="backToBulk()">← Back to bulk upload</button>
   <span class="bb-sp"></span>
-  <button type="button" class="bb-save" id="bbSave" onclick="saveEdit()" disabled>💾 Save</button>
+  <button type="button" class="bb-save" id="bbSave" onclick="saveEdit()" disabled>Save</button>
 </div>
 
 <!-- Intro -->
@@ -195,11 +195,33 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
     <!-- 버튼 줄 한 줄로 (2026-11-18): 버튼을 작게, 제목(화면 위 머리글·허브 창 제목과 겹침)은 숨기고, Reset 은 ✕ 만.
          그래도 좁은 화면에서 넘치면 다음 줄로 내려간다 (전에는 오른쪽 패널에 가려졌다) -->
     <style>
-      .ap-badge { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
-      .ap-badge.ok { background: #E3F4EA; color: #1E7F4F; } .ap-badge.bad { background: #FDE8E7; color: #C8241F; } .ap-badge.warn { background: #2b2926; color: #fff; }
+      /* 승인 상태 (2026-11-25): 단계 없이 지금 상태 하나 — 점 + 글자, 작게. 허브 안에서는 허브 머리줄에 (빌더가 알려 준다) */
+      .ap-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #3A3835; white-space: nowrap; }
+      .ap-badge .ap-k { color: #8E8B85; font-weight: 500; }
+      .ap-badge .ap-dot { width: 8px; height: 8px; border-radius: 50%; background: #A9A59E; flex-shrink: 0; }
+      .ap-badge.pending .ap-dot { background: #A9A59E; } .ap-badge.stale .ap-dot { background: #E9A800; }
+      .ap-badge.approved .ap-dot { background: #1E9E5A; } .ap-badge.rejected .ap-dot { background: #E5322B; }
+      .ap-badge.link { cursor: pointer; } .ap-badge.link:hover .ap-v { text-decoration: underline; }
+      .save-note { font-size: 11.5px; color: #8A5A00; white-space: nowrap; }
+      .tb-side { display: inline-flex; align-items: center; gap: 10px; margin-inline-start: 8px; }
+      body.in-hub .tb-side { display: none; }   /* 허브 안: 상태 · 내보내기는 허브 머리줄에 */
+      /* 오른쪽 카드 목록: 원본 보기는 위 툴바로 옮겼고, 카드 ✕ 는 편집 중에만 */
+      [data-clia-full] { display: none !important; }
+      body:not(.editing) [data-clia-del] { display: none !important; }
       .panel-left > .panel-head .panel-head-title { display: none; }
       .panel-left > .panel-head .btn-sm { height: 30px; padding: 0 9px; font-size: 11.5px; }
-      .panel-left > .panel-head .ap-badge { height: 30px; padding: 0 12px; font-size: 11.5px; font-weight: 600; }
+      /* 띠 없이 툴바 안에 (2026-11-25): Shopee 12장 초과는 원본 보기 옆 빨간 칩, 저장한 편집본은 Edit 왼쪽에 작게 */
+      .tb-gap { flex: 1; }
+      .panel-left > .panel-head .btn-sm.shp-chip { border-color: #F2B8B5; background: #FFF1F0; color: #C62828; }
+      .panel-left > .panel-head .btn-sm.shp-chip:hover { background: #C62828; border-color: #C62828; color: #fff; }
+      .saved-info { font-size: 11.5px; color: #8E8B85; white-space: nowrap; margin-inline-end: 4px; }
+      .saved-info button { all: unset; cursor: pointer; color: #262626; font-weight: 600; text-decoration: underline; font-family: inherit; }
+      body.editing .saved-info { display: none !important; }
+      /* 버튼 역할 (2026-11-25): 빨간 버튼은 Export 하나. Save 는 바꾼 게 있을 때만 켜지고(검정), Edit 은 켜면 옅은 빨강 */
+      .panel-left > .panel-head .btn-sm:disabled { background: #F4F2EE; color: #B5B1AA; border-color: #E6E1D6; cursor: not-allowed; }
+      /* 편집 · 저장은 버튼 하나 (2026-11-25): Edit → 편집 중에는 Save(검정) → 누르면 저장하고 편집 끝 */
+      #btnEditMode.on { background: #111; color: #fff; border-color: #111; }
+      #btnEditMode.on:hover:not(:disabled) { background: #333; }
       .ex-wrap { position: relative; display: inline-flex; }
       .ex-menu { position: absolute; right: 0; top: calc(100% + 6px); min-width: 230px; background: #fff; border: 1px solid #E6E1D6; border-radius: 12px;
                  box-shadow: 0 14px 36px rgba(0,0,0,.16); padding: 6px; z-index: 60; display: flex; flex-direction: column; gap: 2px; }
@@ -214,28 +236,29 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
         Listing Preview
         <span class="badge-ebay">Shopee / Lazada</span>
       </div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;min-width:0;align-items:center">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;min-width:0;align-items:center;flex:1">
+        <!-- 툴바 (2026-11-25): 왼쪽 lg.com 원본 보기 · 오른쪽 편집 · 상품 정보 · 저장. 상태 · 내보내기는 허브 머리줄에(허브 밖에서는 여기 끝에) -->
+        <button class="btn-sm" id="btnFull" type="button" onclick="openFullPage()" disabled>View lg.com page</button>
+        <button class="btn-sm shp-chip" id="shpChip" type="button" onclick="reduceInEdit()" hidden></button>
+        <span class="tb-gap"></span>
+        <span class="saved-info" id="savedInfo" hidden></span>
+        <span class="save-note" id="saveNote" hidden>Saving sends it back for review</span>
+        <button class="btn-sm" id="btnEditMode" type="button" onclick="editOrSave()">Edit</button>
+        <button class="btn-sm" id="btnInfo" type="button" onclick="openProductInfo()">+ Product info</button>
+        <span class="tb-side" id="tbSide">
         <span class="ap-badge" id="apBadge" style="display:none"></span>
-        <button class="btn-sm" id="btnEditMode" type="button" onclick="toggleEdit()">✏ Edit</button>
-        <!-- 추가 메뉴 (2026-11-25): [＋ Add ▾] → 상품 설명 정보(허브 창). 허브 안에서 열었을 때만 -->
-        <div class="ex-wrap" id="adWrap">
-          <button class="btn-sm" id="btnAdd" type="button" onclick="toggleAdd()" aria-haspopup="true" aria-expanded="false">＋ Add ▾</button>
-          <div class="ex-menu" id="adMenu" role="menu" hidden>
-            <button class="ex-item" role="menuitem" id="adInfo" type="button" onclick="adRun(openProductInfo)">📝 Add product info</button>
-          </div>
-        </div>
-        <button class="btn-sm primary" id="btnSave" onclick="saveEdit()" disabled style="display:none" title="Save this edit — the bulk Excel uses it for this product">💾 Save</button>
         <!-- 내보내기 메뉴 (2026-11-24): 다운로드 · 복사 버튼은 이 메뉴 안에 (id 는 그대로 — 켜기/끄기 · 진행 표시 코드가 같이 쓴다) -->
-        <div class="ex-wrap" id="exWrap">
-          <button class="btn-sm primary" id="btnExport" type="button" onclick="toggleExport()" aria-haspopup="true" aria-expanded="false" disabled>⬇ Export ▾</button>
+        <div class="ex-wrap" id="exWrap" style="display:none">
+          <button class="btn-sm primary" id="btnExport" type="button" onclick="toggleExport()" aria-haspopup="true" aria-expanded="false" disabled>Export ▾</button>
           <div class="ex-menu" id="exMenu" role="menu" hidden>
-            <button class="ex-item" role="menuitem" id="btnDownload12" onclick="exRun(() => downloadImages(SHOPEE_MAX_IMAGES))" disabled style="display:none" title="Shopee: only the first 12 images (Shopee description limit)">⬇ Download 12 images</button>
-            <button class="ex-item" role="menuitem" id="btnDownload" onclick="exRun(() => downloadImages())" disabled>⬇ Download all images</button>
-            <button class="ex-item" role="menuitem" id="btnCopyImgHtml" onclick="exRun(copyImageHTML)" disabled title="Images of the preview (1000px wide) + HTML that shows them — looks the same on Lazada/eBay">🖼 Copy image HTML</button>
-            <button class="ex-item" role="menuitem" id="btnCopyHtml" onclick="exRun(copyHTML)" disabled>📋 Copy HTML</button>
-            <button class="ex-item" role="menuitem" id="btnCopyListing" onclick="exRun(copyListingText)" style="display:none" title="Promotion · Product details · Delivery · After care · Return policy written in the CLIA hub product page — paste into the Shopee description">📝 Copy description text</button>
+            <button class="ex-item" role="menuitem" id="btnDownload12" onclick="exRun(() => downloadImages(SHOPEE_MAX_IMAGES))" disabled style="display:none" title="Shopee: only the first 12 images (Shopee description limit)">Download 12 images</button>
+            <button class="ex-item" role="menuitem" id="btnDownload" onclick="exRun(() => downloadImages())" disabled>Download all images</button>
+            <button class="ex-item" role="menuitem" id="btnCopyImgHtml" onclick="exRun(copyImageHTML)" disabled title="Images of the preview (1000px wide) + HTML that shows them — looks the same on Lazada/eBay">Copy image HTML</button>
+            <button class="ex-item" role="menuitem" id="btnCopyHtml" onclick="exRun(copyHTML)" disabled>Copy HTML</button>
+            <button class="ex-item" role="menuitem" id="btnCopyListing" onclick="exRun(copyListingText)" style="display:none" title="Promotion · Product details · Delivery · After care · Return policy written in the CLIA hub product page — paste into the Shopee description">Copy description text</button>
           </div>
         </div>
+        </span>
       </div>
     </div>
     <div class="compliance-bar" id="complianceBar" style="display:none">
@@ -320,7 +343,7 @@ if (CHANNEL === 'shopee') {
   ['btnDownload12', 'btnDownload12b'].forEach(id => { const x = document.getElementById(id); if (x) x.style.display = ''; });
   ['btnDownload2'].forEach(id => { const x = document.getElementById(id); if (x) x.textContent = '⬇ All images (ZIP)'; });
   const b = document.getElementById('btnCopyImgHtml');
-  if (b) { b.textContent = '🖼 Copy image URLs';
+  if (b) { b.textContent = 'Copy image URLs';
            b.title = 'Image URLs only (first ' + SHOPEE_MAX_IMAGES + ' images, one per line) — no summary, no alt text. Paste into the Shopee description.'; }
 }
 
@@ -725,6 +748,7 @@ function showPreview(html) {
   if (window.CLIACardEdit) { CLIACardEdit.snapshot(frame); CLIACardEdit.enableReorder(frame, { onChange: onCardsReordered }); }
   // 미리보기를 실제 크기의 80%로 (위아래 카드가 더 많이 보여 옮기기 쉽게 — 결과물 크기는 그대로)
   if (window.CLIAPreviewScale) CLIAPreviewScale.apply(frame);
+  watchFrame();
   // 오른쪽 컨텐츠 카드 목록 (미리보기 순서 · 끌어서 순서 변경 · 원본 이미지 · 전체 lg.com 캡처) + 전체 캡처 미리 시작
   mountCardList();
   setTimeout(() => { if (window.CLIACardList) CLIACardList.prefetch(document.getElementById('pdpUrl').value.trim(), API_BASE); }, 0);
@@ -736,6 +760,7 @@ function showPreview(html) {
     const b = document.getElementById(id);
     if (b) b.disabled = false;
   });
+  const fb = document.getElementById('btnFull'); if (fb) fb.disabled = false;
   refreshApproval();
   refreshListingButton();
   // Compliance check
@@ -774,16 +799,16 @@ function updateContentInfo() {
     bar.textContent = '';   // 높이 · 장수 안내는 없앴다 (2026-11-25) — Shopee 12장을 넘을 때만 아래 경고
     // Shopee: 12장 제한 — 넘으면 얼마나 줄여야 하는지 빨간 경고 (자동 장수는 섹션 경계에 맞춰 자르므로 실제로는 1~2장 더 나올 수 있음)
     bar.classList.remove('shp-over');
-    if (shopeeLimit()) {
+    // Shopee 12장 초과는 띠 대신 툴바의 빨간 칩 (2026-11-25) — 누르면 편집 모드
+    const chip = document.getElementById('shpChip');
+    if (chip) {
       const auto = Math.max(1, Math.ceil(frame.scrollHeight / capCss));
-      const over = Math.ceil(frame.scrollHeight - SHOPEE_MAX_IMAGES * capCss);
-      const tag = document.createElement('span');
-      tag.className = 'shp-count';
-      if (over > 0) {
-        bar.classList.add('shp-over');
-        tag.textContent = `Shopee only allows ${SHOPEE_MAX_IMAGES} images, and this one has ${auto}. Try removing a few sections with Edit.`;
-      } else tag.textContent = '';
-      bar.prepend(tag);
+      const over = shopeeLimit() && Math.ceil(frame.scrollHeight - SHOPEE_MAX_IMAGES * capCss) > 0;
+      chip.hidden = !over;
+      if (over) {
+        chip.textContent = `Shopee ${auto} / 12 images · Reduce`;
+        chip.title = `Shopee allows 12 images — this one has ${auto}. Click to reduce in Edit.`;
+      }
     }
   };
   show();
@@ -794,40 +819,89 @@ function updateContentInfo() {
 // ── 검토·승인 상태 (2026-11-24, approvals.js) ─────────────────────────────
 // 제품의 승인 상태를 배지로 보여 준다. 서버 설정 APPROVAL_GATE=1 이면 승인 전에는 ZIP·HTML 복사를 잠근다(기본 꺼짐).
 const APPROVAL_LOCK_IDS = ['btnDownload', 'btnDownload2', 'btnDownload12', 'btnDownload12b', 'btnCopyHtml', 'btnCopyImgHtml'];
-let approvalState = { gate: false, status: 'unknown' };
+let approvalState = { gate: false, status: 'unknown', by: '', comment: '' };
 const approvalLocked = () => approvalState.gate && approvalState.status !== 'approved';
 function approvalBlocks() {
   if (!approvalLocked()) return false;
   setStatus('Not approved yet — images and HTML can be downloaded after review and approval.', 'err');
   return true;
 }
+const AP_LABEL = { pending: 'Not approved', stale: 'Waiting for review', approved: 'Approved', rejected: 'Rejected' };
+const reviewUrl = (url) => `${API_BASE}/review/?url=${encodeURIComponent(url)}&country=${(/lg\.com\/([a-z]{2})/i.exec(url) || [, 'th'])[1].toLowerCase()}&lang=${encodeURIComponent((document.documentElement.lang || 'en').slice(0, 2))}`;
+// 상태 하나를 { 글자 · 설명(마우스) · 누르면 열 주소 } 로 — 툴바(허브 밖)와 허브 머리줄이 같은 내용을 쓴다
+function approvalView() {
+  const st = approvalState.status, url = curUrl();
+  if (!AP_LABEL[st]) return null;
+  let tip = '';
+  if (st === 'rejected') {
+    const by = (approvalState.by || '').trim(), c = (approvalState.comment || '').trim();
+    tip = [by ? txT('Rejected by {by}').replace('{by}', by) : '', c].filter(Boolean).join('\n');
+  } else if (st === 'pending') tip = txT('Open this product in Review');
+  else if (st === 'stale') tip = txT('Changed after approval — needs another review');
+  return { status: st, key: txT('Status'), label: txT(AP_LABEL[st]), tip, link: st === 'pending' && url ? reviewUrl(url) : '' };
+}
 async function refreshApproval() {
-  const url = (document.getElementById('pdpUrl').value || '').trim(), badge = document.getElementById('apBadge');
+  const url = curUrl(), badge = document.getElementById('apBadge');
   if (!url || !badge) return;
   try {
     const r = await fetch(`${API_BASE}/api/v1/approvals?url=${encodeURIComponent(url)}`);
     const j = await r.json();
     const it = Object.values(j.items || {})[0] || { status: 'pending' };
-    approvalState = { gate: !!j.gate, status: it.status };
-  } catch (_) { approvalState = { gate: false, status: 'unknown' }; }
-  const st = approvalState.status;
-  // 승인 표시는 짧게 (2026-11-24): 잠금이 꺼져 있어도 '(lock off)' 를 붙이지 않는다 — 다운로드가 된다는 설명은 마우스를 올리면(title)
-  const L = { approved: ['✓ Approved', 'ok'], rejected: ['✕ Rejected', 'bad'], stale: ['Approve again', 'warn'],
-              pending: ['Not approved', 'warn'], unknown: ['', ''] }[st] || ['', ''];
-  badge.textContent = L[0];
-  badge.className = 'ap-badge ' + L[1];
-  badge.style.display = L[0] ? '' : 'none';
-  // 배지를 누르면 검토·승인 화면에서 이 제품을 연다 (2026-11-24, /review/)
-  badge.style.cursor = 'pointer';
-  badge.onclick = () => window.open(`${API_BASE}/review/?url=${encodeURIComponent(url)}&country=${(/lg\.com\/([a-z]{2})/i.exec(url) || [, 'th'])[1].toLowerCase()}&lang=${encodeURIComponent((document.documentElement.lang || 'en').slice(0, 2))}`, '_blank', 'noopener');
-  badge.title = approvalLocked() ? 'Not approved yet — images and HTML can be downloaded after review and approval.'
-    : st === 'approved' ? '' : 'Not approved yet. The download lock is off on this server, so downloads still work.';
+    approvalState = { gate: !!j.gate, status: it.status, by: it.by || '', comment: it.comment || '' };
+  } catch (_) { approvalState = { gate: false, status: 'unknown', by: '', comment: '' }; }
+  const v = approvalView();
+  badge.style.display = v ? '' : 'none';
+  if (v) {
+    badge.className = 'ap-badge ' + v.status + (v.link ? ' link' : '');
+    badge.innerHTML = `<span class="ap-k">${esc(v.key)} ·</span><span class="ap-dot"></span><span class="ap-v">${esc(v.label)}</span>`;
+    badge.title = v.tip;
+    badge.onclick = v.link ? () => window.open(v.link, '_blank') : null;
+  }
+  // 잠금: 승인 전이면 끄고 표시해 둔다. 이 화면에서 승인으로 바뀌면 표시해 둔 것만 다시 켠다(진행 중인 버튼은 건드리지 않음)
   APPROVAL_LOCK_IDS.forEach(id => {
     const b = document.getElementById(id);
     if (!b || !generatedHTML) return;
-    if (approvalLocked()) { b.disabled = true; b.title = badge.title; }
+    if (approvalLocked()) { if (!b.disabled) b.dataset.apLock = '1'; b.disabled = true; }
+    else if (b.dataset.apLock) { delete b.dataset.apLock; b.disabled = false; }
   });
+  syncExportVis();
 }
+// 내보내기는 승인된 뒤에만 (2026-11-25) — 승인된 제품도 편집을 시작하면 숨긴다(저장하면 승인이 풀리므로).
+// 다운로드 잠금(APPROVAL_GATE)이 꺼져 있으면 지금처럼 늘 보인다.
+function exportVisible() {
+  if (!generatedHTML) return false;
+  if (!approvalState.gate) return true;
+  return approvalState.status === 'approved' && !editMode && !_touched;
+}
+function syncExportVis() {
+  const w = document.getElementById('exWrap');
+  if (w) w.style.display = exportVisible() ? '' : 'none';
+  if (!exportVisible()) toggleExport(false);
+  const n = document.getElementById('saveNote');
+  if (n) n.hidden = !(approvalState.status === 'approved' && canSave() && generatedHTML && editMode);   // 버튼이 Save 일 때만
+  pushState();
+}
+// ── 허브에 상태 알리기 (2026-11-25): 허브 머리줄이 [상태 · 내보내기 ▾ · 닫기] 를 그린다. 허브 메뉴를 누르면 이 화면의 같은 항목을 누른다
+let _pushT = 0;
+function pushState() {
+  if (!inHub()) return;
+  clearTimeout(_pushT);
+  _pushT = setTimeout(() => {
+    const btn = document.getElementById('btnExport');
+    const items = exItems().filter((b) => b.style.display !== 'none').map((b) => ({ id: b.id, label: b.textContent.trim(), disabled: !!b.disabled, title: b.title || '' }));
+    try {
+      window.parent.postMessage({ type: 'clia-builder-state', approval: approvalView(), exportShown: exportVisible(),
+        exportLabel: btn ? btn.textContent.trim() : '', exportDisabled: !btn || btn.disabled, items }, location.origin);
+    } catch (_) {}
+  }, 30);
+}
+window.addEventListener('message', (e) => {
+  if (e.origin !== location.origin || e.source !== window.parent || !e.data || e.data.type !== 'clia-builder-export') return;
+  const b = document.getElementById(String(e.data.id || ''));
+  if (!b || !EX_IDS.includes(b.id) || b.disabled || !exportVisible()) return;
+  try { window.focus(); } catch (_) {}   // 복사는 이 화면에 포커스가 있어야 된다
+  b.click();
+});
 
 // Download — 이미지 슬라이스 ZIP
 //   Shopee / Lazada 는 상품 상세를 HTML이 아닌 이미지로 업로드한다.
@@ -1010,12 +1084,14 @@ async function copyHTML() {
 // ══════════════════════════════════════════
 function toggleEdit() {
   editMode = !editMode;
+  quietFrame(editMode ? 600 : 2500);   // 편집 도구를 붙이고 떼는 변화는 '바꾼 것'이 아니다
+  document.body.classList.toggle('editing', editMode);   // 오른쪽 카드 ✕ 는 편집 중에만
+  syncExportVis();
   const btn = document.getElementById('btnEditMode');
   const banner = document.getElementById('editBanner');
   const frame = document.getElementById('previewFrame');
   if (editMode) {
-    btn.textContent = '✓ Done editing';
-    btn.style.background = '#E53238'; btn.style.color = '#fff'; btn.style.borderColor = '#E53238';
+    syncEditBtn();
     banner.classList.add('show');
     frame.querySelectorAll('h1,h2,h3,h4,p,td,th,li,span,div').forEach(el => {
       if (el.children.length === 0 || el.textContent.trim().length < 200) {
@@ -1031,8 +1107,7 @@ function toggleEdit() {
     // ── 카드 단위 삭제 버튼 + 빈 카드 자동 정리 (shared/clia-card-edit.js) ──
     if (window.CLIACardEdit) CLIACardEdit.attach(frame, { onRestore: enableEditIn });   // ↺ 되돌린 카드에 편집 기능 다시
   } else {
-    btn.textContent = '✏ Edit';
-    btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
+    syncEditBtn();
     banner.classList.remove('show');
     frame.querySelectorAll('[contenteditable]').forEach(el => {
       el.removeAttribute('contenteditable');
@@ -1062,6 +1137,20 @@ function onCardsReordered(frame) {
   const cc = document.getElementById('charCount');
   if (cc) cc.textContent = generatedHTML.length.toLocaleString();
   if (typeof updateContentInfo === 'function') updateContentInfo();
+  // 편집 모드 밖에서 순서를 바꿔도 '편집 중'으로 — 버튼이 Save 가 되어 저장할 수 있게 (2026-11-25)
+  _touched = true; toggleEdit();
+}
+// 버튼 하나: 편집 중이 아니면 Edit(누르면 편집 시작), 편집 중이면 Save(바꾼 게 있으면 저장하고 끝, 없으면 그냥 끝)
+function syncEditBtn() {
+  const b = document.getElementById('btnEditMode');
+  if (!b || /^⏳/.test(b.textContent)) return;
+  b.textContent = editMode ? (canSave() ? 'Save' : 'Done editing') : 'Edit';
+  b.classList.toggle('on', !!editMode);
+  b.title = editMode && canSave() ? 'Save this edit — the bulk Excel uses it for this product' : '';
+}
+function editOrSave() {
+  if (!editMode) { toggleEdit(); return; }
+  if (canSave() && _touched) saveEdit(); else toggleEdit();
 }
 
 // ↺ 원래대로 되돌린 카드(root)에 편집 기능 다시 붙이기 — toggleEdit 편집 진입과 같은 규칙, 카드 안에서만
@@ -1541,7 +1630,7 @@ const SL_CORPS = ['th', 'sg'];
 // [내보내기] 버튼에 대신 보인다 (메뉴가 닫혀도 보이게)
 const EX_IDS = ['btnDownload12', 'btnDownload', 'btnCopyImgHtml', 'btnCopyHtml', 'btnCopyListing'];
 const exItems = () => EX_IDS.map((id) => document.getElementById(id)).filter(Boolean);
-const exLabel = () => '⬇ Export ▾';   // 번역은 i18n.js 가 화면 글자를 바꿀 때
+const exLabel = () => 'Export ▾';   // 번역은 i18n.js 가 화면 글자를 바꿀 때
 let exBusy = null;
 function exSync() {
   const btn = document.getElementById('btnExport');
@@ -1553,7 +1642,6 @@ function toggleExport(force) {
   const m = document.getElementById('exMenu'), btn = document.getElementById('btnExport');
   const open = typeof force === 'boolean' ? force : m.hidden;
   m.hidden = !open; btn.setAttribute('aria-expanded', String(open));
-  if (open) { const am = document.getElementById('adMenu'); if (am) am.hidden = true; }
   if (open) { const f = exItems().find((b) => b.style.display !== 'none' && !b.disabled); if (f) f.focus(); }
 }
 function exRun(fn) {
@@ -1576,23 +1664,18 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !documen
       }
     }
     exSync();
+    pushState();
   });
   exItems().forEach((b) => obs.observe(b, { attributes: true, attributeFilter: ['disabled', 'style'], childList: true, characterData: true, subtree: true }));
   exSync();
 })();
-// ── 추가 메뉴 (2026-11-25): [＋ Add ▾] → 상품 설명 정보 ──
-function toggleAdd(force) {
-  const m = document.getElementById('adMenu'), b = document.getElementById('btnAdd');
-  const open = typeof force === 'boolean' ? force : m.hidden; m.hidden = !open; b.setAttribute('aria-expanded', String(open));
-  if (open) toggleExport(false);
-}
-function adRun(fn) { toggleAdd(false); fn(); }
-document.addEventListener('click', (e) => { const w = document.getElementById('adWrap'); if (w && !w.contains(e.target)) toggleAdd(false); });
-document.addEventListener('keydown', (e) => { const m = document.getElementById('adMenu'); if (e.key === 'Escape' && m && !m.hidden) { toggleAdd(false); document.getElementById('btnAdd').focus(); } });
 // 상품 설명 정보(Promotion · Product details · Delivery · After care · Returns): 허브의 같은 창을 허브에 열어 달라고 한다
 const inHub = () => window.parent !== window && !document.body.classList.contains('from-bulk');
 function openProductInfo() { try { window.parent.postMessage({ type: 'clia-open-listing', url: (document.getElementById('pdpUrl').value || '').trim() }, '*'); } catch (_) {} }
-(function () { const w = document.getElementById('adWrap'); if (w && !inHub()) w.style.display = 'none'; })();
+(function () { const b = document.getElementById('btnInfo'); if (b && !inHub()) b.style.display = 'none'; if (inHub()) document.body.classList.add('in-hub'); })();
+// lg.com 원본 보기 — 크롤했던 lg.com 페이지 전체 캡처 (카드 목록 머리에 있던 버튼을 툴바로)
+function reduceInEdit() { if (!editMode) toggleEdit(); }
+function openFullPage() { const u = curUrl(); if (u && window.CLIACardList) CLIACardList.fullPopup(u, API_BASE); }
 function syncBulkBtn() {
   const b = document.getElementById('btnBulk');
   if (b) b.style.display = SL_CORPS.includes(bulkCorp()) ? '' : 'none';
@@ -1607,11 +1690,27 @@ let savedBase = null;    // 마지막으로 저장했거나 불러온 상태 —
 const canSave = () => /^(shopee|lazada)$/.test(CHANNEL);
 const txT = (s) => (window.CLIA_I18N && CLIA_I18N.tx && CLIA_I18N.tx(s)) || s;
 const curUrl = () => (document.getElementById('pdpUrl').value || '').trim();
-function setSaveEnabled(on) {
-  ['btnSave', 'bbSave'].forEach((id) => { const b = document.getElementById(id); if (b) b.disabled = !on; });
-  const b = document.getElementById('btnSave');
-  if (b) b.style.display = canSave() ? '' : 'none';
+// 저장 버튼은 미리보기를 실제로 바꿨을 때만 켠다 (2026-11-25) — 글 고치기 · 카드 삭제 · 순서 바꾸기 · 이미지 확대 등
+// 편집 모드를 켜고 끌 때 붙였다 떼는 편집 도구, 미리보기를 새로 그릴 때의 변화는 세지 않는다
+let _touched = false, _quiet = 0;
+// 스타일 변화는 이미지 확대 · 이동(transform)만 '바꾼 것' — 편집 도구가 글자 칸에 점선 · 커서를 다는 것은 아니다
+const _tf = (st) => ((st || '').match(/transform\s*:[^;]*/) || [''])[0];
+const _realChange = (r) => r.type !== 'attributes' || r.attributeName === 'src' ||
+  (r.target.nodeName === 'IMG' && _tf(r.oldValue) !== _tf(r.target.getAttribute('style')));
+const _frameMO = new MutationObserver((rs) => { if (_quiet || !generatedHTML || _touched || !rs.some(_realChange)) return; _touched = true; syncSave(); });
+function quietFrame(ms) { _quiet++; setTimeout(() => { _frameMO.takeRecords(); _quiet--; }, ms); }
+function watchFrame() {   // 미리보기를 새로 그린 직후: 지금 상태가 기준
+  const f = document.getElementById('previewFrame');
+  _frameMO.disconnect(); _touched = false; quietFrame(800);
+  if (f) _frameMO.observe(f, { subtree: true, childList: true, characterData: true, attributes: true, attributeOldValue: true, attributeFilter: ['src', 'style'] });
+  syncSave();
 }
+function syncSave() {
+  const on = !!generatedHTML && _touched;
+  const bb = document.getElementById('bbSave'); if (bb && !/^⏳/.test(bb.textContent)) bb.disabled = !on;   // 벌크에서 열었을 때 위 막대의 저장
+  if (typeof syncExportVis === 'function') syncExportVis();
+}
+function setSaveEnabled() { syncSave(); }
 async function loadSavedEdit(url) {
   if (!canSave()) return null;
   try {
@@ -1627,8 +1726,15 @@ function showEditNote(saved) {
   const n = document.getElementById('editNote');
   if (!n) return;
   const at = saved && (typeof saved === 'object' ? saved.at : saved);
-  n.style.display = at ? 'flex' : 'none';
-  n.classList.toggle('changed', !!(saved && saved.changed));
+  const changed = !!(at && saved.changed);
+  // 보통은 툴바 안에 작게 'Saved edit · 날짜 · Back to original'. LG.com 내용이 바뀌어 골라야 할 때만 띠로 (2026-11-25)
+  const si = document.getElementById('savedInfo');
+  if (si) {
+    si.hidden = !(at && !changed);
+    si.innerHTML = at && !changed ? `${esc(txT('Saved edit · {d}').replace('{d}', fmtDate(at)))} · <button type="button" onclick="revertEdit()">${esc(txT('Back to original'))}</button>` : '';
+  }
+  n.style.display = changed ? 'flex' : 'none';
+  n.classList.toggle('changed', changed);
   if (at && saved.changed) {
     n.innerHTML = `<span>⚠ ${esc(txT('LG.com content changed after your edit · re-crawled {d}').replace('{d}', fmtDate(saved.crawledAtNow || Date.now())))}</span>` +
       `<button type="button" class="btn-sm" onclick="startFresh()">${esc(txT('Start again from the new content'))}</button>` +
@@ -1651,24 +1757,29 @@ const startFresh = () => revertEdit(txT('Delete your edit and start again from t
 async function bakeNow() {   // 편집 중이면 잠가서(이미지 자르기 반영) 결과 HTML 을 확정
   if (typeof editMode !== 'undefined' && editMode) { toggleEdit(); await (window._bakeP || Promise.resolve()); }
 }
-const isDirty = () => (typeof editMode !== 'undefined' && editMode) || (savedBase !== null && generatedHTML !== savedBase);
+const isDirty = () => _touched;
 async function saveEdit() {
   if (!canSave() || !generatedHTML) return;
   await bakeNow();
-  const btns = ['btnSave', 'bbSave'].map((id) => document.getElementById(id)).filter(Boolean);
-  const labels = btns.map((b) => b.textContent);
+  const btns = ['btnEditMode', 'bbSave'].map((id) => document.getElementById(id)).filter(Boolean);
+  const labels = btns.map((b) => (b.id === 'bbSave' ? b.textContent : ''));
   btns.forEach((b) => { b.disabled = true; b.textContent = txT('⏳ Saving…'); });
+  const restore = () => btns.forEach((b, i) => { b.disabled = false; if (b.id === 'bbSave') b.textContent = labels[i]; else { b.textContent = ''; syncEditBtn(); } });
   try {
     const r = await fetch(`${API_BASE}/api/v1/edits`, { method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url: curUrl(), channel: CHANNEL, html: generatedHTML }) });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
     savedBase = generatedHTML;
+    _touched = false;
+    restore();
     showEditNote(j);
-    btns.forEach((b, i) => { b.textContent = labels[i]; b.disabled = false; });
+    refreshApproval();
     showDone('Saved', 'The bulk Excel uses this edit for this product.');
   } catch (e) {
-    btns.forEach((b, i) => { b.textContent = labels[i]; b.disabled = false; });
+    restore();
+    if (!editMode) toggleEdit();   // 저장 못 했으면 다시 편집 중(Save)으로 — 바꾼 내용은 그대로
+    syncSave();
     setStatus('✕ ' + txT('Could not save') + ': ' + (e.message || e), 'error');
   }
 }
