@@ -441,7 +441,8 @@ function enqueue(slug, ch, opts = {}, bg = false) {
 //   lg.com 이 여러 개를 한꺼번에 찍으면 막아서 한꺼번에 하던 것(한 번 훑을 때 60개)은 계속 막혀 진척이 없었다.
 //   차단기가 열려 있어도 시도하고(실패해도 예전 캡처 그대로), 실패한 제품은 6시간 뒤 다시.
 const UPGRADE_EVERY = envInt('REVIEW_UPGRADE_INTERVAL_SEC', 90, 20, 3600) * 1000;
-const UPGRADE_CONC = envInt('REVIEW_UPGRADE_CONC', 2, 1, 4);   // 동시에 다시 찍는 수 (2026-11-25 사용자 결정: 2개씩)
+// 동시에 다시 찍는 수 (2026-11-25 사용자 결정: 2개씩). 0 = 멈춤 — envInt 는 0 을 「없음」으로 봐 기본값이 되므로 따로 읽는다
+const UPGRADE_CONC = String(process.env.REVIEW_UPGRADE_CONC || '').trim() === '0' ? 0 : envInt('REVIEW_UPGRADE_CONC', 2, 1, 4);
 const upgradeTried = new Map();   // slug → 시도한 시각
 const upgradeKeys = new Set();
 const isGoneRec = (rec) => !!(rec && !rec.shot && /제품 페이지가 없음/.test(rec.shotErr || ''));
@@ -471,7 +472,7 @@ function upgradeCandidates() {
     .sort((a, b) => rank(a) - rank(b)).map((x) => x.p);
 }
 function upgradeTick() {
-  if (!PREWARM || paused || PREWARM_EXISTING_ONLY) return;
+  if (!PREWARM || paused || PREWARM_EXISTING_ONLY || !UPGRADE_CONC) return;   // REVIEW_UPGRADE_CONC=0 이면 다시 찍기 멈춤
   for (const k of [...upgradeKeys]) { const j = jobs.get(k); if (!(j && j.state === 'pending')) upgradeKeys.delete(k); }
   if (queue.length || running > upgradeKeys.size) return;   // 다른 준비가 먼저
   try {
