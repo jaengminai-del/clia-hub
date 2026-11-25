@@ -595,8 +595,10 @@ router.get('/api/v1/review/item/:slug/align-debug', async (req, res) => {
     }
     if (req.query.crawl) {   // 크롤 데이터 (lg.com HTML · 섹션별 컴포넌트) — 크롤 데이터만으로 영역 · 카피를 맞출 수 있는지 점검용
       const dir = dirOf(slug);
-      const raw = path.join(dir, 'pc_raw.html');
-      out.pcRaw = fs.existsSync(raw) ? fs.readFileSync(raw, 'utf8') : null;
+      // pc_raw.html 은 Firecrawl 로 받을 때만 — 받은 HTML 을 그대로 쓴 크롤은 pc.html 이 원본
+      const raw = ['pc_raw.html', 'pc.html'].map((f) => path.join(dir, f)).find((f) => fs.existsSync(f));
+      out.pcRaw = raw ? fs.readFileSync(raw, 'utf8') : null;
+      out.pcRawFile = raw ? path.basename(raw) : null;
       const m = readJson(path.join(dir, 'mirror.json'));
       out.mirror = m ? (m.sections || []).map((x) => ({ order: x.order, component_id: x.component_id, component_dom_index: x.component_dom_index, text: x.text,
         media: (x.media || []).map((v) => v.pc_url || v.unified_url || v.mobile_url).filter(Boolean) })) : null;
