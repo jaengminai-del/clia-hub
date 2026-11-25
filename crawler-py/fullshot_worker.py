@@ -128,7 +128,7 @@ async def capture_direct(browser, url: str, out: Path, scale: float = 0.5, quali
         await page.wait_for_timeout(1200)
         out.parent.mkdir(parents=True, exist_ok=True)
         # 위치는 찍은 뒤에 기록한다 — 찍기 전에 적으면 그 뒤에 늦게 뜬 이미지가 아래 내용을 밀어 캡처와 어긋난다 (2026-11-25 MS4295DIS)
-        await page.screenshot(path=str(out), full_page=True, type="jpeg", quality=quality)
+        await F.stitch_shot_async(page, out, scale, quality)   # 한 화면씩 찍어 붙임 (full_page 는 찍는 동안 배치가 바뀐다 — 2026-11-25 SG 27G550B-B)
         try:
             boxes = await page.evaluate(F._JS_BOXES)
             doc_h = await page.evaluate("document.documentElement.scrollHeight")
@@ -136,7 +136,7 @@ async def capture_direct(browser, url: str, out: Path, scale: float = 0.5, quali
                 comps = await page.evaluate(F._JS_COMPS)
             except Exception:   # noqa: BLE001
                 comps = None
-            Path(str(out) + ".boxes.json").write_text(json.dumps({"scale": scale, "doc_h": doc_h, "after": True, "items": boxes, "comps": comps}), encoding="utf-8")
+            Path(str(out) + ".boxes.json").write_text(json.dumps({"scale": scale, "doc_h": doc_h, "after": True, "method": "stitch", "items": boxes, "comps": comps}), encoding="utf-8")
         except Exception as e:   # 위치 기록은 덤
             print(f"boxes: {e}", file=sys.stderr)
     finally:
