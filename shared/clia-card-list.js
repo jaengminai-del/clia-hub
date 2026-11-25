@@ -336,7 +336,7 @@
       item.style.cssText = `position:relative;display:flex;gap:12px;align-items:center;padding:10px 40px 10px 10px;margin-bottom:8px;background:#fff;border:1px solid #E6E1D6;border-radius:12px;cursor:grab;user-select:none;touch-action:none;font:13px/1.35 ${FONT};`;
       const thumb = info.imgs[0]
         ? `<span data-thumb style="position:relative;flex-shrink:0;display:block;width:88px;height:66px;cursor:${info.video ? 'pointer' : 'zoom-in'};">`
-          + `<img src="${esc(info.imgs[0])}" alt="" style="width:88px;height:66px;object-fit:cover;border-radius:8px;display:block;background:#F2F2F2;">`
+          + `<img src="${esc(info.imgs[0])}" alt="" style="width:88px;height:66px;object-fit:contain;border-radius:8px;display:block;background:#F2F2F2;">`
           + (info.video ? `<span style="position:absolute;left:4px;bottom:4px;padding:2px 7px;border-radius:999px;background:rgba(17,17,17,.78);color:#fff;font:700 10px/1.4 ${FONT};letter-spacing:.02em;">▶ ${esc(t.vid)}</span>` : '')
           + `</span>`
         : `<div style="width:88px;height:66px;border-radius:8px;flex-shrink:0;background:#F2F2F2;display:flex;align-items:center;justify-content:center;color:#BBB;font-size:11px;">Text</div>`;
