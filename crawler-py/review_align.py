@@ -280,7 +280,9 @@ def align(capture_path, top, bottom, html, medium, fonts_css, slice_width, boxes
         new = {}
         for c_i, c in enumerate(cs):
             gain = c[0] - MIN_REFINED + 0.05
-            prev = max(((v[0], key) for key, v in best.items() if cands[key[0]][key[1]][1] < c[1] - 4),
+            # lg.com 에서 같은 줄(카드가 옆으로 나란히)이면 y 가 같다 — 같은 높이도 이어 붙인다 (전에는 더 아래만 → 한 줄에서 하나만 골라
+            # 그 줄의 첫 섹션이 빠지고 기준점이 다음 섹션으로 밀렸다, 2026-11-25 OLED48C6PSA 수상 카드 5장 · 기능 카드 5장)
+            prev = max(((v[0], key) for key, v in best.items() if cands[key[0]][key[1]][1] <= c[1] + 4),
                        default=(0.0, None))
             new[(i, c_i)] = (prev[0] + gain, prev[1])
         best.update(new)
@@ -290,20 +292,19 @@ def align(capture_path, top, bottom, html, medium, fonts_css, slice_width, boxes
         while key is not None:
             chosen[key[0]] = cands[key[0]][key[1]]
             key = best[key][1]
-    # 섹션 앵커: 오른쪽 = 섹션 시작. 왼쪽 = 그 섹션에서 찾은 이미지 중 가장 위 − (섹션 시작~첫 이미지 거리 × 보통 크기 비).
-    # 이미지 하나하나의 크기 비를 쓰면, 카드가 세로로 쌓인 마켓과 가로로 놓인 lg.com 처럼 배치가 다를 때 크게 어긋난다.
-    ks = sorted(c[2] / max(1, items[i][1]["width"]) for i, c in chosen.items())
-    kbar = min(1.2, max(0.5, ks[len(ks) // 2])) if ks else 0.8
+    # 섹션 앵커: 그 섹션에서 찾은 이미지 중 lg.com 에서 가장 위(같은 줄이면 CLIA 에서 먼저 나오는 것)의 윗변 — 양쪽 모두 그 이미지 윗변.
+    # 이미지 윗변은 두 쪽 모두 정확히 안다 (lg.com 은 캡처 때 적은 위치, CLIA 는 HTML 을 그려 잰 위치) → 추정 없이 맞는다.
+    # 전에는 섹션 제목 자리를 이미지 크기 비로 어림했는데, 글과 이미지의 간격 비가 달라 lg.com 쪽이 위로 크게 어긋났다 (2026-11-25).
+    # lg.com 에서 앞 기준점과 같은 줄(카드가 옆으로 나란히)인 섹션은 기준점을 두지 않는다 → 그 줄이 고정된 채 CLIA 카드들이 지나간다.
     anchors, lastL, lastR = [], -1.0, -1.0
     for si, s in enumerate(secs):
         ms = [(chosen[k], im) for k, (sj, im) in enumerate(items) if sj == si and k in chosen]
         if not ms:
             continue
-        yL = min(c[1] for c, _im in ms)
+        c0, im0 = min(ms, key=lambda m: (m[0][1], m[1]["top"]))
         sc = max(c[0] for c, _im in ms)
-        first = min(im["top"] for im in s["imgs"])
-        L = max(top, top + yL - (first - s["top"]) * kbar)
-        R = s["top"] * scale
+        L = top + c0[1]
+        R = im0["top"] * scale
         if L <= lastL + 8 or R <= lastR + 8:
             continue
         anchors.append({"label": s["head"], "L": round(L), "R": round(R), "score": round(sc, 3)})

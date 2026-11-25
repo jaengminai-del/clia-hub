@@ -526,10 +526,13 @@ function layout(){
   const al=(d.align&&d.align.anchors)||[];
   const firstLabel=al[0]&&al[0].L-top<60?al[0].label:'';
   P.push({l:crop?crop.offsetTop:0,r:sl[0]?sl[0].offsetTop:0,label:firstLabel||t('segIntro'),kind:'start'});
-  al.forEach((a,i)=>{if(i===0&&firstLabel)return;P.push({l:lpx(a.L),r:rpx(a.R),label:a.label||t('segN',i+1),kind:'sec',score:a.score});});
+  // 기준점 = 그 섹션 첫 이미지의 윗변(양쪽 같은 이미지). 두 쪽 모두 화면 px 로 같은 만큼(PAD) 위에서 구간을 시작 → 이미지 윗변이 양쪽 같은 높이, 카드 윗부분이 잘리지 않음
+  const PAD=40;
+  al.forEach((a,i)=>{if(i===0&&firstLabel)return;P.push({l:Math.max(crop?crop.offsetTop:0,lpx(a.L)-PAD),r:Math.max(sl[0]?sl[0].offsetTop:0,rpx(a.R)-PAD),label:a.label||t('segN',i+1),kind:'sec',score:a.score});});
   P.push({l:mvL.offsetHeight,r:mvR.offsetHeight,label:'',kind:'end'});
-  // 두 쪽 모두 늘어나는 점만 (앞 점과 같거나 거꾸로면 버린다 — 범위를 사람이 줄였을 때 등)
-  const pts=[P[0]];for(const p of P.slice(1)){const q=pts[pts.length-1];if(p.kind==='end'||(p.l>=q.l&&p.r>q.r+4&&(p.l>q.l+4||q.kind==='sum')))pts.push(p);}
+  // 거꾸로 가지 않고 한 쪽이라도 늘어나는 점만 (거꾸로면 버린다 — 범위를 사람이 줄였을 때 등).
+  // 한 쪽만 늘어나는 구간도 둔다 — 예: lg.com 맨 위 프로모션(CLIA 에 없음)이 지나가는 동안 CLIA 는 기다림 (2026-11-25 OLED48C6PSA)
+  const pts=[P[0]];for(const p of P.slice(1)){const q=pts[pts.length-1];if(p.kind==='end'||(p.l>=q.l&&p.r>=q.r&&(p.r>q.r+4||p.l>q.l+4)))pts.push(p);}
   const segs=[];let S=0;
   for(let i=0;i<pts.length-1;i++){const a=pts[i],b=pts[i+1],dl=Math.max(0,b.l-a.l),dr=Math.max(0,b.r-a.r),len=Math.max(dl,dr);
     if(len<1)continue;segs.push({l:a.l,r:a.r,dl,dr,S,len,label:a.label,kind:a.kind,n:segs.length,
