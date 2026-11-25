@@ -2694,6 +2694,8 @@ function _ltStatus(){
 }
 
 // 팝업 열기 / 닫기
+// 빌더(화면 안 틀)의 편집 메뉴 → 상품 설명 정보 창 (2026-11-25). 지금 연 상품(_lt)의 창을 빌더 위에 연다
+window.addEventListener('message',e=>{if(e.origin!==location.origin||!e.data||e.data.type!=='clia-open-listing')return;openListingModal();});
 function openListingModal(){
   if(!_lt)return;
   let ov=document.getElementById('lxOv');

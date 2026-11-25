@@ -14,7 +14,7 @@
  */
 (function () {
   const T = {
-    en: { busy: '⏳ Building images…', done: (n) => `✓ Copied (${n} images)`, cut: (n, all) => `✓ Copied ${n} image URLs (first ${n} of ${all})`, lock: 'Please press Lock first to finish editing.',
+    en: { busy: '⏳ Building images…', done: (n) => `✓ Copied (${n} images)`, cut: (n, all) => `✓ Copied ${n} image URLs (first ${n} of ${all})`, lock: 'Click "Done editing" first.',
           fail: 'Image HTML failed: ', manual: 'Copy the HTML below (Ctrl/⌘+C) and paste it into the marketplace HTML editor.', close: 'Close', copy: 'Copy', summaryFail: 'Copied the images only — the product summary could not be made: ' },
     ko: { busy: '⏳ 이미지 만드는 중…', done: (n) => `✓ 복사됨 (이미지 ${n}장)`, cut: (n, all) => `✓ 이미지 주소 ${n}개 복사됨 (${all}장 중 앞 ${n}장)`, lock: '편집을 마치려면 먼저 잠금(Lock)을 눌러 주세요.',
           fail: '이미지형 HTML 생성 실패: ', manual: '아래 HTML 을 복사(Ctrl/⌘+C)해서 마켓 HTML 편집기에 붙여 넣으세요.', close: '닫기', copy: '복사', summaryFail: '이미지만 복사했습니다 — 요약 설명을 만들지 못했습니다: ' },

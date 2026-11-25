@@ -132,6 +132,9 @@ body{font-family:'LGEIText', 'LINESeedSansTH',Arial,sans-serif;background:#F6F3E
 /* Edit mode */
 .edit-banner{display:none;padding:6px 14px;background:#FFF3CD;border-bottom:1px solid #F5C842;font-size:10px;color:#7A5800;flex-shrink:0;align-items:center;gap:6px}
 .edit-banner.show{display:flex}
+/* 안내 문구 정리 (2026-11-25): 편집 모드 안내 줄 · 미리보기 배율 안내는 숨김 — 버튼 상태(Done editing)와 빨간 점선으로 충분 */
+.edit-banner,.edit-banner.show,.clia-preview-scale-note{display:none!important}
+.compliance-bar:not(.shp-over):not(.warn){display:none!important}
 </style>
 <link rel="stylesheet" href="../shared/clia-ui.css">
 <style>
@@ -213,7 +216,14 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
       </div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;min-width:0;align-items:center">
         <span class="ap-badge" id="apBadge" style="display:none"></span>
-        <button class="btn-sm" id="btnEditMode" onclick="toggleEdit()">✏ Edit</button>
+        <!-- 편집 메뉴 (2026-11-25): 내보내기처럼 펼침 — 글 · 이미지 고치기 / 상품 설명 정보(허브 창). 편집 중이면 버튼이 [✓ Done editing] -->
+        <div class="ex-wrap" id="edWrap">
+          <button class="btn-sm" id="btnEditMode" type="button" onclick="editBtnClick()" aria-haspopup="true" aria-expanded="false">✏ Edit ▾</button>
+          <div class="ex-menu" id="edMenu" role="menu" hidden>
+            <button class="ex-item" role="menuitem" id="edContent" type="button" onclick="edRun(toggleEdit)">✏ Edit text &amp; images</button>
+            <button class="ex-item" role="menuitem" id="edInfo" type="button" onclick="edRun(openProductInfo)">📝 Product description info</button>
+          </div>
+        </div>
         <button class="btn-sm primary" id="btnSave" onclick="saveEdit()" disabled style="display:none" title="Save this edit — the bulk Excel uses it for this product">💾 Save</button>
         <!-- 내보내기 메뉴 (2026-11-24): 다운로드 · 복사 버튼은 이 메뉴 안에 (id 는 그대로 — 켜기/끄기 · 진행 표시 코드가 같이 쓴다) -->
         <div class="ex-wrap" id="exWrap">
@@ -553,7 +563,7 @@ async function analyzePDP() {
         const qa = !mir._qa ? ''
           : mir._qa.checks ? ` · gallery ${mir._qa.checks.gallery_images} images${(mir._qa.issues || []).length ? ` · ⚠ ${mir._qa.issues.length} check(s)` : ''}`
           : mir._qa.match_score != null ? ` · visual QA ${mir._qa.match_score}/100` : '';
-        setStatus(`✓ PDP content generated — ${crawledFeatures.length} sections${qa}`, 'ok');
+        setStatus('', 'ok'); void qa;   // 성공 문구는 없앰 (2026-11-25) — 미리보기가 보이면 충분
         renderSections();
         btn.disabled = false; btn.textContent = 'Analyze';
         return;
@@ -610,7 +620,7 @@ async function analyzePDP() {
 
 function setStatus(html, cls) {
   const el = document.getElementById('statusArea');
-  el.innerHTML = `<div class="status-msg ${cls||''}">${html}</div>`;
+  el.innerHTML = html ? `<div class="status-msg ${cls||''}">${html}</div>` : '';   // 빈 문구면 줄째 비운다
 }
 
 // ══════════════════════════════════════════
@@ -759,8 +769,7 @@ function updateContentInfo() {
     const cw = (frame.querySelector('.lg-container') || frame).offsetWidth || 832;
     const capCss = Math.min(3000, outW * 1.95) * (cw / outW);   // 한 장에 담기는 미리보기 높이 (CSS px)
     const n = Math.max(1, Math.ceil(frame.scrollHeight / capCss));
-    bar.textContent = '📏 Total content height: ' + Math.round(frame.scrollHeight).toLocaleString() + 'px · '
-      + n + ' slices (auto)' + ' · Use Edit to delete unnecessary content or modify the text. When you finish editing, click Save.';
+    bar.textContent = '';   // 높이 · 장수 안내는 없앴다 (2026-11-25) — Shopee 12장을 넘을 때만 아래 경고
     // Shopee: 12장 제한 — 넘으면 얼마나 줄여야 하는지 빨간 경고 (자동 장수는 섹션 경계에 맞춰 자르므로 실제로는 1~2장 더 나올 수 있음)
     bar.classList.remove('shp-over');
     if (shopeeLimit()) {
@@ -770,8 +779,8 @@ function updateContentInfo() {
       tag.className = 'shp-count';
       if (over > 0) {
         bar.classList.add('shp-over');
-        tag.textContent = '⚠ Shopee: ' + auto + '/' + SHOPEE_MAX_IMAGES + ' images — about ' + over.toLocaleString() + 'px too long. Delete sections with Edit until it fits.';
-      } else tag.textContent = 'Shopee: ~' + auto + '/' + SHOPEE_MAX_IMAGES + ' images';
+        tag.textContent = `⚠ ${auto} images — Shopee allows ${SHOPEE_MAX_IMAGES}`;
+      } else tag.textContent = '';
       bar.prepend(tag);
     }
   };
@@ -1001,7 +1010,7 @@ function toggleEdit() {
   const banner = document.getElementById('editBanner');
   const frame = document.getElementById('previewFrame');
   if (editMode) {
-    btn.textContent = '🔒 Lock';
+    btn.textContent = '✓ Done editing';
     btn.style.background = '#E53238'; btn.style.color = '#fff'; btn.style.borderColor = '#E53238';
     banner.classList.add('show');
     frame.querySelectorAll('h1,h2,h3,h4,p,td,th,li,span,div').forEach(el => {
@@ -1018,7 +1027,7 @@ function toggleEdit() {
     // ── 카드 단위 삭제 버튼 + 빈 카드 자동 정리 (shared/clia-card-edit.js) ──
     if (window.CLIACardEdit) CLIACardEdit.attach(frame, { onRestore: enableEditIn });   // ↺ 되돌린 카드에 편집 기능 다시
   } else {
-    btn.textContent = '✏ Edit';
+    btn.textContent = '✏ Edit ▾';
     btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
     banner.classList.remove('show');
     frame.querySelectorAll('[contenteditable]').forEach(el => {
@@ -1540,6 +1549,7 @@ function toggleExport(force) {
   const m = document.getElementById('exMenu'), btn = document.getElementById('btnExport');
   const open = typeof force === 'boolean' ? force : m.hidden;
   m.hidden = !open; btn.setAttribute('aria-expanded', String(open));
+  if (open) { const em = document.getElementById('edMenu'); if (em) em.hidden = true; }
   if (open) { const f = exItems().find((b) => b.style.display !== 'none' && !b.disabled); if (f) f.focus(); }
 }
 function exRun(fn) {
@@ -1566,6 +1576,20 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !documen
   exItems().forEach((b) => obs.observe(b, { attributes: true, attributeFilter: ['disabled', 'style'], childList: true, characterData: true, subtree: true }));
   exSync();
 })();
+// ── 편집 메뉴 (2026-11-25) ──
+function editBtnClick() {
+  if (typeof editMode !== 'undefined' && editMode) { toggleEdit(); return; }   // 편집 중: 끝내기
+  const m = document.getElementById('edMenu'), b = document.getElementById('btnEditMode');
+  const open = m.hidden; m.hidden = !open; b.setAttribute('aria-expanded', String(open));
+  if (open) toggleExport(false);
+}
+function edRun(fn) { document.getElementById('edMenu').hidden = true; document.getElementById('btnEditMode').setAttribute('aria-expanded', 'false'); fn(); }
+document.addEventListener('click', (e) => { const w = document.getElementById('edWrap'); if (w && !w.contains(e.target)) document.getElementById('edMenu').hidden = true; });
+document.addEventListener('keydown', (e) => { const m = document.getElementById('edMenu'); if (e.key === 'Escape' && m && !m.hidden) { m.hidden = true; document.getElementById('btnEditMode').focus(); } });
+// 상품 설명 정보(Promotion · Product details · Delivery · After care · Returns): 허브의 같은 창을 허브에 열어 달라고 한다
+const inHub = () => window.parent !== window && !document.body.classList.contains('from-bulk');
+function openProductInfo() { try { window.parent.postMessage({ type: 'clia-open-listing', url: (document.getElementById('pdpUrl').value || '').trim() }, '*'); } catch (_) {} }
+(function () { const it = document.getElementById('edInfo'); if (it && !inHub()) it.style.display = 'none'; })();
 function syncBulkBtn() {
   const b = document.getElementById('btnBulk');
   if (b) b.style.display = SL_CORPS.includes(bulkCorp()) ? '' : 'none';
