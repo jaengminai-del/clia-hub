@@ -26,7 +26,8 @@ const CHANNELS = new Set(['shopee', 'lazada']);
 // 준비 결과 판: 2 = 같은 영역 기준점(align) 추가 (2026-11-24) — 낮은 판은 「내용 바뀜」으로 보고 다시 준비
 //   3 = 기준점을 섹션 첫 이미지 윗변으로 · lg.com 같은 줄 카드도 짝지음 (2026-11-25) — 캡처 · 요약 · 조각은 그대로 다시 쓰고 맞추기만 새로
 //   4 = 영역 상자(Lt · Rt) · 찍기 전에 적은 위치 기록의 어긋남을 캡처에서 다시 찾아 고침 (2026-11-25)
-const PREP_V = 4;
+//   5 = lg.com 컴포넌트로 영역 나누기 · 영역 카피 비교(copy) (2026-11-25) — 컴포넌트 기록이 있는 캡처만, 없으면 예전처럼
+const PREP_V = 5;
 const SHOPEE_MAX_IMAGES = 12, SHOPEE_DESC_MAX = 3000;   // bulk-jobs.js 와 같은 규칙
 const LOCAL = () => (process.env.BULK_API_BASE || `http://127.0.0.1:${process.env.PORT || 3001}`).replace(/\/$/, '');
 const PY_DIR = path.join(__dirname, 'crawler-py');
@@ -404,8 +405,9 @@ function upgradeCandidates() {
   return Object.values(idx.products).filter((p) => PREWARM_COUNTRIES.has(p.country)).sort((a, b) => b.crawled_at - a.crawled_at)
     .filter((p) => {
       const { state, rec } = prepState(p.slug, 'shopee', p);
-      return state === 'ready' && rec && rec.shot && rec.align && rec.align.mode !== 'url';
-    });
+      // 컴포넌트 기록이 없는 캡처(2026-11-25 이전) — 위치 기록이 없는 것(pixel)부터
+      return state === 'ready' && rec && rec.shot && rec.align && rec.align.mode !== 'component';
+    }).sort((a, b) => (prepState(a.slug, 'shopee', a).rec.align.mode === 'pixel' ? 0 : 1) - (prepState(b.slug, 'shopee', b).rec.align.mode === 'pixel' ? 0 : 1));
 }
 function upgradeTick() {
   if (!PREWARM || paused || PREWARM_EXISTING_ONLY) return;
@@ -418,7 +420,7 @@ function upgradeTick() {
     if (!p) return;
     upgradeTried.set(p.slug, now);
     upgradeKey = `${p.slug}|shopee`;
-    console.log(`[review] 위치 기록 다시 찍기 (천천히, 남은 ${cands.length}개): ${p.slug}`);
+    console.log(`[review] 컴포넌트 기록 다시 찍기 (천천히, 남은 ${cands.length}개): ${p.slug}`);
     enqueue(p.slug, 'shopee', { recapture: true, upgrade: true }, true);
   } catch (e) { console.warn('[review] 위치 기록 다시 찍기 실패', e.message); }
 }
