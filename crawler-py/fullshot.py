@@ -124,6 +124,8 @@ _JS_COMPS = """() => {
 #   따르는 요소(맨 위 히어로 등)가 그 동안만 커진다 → 아래 내용이 밀리고(SG 27G550B-B 약 1,470px), 미리 잰 높이에서 잘린다.
 #   위치 기록은 평소 화면 배치라 캡처와 어긋났다. 뷰포트를 바꾸지 않고 한 화면씩 내려 찍어 붙이면 캡처와 위치가 늘 같은 배치.
 #   위에 붙는 요소: sticky 는 제자리(relative)로, fixed(머리글 · 쿠키 띠 · 내리면 붙는 제품 막대)는 첫 화면에만 보이게.
+#   내리면 서서히 나타나는 이미지(페이드인)가 반쯤 흐리게 찍히지 않게 애니메이션 · 전환을 끄고, 화면마다 조금 더 기다린다.
+_JS_NO_ANIM = """() => { const st = document.createElement('style'); st.textContent = '*,*::before,*::after{transition-duration:0s!important;transition-delay:0s!important;animation-duration:0s!important;animation-delay:0s!important;scroll-behavior:auto!important}'; document.head.appendChild(st); return 1; }"""
 _JS_UNSTICK = """() => { let n = 0; for (const e of document.querySelectorAll('body *')) { if (getComputedStyle(e).position === 'sticky') { e.style.setProperty('position', 'relative', 'important'); n++; } } return n; }"""
 _JS_HIDE_FIXED = """() => { let n = 0; for (const e of document.querySelectorAll('body *')) { if (getComputedStyle(e).position === 'fixed') { e.style.setProperty('visibility', 'hidden', 'important'); n++; } } return n; }"""
 _JS_DOC_H = "Math.max(document.documentElement.scrollHeight, document.body ? document.body.scrollHeight : 0)"
@@ -141,6 +143,7 @@ def _stitch_paste(canvas, png: bytes, y_css: float, scale: float):
 def stitch_shot(page, out: Path, scale: float, quality: int):
     """(동기) 한 화면씩 찍어 붙여 out(JPEG)에 → (폭, 높이)"""
     from PIL import Image
+    page.evaluate(_JS_NO_ANIM)
     page.evaluate(_JS_UNSTICK)
     vh = page.evaluate("window.innerHeight")
     H = page.evaluate(_JS_DOC_H)
@@ -148,7 +151,7 @@ def stitch_shot(page, out: Path, scale: float, quality: int):
     y, first, width = 0, True, 0
     for _ in range(STITCH_MAX):
         page.evaluate(f"window.scrollTo(0, {y})")
-        page.wait_for_timeout(150)
+        page.wait_for_timeout(350)
         if not first:   # 내리면 그때 붙는 막대(제품명 · 구매 버튼 등)도 있어 화면마다 다시 숨긴다
             page.evaluate(_JS_HIDE_FIXED)
             page.wait_for_timeout(50)
@@ -167,6 +170,7 @@ def stitch_shot(page, out: Path, scale: float, quality: int):
 async def stitch_shot_async(page, out: Path, scale: float, quality: int):
     """(비동기 — fullshot_worker) stitch_shot 과 같다"""
     from PIL import Image
+    await page.evaluate(_JS_NO_ANIM)
     await page.evaluate(_JS_UNSTICK)
     vh = await page.evaluate("window.innerHeight")
     H = await page.evaluate(_JS_DOC_H)
@@ -174,7 +178,7 @@ async def stitch_shot_async(page, out: Path, scale: float, quality: int):
     y, first, width = 0, True, 0
     for _ in range(STITCH_MAX):
         await page.evaluate(f"window.scrollTo(0, {y})")
-        await page.wait_for_timeout(150)
+        await page.wait_for_timeout(350)
         if not first:   # 내리면 그때 붙는 막대(제품명 · 구매 버튼 등)도 있어 화면마다 다시 숨긴다
             await page.evaluate(_JS_HIDE_FIXED)
             await page.wait_for_timeout(50)
