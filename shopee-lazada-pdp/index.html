@@ -162,7 +162,7 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
 <div class="bulk-back-bar" id="bulkBackBar">
   <button type="button" class="bb-back" onclick="backToBulk()">← Back to bulk upload</button>
   <span class="bb-sp"></span>
-  <button type="button" class="bb-save" id="bbSave" onclick="saveEdit()" disabled>💾 Save</button>
+  <button type="button" class="bb-save" id="bbSave" onclick="saveEdit()" disabled>Save</button>
 </div>
 
 <!-- Intro -->
@@ -196,10 +196,15 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
          그래도 좁은 화면에서 넘치면 다음 줄로 내려간다 (전에는 오른쪽 패널에 가려졌다) -->
     <style>
       .ap-badge { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
-      .ap-badge.ok { background: #E3F4EA; color: #1E7F4F; } .ap-badge.bad { background: #FDE8E7; color: #C8241F; } .ap-badge.warn { background: #2b2926; color: #fff; }
+      .ap-badge.ok { background: #E3F4EA; color: #1E7F4F; } .ap-badge.bad { background: #FDE8E7; color: #C8241F; } .ap-badge.warn { background: #FFF3DC; color: #8A5A00; }
       .panel-left > .panel-head .panel-head-title { display: none; }
       .panel-left > .panel-head .btn-sm { height: 30px; padding: 0 9px; font-size: 11.5px; }
-      .panel-left > .panel-head .ap-badge { height: 30px; padding: 0 12px; font-size: 11.5px; font-weight: 600; }
+      .panel-left > .panel-head .ap-badge { height: 26px; padding: 0 11px; font-size: 11.5px; font-weight: 600; margin-inline-end: auto; }
+      /* 버튼 역할 (2026-11-25): 빨간 버튼은 Export 하나. Save 는 바꾼 게 있을 때만 켜지고(검정), Edit 은 켜면 옅은 빨강 */
+      .panel-left > .panel-head .btn-sm:disabled { background: #F4F2EE; color: #B5B1AA; border-color: #E6E1D6; cursor: not-allowed; }
+      #btnSave:not(:disabled) { background: #111; color: #fff; border-color: #111; }
+      #btnSave:not(:disabled):hover { background: #333; }
+      #btnEditMode.on { background: #FBF0EF; color: #C8241F; border-color: #EA1917; }
       .ex-wrap { position: relative; display: inline-flex; }
       .ex-menu { position: absolute; right: 0; top: calc(100% + 6px); min-width: 230px; background: #fff; border: 1px solid #E6E1D6; border-radius: 12px;
                  box-shadow: 0 14px 36px rgba(0,0,0,.16); padding: 6px; z-index: 60; display: flex; flex-direction: column; gap: 2px; }
@@ -214,26 +219,26 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
         Listing Preview
         <span class="badge-ebay">Shopee / Lazada</span>
       </div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;min-width:0;align-items:center">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;min-width:0;align-items:center;flex:1">
         <span class="ap-badge" id="apBadge" style="display:none"></span>
-        <button class="btn-sm" id="btnEditMode" type="button" onclick="toggleEdit()">✏ Edit</button>
+        <button class="btn-sm" id="btnEditMode" type="button" onclick="toggleEdit()">Edit</button>
         <!-- 추가 메뉴 (2026-11-25): [＋ Add ▾] → 상품 설명 정보(허브 창). 허브 안에서 열었을 때만 -->
         <div class="ex-wrap" id="adWrap">
-          <button class="btn-sm" id="btnAdd" type="button" onclick="toggleAdd()" aria-haspopup="true" aria-expanded="false">＋ Add ▾</button>
+          <button class="btn-sm" id="btnAdd" type="button" onclick="toggleAdd()" aria-haspopup="true" aria-expanded="false">Add ▾</button>
           <div class="ex-menu" id="adMenu" role="menu" hidden>
-            <button class="ex-item" role="menuitem" id="adInfo" type="button" onclick="adRun(openProductInfo)">📝 Add product info</button>
+            <button class="ex-item" role="menuitem" id="adInfo" type="button" onclick="adRun(openProductInfo)">Add product info</button>
           </div>
         </div>
-        <button class="btn-sm primary" id="btnSave" onclick="saveEdit()" disabled style="display:none" title="Save this edit — the bulk Excel uses it for this product">💾 Save</button>
+        <button class="btn-sm" id="btnSave" onclick="saveEdit()" disabled style="display:none" title="Save this edit — the bulk Excel uses it for this product">Save</button>
         <!-- 내보내기 메뉴 (2026-11-24): 다운로드 · 복사 버튼은 이 메뉴 안에 (id 는 그대로 — 켜기/끄기 · 진행 표시 코드가 같이 쓴다) -->
         <div class="ex-wrap" id="exWrap">
-          <button class="btn-sm primary" id="btnExport" type="button" onclick="toggleExport()" aria-haspopup="true" aria-expanded="false" disabled>⬇ Export ▾</button>
+          <button class="btn-sm primary" id="btnExport" type="button" onclick="toggleExport()" aria-haspopup="true" aria-expanded="false" disabled>Export ▾</button>
           <div class="ex-menu" id="exMenu" role="menu" hidden>
-            <button class="ex-item" role="menuitem" id="btnDownload12" onclick="exRun(() => downloadImages(SHOPEE_MAX_IMAGES))" disabled style="display:none" title="Shopee: only the first 12 images (Shopee description limit)">⬇ Download 12 images</button>
-            <button class="ex-item" role="menuitem" id="btnDownload" onclick="exRun(() => downloadImages())" disabled>⬇ Download all images</button>
-            <button class="ex-item" role="menuitem" id="btnCopyImgHtml" onclick="exRun(copyImageHTML)" disabled title="Images of the preview (1000px wide) + HTML that shows them — looks the same on Lazada/eBay">🖼 Copy image HTML</button>
-            <button class="ex-item" role="menuitem" id="btnCopyHtml" onclick="exRun(copyHTML)" disabled>📋 Copy HTML</button>
-            <button class="ex-item" role="menuitem" id="btnCopyListing" onclick="exRun(copyListingText)" style="display:none" title="Promotion · Product details · Delivery · After care · Return policy written in the CLIA hub product page — paste into the Shopee description">📝 Copy description text</button>
+            <button class="ex-item" role="menuitem" id="btnDownload12" onclick="exRun(() => downloadImages(SHOPEE_MAX_IMAGES))" disabled style="display:none" title="Shopee: only the first 12 images (Shopee description limit)">Download 12 images</button>
+            <button class="ex-item" role="menuitem" id="btnDownload" onclick="exRun(() => downloadImages())" disabled>Download all images</button>
+            <button class="ex-item" role="menuitem" id="btnCopyImgHtml" onclick="exRun(copyImageHTML)" disabled title="Images of the preview (1000px wide) + HTML that shows them — looks the same on Lazada/eBay">Copy image HTML</button>
+            <button class="ex-item" role="menuitem" id="btnCopyHtml" onclick="exRun(copyHTML)" disabled>Copy HTML</button>
+            <button class="ex-item" role="menuitem" id="btnCopyListing" onclick="exRun(copyListingText)" style="display:none" title="Promotion · Product details · Delivery · After care · Return policy written in the CLIA hub product page — paste into the Shopee description">Copy description text</button>
           </div>
         </div>
       </div>
@@ -320,7 +325,7 @@ if (CHANNEL === 'shopee') {
   ['btnDownload12', 'btnDownload12b'].forEach(id => { const x = document.getElementById(id); if (x) x.style.display = ''; });
   ['btnDownload2'].forEach(id => { const x = document.getElementById(id); if (x) x.textContent = '⬇ All images (ZIP)'; });
   const b = document.getElementById('btnCopyImgHtml');
-  if (b) { b.textContent = '🖼 Copy image URLs';
+  if (b) { b.textContent = 'Copy image URLs';
            b.title = 'Image URLs only (first ' + SHOPEE_MAX_IMAGES + ' images, one per line) — no summary, no alt text. Paste into the Shopee description.'; }
 }
 
@@ -725,6 +730,7 @@ function showPreview(html) {
   if (window.CLIACardEdit) { CLIACardEdit.snapshot(frame); CLIACardEdit.enableReorder(frame, { onChange: onCardsReordered }); }
   // 미리보기를 실제 크기의 80%로 (위아래 카드가 더 많이 보여 옮기기 쉽게 — 결과물 크기는 그대로)
   if (window.CLIAPreviewScale) CLIAPreviewScale.apply(frame);
+  watchFrame();
   // 오른쪽 컨텐츠 카드 목록 (미리보기 순서 · 끌어서 순서 변경 · 원본 이미지 · 전체 lg.com 캡처) + 전체 캡처 미리 시작
   mountCardList();
   setTimeout(() => { if (window.CLIACardList) CLIACardList.prefetch(document.getElementById('pdpUrl').value.trim(), API_BASE); }, 0);
@@ -1010,12 +1016,12 @@ async function copyHTML() {
 // ══════════════════════════════════════════
 function toggleEdit() {
   editMode = !editMode;
+  quietFrame(editMode ? 600 : 2500);   // 편집 도구를 붙이고 떼는 변화는 '바꾼 것'이 아니다
   const btn = document.getElementById('btnEditMode');
   const banner = document.getElementById('editBanner');
   const frame = document.getElementById('previewFrame');
   if (editMode) {
-    btn.textContent = '✓ Done editing';
-    btn.style.background = '#E53238'; btn.style.color = '#fff'; btn.style.borderColor = '#E53238';
+    btn.textContent = 'Done editing'; btn.classList.add('on');
     banner.classList.add('show');
     frame.querySelectorAll('h1,h2,h3,h4,p,td,th,li,span,div').forEach(el => {
       if (el.children.length === 0 || el.textContent.trim().length < 200) {
@@ -1031,8 +1037,7 @@ function toggleEdit() {
     // ── 카드 단위 삭제 버튼 + 빈 카드 자동 정리 (shared/clia-card-edit.js) ──
     if (window.CLIACardEdit) CLIACardEdit.attach(frame, { onRestore: enableEditIn });   // ↺ 되돌린 카드에 편집 기능 다시
   } else {
-    btn.textContent = '✏ Edit';
-    btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
+    btn.textContent = 'Edit'; btn.classList.remove('on');
     banner.classList.remove('show');
     frame.querySelectorAll('[contenteditable]').forEach(el => {
       el.removeAttribute('contenteditable');
@@ -1541,7 +1546,7 @@ const SL_CORPS = ['th', 'sg'];
 // [내보내기] 버튼에 대신 보인다 (메뉴가 닫혀도 보이게)
 const EX_IDS = ['btnDownload12', 'btnDownload', 'btnCopyImgHtml', 'btnCopyHtml', 'btnCopyListing'];
 const exItems = () => EX_IDS.map((id) => document.getElementById(id)).filter(Boolean);
-const exLabel = () => '⬇ Export ▾';   // 번역은 i18n.js 가 화면 글자를 바꿀 때
+const exLabel = () => 'Export ▾';   // 번역은 i18n.js 가 화면 글자를 바꿀 때
 let exBusy = null;
 function exSync() {
   const btn = document.getElementById('btnExport');
@@ -1607,11 +1612,28 @@ let savedBase = null;    // 마지막으로 저장했거나 불러온 상태 —
 const canSave = () => /^(shopee|lazada)$/.test(CHANNEL);
 const txT = (s) => (window.CLIA_I18N && CLIA_I18N.tx && CLIA_I18N.tx(s)) || s;
 const curUrl = () => (document.getElementById('pdpUrl').value || '').trim();
-function setSaveEnabled(on) {
-  ['btnSave', 'bbSave'].forEach((id) => { const b = document.getElementById(id); if (b) b.disabled = !on; });
+// 저장 버튼은 미리보기를 실제로 바꿨을 때만 켠다 (2026-11-25) — 글 고치기 · 카드 삭제 · 순서 바꾸기 · 이미지 확대 등
+// 편집 모드를 켜고 끌 때 붙였다 떼는 편집 도구, 미리보기를 새로 그릴 때의 변화는 세지 않는다
+let _touched = false, _quiet = 0;
+// 스타일 변화는 이미지 확대 · 이동(transform)만 '바꾼 것' — 편집 도구가 글자 칸에 점선 · 커서를 다는 것은 아니다
+const _tf = (st) => ((st || '').match(/transform\s*:[^;]*/) || [''])[0];
+const _realChange = (r) => r.type !== 'attributes' || r.attributeName === 'src' ||
+  (r.target.nodeName === 'IMG' && _tf(r.oldValue) !== _tf(r.target.getAttribute('style')));
+const _frameMO = new MutationObserver((rs) => { if (_quiet || !generatedHTML || _touched || !rs.some(_realChange)) return; _touched = true; syncSave(); });
+function quietFrame(ms) { _quiet++; setTimeout(() => { _frameMO.takeRecords(); _quiet--; }, ms); }
+function watchFrame() {   // 미리보기를 새로 그린 직후: 지금 상태가 기준
+  const f = document.getElementById('previewFrame');
+  _frameMO.disconnect(); _touched = false; quietFrame(800);
+  if (f) _frameMO.observe(f, { subtree: true, childList: true, characterData: true, attributes: true, attributeOldValue: true, attributeFilter: ['src', 'style'] });
+  syncSave();
+}
+function syncSave() {
+  const on = !!generatedHTML && _touched;
+  ['btnSave', 'bbSave'].forEach((id) => { const b = document.getElementById(id); if (b && !/^⏳/.test(b.textContent)) b.disabled = !on; });
   const b = document.getElementById('btnSave');
   if (b) b.style.display = canSave() ? '' : 'none';
 }
+function setSaveEnabled() { syncSave(); }
 async function loadSavedEdit(url) {
   if (!canSave()) return null;
   try {
@@ -1651,7 +1673,7 @@ const startFresh = () => revertEdit(txT('Delete your edit and start again from t
 async function bakeNow() {   // 편집 중이면 잠가서(이미지 자르기 반영) 결과 HTML 을 확정
   if (typeof editMode !== 'undefined' && editMode) { toggleEdit(); await (window._bakeP || Promise.resolve()); }
 }
-const isDirty = () => (typeof editMode !== 'undefined' && editMode) || (savedBase !== null && generatedHTML !== savedBase);
+const isDirty = () => _touched;
 async function saveEdit() {
   if (!canSave() || !generatedHTML) return;
   await bakeNow();
@@ -1664,11 +1686,13 @@ async function saveEdit() {
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
     savedBase = generatedHTML;
+    _touched = false;
+    btns.forEach((b, i) => { b.textContent = labels[i]; });
     showEditNote(j);
-    btns.forEach((b, i) => { b.textContent = labels[i]; b.disabled = false; });
     showDone('Saved', 'The bulk Excel uses this edit for this product.');
   } catch (e) {
-    btns.forEach((b, i) => { b.textContent = labels[i]; b.disabled = false; });
+    btns.forEach((b, i) => { b.textContent = labels[i]; });
+    syncSave();
     setStatus('✕ ' + txT('Could not save') + ': ' + (e.message || e), 'error');
   }
 }

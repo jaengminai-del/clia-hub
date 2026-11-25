@@ -316,7 +316,7 @@
     head.innerHTML = `<span>${t.title(cards.length)}</span>`;
     const fullBtn = document.createElement('button');
     fullBtn.type = 'button';
-    fullBtn.textContent = '🖥 ' + t.full;
+    fullBtn.textContent = t.full;
     fullBtn.style.cssText = `flex-shrink:0;padding:6px 12px;border-radius:999px;border:1px solid #262626;background:#fff;color:#262626;font:600 12px/1 ${FONT};cursor:pointer;text-transform:none;letter-spacing:0;`;
     fullBtn.onclick = () => { const u = getUrl && getUrl(); if (u) fullPopup(u, apiBase); };
     head.appendChild(fullBtn);
