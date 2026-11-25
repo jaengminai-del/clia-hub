@@ -217,9 +217,9 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
       #btnFull { margin-inline-end: auto; }
       /* 버튼 역할 (2026-11-25): 빨간 버튼은 Export 하나. Save 는 바꾼 게 있을 때만 켜지고(검정), Edit 은 켜면 옅은 빨강 */
       .panel-left > .panel-head .btn-sm:disabled { background: #F4F2EE; color: #B5B1AA; border-color: #E6E1D6; cursor: not-allowed; }
-      #btnSave:not(:disabled) { background: #111; color: #fff; border-color: #111; }
-      #btnSave:not(:disabled):hover { background: #333; }
-      #btnEditMode.on { background: #FBF0EF; color: #C8241F; border-color: #EA1917; }
+      /* 편집 · 저장은 버튼 하나 (2026-11-25): Edit → 편집 중에는 Save(검정) → 누르면 저장하고 편집 끝 */
+      #btnEditMode.on { background: #111; color: #fff; border-color: #111; }
+      #btnEditMode.on:hover:not(:disabled) { background: #333; }
       .ex-wrap { position: relative; display: inline-flex; }
       .ex-menu { position: absolute; right: 0; top: calc(100% + 6px); min-width: 230px; background: #fff; border: 1px solid #E6E1D6; border-radius: 12px;
                  box-shadow: 0 14px 36px rgba(0,0,0,.16); padding: 6px; z-index: 60; display: flex; flex-direction: column; gap: 2px; }
@@ -237,10 +237,9 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
       <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;min-width:0;align-items:center;flex:1">
         <!-- 툴바 (2026-11-25): 왼쪽 lg.com 원본 보기 · 오른쪽 편집 · 상품 정보 · 저장. 상태 · 내보내기는 허브 머리줄에(허브 밖에서는 여기 끝에) -->
         <button class="btn-sm" id="btnFull" type="button" onclick="openFullPage()" disabled>View lg.com page</button>
-        <button class="btn-sm" id="btnEditMode" type="button" onclick="toggleEdit()">Edit</button>
-        <button class="btn-sm" id="btnInfo" type="button" onclick="openProductInfo()">+ Product info</button>
         <span class="save-note" id="saveNote" hidden>Saving removes the approval</span>
-        <button class="btn-sm" id="btnSave" onclick="saveEdit()" disabled style="display:none" title="Save this edit — the bulk Excel uses it for this product">Save</button>
+        <button class="btn-sm" id="btnEditMode" type="button" onclick="editOrSave()">Edit</button>
+        <button class="btn-sm" id="btnInfo" type="button" onclick="openProductInfo()">+ Product info</button>
         <span class="tb-side" id="tbSide">
         <span class="ap-badge" id="apBadge" style="display:none"></span>
         <!-- 내보내기 메뉴 (2026-11-24): 다운로드 · 복사 버튼은 이 메뉴 안에 (id 는 그대로 — 켜기/끄기 · 진행 표시 코드가 같이 쓴다) -->
@@ -878,7 +877,7 @@ function syncExportVis() {
   if (w) w.style.display = exportVisible() ? '' : 'none';
   if (!exportVisible()) toggleExport(false);
   const n = document.getElementById('saveNote');
-  if (n) n.hidden = !(approvalState.status === 'approved' && canSave() && generatedHTML);
+  if (n) n.hidden = !(approvalState.status === 'approved' && canSave() && generatedHTML && editMode);   // 버튼이 Save 일 때만
   pushState();
 }
 // ── 허브에 상태 알리기 (2026-11-25): 허브 머리줄이 [상태 · 내보내기 ▾ · 닫기] 를 그린다. 허브 메뉴를 누르면 이 화면의 같은 항목을 누른다
@@ -1091,7 +1090,7 @@ function toggleEdit() {
   const banner = document.getElementById('editBanner');
   const frame = document.getElementById('previewFrame');
   if (editMode) {
-    btn.textContent = 'Done editing'; btn.classList.add('on');
+    syncEditBtn();
     banner.classList.add('show');
     frame.querySelectorAll('h1,h2,h3,h4,p,td,th,li,span,div').forEach(el => {
       if (el.children.length === 0 || el.textContent.trim().length < 200) {
@@ -1107,7 +1106,7 @@ function toggleEdit() {
     // ── 카드 단위 삭제 버튼 + 빈 카드 자동 정리 (shared/clia-card-edit.js) ──
     if (window.CLIACardEdit) CLIACardEdit.attach(frame, { onRestore: enableEditIn });   // ↺ 되돌린 카드에 편집 기능 다시
   } else {
-    btn.textContent = 'Edit'; btn.classList.remove('on');
+    syncEditBtn();
     banner.classList.remove('show');
     frame.querySelectorAll('[contenteditable]').forEach(el => {
       el.removeAttribute('contenteditable');
@@ -1137,6 +1136,20 @@ function onCardsReordered(frame) {
   const cc = document.getElementById('charCount');
   if (cc) cc.textContent = generatedHTML.length.toLocaleString();
   if (typeof updateContentInfo === 'function') updateContentInfo();
+  // 편집 모드 밖에서 순서를 바꿔도 '편집 중'으로 — 버튼이 Save 가 되어 저장할 수 있게 (2026-11-25)
+  _touched = true; toggleEdit();
+}
+// 버튼 하나: 편집 중이 아니면 Edit(누르면 편집 시작), 편집 중이면 Save(바꾼 게 있으면 저장하고 끝, 없으면 그냥 끝)
+function syncEditBtn() {
+  const b = document.getElementById('btnEditMode');
+  if (!b || /^⏳/.test(b.textContent)) return;
+  b.textContent = editMode ? (canSave() ? 'Save' : 'Done editing') : 'Edit';
+  b.classList.toggle('on', !!editMode);
+  b.title = editMode && canSave() ? 'Save this edit — the bulk Excel uses it for this product' : '';
+}
+function editOrSave() {
+  if (!editMode) { toggleEdit(); return; }
+  if (canSave() && _touched) saveEdit(); else toggleEdit();
 }
 
 // ↺ 원래대로 되돌린 카드(root)에 편집 기능 다시 붙이기 — toggleEdit 편집 진입과 같은 규칙, 카드 안에서만
@@ -1692,9 +1705,7 @@ function watchFrame() {   // 미리보기를 새로 그린 직후: 지금 상태
 }
 function syncSave() {
   const on = !!generatedHTML && _touched;
-  ['btnSave', 'bbSave'].forEach((id) => { const b = document.getElementById(id); if (b && !/^⏳/.test(b.textContent)) b.disabled = !on; });
-  const b = document.getElementById('btnSave');
-  if (b) b.style.display = canSave() ? '' : 'none';
+  const bb = document.getElementById('bbSave'); if (bb && !/^⏳/.test(bb.textContent)) bb.disabled = !on;   // 벌크에서 열었을 때 위 막대의 저장
   if (typeof syncExportVis === 'function') syncExportVis();
 }
 function setSaveEnabled() { syncSave(); }
@@ -1741,9 +1752,10 @@ const isDirty = () => _touched;
 async function saveEdit() {
   if (!canSave() || !generatedHTML) return;
   await bakeNow();
-  const btns = ['btnSave', 'bbSave'].map((id) => document.getElementById(id)).filter(Boolean);
-  const labels = btns.map((b) => b.textContent);
+  const btns = ['btnEditMode', 'bbSave'].map((id) => document.getElementById(id)).filter(Boolean);
+  const labels = btns.map((b) => (b.id === 'bbSave' ? b.textContent : ''));
   btns.forEach((b) => { b.disabled = true; b.textContent = txT('⏳ Saving…'); });
+  const restore = () => btns.forEach((b, i) => { b.disabled = false; if (b.id === 'bbSave') b.textContent = labels[i]; else { b.textContent = ''; syncEditBtn(); } });
   try {
     const r = await fetch(`${API_BASE}/api/v1/edits`, { method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url: curUrl(), channel: CHANNEL, html: generatedHTML }) });
@@ -1751,12 +1763,13 @@ async function saveEdit() {
     if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
     savedBase = generatedHTML;
     _touched = false;
-    btns.forEach((b, i) => { b.textContent = labels[i]; });
+    restore();
     showEditNote(j);
     refreshApproval();
     showDone('Saved', 'The bulk Excel uses this edit for this product.');
   } catch (e) {
-    btns.forEach((b, i) => { b.textContent = labels[i]; });
+    restore();
+    if (!editMode) toggleEdit();   // 저장 못 했으면 다시 편집 중(Save)으로 — 바꾼 내용은 그대로
     syncSave();
     setStatus('✕ ' + txT('Could not save') + ': ' + (e.message || e), 'error');
   }
