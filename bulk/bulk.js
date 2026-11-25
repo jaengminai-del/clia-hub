@@ -169,7 +169,7 @@
   const flagsOf = (row) => ((itemOf(row) || {}).flags || []).map(normFlag).concat((editOf(row) || {}).changed ? [{ code: 'editChanged', sev: 'warn' }] : []);
   const openFlags = (row) => flagsOf(row).filter((f) => f.sev !== 'info' && !S.ack.has(`${row}:${f.code}`));
   const flagText = (f) => ({ editChanged: () => t('f_editChanged'), bundle: () => t('f_bundle', f.n), crawl: () => t('f_crawl'), content: () => t('f_content'), qa: () => t('f_qa', f.images), qaTx: () => t('f_qaTx', f.texts), frame: () => t('f_frame', f.n),
-    over12: () => t('f_over12', f.all), summary: () => t('f_summary'), fuzzy: () => t('f_fuzzy'), alts: () => t('f_alts', f.n) }[f.code] || (() => f.code))();
+    over12: () => t('f_over12', f.all), summary: () => t('f_summary'), long: () => t('f_long', f.n), fuzzy: () => t('f_fuzzy'), alts: () => t('f_alts', f.n) }[f.code] || (() => f.code))();
   const builderUrl = (u) => `/shopee-lazada-pdp/index.html?url=${encodeURIComponent(u || '')}&channel=${S.channel || 'shopee'}&lang=${L}`;
   const reviewRows = () => act().filter((r) => openFlags(r.row).length);
   // 다시 돌리면 고쳐지는 것: LG.com 페이지 · 이미지 누락은 다시 가져오고, 설명 · 요약은 다시 만든다

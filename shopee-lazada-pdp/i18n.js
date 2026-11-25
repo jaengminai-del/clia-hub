@@ -25,6 +25,11 @@ CLIA_I18N.init({
   '{n} images in a ZIP file': { de: '{n} Bilder in einer ZIP-Datei', th: 'รูปภาพ {n} รูปในไฟล์ ZIP', ar: '{n} صورة في ملف ZIP' },
   '{a} of {b} images in a ZIP file': { de: '{a} von {b} Bildern in einer ZIP-Datei', th: 'รูปภาพ {a} จาก {b} รูปในไฟล์ ZIP', ar: '{a} من {b} صورة في ملف ZIP' },
   'Shopee takes up to 12 images — use “Download 12 images” for the first 12.': { de: 'Shopee nimmt bis zu 12 Bilder — für die ersten 12 „12 Bilder herunterladen“ verwenden.', th: 'Shopee รับได้สูงสุด 12 รูป — ใช้ "ดาวน์โหลดภาพ 12 ภาพ" สำหรับ 12 รูปแรก', ar: 'يقبل Shopee حتى 12 صورة — استخدم «تنزيل 12 صورة» لأول 12 صورة.' },
+  // 편집 · 추가 (2026-11-25)
+  '✓ Done editing': { de: '✓ Bearbeiten beenden', th: '✓ แก้ไขเสร็จแล้ว', ar: '✓ إنهاء التعديل' },
+  '＋ Add ▾': { de: '＋ Hinzufügen ▾', th: '＋ เพิ่ม ▾', ar: '＋ إضافة ▾' },
+  '📝 Add product info': { de: '📝 Produktinfo hinzufügen', th: '📝 เพิ่มข้อมูลสินค้า', ar: '📝 إضافة معلومات المنتج' },
+  'Shopee only allows 12 images, and this one has {n}. Try removing a few sections with Edit.': { de: 'Shopee erlaubt nur 12 Bilder, hier sind es {n}. Entfernen Sie mit „Bearbeiten“ einfach ein paar Abschnitte.', th: 'Shopee ใส่รูปได้แค่ 12 รูป แต่ตอนนี้มี {n} รูป ลองกด "แก้ไข" แล้วลบบางส่วนออกดูนะ', ar: 'يسمح Shopee بـ 12 صورة فقط، وهنا {n} صورة. جرّب حذف بعض الأقسام عبر «تعديل».' },
   // 내보내기 메뉴 (2026-11-24)
   '⬇ Export': { de: '⬇ Exportieren', th: '⬇ ส่งออก', ar: '⬇ تصدير' },
   '⬇ Export ▾': { de: '⬇ Exportieren ▾', th: '⬇ ส่งออก ▾', ar: '⬇ تصدير ▾' },

@@ -147,7 +147,38 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 .feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:16px;}
 .feat-thumb{background:#f7f7f7;border:1px solid #eee;border-radius:6px;overflow:hidden;cursor:pointer;transition:all .2s ease;position:relative;aspect-ratio:1;}
 .feat-thumb:hover{transform:scale(1.08);box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:5;border-color:#A50034;}
-.feat-thumb img{width:100%;height:100%;display:block;object-fit:cover;object-position:center;}
+/* 피처 썸네일 (2026-11-25): 모든 칸을 같은 크기 정사각형으로, 이미지는 자르지 않고 칸 안에 다 보이게(contain).
+   두 장 · 세 장 묶음(split · puzzle)도 칸 하나 — 첫 장 + '+N' 표시, 누르면 전부 보인다 */
+.feat-thumb img{width:100%;height:100%;display:block;object-fit:contain;object-position:center;padding:4px;box-sizing:border-box;}
+/* 상품 상세 레이아웃 (2026-11-25): 위 상품 정보는 작게(대표 이미지 + 갤러리 썸네일 2줄) · 요약 카드 · 좌우 박스(피처 · GEO) · 아래 스펙 2열 */
+.clia-hub .dp > .dp-top{padding:18px 20px;gap:22px;margin-bottom:0;align-items:flex-start}
+.clia-hub .dp > .dp-top .dp-left{width:232px}
+.clia-hub .dp > .dp-top .dp-main-img{aspect-ratio:auto;height:176px;margin-bottom:8px}
+.clia-hub .dp > .dp-top .dp-thumbs{gap:4px}
+.clia-hub .dp > .dp-top .dp-th{width:35px;height:35px;border-radius:6px}
+.clia-hub .dp > .dp-top .dp-img-count{margin:4px 0 0}
+.clia-hub .dp > .dp-top .dp-name{font-size:20px;margin-bottom:6px}
+.sum-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0 22px}
+.sum-card{all:unset;box-sizing:border-box;cursor:pointer;background:#fff;border:1px solid var(--clia-gray-200,#E6E3DD);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:3px}
+.sum-card:hover{border-color:var(--clia-gray-300,#ccc);box-shadow:0 6px 16px rgba(0,0,0,.06)}
+.sum-card:focus-visible{outline:2px solid var(--clia-gray-900,#111);outline-offset:2px}
+.sum-card .i{font-size:18px}.sum-card .l{font-size:12px;color:var(--clia-gray-600,#6b6862);margin-top:4px}.sum-card .v{font-size:16px;font-weight:800;color:var(--clia-gray-900,#111)}.sum-card .go{font-size:12px;font-weight:700;color:var(--clia-brand,#EA1917);margin-top:4px}
+.sum-card.warn{border-color:#F0C98B;background:#FFFBF2}
+.side2{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;margin-bottom:26px}.side2.one{grid-template-columns:1fr}
+.lrbox{background:#fff;border:1px solid var(--clia-gray-200,#E6E3DD);border-radius:18px;padding:16px;min-width:0;scroll-margin-top:12px}
+.clia-hub .lrbox .feat-header{margin-top:0}
+.clia-hub .lrbox .feat-grid{grid-template-columns:repeat(3,1fr);margin-bottom:0}
+.side2.one .lrbox .feat-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.lrbox .geo-sec{margin:0;border:0}
+.lrbox .geo-pscores{grid-template-columns:1fr}
+.lrbox table{font-size:10px}
+.sec-anchor{scroll-margin-top:12px}
+.clia-hub .spec-t.two tbody{display:grid;grid-template-columns:1fr 1fr}
+.clia-hub .spec-t.two tr{display:grid;grid-template-columns:42% 58%}
+.clia-hub .spec-t.two tr:nth-child(odd){border-right:1px solid var(--clia-gray-100,#F0EEE9)}
+.clia-hub .spec-t.two td{width:auto;padding:8px 12px;font-size:12px;line-height:1.4}
+@media (max-width:1300px){.side2{grid-template-columns:1fr}.clia-hub .lrbox .feat-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}.sum-cards{grid-template-columns:repeat(2,1fr)}.clia-hub .spec-t.two tbody{grid-template-columns:1fr}}
+.feat-thumb .ft-more{position:absolute;top:6px;right:6px;background:rgba(17,17,17,.72);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;pointer-events:none;}
 .feat-thumb .ft-overlay{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);color:#fff;padding:4px 6px;font-size:8px;line-height:1.3;opacity:0;transition:opacity .2s;}
 .feat-thumb:hover .ft-overlay{opacity:1;}
 .feat-thumb .ft-overlay b{color:#F9A8C9;font-size:9px;display:block;margin-bottom:1px;}
@@ -175,6 +206,9 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 .lx-status{font-size:12px;color:var(--clia-gray-500);display:inline-flex;align-items:center;gap:6px;}
 .lx-status::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--clia-gray-300);}
 .lx-status.on{color:var(--clia-gray-700);}.lx-status.on::before{background:#22A06B;}
+.lx-count{font-size:12px;font-weight:700;padding:6px 12px;border-radius:12px;white-space:normal;max-width:340px;line-height:1.35;background:#E3F4EA;color:#1E7F4F;margin-right:auto}.lx-count.over{background:#FDE8E7;color:#C8241F}
+.lx-auto{display:inline-block;margin:0 0 6px;font-size:11.5px;font-weight:700;color:#1E7F4F;background:#E3F4EA;border-radius:999px;padding:3px 10px}
+.lx-ta.auto{background:#F3FBF6}
 .lx-ov{position:fixed;inset:0;z-index:9700;background:rgba(38,38,38,.45);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;padding:24px;}
 .lx-ov.show{display:flex;}
 .lx-modal{width:min(1120px,100%);height:min(860px,100%);background:#fff;border-radius:var(--clia-radius-lg);box-shadow:0 24px 64px rgba(38,38,38,.22);display:flex;flex-direction:column;overflow:hidden;font-family:var(--clia-font);color:var(--clia-gray-900);}
@@ -1038,6 +1072,7 @@ const I18N={en:{
   'list.title':'Product List — {c}',
   'list.count':'{n} products',
   'st.ready':'✓ Ready','st.md':'✓ MD','st.pend':'○ Pending',
+  "sum.gallery":"Gallery","sum.images":"{n} images","sum.feat":"Feature content","sum.sections":"{n} sections","sum.geo":"GEO score","sum.specs":"Specifications","sum.items":"{n} items","sum.view":"View ↓",
   'dp.images':'{n} gallery images from LG.com',
   'dp.model':'Model',
   'dp.view':'View on LG.com →','dp.open':'Details',
@@ -1091,6 +1126,7 @@ I18N.de={
   'geo.pscores':'Bewertung je KI-Plattform','geo.why.pp':'Zitiert Quellen — gewichtet belegte Q&A, technische Daten und Feature-Details','geo.why.gp':'Shopping-Attribute — gewichtet technische Daten, Bilder, Features und Preis','geo.why.go':'Antwort-Snippets — gewichtet FAQ, Strukturdaten und Features','geo.why.bi':'Suchanfragen-Abgleich — gewichtet Keywords, technische Daten und Bilder','geo.generating':'KI-Q&A und Keywords werden aus der gecrawlten Seite erstellt…','geo.genFail':'KI-Q&A-Erstellung fehlgeschlagen: ','geo.retry':'Erneut versuchen','geo.md':'Optimierte MD-Datei erstellen','coffee.geo':'GEO-Q&A und Keywords werden erstellt…','md.features':'Wichtigste Merkmale','md.specs':'Technische Daten','md.faq':'Häufig gestellte Fragen','md.keywords':'Keywords',
   'tb.logout':'Abmelden','list.title':'Produktliste — {c}','list.count':'{n} Produkte',
   'st.ready':'✓ Bereit','st.md':'✓ MD','st.pend':'○ Ausstehend',
+  "sum.gallery":"Galerie","sum.images":"{n} Bilder","sum.feat":"Feature-Inhalte","sum.sections":"{n} Abschnitte","sum.geo":"GEO-Wert","sum.specs":"Technische Daten","sum.items":"{n} Einträge","sum.view":"Ansehen ↓",
   'dp.images':'{n} Galeriebilder von LG.com','dp.model':'Modell','dp.view':'Auf LG.com ansehen →','dp.open':'Details','dp.recrawl':'Neu crawlen',
   'dp.channel':'KI-CONTENT-ERSTELLUNG — KANAL WÄHLEN','ch.lgcom':'LG.com Offiziell','ch.md':'MD-Quelle','ch.comingSoon':'Demnächst verfügbar',
   'dp.feat':'Feature-Inhalte ({n})','dp.aiExtracted':'KI-extrahiert','dp.hover':'Zum Ansehen darüberfahren · Zum Vergrößern klicken','dp.specs':'Technische Daten',
@@ -1117,6 +1153,7 @@ I18N.th={
   'geo.pscores':'คะแนนตามแพลตฟอร์ม AI','geo.why.pp':'อ้างอิงแหล่งที่มา — ให้น้ำหนักกับถาม-ตอบที่มีแหล่งอ้างอิง ข้อมูลจำเพาะ และรายละเอียดฟีเจอร์','geo.why.gp':'คุณสมบัติสำหรับช้อปปิ้ง — ให้น้ำหนักกับข้อมูลจำเพาะ ภาพ ฟีเจอร์ และราคา','geo.why.go':'สนิปเป็ตคำตอบ — ให้น้ำหนักกับ FAQ ข้อมูลโครงสร้าง และฟีเจอร์','geo.why.bi':'การจับคู่คำค้น — ให้น้ำหนักกับคีย์เวิร์ด ข้อมูลจำเพาะ และภาพ','geo.generating':'กำลังสร้างถาม-ตอบและคีย์เวิร์ดด้วย AI จากหน้าที่ครอว์ล…','geo.genFail':'สร้างถาม-ตอบด้วย AI ไม่สำเร็จ: ','geo.retry':'ลองอีกครั้ง','geo.md':'สร้างไฟล์ MD ที่ปรับแต่งแล้ว','coffee.geo':'กำลังสร้างถาม-ตอบและคีย์เวิร์ด GEO…','md.features':'ฟีเจอร์หลัก','md.specs':'ข้อมูลจำเพาะ','md.faq':'คำถามที่พบบ่อย','md.keywords':'คีย์เวิร์ด',
   'tb.logout':'ออกจากระบบ','list.title':'รายการสินค้า — {c}','list.count':'{n} สินค้า',
   'st.ready':'✓ พร้อม','st.md':'✓ MD','st.pend':'○ รอดำเนินการ',
+  "sum.gallery":"แกลเลอรี","sum.images":"{n} ภาพ","sum.feat":"คอนเทนต์ฟีเจอร์","sum.sections":"{n} ส่วน","sum.geo":"คะแนน GEO","sum.specs":"สเปก","sum.items":"{n} รายการ","sum.view":"ดู ↓",
   'dp.images':'{n} ภาพแกลเลอรีจาก LG.com','dp.model':'รุ่น','dp.view':'ดูบน LG.com →','dp.open':'รายละเอียด','dp.recrawl':'ครอว์ลใหม่',
   'dp.channel':'สร้างคอนเทนต์ด้วย AI — เลือกช่องทาง','ch.lgcom':'LG.com อย่างเป็นทางการ','ch.md':'แหล่ง MD','ch.comingSoon':'เร็ว ๆ นี้',
   'dp.feat':'คอนเทนต์ฟีเจอร์ ({n})','dp.aiExtracted':'ดึงข้อมูลด้วย AI','dp.hover':'วางเมาส์เพื่อดูตัวอย่าง · คลิกเพื่อขยาย','dp.specs':'ข้อมูลจำเพาะ',
@@ -1143,6 +1180,7 @@ I18N.ar={
   'geo.pscores':'تقييم كل منصة ذكاء اصطناعي','geo.why.pp':'يستشهد بالمصادر — يركز على الأسئلة والأجوبة الموثقة والمواصفات وتفاصيل الميزات','geo.why.gp':'سمات التسوق — يركز على المواصفات والصور والميزات والسعر','geo.why.go':'مقتطفات الإجابات — يركز على الأسئلة الشائعة والبيانات المنظمة والميزات','geo.why.bi':'مطابقة الاستعلامات — يركز على الكلمات المفتاحية والمواصفات والصور','geo.generating':'جارٍ إنشاء الأسئلة والأجوبة والكلمات المفتاحية بالذكاء الاصطناعي من الصفحة…','geo.genFail':'فشل إنشاء الأسئلة والأجوبة بالذكاء الاصطناعي: ','geo.retry':'إعادة المحاولة','geo.md':'إنشاء ملف MD محسّن','coffee.geo':'جارٍ إنشاء أسئلة وأجوبة وكلمات GEO المفتاحية…','md.features':'الميزات الرئيسية','md.specs':'المواصفات','md.faq':'الأسئلة الشائعة','md.keywords':'الكلمات المفتاحية',
   'tb.logout':'تسجيل الخروج','list.title':'قائمة المنتجات — {c}','list.count':'{n} منتج',
   'st.ready':'✓ جاهز','st.md':'✓ MD','st.pend':'○ قيد الانتظار',
+  "sum.gallery":"المعرض","sum.images":"{n} صورة","sum.feat":"محتوى الميزات","sum.sections":"{n} قسم","sum.geo":"تقييم GEO","sum.specs":"المواصفات","sum.items":"{n} عنصر","sum.view":"عرض ↓",
   'dp.images':'{n} صورة من معرض LG.com','dp.model':'الطراز','dp.view':'عرض على LG.com ←','dp.open':'التفاصيل','dp.recrawl':'إعادة الزحف',
   'dp.channel':'إنشاء المحتوى بالذكاء الاصطناعي — اختر القناة','ch.lgcom':'موقع LG.com الرسمي','ch.md':'مصدر MD','ch.comingSoon':'قريبًا',
   'dp.feat':'محتوى الميزات ({n})','dp.aiExtracted':'مستخرج بالذكاء الاصطناعي','dp.hover':'مرّر للمعاينة · انقر للتكبير','dp.specs':'المواصفات',
@@ -2597,7 +2635,7 @@ function showPending(p){
 Object.assign(I18N.en,{
   'lt.del':'Delete this version','lt.delQ':'Delete v{v}?','lt.delMsg':'Are you sure? A deleted version can\'t be restored.','lt.delInUse':'v{v} is in use now — after deleting, the latest remaining version will be used.','lt.delOk':'Delete','lt.cancel':'Cancel','lt.deleted':'v{v} deleted.',
   'lt.label':'PRODUCT INFO TEXT','lt.open':'Write product info text','lt.title':'Product info text',
-  'lt.where':'① is added at the top, ②–⑤ at the bottom of eBay / Lazada content. Shopee: copied as description text.',
+  'lt.where':'① is added at the top, ②–⑤ at the bottom of eBay / Lazada content. Shopee: copied as description text.',"lt.whereTh":"① and ② go at the top, ③–⑤ at the bottom of Shopee and Lazada content. ② is the PDP summary — edit it here if needed.","lt.whereSl":"① goes at the top, ②–⑤ at the bottom of Shopee and Lazada content.","lt.count":"Shopee description: {n} / 3,000 (with 12 image URLs)","lt.over":"too long, shorten the text to save","lt.auto":"Filled automatically from the PDP summary","lt.autoWait":"Making the PDP summary…",
   'lt.stNone':'Not written yet','lt.stUse':'v{v} in use · {n}/5 filled',
   'lt.versions':'Versions','lt.none':'No saved version yet','lt.inUse':'In use','lt.latest':'Latest','lt.useThis':'Use this version','lt.useLatest':'Always use latest',
   'lt.import':'Import from…','lt.tpl':'Templates','lt.prods':'Other products','lt.draft':'Draft from LG.com',
@@ -2611,7 +2649,7 @@ Object.assign(I18N.en,{
 Object.assign(I18N.de,{
   'lt.del':'Diese Version löschen','lt.delQ':'v{v} löschen?','lt.delMsg':'Wirklich löschen? Eine gelöschte Version kann nicht wiederhergestellt werden.','lt.delInUse':'v{v} ist gerade aktiv — nach dem Löschen wird die neueste verbleibende Version verwendet.','lt.delOk':'Löschen','lt.cancel':'Abbrechen','lt.deleted':'v{v} gelöscht.',
   'lt.label':'PRODUKTINFO-TEXT','lt.open':'Produktinfo-Text schreiben','lt.title':'Produktinfo-Text',
-  'lt.where':'① wird oben, ②–⑤ unten im eBay-/Lazada-Inhalt eingefügt. Shopee: als Beschreibungstext kopieren.',
+  'lt.where':'① wird oben, ②–⑤ unten im eBay-/Lazada-Inhalt eingefügt. Shopee: als Beschreibungstext kopieren.',"lt.whereTh":"① und ② oben, ③–⑤ unten im Shopee-/Lazada-Inhalt. ② ist die PDP-Zusammenfassung — hier bei Bedarf ändern.","lt.whereSl":"① oben, ②–⑤ unten im Shopee-/Lazada-Inhalt.","lt.count":"Shopee-Beschreibung: {n} / 3.000 (mit 12 Bild-URLs)","lt.over":"zu lang, zum Speichern kürzen","lt.auto":"Automatisch aus der PDP-Zusammenfassung","lt.autoWait":"PDP-Zusammenfassung wird erstellt…",
   'lt.stNone':'Noch nicht erstellt','lt.stUse':'v{v} aktiv · {n}/5 ausgefüllt',
   'lt.versions':'Versionen','lt.none':'Noch keine gespeicherte Version','lt.inUse':'Aktiv','lt.latest':'Neueste','lt.useThis':'Diese Version verwenden','lt.useLatest':'Immer neueste verwenden',
   'lt.import':'Importieren aus…','lt.tpl':'Vorlagen','lt.prods':'Andere Produkte','lt.draft':'Entwurf von LG.com',
@@ -2625,7 +2663,7 @@ Object.assign(I18N.de,{
 Object.assign(I18N.th,{
   'lt.del':'ลบเวอร์ชันนี้','lt.delQ':'ลบ v{v} ใช่ไหม?','lt.delMsg':'แน่ใจหรือไม่? เวอร์ชันที่ลบแล้วจะกู้คืนไม่ได้','lt.delInUse':'v{v} กำลังใช้งานอยู่ — หลังลบ จะใช้เวอร์ชันล่าสุดที่เหลืออยู่แทน','lt.delOk':'ลบ','lt.cancel':'ยกเลิก','lt.deleted':'ลบ v{v} แล้ว',
   'lt.label':'ข้อความข้อมูลสินค้า','lt.open':'เขียนข้อความข้อมูลสินค้า','lt.title':'ข้อความข้อมูลสินค้า',
-  'lt.where':'① จะถูกเพิ่มด้านบน ②–⑤ ด้านล่างของคอนเทนต์ eBay / Lazada · Shopee: คัดลอกเป็นข้อความคำอธิบาย',
+  'lt.where':'① จะถูกเพิ่มด้านบน ②–⑤ ด้านล่างของคอนเทนต์ eBay / Lazada · Shopee: คัดลอกเป็นข้อความคำอธิบาย',"lt.whereTh":"① และ ② อยู่ด้านบน ③–⑤ อยู่ด้านล่างของคอนเทนต์ Shopee และ Lazada ② คือสรุป PDP — แก้ไขที่นี่ได้ถ้าต้องการ","lt.whereSl":"① อยู่ด้านบน ②–⑤ อยู่ด้านล่างของคอนเทนต์ Shopee และ Lazada","lt.count":"คำอธิบาย Shopee: {n} / 3,000 (รวม URL รูป 12 รายการ)","lt.over":"ยาวเกินไป โปรดย่อข้อความเพื่อบันทึก","lt.auto":"กรอกอัตโนมัติจากสรุป PDP","lt.autoWait":"กำลังสร้างสรุป PDP…",
   'lt.stNone':'ยังไม่ได้เขียน','lt.stUse':'ใช้ v{v} · กรอกแล้ว {n}/5',
   'lt.versions':'เวอร์ชัน','lt.none':'ยังไม่มีเวอร์ชันที่บันทึก','lt.inUse':'ใช้งานอยู่','lt.latest':'ล่าสุด','lt.useThis':'ใช้เวอร์ชันนี้','lt.useLatest':'ใช้เวอร์ชันล่าสุดเสมอ',
   'lt.import':'นำเข้าจาก…','lt.tpl':'เทมเพลต','lt.prods':'สินค้าอื่น','lt.draft':'ร่างจาก LG.com',
@@ -2639,7 +2677,7 @@ Object.assign(I18N.th,{
 Object.assign(I18N.ar,{
   'lt.del':'حذف هذا الإصدار','lt.delQ':'حذف v{v}؟','lt.delMsg':'هل أنت متأكد؟ لا يمكن استعادة الإصدار المحذوف.','lt.delInUse':'v{v} مستخدم حاليًا — بعد الحذف سيُستخدم أحدث إصدار متبقٍ.','lt.delOk':'حذف','lt.cancel':'إلغاء','lt.deleted':'تم حذف v{v}.',
   'lt.label':'نص معلومات المنتج','lt.open':'كتابة نص معلومات المنتج','lt.title':'نص معلومات المنتج',
-  'lt.where':'① يُضاف في الأعلى، و②–⑤ في أسفل محتوى eBay / Lazada · Shopee: يُنسخ كنص وصف.',
+  'lt.where':'① يُضاف في الأعلى، و②–⑤ في أسفل محتوى eBay / Lazada · Shopee: يُنسخ كنص وصف.',"lt.whereTh":"① و② في الأعلى، و③–⑤ في أسفل محتوى Shopee وLazada. ② هو ملخص PDP — عدّله هنا عند الحاجة.","lt.whereSl":"① في الأعلى، و②–⑤ في أسفل محتوى Shopee وLazada.","lt.count":"وصف Shopee: {n} / 3,000 (مع 12 رابط صورة)","lt.over":"طويل جدًا، اختصر النص للحفظ","lt.auto":"مملوء تلقائيًا من ملخص PDP","lt.autoWait":"جارٍ إنشاء ملخص PDP…",
   'lt.stNone':'لم يُكتب بعد','lt.stUse':'v{v} مستخدم · {n}/5 مكتمل',
   'lt.versions':'الإصدارات','lt.none':'لا يوجد إصدار محفوظ بعد','lt.inUse':'مستخدم','lt.latest':'الأحدث','lt.useThis':'استخدم هذا الإصدار','lt.useLatest':'استخدم الأحدث دائمًا',
   'lt.import':'استيراد من…','lt.tpl':'القوالب','lt.prods':'منتجات أخرى','lt.draft':'مسودة من LG.com',
@@ -2691,6 +2729,8 @@ function _ltStatus(){
 }
 
 // 팝업 열기 / 닫기
+// 빌더(화면 안 틀)의 편집 메뉴 → 상품 설명 정보 창 (2026-11-25). 지금 연 상품(_lt)의 창을 빌더 위에 연다
+window.addEventListener('message',e=>{if(e.origin!==location.origin||!e.data||e.data.type!=='clia-open-listing')return;openListingModal();});
 function openListingModal(){
   if(!_lt)return;
   let ov=document.getElementById('lxOv');
@@ -2713,18 +2753,19 @@ function openListingModal(){
       <div class="lx-side-t" style="margin-top:18px;">${lxIc('layers',14)} ${_ltEsc(t('lt.import'))}</div>
       <select class="clia-input lx-sel" id="lxImport" onchange="ltImport(this)"><option value="">${_ltEsc(t('lt.import'))}</option></select>
       <button class="clia-btn lx-sm" onclick="ltDraft(this)">${lxIc('spark',14)}${_ltEsc(t('lt.draft'))}</button>
-      <div class="lx-where">${_ltEsc(t('lt.where'))}</div>
+      <div class="lx-where">${_ltEsc(t(corp==='th'?'lt.whereTh':LT_SL.includes(corp)?'lt.whereSl':'lt.where'))}</div>
     </aside>
     <main class="lx-main">
-      ${LT_FIELDS.map((k,i)=>`<section class="lx-f">
-        <div class="lx-f-hd"><span class="lx-num${i?'':' top'}">${i+1}</span><span class="lx-f-name">${_ltEsc(t('lt.f.'+k))}</span>
-          <span class="lx-pos${i?'':' top'}">${_ltEsc(t(i?'lt.bottom':'lt.top'))}</span>
+      ${LT_FIELDS.map((k,i)=>{const top=!i||(k==='details'&&corp==='th');return`<section class="lx-f">
+        <div class="lx-f-hd"><span class="lx-num${top?' top':''}">${i+1}</span><span class="lx-f-name">${_ltEsc(t('lt.f.'+k))}</span>
+          <span class="lx-pos${top?' top':''}">${_ltEsc(t(top?'lt.top':'lt.bottom'))}</span>
           <input class="lx-f-title" id="ltT_${k}" oninput="ltDirty()" placeholder="${_ltEsc(LT_TITLES[k])}"></div>
-        <textarea class="lx-ta" id="ltF_${k}" oninput="ltDirty()" rows="${k==='details'?8:4}"></textarea></section>`).join('')}
+        ${k==='details'&&corp==='th'?`<span class="lx-auto" id="ltAuto" hidden></span>`:''}<textarea class="lx-ta" id="ltF_${k}" oninput="ltDirty()" rows="${k==='details'?8:4}"></textarea></section>`;}).join('')}
       <div class="lx-hint">${_ltEsc(t('lt.hint'))}</div>
     </main>
   </div>
   <div class="lx-ft">
+    ${LT_SL.includes(corp)?`<div class="lx-count" id="lxCount"></div>`:''}
     <div class="lx-msg" id="lxMsg"></div>
     <input class="clia-input lx-note" id="ltNote" placeholder="${_ltEsc(t('lt.note'))}">
     <button class="clia-btn" onclick="ltSaveTpl(this)">${lxIc('layers',15)}${_ltEsc(t('lt.saveTpl',{c:corp.toUpperCase()+' · '+cat}))}</button>
@@ -2752,7 +2793,8 @@ async function _ltLoad(){
       const tp=await _ltApi('/api/v1/listing-template?corp='+mine.corp+'&category='+encodeURIComponent(mine.cat)).catch(()=>({}));
       if(_lt===mine&&tp.current){_ltSet(tp.current);mine.from='template:'+mine.corp+'/'+mine.cat+'#v'+tp.current.v;_ltMsg(t('lt.loadedTpl',{c:mine.cat}));ltDirty();}
     }
-    _ltRenderVersions();_ltStatus();
+    _ltRenderVersions();_ltStatus();_ltCount();
+    _ltAutoDetails(mine);
   }catch(e){_ltMsg(t('lt.fail')+e.message,'err');}
   _ltFillImport();
 }
@@ -2767,7 +2809,32 @@ function _ltSet(ver){
     document.getElementById('ltT_'+k).value=((ver&&ver.titles)||{})[k]||LT_TITLES[k];
   });
 }
-function ltDirty(){if(_lt)_lt.dirty=true;const d=document.getElementById('lxDirty');if(d)d.textContent='● '+t('lt.dirty');_ltRenderVersions();}
+function ltDirty(){if(_lt)_lt.dirty=true;const d=document.getElementById('lxDirty');if(d)d.textContent='● '+t('lt.dirty');_ltRenderVersions();_ltCount();}
+// Shopee 설명 칸은 3,000자 (2026-11-25): 위(Promotion · 태국은 ② 요약) + 이미지 주소 12개(약 870자) + 아래(나머지)를 합쳐 넘으면 저장을 막는다. 태국 · 싱가포르만
+const LT_SL=['th','sg'],LT_IMG_EST=870,LT_MAX=3000;
+function _ltCount(){
+  const el=document.getElementById('lxCount');if(!el||!_lt)return 0;
+  const {fields,titles}=_ltGet(),T={...LT_TITLES,...titles};
+  const n=LT_FIELDS.filter(k=>fields[k].trim()).reduce((a,k)=>a+T[k].length+3+fields[k].trim().length+2,0)+LT_IMG_EST;
+  const over=n>LT_MAX;
+  el.textContent=t('lt.count',{n:n.toLocaleString()})+(over?' — '+t('lt.over'):'');
+  el.classList.toggle('over',over);
+  document.querySelectorAll('#lxOv .lx-ft .clia-btn.primary').forEach(b=>{b.disabled=over;});   // 템플릿(② 제외)은 막지 않는다
+  return n;
+}
+// 태국: ② Product details 가 비어 있으면 크롤 때 만든 PDP 요약으로 채운다 (이미 결과물 맨 위에 쓰이는 글 — 고쳐서 저장하면 그 글이 대신 쓰인다)
+async function _ltAutoDetails(mine){
+  const ta=document.getElementById('ltF_details'),tag=document.getElementById('ltAuto');
+  if(!ta||!tag||mine.corp!=='th'||ta.value.trim())return;
+  tag.hidden=false;tag.textContent=t('lt.autoWait');
+  const ask=body=>fetch(CRAWLER_API+'/api/v1/pdp-summary',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(async r=>{const j=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(j.error||'HTTP '+r.status),{status:r.status});return j;});
+  let j=null;
+  try{j=await ask({url:mine.url,cachedOnly:true});}catch(e){if(e.status===404){try{j=await ask({url:mine.url});}catch(_){}}}
+  if(_lt!==mine)return;
+  if(j&&j.text&&!ta.value.trim()){ta.value=j.text.trim();ta.classList.add('auto');tag.textContent=t('lt.auto');}
+  else tag.hidden=true;
+  _ltCount();
+}
 function _ltClean(){if(_lt)_lt.dirty=false;const d=document.getElementById('lxDirty');if(d)d.textContent='';}
 function _ltRenderVersions(){
   const box=document.getElementById('lxVers');if(!box||!_lt)return;
@@ -2903,26 +2970,31 @@ function showDetail(p){
         <div class="ch-main-row">
           ${marketsOf(productCorp(p)).map(k=>`<button class="ch-btn ch-main" style="--ch-color:${MARKET_INFO[k][1]}" onclick="openChannel('${k}','${p.id}')">${MARKET_INFO[k][0]}</button>`).join('')}
         </div>
-        <div class="ch-sub-label">${t('ch.comingSoon')}: ${[t('ch.lgcom'),'Mercado Libre',t('ch.md'),'Instagram','Facebook','Shorts'].join(' · ')}</div>
       </div>
-    </div>
-    <div class="lx-row">
-      <div class="ch-label">${t('lt.label')}</div>
-      <div class="lx-row-in"><button class="lx-open" onclick="openListingModal()">${lxIc('doc',18)}${t('lt.open')}</button><span class="lx-status" id="lxStatus"></span></div>
     </div>
   </div>
 </div>
+<!-- 요약 카드 (2026-11-25): 크롤해서 가져온 것 한눈에 — 누르면 그 영역으로 -->
+<div class="sum-cards">${[['🖼','sum.gallery',t('sum.images',{n:all.length}),'dp-main'],['🧩','sum.feat',t('sum.sections',{n:p.feat.length}),'sFeat'],['🔎','sum.geo','—','sGeo'],['📋','sum.specs',t('sum.items',{n:Object.keys(p.sp||{}).length}),'sSpec']].map(([i,l,v,to])=>`<button type="button" class="sum-card" data-to="${to}" onclick="sumGo('${to}')"><span class="i">${i}</span><span class="l">${t(l)}</span><span class="v"${to==='sGeo'?' id="sumGeo"':''}>${v}</span><span class="go">${t('sum.view')}</span></button>`).join('')}</div>
+<!-- 좌우 박스: 피처 전체 · GEO 전체를 나란히 (둘 다 펼침) -->
+<div class="side2${p.crawled?'':' one'}">
+<div class="lrbox" id="sFeat">
 <div class="feat-header">${t('dp.feat',{n:p.feat.length})} <span class="ai-tag">${t('dp.aiExtracted')}</span> <span style="font-size:9px;color:#888;font-weight:400;margin-left:4px;">${t('dp.hover')}</span></div>
-<div class="feat-grid" data-no-i18n>${p.feat.map((f,i)=>{if(f.layout==='split'&&f.imgs&&f.imgs.length>=2){return`<div class="feat-thumb" onclick="openLB('${p.id}',${i})" style="grid-column:span 2;"><div style="display:flex;gap:2px;"><img src="${I(f.imgs[0].p,400)}" style="width:50%;display:block;" onerror="this.style.display='none'"><img src="${I(f.imgs[1].p,400)}" style="width:50%;display:block;" onerror="this.style.display='none'"></div><div class="ft-overlay"><b>${f.t}</b>${f.d.substring(0,50)}...</div></div>`;}else if(f.layout==='puzzle'&&f.imgs&&f.imgs.length>=3){return`<div class="feat-thumb" onclick="openLB('${p.id}',${i})" style="grid-column:span 2;"><div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;"><img src="${I(f.imgs[0].p,400)}" style="grid-row:1/3;width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"><img src="${I(f.imgs[1].p,300)}" style="width:100%;object-fit:cover;" onerror="this.style.display='none'"><img src="${I(f.imgs[2].p,300)}" style="width:100%;object-fit:cover;" onerror="this.style.display='none'"></div><div class="ft-overlay"><b>${f.t}</b>${f.d.substring(0,50)}...</div></div>`;}else{return`<div class="feat-thumb" onclick="openLB('${p.id}',${i})"><img src="${I(f.p,400)}" onerror="this.parentElement.style.display='none'"><div class="ft-overlay"><b>${f.t}</b>${f.d.substring(0,50)}...</div></div>`;}}).join('')}</div>
+<div class="feat-grid" data-no-i18n>${p.feat.map((f,i)=>{const im=(f.imgs&&f.imgs.length)?f.imgs:[{p:f.p}],more=im.length-1;return`<div class="feat-thumb" onclick="openLB('${p.id}',${i})"><img src="${I(im[0].p,400)}" alt="" onerror="this.parentElement.style.display='none'">${more>0?`<span class="ft-more">+${more}</span>`:''}<div class="ft-overlay"><b>${f.t}</b>${(f.d||'').substring(0,50)}...</div></div>`;}).join('')}</div>
+</div>
+${p.crawled?`<div class="lrbox" id="sGeo">${geoHTML(p)}</div>`:''}
+</div>
+<div id="sSpec" class="sec-anchor"></div>
 <div class="feat-header">${t('dp.specs')}</div>
-<table class="spec-t" data-no-i18n>${Object.entries(p.sp).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('')}</table>
+<table class="spec-t two" data-no-i18n>${Object.entries(p.sp).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('')}</table>
 <div style="margin-bottom:8px;">${p.tags.map(t=>`<span class="ptag">${t}</span>`).join('')}</div>
-${geoHTML(p)}
 </div>`;
   rp.scrollTop=0;
+  {const g=rp.querySelector('#sGeo .geo-num'),c=document.getElementById('sumGeo');if(c)c.textContent=g?g.textContent+' / 100':'—';const card=c&&c.closest('.sum-card');if(card&&g)card.classList.toggle('warn',+g.textContent<70);}
   geoForDetail(p);
   listingForDetail(p);
 }
+function sumGo(id){const e=document.getElementById(id);if(e)e.scrollIntoView({behavior:'smooth',block:'start'});}
 function dpTh(el,src){document.querySelectorAll('.dp-th').forEach(t=>t.classList.remove('act'));el.classList.add('act');document.querySelector('#dp-main img').src=src;}
 
 // ═══ GEO (Generative Engine Optimization) ═══
