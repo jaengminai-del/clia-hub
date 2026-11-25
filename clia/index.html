@@ -2791,7 +2791,8 @@ async function _ltLoad(){
     else{   // 저장된 문구가 없으면 같은 법인·제품군 템플릿을 기본으로 채워 둔다 (저장해야 적용)
       mine.sel=null;
       const tp=await _ltApi('/api/v1/listing-template?corp='+mine.corp+'&category='+encodeURIComponent(mine.cat)).catch(()=>({}));
-      if(_lt===mine&&tp.current){_ltSet(tp.current);mine.from='template:'+mine.corp+'/'+mine.cat+'#v'+tp.current.v;_ltMsg(t('lt.loadedTpl',{c:mine.cat}));ltDirty();}
+      // 내용이 빈 템플릿은 불러오지 않는다 (2026-11-25) — '불러옴 · 저장 안 한 변경' 표시만 생기고 바뀌는 것이 없어서
+      if(_lt===mine&&tp.current&&LT_FIELDS.some(k=>((tp.current.fields||{})[k]||'').trim())){_ltSet(tp.current);mine.from='template:'+mine.corp+'/'+mine.cat+'#v'+tp.current.v;_ltMsg(t('lt.loadedTpl',{c:mine.cat}));ltDirty();}
     }
     _ltRenderVersions();_ltStatus();_ltCount();
     _ltAutoDetails(mine);
