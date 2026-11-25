@@ -230,7 +230,8 @@ def align(capture_path, top, bottom, html, medium, fonts_css, slice_width, boxes
             import json as _json
             bj = _json.loads(Path(boxes).read_text(encoding="utf-8"))
             boxes_after, comps, bscale = bool(bj.get("after")), (bj.get("comps") or None), float(bj.get("scale") or 0.5)
-            stitched = bj.get("method") == "stitch"   # 한 화면씩 찍어 붙인 캡처 (2026-11-25 — full_page 는 찍는 동안 배치가 바뀔 수 있음)
+            # 한 화면씩 찍어 붙인 캡처 (2026-11-25 — full_page 는 찍는 동안 배치가 바뀔 수 있음). v2 = 애니메이션을 끄고 찍음 (페이드인 이미지가 흐리지 않게)
+            stitched = bj.get("method") == "stitch" and int(bj.get("v") or 1) >= 2
         except Exception:   # noqa: BLE001 — 위치 기록이 깨졌으면 그림 맞추기만
             idx = {}
     by_url = lambda src: [b for b in idx.get(stem(src), []) if top - 40 <= b[1] <= bottom]
