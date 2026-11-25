@@ -2067,7 +2067,8 @@ app.post('/api/ebay-generate', async (req, res) => {
           const outName = `${medium}_content.html`;   // ebay → ebay_content.html (기존 파일명 유지)
           const args = [script, slugDir, '--fragment', '--medium', medium, '-o', outName];
           // 리스팅 문구: 프로모션은 맨 위, 제품 상세·배송·사후 케어·반품은 맨 아래 (Shopee 는 listing:false → 텍스트 복사만)
-          const listing = req.body.listing === false ? null : await require('./listing-routes').currentFor(url);
+          const LR = require('./listing-routes');
+          const listing = req.body.listing === false ? null : LR.forRender(await LR.currentFor(url), url);   // 태국 Product details 는 맨 위 요약 자리라 빼고
           if (listing) {
             const lf = path.join(slugDir, 'listing.json');
             fs.writeFileSync(lf, JSON.stringify(listing));
@@ -2703,6 +2704,15 @@ app.post('/api/v1/pdp-summary', async (req, res) => {
   const slug = url.replace(/https?:\/\//, '').replace(/[^\w]+/g, '-').replace(/-+$/, '');
   const slugDir = path.join(__dirname, 'crawler-py', 'out', slug);
   if (!fs.existsSync(path.join(slugDir, 'mirror.json'))) return res.status(404).json({ error: 'no crawl for this URL — crawl it first' });
+  // 태국: 사용자가 상품 설명 정보의 Product details 를 저장했으면 그 글이 요약 대신 (2026-11-25) — 빌더 · 벌크 · 검토 화면 모두 이 주소를 쓴다
+  if (!refresh && !(req.body || {}).aiOnly) {
+    const LR = require('./listing-routes');
+    if (LR.isTh(url)) {
+      const L = await LR.currentFor(url).catch(() => null);
+      const det = L && (L.fields.details || '').trim();
+      if (det) return res.json({ text: det, html: LR.detailsHtml(det), chars: det.length, model: 'listing', source: 'listing', listing_v: L.v });
+    }
+  }
   if (cachedOnly && (refresh || !fs.existsSync(path.join(slugDir, 'summary.json')))) return res.status(404).json({ error: 'no summary yet', code: 'none' });
   const key = slug + (refresh ? '|refresh' : '') + (model ? '|' + model : '');
   // 실패 기억 (2026-11-24): 같은 크롤 내용으로 실패한 요약은 다시 만들지 않는다 — 번들 제품(USP 23~57개)은 2,000자 안에

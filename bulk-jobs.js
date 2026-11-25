@@ -166,12 +166,18 @@ async function contentFor(channel, url) {
   const sl = await post('/api/v1/slice-html', { html: g.html, medium: 'shopee_lazada' }, 12 * 60 * 1000);
   const sm = await summaryP;
   if (channel === 'shopee') {
-    // Shopee 설명은 HTML 을 받지 않는다 → 요약은 태그 없는 글로 맨 위, 그 아래 이미지 주소 (한 줄에 하나, 앞 12장)
-    const top = sm && sm.text ? sm.text.trim() + '\n\n' : '';
+    // Shopee 설명은 HTML 을 받지 않는다 → Promotion(상품 설명 정보) · 요약(태국)은 태그 없는 글로 위, 그 아래 이미지 주소 (한 줄에 하나, 앞 12장),
+    // 맨 아래 상품 설명 정보의 나머지 (2026-11-25 — 태국은 Product details 가 요약 자리)
+    const LR = require('./listing-routes');
+    const parts = LR.shopeeParts(await LR.currentFor(url).catch(() => null), url);
+    const head = (parts.top ? parts.top + '\n\n' : '') + (sm && sm.text ? sm.text.trim() + '\n\n' : '');
+    const tail = parts.bottom ? '\n\n' + parts.bottom : '';
     const urls = (sl.urls || []).slice(0, SHOPEE_MAX_IMAGES);
-    while (urls.length > 1 && (top + urls.join('\n')).length > SHOPEE_DESC_MAX) urls.pop();
+    while (urls.length > 1 && (head + urls.join('\n') + tail).length > SHOPEE_DESC_MAX) urls.pop();
     if (!urls.length) throw new Error('no images');
-    return { text: top + urls.join('\n'), images: urls.length, allImages: sl.count, summaryErr: sm && sm.error ? sm.error.slice(0, 200) : '', edited: !!ed };
+    const text = head + urls.join('\n') + tail;
+    return { text, images: urls.length, allImages: sl.count, summaryErr: sm && sm.error ? sm.error.slice(0, 200) : '', edited: !!ed,
+             tooLong: text.length > SHOPEE_DESC_MAX ? text.length : 0 };
   }
   return { text: (sm && sm.html ? sm.html + '\n' : '') + sl.html, images: sl.count, allImages: sl.count, summaryErr: sm && sm.error ? sm.error.slice(0, 200) : '', edited: !!ed };
 }
@@ -240,6 +246,7 @@ function flagsFor(j, it, c) {
   if (frames) f.push({ code: 'frame', sev: 'info', n: frames });                        // 자동으로 고른 장면은 정상 동작 — 바꾸고 싶을 때만
   if (c && j.channel === 'shopee' && c.allImages > SHOPEE_MAX_IMAGES) f.push({ code: 'over12', sev: 'info', all: c.allImages });   // 앞 12장만 넣는 것은 정한 동작 — 안내만
   if (c && c.summaryErr) f.push({ code: 'summary', sev: 'warn' });
+  if (c && c.tooLong) f.push({ code: 'long', sev: 'warn', n: c.tooLong });   // 상품 설명 정보까지 합쳐 Shopee 3,000자 넘음 — 문구를 줄여야
   if (it.fuzzy) f.push({ code: 'fuzzy', sev: 'warn' });
   if (it.alts) f.push({ code: 'alts', sev: 'info', n: it.alts });
   return f;

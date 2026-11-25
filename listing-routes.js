@@ -78,7 +78,46 @@ function plainText(listing) {
   return parts.length ? parts.join('\n\n\n\n') + '\n' : '';
 }
 
+// ── 결과물에 넣는 모양 (2026-11-25) ──
+// 태국: 크롤 때 자동으로 만든 PDP 요약이 Product details 자리. 사용자가 Product details 를 저장했으면 그 글이 요약 대신 맨 위에 들어간다
+//   (/api/v1/pdp-summary 가 그 글을 돌려준다 — 빌더 복사 · ZIP · 벌크 모두 같은 곳에서 받는다). 그래서 태국은 아래쪽에 Product details 를 또 넣지 않는다.
+// 싱가포르 등: 지금 규칙 그대로 — Promotion 은 위, Product details · Delivery · After care · Returns 는 아래
+const isTh = (u) => /lg\.com\/th\//i.test(String(u || ''));
+const TITLES = { promotion: 'Promotion Details', details: 'Product Details', delivery: 'Delivery & Installation Notice',
+                 aftercare: 'After Care Service Information', returns: 'Terms & Conditions for Return Policy' };
+const titlesOf = (listing) => ({ ...TITLES, ...Object.fromEntries(Object.entries((listing && listing.titles) || {}).filter(([, v]) => v)) });
+const escH = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+// 저장한 Product details(● 제목 · - 들여쓰기) → PDP 요약과 같은 모양의 HTML (Lazada · eBay 맨 위)
+function detailsHtml(text) {
+  const F = "font-family:'LGEIText','LG EI Text','LINESeedSansTH',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;";
+  const rows = String(text || '').split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
+    if (/^●/.test(l)) return `<h3 style="${F}font-weight:700;font-size:18px;line-height:1.5;color:#111111;margin:14px 0 6px 0;">${escH(l.replace(/^●\s*/, ''))}</h3>`;
+    if (/^-/.test(l)) return `<p style="${F}font-size:16px;line-height:1.6;color:#333333;margin:0 0 6px 16px;">${escH(l.replace(/^-\s*/, ''))}</p>`;
+    return `<p style="${F}font-size:16px;line-height:1.6;color:#333333;margin:0 0 8px 0;">${escH(l)}</p>`;
+  });
+  return `<div class="lg-pdp-summary" style="max-width:1000px;margin:0 auto;padding:24px 20px;box-sizing:border-box;">${rows.join('')}</div>`;
+}
+// Shopee 설명 글: 위(Promotion) · 아래(나머지 — 태국은 Product details 제외). 가운데에 요약 · 이미지 주소가 들어간다
+function shopeeParts(listing, url) {
+  if (!listing) return { top: '', bottom: '' };
+  const T = titlesOf(listing), f = listing.fields || {};
+  const block = (k) => ((f[k] || '').trim() ? `${T[k]}:\n\n${f[k].trim()}` : '');
+  const bottomKeys = (isTh(url) ? [] : ['details']).concat(['delivery', 'aftercare', 'returns']);
+  return { top: block('promotion'), bottom: bottomKeys.map(block).filter(Boolean).join('\n\n') };
+}
+// 결과물(렌더러)에 넘길 문구: 태국은 Product details 를 빼고 (맨 위 요약 자리에 들어가므로)
+function forRender(listing, url) {
+  if (!listing || !isTh(url)) return listing;
+  const fields = { ...listing.fields, details: '' };
+  return Object.values(fields).some((v) => (v || '').trim()) ? { ...listing, fields } : null;
+}
+
 const router = express.Router();
+router.get('/api/v1/listing/shopee', async (req, res) => {
+  const url = String(req.query.url || '');
+  if (!/^https?:\/\/(www\.)?lg\.com\//i.test(url)) return res.status(400).json({ error: 'LG.com url required' });
+  res.json(shopeeParts(await currentFor(url), url));
+});
 
 router.get('/api/v1/listing', async (req, res) => {
   if (typeof req.query.url !== 'string') return res.status(400).json({ error: 'url required' });
@@ -178,4 +217,4 @@ router.post('/api/v1/listing-template', async (req, res) => {
   res.json({ ok: true, v, record: rec, current: current(rec) });
 });
 
-module.exports = { router, currentFor, plainText, slugify };
+module.exports = { router, currentFor, plainText, slugify, isTh, detailsHtml, shopeeParts, forRender };

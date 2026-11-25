@@ -51,6 +51,8 @@
     if (!html) throw new Error('no HTML');
     const nUrls = typeof opts.urlsOnly === 'function' ? opts.urlsOnly() : opts.urlsOnly;
     const sUrl = typeof opts.summaryUrl === 'function' ? opts.summaryUrl() : opts.summaryUrl;
+    const lUrl = typeof opts.listingUrl === 'function' ? opts.listingUrl() : opts.listingUrl;   // 상품 설명 정보 (Shopee 글 위 · 아래, 2026-11-25)
+    const listingP = nUrls && lUrl ? fetch((opts.apiBase || '') + '/api/v1/listing/shopee?url=' + encodeURIComponent(lUrl)).then((x) => (x.ok ? x.json() : {})).catch(() => ({})) : Promise.resolve({});
     // 요약 설명은 이미지와 동시에 요청 (처음 한 번은 AI 가 쓰는 시간이 걸리고, 이후엔 보관본)
     const summaryP = sUrl ? fetch((opts.apiBase || '') + '/api/v1/pdp-summary', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: sUrl }),
@@ -65,12 +67,14 @@
     const set = { hash: d.hash, width: d.width };
     if (nUrls) {
       // Shopee: HTML 을 받지 않으므로 요약은 태그 없는 글로 맨 위, 그 아래 이미지 주소 (2026-11-24). 설명 한도 3,000자를 넘으면 뒤 이미지부터 뺀다
-      let top = '', summaryErr = '';
-      try { const sm = await summaryP; if (sm && sm.text) top = sm.text.trim() + '\n\n'; }
+      const lp = await listingP;
+      let top = lp.top ? lp.top + '\n\n' : '', summaryErr = '';
+      try { const sm = await summaryP; if (sm && sm.text) top += sm.text.trim() + '\n\n'; }
       catch (e) { summaryErr = e.message; }
+      const tail = lp.bottom ? '\n\n' + lp.bottom : '';
       const urls = (d.urls || []).slice(0, nUrls);
-      while (urls.length > 1 && (top + urls.join('\n')).length > 3000) urls.pop();
-      return { text: top + urls.join('\n'), count: d.count, n: urls.length, kind: 'urls', summaryErr, ...set };
+      while (urls.length > 1 && (top + urls.join('\n') + tail).length > 3000) urls.pop();
+      return { text: top + urls.join('\n') + tail, count: d.count, n: urls.length, kind: 'urls', summaryErr, ...set };
     }
     let text = d.html, summaryErr = '';
     try { const sm = await summaryP; if (sm) text = sm.html + '\n' + d.html; }

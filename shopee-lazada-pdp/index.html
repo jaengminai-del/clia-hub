@@ -932,7 +932,9 @@ function imageHtmlOpts(html) {
            // PDP 이미지 위에 그 제품의 요약 설명(태국어)을 붙인다 (2026-11-10)
            summaryUrl: () => summaryFor((document.getElementById('pdpUrl').value || '').trim()),   // 태국 제품만
            // Shopee: 설명에 글·alt 를 못 넣으므로 이미지 주소만, 앞 12장 (2026-11-10)
-           urlsOnly: CHANNEL === 'shopee' ? SHOPEE_MAX_IMAGES : 0 };
+           urlsOnly: CHANNEL === 'shopee' ? SHOPEE_MAX_IMAGES : 0,
+           // 상품 설명 정보: Shopee 이미지 주소 글의 위(Promotion) · 아래(나머지) — 벌크 엑셀과 같은 모양 (2026-11-25)
+           listingUrl: () => (document.getElementById('pdpUrl').value || '').trim() };
 }
 function copyImageHTML() {
   if (!window.CLIAImageHTML || approvalBlocks()) return;
