@@ -125,6 +125,28 @@ function publishPageShot(url, out) {
   } catch (e) { console.warn('[crawl] 캡처 올리기 실패', e.message); }
 }
 
+// 크롤 단계 캡처 (2026-11-24): Shopee/Lazada 법인(th · sg) 제품은 크롤이 끝나면 바로 lg.com 을 직접 캡처(이미지 위치 기록 포함)하고
+//   검토 화면 준비를 차례에 넣는다 → 검토 준비는 이 캡처를 그대로 써서 몇 초 만에 끝난다 (따로 캡처하지 않음).
+//   캡처는 서버의 캡처 작업자로 (/api/v1/fullshot force · via direct — Firecrawl 유료 호출 없음). 막히면 크롤 때 받은 Firecrawl 캡처가 남는다.
+//   CRAWL_CAPTURE=0 이면 끔. 대상 법인은 REVIEW_PREWARM_COUNTRIES (기본 th,sg)
+const CRAWL_CAPTURE_COUNTRIES = new Set(String(process.env.REVIEW_PREWARM_COUNTRIES || 'th,sg').split(',').map((x) => x.trim().toLowerCase()).filter(Boolean));
+function crawlCapture(url, slug) {
+  if (process.env.CRAWL_CAPTURE === '0') return;
+  const m = /lg\.com\/([a-z]{2})\//i.exec(url || '');
+  if (!m || !CRAWL_CAPTURE_COUNTRIES.has(m[1].toLowerCase())) return;
+  fetch(`http://127.0.0.1:${process.env.PORT || 3001}/api/v1/fullshot`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url, force: true, via: 'direct' }) })
+    .then((r) => r.json())
+    .then((j) => {
+      console.log(`[crawl] lg.com 캡처 시작 (크롤 단계) ${slug} — ${j.status}`);
+      try {   // 검토 준비 — 캡처가 끝나기를 기다렸다가 그 캡처로 (미리 준비 차례, 사람이 연 것보다 뒤)
+        const review = require('./review');
+        for (const ch of ['shopee', 'lazada']) review.enqueue(slug, ch, {}, true);
+      } catch (e) { console.warn('[crawl] 검토 준비 차례 넣기 실패', e.message); }
+    })
+    .catch((e) => console.warn('[crawl] lg.com 캡처 시작 실패', slug, e.message));
+}
+
 function launchPipeline(jobId, url, usePro, geminiKey, fullAi, html = null, base = '') {
   const slug = slugify(url);
   const out = path.join(OUT_DIR, slug);
@@ -163,6 +185,7 @@ function launchPipeline(jobId, url, usePro, geminiKey, fullAi, html = null, base
     job.exited = true;
     if (!ok) return;
     publishPageShot(url, out);
+    crawlCapture(url, slug);
     autoFrame(out, { base })
       .catch((e) => console.warn('[auto-frame]', slug, e.message))
       .finally(() => {

@@ -2896,6 +2896,70 @@ function putFullshotMeta(key, m) {
 const lastSeg = (u) => String(u || '').replace(/[?#].*$/, '').replace(/\/+$/, '').toLowerCase().split('/').pop();
 const movedOnly = (m) => !!(m && m.final && m.url && lastSeg(m.final) === lastSeg(m.url) && (String(m.final).match(/\//g) || []).length >= 5);
 const isGone = (m) => !!(m && m.gone && !movedOnly(m) && Date.now() - (m.at || 0) < GONE_MS);
+// 캡처 작업자 (2026-11-24): crawler-py/fullshot_worker.py 를 한 번 띄워 두고 Chrome 하나 + 탭으로 캡처한다.
+//   예전에는 캡처마다 python + Chrome 을 새로 띄워, 동시에 여럿이면 프로세스 · 스레드가 모자랐다 (can't start new thread · Target crashed).
+//   작업자가 죽으면 기다리던 캡처는 실패로 돌려주고(미리 준비가 5분 뒤 다시) 다음 캡처 때 새로 띄운다.
+//   FULLSHOT_WORKER=0 이면 예전처럼 캡처마다 fullshot.py 를 띄운다. 동시 탭 수 FULLSHOT_WORKER_CONC (기본 6).
+let fsWorker = null, fsSeq = 0;
+const fsWaiting = new Map();   // id → 결과를 받을 함수
+function fsPython() {
+  const fs = require('fs'), path = require('path');
+  const crawlerDir = path.join(__dirname, 'crawler-py');
+  const venvPy = path.join(crawlerDir, '.venv', 'bin', 'python');
+  return { crawlerDir, py: process.env.CRAWLER_PYTHON || (fs.existsSync(venvPy) ? venvPy : 'python3') };
+}
+function fsWorkerProc() {
+  if (fsWorker) return fsWorker;
+  const { crawlerDir, py } = fsPython();
+  const w = require('child_process').spawn(py, ['fullshot_worker.py'], { cwd: crawlerDir, env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
+  let buf = '';
+  w.stdout.on('data', (d) => {
+    buf += d;
+    for (let i = buf.indexOf('\n'); i >= 0; i = buf.indexOf('\n')) {
+      const line = buf.slice(0, i); buf = buf.slice(i + 1);
+      let m = null;
+      try { m = JSON.parse(line); } catch (_) { continue; }
+      const cb = fsWaiting.get(m.id);
+      if (cb) { fsWaiting.delete(m.id); cb(m); }
+    }
+  });
+  w.stderr.on('data', (d) => { const t = String(d).trim(); if (t && !/^boxes:/.test(t)) console.warn('[fullshot-worker]', t.slice(0, 300)); });
+  w.stdin.on('error', () => {});
+  w.on('exit', (code, sig) => {
+    console.warn(`[fullshot-worker] 끝남 (${code ?? sig}) — 기다리던 캡처 ${fsWaiting.size}개는 실패로`);
+    if (fsWorker === w) fsWorker = null;
+    for (const [id, cb] of fsWaiting) cb({ id, error: `capture worker exited (${code ?? sig})` });
+    fsWaiting.clear();
+  });
+  console.log('[fullshot-worker] 시작');
+  fsWorker = w;
+  return w;
+}
+function fsSpawnOnce(job, timeoutMs) {   // 예전 방식 — 캡처마다 fullshot.py
+  return new Promise((resolve) => {
+    const { crawlerDir, py } = fsPython();
+    const args = job.op === 'check' ? ['fullshot.py', '--check', job.url] : ['fullshot.py', job.url, job.out];
+    const proc = require('child_process').spawn(py, args, { cwd: crawlerDir, env: { ...process.env, PYTHONIOENCODING: 'utf-8', ...(job.via ? { FULLSHOT_VIA: job.via } : {}) } });
+    let out = '';
+    const timer = setTimeout(() => proc.kill('SIGKILL'), timeoutMs);
+    proc.stdout.on('data', (d) => { out += d; });
+    proc.on('close', (code) => { clearTimeout(timer); let meta = {}; try { meta = JSON.parse(out); } catch (_) {} resolve({ code, meta }); });
+  });
+}
+function fsRun(job, timeoutMs = 180 * 1000) {
+  if (process.env.FULLSHOT_WORKER === '0') return fsSpawnOnce(job, timeoutMs);
+  return new Promise((resolve) => {
+    const id = ++fsSeq;
+    let done = false;
+    const finish = (r) => { if (done) return; done = true; clearTimeout(t); fsWaiting.delete(id); resolve(r); };
+    const t = setTimeout(() => finish({ code: 1, meta: { error: 'timeout (capture worker)' } }), timeoutMs);
+    fsWaiting.set(id, (m) => finish({ code: m.error ? 1 : 0, meta: m }));
+    try { fsWorkerProc().stdin.write(JSON.stringify({ id, ...job }) + '\n'); } catch (e) { finish({ code: 1, meta: { error: `capture worker: ${e.message}` } }); }
+  });
+}
+// 재배포 · 끝낼 때 작업자도 함께 끝낸다 (돌고 있는 캡처는 drain 이 기다린 뒤)
+process.on('exit', () => { try { fsWorker && fsWorker.kill('SIGTERM'); } catch (_) {} });
+
 // 찍지 않고 주소만 확인 (예전 캡처) — 제품 페이지면 기록만 남기고, 홈으로 넘어가면 gone
 function verifyFullshot(url, key) {
   const fs = require('fs'), path = require('path');
@@ -2903,10 +2967,9 @@ function verifyFullshot(url, key) {
   const venvPy = path.join(crawlerDir, '.venv', 'bin', 'python');
   const py = process.env.CRAWLER_PYTHON || (fs.existsSync(venvPy) ? venvPy : 'python3');
   fullshotJobs.set(key, { status: 'pending', verify: true });
-  require('child_process').execFile(py, ['fullshot.py', '--check', url.trim()], { cwd: crawlerDir, timeout: 90 * 1000,
-    env: { ...process.env, PYTHONIOENCODING: 'utf-8' } }, (err, out) => {
-    let d = {};
-    try { d = JSON.parse(String(out || '')); } catch (_) {}
+  void py; void crawlerDir;
+  fsRun({ op: 'check', url: url.trim() }, 90 * 1000).then(({ meta: d }) => {
+    const err = d.error ? { message: d.error } : null;
     if (d.final) {
       putFullshotMeta(key, d.gone ? { url, final: d.final, at: Date.now(), gone: true, error: `lg.com 에 이 제품 페이지가 없음 → ${d.final} 로 넘어감`, via: 'check' }
         : { url, final: d.final, at: Date.now(), via: 'check' });
@@ -2925,14 +2988,8 @@ function startFullshot(url, key, via = '') {   // via 'direct': 직접 캡처만
   const abs = path.join(FULLSHOT_DIR, `${key}.jpg`), tmp = `${abs}.part.jpg`;
   fs.mkdirSync(FULLSHOT_DIR, { recursive: true });
   fullshotJobs.set(key, { status: 'pending' });
-  const proc = spawn(py, ['fullshot.py', url.trim(), tmp], { cwd: crawlerDir, env: { ...process.env, PYTHONIOENCODING: 'utf-8', ...(via === 'direct' ? { FULLSHOT_VIA: 'direct' } : {}) } });
-  let out = '';
-  const timer = setTimeout(() => proc.kill('SIGKILL'), 3 * 60 * 1000);
-  proc.stdout.on('data', (d) => { out += d; });
-  proc.on('close', async (code) => {
-    clearTimeout(timer);
-    let meta = {};
-    try { meta = JSON.parse(out); } catch (_) {}
+  void spawn; void py; void crawlerDir;
+  fsRun({ op: 'capture', url: url.trim(), out: tmp, via: via === 'direct' || via === 'firecrawl' ? via : '' }, 3 * 60 * 1000).then(async ({ code, meta }) => {
     const tmpBoxes = `${tmp}.boxes.json`;   // 이미지 위치 기록 (fullshot.py _save_boxes)
     if (code !== 0 || meta.error || !fs.existsSync(tmp)) {
       fs.rmSync(tmp, { force: true });
@@ -2967,7 +3024,8 @@ async function fullshotStatus(url) {
   if (job && job.status === 'pending') return { status: 'pending', key };
   const meta = await fullshotMeta(key);
   if (isGone(meta)) return { status: 'gone', key, error: meta.error || 'lg.com 에 이 제품 페이지가 없음', final: meta.final || '' };
-  if (await fullshotReady(key)) return { status: 'ready', key, src: `/media/fullshot/${key}.jpg`, verified: !!meta };
+  // 다시 찍기가 실패했으면(예전 캡처는 그대로) 그 오류도 알려 준다 — 검토 미리 준비의 차단기가 막힘을 셀 수 있게
+  if (await fullshotReady(key)) return { status: 'ready', key, src: `/media/fullshot/${key}.jpg`, verified: !!meta, ...(job && job.status === 'error' ? { lastError: job.error } : {}) };
   if (job && job.status === 'error') return { status: 'error', key, error: job.error };
   return { status: 'none', key };
 }
@@ -2979,8 +3037,8 @@ app.post('/api/v1/fullshot', async (req, res) => {
   const st = await fullshotStatus(url);
   // verify: 기록 없는 예전 캡처의 주소만 확인 (찍지 않음)
   if (verify && st.status === 'ready' && !st.verified) { verifyFullshot(url, st.key); return res.json({ status: 'pending', key: st.key }); }
-  if (st.status === 'gone' && force) { startFullshot(url, st.key, via === 'direct' ? 'direct' : ''); return res.json({ status: 'pending', key: st.key }); }
-  if (st.status === 'none' || (st.status === 'error' && retry) || (force && st.status === 'ready')) { startFullshot(url, st.key, via === 'direct' ? 'direct' : ''); return res.json({ status: 'pending', key: st.key }); }
+  if (st.status === 'gone' && force) { startFullshot(url, st.key, via === 'direct' || via === 'firecrawl' ? via : ''); return res.json({ status: 'pending', key: st.key }); }
+  if (st.status === 'none' || (st.status === 'error' && retry) || (force && st.status === 'ready')) { startFullshot(url, st.key, via === 'direct' || via === 'firecrawl' ? via : ''); return res.json({ status: 'pending', key: st.key }); }
   res.json(st);
 });
 

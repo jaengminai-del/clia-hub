@@ -70,9 +70,12 @@ def measure(html, medium, fonts_css, need=None):
                 for im in s["imgs"]:
                     if need is not None and not need(im["src"]):
                         continue
-                    shot = page.screenshot(type="png", full_page=True,
-                                           clip={"x": im["left"], "y": im["top"], "width": im["width"], "height": im["bottom"] - im["top"]})
-                    im["gray"] = np.asarray(Image.open(io.BytesIO(shot)).convert("L"), dtype=np.float32)
+                    try:   # 페이지 밖으로 나간 이미지 등은 그 이미지만 건너뛴다 (2026-11-24 OLED65C4PSA: Clipped area is either empty)
+                        shot = page.screenshot(type="png", full_page=True,
+                                               clip={"x": im["left"], "y": im["top"], "width": im["width"], "height": im["bottom"] - im["top"]})
+                        im["gray"] = np.asarray(Image.open(io.BytesIO(shot)).convert("L"), dtype=np.float32)
+                    except Exception:   # noqa: BLE001
+                        pass
             ctx.close()
         finally:
             browser.close()

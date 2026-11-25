@@ -123,7 +123,7 @@ async function sliceManifest(hash) {
 }
 
 /** lg.com 전체 화면 캡처 — 있으면 그것, 없으면(또는 recapture) 캡처하고 기다린다 (최대 4분) */
-async function fullshot(url, recapture, step, existingOnly = false, directOnly = false) {
+async function fullshot(url, recapture, step, existingOnly = false, via = '') {   // via: 'direct' (직접만) · 'firecrawl' · '' (직접 → 막히면 Firecrawl)
   const q = '/api/v1/fullshot?url=' + encodeURIComponent(url);
   let st = await getJ(q);
   // 기록 없는 예전 캡처 → 주소만 확인 (4초) — 없어진 제품 페이지(홈으로 넘어감)를 찍은 것이면 gone (2026-11-24)
@@ -137,7 +137,7 @@ async function fullshot(url, recapture, step, existingOnly = false, directOnly =
   if (st.status !== 'pending') {
     step('fullshot');
     // recapture: 있는 캡처도 다시 찍는다 (지연 로드가 덜 찍힌 캡처 — 새 캡처가 성공해야 바뀐다)
-    st = await post('/api/v1/fullshot', { url, retry: true, force: !!recapture, ...(directOnly ? { via: 'direct' } : {}) }, 30000);
+    st = await post('/api/v1/fullshot', { url, retry: true, force: !!recapture, ...(via ? { via } : {}) }, 30000);
   }
   for (let i = 0; i < 120 && st.status === 'pending'; i++) { await sleep(2000); st = await getJ(q); }
   return st;
@@ -148,8 +148,9 @@ async function fullshot(url, recapture, step, existingOnly = false, directOnly =
 //   30분 뒤 한 건만 먼저 시험해 보고(probe), 풀렸으면 다시 찍고 비워 둔 캡처를 채운다 (prewarm 이 다시 차례에 넣음).
 //   막힌 동안 4개가 동시에 계속 부딪히지 않게. 사람이 연 제품은 상관없이 찍는다 (Firecrawl 로 넘어감).
 const BLOCK_MS = (parseInt(process.env.REVIEW_CAPTURE_BLOCK_MINUTES, 10) || 30) * 60 * 1000;
+const FIRECRAWL_FALLBACK = process.env.REVIEW_FIRECRAWL_FALLBACK !== '0';
 const breaker = { until: 0, probing: false, trips: 0, streak: 0 };   // streak: 서로 다른 제품에서 연달아 막힌 수 (2번이면 쉼)
-const isTransientErr = (m) => /thread|crash|has been closed|Target |Timeout|timed out|ECONN|EAGAIN|ENOMEM|exit \d|SIGKILL|socket hang up|fetch failed/i.test(String(m || ''));
+const isTransientErr = (m) => /thread|crash|has been closed|Target |Timeout|timed out|ECONN|EAGAIN|ENOMEM|exit \d|SIGKILL|socket hang up|fetch failed|KeyboardInterrupt|Chromium|Command failed|worker exited|context was destroyed|exit null|Expecting value|Clipped area/i.test(String(m || ''));
 const isBlockErr = (m) => /막음|막는 중|blocked|stylesheet|\b403\b|access denied/i.test(String(m || ''));
 function captureGate() {   // 미리 준비만: false = 건너뜀, 'probe' = 풀렸는지 시험하는 한 건, true = 찍음
   if (Date.now() < breaker.until || breaker.probing) return false;
@@ -203,7 +204,7 @@ function runPrep(input) {
 // existingOnly (미리 준비): 크롤 데이터와 이미 있는 것만으로 — PDP 요약(AI)·lg.com 캡처(Firecrawl)를 새로 만들지 않는다.
 //   빠진 것은 사람이 그 제품을 열 때 채운다 (화면이 force 로 다시 준비 → 아래 existingOnly=false)
 // bg (미리 준비): lg.com 캡처는 직접(Playwright)만 — 막히면 Firecrawl 로 넘기지 않고 비워 두고, 사람이 열 때 채운다
-async function prepare(slug, ch, { recapture = false, existingOnly = false, bg = false } = {}) {
+async function prepare(slug, ch, { recapture = false, existingOnly = false, bg = false, upgrade = false } = {}) {
   const key = `${slug}|${ch}`, job = jobs.get(key);
   // 단계별 시간 (속도 개선용 — 로그 한 줄에 함께)
   const T = {}, t0 = Date.now();
@@ -286,15 +287,32 @@ async function prepare(slug, ch, { recapture = false, existingOnly = false, bg =
   step('fullshot-check');
   let fsErr = '', st = null, skipped = false;
   const shoot = async (re) => {
-    const gate = bg && !existingOnly ? captureGate() : true;   // 미리 준비: lg.com 이 막는 중이면 있는 캡처만 (새로 찍지 않음)
-    skipped = !gate;
+    // upgrade (위치 기록 다시 찍기, 천천히): 차단기와 상관없이 직접 캡처 한 번 — 실패해도 예전 캡처는 그대로, 차단기 · Firecrawl 에 손대지 않음
+    const gate = upgrade ? true : bg && !existingOnly ? captureGate() : true;   // 미리 준비: lg.com 이 막는 중이면 직접 캡처는 하지 않는다
+    // 사용자 결정(2026-11-24): 직접 캡처가 막히면 Firecrawl 로 (유료). 막힌 동안(차단기)은 바로 Firecrawl — REVIEW_FIRECRAWL_FALLBACK=0 이면 예전처럼 비워 둠.
+    //   Firecrawl 캡처는 이미지 위치 기록이 없어 그림으로 맞춘다 → 풀리면 위치 기록 캡처로 다시 찍는다 (prewarm 의 위치 기록 다시 찍기)
+    const fc = !upgrade && bg && !existingOnly && !gate && FIRECRAWL_FALLBACK;
+    skipped = !gate && !fc;
     let tried = false;   // 실제로 새로 찍었는지 (있는 캡처를 그대로 쓰면 풀렸는지 알 수 없다)
     const stp = (x) => { if (x === 'fullshot') tried = true; step(x); };
-    try { st = await LANES.capture(() => fullshot(sum.url, re && !skipped, stp, (existingOnly && !re) || skipped, bg), !bg); fsErr = ''; } catch (e) { fsErr = String(e.message).slice(0, 200); tried = true; }
+    const viaNow = fc ? 'firecrawl' : bg ? 'direct' : '';
+    // 막힌 동안 「다시 찍기」(위치 기록 · 덜 찍힘)는 하지 않는다 — 직접 찍은 캡처를 위치 기록 없는 Firecrawl 캡처로 바꾸지 않게
+    try { st = await LANES.capture(() => fullshot(sum.url, re && !skipped && !fc, stp, (existingOnly && !re) || skipped, viaNow), !bg); fsErr = ''; } catch (e) { fsErr = String(e.message).slice(0, 200); tried = true; }
+    // 직접 캡처가 막혔으면 바로 Firecrawl 로 한 번 더 (차단기 기록은 직접 캡처 결과로)
+    const directBlocked = !upgrade && viaNow === 'direct' && FIRECRAWL_FALLBACK && st && st.status === 'error' && isBlockErr(st.error);
+    if (directBlocked) {
+      if (gate) captureResult(gate, st.error);
+      const blockedErr = st.error;
+      try { st = await LANES.capture(() => fullshot(sum.url, false, stp, false, 'firecrawl'), !bg); } catch (e) { fsErr = String(e.message).slice(0, 200); }
+      if (st && st.status === 'ready') console.log(`[review] ${slug}: lg.com 이 직접 캡처를 막음 → Firecrawl 로 찍음`);
+      else if (st && st.status === 'error') st = { ...st, error: `${blockedErr} · Firecrawl: ${st.error}` };
+    }
+    if (fc && st && st.status === 'ready' && tried) console.log(`[review] ${slug}: lg.com 이 막는 중 → Firecrawl 로 찍음`);
     if (st && st.status === 'none') fsErr = skipped ? 'lg.com 이 막는 중 — 나중에 채움' : existingOnly ? 'not captured yet' : 'no capture';
     if (st && (st.status === 'error' || st.status === 'gone')) fsErr = String(st.error || 'capture failed').slice(0, 200);
-    if (gate && bg && !existingOnly) {
-      if (tried) captureResult(gate, st && st.status === 'ready' ? '' : fsErr);
+    if (!upgrade && gate && bg && !existingOnly && !directBlocked) {
+      // 다시 찍기가 막혀 예전 캡처가 남은 것(상태는 ready)도 막힘으로 센다 — 차단기가 열려야 막힌 동안 다시 찍기를 멈춘다
+      if (tried) captureResult(gate, st && st.status === 'ready' ? (st.lastError || '') : fsErr);
       else if (gate === 'probe') breaker.probing = false;   // 시험할 기회를 다음 건에 넘긴다
     }
   };
@@ -348,7 +366,8 @@ function pump() {
     runningSlugs.set(slug, (runningSlugs.get(slug) || 0) + 1);
     prepare(slug, ch, { ...opts, bg }).then(() => jobs.delete(key)).catch((e) => {
       console.warn('[review] 준비 실패', slug, ch, e.message);
-      jobs.set(key, { state: 'error', error: String(e.message).slice(0, 300), at: Date.now(), bg });
+      const prevTries = (jobs.get(key) || {}).tries || 0;   // 같은 채널이 연달아 실패한 수 (일시 오류 빠른 재시도는 3번까지)
+      jobs.set(key, { state: 'error', error: String(e.message).slice(0, 300), at: Date.now(), bg, tries: prevTries + 1 });
     }).finally(() => {
       running--; if (bg) runningBg--;
       const n = (runningSlugs.get(slug) || 1) - 1; if (n) runningSlugs.set(slug, n); else runningSlugs.delete(slug);
@@ -364,46 +383,75 @@ function enqueue(slug, ch, opts = {}, bg = false) {
     if (!bg && q >= 0 && queue[q].bg) { const [it] = queue.splice(q, 1); it.bg = false; it.opts = { ...it.opts, ...opts, existingOnly: false }; queue.unshift(it); j.bg = false; pump(); }
     return j;
   }
-  const nj = { state: 'pending', step: 'queued', at: Date.now(), bg };
+  const nj = { state: 'pending', step: 'queued', at: Date.now(), bg, tries: j && j.state === 'error' ? j.tries || 0 : 0 };
   jobs.set(key, nj);
   if (bg) queue.push({ slug, ch, opts, bg }); else queue.unshift({ slug, ch, opts, bg });
   pump();
   return nj;
 }
 
-const upgraded = new Set();   // 위치 기록 캡처로 다시 찍은 제품 (서버가 떠 있는 동안 한 번씩만)
+// 위치 기록 다시 찍기 — 천천히 (2026-11-25 사용자 결정): 위치 기록 없이 찍은 캡처(Firecrawl · 예전 캡처, 그림 맞추기)를
+//   REVIEW_UPGRADE_INTERVAL_SEC(기본 90초)마다 한 제품씩 직접 다시 찍어 주소 맞추기로 옮긴다. 다른 준비가 없을 때만, 한 번에 하나.
+//   lg.com 이 여러 개를 한꺼번에 찍으면 막아서 한꺼번에 하던 것(한 번 훑을 때 60개)은 계속 막혀 진척이 없었다.
+//   차단기가 열려 있어도 시도하고(실패해도 예전 캡처 그대로), 실패한 제품은 6시간 뒤 다시.
+const UPGRADE_EVERY = envInt('REVIEW_UPGRADE_INTERVAL_SEC', 90, 20, 3600) * 1000;
+const upgradeTried = new Map();   // slug → 시도한 시각
+let upgradeKey = '';
+function upgradeCandidates() {
+  const idx = require('./bulk-catalog').productIndex();
+  return Object.values(idx.products).filter((p) => PREWARM_COUNTRIES.has(p.country)).sort((a, b) => b.crawled_at - a.crawled_at)
+    .filter((p) => {
+      const { state, rec } = prepState(p.slug, 'shopee', p);
+      return state === 'ready' && rec && rec.shot && rec.align && rec.align.mode !== 'url';
+    });
+}
+function upgradeTick() {
+  if (!PREWARM || paused || PREWARM_EXISTING_ONLY) return;
+  if (upgradeKey) { const j = jobs.get(upgradeKey); if (j && j.state === 'pending') return; upgradeKey = ''; }
+  if (queue.length || running) return;   // 다른 준비가 먼저
+  try {
+    const now = Date.now();
+    const cands = upgradeCandidates();
+    const p = cands.find((x) => now - (upgradeTried.get(x.slug) || 0) > 6 * 3600 * 1000);
+    if (!p) return;
+    upgradeTried.set(p.slug, now);
+    upgradeKey = `${p.slug}|shopee`;
+    console.log(`[review] 위치 기록 다시 찍기 (천천히, 남은 ${cands.length}개): ${p.slug}`);
+    enqueue(p.slug, 'shopee', { recapture: true, upgrade: true }, true);
+  } catch (e) { console.warn('[review] 위치 기록 다시 찍기 실패', e.message); }
+}
+if (PREWARM) setInterval(upgradeTick, UPGRADE_EVERY).unref();
 /** 미리 준비: Shopee/Lazada 법인 제품 중 준비 안 됨 · 내용 바뀜인 채널을 미리 준비 차례에 넣는다 (최근 크롤 먼저) */
 function prewarm() {
   if (!PREWARM || paused) return 0;
-  let n = 0, refills = 0, upgrades = 0;
+  let n = 0, refills = 0;
   try {
     const idx = require('./bulk-catalog').productIndex();
     const ps = Object.values(idx.products).filter((p) => PREWARM_COUNTRIES.has(p.country)).sort((a, b) => b.crawled_at - a.crawled_at);
     for (const p of ps) for (const ch of CHANNELS) {
       const j = jobs.get(`${p.slug}|${ch}`);
-      if (j && (j.state === 'pending' || (j.state === 'error' && Date.now() - j.at < 6 * 3600 * 1000))) continue;
+      // 실패한 준비는 6시간 뒤 다시 — 단, 일시 오류(프로세스 · 스레드 부족, 브라우저 충돌, 연결)는 5분 뒤 (2026-11-24 운영: EAGAIN · KeyboardInterrupt)
+      const retryMs = j && j.state === 'error' && isTransientErr(j.error) && (j.tries || 0) <= 3 ? 5 * 60 * 1000 : 6 * 3600 * 1000;
+      if (j && (j.state === 'pending' || (j.state === 'error' && Date.now() - j.at < retryMs))) continue;
       const { state, rec } = prepState(p.slug, ch, p);
       // 캡처를 비워 두고 준비한 것(lg.com 이 막던 때) — 차단이 풀렸으면 다시 (1시간 지난 것만, 한 번 훑을 때 최대 40개)
       // 일시 오류(브라우저 · 스레드 부족 · 시간 초과)로 캡처 없이 준비된 것은 5분 뒤에 (2026-11-24 운영: 동시 실행이 많아 「can't start new thread」 · 「Target crashed」)
       const transient = rec && ((!rec.shot && isTransientErr(rec.shotErr)) || (rec.shot && !rec.align && isTransientErr(rec.alignErr)));
-      const refill = state === 'ready' && !PREWARM_EXISTING_ONLY && rec && (transient || (!rec.shot && (isBlockErr(rec.shotErr) || movedBack(rec)))) && !captureBlocked() && refills < 40
+      // 막힌 동안에도 채운다 — 차단기가 열려 있으면 준비가 바로 Firecrawl 로 찍는다 (REVIEW_FIRECRAWL_FALLBACK)
+      // 요약이 예전 규칙으로 실패한 것도 다시 (규칙이 바뀌면 서버가 새로 만든다 — 같은 규칙으로 실패한 것은 서버가 24시간 기억해 바로 돌려줌)
+      const sumRetry = rec && /rule not met/.test(rec.summaryErr || '');
+      const refill = state === 'ready' && !PREWARM_EXISTING_ONLY && rec && (transient || sumRetry || (!rec.shot && (isBlockErr(rec.shotErr) || movedBack(rec) || /Firecrawl 캡처 실패/.test(rec.shotErr || ''))))
+        && (FIRECRAWL_FALLBACK || !captureBlocked()) && refills < 40
         && Date.now() - (rec.prepared_at || 0) > (transient ? 5 : 60) * 60 * 1000;
       if (state === 'none' || state === 'stale' || state === 'error' || refill) {
         enqueue(p.slug, ch, { existingOnly: PREWARM_EXISTING_ONLY }, true); n++;
         if (refill) refills++;
         continue;
       }
-      // 위치 기록 없이 찍은 예전 캡처 → 다시 찍어(위치 기록 포함) 주소로 맞춘다 (2026-11-24 — 그림 맞추기는 느리고 덜 정확).
-      //   새 일이 거의 없을 때만(대기 50개 미만), 한 번 훑을 때 60개까지, 한 채널만 (다른 채널은 그 결과를 그대로 씀)
-      if (state === 'ready' && !PREWARM_EXISTING_ONLY && ch === 'shopee' && rec && rec.shot && rec.align && rec.align.mode !== 'url'
-          && !upgraded.has(p.slug) && upgrades < 60 && queue.length < 50 && !captureBlocked()) {
-        upgraded.add(p.slug); upgrades++; n++;
-        enqueue(p.slug, ch, { recapture: true }, true);
-      }
     }
     verifySweep(ps);
   } catch (e) { console.warn('[review] 미리 준비 목록 실패', e.message); }
-  if (n) console.log(`[review] 미리 준비 ${n}개 차례에 넣음 (대기 ${queue.length} · 동시 ${BG_CONC}${refills ? ` · 캡처 채우기 ${refills}` : ''}${upgrades ? ` · 위치 기록 캡처 ${upgrades}` : ''})`);
+  if (n) console.log(`[review] 미리 준비 ${n}개 차례에 넣음 (대기 ${queue.length} · 동시 ${BG_CONC}${refills ? ` · 캡처 채우기 ${refills}` : ''})`);
   return n;
 }
 if (PREWARM) {
