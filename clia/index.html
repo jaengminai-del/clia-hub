@@ -938,6 +938,24 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 .chb-overlay{position:fixed;inset:0;z-index:9600;background:#F6F3EB;display:none;flex-direction:column;}
 .chb-overlay.show{display:flex;}
 .chb-overlay iframe{flex:1;width:100%;border:0;background:#fff;}
+/* 빌더 머리줄 (2026-11-25): 제품명 · [상태 · 내보내기 ▾ · 닫기] — 상태와 내보내기 메뉴는 빌더가 알려 준다(clia-builder-state) */
+.chb-overlay .ebb-title{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chb-overlay .ebb-close{margin-left:0}
+.chb-side{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.chb-st{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#3A3835;white-space:nowrap}
+.chb-st .k{color:#8E8B85;font-weight:500}
+.chb-st .d{width:8px;height:8px;border-radius:50%;background:#A9A59E}
+.chb-st.stale .d{background:#E9A800}.chb-st.approved .d{background:#1E9E5A}.chb-st.rejected .d{background:#E5322B}
+.chb-st.link{cursor:pointer}.chb-st.link:hover .v{text-decoration:underline}
+.chb-ex{position:relative}
+.chb-ex>button{height:32px;padding:0 14px;border-radius:6px;border:1px solid #E53238;background:#E53238;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.chb-ex>button:hover:not(:disabled){background:#c42a2f}
+.chb-ex>button:disabled{background:#F4F2EE;color:#B5B1AA;border-color:#E6E1D6;cursor:not-allowed}
+.chb-menu{position:absolute;right:0;top:calc(100% + 6px);min-width:230px;background:#fff;border:1px solid #E6E1D6;border-radius:12px;box-shadow:0 14px 36px rgba(0,0,0,.16);padding:6px;z-index:5;display:flex;flex-direction:column;gap:2px}
+.chb-menu[hidden]{display:none}
+.chb-menu button{all:unset;box-sizing:border-box;padding:9px 12px;border-radius:8px;font-size:13px;font-weight:600;color:#111;cursor:pointer;white-space:nowrap}
+.chb-menu button:hover:not(:disabled),.chb-menu button:focus-visible{background:#FBF0EF}
+.chb-menu button:disabled{color:#B5B1AA;cursor:not-allowed}
 .coffee-status span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -7149,13 +7167,39 @@ async function openChannel(ch,pid){
   if(ch==='ebay'){openEbayBuilder();ebbFromLibrary(pid);return;}
   const b=BUILDERS[ch];
   document.getElementById('chbTitle').textContent=b.title+' — '+(p.nm||p.id);
+  chbState(null);
   _frameGo('chbFrame',b.path+'?url='+encodeURIComponent(url)+'&channel='+ch+'&lang='+_txLang());   // 빌더 UI를 법인 언어로
   document.getElementById('chbOverlay').classList.add('show');
 }
 function closeBuilderFrame(){
   document.getElementById('chbOverlay').classList.remove('show');
   _frameGo('chbFrame','about:blank');
+  chbState(null);
 }
+// 빌더가 알려 주는 상태 → 머리줄 [상태 · 내보내기 ▾] (2026-11-25). 메뉴를 누르면 빌더의 같은 항목을 누르게 한다
+let _chb=null;
+function chbState(st){
+  _chb=st;const side=document.getElementById('chbSide');if(!side)return;
+  if(!st){side.innerHTML='';return;}
+  const a=st.approval,open=!!(side.querySelector('.chb-menu')&&!side.querySelector('.chb-menu').hidden);
+  const stH=a?`<span class="chb-st ${fltEsc(a.status)}${a.link?' link':''}" title="${fltEsc(a.tip||'')}"${a.link?' role="link" tabindex="0"':''}><span class="k">${fltEsc(a.key)} ·</span><span class="d"></span><span class="v">${fltEsc(a.label)}</span></span>`:'';
+  const exH=st.exportShown?`<div class="chb-ex"><button type="button" aria-haspopup="true" aria-expanded="${open}"${st.exportDisabled?' disabled':''}>${fltEsc(st.exportLabel||'Export ▾')}</button>
+    <div class="chb-menu" role="menu"${open?'':' hidden'}>${(st.items||[]).map(i=>`<button type="button" role="menuitem" data-id="${fltEsc(i.id)}" title="${fltEsc(i.title||'')}"${i.disabled?' disabled':''}>${fltEsc(i.label)}</button>`).join('')}</div></div>`:'';
+  side.innerHTML=stH+exH;
+  const s=side.querySelector('.chb-st.link');
+  if(s){const go=()=>window.open(a.link,'_blank');s.onclick=go;s.onkeydown=e=>{if(e.key==='Enter')go();};}
+  const b=side.querySelector('.chb-ex>button'),m=side.querySelector('.chb-menu');
+  if(b){b.onclick=e=>{e.stopPropagation();m.hidden=!m.hidden;b.setAttribute('aria-expanded',String(!m.hidden));};
+    m.querySelectorAll('button[data-id]').forEach(x=>x.onclick=()=>{m.hidden=true;b.setAttribute('aria-expanded','false');
+      const f=document.getElementById('chbFrame');if(f&&f.contentWindow)f.contentWindow.postMessage({type:'clia-builder-export',id:x.dataset.id},location.origin);});}
+}
+window.addEventListener('message',e=>{
+  if(e.origin!==location.origin||!e.data||e.data.type!=='clia-builder-state')return;
+  const f=document.getElementById('chbFrame');if(!f||e.source!==f.contentWindow)return;
+  chbState(e.data);
+});
+document.addEventListener('click',e=>{const m=document.querySelector('#chbSide .chb-menu');if(m&&!m.hidden&&!e.target.closest('.chb-ex')){m.hidden=true;}});
+document.addEventListener('keydown',e=>{const m=document.querySelector('#chbSide .chb-menu');if(e.key==='Escape'&&m&&!m.hidden){m.hidden=true;e.stopPropagation();}},true);
 // iframe 내용 바꾸기 — 같은 iframe 의 주소를 바꾸면(src 든 location.replace 든) 브라우저가 그 변화를 기록에 묶어 두어서,
 // 뒤로가기·앞으로가기를 할 때 닫아 둔 빌더가 뒤에서 다시 불려 온다. 그래서 주소를 바꾸는 대신 iframe 을 새것으로 갈아 끼운다.
 function _frameGo(id,url){
@@ -7717,6 +7761,7 @@ window.addEventListener('load',()=>{
     <div class="ebb-logo">LG<b>CLIA</b></div>
     <div class="ebb-sep"></div>
     <div class="ebb-title" id="chbTitle"></div>
+    <div class="chb-side" id="chbSide"></div>
     <button class="ebb-close" onclick="closeBuilderFrame()">Close</button>
   </div>
   <iframe id="chbFrame" title="Channel builder"></iframe>

@@ -316,6 +316,7 @@
     head.innerHTML = `<span>${t.title(cards.length)}</span>`;
     const fullBtn = document.createElement('button');
     fullBtn.type = 'button';
+    fullBtn.dataset.cliaFull = '1';   // 화면이 이 버튼을 다른 곳(툴바)에 두면 숨길 수 있게
     fullBtn.textContent = t.full;
     fullBtn.style.cssText = `flex-shrink:0;padding:6px 12px;border-radius:999px;border:1px solid #262626;background:#fff;color:#262626;font:600 12px/1 ${FONT};cursor:pointer;text-transform:none;letter-spacing:0;`;
     fullBtn.onclick = () => { const u = getUrl && getUrl(); if (u) fullPopup(u, apiBase); };
@@ -349,6 +350,7 @@
       // 오른쪽 위 ✕ → 확인 후 미리보기에서 카드 삭제 (목록은 MutationObserver 로 다시 그려짐)
       const x = document.createElement('button');
       x.type = 'button'; x.title = t.del; x.setAttribute('aria-label', t.del);
+      x.dataset.cliaDel = '1';   // 화면이 편집 중에만 보이게 할 수 있게
       x.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
       x.style.cssText = 'position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;border:none;background:transparent;color:#A8A49C;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;transition:background .15s,color .15s;';
       x.onmouseenter = () => { x.style.background = '#FFECEB'; x.style.color = '#FD312E'; item.style.borderColor = '#FD312E'; };
