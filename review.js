@@ -593,6 +593,14 @@ router.get('/api/v1/review/item/:slug/align-debug', async (req, res) => {
       if (!m) { const buf = await store.getBuffer(`media-fullshot/${rec.shot.key}.json`).catch(() => null); try { m = buf ? JSON.parse(buf.toString('utf8')) : null; } catch (_) { m = null; } }
       out.shotMeta = m;
     }
+    if (req.query.crawl) {   // 크롤 데이터 (lg.com HTML · 섹션별 컴포넌트) — 크롤 데이터만으로 영역 · 카피를 맞출 수 있는지 점검용
+      const dir = dirOf(slug);
+      const raw = path.join(dir, 'pc_raw.html');
+      out.pcRaw = fs.existsSync(raw) ? fs.readFileSync(raw, 'utf8') : null;
+      const m = readJson(path.join(dir, 'mirror.json'));
+      out.mirror = m ? (m.sections || []).map((x) => ({ order: x.order, component_id: x.component_id, component_dom_index: x.component_dom_index, text: x.text,
+        media: (x.media || []).map((v) => v.pc_url || v.unified_url || v.mobile_url).filter(Boolean) })) : null;
+    }
     if (req.query.lite) { if (out.boxes) out.boxes = { scale: out.boxes.scale, after: !!out.boxes.after, comps: Array.isArray(out.boxes.comps) ? out.boxes.comps.length : 0, items: (out.boxes.items || []).length }; return res.json(out); }
     const lc = path.join(SLICE_CACHE, rec.hash || '_', 'align-layout.json');
     if (!fs.existsSync(lc)) {
