@@ -158,12 +158,12 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 .clia-hub .dp > .dp-top .dp-th{width:35px;height:35px;border-radius:6px}
 .clia-hub .dp > .dp-top .dp-img-count{margin:4px 0 0}
 .clia-hub .dp > .dp-top .dp-name{font-size:20px;margin-bottom:6px}
-.sum-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0 22px}
-.sum-card{all:unset;box-sizing:border-box;cursor:pointer;background:#fff;border:1px solid var(--clia-gray-200,#E6E3DD);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:3px}
-.sum-card:hover{border-color:var(--clia-gray-300,#ccc);box-shadow:0 6px 16px rgba(0,0,0,.06)}
-.sum-card:focus-visible{outline:2px solid var(--clia-gray-900,#111);outline-offset:2px}
-.sum-card .i{font-size:18px}.sum-card .l{font-size:12px;color:var(--clia-gray-600,#6b6862);margin-top:4px}.sum-card .v{font-size:16px;font-weight:800;color:var(--clia-gray-900,#111)}.sum-card .go{font-size:12px;font-weight:700;color:var(--clia-brand,#EA1917);margin-top:4px}
-.sum-card.warn{border-color:#F0C98B;background:#FFFBF2}
+.sum-cards{display:flex;flex-wrap:wrap;background:#fff;border:1px solid var(--clia-gray-200,#E6E3DD);border-radius:12px;margin:16px 0 22px;overflow:hidden}
+.sum-card{all:unset;box-sizing:border-box;cursor:pointer;flex:1 1 auto;padding:12px 18px;display:flex;align-items:baseline;justify-content:center;gap:8px;white-space:nowrap;border-left:1px solid var(--clia-gray-200,#E6E3DD);margin-left:-1px}
+.sum-card:hover{background:var(--clia-gray-50,#FAF9F7)}
+.sum-card:focus-visible{outline:2px solid var(--clia-gray-900,#111);outline-offset:-2px}
+.sum-card .l{font-size:13px;color:var(--clia-gray-600,#6b6862)}.sum-card .v{font-size:14px;font-weight:700;color:var(--clia-gray-900,#111)}
+.sum-card.warn{background:#FFFBF2}.sum-card.warn .v{color:#B26B00}
 .side2{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;margin-bottom:26px}.side2.one{grid-template-columns:1fr}
 .lrbox{background:#fff;border:1px solid var(--clia-gray-200,#E6E3DD);border-radius:18px;padding:16px;min-width:0;scroll-margin-top:12px}
 .clia-hub .lrbox .feat-header{margin-top:0}
@@ -177,7 +177,7 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 .clia-hub .spec-t.two tr{display:grid;grid-template-columns:42% 58%}
 .clia-hub .spec-t.two tr:nth-child(odd){border-right:1px solid var(--clia-gray-100,#F0EEE9)}
 .clia-hub .spec-t.two td{width:auto;padding:8px 12px;font-size:12px;line-height:1.4}
-@media (max-width:1300px){.side2{grid-template-columns:1fr}.clia-hub .lrbox .feat-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}.sum-cards{grid-template-columns:repeat(2,1fr)}.clia-hub .spec-t.two tbody{grid-template-columns:1fr}}
+@media (max-width:1300px){.side2{grid-template-columns:1fr}.clia-hub .lrbox .feat-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}.clia-hub .spec-t.two tbody{grid-template-columns:1fr}}
 .feat-thumb .ft-more{position:absolute;top:6px;right:6px;background:rgba(17,17,17,.72);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;pointer-events:none;}
 .feat-thumb .ft-overlay{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);color:#fff;padding:4px 6px;font-size:8px;line-height:1.3;opacity:0;transition:opacity .2s;}
 .feat-thumb:hover .ft-overlay{opacity:1;}
@@ -1072,7 +1072,7 @@ const I18N={en:{
   'list.title':'Product List — {c}',
   'list.count':'{n} products',
   'st.ready':'✓ Ready','st.md':'✓ MD','st.pend':'○ Pending',
-  "sum.gallery":"Gallery","sum.images":"{n} images","sum.feat":"Feature content","sum.sections":"{n} sections","sum.geo":"GEO score","sum.specs":"Specifications","sum.items":"{n} items","sum.view":"View ↓",
+  "sum.gallery":"Gallery","sum.images":"{n} images","sum.feat":"Feature content","sum.sections":"{n} sections","sum.geo":"GEO score","sum.specs":"Specifications","sum.items":"{n} items",
   'dp.images':'{n} gallery images from LG.com',
   'dp.model':'Model',
   'dp.view':'View on LG.com →','dp.open':'Details',
@@ -1126,7 +1126,7 @@ I18N.de={
   'geo.pscores':'Bewertung je KI-Plattform','geo.why.pp':'Zitiert Quellen — gewichtet belegte Q&A, technische Daten und Feature-Details','geo.why.gp':'Shopping-Attribute — gewichtet technische Daten, Bilder, Features und Preis','geo.why.go':'Antwort-Snippets — gewichtet FAQ, Strukturdaten und Features','geo.why.bi':'Suchanfragen-Abgleich — gewichtet Keywords, technische Daten und Bilder','geo.generating':'KI-Q&A und Keywords werden aus der gecrawlten Seite erstellt…','geo.genFail':'KI-Q&A-Erstellung fehlgeschlagen: ','geo.retry':'Erneut versuchen','geo.md':'Optimierte MD-Datei erstellen','coffee.geo':'GEO-Q&A und Keywords werden erstellt…','md.features':'Wichtigste Merkmale','md.specs':'Technische Daten','md.faq':'Häufig gestellte Fragen','md.keywords':'Keywords',
   'tb.logout':'Abmelden','list.title':'Produktliste — {c}','list.count':'{n} Produkte',
   'st.ready':'✓ Bereit','st.md':'✓ MD','st.pend':'○ Ausstehend',
-  "sum.gallery":"Galerie","sum.images":"{n} Bilder","sum.feat":"Feature-Inhalte","sum.sections":"{n} Abschnitte","sum.geo":"GEO-Wert","sum.specs":"Technische Daten","sum.items":"{n} Einträge","sum.view":"Ansehen ↓",
+  "sum.gallery":"Galerie","sum.images":"{n} Bilder","sum.feat":"Feature-Inhalte","sum.sections":"{n} Abschnitte","sum.geo":"GEO-Wert","sum.specs":"Technische Daten","sum.items":"{n} Einträge",
   'dp.images':'{n} Galeriebilder von LG.com','dp.model':'Modell','dp.view':'Auf LG.com ansehen →','dp.open':'Details','dp.recrawl':'Neu crawlen',
   'dp.channel':'KI-CONTENT-ERSTELLUNG — KANAL WÄHLEN','ch.lgcom':'LG.com Offiziell','ch.md':'MD-Quelle','ch.comingSoon':'Demnächst verfügbar',
   'dp.feat':'Feature-Inhalte ({n})','dp.aiExtracted':'KI-extrahiert','dp.hover':'Zum Ansehen darüberfahren · Zum Vergrößern klicken','dp.specs':'Technische Daten',
@@ -1153,7 +1153,7 @@ I18N.th={
   'geo.pscores':'คะแนนตามแพลตฟอร์ม AI','geo.why.pp':'อ้างอิงแหล่งที่มา — ให้น้ำหนักกับถาม-ตอบที่มีแหล่งอ้างอิง ข้อมูลจำเพาะ และรายละเอียดฟีเจอร์','geo.why.gp':'คุณสมบัติสำหรับช้อปปิ้ง — ให้น้ำหนักกับข้อมูลจำเพาะ ภาพ ฟีเจอร์ และราคา','geo.why.go':'สนิปเป็ตคำตอบ — ให้น้ำหนักกับ FAQ ข้อมูลโครงสร้าง และฟีเจอร์','geo.why.bi':'การจับคู่คำค้น — ให้น้ำหนักกับคีย์เวิร์ด ข้อมูลจำเพาะ และภาพ','geo.generating':'กำลังสร้างถาม-ตอบและคีย์เวิร์ดด้วย AI จากหน้าที่ครอว์ล…','geo.genFail':'สร้างถาม-ตอบด้วย AI ไม่สำเร็จ: ','geo.retry':'ลองอีกครั้ง','geo.md':'สร้างไฟล์ MD ที่ปรับแต่งแล้ว','coffee.geo':'กำลังสร้างถาม-ตอบและคีย์เวิร์ด GEO…','md.features':'ฟีเจอร์หลัก','md.specs':'ข้อมูลจำเพาะ','md.faq':'คำถามที่พบบ่อย','md.keywords':'คีย์เวิร์ด',
   'tb.logout':'ออกจากระบบ','list.title':'รายการสินค้า — {c}','list.count':'{n} สินค้า',
   'st.ready':'✓ พร้อม','st.md':'✓ MD','st.pend':'○ รอดำเนินการ',
-  "sum.gallery":"แกลเลอรี","sum.images":"{n} ภาพ","sum.feat":"คอนเทนต์ฟีเจอร์","sum.sections":"{n} ส่วน","sum.geo":"คะแนน GEO","sum.specs":"สเปก","sum.items":"{n} รายการ","sum.view":"ดู ↓",
+  "sum.gallery":"แกลเลอรี","sum.images":"{n} ภาพ","sum.feat":"คอนเทนต์ฟีเจอร์","sum.sections":"{n} ส่วน","sum.geo":"คะแนน GEO","sum.specs":"สเปก","sum.items":"{n} รายการ",
   'dp.images':'{n} ภาพแกลเลอรีจาก LG.com','dp.model':'รุ่น','dp.view':'ดูบน LG.com →','dp.open':'รายละเอียด','dp.recrawl':'ครอว์ลใหม่',
   'dp.channel':'สร้างคอนเทนต์ด้วย AI — เลือกช่องทาง','ch.lgcom':'LG.com อย่างเป็นทางการ','ch.md':'แหล่ง MD','ch.comingSoon':'เร็ว ๆ นี้',
   'dp.feat':'คอนเทนต์ฟีเจอร์ ({n})','dp.aiExtracted':'ดึงข้อมูลด้วย AI','dp.hover':'วางเมาส์เพื่อดูตัวอย่าง · คลิกเพื่อขยาย','dp.specs':'ข้อมูลจำเพาะ',
@@ -1180,7 +1180,7 @@ I18N.ar={
   'geo.pscores':'تقييم كل منصة ذكاء اصطناعي','geo.why.pp':'يستشهد بالمصادر — يركز على الأسئلة والأجوبة الموثقة والمواصفات وتفاصيل الميزات','geo.why.gp':'سمات التسوق — يركز على المواصفات والصور والميزات والسعر','geo.why.go':'مقتطفات الإجابات — يركز على الأسئلة الشائعة والبيانات المنظمة والميزات','geo.why.bi':'مطابقة الاستعلامات — يركز على الكلمات المفتاحية والمواصفات والصور','geo.generating':'جارٍ إنشاء الأسئلة والأجوبة والكلمات المفتاحية بالذكاء الاصطناعي من الصفحة…','geo.genFail':'فشل إنشاء الأسئلة والأجوبة بالذكاء الاصطناعي: ','geo.retry':'إعادة المحاولة','geo.md':'إنشاء ملف MD محسّن','coffee.geo':'جارٍ إنشاء أسئلة وأجوبة وكلمات GEO المفتاحية…','md.features':'الميزات الرئيسية','md.specs':'المواصفات','md.faq':'الأسئلة الشائعة','md.keywords':'الكلمات المفتاحية',
   'tb.logout':'تسجيل الخروج','list.title':'قائمة المنتجات — {c}','list.count':'{n} منتج',
   'st.ready':'✓ جاهز','st.md':'✓ MD','st.pend':'○ قيد الانتظار',
-  "sum.gallery":"المعرض","sum.images":"{n} صورة","sum.feat":"محتوى الميزات","sum.sections":"{n} قسم","sum.geo":"تقييم GEO","sum.specs":"المواصفات","sum.items":"{n} عنصر","sum.view":"عرض ↓",
+  "sum.gallery":"المعرض","sum.images":"{n} صورة","sum.feat":"محتوى الميزات","sum.sections":"{n} قسم","sum.geo":"تقييم GEO","sum.specs":"المواصفات","sum.items":"{n} عنصر",
   'dp.images':'{n} صورة من معرض LG.com','dp.model':'الطراز','dp.view':'عرض على LG.com ←','dp.open':'التفاصيل','dp.recrawl':'إعادة الزحف',
   'dp.channel':'إنشاء المحتوى بالذكاء الاصطناعي — اختر القناة','ch.lgcom':'موقع LG.com الرسمي','ch.md':'مصدر MD','ch.comingSoon':'قريبًا',
   'dp.feat':'محتوى الميزات ({n})','dp.aiExtracted':'مستخرج بالذكاء الاصطناعي','dp.hover':'مرّر للمعاينة · انقر للتكبير','dp.specs':'المواصفات',
@@ -2976,7 +2976,7 @@ function showDetail(p){
   </div>
 </div>
 <!-- 요약 카드 (2026-11-25): 크롤해서 가져온 것 한눈에 — 누르면 그 영역으로 -->
-<div class="sum-cards">${[['🖼','sum.gallery',t('sum.images',{n:all.length}),'dp-main'],['🧩','sum.feat',t('sum.sections',{n:p.feat.length}),'sFeat'],['🔎','sum.geo','—','sGeo'],['📋','sum.specs',t('sum.items',{n:Object.keys(p.sp||{}).length}),'sSpec']].map(([i,l,v,to])=>`<button type="button" class="sum-card" data-to="${to}" onclick="sumGo('${to}')"><span class="i">${i}</span><span class="l">${t(l)}</span><span class="v"${to==='sGeo'?' id="sumGeo"':''}>${v}</span><span class="go">${t('sum.view')}</span></button>`).join('')}</div>
+<div class="sum-cards">${[['sum.gallery',t('sum.images',{n:all.length}),'dp-main'],['sum.feat',t('sum.sections',{n:p.feat.length}),'sFeat'],['sum.geo','—','sGeo'],['sum.specs',t('sum.items',{n:Object.keys(p.sp||{}).length}),'sSpec']].map(([l,v,to])=>`<button type="button" class="sum-card" data-to="${to}" onclick="sumGo('${to}')"><span class="l">${t(l)}</span><span class="v"${to==='sGeo'?' id="sumGeo"':''}>${v}</span></button>`).join('')}</div>
 <!-- 좌우 박스: 피처 전체 · GEO 전체를 나란히 (둘 다 펼침) -->
 <div class="side2${p.crawled?'':' one'}">
 <div class="lrbox" id="sFeat">
