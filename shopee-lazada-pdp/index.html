@@ -208,13 +208,15 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
       /* 오른쪽 카드 목록: 원본 보기는 위 툴바로 옮겼고, 카드 ✕ 는 편집 중에만 */
       [data-clia-full] { display: none !important; }
       body:not(.editing) [data-clia-del] { display: none !important; }
-      .compliance-bar .shp-fix { margin-inline-start: auto; height: 26px; padding: 0 10px; border-radius: 6px; border: 1px solid #E5A3A3; background: #fff; color: #C62828;
-                                 font: 600 11.5px inherit; font-family: inherit; cursor: pointer; white-space: nowrap; }
-      .compliance-bar .shp-fix:hover { background: #C62828; color: #fff; border-color: #C62828; }
-      .compliance-bar.shp-over { font-size: 12px; }
       .panel-left > .panel-head .panel-head-title { display: none; }
       .panel-left > .panel-head .btn-sm { height: 30px; padding: 0 9px; font-size: 11.5px; }
-      #btnFull { margin-inline-end: auto; }
+      /* 띠 없이 툴바 안에 (2026-11-25): Shopee 12장 초과는 원본 보기 옆 빨간 칩, 저장한 편집본은 Edit 왼쪽에 작게 */
+      .tb-gap { flex: 1; }
+      .panel-left > .panel-head .btn-sm.shp-chip { border-color: #F2B8B5; background: #FFF1F0; color: #C62828; }
+      .panel-left > .panel-head .btn-sm.shp-chip:hover { background: #C62828; border-color: #C62828; color: #fff; }
+      .saved-info { font-size: 11.5px; color: #8E8B85; white-space: nowrap; margin-inline-end: 4px; }
+      .saved-info button { all: unset; cursor: pointer; color: #262626; font-weight: 600; text-decoration: underline; font-family: inherit; }
+      body.editing .saved-info { display: none !important; }
       /* 버튼 역할 (2026-11-25): 빨간 버튼은 Export 하나. Save 는 바꾼 게 있을 때만 켜지고(검정), Edit 은 켜면 옅은 빨강 */
       .panel-left > .panel-head .btn-sm:disabled { background: #F4F2EE; color: #B5B1AA; border-color: #E6E1D6; cursor: not-allowed; }
       /* 편집 · 저장은 버튼 하나 (2026-11-25): Edit → 편집 중에는 Save(검정) → 누르면 저장하고 편집 끝 */
@@ -237,7 +239,10 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
       <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;min-width:0;align-items:center;flex:1">
         <!-- 툴바 (2026-11-25): 왼쪽 lg.com 원본 보기 · 오른쪽 편집 · 상품 정보 · 저장. 상태 · 내보내기는 허브 머리줄에(허브 밖에서는 여기 끝에) -->
         <button class="btn-sm" id="btnFull" type="button" onclick="openFullPage()" disabled>View lg.com page</button>
-        <span class="save-note" id="saveNote" hidden>Saving removes the approval</span>
+        <button class="btn-sm shp-chip" id="shpChip" type="button" onclick="reduceInEdit()" hidden></button>
+        <span class="tb-gap"></span>
+        <span class="saved-info" id="savedInfo" hidden></span>
+        <span class="save-note" id="saveNote" hidden>Saving sends it back for review</span>
         <button class="btn-sm" id="btnEditMode" type="button" onclick="editOrSave()">Edit</button>
         <button class="btn-sm" id="btnInfo" type="button" onclick="openProductInfo()">+ Product info</button>
         <span class="tb-side" id="tbSide">
@@ -794,20 +799,16 @@ function updateContentInfo() {
     bar.textContent = '';   // 높이 · 장수 안내는 없앴다 (2026-11-25) — Shopee 12장을 넘을 때만 아래 경고
     // Shopee: 12장 제한 — 넘으면 얼마나 줄여야 하는지 빨간 경고 (자동 장수는 섹션 경계에 맞춰 자르므로 실제로는 1~2장 더 나올 수 있음)
     bar.classList.remove('shp-over');
-    if (shopeeLimit()) {
+    // Shopee 12장 초과는 띠 대신 툴바의 빨간 칩 (2026-11-25) — 누르면 편집 모드
+    const chip = document.getElementById('shpChip');
+    if (chip) {
       const auto = Math.max(1, Math.ceil(frame.scrollHeight / capCss));
-      const over = Math.ceil(frame.scrollHeight - SHOPEE_MAX_IMAGES * capCss);
-      const tag = document.createElement('span');
-      tag.className = 'shp-count';
-      if (over > 0) {
-        bar.classList.add('shp-over');
-        tag.textContent = `Shopee allows ${SHOPEE_MAX_IMAGES} images — this one has ${auto}.`;
-        const fix = document.createElement('button');
-        fix.type = 'button'; fix.className = 'shp-fix'; fix.textContent = 'Reduce in Edit';
-        fix.onclick = () => { if (!editMode) toggleEdit(); };
-        bar.append(fix);
-      } else tag.textContent = '';
-      bar.prepend(tag);
+      const over = shopeeLimit() && Math.ceil(frame.scrollHeight - SHOPEE_MAX_IMAGES * capCss) > 0;
+      chip.hidden = !over;
+      if (over) {
+        chip.textContent = `Shopee ${auto} / 12 images · Reduce`;
+        chip.title = `Shopee allows 12 images — this one has ${auto}. Click to reduce in Edit.`;
+      }
     }
   };
   show();
@@ -1673,6 +1674,7 @@ const inHub = () => window.parent !== window && !document.body.classList.contain
 function openProductInfo() { try { window.parent.postMessage({ type: 'clia-open-listing', url: (document.getElementById('pdpUrl').value || '').trim() }, '*'); } catch (_) {} }
 (function () { const b = document.getElementById('btnInfo'); if (b && !inHub()) b.style.display = 'none'; if (inHub()) document.body.classList.add('in-hub'); })();
 // lg.com 원본 보기 — 크롤했던 lg.com 페이지 전체 캡처 (카드 목록 머리에 있던 버튼을 툴바로)
+function reduceInEdit() { if (!editMode) toggleEdit(); }
 function openFullPage() { const u = curUrl(); if (u && window.CLIACardList) CLIACardList.fullPopup(u, API_BASE); }
 function syncBulkBtn() {
   const b = document.getElementById('btnBulk');
@@ -1724,8 +1726,15 @@ function showEditNote(saved) {
   const n = document.getElementById('editNote');
   if (!n) return;
   const at = saved && (typeof saved === 'object' ? saved.at : saved);
-  n.style.display = at ? 'flex' : 'none';
-  n.classList.toggle('changed', !!(saved && saved.changed));
+  const changed = !!(at && saved.changed);
+  // 보통은 툴바 안에 작게 'Saved edit · 날짜 · Back to original'. LG.com 내용이 바뀌어 골라야 할 때만 띠로 (2026-11-25)
+  const si = document.getElementById('savedInfo');
+  if (si) {
+    si.hidden = !(at && !changed);
+    si.innerHTML = at && !changed ? `${esc(txT('Saved edit · {d}').replace('{d}', fmtDate(at)))} · <button type="button" onclick="revertEdit()">${esc(txT('Back to original'))}</button>` : '';
+  }
+  n.style.display = changed ? 'flex' : 'none';
+  n.classList.toggle('changed', changed);
   if (at && saved.changed) {
     n.innerHTML = `<span>⚠ ${esc(txT('LG.com content changed after your edit · re-crawled {d}').replace('{d}', fmtDate(saved.crawledAtNow || Date.now())))}</span>` +
       `<button type="button" class="btn-sm" onclick="startFresh()">${esc(txT('Start again from the new content'))}</button>` +
