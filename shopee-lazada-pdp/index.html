@@ -779,7 +779,7 @@ function updateContentInfo() {
       tag.className = 'shp-count';
       if (over > 0) {
         bar.classList.add('shp-over');
-        tag.textContent = `Too long for Shopee: this makes ${auto} images, but Shopee takes only ${SHOPEE_MAX_IMAGES}. Remove some sections with Edit.`;
+        tag.textContent = `Shopee only allows ${SHOPEE_MAX_IMAGES} images, and this one has ${auto}. Try removing a few sections with Edit.`;
       } else tag.textContent = '';
       bar.prepend(tag);
     }

@@ -29,7 +29,7 @@ CLIA_I18N.init({
   '✓ Done editing': { de: '✓ Bearbeiten beenden', th: '✓ แก้ไขเสร็จแล้ว', ar: '✓ إنهاء التعديل' },
   '＋ Add ▾': { de: '＋ Hinzufügen ▾', th: '＋ เพิ่ม ▾', ar: '＋ إضافة ▾' },
   '📝 Add product info': { de: '📝 Produktinfo hinzufügen', th: '📝 เพิ่มข้อมูลสินค้า', ar: '📝 إضافة معلومات المنتج' },
-  'Too long for Shopee: this makes {n} images, but Shopee takes only 12. Remove some sections with Edit.': { de: 'Zu lang für Shopee: Das ergibt {n} Bilder, Shopee nimmt aber nur 12. Entfernen Sie mit „Bearbeiten“ einige Abschnitte.', th: 'ยาวเกินไปสำหรับ Shopee: ได้ {n} รูป แต่ Shopee รับได้แค่ 12 รูป กด "แก้ไข" เพื่อลบบางส่วนออก', ar: 'طويل جدًا لـ Shopee: ينتج {n} صورة، لكن Shopee يقبل 12 فقط. احذف بعض الأقسام عبر «تعديل».' },
+  'Shopee only allows 12 images, and this one has {n}. Try removing a few sections with Edit.': { de: 'Shopee erlaubt nur 12 Bilder, hier sind es {n}. Entfernen Sie mit „Bearbeiten“ einfach ein paar Abschnitte.', th: 'Shopee ใส่รูปได้แค่ 12 รูป แต่ตอนนี้มี {n} รูป ลองกด "แก้ไข" แล้วลบบางส่วนออกดูนะ', ar: 'يسمح Shopee بـ 12 صورة فقط، وهنا {n} صورة. جرّب حذف بعض الأقسام عبر «تعديل».' },
   // 내보내기 메뉴 (2026-11-24)
   '⬇ Export': { de: '⬇ Exportieren', th: '⬇ ส่งออก', ar: '⬇ تصدير' },
   '⬇ Export ▾': { de: '⬇ Exportieren ▾', th: '⬇ ส่งออก ▾', ar: '⬇ تصدير ▾' },
