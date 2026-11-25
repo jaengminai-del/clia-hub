@@ -1242,7 +1242,8 @@ def fetch_product_html(url: str):
     reasons = []
     for attempt in range(3):
         try:
-            d = firecrawl_scrape(url, mobile=False, screenshot=True)
+            # 검토 화면 법인은 크롤 뒤에 서버가 lg.com 을 직접 캡처한다(컴포넌트 기록 포함) → 여기서는 HTML 만 (빠르게)
+            d = firecrawl_scrape(url, mobile=False, screenshot=os.getenv("CRAWL_FIRECRAWL_SHOT", "1") != "0")
             md, html, raw = d.get("markdown", ""), d.get("html", ""), d.get("rawHtml", "")
             ok, why = aem_model.page_check(raw or html, url)
             if ok:
@@ -1407,6 +1408,7 @@ def main():
         md, raw = "", html
         (out / "pc.md").write_text(md, encoding="utf-8")
         (out / "pc.html").write_text(html, encoding="utf-8")
+        (out / "pc_raw.html").write_text(html, encoding="utf-8")   # 원본 HTML 은 늘 같은 이름으로 (검토 · 점검이 씀)
         print("✓ [Step1] 받은 HTML 사용 (제품 페이지 확인됨)")
         write_progress(35, "1단계: 받은 HTML 사용", "fetched")
     elif md_cached is None or html_cached is None:

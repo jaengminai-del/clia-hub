@@ -130,10 +130,13 @@ function publishPageShot(url, out) {
 //   캡처는 서버의 캡처 작업자로 (/api/v1/fullshot force · via direct — Firecrawl 유료 호출 없음). 막히면 크롤 때 받은 Firecrawl 캡처가 남는다.
 //   CRAWL_CAPTURE=0 이면 끔. 대상 법인은 REVIEW_PREWARM_COUNTRIES (기본 th,sg)
 const CRAWL_CAPTURE_COUNTRIES = new Set(String(process.env.REVIEW_PREWARM_COUNTRIES || 'th,sg').split(',').map((x) => x.trim().toLowerCase()).filter(Boolean));
-function crawlCapture(url, slug) {
-  if (process.env.CRAWL_CAPTURE === '0') return;
+function willCrawlCapture(url) {
+  if (process.env.CRAWL_CAPTURE === '0') return false;
   const m = /lg\.com\/([a-z]{2})\//i.exec(url || '');
-  if (!m || !CRAWL_CAPTURE_COUNTRIES.has(m[1].toLowerCase())) return;
+  return !!(m && CRAWL_CAPTURE_COUNTRIES.has(m[1].toLowerCase()));
+}
+function crawlCapture(url, slug) {
+  if (!willCrawlCapture(url)) return;
   fetch(`http://127.0.0.1:${process.env.PORT || 3001}/api/v1/fullshot`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ url, force: true, via: 'direct' }) })
     .then((r) => r.json())
@@ -167,6 +170,9 @@ function launchPipeline(jobId, url, usePro, geminiKey, fullAi, html = null, base
   if (fullAi) args.push('--full-ai'); // 기존 방식(스크린샷 + Gemini 분석·시각 QA) 강제
   const env = { ...process.env, PYTHONIOENCODING: 'utf-8' };
   if (geminiKey) env.GEMINI_API_KEY = geminiKey; // BYOK
+  // 검토 화면 법인(th · sg)은 크롤이 끝나면 뒤에서 lg.com 을 직접 캡처(컴포넌트 기록 포함)하므로, 크롤의 Firecrawl 요청에서는 캡처를 받지 않는다
+  //   → 빌더에 필요한 HTML 만 빨리 받고(스크롤 23번 · 전체 화면 캡처 생략) 바로 빌더로 (2026-11-25 사용자 결정)
+  if (willCrawlCapture(url) && process.env.CRAWL_FIRECRAWL_SHOT !== '1') env.CRAWL_FIRECRAWL_SHOT = '0';
 
   const logFd = fs.openSync(path.join(out, 'pipeline.log'), 'w');
   const proc = spawn(resolvePython(), args, { cwd: CRAWLER_DIR, env, stdio: ['ignore', logFd, logFd] });
@@ -185,11 +191,14 @@ function launchPipeline(jobId, url, usePro, geminiKey, fullAi, html = null, base
     job.exited = true;
     if (!ok) return;
     publishPageShot(url, out);
-    crawlCapture(url, slug);
+    crawlCapture(url, slug);   // 검토용 캡처 · 검토 준비는 뒤에서 (빌더를 기다리게 하지 않음)
+    const tCrawl = Date.now() / 1000 - job.startedAt;
     autoFrame(out, { base })
       .catch((e) => console.warn('[auto-frame]', slug, e.message))
       .finally(() => {
         job.post = false;
+        const tAll = Date.now() / 1000 - job.startedAt;
+        console.log(`[crawl] 완료 ${slug} — 크롤 ${tCrawl.toFixed(1)}초 · 동영상 장면 ${(tAll - tCrawl).toFixed(1)}초 → 빌더 열림 (총 ${tAll.toFixed(1)}초)${willCrawlCapture(url) ? ' · 검토 캡처 · 준비는 뒤에서' : ''}`);
         // 크롤 결과를 버킷에 보관 (재배포해도 유지)
         store.pushProduct(slug).then((n) => n && console.log(`[crawl-store] ${slug}: ${n}개 파일 업로드`));
       });
