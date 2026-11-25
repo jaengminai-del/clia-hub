@@ -222,10 +222,12 @@ def align(capture_path, top, bottom, html, medium, fonts_css, slice_width, boxes
     boxes 가 없으면(예전 캡처) 예전처럼 그림으로 찾는다."""
     import numpy as np
     from PIL import Image
-    idx = {}
+    idx, boxes_after = {}, False
     if boxes and Path(boxes).exists():
         try:
             idx = box_index(boxes)
+            import json as _json
+            boxes_after = bool(_json.loads(Path(boxes).read_text(encoding="utf-8")).get("after"))
         except Exception:   # noqa: BLE001 — 위치 기록이 깨졌으면 그림 맞추기만
             idx = {}
     by_url = lambda src: [b for b in idx.get(stem(src), []) if top - 40 <= b[1] <= bottom]
@@ -267,7 +269,7 @@ def align(capture_path, top, bottom, html, medium, fonts_css, slice_width, boxes
         u = by_url(im["src"])
         if u:   # 주소로 찾음 — 보이는 자리를 먼저 (캐러셀의 다른 장 · 숨은 탭은 상위 요소 자리), 점수 1.0 / 0.9
             n_url += 1
-            cs = sorted(((1.0 if vis else 0.9), max(0.0, y - top), w) for vis, y, _x, w, _h in u)
+            cs = sorted(((1.0 if vis else 0.9), max(0.0, y - top), w, x, h) for vis, y, x, w, h in u)
             cs.sort(key=lambda c: (-c[0], c[1]))
             cands.append(cs[:4])
         elif not idx and "gray" in im:
@@ -294,8 +296,9 @@ def align(capture_path, top, bottom, html, medium, fonts_css, slice_width, boxes
             key = best[key][1]
     # 섹션 앵커: 그 섹션에서 찾은 이미지 중 lg.com 에서 가장 위(같은 줄이면 CLIA 에서 먼저 나오는 것)의 윗변 — 양쪽 모두 그 이미지 윗변.
     # 이미지 윗변은 두 쪽 모두 정확히 안다 (lg.com 은 캡처 때 적은 위치, CLIA 는 HTML 을 그려 잰 위치) → 추정 없이 맞는다.
-    # 전에는 섹션 제목 자리를 이미지 크기 비로 어림했는데, 글과 이미지의 간격 비가 달라 lg.com 쪽이 위로 크게 어긋났다 (2026-11-25).
     # lg.com 에서 앞 기준점과 같은 줄(카드가 옆으로 나란히)인 섹션은 기준점을 두지 않는다 → 그 줄이 고정된 채 CLIA 카드들이 지나간다.
+    # 영역 상자(Lt · Rt): CLIA 는 섹션 시작(제목 포함), lg.com 은 앞 섹션의 마지막 이미지 아래 — 제목 · 설명이 상자 안에 다 들어가게 (2026-11-25)
+    vis_boxes = sorted({(round(y), round(h)) for lst in idx.values() for vis, y, _x, _w, h in lst if vis})
     anchors, lastL, lastR = [], -1.0, -1.0
     for si, s in enumerate(secs):
         ms = [(chosen[k], im) for k, (sj, im) in enumerate(items) if sj == si and k in chosen]
@@ -307,11 +310,90 @@ def align(capture_path, top, bottom, html, medium, fonts_css, slice_width, boxes
         R = im0["top"] * scale
         if L <= lastL + 8 or R <= lastR + 8:
             continue
-        anchors.append({"label": s["head"], "L": round(L), "R": round(R), "score": round(sc, 3)})
+        # lg.com 영역 위 = 바로 위에 있는 (보이는) 이미지의 아래 — 짝지은 이미지가 아니어도 (프로모션 배너 등). 없으면 200px 위(제목 자리)
+        prev_bot = [y + h for y, h in vis_boxes if y + h <= L + 2]
+        Lt = min(L, max([lastL if lastL > 0 else max(top, L - 200)] + prev_bot))
+        anchors.append({"label": s["head"], "L": round(L), "R": round(R), "Lt": round(Lt), "Rt": round(s["top"] * scale), "score": round(sc, 3),
+                        "_c": c0, "_src": im0["src"]})
         lastL, lastR = L, R
+    drift = []
+    if idx and not boxes_after and anchors and capture_path and Path(capture_path).exists() and html:
+        drift = _fix_drift(anchors, capture_path, html, medium, fonts_css)
+        keep, lastL = [], -1.0   # 고친 뒤에도 위에서 아래 순서인 것만
+        for a in anchors:
+            if a["L"] > lastL + 8:
+                keep.append(a)
+                lastL = a["L"]
+        anchors = keep
+    for a in anchors:
+        a.pop("_c", None)
+        a.pop("_src", None)
     return {"anchors": anchors, "sections": len(secs), "images": len(items), "matched": len(chosen), "by_url": n_url,
-            "mode": "url" if idx else "pixel", "layout_cached": cached}
+            "mode": "url" if idx else "pixel", "layout_cached": cached, "boxes_after": boxes_after, "drift": drift}
 
+
+
+DRIFT_MIN = 0.5    # 위치 고치기: 캡처에서 다시 찾은 자리의 상관이 이보다 낮으면 기록 그대로
+
+
+def _fix_drift(anchors, capture_path, html, medium, fonts_css):
+    """찍기 전에 적은 위치 기록(2026-11-25 이전 캡처)은 그 뒤 늦게 커진 이미지만큼 캡처와 어긋날 수 있다 (MS4295DIS 450px).
+    기준점 이미지마다 CLIA 의 같은 이미지(HTML 을 그려 자른 조각)를 캡처의 같은 가로 자리에서 위아래로 찾아 실제 윗변으로 고친다.
+    상자 위(Lt)도 같은 만큼 옮긴다. 반환: [(기록 y, 고친 y, 상관)]"""
+    import numpy as np
+    from PIL import Image
+    need = {a["_src"] for a in anchors}
+    try:
+        _layout, secs2 = measure(html, medium, fonts_css, need=lambda src: src in need)
+    except Exception:   # noqa: BLE001 — 그리지 못하면 기록 그대로
+        return []
+    gray = {}
+    for s2 in secs2:
+        for im in s2["imgs"]:
+            if "gray" in im and im["src"] not in gray:
+                gray[im["src"]] = im["gray"]
+    with Image.open(capture_path) as im:
+        cap = np.asarray(im.convert("L"), dtype=np.float32)
+    H, W = cap.shape
+    out, last_d = [], None   # 못 찾은 기준점은 바로 앞에서 찾은 만큼 옮긴다 (어긋남은 위에서부터 쌓이므로)
+
+    def shift(a, d):
+        if d:
+            a["L"], a["Lt"] = a["L"] + d, a["Lt"] + d
+
+    for a in anchors:
+        c, g = a["_c"], gray.get(a["_src"])
+        if g is None or len(c) < 5:
+            shift(a, last_d)
+            continue
+        x, w, h = int(round(c[3])), int(round(c[2])), int(round(c[4]))
+        x, w = max(0, x), min(w, W - max(0, x))
+        if w < 60 or h < 40:
+            shift(a, last_d)
+            continue
+        y = a["L"]
+        y0, y1 = max(0, y - 500), min(H, y + 1500)
+        best = (-1.0, y)
+        for th in {round(g.shape[0] * w / g.shape[1]), h}:   # 같은 비율로 줄인 것 · lg.com 상자 크기에 맞춘 것 (object-fit 으로 잘린 경우)
+            th = max(20, min(th, 320, y1 - y0 - 1))
+            full_h = round(g.shape[0] * w / g.shape[1]) if th != h else h
+            t = np.asarray(Image.fromarray(g).resize((w, max(20, full_h)), Image.BILINEAR), dtype=np.float32)[:th]
+            strip = cap[y0:y1, x:x + w]
+            if strip.shape[0] <= t.shape[0] or strip.shape[1] != t.shape[1]:
+                continue
+            r = ncc(strip, t)
+            if r is None:
+                continue
+            i = int(r[:, 0].argmax())
+            if float(r[i, 0]) > best[0]:
+                best = (float(r[i, 0]), y0 + i)
+        out.append((y, best[1], round(best[0], 3)))
+        if best[0] >= DRIFT_MIN:
+            last_d = best[1] - y
+            shift(a, last_d)
+        else:
+            shift(a, last_d)
+    return out
 
 if __name__ == "__main__":     # 시험: python review_align.py <캡처> <top> <bottom> <html> <fonts css> <슬라이스 폭>
     import json

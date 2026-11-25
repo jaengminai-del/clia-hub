@@ -92,7 +92,8 @@ _JS_BOXES = """() => {
 def _save_boxes(page, out: Path, scale: float):
     try:
         boxes = page.evaluate(_JS_BOXES)
-        Path(str(out) + ".boxes.json").write_text(json.dumps({"scale": scale, "items": boxes}), encoding="utf-8")
+        doc_h = page.evaluate("document.documentElement.scrollHeight")   # 캡처 높이(× scale)와 다르면 위치 기록이 캡처와 어긋난 것
+        Path(str(out) + ".boxes.json").write_text(json.dumps({"scale": scale, "doc_h": doc_h, "after": True, "items": boxes}), encoding="utf-8")
     except Exception as e:   # 위치 기록은 덤 — 실패해도 캡처는 그대로
         print(f"boxes: {e}", file=sys.stderr)
 
@@ -267,8 +268,10 @@ def capture_direct(url: str, out: Path, scale: float = 0.5, quality: int = 80) -
             page.evaluate("window.scrollTo(0, 0)")
             page.wait_for_timeout(1200)
             out.parent.mkdir(parents=True, exist_ok=True)
-            _save_boxes(page, out, scale)
+            # 위치는 찍은 뒤에 기록한다 — 찍기 전에 적으면 그 뒤에 늦게 뜬 이미지가 아래 내용을 밀어 캡처와 어긋난다
+            # (2026-11-25 MS4295DIS: 첫 이미지가 늦게 커져 아래 이미지 위치가 450px 위로 적힘)
             page.screenshot(path=str(out), full_page=True, type="jpeg", quality=quality)
+            _save_boxes(page, out, scale)
         finally:
             browser.close()
     from PIL import Image
