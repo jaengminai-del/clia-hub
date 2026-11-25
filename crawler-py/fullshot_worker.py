@@ -132,7 +132,11 @@ async def capture_direct(browser, url: str, out: Path, scale: float = 0.5, quali
         try:
             boxes = await page.evaluate(F._JS_BOXES)
             doc_h = await page.evaluate("document.documentElement.scrollHeight")
-            Path(str(out) + ".boxes.json").write_text(json.dumps({"scale": scale, "doc_h": doc_h, "after": True, "items": boxes}), encoding="utf-8")
+            try:
+                comps = await page.evaluate(F._JS_COMPS)
+            except Exception:   # noqa: BLE001
+                comps = None
+            Path(str(out) + ".boxes.json").write_text(json.dumps({"scale": scale, "doc_h": doc_h, "after": True, "items": boxes, "comps": comps}), encoding="utf-8")
         except Exception as e:   # 위치 기록은 덤
             print(f"boxes: {e}", file=sys.stderr)
     finally:

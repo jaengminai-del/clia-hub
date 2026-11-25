@@ -89,11 +89,46 @@ _JS_BOXES = """() => {
 }"""
 
 
+# lg.com 컴포넌트 기록 (2026-11-25): 크롤러가 읽는 단위(.c-wrapper — component_parser.py)마다 위치 · 제목 · 글 · 이미지 이름.
+#   검토 화면이 CLIA 섹션(같은 컴포넌트에서 만든 것)과 컴포넌트를 그대로 짝지어 영역을 정확히 나누고, 영역의 카피를 비교한다.
+_JS_COMPS = """() => {
+  const vis = (e) => { const r = e.getBoundingClientRect(); const c = getComputedStyle(e);
+    return r.width > 20 && r.height > 20 && c.display !== 'none' && c.visibility !== 'hidden'; };
+  const out = [];
+  [...document.querySelectorAll('[class*="c-wrapper"]')].forEach((e, i) => {
+    if (!/(^|\\s)c-wrapper/.test(e.className || '')) return;
+    const r = e.getBoundingClientRect();
+    const h = e.querySelector('h1, h2, h3, h4, [class*="headline"], [class*="title"]');
+    const imgs = [];
+    for (const m of e.querySelectorAll('img, picture source, video')) {
+      const u = (m.currentSrc || m.src || m.getAttribute('data-src') || m.getAttribute('srcset') || m.getAttribute('poster') || '').split(/[\\s,]+/)[0];
+      if (u && imgs.length < 60 && !imgs.includes(u)) imgs.push(u);
+    }
+    // 화면에 안 보이는 글(스크린 리더용 이미지 설명 · 숨긴 글자)은 카피가 아니다 — 따로 적어 비교에서 뺀다
+    const hidden = [];
+    const tw = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
+    for (let n = tw.nextNode(); n; n = tw.nextNode()) {
+      const p = n.parentElement, t = (n.textContent || '').replace(/\\s+/g, ' ').trim();
+      if (!p || t.length < 4) continue;
+      const q = p.getBoundingClientRect(), c = getComputedStyle(p);
+      if (q.width < 3 || q.height < 3 || /rect\\(0/.test(c.clip || '') || /inset\\(50%/.test(c.clipPath || '') || +c.opacity === 0) { if (hidden.length < 80) hidden.push(t.slice(0, 300)); }
+    }
+    out.push({ i, hidden, cls: String(e.className).slice(0, 200), id: e.id || '', x: Math.round(r.left + scrollX), y: Math.round(r.top + scrollY),
+      w: Math.round(r.width), h: Math.round(r.height), vis: vis(e), head: h ? h.innerText.replace(/\\s+/g, ' ').trim().slice(0, 200) : '',
+      text: (e.innerText || '').replace(/[ \\t]+/g, ' ').replace(/\\n\\s*\\n+/g, '\\n').trim().slice(0, 4000), imgs });
+  });
+  return out;
+}"""
+
 def _save_boxes(page, out: Path, scale: float):
     try:
         boxes = page.evaluate(_JS_BOXES)
         doc_h = page.evaluate("document.documentElement.scrollHeight")   # 캡처 높이(× scale)와 다르면 위치 기록이 캡처와 어긋난 것
-        Path(str(out) + ".boxes.json").write_text(json.dumps({"scale": scale, "doc_h": doc_h, "after": True, "items": boxes}), encoding="utf-8")
+        try:
+            comps = page.evaluate(_JS_COMPS)
+        except Exception:   # noqa: BLE001
+            comps = None
+        Path(str(out) + ".boxes.json").write_text(json.dumps({"scale": scale, "doc_h": doc_h, "after": True, "items": boxes, "comps": comps}), encoding="utf-8")
     except Exception as e:   # 위치 기록은 덤 — 실패해도 캡처는 그대로
         print(f"boxes: {e}", file=sys.stderr)
 

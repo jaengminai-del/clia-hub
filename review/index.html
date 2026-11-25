@@ -114,6 +114,9 @@ aside{display:flex;flex-direction:column;min-height:0;background:#fff;border-lef
 .ckh{padding:12px 16px 10px;border-bottom:1px solid var(--line)}.ckh b{font-size:14px}.ckh .p{font-size:12px;color:var(--g500);margin-left:8px}
 .ckh .prog{width:100%;height:6px;margin:8px 0 0}
 .ckl{flex:1;overflow:auto;padding:6px 8px 40px}
+.cpd{margin:8px 10px 0;padding:10px 12px;border:1px solid #F1C4C4;background:#FFF7F7;border-radius:8px;font-size:12px;line-height:1.45;max-height:36vh;overflow:auto;flex:none}
+.cpd h4{margin:0 0 6px;font-size:13px;color:var(--bad)}.cpd .k{display:inline-block;min-width:64px;font-weight:700;color:var(--g500)}
+.cpd ul{margin:2px 0 6px;padding-left:16px}.cpd li{margin:2px 0;word-break:break-word}
 .it{border-radius:10px;padding:8px 10px;margin:2px 0;cursor:pointer;border:1px solid transparent}
 .it:hover{background:var(--g50)}.it.cur{border-color:var(--red);background:#FFF8F7}
 .it .t{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600}
@@ -172,7 +175,7 @@ aside{display:flex;flex-direction:column;min-height:0;background:#fff;border-lef
    <div id="spacer"></div><div id="snaps"></div>
    <div class="prep" id="prep"><div class="box" id="prepBox"></div></div>
   </div>
-  <aside><div class="ckh"><b data-t="ck"></b><span class="p" id="ckP"></span><div class="prog"><i id="ckBar"></i></div></div><div class="ckl" id="ckl"></div></aside>
+  <aside><div class="ckh"><b data-t="ck"></b><span class="p" id="ckP"></span><div class="prog"><i id="ckBar"></i></div></div><div class="cpd" id="cpd" hidden></div><div class="ckl" id="ckl"></div></aside>
  </div>
 </main>
 <div class="toast" id="toast"></div>
@@ -180,7 +183,7 @@ aside{display:flex;flex-direction:column;min-height:0;background:#fff;border-lef
 <script>
 // ── 화면 문구 (한국어 · English · ไทย). 제품군 이름은 벌크 엑셀(bulk/bulk-i18n.js)과 같은 낱말. 태국어는 태국 법인 확인 전 ──
 const TX={
- ko:{appTag:'검토 / 승인',noCountry:'CLIA 허브에 로그인해 법인을 고른 뒤 열어 주세요.',shotThin:'lg.com 페이지에 상세 내용이 거의 없음 (누르면 다시 캡처)',readyCnt:(n,a)=>`준비 <b>${n}</b>/${a}`,waitShort:'기다리는 중',segSum:'PDP 요약',segIntro:'도입 (대표 이미지)',segN:n=>`섹션 ${n}`,segNoneL:'LG.com에 없음 · 기다리는 중',segNoneR:'여기는 없음 · 기다리는 중',segHint:'같은 번호·색 = 같은 영역',who:'검토자',whoPh:'이름 (승인 기록에 남음)',whoNeed:'검토자 이름을 먼저 넣어 주세요',h:'검토 / 승인',
+ ko:{copyN:n=>`카피 차이 ${n}`,copyHead:n=>`이 영역 카피 차이 ${n}곳 (lg.com 컴포넌트와 비교)`,copyLg:'LG.com에만',copyClia:'CLIA에만',appTag:'검토 / 승인',noCountry:'CLIA 허브에 로그인해 법인을 고른 뒤 열어 주세요.',shotThin:'lg.com 페이지에 상세 내용이 거의 없음 (누르면 다시 캡처)',readyCnt:(n,a)=>`준비 <b>${n}</b>/${a}`,waitShort:'기다리는 중',segSum:'PDP 요약',segIntro:'도입 (대표 이미지)',segN:n=>`섹션 ${n}`,segNoneL:'LG.com에 없음 · 기다리는 중',segNoneR:'여기는 없음 · 기다리는 중',segHint:'같은 번호·색 = 같은 영역',who:'검토자',whoPh:'이름 (승인 기록에 남음)',whoNeed:'검토자 이름을 먼저 넣어 주세요',h:'검토 / 승인',
   gateOn:'승인 전 제품은 빌더의 이미지 ZIP·HTML 복사와 벌크 엑셀 받기가 잠깁니다.',gateOff:'지금 서버는 다운로드 잠금이 꺼져 있어, 승인 전에도 빌더·벌크에서 받을 수 있습니다(빌더에는 「승인 전」 배지만 보임). 제품군 분류는 벌크 엑셀·허브 목록과 같은 규칙.',
   tabAll:'전체',tabUnrev:'미검토',tabOk:'승인',tabRej:'반려',stUnrev:'미검토',stStale:'다시 확인',stOk:'승인',stRej:'반려',
   grpBtn:'제품군',all:'전체',none:'선택 안 함',grpHint:'선택한 BU의 제품군만 고를 수 있습니다',search:'모델명·상품명 검색',viewList:'리스트',viewGrid:'갤러리',selAll:'전체 선택',
@@ -204,7 +207,7 @@ const TX={
   staleTx:'준비한 뒤 크롤·편집본·요약 또는 lg.com 캡처가 바뀌었어요. 보이는 것은 예전 내용입니다.',reprep:'다시 준비',imgFail:s=>`이미지 일부를 못 불러온 채 만들어짐 (${s})`,
   cropBtn:'범위 맞추기',cropTop:'시작(px)',cropBottom:'끝(px)',cropAuto:'자동으로',cropSave:'저장',recapture:'다시 캡처',cropSaved:'lg.com 범위를 저장했어요',cropAutoT:'자동 범위로 돌렸어요',
   cropWarnTop:'시작 자동 감지 못 함',cropWarnBot:'끝 자동 감지 못 함',cropManual:'사람이 맞춘 범위',noShot:e=>`lg.com 캡처가 없어요 (${e}). 「다시 캡처」를 눌러 주세요.`,recapToast:'lg.com을 다시 캡처하고 있어요 (1~2분)'},
- en:{appTag:'Review / Approve',noCountry:'Log in to the CLIA hub and choose your subsidiary, then open this page.',shotThin:'Little detail on the lg.com page (click to capture again)',readyCnt:(n,a)=>`Prepared <b>${n}</b>/${a}`,waitShort:'waiting',segSum:'PDP summary',segIntro:'Intro (main image)',segN:n=>`Section ${n}`,segNoneL:'not on LG.com · waiting',segNoneR:'not here · waiting',segHint:'Same number and color = same area',who:'Reviewer',whoPh:'Name (saved with approvals)',whoNeed:'Enter the reviewer name first',h:'Review / Approve',
+ en:{copyN:n=>`copy differs ${n}`,copyHead:n=>`Copy differs in ${n} places in this area (vs the lg.com component)`,copyLg:'LG.com only',copyClia:'CLIA only',appTag:'Review / Approve',noCountry:'Log in to the CLIA hub and choose your subsidiary, then open this page.',shotThin:'Little detail on the lg.com page (click to capture again)',readyCnt:(n,a)=>`Prepared <b>${n}</b>/${a}`,waitShort:'waiting',segSum:'PDP summary',segIntro:'Intro (main image)',segN:n=>`Section ${n}`,segNoneL:'not on LG.com · waiting',segNoneR:'not here · waiting',segHint:'Same number and color = same area',who:'Reviewer',whoPh:'Name (saved with approvals)',whoNeed:'Enter the reviewer name first',h:'Review / Approve',
   gateOn:'Products that are not approved cannot be downloaded from the builder (image ZIP, HTML copy) or bulk Excel.',gateOff:'The download lock is off on this server, so builder and bulk downloads still work before approval (the builder only shows a “Not approved” badge). Product groups follow the same rules as Bulk Excel and the hub list.',
   tabAll:'All',tabUnrev:'To review',tabOk:'Approved',tabRej:'Rejected',stUnrev:'To review',stStale:'Check again',stOk:'Approved',stRej:'Rejected',
   grpBtn:'Product group',all:'All',none:'None',grpHint:'Only groups in the selected BUs can be chosen',search:'Search model or product name',viewList:'List',viewGrid:'Gallery',selAll:'Select all',
@@ -228,7 +231,7 @@ const TX={
   staleTx:'The crawl, builder edit, summary or lg.com capture changed after this was prepared. You are looking at the old content.',reprep:'Prepare again',imgFail:s=>`Made while some images failed to load (${s})`,
   cropBtn:'Adjust range',cropTop:'Start (px)',cropBottom:'End (px)',cropAuto:'Automatic',cropSave:'Save',recapture:'Capture again',cropSaved:'lg.com range saved',cropAutoT:'Back to the automatic range',
   cropWarnTop:'Start not detected',cropWarnBot:'End not detected',cropManual:'Range set by a person',noShot:e=>`No lg.com capture (${e}). Press “Capture again”.`,recapToast:'Capturing lg.com again (1–2 minutes)'},
- th:{appTag:'ตรวจสอบ / อนุมัติ',noCountry:'กรุณาเข้าสู่ระบบ CLIA Hub และเลือกบริษัทในเครือก่อนเปิดหน้านี้',shotThin:'หน้า lg.com แทบไม่มีรายละเอียด (คลิกเพื่อถ่ายใหม่)',readyCnt:(n,a)=>`เตรียมแล้ว <b>${n}</b>/${a}`,waitShort:'รออยู่',segSum:'สรุป PDP',segIntro:'ส่วนแนะนำ (ภาพหลัก)',segN:n=>`ส่วนที่ ${n}`,segNoneL:'ไม่มีใน LG.com · รออยู่',segNoneR:'ไม่มีในส่วนนี้ · รออยู่',segHint:'หมายเลขและสีเดียวกัน = ส่วนเดียวกัน',who:'ผู้ตรวจ',whoPh:'ชื่อ (บันทึกพร้อมการอนุมัติ)',whoNeed:'กรุณาใส่ชื่อผู้ตรวจก่อน',h:'ตรวจสอบ / อนุมัติ',
+ th:{copyN:n=>`ข้อความต่าง ${n}`,copyHead:n=>`ข้อความในส่วนนี้ต่างกัน ${n} จุด (เทียบกับคอมโพเนนต์ lg.com)`,copyLg:'มีเฉพาะ LG.com',copyClia:'มีเฉพาะ CLIA',appTag:'ตรวจสอบ / อนุมัติ',noCountry:'กรุณาเข้าสู่ระบบ CLIA Hub และเลือกบริษัทในเครือก่อนเปิดหน้านี้',shotThin:'หน้า lg.com แทบไม่มีรายละเอียด (คลิกเพื่อถ่ายใหม่)',readyCnt:(n,a)=>`เตรียมแล้ว <b>${n}</b>/${a}`,waitShort:'รออยู่',segSum:'สรุป PDP',segIntro:'ส่วนแนะนำ (ภาพหลัก)',segN:n=>`ส่วนที่ ${n}`,segNoneL:'ไม่มีใน LG.com · รออยู่',segNoneR:'ไม่มีในส่วนนี้ · รออยู่',segHint:'หมายเลขและสีเดียวกัน = ส่วนเดียวกัน',who:'ผู้ตรวจ',whoPh:'ชื่อ (บันทึกพร้อมการอนุมัติ)',whoNeed:'กรุณาใส่ชื่อผู้ตรวจก่อน',h:'ตรวจสอบ / อนุมัติ',
   gateOn:'สินค้าที่ยังไม่อนุมัติจะดาวน์โหลด ZIP รูปภาพ คัดลอก HTML ในตัวสร้าง และ Bulk Excel ไม่ได้',gateOff:'เซิร์ฟเวอร์นี้ปิดการล็อกดาวน์โหลดอยู่ จึงยังดาวน์โหลดจากตัวสร้างและ Bulk ได้ก่อนอนุมัติ (ตัวสร้างแสดงแค่ป้าย “ยังไม่อนุมัติ”) กลุ่มสินค้าใช้กฎเดียวกับ Bulk Excel และรายการในฮับ',
   tabAll:'ทั้งหมด',tabUnrev:'รอตรวจ',tabOk:'อนุมัติแล้ว',tabRej:'ปฏิเสธ',stUnrev:'รอตรวจ',stStale:'ตรวจอีกครั้ง',stOk:'อนุมัติแล้ว',stRej:'ปฏิเสธ',
   grpBtn:'กลุ่มสินค้า',all:'ทั้งหมด',none:'ไม่ได้เลือก',grpHint:'เลือกได้เฉพาะกลุ่มสินค้าของ BU ที่เลือก',search:'ค้นหารุ่นหรือชื่อสินค้า',viewList:'รายการ',viewGrid:'แกลเลอรี',selAll:'เลือกทั้งหมด',
@@ -530,7 +533,8 @@ function layout(){
   const PAD=40;
   // 영역 상자: li · ri = 기준 이미지 윗변, lt · rt = 영역 위 (lg.com 은 앞 이미지 아래, CLIA 는 섹션 시작 — 제목 포함). 예전 준비 결과에는 lt · rt 가 없다
   al.forEach((a,i)=>{if(i===0&&firstLabel)return;P.push({l:Math.max(crop?crop.offsetTop:0,lpx(a.L)-PAD),r:Math.max(sl[0]?sl[0].offsetTop:0,rpx(a.R)-PAD),
-    li:lpx(a.L),ri:rpx(a.R),lt:a.Lt!=null?lpx(a.Lt):null,rt:a.Rt!=null?rpx(a.Rt):null,label:a.label||t('segN',i+1),kind:'sec',score:a.score});});
+    li:lpx(a.L),ri:rpx(a.R),lt:a.Lt!=null?lpx(a.Lt):null,rt:a.Rt!=null?rpx(a.Rt):null,lb:a.Lb!=null?lpx(a.Lb):null,rb:a.Rb!=null?rpx(a.Rb):null,
+    copy:a.copy||null,label:a.label||t('segN',i+1),kind:'sec',score:a.score});});
   P.push({l:mvL.offsetHeight,r:mvR.offsetHeight,label:'',kind:'end'});
   // 거꾸로 가지 않고 한 쪽이라도 늘어나는 점만 (거꾸로면 버린다 — 범위를 사람이 줄였을 때 등).
   // 한 쪽만 늘어나는 구간도 둔다 — 예: lg.com 맨 위 프로모션(CLIA 에 없음)이 지나가는 동안 CLIA 는 기다림 (2026-11-25 OLED48C6PSA)
@@ -539,15 +543,16 @@ function layout(){
   for(let i=0;i<pts.length-1;i++){const a=pts[i],b=pts[i+1],dl=Math.max(0,b.l-a.l),dr=Math.max(0,b.r-a.r),len=Math.max(dl,dr);
     // 상자는 구간보다 넉넉하게: 위는 영역 위(lt · rt)까지, 아래는 다음 영역의 이미지 윗변(lg.com) · 다음 섹션 시작(CLIA)까지 — 영역이 상자 안에 다 들어가게 (2026-11-25)
     const bl0=a.lt!=null?Math.min(a.l,a.lt):a.l,br0=a.rt!=null?Math.min(a.r,a.rt):a.r;
-    const bl1=Math.max(b.l,b.li!=null?b.li:b.l),br1=Math.max(b.r,b.rt!=null?b.rt:b.r);
-    if(len<1)continue;segs.push({l:a.l,r:a.r,dl,dr,S,len,label:a.label,kind:a.kind,n:segs.length,bl0,bl1,br0,br1,
+    // lg.com 컴포넌트로 나눈 영역(lb · rb 있음)은 상자 = 그 영역 그대로 (lg.com 컴포넌트 아래 · CLIA 섹션 아래)
+    const bl1=a.lb!=null?Math.max(bl0+2,a.lb):Math.max(b.l,b.li!=null?b.li:b.l),br1=a.rb!=null?Math.max(br0+2,a.rb):Math.max(b.r,b.rt!=null?b.rt:b.r);
+    if(len<1)continue;segs.push({l:a.l,r:a.r,dl,dr,S,len,label:a.label,kind:a.kind,n:segs.length,bl0,bl1,br0,br1,copy:a.copy||null,
       xl:Math.min(dl,vpL.clientHeight),xr:Math.min(dr,vpR.clientHeight)});S+=len;}
   // 끝: 두 쪽이 모두 끝에 닿는 가장 작은 스크롤량
   const reach=(side,max)=>{for(const g of segs){const x=g[side],dx=side==='l'?g.dl:g.dr;if(x+dx>=max)return g.S+segTt(g,side,Math.max(0,max-x));}return S;};
   const sMax=Math.max(reach('l',lmax),reach('r',rmax));
   $('spacer').style.height=sMax+'px';
   $('snaps').innerHTML=segs.filter(g=>g.S<=sMax).map(g=>`<i style="top:${g.S}px"></i>`).join('')+`<i style="top:${sMax}px"></i>`;
-  G={lmax,rmax,sMax,segs,vh:vpR.clientHeight,anchors,imgs,s:G?G.s:0,aligned:al.length};
+  G={lmax,rmax,sMax,segs,vh:vpR.clientHeight,anchors,imgs,s:G?G.s:0,aligned:al.length};lastSeg=-1;
 }
 // 구간 안 진행 tt(0..len) → 그 쪽이 구간 시작에서 움직인 거리. 긴 쪽은 1:1, 짧은 쪽은 고정(넘치면 비례) 뒤 마지막 x 만큼 1:1
 function segOff(g,side,tt){
@@ -580,7 +585,7 @@ function update(){
 // 같은 영역 표시: 지금 구간을 양쪽에 같은 색 테두리 + 같은 이름표(번호 · 섹션 제목)로
 let lastSeg=-1;
 function segMark(g,l,r,waitL,waitR){
-  if(g.n!==lastSeg){lastSeg=g.n;['segL','segR'].forEach(id=>{const e=$(id);e.classList.remove('pop');void e.offsetWidth;e.classList.add('pop');});}
+  if(g.n!==lastSeg){lastSeg=g.n;['segL','segR'].forEach(id=>{const e=$(id);e.classList.remove('pop');void e.offsetWidth;e.classList.add('pop');});copyPanel(g);}
   const col=SEG_COLOR,label=segLabel(g);
   [['L',g.l-l,g.dl,g.bl0-l,g.bl1-g.bl0],['R',g.r-r,g.dr,g.br0-r,g.br1-g.br0]].forEach(([k,y,h,by,bh])=>{
     const box=$('seg'+k),tag=$('segTag'+k);
@@ -588,10 +593,19 @@ function segMark(g,l,r,waitL,waitR){
     tag.style.background=col;tag.style.top=Math.max(6,Math.min(by+6,G.vh-30))+'px';
     // 이름표 = 오른쪽 체크리스트 항목 이름 그대로. 기다리는 쪽 · 없는 쪽은 옆에 작은 글씨로 (이름 글자는 그대로)
     const note=h<2?t(k==='L'?'segNoneL':'segNoneR'):(k==='L'?waitL:waitR)?t('waitShort'):'';
-    tag.innerHTML=`<b>${esc(label)}</b>${note?`<i>${esc(note)}</i>`:''}`;
+    const nc=g.copy?(g.copy.nMissing||0)+(g.copy.nExtra||0):0;
+    tag.innerHTML=`<b>${esc(label)}</b>${note?`<i>${esc(note)}</i>`:''}${k==='R'&&nc?`<i style="color:#FFD2D2;font-weight:700">${esc(t('copyN',nc))}</i>`:''}`;
   });
   const mkR=$('mvR').querySelector('.mk');$('segR').style.left=mkR.offsetLeft+'px';$('segR').style.width=mkR.clientWidth+'px';
   const cr=$('mvL').querySelector('.crop');if(cr){$('segL').style.left=cr.offsetLeft+'px';$('segL').style.width=cr.clientWidth+'px';}
+}
+// 이 영역의 카피 차이 (lg.com 컴포넌트 글 ↔ CLIA 섹션 글) — 체크리스트 위에
+function copyPanel(g){
+  const e=$('cpd'),c=g&&g.copy;const n=c?(c.nMissing||0)+(c.nExtra||0):0;
+  if(!n){e.hidden=true;e.innerHTML='';return;}
+  const li=a=>a.map(x=>`<li lang="th">${esc(x)}</li>`).join('');
+  e.innerHTML=`<h4>${esc(t('copyHead',n))}</h4>${c.missing&&c.missing.length?`<span class="k">${esc(t('copyLg'))}</span><ul>${li(c.missing)}</ul>`:''}${c.extra&&c.extra.length?`<span class="k">${esc(t('copyClia'))}</span><ul>${li(c.extra)}</ul>`:''}`;
+  e.hidden=false;
 }
 // 같은 영역 이름표: 오른쪽 체크리스트 항목 이름과 똑같이 — 지금 항목이 이 구간 안이면 그 항목, 아니면 구간이 시작하는 자리의 항목
 function segLabel(g){
