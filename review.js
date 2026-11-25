@@ -27,7 +27,8 @@ const CHANNELS = new Set(['shopee', 'lazada']);
 //   3 = 기준점을 섹션 첫 이미지 윗변으로 · lg.com 같은 줄 카드도 짝지음 (2026-11-25) — 캡처 · 요약 · 조각은 그대로 다시 쓰고 맞추기만 새로
 //   4 = 영역 상자(Lt · Rt) · 찍기 전에 적은 위치 기록의 어긋남을 캡처에서 다시 찾아 고침 (2026-11-25)
 //   5 = lg.com 컴포넌트로 영역 나누기 · 영역 카피 비교(copy) (2026-11-25) — 컴포넌트 기록이 있는 캡처만, 없으면 예전처럼
-const PREP_V = 5;
+//   6 = 한 화면씩 찍어 붙인 캡처 판(stitched v2)을 맞춤 결과에 (2026-11-25) — 다시 맞춰야 목록이 v2 캡처만 보여 준다
+const PREP_V = 6;
 const SHOPEE_MAX_IMAGES = 12, SHOPEE_DESC_MAX = 3000;   // bulk-jobs.js 와 같은 규칙
 const LOCAL = () => (process.env.BULK_API_BASE || `http://127.0.0.1:${process.env.PORT || 3001}`).replace(/\/$/, '');
 const PY_DIR = path.join(__dirname, 'crawler-py');
@@ -450,7 +451,8 @@ function reviewVisible(p) {
   for (const ch of CHANNELS) {
     const { state, rec } = prepState(p.slug, ch, p);
     if (state !== 'ready' || !rec) return false;
-    if (!(rec.align && rec.align.mode === 'component') && !isGoneRec(rec)) return false;
+    // 한 화면씩 찍어 붙인 캡처만 (2026-11-25 — 전체 화면 캡처는 찍는 동안 배치가 바뀌어 위치와 어긋날 수 있음: SG 27G550B-B)
+    if (!(rec.align && rec.align.mode === 'component' && rec.align.stitched) && !isGoneRec(rec)) return false;
   }
   return true;
 }
@@ -458,13 +460,15 @@ function upgradeCandidates() {
   const idx = require('./bulk-catalog').productIndex();
   // 순서 (2026-11-25 사용자 결정): 캡처 없음(실패) → lg.com 에 기능 섹션이 보이는 제품 → lg.com 에 기능 섹션이 없는 제품
   //   (lg.com 오류 — 예전 캡처에서 CLIA 이미지를 10% 도 못 찾음: TH 243개, lg.com HTML 에 기능 컴포넌트가 없고 페이지 데이터에만 있음)
-  const lgNoFeature = (rec) => !!(rec.align && (rec.align.images || 0) >= 3 && (rec.align.matched || 0) / rec.align.images < 0.1);
-  const rank = (rec) => (!rec.shot ? 0 : lgNoFeature(rec) ? 2 : 1);
+  //   기능 섹션을 숨긴 제품(lg-visibility.js)도 여기 — 숨기면 CLIA 이미지가 줄어 이미지 비율로는 알 수 없다
+  const lgNoFeature = (x) => !!lgNoFeatureOf(x.p.slug) || !!(x.rec.align && (x.rec.align.images || 0) >= 3 && (x.rec.align.matched || 0) / x.rec.align.images < 0.1);
+  //   정상 제품 중 오늘 컴포넌트 기록으로 다시 찍었지만 전체 화면 캡처(full_page)로 찍은 것은 정상 제품 다음 — 한 화면씩 찍어 붙여 다시
+  const rank = (x) => (!x.rec.shot ? 0 : lgNoFeature(x) ? 3 : x.rec.align && x.rec.align.mode === 'component' ? 2 : 1);
   return Object.values(idx.products).filter((p) => PREWARM_COUNTRIES.has(p.country)).sort((a, b) => b.crawled_at - a.crawled_at)
     .map((p) => ({ p, ...prepState(p.slug, 'shopee', p) }))
     // 컴포넌트 기록이 없는 캡처(2026-11-25 이전) · 캡처를 못 한 것 (lg.com 에 페이지가 없는 것은 빼고)
-    .filter(({ state, rec }) => state === 'ready' && rec && !isGoneRec(rec) && !(rec.shot && rec.align && rec.align.mode === 'component'))
-    .sort((a, b) => rank(a.rec) - rank(b.rec)).map((x) => x.p);
+    .filter(({ state, rec }) => state === 'ready' && rec && !isGoneRec(rec) && !(rec.shot && rec.align && rec.align.mode === 'component' && rec.align.stitched))
+    .sort((a, b) => rank(a) - rank(b)).map((x) => x.p);
 }
 function upgradeTick() {
   if (!PREWARM || paused || PREWARM_EXISTING_ONLY) return;
@@ -636,9 +640,9 @@ router.get('/api/v1/review/item/:slug', (req, res) => {
   const { state, job } = prepState(slug, ch);
   res.json({ product: { slug, url: p.url, model: p.model || '', title: p.title, dv: p.dv || '', grp: p.grp || '' }, channel: ch,
     approval: approvals.status(slug), gate: approvals.gateOn(), state, job, data: state === 'ready' || state === 'stale' ? readPrep(slug, ch) : null,
-    lgNoFeature: lgNoFeature(slug) });
+    lgNoFeature: lgNoFeatureOf(slug) });
 });
-function lgNoFeature(slug) {   // lg.com 화면에 기능 섹션이 없어 숨긴 제품 (lg-visibility.js)
+function lgNoFeatureOf(slug) {   // lg.com 화면에 기능 섹션이 없어 숨긴 제품 (lg-visibility.js)
   const m = readJson(path.join(dirOf(slug), 'mirror.json'));
   return m && m._lg_hidden ? { visible: m._lg_hidden.visible, at: m._lg_hidden.at, hidden: (m._lg_hidden.sections || []).length } : null;
 }

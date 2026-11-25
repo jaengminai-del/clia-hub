@@ -120,6 +120,79 @@ _JS_COMPS = """() => {
   return out;
 }"""
 
+# 화면 단위로 찍어 이어 붙이기 (2026-11-25): 전체 화면 캡처(full_page)는 찍는 동안 뷰포트를 페이지 높이로 늘려, 높이가 화면 높이(vh)를
+#   따르는 요소(맨 위 히어로 등)가 그 동안만 커진다 → 아래 내용이 밀리고(SG 27G550B-B 약 1,470px), 미리 잰 높이에서 잘린다.
+#   위치 기록은 평소 화면 배치라 캡처와 어긋났다. 뷰포트를 바꾸지 않고 한 화면씩 내려 찍어 붙이면 캡처와 위치가 늘 같은 배치.
+#   위에 붙는 요소: sticky 는 제자리(relative)로, fixed(머리글 · 쿠키 띠 · 내리면 붙는 제품 막대)는 첫 화면에만 보이게.
+#   내리면 서서히 나타나는 이미지(페이드인)가 반쯤 흐리게 찍히지 않게 애니메이션 · 전환을 끄고, 화면마다 조금 더 기다린다.
+_JS_NO_ANIM = """() => { const st = document.createElement('style'); st.textContent = '*,*::before,*::after{transition-duration:0s!important;transition-delay:0s!important;animation-duration:0s!important;animation-delay:0s!important;scroll-behavior:auto!important}'; document.head.appendChild(st); return 1; }"""
+_JS_UNSTICK = """() => { let n = 0; for (const e of document.querySelectorAll('body *')) { if (getComputedStyle(e).position === 'sticky') { e.style.setProperty('position', 'relative', 'important'); n++; } } return n; }"""
+_JS_HIDE_FIXED = """() => { let n = 0; for (const e of document.querySelectorAll('body *')) { if (getComputedStyle(e).position === 'fixed') { e.style.setProperty('visibility', 'hidden', 'important'); n++; } } return n; }"""
+_JS_DOC_H = "Math.max(document.documentElement.scrollHeight, document.body ? document.body.scrollHeight : 0)"
+STITCH_MAX = 60   # 화면 수 상한 (1080px × 60 = 64,800 CSS px)
+
+
+def _stitch_paste(canvas, png: bytes, y_css: float, scale: float):
+    import io
+    from PIL import Image
+    im = Image.open(io.BytesIO(png)).convert("RGB")
+    canvas.paste(im, (0, round(y_css * scale)))
+    return im.width
+
+
+def stitch_shot(page, out: Path, scale: float, quality: int):
+    """(동기) 한 화면씩 찍어 붙여 out(JPEG)에 → (폭, 높이)"""
+    from PIL import Image
+    page.evaluate(_JS_NO_ANIM)
+    page.evaluate(_JS_UNSTICK)
+    vh = page.evaluate("window.innerHeight")
+    H = page.evaluate(_JS_DOC_H)
+    canvas = Image.new("RGB", (round(1920 * scale), round(H * scale * 1.5) + 10), "white")
+    y, first, width = 0, True, 0
+    for _ in range(STITCH_MAX):
+        page.evaluate(f"window.scrollTo(0, {y})")
+        page.wait_for_timeout(350)
+        if not first:   # 내리면 그때 붙는 막대(제품명 · 구매 버튼 등)도 있어 화면마다 다시 숨긴다
+            page.evaluate(_JS_HIDE_FIXED)
+            page.wait_for_timeout(50)
+        sy = page.evaluate("window.scrollY")
+        width = _stitch_paste(canvas, page.screenshot(type="png"), sy, scale)
+        first = False
+        H = page.evaluate(_JS_DOC_H)
+        if sy + vh >= H - 1 or round(H * scale) > canvas.height:
+            break
+        y = sy + vh
+    page.evaluate("window.scrollTo(0, 0)")
+    page.wait_for_timeout(300)
+    canvas.crop((0, 0, width or canvas.width, min(canvas.height, round(H * scale)))).save(str(out), "JPEG", quality=quality)
+
+
+async def stitch_shot_async(page, out: Path, scale: float, quality: int):
+    """(비동기 — fullshot_worker) stitch_shot 과 같다"""
+    from PIL import Image
+    await page.evaluate(_JS_NO_ANIM)
+    await page.evaluate(_JS_UNSTICK)
+    vh = await page.evaluate("window.innerHeight")
+    H = await page.evaluate(_JS_DOC_H)
+    canvas = Image.new("RGB", (round(1920 * scale), round(H * scale * 1.5) + 10), "white")
+    y, first, width = 0, True, 0
+    for _ in range(STITCH_MAX):
+        await page.evaluate(f"window.scrollTo(0, {y})")
+        await page.wait_for_timeout(350)
+        if not first:   # 내리면 그때 붙는 막대(제품명 · 구매 버튼 등)도 있어 화면마다 다시 숨긴다
+            await page.evaluate(_JS_HIDE_FIXED)
+            await page.wait_for_timeout(50)
+        sy = await page.evaluate("window.scrollY")
+        width = _stitch_paste(canvas, await page.screenshot(type="png"), sy, scale)
+        first = False
+        H = await page.evaluate(_JS_DOC_H)
+        if sy + vh >= H - 1 or round(H * scale) > canvas.height:
+            break
+        y = sy + vh
+    await page.evaluate("window.scrollTo(0, 0)")
+    await page.wait_for_timeout(300)
+    canvas.crop((0, 0, width or canvas.width, min(canvas.height, round(H * scale)))).save(str(out), "JPEG", quality=quality)
+
 def _save_boxes(page, out: Path, scale: float):
     try:
         boxes = page.evaluate(_JS_BOXES)
@@ -128,7 +201,7 @@ def _save_boxes(page, out: Path, scale: float):
             comps = page.evaluate(_JS_COMPS)
         except Exception:   # noqa: BLE001
             comps = None
-        Path(str(out) + ".boxes.json").write_text(json.dumps({"scale": scale, "doc_h": doc_h, "after": True, "items": boxes, "comps": comps}), encoding="utf-8")
+        Path(str(out) + ".boxes.json").write_text(json.dumps({"scale": scale, "doc_h": doc_h, "after": True, "method": "stitch", "v": 2, "items": boxes, "comps": comps}), encoding="utf-8")
     except Exception as e:   # 위치 기록은 덤 — 실패해도 캡처는 그대로
         print(f"boxes: {e}", file=sys.stderr)
 
@@ -305,7 +378,7 @@ def capture_direct(url: str, out: Path, scale: float = 0.5, quality: int = 80) -
             out.parent.mkdir(parents=True, exist_ok=True)
             # 위치는 찍은 뒤에 기록한다 — 찍기 전에 적으면 그 뒤에 늦게 뜬 이미지가 아래 내용을 밀어 캡처와 어긋난다
             # (2026-11-25 MS4295DIS: 첫 이미지가 늦게 커져 아래 이미지 위치가 450px 위로 적힘)
-            page.screenshot(path=str(out), full_page=True, type="jpeg", quality=quality)
+            stitch_shot(page, out, scale, quality)   # 한 화면씩 찍어 붙임 (full_page 는 찍는 동안 배치가 바뀐다)
             _save_boxes(page, out, scale)
         finally:
             browser.close()

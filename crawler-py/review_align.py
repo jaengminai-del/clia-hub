@@ -223,13 +223,15 @@ def align(capture_path, top, bottom, html, medium, fonts_css, slice_width, boxes
     boxes 가 없으면(예전 캡처) 예전처럼 그림으로 찾는다."""
     import numpy as np
     from PIL import Image
-    idx, boxes_after, comps, bscale = {}, False, None, 0.5
+    idx, boxes_after, comps, bscale, stitched = {}, False, None, 0.5, False
     if boxes and Path(boxes).exists():
         try:
             idx = box_index(boxes)
             import json as _json
             bj = _json.loads(Path(boxes).read_text(encoding="utf-8"))
             boxes_after, comps, bscale = bool(bj.get("after")), (bj.get("comps") or None), float(bj.get("scale") or 0.5)
+            # 한 화면씩 찍어 붙인 캡처 (2026-11-25 — full_page 는 찍는 동안 배치가 바뀔 수 있음). v2 = 애니메이션을 끄고 찍음 (페이드인 이미지가 흐리지 않게)
+            stitched = bj.get("method") == "stitch" and int(bj.get("v") or 1) >= 2
         except Exception:   # noqa: BLE001 — 위치 기록이 깨졌으면 그림 맞추기만
             idx = {}
     by_url = lambda src: [b for b in idx.get(stem(src), []) if top - 40 <= b[1] <= bottom]
@@ -339,7 +341,7 @@ def align(capture_path, top, bottom, html, medium, fonts_css, slice_width, boxes
         if len(ca) >= max(1, len(anchors) // 2):
             anchors, mode = ca, "component"
     return {"anchors": anchors, "sections": len(secs), "images": len(items), "matched": len(chosen), "by_url": n_url,
-            "mode": mode, "layout_cached": cached, "boxes_after": boxes_after, "drift": drift}
+            "mode": mode, "layout_cached": cached, "boxes_after": boxes_after, "stitched": stitched, "drift": drift}
 
 
 
@@ -449,6 +451,12 @@ def component_anchors(comps, bscale, secs, scale, top, bottom):
         out.append({"label": s.get("head") or "", "L": L, "R": R, "Lt": L, "Rt": R, "Lb": Lb, "Rb": Rb, "score": 1.0,
                     "_lg": lg_lines, "_clia": [s.get("text") or ""], "_spec": any(c["spec"] for c in grp)})
         last_top = L
+    # 제목이 따로 컴포넌트가 아니거나(큰 탭 안) 짝짓지 못한 경우 lg.com 영역이 이미지부터 시작한다 → 앞 영역 아래와의 틈이 짧으면(600px 이하)
+    # 그 틈(제목 · 설명)까지 이 영역으로 — CLIA 섹션도 제목부터라 양쪽 시작이 같아진다 (2026-11-25 SG 27G550B-B)
+    for i in range(1, len(out)):
+        gap = out[i]["L"] - out[i - 1]["Lb"]
+        if 0 < gap <= 600:
+            out[i]["L"] = out[i]["Lt"] = out[i - 1]["Lb"]
     for a in out:
         ct = _norm("\n".join(a["_clia"]))
         lt = _norm("\n".join(a["_lg"]))
