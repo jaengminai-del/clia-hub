@@ -24,7 +24,8 @@ const approvals = require('./approvals');
 const router = express.Router();
 const CHANNELS = new Set(['shopee', 'lazada']);
 // 준비 결과 판: 2 = 같은 영역 기준점(align) 추가 (2026-11-24) — 낮은 판은 「내용 바뀜」으로 보고 다시 준비
-const PREP_V = 2;
+//   3 = 기준점을 섹션 첫 이미지 윗변으로 · lg.com 같은 줄 카드도 짝지음 (2026-11-25) — 캡처 · 요약 · 조각은 그대로 다시 쓰고 맞추기만 새로
+const PREP_V = 3;
 const SHOPEE_MAX_IMAGES = 12, SHOPEE_DESC_MAX = 3000;   // bulk-jobs.js 와 같은 규칙
 const LOCAL = () => (process.env.BULK_API_BASE || `http://127.0.0.1:${process.env.PORT || 3001}`).replace(/\/$/, '');
 const PY_DIR = path.join(__dirname, 'crawler-py');

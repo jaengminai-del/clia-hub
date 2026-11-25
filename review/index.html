@@ -503,8 +503,10 @@ async function recapture(){CROP=null;$('cropEd').hidden=true;toast(t('recapToast
 // 스크롤 막대는 하나(#sc). 양쪽 내용은 transform 으로 같은 프레임에 같이 움직인다.
 // 기준점(서버 review_align.py — lg.com 캡처와 상세 이미지에서 같은 섹션이 시작하는 자리)으로 구간을 나눈다:
 //   [PDP 요약(오른쪽에만)] → [PDP 시작 ↔ 첫 상세 이미지] → 섹션 기준점마다 … → [양쪽 끝]
-// 한 구간 안에서는 두 쪽이 같은 속도(화면 px)로 같이 움직이고, 그 구간이 짧은 쪽은 구간 끝에서 긴 쪽이 끝날 때까지 기다린다.
-// 다음 구간은 두 쪽이 같은 자리(구간 시작)에서 같이 출발한다 → 같은 영역이 늘 같은 높이에 온다.
+// 한 구간 안에서 긴 쪽(보통 CLIA)은 1:1 로 끝까지 스크롤하고, 짧은 쪽(보통 lg.com — 카드가 옆으로 놓여 짧다)은
+// 그 영역을 화면 위에 고정해 두었다가, 긴 쪽 영역의 끝이 화면을 지나갈 때(마지막 화면 높이만큼) 같이 1:1 로 올라간다.
+// 짧은 쪽 영역이 화면보다 길면 넘치는 만큼은 고정하는 동안 천천히(비례해서) 움직인다 → 두 쪽 영역 끝이 같이 온다.
+// 다음 구간은 두 쪽이 같은 자리(구간 시작)에서 같이 출발한다 → 같은 영역이 늘 같은 높이에 온다. (2026-11-25)
 const SEG_COLOR='#1E7F4F';   // 같은 영역 표시는 초록 한 가지 (구간은 번호 · 이름표로 구분). 빨강은 체크리스트 지금 항목
 function layout(){
   const sc=$('sc'),st=$('stage');st.style.height=sc.clientHeight+'px';
@@ -524,30 +526,48 @@ function layout(){
   const al=(d.align&&d.align.anchors)||[];
   const firstLabel=al[0]&&al[0].L-top<60?al[0].label:'';
   P.push({l:crop?crop.offsetTop:0,r:sl[0]?sl[0].offsetTop:0,label:firstLabel||t('segIntro'),kind:'start'});
-  al.forEach((a,i)=>{if(i===0&&firstLabel)return;P.push({l:lpx(a.L),r:rpx(a.R),label:a.label||t('segN',i+1),kind:'sec',score:a.score});});
+  // 기준점 = 그 섹션 첫 이미지의 윗변(양쪽 같은 이미지). 두 쪽 모두 화면 px 로 같은 만큼(PAD) 위에서 구간을 시작 → 이미지 윗변이 양쪽 같은 높이, 카드 윗부분이 잘리지 않음
+  const PAD=40;
+  al.forEach((a,i)=>{if(i===0&&firstLabel)return;P.push({l:Math.max(crop?crop.offsetTop:0,lpx(a.L)-PAD),r:Math.max(sl[0]?sl[0].offsetTop:0,rpx(a.R)-PAD),label:a.label||t('segN',i+1),kind:'sec',score:a.score});});
   P.push({l:mvL.offsetHeight,r:mvR.offsetHeight,label:'',kind:'end'});
-  // 두 쪽 모두 늘어나는 점만 (앞 점과 같거나 거꾸로면 버린다 — 범위를 사람이 줄였을 때 등)
-  const pts=[P[0]];for(const p of P.slice(1)){const q=pts[pts.length-1];if(p.kind==='end'||(p.l>=q.l&&p.r>q.r+4&&(p.l>q.l+4||q.kind==='sum')))pts.push(p);}
+  // 거꾸로 가지 않고 한 쪽이라도 늘어나는 점만 (거꾸로면 버린다 — 범위를 사람이 줄였을 때 등).
+  // 한 쪽만 늘어나는 구간도 둔다 — 예: lg.com 맨 위 프로모션(CLIA 에 없음)이 지나가는 동안 CLIA 는 기다림 (2026-11-25 OLED48C6PSA)
+  const pts=[P[0]];for(const p of P.slice(1)){const q=pts[pts.length-1];if(p.kind==='end'||(p.l>=q.l&&p.r>=q.r&&(p.r>q.r+4||p.l>q.l+4)))pts.push(p);}
   const segs=[];let S=0;
   for(let i=0;i<pts.length-1;i++){const a=pts[i],b=pts[i+1],dl=Math.max(0,b.l-a.l),dr=Math.max(0,b.r-a.r),len=Math.max(dl,dr);
-    if(len<1)continue;segs.push({l:a.l,r:a.r,dl,dr,S,len,label:a.label,kind:a.kind,n:segs.length});S+=len;}
+    if(len<1)continue;segs.push({l:a.l,r:a.r,dl,dr,S,len,label:a.label,kind:a.kind,n:segs.length,
+      xl:Math.min(dl,vpL.clientHeight),xr:Math.min(dr,vpR.clientHeight)});S+=len;}
   // 끝: 두 쪽이 모두 끝에 닿는 가장 작은 스크롤량
-  const reach=(side,max)=>{for(const g of segs){const x=g[side],dx=side==='l'?g.dl:g.dr;if(x+dx>=max)return g.S+Math.max(0,max-x);}return S;};
+  const reach=(side,max)=>{for(const g of segs){const x=g[side],dx=side==='l'?g.dl:g.dr;if(x+dx>=max)return g.S+segTt(g,side,Math.max(0,max-x));}return S;};
   const sMax=Math.max(reach('l',lmax),reach('r',rmax));
   $('spacer').style.height=sMax+'px';
   $('snaps').innerHTML=segs.filter(g=>g.S<=sMax).map(g=>`<i style="top:${g.S}px"></i>`).join('')+`<i style="top:${sMax}px"></i>`;
   G={lmax,rmax,sMax,segs,vh:vpR.clientHeight,anchors,imgs,s:G?G.s:0,aligned:al.length};
 }
+// 구간 안 진행 tt(0..len) → 그 쪽이 구간 시작에서 움직인 거리. 긴 쪽은 1:1, 짧은 쪽은 고정(넘치면 비례) 뒤 마지막 x 만큼 1:1
+function segOff(g,side,tt){
+  const D=side==='l'?g.dl:g.dr,x=side==='l'?g.xl:g.xr,L=g.len;tt=Math.max(0,Math.min(tt,L));
+  if(D>=L-0.5||L-x<=0)return Math.min(tt,D);
+  const hold=L-x;return tt<hold?(D-x)*tt/hold:(D-x)+(tt-hold);
+}
+// 거꾸로: 그 쪽이 구간 시작에서 d 만큼 움직인 자리가 되는 tt (그 자리에 처음 닿는 때)
+function segTt(g,side,d){
+  const D=side==='l'?g.dl:g.dr,x=side==='l'?g.xl:g.xr,L=g.len;d=Math.max(0,Math.min(d,D));
+  if(D>=L-0.5||L-x<=0)return d;
+  const hold=L-x;if(d<=D-x)return D-x>0?d*hold/(D-x):0;return hold+(d-(D-x));
+}
 function segAt(s){const g=G.segs;let i=0;while(i<g.length-1&&s+1>=g[i+1].S)i++;return g[i];}   // +1: 스냅이 소수점 아래로 멈춰도 그 구간
 // 오른쪽 내용 y 가 화면 맨 위에 오는 스크롤량
-function sOfR(y){for(const g of G.segs){if(y<g.r+g.dr||g===G.segs[G.segs.length-1])return Math.min(G.sMax,g.S+Math.max(0,Math.min(y-g.r,g.dr)));}return 0;}
+function sOfR(y){for(const g of G.segs){if(y<g.r+g.dr||g===G.segs[G.segs.length-1])return Math.min(G.sMax,g.S+segTt(g,'r',y-g.r));}return 0;}
 function update(){
   if(!G||!C||!G.segs.length)return;const s=$('sc').scrollTop;G.s=s;
   const g=segAt(s),tt=Math.max(0,s-g.S);
-  const posL=g.l+Math.min(tt,g.dl),posR=g.r+Math.min(tt,g.dr);
+  const posL=g.l+segOff(g,'l',tt),posR=g.r+segOff(g,'r',tt);
   const l=Math.min(posL,G.lmax),r=Math.min(posR,G.rmax);
   $('mvR').style.transform=`translate3d(0,${-r}px,0)`;$('mvL').style.transform=`translate3d(0,${-l}px,0)`;
-  const doneL=tt>=g.dl||posL>=G.lmax,doneR=tt>=g.dr||posR>=G.rmax;
+  // 고정돼 있는 쪽(구간이 짧아 긴 쪽을 기다리는 중) — 이름표에 「기다리는 중」
+  const hold=(side,D,x,pos,max)=>pos>=max||(D<g.len-0.5&&D-x<1&&tt<g.len-x);
+  const doneL=hold('l',g.dl,g.xl,posL,G.lmax),doneR=hold('r',g.dr,g.xr,posR,G.rmax);
   for(const im of G.imgs)if(!im.e.src&&im.top<r+G.vh*2.5)im.e.src=im.e.dataset.src;   // 보이는 근처만 읽기
   track(r);   // 지금 체크리스트 항목을 먼저 정해 두고 → 이름표가 그 항목 이름을 쓴다
   segMark(g,l,r,doneL&&!doneR,doneR&&!doneL);
