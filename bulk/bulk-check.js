@@ -8,35 +8,35 @@
    bulk.js 가 매칭(setData)까지 하고 BulkCheck.begin(core) 로 넘긴다. 기존 벌크 흐름은 그대로. */
 (function () {
   const TX = {
-    en: { wait: 'Waiting', checking: 'Checking…', passed: 'Passed', checkingN: (n) => `AI is checking ${n} products…`, passedN: (n) => `${n} passed`, lookN: (n) => `${n} need${n === 1 ? 's' : ''} a look`, confirmN: (n) => `Confirm ${n} & next →`, steps: ['Attach', 'Prepare', 'Check', 'Download'], rows: (n) => `${n} rows`, prep: (a, b) => `Preparing ${a} / ${b}`, liveP: 'live products',
+    en: { wait: 'Waiting', checking: 'Checking…', passed: 'Passed', checkingN: (n) => `AI is checking ${n} products…`, passedN: (n) => `${n} passed`, lookN: (n) => `${n} need${n === 1 ? 's' : ''} a look`, confirm: 'Confirm', steps: ['Attach', 'Prepare', 'Check', 'Download'], rows: (n) => `${n} rows`, prep: (a, b) => `Preparing ${a} / ${b}`, liveP: 'live products',
       skip: (n) => `${n} not live — skipped`, view: 'View', hide: 'Hide', asOf: (d) => `Live list as of ${d}`, byStatus: 'From the Status column',
       skipRows: (n) => `${n} rows in the Excel — left as they are`, notLive: 'Not live', unknown: 'Unknown', none: 'No live products in this file.',
       ai: 'AI check', c_img: 'All images loaded', c_txt: 'Same text as lg.com', c_sum: 'Summary included', c_n12: 'Shopee: 12 images or fewer', c_spec: 'Spec table included',
       used: (u, a) => `${u} of ${a} images used`, w_img: (n) => `${n} image${n === 1 ? '' : 's'} didn't load`, w_txt: (n) => `${n} lg.com lines missing`, w_sum: "Summary couldn't be made",
       w_spec: 'No spec table', w_fail: "Couldn't prepare", w_retried: 'still there after a retry', next: 'Confirm & next →', redo: 'Prepare again', remove: 'Remove from this Excel',
       redoing: 'Preparing again', doneT: (n) => `${n} checked`, removed: (n) => `${n} removed`, skipped: (n) => `${n} not live skipped`, dl: 'Download Excel', err: 'Something went wrong: ' },
-    th: { wait: 'รอ', checking: 'กำลังตรวจ…', passed: 'ผ่าน', checkingN: (n) => `AI กำลังตรวจ ${n} รายการ…`, passedN: (n) => `ผ่าน ${n}`, lookN: (n) => `ต้องดู ${n}`, confirmN: (n) => `ยืนยัน ${n} และถัดไป →`, steps: ['แนบไฟล์', 'เตรียม', 'ตรวจ', 'ดาวน์โหลด'], rows: (n) => `${n} แถว`, prep: (a, b) => `กำลังเตรียม ${a} / ${b}`, liveP: 'สินค้าที่ไลฟ์',
+    th: { wait: 'รอ', checking: 'กำลังตรวจ…', passed: 'ผ่าน', checkingN: (n) => `AI กำลังตรวจ ${n} รายการ…`, passedN: (n) => `ผ่าน ${n}`, lookN: (n) => `ต้องดู ${n}`, confirm: 'ยืนยัน', steps: ['แนบไฟล์', 'เตรียม', 'ตรวจ', 'ดาวน์โหลด'], rows: (n) => `${n} แถว`, prep: (a, b) => `กำลังเตรียม ${a} / ${b}`, liveP: 'สินค้าที่ไลฟ์',
       skip: (n) => `ไม่ได้ไลฟ์ ${n} รายการ — ข้ามไป`, view: 'ดู', hide: 'ซ่อน', asOf: (d) => `รายการไลฟ์ ณ ${d}`, byStatus: 'จากคอลัมน์ Status',
       skipRows: (n) => `${n} แถวใน Excel — คงไว้ตามเดิม`, notLive: 'ไม่ได้ไลฟ์', unknown: 'ไม่ทราบ', none: 'ไม่มีสินค้าที่ไลฟ์ในไฟล์นี้',
       ai: 'AI ตรวจ', c_img: 'โหลดรูปครบ', c_txt: 'ข้อความตรงกับ lg.com', c_sum: 'มีสรุปสินค้า', c_n12: 'Shopee: ไม่เกิน 12 รูป', c_spec: 'มีตารางสเปก',
       used: (u, a) => `ใช้ ${u} จาก ${a} รูป`, w_img: (n) => `โหลดรูปไม่ได้ ${n} รูป`, w_txt: (n) => `ข้อความจาก lg.com ขาด ${n} บรรทัด`, w_sum: 'สร้างสรุปไม่ได้',
       w_spec: 'ไม่มีตารางสเปก', w_fail: 'เตรียมไม่สำเร็จ', w_retried: 'ลองใหม่แล้วยังเหมือนเดิม', next: 'ยืนยันและถัดไป →', redo: 'เตรียมใหม่', remove: 'นำออกจาก Excel นี้',
       redoing: 'กำลังเตรียมใหม่', doneT: (n) => `ตรวจแล้ว ${n} รายการ`, removed: (n) => `นำออก ${n}`, skipped: (n) => `ข้ามที่ไม่ได้ไลฟ์ ${n}`, dl: 'ดาวน์โหลด Excel', err: 'เกิดข้อผิดพลาด: ' },
-    ko: { wait: '대기', checking: '확인 중…', passed: '통과', checkingN: (n) => `AI가 ${n}개 확인 중…`, passedN: (n) => `${n}개 통과`, lookN: (n) => `${n}개 확인 필요`, confirmN: (n) => `${n}개 확인하고 다음 →`, steps: ['첨부', '준비', 'Check', '받기'], rows: (n) => `${n}행`, prep: (a, b) => `준비 중 ${a} / ${b}`, liveP: '라이브 제품',
+    ko: { wait: '대기', checking: '확인 중…', passed: '통과', checkingN: (n) => `AI가 ${n}개 확인 중…`, passedN: (n) => `${n}개 통과`, lookN: (n) => `${n}개 확인 필요`, confirm: '확인', steps: ['첨부', '준비', 'Check', '받기'], rows: (n) => `${n}행`, prep: (a, b) => `준비 중 ${a} / ${b}`, liveP: '라이브 제품',
       skip: (n) => `라이브 아님 ${n}개 — 건너뜀`, view: '보기', hide: '닫기', asOf: (d) => `라이브 목록 기준일 ${d}`, byStatus: 'Status 칸 기준',
       skipRows: (n) => `엑셀 ${n}행 — 원래 내용 그대로`, notLive: '라이브 아님', unknown: '모름', none: '이 파일에 라이브 제품이 없어요.',
       ai: 'AI 체크', c_img: '이미지 다 불러옴', c_txt: 'lg.com 문구와 같음', c_sum: '요약 들어감', c_n12: 'Shopee 12장 이하', c_spec: '스펙표 들어감',
       used: (u, a) => `${a}장 중 ${u}장 사용`, w_img: (n) => `이미지 ${n}장 못 불러옴`, w_txt: (n) => `lg.com 문구 ${n}줄 빠짐`, w_sum: '요약을 못 만듦',
       w_spec: '스펙표 없음', w_fail: '준비 못 함', w_retried: '다시 해도 그대로', next: '확인하고 다음 →', redo: '다시 준비', remove: '이번 엑셀에서 빼기',
       redoing: '다시 준비하는 중', doneT: (n) => `${n}개 확인 완료`, removed: (n) => `${n}개 뺌`, skipped: (n) => `라이브 아님 ${n}개 건너뜀`, dl: '엑셀 받기', err: '문제가 생겼어요: ' },
-    de: { wait: 'Wartet', checking: 'Prüft…', passed: 'Bestanden', checkingN: (n) => `KI prüft ${n} Produkte…`, passedN: (n) => `${n} bestanden`, lookN: (n) => `${n} ansehen`, confirmN: (n) => `${n} bestätigen & weiter →`, steps: ['Anhängen', 'Vorbereiten', 'Prüfen', 'Herunterladen'], rows: (n) => `${n} Zeilen`, prep: (a, b) => `Vorbereitung ${a} / ${b}`, liveP: 'Live-Produkte',
+    de: { wait: 'Wartet', checking: 'Prüft…', passed: 'Bestanden', checkingN: (n) => `KI prüft ${n} Produkte…`, passedN: (n) => `${n} bestanden`, lookN: (n) => `${n} ansehen`, confirm: 'Bestätigen', steps: ['Anhängen', 'Vorbereiten', 'Prüfen', 'Herunterladen'], rows: (n) => `${n} Zeilen`, prep: (a, b) => `Vorbereitung ${a} / ${b}`, liveP: 'Live-Produkte',
       skip: (n) => `${n} nicht live — übersprungen`, view: 'Ansehen', hide: 'Ausblenden', asOf: (d) => `Live-Liste vom ${d}`, byStatus: 'Aus der Spalte Status',
       skipRows: (n) => `${n} Zeilen in der Excel — bleiben unverändert`, notLive: 'Nicht live', unknown: 'Unbekannt', none: 'Keine Live-Produkte in dieser Datei.',
       ai: 'KI-Prüfung', c_img: 'Alle Bilder geladen', c_txt: 'Gleicher Text wie lg.com', c_sum: 'Zusammenfassung enthalten', c_n12: 'Shopee: höchstens 12 Bilder', c_spec: 'Datenblatt enthalten',
       used: (u, a) => `${u} von ${a} Bildern verwendet`, w_img: (n) => `${n} Bild(er) nicht geladen`, w_txt: (n) => `${n} Zeilen von lg.com fehlen`, w_sum: 'Zusammenfassung fehlgeschlagen',
       w_spec: 'Kein Datenblatt', w_fail: 'Vorbereitung fehlgeschlagen', w_retried: 'auch nach erneutem Versuch', next: 'Bestätigen & weiter →', redo: 'Neu vorbereiten', remove: 'Aus dieser Excel entfernen',
       redoing: 'Wird neu vorbereitet', doneT: (n) => `${n} geprüft`, removed: (n) => `${n} entfernt`, skipped: (n) => `${n} nicht live übersprungen`, dl: 'Excel herunterladen', err: 'Fehler: ' },
-    ar: { wait: 'بانتظار', checking: 'جارٍ الفحص…', passed: 'ناجح', checkingN: (n) => `الذكاء الاصطناعي يفحص ${n} منتجات…`, passedN: (n) => `${n} ناجح`, lookN: (n) => `${n} يحتاج مراجعة`, confirmN: (n) => `تأكيد ${n} والتالي ←`, steps: ['إرفاق', 'تجهيز', 'تحقق', 'تنزيل'], rows: (n) => `${n} صف`, prep: (a, b) => `جارٍ التجهيز ${a} / ${b}`, liveP: 'منتجات نشطة',
+    ar: { wait: 'بانتظار', checking: 'جارٍ الفحص…', passed: 'ناجح', checkingN: (n) => `الذكاء الاصطناعي يفحص ${n} منتجات…`, passedN: (n) => `${n} ناجح`, lookN: (n) => `${n} يحتاج مراجعة`, confirm: 'تأكيد', steps: ['إرفاق', 'تجهيز', 'تحقق', 'تنزيل'], rows: (n) => `${n} صف`, prep: (a, b) => `جارٍ التجهيز ${a} / ${b}`, liveP: 'منتجات نشطة',
       skip: (n) => `${n} غير نشط — تم تخطيه`, view: 'عرض', hide: 'إخفاء', asOf: (d) => `قائمة النشط بتاريخ ${d}`, byStatus: 'من عمود Status',
       skipRows: (n) => `${n} صف في Excel — يبقى كما هو`, notLive: 'غير نشط', unknown: 'غير معروف', none: 'لا توجد منتجات نشطة في هذا الملف.',
       ai: 'فحص الذكاء الاصطناعي', c_img: 'تم تحميل كل الصور', c_txt: 'نفس نص lg.com', c_sum: 'الملخص مضمّن', c_n12: 'Shopee: ‏12 صورة أو أقل', c_spec: 'جدول المواصفات مضمّن',
@@ -184,8 +184,9 @@
     const el = frame(core, 2);
     el.innerHTML = `<div class="ck-p"><div class="ck-bar"><i style="width:${doneN / us.length * 100}%"></i></div><span class="ck-c">${doneN} / ${us.length}</span></div>
       <div class="ck-grid" id="ckGrid">${batch.map((u, i) => cardHtml(core, u, i)).join('')}</div>
-      <div class="ck-bact" id="ckAct"><span class="ck-bsum" id="ckSum">${e(T.checkingN(batch.length))}</span><span class="ck-gap"></span><span class="ck-kbd"><b>Enter</b></span><button class="clia-btn primary big" id="ckNext" type="button"></button></div>
       <div id="ckGo"></div>`;
+    // 확인 버튼은 단계 줄(Attach › … › Download) 오른쪽 끝 — 다른 화면으로 가면 frame() 이 단계 줄을 다시 그려 사라짐
+    document.getElementById('ckSteps').insertAdjacentHTML('beforeend', `<div class="ck-sact" id="ckAct"><span class="ck-bsum" id="ckSum">${e(T.checkingN(batch.length))}</span><span class="ck-kbd"><b>Enter</b></span><button class="clia-btn primary" id="ckNext" type="button"></button></div>`);
     prefetch(left.slice(BATCH, BATCH * 2));
     const cards = [...document.querySelectorAll('#ckGrid .ck-bc')];
     cards.forEach((c, i) => c.querySelectorAll('[data-a]').forEach((b) => { b.onclick = () => act(core, batch[i].map((x) => x.row), b.dataset.a, b); }));
@@ -196,7 +197,7 @@
     document.getElementById('ckSum').innerHTML = [pass.length ? `<b>${e(T.passedN(pass.length))}</b>` : '', bad ? `<em>${e(T.lookN(bad))}</em>` : ''].filter(Boolean).join(' · ');
     if (batch.some((u) => u.some((x) => x.status === 'working'))) waitRedo(core, batch.filter((u) => u.some((x) => x.status === 'working')));
     if (!pass.length) return;
-    const go = document.getElementById('ckNext'); go.textContent = T.confirmN(pass.length);
+    const go = document.getElementById('ckNext'); go.textContent = T.confirm;
     document.getElementById('ckAct').classList.add('on'); go.focus();
     go.onclick = async () => {
       go.disabled = true;

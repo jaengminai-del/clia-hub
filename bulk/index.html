@@ -396,7 +396,7 @@ button.eb { cursor: pointer; }
 .ck-p .ck-bar { flex: 1; margin: 0; } .ck-p .ck-c { font-size: 13px; color: var(--clia-gray-700); font-variant-numeric: tabular-nums; min-width: 64px; text-align: right; }
 .ck-p { max-width: 1240px; padding: 14px 20px 0; }
 /* 한 번에 6개 — 카드 = 작은 상품 페이지(bulk-market, 반 크기) · 점(체크 하나 = 점 하나) · 한 줄 상태. 움직임은 transform 만 */
-.ck-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; padding: 16px 20px 10px; max-width: 1240px; width: 100%; margin: 0 auto; }
+.ck-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; padding: 16px 20px 20px; max-width: 1240px; width: 100%; margin: 0 auto; }
 .ck-bc { display: flex; flex-direction: column; min-width: 0; min-height: 0; transition: transform .45s cubic-bezier(.4,0,.2,1), opacity .35s; animation: ckin .45s cubic-bezier(.2,.8,.2,1) both; }
 @keyframes ckin { from { transform: translateX(60px); opacity: 0; } }
 .ck-bc.ck-out { transform: translateY(-120px) scale(.6); opacity: 0; }
@@ -418,11 +418,14 @@ button.eb { cursor: pointer; }
 .ck-bst { margin-top: 5px; font-size: 12px; color: var(--muted); min-height: 16px; line-height: 1.35; } .ck-bc.ck-fail .ck-bst { color: var(--bad); }
 .ck-bc.ck-busy .ck-bst::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: -1px; border-radius: 50%; border: 2px solid var(--clia-gray-200); border-top-color: var(--clia-gray-900); animation: ckspin .7s linear infinite; }
 .ck-bfx { display: none; gap: 6px; margin-top: 6px; flex-wrap: wrap; } .ck-bc.ck-fail .ck-bfx { display: flex; } .ck-bfx .clia-btn { height: 28px; padding: 0 10px; font-size: 12px; }
-.ck-bact { flex: none; display: flex; align-items: center; gap: 14px; padding: 8px 20px 18px; min-height: 70px; max-width: 1240px; width: 100%; margin: 0 auto; }
-.ck-bsum { font-size: 14px; color: var(--clia-gray-700); } .ck-bsum b { color: var(--ok); } .ck-bsum em { font-style: normal; color: var(--bad); } .ck-gap { flex: 1; }
-.ck-bact .clia-btn.primary, .ck-bact .ck-kbd { opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; }
-.ck-bact.on .clia-btn.primary, .ck-bact.on .ck-kbd { opacity: 1; pointer-events: auto; }
-.ck-bact .clia-btn.primary:focus { outline: 3px solid rgba(253,49,46,.28); outline-offset: 2px; }
+.ck-steps { position: relative; }
+.ck-sact { position: absolute; inset-inline-end: 20px; top: 0; bottom: 0; display: flex; align-items: center; gap: 10px; }
+.ck-bsum { font-size: 13px; color: var(--clia-gray-700); white-space: nowrap; } .ck-bsum b { color: var(--ok); } .ck-bsum em { font-style: normal; color: var(--bad); }
+.ck-sact .clia-btn.primary { height: 30px; padding: 0 16px; font-size: 13px; border-radius: 999px; }
+.ck-sact .clia-btn.primary, .ck-sact .ck-kbd { opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; }
+.ck-sact.on .clia-btn.primary, .ck-sact.on .ck-kbd { opacity: 1; pointer-events: auto; }
+.ck-sact .clia-btn.primary:focus { outline: 3px solid rgba(253,49,46,.28); outline-offset: 2px; }
+@media (max-width: 900px) { .ck-sact .ck-bsum, .ck-sact .ck-kbd { display: none; } }
 #ckGo { padding: 0 20px; max-width: 1240px; margin: 0 auto; width: 100%; } #ckGo .ck-why { margin: 0 0 12px; }
 .ck-redo { display: flex; align-items: center; gap: 10px; color: var(--clia-gray-700); font-size: 14px; }
 @media (max-width: 900px) { .ck-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: auto; } .ck-bph { min-height: 320px; } }
