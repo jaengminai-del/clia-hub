@@ -108,4 +108,4 @@ router.post('/api/v1/approvals', cr.auth, (req, res) => {
   post(req, res, slugs);
 });
 
-module.exports = { router, status, isApproved, pendingOf, gateOn };
+module.exports = { router, status, isApproved, pendingOf, gateOn, write };   // write: 벌크 Check 확인 (bulk-jobs.js checkAction)
