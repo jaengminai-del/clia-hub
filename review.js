@@ -641,8 +641,15 @@ router.get('/api/v1/review/item/:slug', (req, res) => {
   const { state, job } = prepState(slug, ch);
   res.json({ product: { slug, url: p.url, model: p.model || '', title: p.title, dv: p.dv || '', grp: p.grp || '' }, channel: ch,
     approval: approvals.status(slug), gate: approvals.gateOn(), state, job, data: state === 'ready' || state === 'stale' ? readPrep(slug, ch) : null,
-    lgNoFeature: lgNoFeatureOf(slug) });
+    lgNoFeature: lgNoFeatureOf(slug), store: storeOf(slug, p) });
 });
+// Shopee · Lazada 상품 페이지 틀(shared/clia-market.js)에 넣을 갤러리 · 스펙 · 제목 — 크롤 데이터에서 (2026-11-26)
+function storeOf(slug, p) {
+  const m = readJson(path.join(dirOf(slug), 'mirror.json'));
+  if (!m) return null;
+  const CM = require('./shared/clia-market.js');
+  return { title: m.product_title || p.title || '', gallery: CM.galleryOf(m), specs: CM.specsOf(m) };
+}
 function lgNoFeatureOf(slug) {   // lg.com 화면에 기능 섹션이 없어 숨긴 제품 (lg-visibility.js)
   const m = readJson(path.join(dirOf(slug), 'mirror.json'));
   return m && m._lg_hidden ? { visible: m._lg_hidden.visible, at: m._lg_hidden.at, hidden: (m._lg_hidden.sections || []).length } : null;

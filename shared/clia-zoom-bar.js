@@ -131,13 +131,15 @@
   };
   function note(el, pct) {
     if (!el || !el.parentElement) return;
-    let n = el.previousElementSibling;
+    // 미리보기 바로 위에 붙는 상단 바(data-preview-top — Shopee · Lazada 바, 2026-11-26)가 있으면 안내는 그 위에
+    const prev = el.previousElementSibling, ref = prev && prev.hasAttribute('data-preview-top') ? prev : el;
+    let n = ref.previousElementSibling;
     if (!n || !n.classList.contains('clia-preview-scale-note')) {
       n = document.createElement('div');
       n.className = 'clia-preview-scale-note';
       n.style.cssText = "margin:0 0 8px;padding:6px 10px;border-radius:6px;background:#F4F4F4;color:#555;"
         + "font:600 12px/1.3 'LGEIText',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;text-align:center;";
-      el.parentElement.insertBefore(n, el);
+      el.parentElement.insertBefore(n, ref);
     }
     const lang = (window.CLIA_LANG || document.documentElement.lang || 'en').slice(0, 2);
     n.textContent = '🔎 ' + (TEXT[lang] || TEXT.en)(pct);

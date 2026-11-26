@@ -3,6 +3,8 @@
 <title>CLIA · Review</title>
 <link rel="icon" href="/shared/assets/clia-icon.svg">
 <link rel="stylesheet" href="/css/fonts.css">
+<link rel="stylesheet" href="/shared/clia-market.css">
+<script src="/shared/clia-market.js"></script>
 <!--
   검토·승인 화면 (2026-11-24, docs/clia-pdp-review/mockups/v12 를 운영으로)
   · 목록: CLIA 크롤 제품 전체 (법인별) — BU·제품군 필터, 리스트/갤러리, 전체 선택 → 선택 승인 · 선택 준비
@@ -98,8 +100,10 @@ td .m,.cb .m{font-weight:700}td .s{font-size:12px;color:var(--g500);max-width:42
 .mv{position:absolute;left:0;right:0;top:0;will-change:transform}
 .lg{padding:10px 14px}.lg .crop{width:100%;overflow:hidden;background:#fff}.lg .crop img{width:100%;height:auto;display:block}
 .noshot{margin:20px;padding:16px;background:#fff;border-radius:10px;font-size:13px;color:var(--g700)}
-.mk{width:min(390px,calc(100% - 24px));margin:10px auto;background:#fff}
-.mk .h{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;font-size:13px;font-weight:700;border-bottom:1px solid #eee}
+.mkw{width:min(390px,calc(100% - 24px));margin:10px auto}   /* Shopee · Lazada 상품 페이지 틀 (clia-market) 폭 = 모바일 */
+.mk{width:100%;background:#fff}
+.mk .h{display:flex;justify-content:flex-end;align-items:center;padding:6px 12px 0;font-size:13px;font-weight:700}
+.mk .mk-sep{height:1px;background:#EEE;margin:0 12px}
 .mk .h small{font-weight:400;color:#999;font-size:11px}
 .mk .stxt{white-space:pre-wrap;margin:0;padding:12px;font:14px/1.55 Roboto,'Helvetica Neue',Arial,'LINESeedSansTH',sans-serif;color:#222}
 .mk .lsum{padding:0 0 4px}.mk .lsum .lg-pdp-summary{padding:14px 12px!important}
@@ -188,7 +192,7 @@ aside{display:flex;flex-direction:column;min-height:0;background:#fff;border-lef
 <script>
 // ── 화면 문구 (한국어 · English · ไทย). 제품군 이름은 벌크 엑셀(bulk/bulk-i18n.js)과 같은 낱말. 태국어는 태국 법인 확인 전 ──
 const TX={
- ko:{lgNoPdp:'lg.com에 기능 섹션(PDP) 없음 — lg.com처럼 스펙만 비교',hiddenN:n=>`lg.com 다시 캡처 중 ${n}개 — 준비되면 차례로 보임`,copyN:n=>`카피 차이 ${n}`,copyHead:n=>`이 영역 카피 차이 ${n}곳 (lg.com 컴포넌트와 비교)`,copyLg:'LG.com에만',copyClia:'CLIA에만',appTag:'검토 / 승인',noCountry:'CLIA 허브에 로그인해 법인을 고른 뒤 열어 주세요.',shotThin:'lg.com 페이지에 상세 내용이 거의 없음 (누르면 다시 캡처)',readyCnt:(n,a)=>`준비 <b>${n}</b>/${a}`,waitShort:'기다리는 중',segSum:'PDP 요약',segIntro:'도입 (대표 이미지)',segN:n=>`섹션 ${n}`,segNoneL:'LG.com에 없음 · 기다리는 중',segNoneR:'여기는 없음 · 기다리는 중',segHint:'같은 번호·색 = 같은 영역',who:'검토자',whoPh:'이름 (승인 기록에 남음)',whoNeed:'검토자 이름을 먼저 넣어 주세요',h:'검토',
+ ko:{segStore:'스토어 페이지',lgNoPdp:'lg.com에 기능 섹션(PDP) 없음 — lg.com처럼 스펙만 비교',hiddenN:n=>`lg.com 다시 캡처 중 ${n}개 — 준비되면 차례로 보임`,copyN:n=>`카피 차이 ${n}`,copyHead:n=>`이 영역 카피 차이 ${n}곳 (lg.com 컴포넌트와 비교)`,copyLg:'LG.com에만',copyClia:'CLIA에만',appTag:'검토 / 승인',noCountry:'CLIA 허브에 로그인해 법인을 고른 뒤 열어 주세요.',shotThin:'lg.com 페이지에 상세 내용이 거의 없음 (누르면 다시 캡처)',readyCnt:(n,a)=>`준비 <b>${n}</b>/${a}`,waitShort:'기다리는 중',segSum:'PDP 요약',segIntro:'도입 (대표 이미지)',segN:n=>`섹션 ${n}`,segNoneL:'LG.com에 없음 · 기다리는 중',segNoneR:'여기는 없음 · 기다리는 중',segHint:'같은 번호·색 = 같은 영역',who:'검토자',whoPh:'이름 (승인 기록에 남음)',whoNeed:'검토자 이름을 먼저 넣어 주세요',h:'검토',
   gateOn:'승인 전 제품은 빌더의 이미지 ZIP·HTML 복사와 벌크 엑셀 받기가 잠깁니다.',gateOff:'지금 서버는 다운로드 잠금이 꺼져 있어, 승인 전에도 빌더·벌크에서 받을 수 있습니다(빌더에는 「승인 전」 배지만 보임). 제품군 분류는 벌크 엑셀·허브 목록과 같은 규칙.',
   tabAll:'전체',tabUnrev:'미검토',tabOk:'승인',tabRej:'반려',stUnrev:'미검토',stStale:'다시 확인',stOk:'승인',stRej:'반려',
   grpBtn:'제품군',all:'전체',none:'선택 안 함',grpHint:'선택한 BU의 제품군만 고를 수 있습니다',search:'모델명·상품명 검색',viewList:'리스트',viewGrid:'갤러리',selAll:'전체 선택',
@@ -212,7 +216,7 @@ const TX={
   staleTx:'준비한 뒤 크롤·편집본·요약 또는 lg.com 캡처가 바뀌었어요. 보이는 것은 예전 내용입니다.',reprep:'다시 준비',imgFail:s=>`이미지 일부를 못 불러온 채 만들어짐 (${s})`,
   cropBtn:'범위 맞추기',cropTop:'시작(px)',cropBottom:'끝(px)',cropAuto:'자동으로',cropSave:'저장',recapture:'다시 캡처',cropSaved:'lg.com 범위를 저장했어요',cropAutoT:'자동 범위로 돌렸어요',
   cropWarnTop:'시작 자동 감지 못 함',cropWarnBot:'끝 자동 감지 못 함',cropManual:'사람이 맞춘 범위',noShot:e=>`lg.com 캡처가 없어요 (${e}). 「다시 캡처」를 눌러 주세요.`,recapToast:'lg.com을 다시 캡처하고 있어요 (1~2분)'},
- en:{lgNoPdp:'No feature section (PDP) on lg.com — comparing the specs only, as on lg.com',hiddenN:n=>`${n} being recaptured from lg.com — they appear as they are ready`,copyN:n=>`copy differs ${n}`,copyHead:n=>`Copy differs in ${n} places in this area (vs the lg.com component)`,copyLg:'LG.com only',copyClia:'CLIA only',appTag:'Review / Approve',noCountry:'Log in to the CLIA hub and choose your subsidiary, then open this page.',shotThin:'Little detail on the lg.com page (click to capture again)',readyCnt:(n,a)=>`Prepared <b>${n}</b>/${a}`,waitShort:'waiting',segSum:'PDP summary',segIntro:'Intro (main image)',segN:n=>`Section ${n}`,segNoneL:'not on LG.com · waiting',segNoneR:'not here · waiting',segHint:'Same number and color = same area',who:'Reviewer',whoPh:'Name (saved with approvals)',whoNeed:'Enter the reviewer name first',h:'Review',
+ en:{segStore:'Store page',lgNoPdp:'No feature section (PDP) on lg.com — comparing the specs only, as on lg.com',hiddenN:n=>`${n} being recaptured from lg.com — they appear as they are ready`,copyN:n=>`copy differs ${n}`,copyHead:n=>`Copy differs in ${n} places in this area (vs the lg.com component)`,copyLg:'LG.com only',copyClia:'CLIA only',appTag:'Review / Approve',noCountry:'Log in to the CLIA hub and choose your subsidiary, then open this page.',shotThin:'Little detail on the lg.com page (click to capture again)',readyCnt:(n,a)=>`Prepared <b>${n}</b>/${a}`,waitShort:'waiting',segSum:'PDP summary',segIntro:'Intro (main image)',segN:n=>`Section ${n}`,segNoneL:'not on LG.com · waiting',segNoneR:'not here · waiting',segHint:'Same number and color = same area',who:'Reviewer',whoPh:'Name (saved with approvals)',whoNeed:'Enter the reviewer name first',h:'Review',
   gateOn:'Products that are not approved cannot be downloaded from the builder (image ZIP, HTML copy) or bulk Excel.',gateOff:'The download lock is off on this server, so builder and bulk downloads still work before approval (the builder only shows a “Not approved” badge). Product groups follow the same rules as Bulk Excel and the hub list.',
   tabAll:'All',tabUnrev:'To review',tabOk:'Approved',tabRej:'Rejected',stUnrev:'To review',stStale:'Check again',stOk:'Approved',stRej:'Rejected',
   grpBtn:'Product group',all:'All',none:'None',grpHint:'Only groups in the selected BUs can be chosen',search:'Search model or product name',viewList:'List',viewGrid:'Gallery',selAll:'Select all',
@@ -236,7 +240,7 @@ const TX={
   staleTx:'The crawl, builder edit, summary or lg.com capture changed after this was prepared. You are looking at the old content.',reprep:'Prepare again',imgFail:s=>`Made while some images failed to load (${s})`,
   cropBtn:'Adjust range',cropTop:'Start (px)',cropBottom:'End (px)',cropAuto:'Automatic',cropSave:'Save',recapture:'Capture again',cropSaved:'lg.com range saved',cropAutoT:'Back to the automatic range',
   cropWarnTop:'Start not detected',cropWarnBot:'End not detected',cropManual:'Range set by a person',noShot:e=>`No lg.com capture (${e}). Press “Capture again”.`,recapToast:'Capturing lg.com again (1–2 minutes)'},
- th:{lgNoPdp:'lg.com ไม่มีส่วนฟีเจอร์ (PDP) — เทียบเฉพาะสเปกเหมือน lg.com',hiddenN:n=>`กำลังถ่าย lg.com ใหม่ ${n} รายการ — จะแสดงเมื่อพร้อม`,copyN:n=>`ข้อความต่าง ${n}`,copyHead:n=>`ข้อความในส่วนนี้ต่างกัน ${n} จุด (เทียบกับคอมโพเนนต์ lg.com)`,copyLg:'มีเฉพาะ LG.com',copyClia:'มีเฉพาะ CLIA',appTag:'ตรวจสอบ / อนุมัติ',noCountry:'กรุณาเข้าสู่ระบบ CLIA Hub และเลือกบริษัทในเครือก่อนเปิดหน้านี้',shotThin:'หน้า lg.com แทบไม่มีรายละเอียด (คลิกเพื่อถ่ายใหม่)',readyCnt:(n,a)=>`เตรียมแล้ว <b>${n}</b>/${a}`,waitShort:'รออยู่',segSum:'สรุป PDP',segIntro:'ส่วนแนะนำ (ภาพหลัก)',segN:n=>`ส่วนที่ ${n}`,segNoneL:'ไม่มีใน LG.com · รออยู่',segNoneR:'ไม่มีในส่วนนี้ · รออยู่',segHint:'หมายเลขและสีเดียวกัน = ส่วนเดียวกัน',who:'ผู้ตรวจ',whoPh:'ชื่อ (บันทึกพร้อมการอนุมัติ)',whoNeed:'กรุณาใส่ชื่อผู้ตรวจก่อน',h:'ตรวจสอบ',
+ th:{segStore:'หน้าร้านค้า',lgNoPdp:'lg.com ไม่มีส่วนฟีเจอร์ (PDP) — เทียบเฉพาะสเปกเหมือน lg.com',hiddenN:n=>`กำลังถ่าย lg.com ใหม่ ${n} รายการ — จะแสดงเมื่อพร้อม`,copyN:n=>`ข้อความต่าง ${n}`,copyHead:n=>`ข้อความในส่วนนี้ต่างกัน ${n} จุด (เทียบกับคอมโพเนนต์ lg.com)`,copyLg:'มีเฉพาะ LG.com',copyClia:'มีเฉพาะ CLIA',appTag:'ตรวจสอบ / อนุมัติ',noCountry:'กรุณาเข้าสู่ระบบ CLIA Hub และเลือกบริษัทในเครือก่อนเปิดหน้านี้',shotThin:'หน้า lg.com แทบไม่มีรายละเอียด (คลิกเพื่อถ่ายใหม่)',readyCnt:(n,a)=>`เตรียมแล้ว <b>${n}</b>/${a}`,waitShort:'รออยู่',segSum:'สรุป PDP',segIntro:'ส่วนแนะนำ (ภาพหลัก)',segN:n=>`ส่วนที่ ${n}`,segNoneL:'ไม่มีใน LG.com · รออยู่',segNoneR:'ไม่มีในส่วนนี้ · รออยู่',segHint:'หมายเลขและสีเดียวกัน = ส่วนเดียวกัน',who:'ผู้ตรวจ',whoPh:'ชื่อ (บันทึกพร้อมการอนุมัติ)',whoNeed:'กรุณาใส่ชื่อผู้ตรวจก่อน',h:'ตรวจสอบ',
   gateOn:'สินค้าที่ยังไม่อนุมัติจะดาวน์โหลด ZIP รูปภาพ คัดลอก HTML ในตัวสร้าง และ Bulk Excel ไม่ได้',gateOff:'เซิร์ฟเวอร์นี้ปิดการล็อกดาวน์โหลดอยู่ จึงยังดาวน์โหลดจากตัวสร้างและ Bulk ได้ก่อนอนุมัติ (ตัวสร้างแสดงแค่ป้าย “ยังไม่อนุมัติ”) กลุ่มสินค้าใช้กฎเดียวกับ Bulk Excel และรายการในฮับ',
   tabAll:'ทั้งหมด',tabUnrev:'รอตรวจ',tabOk:'อนุมัติแล้ว',tabRej:'ปฏิเสธ',stUnrev:'รอตรวจ',stStale:'ตรวจอีกครั้ง',stOk:'อนุมัติแล้ว',stRej:'ปฏิเสธ',
   grpBtn:'กลุ่มสินค้า',all:'ทั้งหมด',none:'ไม่ได้เลือก',grpHint:'เลือกได้เฉพาะกลุ่มสินค้าของ BU ที่เลือก',search:'ค้นหารุ่นหรือชื่อสินค้า',viewList:'รายการ',viewGrid:'แกลเลอรี',selAll:'เลือกทั้งหมด',
@@ -415,7 +419,7 @@ async function fetchItems(start){
       if(start&&(j.state==='none'||(j.state==='pending'&&j.job&&j.job.bg))){   // 미리 준비 차례를 기다리던 것은 사람 차례(맨 앞)로
         await api(`/api/v1/review/item/${encodeURIComponent(slug)}/prepare`,{channel:ch});j={...j,state:'pending',job:{step:'queued'}};}
       if(!C||C.p.slug!==slug)return;
-      C.st[ch]=j;C.err[ch]='';if(j.data)C.d[ch]=j.data;C.p.approval=j.approval;S.gate=!!j.gate;C.lgNo=j.lgNoFeature||null;
+      C.st[ch]=j;C.err[ch]='';if(j.data)C.d[ch]=j.data;if(j.store)C.store=j.store;C.p.approval=j.approval;S.gate=!!j.gate;C.lgNo=j.lgNoFeature||null;
       C.p.prep[ch]={...C.p.prep[ch],state:j.state,hash:j.data?j.data.hash:'',n:j.data?j.data.slices.length:0,shopeeN:j.data?j.data.shopeeN:0,first:j.data&&j.data.slices[0]?j.data.slices[0].src:''};
     }catch(e){if(C)C.err[ch]=e.message;}
   }));
@@ -473,8 +477,11 @@ function renderCmp(fresh,keepS){
   renderLeft();
   const n=shp?d.shopeeN:d.slices.length,hasSum=shp?d.sumText:d.sum;
   const sum=!hasSum?`<div class="nosum" data-a="sum">${esc(d.summaryErr?t('noSumErr',d.summaryErr):t('noSum'))}</div>`:shp?`<pre class="stxt" data-a="sum" lang="th">${esc(d.sumText)}</pre>`:`<div class="lsum" data-a="sum" lang="th">${safeHtml(d.sum)}</div>`;
-  $('mvR').innerHTML=`<div class="mk"><div class="h">${shp?'Shopee':'Lazada'} · รายละเอียดสินค้า<small>${shp?t('mkShopee',n,d.slices.length):t('mkLazada',d.slices.length)}</small></div>${sum}`+
+  // Shopee · Lazada 상품 페이지 틀 (shared/clia-market.js, 2026-11-26) — 상세 칸에 우리 결과(요약 › 구분선 › 상세 이미지)
+  const body=`<div class="mk"><div class="h"><small>${shp?t('mkShopee',n,d.slices.length):t('mkLazada',d.slices.length)}</small></div>${sum}<div class="mk-sep"></div>`+
     d.slices.map((s,i)=>`${shp&&i===n?`<div class="cutnote" data-a="cut">${t('cutNote',d.slices.length-n)}</div>`:''}<img class="sl ${shp&&i>=n?'cut':''}" data-a="s${i}" data-src="${esc(s.src)}" width="${s.w}" height="${s.h}" alt="">`).join('')+'<div data-a="end" style="height:1px"></div></div>';
+  const so=C.store||{};
+  $('mvR').innerHTML=`<div class="mkw">${window.CliaMarket?CliaMarket.page(C.ch,{title:so.title||p.title,gallery:so.gallery,specs:so.specs,body}):body}</div>`;
   renderCk();
   requestAnimationFrame(()=>{if(!C||!C.d[C.ch])return;layout();const sc=$('sc');sc.scrollTop=fresh?0:Math.min(keepS||0,G.sMax);update();});
 }
@@ -533,6 +540,8 @@ function layout(){
   const top=f?(CROP?CROP.top:f.top):0,bot=f?(CROP?CROP.bottom:f.bottom):0;
   const lpx=y=>crop?crop.offsetTop+(Math.max(top,Math.min(y,bot))-top)*(crop.clientWidth/f.w):0;
   const P=[{l:crop?crop.offsetTop:0,r:0,label:t('segSum'),kind:'sum'}];   // PDP 요약은 lg.com 에 없다 → 왼쪽 길이 0 (기다림)
+  // Shopee · Lazada 상품 페이지 틀 윗부분(갤러리 · 제목 · 스펙)도 lg.com 에 없다 → 따로 한 구간 (2026-11-26)
+  if(anchors.sum>8)P.unshift({l:crop?crop.offsetTop:0,r:0,label:t('segStore'),kind:'store'}),P[1].r=anchors.sum;
   const al=(d.align&&d.align.anchors)||[];
   const firstLabel=al[0]&&al[0].L-top<60?al[0].label:'';
   P.push({l:crop?crop.offsetTop:0,r:sl[0]?sl[0].offsetTop:0,label:firstLabel||t('segIntro'),kind:'start'});
@@ -616,6 +625,7 @@ function copyPanel(g){
 }
 // 같은 영역 이름표: 오른쪽 체크리스트 항목 이름과 똑같이 — 지금 항목이 이 구간 안이면 그 항목, 아니면 구간이 시작하는 자리의 항목
 function segLabel(g){
+  if(g.kind==='store')return g.label;   // 상품 페이지 틀 윗부분 — 체크리스트 항목이 없다
   const list=items(C.ch),inSeg=it=>{const y=G.anchors[it.anchor];return y!=null&&y>=g.r-8&&y<g.r+Math.max(g.dr,1);};
   const cur=list.find(it=>it.id===curId);
   if(cur&&inSeg(cur))return cur.title;
