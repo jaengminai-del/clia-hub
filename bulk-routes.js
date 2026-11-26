@@ -36,6 +36,8 @@ const HEAD = {
   id: /product[_\s-]*id|item[_\s-]*id|รหัสสินค้า|\bspu[_\s-]*id/i,
   idNot: /categor|cat[_\s-]*id|shop|brand|variation|model[_\s-]*id/i,
   name: /product[_\s-]*name|item[_\s-]*name|ชื่อสินค้า|nama\s*produk|tên\s*sản\s*phẩm|商品名称/i,
+  // 판매 상태 (Shopee Live · Lazada Active) — 벌크 Check 가 라이브 아닌 행을 건너뛴다 (2026-11-26). 칸 이름이 그 말 하나일 때만
+  status: /^\s*(?:et_title_)?(?:product[_\s-]*|item[_\s-]*|listing[_\s-]*)?status\s*$|^\s*สถานะ(?:สินค้า)?\s*$/i,
 };
 const HEAD_ROWS = 15;
 
@@ -68,7 +70,7 @@ function detect(sheet) {
     }
     return null;
   };
-  const found = { desc: pick(HEAD.desc, HEAD.descNot), parentSku: pick(HEAD.parentSku), id: pick(HEAD.id, HEAD.idNot), name: pick(HEAD.name) };
+  const found = { desc: pick(HEAD.desc, HEAD.descNot), parentSku: pick(HEAD.parentSku), id: pick(HEAD.id, HEAD.idNot), name: pick(HEAD.name), status: pick(HEAD.status) };
   found.sku = pick(HEAD.sku, HEAD.parentSku, [found.parentSku]);
   // 같은 열의 아래 머리글 행(현지어 이름·필수 표시·설명)까지: 맞은 행 바로 아래의 짧은 글 행들도 머리글로 본다
   const dataStart = (() => {
@@ -100,7 +102,7 @@ function analyze(wb, fileName, { sheet: wantSheet, cols: over } = {}) {
   const chosen = scored.find((x) => x.s.path === wantSheet) || scored[0];
   const { s: sheet, d } = chosen;
   const f = { ...d.found };
-  for (const k of ['desc', 'parentSku', 'sku', 'id', 'name']) {
+  for (const k of ['desc', 'parentSku', 'sku', 'id', 'name', 'status']) {
     if (over && k in over) f[k] = over[k] ? +over[k] : null;
   }
   let headEnd = d.headEnd;
@@ -115,7 +117,7 @@ function analyze(wb, fileName, { sheet: wantSheet, cols: over } = {}) {
     if (f.id ? !/^\d{3,}$/.test(id) : !(sku || parentSku || name)) continue;
     const desc = get(f.desc);
     const m = matchRow({ sku, parentSku, name }, idx);
-    rows.push({ row: r, id, sku, parentSku, name: name.slice(0, 200), descLen: desc.length, descHead: desc.slice(0, 160), ...m });
+    rows.push({ row: r, id, sku, parentSku, name: name.slice(0, 200), descLen: desc.length, descHead: desc.slice(0, 160), ...(f.status ? { status: get(f.status).slice(0, 40) } : {}), ...m });
   }
   const used = new Set(rows.flatMap((x) => x.candidates));
   const products = Object.fromEntries([...used].map((k) => [k, idx.products[k]]));
@@ -301,7 +303,10 @@ router.post('/api/v1/bulk/build', async (req, res) => {
   const email = b.notify && b.notify.email ? String(b.notify.email).trim() : '';
   if (email && !bulkJobs.emailOk(email)) return res.status(400).json({ error: 'email address not allowed', code: 'bad_email' });
   const base = `${req.get('x-forwarded-proto') || req.protocol}://${req.get('host')}`;
-  const j = bulkJobs.create({ upload: b.id, channel: b.channel, country, sheet: b.sheet, descCol, items, base, skus, skuCol,
+  // 벌크 Check (?check=1, 2026-11-26): 라이브 아닌 행은 화면이 이미 뺐다 — 건너뛴 수 · 기준만 기록 (완료 화면 · 메일)
+  const ck = b.check && typeof b.check === 'object' ? { skipModels: Math.max(0, parseInt(b.check.skipModels, 10) || 0), skipRows: Math.max(0, parseInt(b.check.skipRows, 10) || 0),
+    by: b.check.by === 'status' ? 'status' : 'list', asOf: /^\d{4}-\d{2}-\d{2}$/.test(b.check.asOf || '') ? b.check.asOf : '' } : null;
+  const j = bulkJobs.create({ upload: b.id, channel: b.channel, country, sheet: b.sheet, descCol, items, base, skus, skuCol, check: ck,
     outName: `${up.meta.fileName.replace(/\.xlsx$/i, '')}-clia-${b.channel}.xlsx`,
     notify: email && bulkJobs.mailReady() ? { email } : null, lang: /^[a-z]{2}$/.test(b.lang || '') ? b.lang : 'en' });
   // 내보낸 엑셀의 상품 ID 를 그 나라 히스토리에 (다음 업로드 확인용)
@@ -352,6 +357,17 @@ router.get('/api/v1/bulk/jobs/:job', async (req, res) => {
 });
 
 // 중단 (실수로 내보내기를 눌렀을 때) — 진행 중일 때만
+// 벌크 Check 버튼 (2026-11-26): { rows: [행…] (한 제품), action: 'ok' | 'remove' | 'retry', by }
+router.post('/api/v1/bulk/jobs/:job/check', async (req, res) => {
+  const j = await bulkJobs.getJob(req.params.job);
+  if (!j) return res.status(404).json({ error: 'job not found' });
+  const b = req.body || {};
+  const rows = (Array.isArray(b.rows) ? b.rows : [b.row]).map((x) => parseInt(x, 10)).filter((x) => x >= 1).slice(0, 50);
+  const r = await bulkJobs.checkAction(j, rows, String(b.action || ''), b.by).catch((e) => ({ error: e.message, status: 500 }));
+  if (r.error) return res.status(r.status || 400).json({ error: r.error });
+  res.json(bulkJobs.jobView(j));
+});
+
 router.post('/api/v1/bulk/jobs/:job/cancel', async (req, res) => {
   const j = await bulkJobs.getJob(req.params.job);
   if (!j) return res.status(404).json({ error: 'job not found' });

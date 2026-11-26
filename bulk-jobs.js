@@ -129,6 +129,7 @@ function countryOf(j) {
   return Object.keys(n).sort((a, b) => n[b] - n[a])[0] || '';
 }
 
+const units = (its) => { const m = new Map(); for (const it of its) { const k = it.bundle ? 'b:' + it.row : it.slug || it.url || 'r:' + it.row; if (!m.has(k)) m.set(k, []); m.get(k).push(it); } return [...m.values()]; };
 function jobView(j) {
   const done = j.status !== 'running' && j.status !== 'queued';
   // 동영상 수(장면 바꾸기 버튼)는 이 기능 전에 끝난 작업 기록에 없어서 다시 열 때 센다
@@ -144,6 +145,9 @@ function jobView(j) {
     review: its.filter((x) => (x.flags || []).some((f) => f.sev !== 'info')).length,
     notify: j.notify ? { email: !!j.notify.email, sent: !!j.notify.sent } : null,
     skus: j.skus || [], items: its, file: j.status === 'ready' ? `/api/v1/bulk/jobs/${j.id}/file` : null, fileName: j.outName, at: j.at, finishedAt: j.finishedAt,
+    // 벌크 Check (?check=1): 라이브 아닌 것 건너뜀 수 · 확인 · 뺀 수
+    // 확인 · 뺀 수는 제품 기준 (같은 제품의 여러 행은 하나) — 진행 막대 · 건너뜀 수와 같은 단위
+    check: j.check ? { ...j.check, confirmed: units(its).filter((u) => u.every((x) => x.check === 'ok')).length, removed: units(its).filter((u) => u.every((x) => x.check === 'removed')).length } : null,
     // 검토·승인 (approvals.js): 승인 안 된 제품 수. gate 가 켜져 있으면 엑셀 받기가 잠긴다
     approval: done ? (() => { const a = require('./approvals'); const p = a.pendingOf(its); return { gate: a.gateOn(), pending: p.length, models: p.slice(0, 20).map((x) => x.model || x.slug) }; })() : null };
 }
@@ -177,9 +181,10 @@ async function contentFor(channel, url) {
     if (!urls.length) throw new Error('no images');
     const text = head + urls.join('\n') + tail;
     return { text, images: urls.length, allImages: sl.count, summaryErr: sm && sm.error ? sm.error.slice(0, 200) : '', edited: !!ed,
-             tooLong: text.length > SHOPEE_DESC_MAX ? text.length : 0 };
+             tooLong: text.length > SHOPEE_DESC_MAX ? text.length : 0, urls, hash: sl.hash, loaded: sl.images_loaded };
   }
-  return { text: (sm && sm.html ? sm.html + '\n' : '') + sl.html, images: sl.count, allImages: sl.count, summaryErr: sm && sm.error ? sm.error.slice(0, 200) : '', edited: !!ed };
+  return { text: (sm && sm.html ? sm.html + '\n' : '') + sl.html, images: sl.count, allImages: sl.count, summaryErr: sm && sm.error ? sm.error.slice(0, 200) : '', edited: !!ed,
+           urls: sl.urls || [], hash: sl.hash, loaded: sl.images_loaded };
 }
 
 // 묶음 상품 ('A + B' 행, 2026-11-23): 구성품 크롤 결과를 빌더 번들과 같은 모양으로 합쳐(crawler-py/bundle_pto.py combine)
@@ -201,9 +206,153 @@ async function contentForBundle(channel, it, title) {
   if (channel === 'shopee') {
     const urls = (sl.urls || []).slice(0, SHOPEE_MAX_IMAGES);
     if (!urls.length) throw new Error('no images');
-    return { text: urls.join('\n'), images: urls.length, allImages: sl.count, summaryErr: '' };
+    return { text: urls.join('\n'), images: urls.length, allImages: sl.count, summaryErr: '', urls, hash: sl.hash, loaded: sl.images_loaded };
   }
-  return { text: sl.html, images: sl.count, allImages: sl.count, summaryErr: '' };   // 묶음은 PDP 요약 없이 (요약은 제품 하나 기준)
+  return { text: sl.html, images: sl.count, allImages: sl.count, summaryErr: '', urls: sl.urls || [], hash: sl.hash, loaded: sl.images_loaded };   // 묶음은 PDP 요약 없이 (요약은 제품 하나 기준)
+}
+
+// 크롤 검사 기록(qa_report)으로 센 원문 누락 — 확인 필요(flagsFor) · 벌크 Check 의 AI 체크(aiChecks)가 같이 쓴다
+function qaOf(slug) {
+  const dir = path.join(OUT_DIR(), slug || '');
+  const mirror = readJson(path.join(dir, 'mirror.json'));
+  const qa = readJson(path.join(dir, 'qa_report.json')) || (mirror && mirror._qa) || {};
+  // 원문 누락: 일부러 빼는 것(바로가기 링크 영역 ST0018 · 탭 카드 안 글)은 세지 않는다 — 그대로 세면 거의 모든 제품이 걸린다.
+  // 구매처 영역(PD0016 Where to buy)도 컨텐츠가 아니다 — 이 규칙 전에 크롤한 제품의 검사 기록에는 그 썸네일이 누락으로 들어 있다
+  // 실제로 빠진 이미지가 있거나, 본문 글이 5개 이상 빠졌을 때만
+  const cov = qa.coverage || {}, chk = qa.checks || {};
+  const real = (x) => x && !NON_CONTENT.has(x.component_id);
+  const texts = (cov.missing_texts || []).filter((x) => real(x) && !x.only_in_cards).length;
+  // 예전에 크롤한 결과의 검사 기록에는 '크롤러가 일부러 뺀 이미지(LG 가 404·자리표시를 내줌)'가 누락으로 들어 있다 — 그것은 빼고 센다.
+  // 새 크롤은 검사가 이미 제외한다. 주소가 겹쳐 있던 것은 실제로 이미지를 잃은 것이라 그대로 센다 (다시 가져오면 고쳐진다).
+  const dead = new Set(((mirror && mirror._dead_media_dropped) || []).filter((d) => !DUP_DAM.test(d.url || '')).map((d) => imgKey(d.url)));
+  const gone = (cov.missing_images || []).filter(real).filter((x) => !dead.has(imgKey(x.image)));
+  const images = gone.length + (chk.images_missing_url || 0);
+  const files = gone.slice(0, 3).map((x) => String(x.image || '').split('/').pop());   // 어떤 이미지가 빠졌는지 (화면에서 마우스를 올리면 보임)
+  return { images, texts, files, mirror };
+}
+
+// ── 벌크 Check (?check=1, 2026-11-26) ──
+// AI 체크: 미리 계산해 두고 화면이 한 줄씩 보여 준다. 항목: 이미지 다 불러옴 · lg.com 문구와 같음 · (태국) 요약 · Shopee 12장 · 스펙표.
+//   ok=false 인 항목이 있으면 사람이 '다시 준비' / '이번 엑셀에서 빼기'. Shopee 12장 넘는 것은 자동으로 앞 12장 — 통과 + 회색 안내.
+function aiChecks(j, it, c) {
+  const out = [];
+  const m = /^(\d+)\/(\d+)$/.exec(String((c && c.loaded) || ''));
+  const notLoaded = m ? Math.max(0, +m[2] - +m[1]) : 0;
+  const q = it.bundle ? { images: 0, texts: 0, mirror: null } : qaOf(it.slug);
+  const lgImg = q.images;
+  out.push({ k: 'img', ok: !notLoaded && !lgImg, n: notLoaded + lgImg });
+  out.push({ k: 'txt', ok: q.texts < 5, n: q.texts });   // 글 몇 줄은 캐러셀 버튼 글자 같은 오탐이 많다 — 확인 필요 규칙과 같게 5줄부터
+  if (!it.bundle && /lg\.com\/th\//i.test(it.url || '')) out.push({ k: 'sum', ok: !(c && c.summaryErr) });
+  if (j.channel === 'shopee') out.push({ k: 'n12', ok: true, used: c ? c.images : 0, all: c ? c.allImages : 0 });
+  const specs = q.mirror ? (q.mirror.sections || []).reduce((n, s) => n + ((s.specs || []).length), 0) : (it.bundle ? 1 : 0);
+  out.push({ k: 'spec', ok: specs > 0 });
+  return out;
+}
+const aiFail = (ai) => (ai || []).some((x) => !x.ok);
+// 상품 페이지 프리뷰(bulk/bulk-market.js)에 넣을 제목 · 갤러리 · 스펙 — 크롤 데이터에서 (묶음은 첫 구성품)
+function storeOf(it) {
+  const slug = it.bundle ? (it.bundle[0] || {}).slug : it.slug;
+  const m = readJson(path.join(OUT_DIR(), slug || '', 'mirror.json'));
+  const CM = require('./bulk/bulk-market.js');
+  return { title: (it.bundle ? it.bundleTitle : m && m.product_title) || it.title || it.model || '', gallery: m ? CM.galleryOf(m) : [], specs: m ? CM.specsOf(m) : [] };
+}
+// 고쳐질 수 있는 문제(이미지 · 글 누락)면 한 번 자동으로 다시: 마지막 크롤이 하루보다 오래됐으면 다시 크롤, 아니면 다시 그리기만.
+// (방금 크롤한 것은 다시 크롤해도 같다 — 크롤 비용만 든다)
+async function autoRetry(j, it, c) {
+  const ai = aiChecks(j, it, c);
+  if (it.bundle || !aiFail(ai) || it.retried) return { c, ai };
+  const bad = new Set(ai.filter((x) => !x.ok).map((x) => x.k));
+  if (!bad.has('img') && !bad.has('txt')) return { c, ai };
+  it.retried = 1;
+  const cr = require('./crawler-routes');
+  const src = readJson(path.join(OUT_DIR(), it.slug, 'source.json')) || {};
+  if (Date.now() / 1000 - (Number(src.crawled_at) || 0) > 24 * 3600) {
+    await crawlSlot(() => cr.crawl(it.url, { force: true, base: j.base })).catch((e) => console.warn('[bulk] check retry crawl', it.slug, e.message));
+    catalog.invalidate();
+  }
+  try { const c2 = await contentFor(j.channel, it.url); return { c: c2, ai: aiChecks(j, it, c2) }; }
+  catch (e) { console.warn('[bulk] check retry content', it.slug, e.message); return { c, ai }; }
+}
+// 작업 결과 글(행 → 설명 칸)을 남겨 둔다 — Check 에서 뺀 행만 빼고 엑셀을 다시 만들 때 (로컬 + 버킷)
+const textsFile = (j) => path.join(DIR, j.upload, `texts-${j.id}.json`);
+async function saveTexts(j, texts, bucket) {
+  fs.mkdirSync(path.join(DIR, j.upload), { recursive: true });
+  const buf = Buffer.from(JSON.stringify(Object.fromEntries(texts)));
+  fs.writeFileSync(textsFile(j), buf);
+  if (bucket) await store.putBuffer(`bulk/${j.upload}/texts-${j.id}.json`, buf, 'application/json').catch(() => {});
+}
+async function loadTexts(j) {
+  let d = readJson(textsFile(j));
+  if (!d) { const b = await store.getBuffer(`bulk/${j.upload}/texts-${j.id}.json`).catch(() => null); try { d = b && JSON.parse(b.toString('utf8')); } catch (_) {} }
+  return new Map(Object.entries(d || {}).map(([k, v]) => [+k, v]));
+}
+// 결과 엑셀 = 올린 파일 + (빼지 않은) 채운 행. 뺀 행은 원래 내용 그대로
+async function writeResult(j, texts) {
+  const up = await readUpload(j.upload);
+  if (!up) throw new Error('uploaded file expired');
+  const wb = await xlsx.load(up.buf);
+  const sheet = wb.sheets.find((x) => x.path === j.sheet);
+  if (!sheet) throw new Error('sheet not found');
+  let n = 0;
+  for (const it of j.items) {
+    if (it.status !== 'ok' || it.check === 'removed' || !texts.has(it.row)) continue;
+    it.prevLen = String((sheet.rows.get(it.row) || new Map()).get(j.descCol) || '').trim().length;
+    wb.setCell(j.sheet, it.row, j.descCol, texts.get(it.row));
+    n++;
+  }
+  for (const x of j.skus || []) if (j.skuCol) wb.setCell(j.sheet, x.row, j.skuCol, x.sku);
+  const buf = await wb.save();
+  fs.mkdirSync(path.join(DIR, j.upload), { recursive: true });
+  fs.writeFileSync(path.join(DIR, j.upload, `result-${j.id}.xlsx`), buf);
+  await store.putBuffer(`bulk/${j.upload}/result-${j.id}.xlsx`, buf, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet').catch(() => {});
+  return n;
+}
+// Check 화면의 버튼 — 한 제품(같은 제품의 여러 행)에 한 번: ok(확인하고 다음 → 승인 기록 via 'bulk' + 본 이미지 해시) ·
+//   remove(이번 엑셀에서 빼기 — 그 행들은 원래 내용 그대로) · retry(다시 준비)
+async function checkAction(j, rows, action, by) {
+  const its = j.items.filter((x) => rows.includes(x.row));
+  if (!j.check || !its.length) return { error: 'not found', status: 404 };
+  if (j.status !== 'ready') return { error: 'job is not ready', status: 409 };
+  if (action === 'ok') {
+    if (its.some((it) => it.status !== 'ok')) return { error: 'item is not ready', status: 409 };
+    const who = String(by || '').slice(0, 120), done = new Set();
+    for (const it of its) {
+      it.check = 'ok'; it.checkedBy = who; it.checkedAt = Date.now();
+      // 묶음 상품은 구성품마다 따로 검토 — 여기서는 기록하지 않는다
+      if (!it.bundle && it.hash && it.slug && !done.has(it.slug)) { done.add(it.slug); require('./approvals').write(it.slug, { state: 'approved', by: who, via: 'bulk', hashes: { [j.channel]: it.hash } }); }
+    }
+  } else if (action === 'remove') {
+    for (const it of its) it.check = 'removed';
+    await writeResult(j, await loadTexts(j));
+  } else if (action === 'retry') {
+    if (its.some((it) => it.status === 'working')) return { error: 'already preparing', status: 409 };
+    for (const it of its) { it.check = null; it.status = 'working'; }
+    redoAll(j, its).catch((e) => console.warn('[bulk] check redo', j.id, rows.join(','), e.message));
+  } else return { error: 'unknown action', status: 400 };
+  await persist(j, true);
+  return { ok: true };
+}
+async function redoAll(j, its) { const [first, ...rest] = its; await redo(j, first, rest); }
+// 다시 준비 (사람이 누름): 다시 크롤 → 내용 → AI 체크(자동 재시도 없이) → 엑셀 다시
+async function redo(j, it, same = []) {
+  const cr = require('./crawler-routes');
+  try {
+    if (!it.bundle) { await crawlSlot(() => cr.crawl(it.url, { force: true, base: j.base })); catalog.invalidate(); }
+    const c = it.bundle ? await contentForBundle(j.channel, it, it.bundleTitle) : await contentFor(j.channel, it.url);
+    it.retried = 1;
+    const texts = await loadTexts(j);
+    for (const x of [it, ...same]) {
+      texts.set(x.row, c.text);
+      Object.assign(x, { status: 'ok', error: '', images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: c.summaryErr || '',
+        imgs: c.urls || [], hash: c.hash || '', ai: aiChecks(j, x, c), store: storeOf(x) });
+      x.flags = flagsFor(j, x, c);
+    }
+    await saveTexts(j, texts, true);
+    await writeResult(j, texts);
+  } catch (e) {
+    for (const x of [it, ...same]) Object.assign(x, { status: x.error && !x.imgs ? 'failed' : 'ok', ai: [...(x.ai || []).filter((y) => y.k !== 'redo'), { k: 'redo', ok: false, msg: String(e.message || e).slice(0, 200) }] });
+  }
+  await persist(j, true);
 }
 
 // ── 확인 필요 ──
@@ -224,21 +373,7 @@ const DUP_DAM = /(?:\/content\/dam\/channel\/wcms){2,}/;   // LG 페이지가 �
 function flagsFor(j, it, c) {
   const f = [];
   if (it.bundle) f.push({ code: 'bundle', sev: 'info', n: it.bundle.length });   // 묶음 상품: 구성품 N개를 합친 내용 (안내)
-  const dir = path.join(OUT_DIR(), it.slug || '');
-  const mirror = readJson(path.join(dir, 'mirror.json'));
-  const qa = readJson(path.join(dir, 'qa_report.json')) || (mirror && mirror._qa) || {};
-  // 원문 누락: 일부러 빼는 것(바로가기 링크 영역 ST0018 · 탭 카드 안 글)은 세지 않는다 — 그대로 세면 거의 모든 제품이 걸린다.
-  // 구매처 영역(PD0016 Where to buy)도 컨텐츠가 아니다 — 이 규칙 전에 크롤한 제품의 검사 기록에는 그 썸네일이 누락으로 들어 있다
-  // 실제로 빠진 이미지가 있거나, 본문 글이 5개 이상 빠졌을 때만
-  const cov = qa.coverage || {}, chk = qa.checks || {};
-  const real = (x) => x && !NON_CONTENT.has(x.component_id);
-  const texts = (cov.missing_texts || []).filter((x) => real(x) && !x.only_in_cards).length;
-  // 예전에 크롤한 결과의 검사 기록에는 '크롤러가 일부러 뺀 이미지(LG 가 404·자리표시를 내줌)'가 누락으로 들어 있다 — 그것은 빼고 센다.
-  // 새 크롤은 검사가 이미 제외한다. 주소가 겹쳐 있던 것은 실제로 이미지를 잃은 것이라 그대로 센다 (다시 가져오면 고쳐진다).
-  const dead = new Set(((mirror && mirror._dead_media_dropped) || []).filter((d) => !DUP_DAM.test(d.url || '')).map((d) => imgKey(d.url)));
-  const gone = (cov.missing_images || []).filter(real).filter((x) => !dead.has(imgKey(x.image)));
-  const images = gone.length + (chk.images_missing_url || 0);
-  const files = gone.slice(0, 3).map((x) => String(x.image || '').split('/').pop());   // 어떤 이미지가 빠졌는지 (화면에서 마우스를 올리면 보임)
+  const { images, texts, files, mirror } = qaOf(it.slug);
   // 확인 필요(warn·error)는 '다른 제품일 수 있음' 또는 '다시 돌리면 고쳐질 수 있음'만. 그대로 써도 되는 것은 info(작은 안내)
   if (images) f.push({ code: 'qa', sev: 'warn', images, texts, files });                       // 이미지 누락: 다시 가져오기 · 확인
   if (texts >= 5) f.push({ code: 'qaTx', sev: 'info', texts });                         // 글 누락: 캐러셀 버튼 글자 같은 오탐이 많아 안내만
@@ -301,6 +436,7 @@ async function run(j) {
         stop();
         if (c.text.length > CELL_MAX) throw Object.assign(new Error(`too long for one Excel cell (${c.text.length} chars)`), { stage: 'content' });
         texts.set(it.row, c.text);
+        if (j.check) { Object.assign(it, { ai: aiChecks(j, it, c), imgs: c.urls || [], hash: c.hash || '', store: storeOf(it) }); await saveTexts(j, texts, false); require('./slice-preview').ensure(it.imgs).catch(() => {}); }
         Object.assign(it, { status: 'ok', error: '', images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: '' });
         it.flags = flagsFor(j, it, c);
         it.videos = 0;
@@ -322,10 +458,13 @@ async function run(j) {
       if (!j.items.some((x) => (x.register || x.force) && !x.crawled && x.status !== 'failed')) j.phase = 'content';
       it.status = 'working'; persist(j);
       if (!contentBy.has(it.slug)) contentBy.set(it.slug, contentSlot(() => { stop(); return contentFor(j.channel, it.url); }));
-      const c = await contentBy.get(it.slug);
+      let c = await contentBy.get(it.slug);
       stop();
+      if (j.check) { const r = await autoRetry(j, it, c); c = r.c; Object.assign(it, { ai: r.ai, imgs: c.urls || [], hash: c.hash || '', store: storeOf(it) }); stop();
+        require('./slice-preview').ensure(it.imgs).catch(() => {}); }   // Check 화면용 작은 미리보기를 미리 (원본은 그대로)
       if (c.text.length > CELL_MAX) throw Object.assign(new Error(`too long for one Excel cell (${c.text.length} chars)`), { stage: 'content' });
       texts.set(it.row, c.text);
+      if (j.check) await saveTexts(j, texts, false);
       Object.assign(it, { status: 'ok', error: '', images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: c.summaryErr, edited: !!c.edited });
       it.flags = flagsFor(j, it, c);
       it.videos = productVideos(readJson(path.join(OUT_DIR(), it.slug, 'mirror.json'))).length;   // 동영상 장면 바꾸기 버튼 (shared/clia-frame-picker.js)
@@ -349,6 +488,7 @@ async function run(j) {
   // SKU 번호가 비어 있던 행에 사용자가 넣은 SKU
   for (const x of j.skus || []) if (j.skuCol) wb.setCell(j.sheet, x.row, j.skuCol, x.sku);
   if (!j.items.some((x) => x.status === 'ok')) throw new Error('no row could be filled');
+  if (j.check) await saveTexts(j, texts, true);
   const buf = await wb.save();
   fs.mkdirSync(path.join(DIR, j.upload), { recursive: true });
   fs.writeFileSync(path.join(DIR, j.upload, `result-${j.id}.xlsx`), buf);
@@ -381,8 +521,8 @@ function start(j) {
   return j;
 }
 
-function create({ upload, channel, country, sheet, descCol, items, outName, base, notify: nt, lang, skus, skuCol }) {
-  const j = { id: crypto.randomBytes(8).toString('hex'), upload, channel, country: country || countryOf({ items }), sheet, descCol, items, outName, base, lang,
+function create({ upload, channel, country, sheet, descCol, items, outName, base, notify: nt, lang, skus, skuCol, check }) {
+  const j = { id: crypto.randomBytes(8).toString('hex'), upload, channel, country: country || countryOf({ items }), sheet, descCol, items, outName, base, lang, check: check || null,
     skus: skus && skus.length && skuCol ? skus : [], skuCol: skuCol || null,
     notify: nt && nt.email ? { email: nt.email, lang } : null, status: 'running', phase: 'queued', error: '', at: Date.now() };
   for (const [k, x] of jobs) if (Date.now() - (x.at || 0) > KEEP_MS) jobs.delete(k);
@@ -467,4 +607,4 @@ function emailOk(e) {
   return !allow.length || allow.some((d) => String(e).toLowerCase().endsWith('@' + d) || String(e).toLowerCase().endsWith('.' + d));
 }
 
-module.exports = { countryOf, create, cancel, setNotify, getJob, jobView, resumeAll, saveUpload, readUpload, mailReady, emailOk, CRAWL_CONC, DIR };
+module.exports = { countryOf, create, cancel, setNotify, getJob, jobView, resumeAll, saveUpload, readUpload, mailReady, emailOk, CRAWL_CONC, DIR, checkAction, aiChecks };

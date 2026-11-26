@@ -23,6 +23,9 @@
     return d;
   };
   const EMBED = qs.get('embed') === '1';
+  // 벌크 Check 단계 (2026-11-26, bulk-check.js): ?check=1 일 때만 — 라이브 제품만 준비하고 한 제품씩 확인. 없으면 예전 흐름 그대로
+  const CHECK = qs.get('check') === '1' && !!window.BulkCheck;
+  const core = () => ({ S, d: S.data, L, home: () => home, api, esc, remember: (id) => store.set(lastKey, { job: id, file: S.data && S.data.fileName, at: Date.now() }) });
   const cName = (c) => ((T.cn || TX.en.cn)[c]) || String(c || '').toUpperCase();
   let home = String(qs.get('corp') || '').toLowerCase();
   const DIVS = ['MS', 'HS', 'ES'];
@@ -99,10 +102,10 @@
       S.mis = CH0 && d.channel && d.channel !== CH0 ? d.channel : '';
       S.channel = S.mis ? '' : (CH0 || d.channel || '');
       chTag();
-      Object.assign(S, { job: null, q: '', last: null, regOn: false, own: {}, pick: {}, fixed: {}, draft: {}, uerr: {}, skuIn: {}, openG: null, edits: {}, editsLoaded: false, force: new Set(), redo: new Set(), ack: new Set() });
+      Object.assign(S, { job: null, checkOff: false, q: '', last: null, regOn: false, own: {}, pick: {}, fixed: {}, draft: {}, uerr: {}, skuIn: {}, openG: null, edits: {}, editsLoaded: false, force: new Set(), redo: new Set(), ack: new Set() });
       $('q').value = '';
       setData(d, true);
-      askRegister();
+      if (!CHECK) askRegister();
     } catch (e) {
       if (e.code === 'wrong_country') return wrongCountry(e.info || {}, f.name);
       fail(e.code || 'other', { maxMb: e.maxMb, error: e.message, fileName: f.name });
@@ -146,6 +149,11 @@
       else S.skip.push({ ...r, why: 'rNone' });
     }
     if (fresh) S.sel = new Set(S.ok.map((r) => r.row).concat(S.reg.map((r) => r.row)));
+    if (fresh && CHECK && !S.checkOff) {   // Check: 목록 대신 준비 › Check. 설명 칸을 못 찾은 파일이면 예전 흐름으로
+      show('s2');
+      BulkCheck.begin(core()).then((ok) => { if (ok === false) { S.checkOff = true; setData(d, fresh); } });
+      return;
+    }
     if (!S.editsLoaded) { S.editsLoaded = true; loadEdits(); }
     show('s3');
     render(fresh);
@@ -895,6 +903,7 @@
       if (!home && j.country) home = j.country;   // 메일 링크(나라 없이 열림): 작업의 나라로 맞춘다
       if (!S.channel) S.channel = j.channel;
       chTag();
+      if (CHECK && j.check) return BulkCheck.resume(core(), j);   // Check 작업: 준비 › Check › 받기 화면으로
       const d = await api('/api/v1/bulk/analyze', { id: j.upload, country: home });
       S.own = {};
       for (const it of j.items) if (!it.register && !it.bundle && it.slug) S.pick[it.row] = it.slug;   // 여러 후보 중 골랐던 제품

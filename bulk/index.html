@@ -8,6 +8,7 @@
 <link rel="icon" type="image/svg+xml" href="../shared/assets/clia-icon.svg">
 <link rel="stylesheet" href="../css/fonts.css">
 <link rel="stylesheet" href="../shared/clia-ui.css">
+<link rel="stylesheet" href="bulk-market.css">
 <style>
 :root { --line: var(--clia-gray-200); --muted: var(--clia-gray-500); --ok: #1E7F4F; --warn: #A15C00; --bad: #C8241F; --red: var(--clia-brand); }
 * { box-sizing: border-box; }
@@ -374,6 +375,64 @@ button.eb { cursor: pointer; }
   .item .r { grid-column: 3; align-items: flex-start; text-align: start; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+/* 벌크 Check (?check=1, 2026-11-26 — bulk-check.js): 첨부 › 준비 › Check › 받기. 문구는 짧게, 아이콘 최소 */
+.ck-steps { flex: none; display: flex; gap: 10px; align-items: center; justify-content: center; height: 44px; background: #fff; border-bottom: 1px solid var(--line); font-size: 13px; }
+.ck-steps .ck-st { color: var(--clia-gray-400); font-weight: 500; } .ck-steps .ck-st.ck-d { color: var(--clia-gray-600); } .ck-steps .ck-st.ck-o { color: var(--clia-gray-900); font-weight: 700; }
+.ck-steps .ck-sep { color: var(--clia-gray-300); }
+.ck { flex: 1; min-height: 0; overflow: auto; }
+.ck.ck-full { display: flex; flex-direction: column; overflow: hidden; }
+.ck-wrap { max-width: 760px; margin: 0 auto; padding: 40px 28px 80px; }
+.ck-card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 22px 24px; }
+.ck-file { display: flex; align-items: center; gap: 8px; font-size: 14px; } .ck-file svg { width: 18px; height: 18px; fill: none; stroke: var(--clia-gray-500); stroke-width: 1.6; } .ck-file span { color: var(--muted); font-size: 13px; }
+.ck-pt { margin-top: 18px; font-size: 15px; font-weight: 700; } .ck-pt span { font-weight: 400; color: var(--muted); margin-left: 6px; font-size: 13px; }
+.ck-bar { height: 6px; border-radius: 999px; background: var(--clia-gray-100); margin-top: 10px; overflow: hidden; } .ck-bar i { display: block; height: 100%; background: var(--clia-gray-900); border-radius: 999px; transition: width .4s; }
+.ck-skip { margin-top: 14px; font-size: 13px; color: var(--muted); } .ck-skip a { color: var(--clia-gray-900); text-decoration: underline; text-underline-offset: 3px; margin-left: 4px; }
+.ck-skip .ck-src { margin-left: 10px; color: var(--clia-gray-400); font-size: 12px; }
+.ck-sl { margin-top: 10px; border: 1px solid var(--line); border-radius: 12px; max-height: 300px; overflow: auto; }
+.ck-sl > div { display: flex; justify-content: space-between; gap: 12px; padding: 8px 14px; font-size: 13px; border-top: 1px solid var(--clia-gray-100); } .ck-sl > div:first-child { border-top: 0; }
+.ck-sl .ck-slh { color: var(--muted); font-size: 12px; background: var(--clia-gray-100); }
+.ck-sl .ck-m { color: var(--muted); font-size: 12px; white-space: nowrap; }
+.ck-p { flex: none; display: flex; align-items: center; gap: 14px; padding: 14px 28px 0; max-width: 1100px; width: 100%; margin: 0 auto; }
+.ck-p .ck-bar { flex: 1; margin: 0; } .ck-p .ck-c { font-size: 13px; color: var(--clia-gray-700); font-variant-numeric: tabular-nums; min-width: 64px; text-align: right; }
+.ck-p { max-width: 1240px; padding: 14px 20px 0; }
+/* 한 번에 6개 — 카드 = 작은 상품 페이지(bulk-market, 반 크기) · 점(체크 하나 = 점 하나) · 한 줄 상태. 움직임은 transform 만 */
+.ck-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; padding: 16px 20px 10px; max-width: 1240px; width: 100%; margin: 0 auto; }
+.ck-bc { display: flex; flex-direction: column; min-width: 0; min-height: 0; transition: transform .45s cubic-bezier(.4,0,.2,1), opacity .35s; animation: ckin .45s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes ckin { from { transform: translateX(60px); opacity: 0; } }
+.ck-bc.ck-out { transform: translateY(-120px) scale(.6); opacity: 0; }
+.ck-bph { position: relative; flex: 1; min-height: 0; border: 1px solid var(--line); border-radius: 14px; background: #fff; overflow: hidden; transition: border-color .25s, box-shadow .25s; }
+.ck-bsc { position: absolute; inset: 0; overflow-y: auto; scrollbar-width: none; } .ck-bsc::-webkit-scrollbar { display: none; }
+.ck-mv { will-change: transform; } .ck-mv .cm { zoom: .5; } .ck-imgs img { display: block; width: 100%; height: auto; }
+.ck-load .ck-bph { background: linear-gradient(90deg, #f3f1ed 0%, #faf9f6 50%, #f3f1ed 100%); background-size: 200% 100%; animation: cksh 1.2s infinite linear; } .ck-load .ck-mv { opacity: 0; }
+@keyframes cksh { to { background-position: -200% 0; } }
+.ck-scan { position: absolute; left: 0; right: 0; top: 46%; height: 40px; pointer-events: none; opacity: 0; transition: opacity .2s; z-index: 2; background: linear-gradient(to bottom, rgba(30,127,79,0), rgba(30,127,79,.12) 50%, rgba(30,127,79,0)); }
+.ck-scan::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 2px; background: #1E7F4F; box-shadow: 0 0 10px rgba(30,127,79,.7); } .ck-scan.on { opacity: 1; }
+.ck-bdg { position: absolute; right: 8px; top: 8px; width: 30px; height: 30px; border-radius: 50%; background: #1E7F4F; color: #fff; display: flex; align-items: center; justify-content: center; z-index: 3; transform: scale(0); transition: transform .3s cubic-bezier(.3,1.6,.5,1); }
+.ck-bdg svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.ck-bc.ck-pass .ck-bdg { transform: scale(1); } .ck-bc.ck-pass .ck-bph { border-color: #B9DEC8; }
+.ck-bc.ck-fail .ck-bph { border-color: var(--bad); box-shadow: 0 0 0 3px rgba(200,36,31,.15); }
+.ck-bmeta { padding: 8px 2px 0; } .ck-bmo { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ck-bdots { display: flex; gap: 5px; margin-top: 6px; } .ck-bdots i { width: 8px; height: 8px; border-radius: 50%; background: var(--clia-gray-200); transition: background .2s, transform .2s; }
+.ck-bdots i.k { background: var(--ok); } .ck-bdots i.x { background: var(--bad); transform: scale(1.25); } .ck-bdots i.r { background: var(--clia-gray-500); animation: ckbl .5s infinite alternate; }
+@keyframes ckbl { to { opacity: .3; } }
+.ck-bst { margin-top: 5px; font-size: 12px; color: var(--muted); min-height: 16px; line-height: 1.35; } .ck-bc.ck-fail .ck-bst { color: var(--bad); }
+.ck-bc.ck-busy .ck-bst::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: -1px; border-radius: 50%; border: 2px solid var(--clia-gray-200); border-top-color: var(--clia-gray-900); animation: ckspin .7s linear infinite; }
+.ck-bfx { display: none; gap: 6px; margin-top: 6px; flex-wrap: wrap; } .ck-bc.ck-fail .ck-bfx { display: flex; } .ck-bfx .clia-btn { height: 28px; padding: 0 10px; font-size: 12px; }
+.ck-bact { flex: none; display: flex; align-items: center; gap: 14px; padding: 8px 20px 18px; min-height: 70px; max-width: 1240px; width: 100%; margin: 0 auto; }
+.ck-bsum { font-size: 14px; color: var(--clia-gray-700); } .ck-bsum b { color: var(--ok); } .ck-bsum em { font-style: normal; color: var(--bad); } .ck-gap { flex: 1; }
+.ck-bact .clia-btn.primary, .ck-bact .ck-kbd { opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; }
+.ck-bact.on .clia-btn.primary, .ck-bact.on .ck-kbd { opacity: 1; pointer-events: auto; }
+.ck-bact .clia-btn.primary:focus { outline: 3px solid rgba(253,49,46,.28); outline-offset: 2px; }
+#ckGo { padding: 0 20px; max-width: 1240px; margin: 0 auto; width: 100%; } #ckGo .ck-why { margin: 0 0 12px; }
+.ck-redo { display: flex; align-items: center; gap: 10px; color: var(--clia-gray-700); font-size: 14px; }
+@media (max-width: 900px) { .ck-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: auto; } .ck-bph { min-height: 320px; } }
+@media (prefers-reduced-motion: reduce) { .ck-bc, .ck-bdg { animation: none; transition: none; } }
+@keyframes ckspin { to { transform: rotate(360deg); } }
+.ck-kbd { font-size: 12px; color: var(--muted); } .ck-kbd b { display: inline-block; border: 1px solid var(--clia-gray-300); border-bottom-width: 2px; border-radius: 5px; padding: 0 6px; font-weight: 500; color: var(--clia-gray-700); font-size: 11px; line-height: 18px; }
+.ck-why { margin-top: 26px; padding: 12px 14px; border-radius: 10px; background: #FDF1F0; color: var(--bad); font-size: 13px; line-height: 1.5; }
+.ck-done { text-align: center; padding: 56px 24px; } .ck-ic { width: 56px; height: 56px; border-radius: 50%; background: #E7F4EC; color: var(--ok); display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; }
+.ck-ic svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.ck-dt { font-size: 20px; font-weight: 700; } .ck-ds { margin-top: 8px; font-size: 14px; color: var(--muted); } .ck-done .clia-btn { margin-top: 26px; }
 </style>
 </head>
 <body>
@@ -471,6 +530,8 @@ button.eb { cursor: pointer; }
 </div>
 <script src="../shared/clia-frame-picker.js"></script>
 <script src="bulk-i18n.js"></script>
+<script src="bulk-market.js"></script>
+<script src="bulk-check.js"></script>
 <script src="bulk.js"></script>
 </body>
 </html>

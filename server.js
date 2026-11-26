@@ -12,6 +12,7 @@ app.use(require('./crawler-routes')); // 내장 PDP 크롤러 (/api/v1/*) — �
 app.use(require('./listing-routes').router); // 제품별 리스팅 문구 (프로모션·제품 상세·배송·사후 케어·반품) 버전 저장
 app.use(require('./video-frames').router); // 동영상 카드 장면 고르기 (빌더 카드 목록 팝업 → ffmpeg 장면 추출)
 app.use(require('./bulk-routes').router); // Shopee/Lazada 벌크 엑셀 설명 칸 채우기 (/bulk/ 화면)
+app.use(require('./slice-preview').router); // 상세 이미지 작은 미리보기 /media/slices-p/ (벌크 Check 6개 한 번에 — 원본은 그대로)
 app.use(require('./edits').router); // 빌더 편집본 저장 — 벌크 엑셀이 편집본으로 채운다
 app.use(require('./approvals').router); // 검토·승인 상태 — 빌더 「승인 전」 배지, APPROVAL_GATE=1 이면 다운로드 잠금
 app.use(require('./review').router); // 검토·승인 화면 /review/ — 빌더·벌크와 같은 이미지를 lg.com 캡처와 나란히

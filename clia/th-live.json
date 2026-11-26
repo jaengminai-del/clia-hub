@@ -4,6 +4,7 @@
   "Shopee_LG_Mapping_261105.xlsx",
   "Lazada_LG_Mapping_261105_1.xlsx"
  ],
+ "asOf": "2026-11-05",
  "updated": "2026-11-26",
  "rule": "Shopee Status = Live 또는 Lazada Status = Active 인 SKU 가 하나라도 있고, 그 SKU 의 LG Model Status 가 Discontinued 가 아님 (Airtable Products 'Sales Target')",
  "live": [
