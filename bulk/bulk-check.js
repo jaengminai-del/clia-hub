@@ -182,6 +182,7 @@
     if (!left.length) return doneView(core);
     const batch = left.slice(0, BATCH), doneN = us.length - left.length;
     const el = frame(core, 2);
+    flyOff();   // 확인한 카드는 화면 위에서 마저 사라지고, 그동안 다음 묶음이 들어옴 (겹침)
     el.innerHTML = `<div class="ck-p"><div class="ck-bar"><i style="width:${doneN / us.length * 100}%"></i></div><span class="ck-c">${doneN} / ${us.length}</span></div>
       <div class="ck-csum" id="ckSum">${e(T.checkingN(batch.length))}</div>
       <div class="ck-grid" id="ckGrid">${batch.map((u, i) => cardHtml(core, u, i)).join('')}</div>
@@ -200,14 +201,28 @@
     const segs = [['all', T.fAll, cards.length], ['ready', T.fReady, pass.length], ['review', T.fReview, bad]].filter((x) => x[0] === 'all' || x[2]);   // 0개인 칸은 숨김
     if (!segs.some((x) => x[0] === C.filter)) C.filter = 'all';
     const sum = document.getElementById('ckSum');
-    sum.innerHTML = `<div class="ck-seg" role="tablist">${segs.map(([k, label, n]) => `<button type="button" role="tab" data-f="${k}">${k === 'review' ? '<span class="ck-sd"></span>' : ''}${e(label)}<b>${n}</b></button>`).join('')}</div>`;
-    const setF = (f) => {
-      C.filter = f;
-      sum.querySelectorAll('[data-f]').forEach((b) => { b.classList.toggle('on', b.dataset.f === f); b.setAttribute('aria-selected', b.dataset.f === f); });
-      cards.forEach((c, i) => { c.style.display = f === 'all' || kinds[i] === f ? '' : 'none'; });
+    sum.innerHTML = `<div class="ck-seg" role="tablist"><i class="ck-pill"></i>${segs.map(([k, label, n]) => `<button type="button" role="tab" data-f="${k}">${k === 'review' ? '<span class="ck-sd"></span>' : ''}${e(label)}<b>${n}</b></button>`).join('')}</div>`;
+    let swap = 0;
+    const setF = async (f, anim) => {
+      C.filter = f; const my = ++swap;
+      const btns = [...sum.querySelectorAll('[data-f]')], on = btns.find((b) => b.dataset.f === f), pill = sum.querySelector('.ck-pill');
+      btns.forEach((b) => { b.classList.toggle('on', b === on); b.setAttribute('aria-selected', b === on); });
+      if (!anim) pill.style.transition = 'none';
+      pill.style.width = on.offsetWidth + 'px'; pill.style.transform = `translateX(${on.offsetLeft}px)`;   // 흰 알약이 미끄러져 옮겨감 (power3.out 0.3s)
+      if (!anim) { void pill.offsetWidth; pill.style.transition = ''; }
+      const want = cards.map((c, i) => f === 'all' || kinds[i] === f);
+      if (!anim || reduced()) { cards.forEach((c, i) => { c.style.display = want[i] ? '' : 'none'; }); return; }
+      // 같은 무대에서 블러 스왑: 빠질 카드는 0.15s 블러로 사라지고 → 남는 카드는 새 자리로 미끄러지고(FLIP) → 새로 보일 카드는 블러에서 또렷하게
+      const out = cards.filter((c, i) => !want[i] && c.style.display !== 'none');
+      await Promise.all(out.map((c) => c.animate([{ opacity: 1, filter: 'blur(0px)' }, { opacity: 0, filter: 'blur(8px)', transform: 'scale(.98)' }], { duration: 150, easing: 'cubic-bezier(.32,0,.67,0)' }).finished.catch(() => {})));
+      if (my !== swap) return;
+      const stay = cards.filter((c, i) => want[i] && c.style.display !== 'none'), before = stay.map((c) => c.getBoundingClientRect());
+      cards.forEach((c, i) => { c.style.display = want[i] ? '' : 'none'; });
+      stay.forEach((c, i) => { const a = before[i], b = c.getBoundingClientRect(), dx = a.left - b.left, dy = a.top - b.top; if (dx || dy) c.animate([{ transform: `translate(${dx}px,${dy}px)` }, { transform: 'none' }], { duration: 340, easing: 'cubic-bezier(.33,1,.68,1)' }); });
+      cards.filter((c, i) => want[i] && !stay.includes(c)).forEach((c, i) => c.animate([{ opacity: 0, filter: 'blur(6px)', transform: 'translateY(8px)' }, { opacity: 1, filter: 'blur(0px)', transform: 'none' }], { duration: 380, delay: i * 50, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' }));
     };
-    sum.querySelectorAll('[data-f]').forEach((b) => { b.onclick = () => { setF(b.dataset.f); if (pass.length) document.getElementById('ckNext').focus(); }; });   // Enter 는 계속 확인
-    setF(C.filter || 'all');
+    sum.querySelectorAll('[data-f]').forEach((b) => { b.onclick = () => { if (b.dataset.f !== C.filter) setF(b.dataset.f, true); if (pass.length) document.getElementById('ckNext').focus(); }; });   // Enter 는 계속 확인
+    setF(C.filter || 'all', false);
     if (batch.some((u) => u.some((x) => x.status === 'working'))) waitRedo(core, batch.filter((u) => u.some((x) => x.status === 'working')));
     if (!pass.length) return;
     const go = document.getElementById('ckNext'); go.textContent = T.confirm;
@@ -215,9 +230,22 @@
     go.onclick = async () => {
       go.disabled = true; C.filter = 'all';   // 다음 묶음은 전체부터
       const rows = pass.flatMap((u) => u.map((x) => x.row));
-      cards.filter((c) => c.classList.contains('ck-pass')).forEach((c, i) => { c.style.transitionDelay = i * 50 + 'ms'; c.classList.add('ck-out'); });
-      await act(core, rows, 'ok', go, 450);
+      // 나가기: 들어올 때보다 짧게(0.3s) 가속하며 한 번에 — 블러 8px, 카드마다 35ms 차이
+      const leaving = cards.filter((c) => c.classList.contains('ck-pass') && c.style.display !== 'none');
+      const anims = reduced() ? [] : leaving.map((c, i) => { c.style.animation = 'none'; return c.animate([{ transform: 'none', opacity: 1, filter: 'blur(0px)' }, { transform: 'translateY(-28px) scale(.94)', opacity: 0, filter: 'blur(8px)' }], { duration: 300, delay: i * 35, easing: 'cubic-bezier(.32,0,.67,0)', fill: 'forwards' }); });
+      C.leaving = anims.length ? { grid: document.getElementById('ckGrid'), keep: leaving, anims } : null;
+      await act(core, rows, 'ok', go, anims.length ? 200 : 0);   // 첫 카드가 반쯤 사라졌을 때 다음 묶음 시작
     };
+  }
+  function flyOff() {   // 사라지는 중인 이전 묶음을 화면 위(고정 위치)로 옮겨 애니메이션을 끝까지 — 새 묶음과 겹침
+    const L = C.leaving; C.leaving = null;
+    if (!L || !L.grid || !L.grid.isConnected) return;
+    const r = L.grid.getBoundingClientRect(), g = L.grid;
+    g.removeAttribute('id');
+    [...g.children].forEach((c) => { if (!L.keep.includes(c)) c.style.visibility = 'hidden'; });
+    Object.assign(g.style, { position: 'fixed', left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px', margin: '0', pointerEvents: 'none', zIndex: 5 });
+    document.body.appendChild(g);
+    Promise.all(L.anims.map((a) => a.finished.catch(() => {}))).then(() => g.remove());
   }
   async function act(core, rows, action, btn, wait) {
     if (btn) btn.disabled = true;
@@ -229,6 +257,7 @@
       checkView(core);
     } catch (e) {   // 실패: 사라지던 카드를 되돌리고(다시 그림 — 이미 본 카드는 결과만) 아래에 이유 한 줄
       if (btn) btn.disabled = false;
+      C.leaving = null;
       const msg = C.T.err + e.message;
       await checkView(core);
       alertLine(core, msg);
