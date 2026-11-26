@@ -188,6 +188,7 @@ function launchPipeline(jobId, url, usePro, geminiKey, fullAi, html = null, base
     }
     // 텍스트 v2 크롤 결과: 검은·없는 동영상 포스터에 자동 장면 (video-frames.js) — 끝날 때까지 작업은 '처리 중'
     if (ok) job.post = true;
+    settlePrev(out, ok);   // 다시 크롤이었으면: 성공 → 지난 결과 지움 · 실패 → 되돌림
     job.exited = true;
     if (!ok) return;
     publishPageShot(url, out);
@@ -203,7 +204,7 @@ function launchPipeline(jobId, url, usePro, geminiKey, fullAi, html = null, base
         store.pushProduct(slug).then((n) => n && console.log(`[crawl-store] ${slug}: ${n}개 파일 업로드`));
       });
   });
-  proc.on('error', (e) => { job.exited = true; job.spawnError = e.message; console.error(`[crawl] 실패 #${refOf(jobId)} ${url} — 시작 못 함 · ${e.message}`); });
+  proc.on('error', (e) => { settlePrev(out, false); job.exited = true; job.spawnError = e.message; console.error(`[crawl] 실패 #${refOf(jobId)} ${url} — 시작 못 함 · ${e.message}`); });
 }
 
 // 컨텐츠가 아닌 컴포넌트를 캐시된 mirror.json 에서도 뺀다 (crawler-py/component_mirror.py NON_CONTENT_COMPONENTS 와 같은 목록)
@@ -303,6 +304,26 @@ router.get('/healthz', (req, res) => res.json({
 }));
 
 // 크롤 작업 등록 → { jobId, cached }. 캐시(mirror.json)가 있으면 파이프라인 없이 즉시 완료.
+// 다시 크롤(force): 지난 결과를 지우지 않고 옆에 둔다 (2026-11-26). 크롤이 실패하면(LG.com 페이지가 없어짐 · 막힘 등)
+//   되돌려서 제품이 사라지지 않게 하고, 성공하면 지운다. *.bak 는 버킷에 올리지 않는다(crawl-store EXCLUDE).
+//   예전에는 시작할 때 지워서, 실패하면 다음 재배포 때 버킷에서 다시 받을 때까지 제품이 목록에서 빠졌다.
+const PREV_FILES = ['mirror.json', 'final.json', 'pc.md', 'pc.html', 'pc_raw.html', 'pc_full.png', 'lgcom_full.jpg', 'progress.json', 'source.json'];
+const PREV_SUFFIX = '.prevcrawl.bak';
+function setAsidePrev(out) {
+  for (const f of PREV_FILES) {
+    const a = path.join(out, f);
+    try { if (fs.existsSync(a)) fs.renameSync(a, a + PREV_SUFFIX); } catch {}
+  }
+}
+function settlePrev(out, ok) {
+  for (const f of PREV_FILES) {
+    const a = path.join(out, f), b = a + PREV_SUFFIX;
+    if (!fs.existsSync(b)) continue;
+    try { if (ok) fs.unlinkSync(b); else fs.renameSync(b, a); } catch {}
+  }
+  if (!ok) console.log(`[crawl] 다시 크롤 실패 → 지난 결과로 되돌림 ${path.basename(out)}`);
+}
+
 function startCrawl(url, { force = false, pro = false, geminiKey = null, fullAi = false, html = null, base = '' } = {}) {
   url = cleanUrl(url);
   const slug = slugify(url);
@@ -322,11 +343,7 @@ function startCrawl(url, { force = false, pro = false, geminiKey = null, fullAi 
     jobs.set(jobId, { url, slug, out, startedAt: 0, proc: null, exited: true });
     return { jobId, cached: true };
   }
-  if (force && fs.existsSync(out)) {
-    for (const f of ['mirror.json', 'final.json', 'pc.md', 'pc.html', 'pc_raw.html', 'pc_full.png', 'lgcom_full.jpg', 'progress.json']) {
-      try { fs.unlinkSync(path.join(out, f)); } catch {}
-    }
-  }
+  if (force && fs.existsSync(out)) setAsidePrev(out);
   const jobId = 'job_' + crypto.randomBytes(6).toString('hex');
   jobs.set(jobId, { url, slug, startedAt: Date.now() / 1000 });
   launchPipeline(jobId, url, pro, geminiKey, fullAi, html, base);
