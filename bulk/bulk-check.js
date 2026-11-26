@@ -183,10 +183,11 @@
     const batch = left.slice(0, BATCH), doneN = us.length - left.length;
     const el = frame(core, 2);
     el.innerHTML = `<div class="ck-p"><div class="ck-bar"><i style="width:${doneN / us.length * 100}%"></i></div><span class="ck-c">${doneN} / ${us.length}</span></div>
+      <div class="ck-csum" id="ckSum">${e(T.checkingN(batch.length))}</div>
       <div class="ck-grid" id="ckGrid">${batch.map((u, i) => cardHtml(core, u, i)).join('')}</div>
       <div id="ckGo"></div>`;
     // 확인 버튼은 단계 줄(Attach › … › Download) 오른쪽 끝 — 다른 화면으로 가면 frame() 이 단계 줄을 다시 그려 사라짐
-    document.getElementById('ckSteps').insertAdjacentHTML('beforeend', `<div class="ck-sact" id="ckAct"><span class="ck-bsum" id="ckSum">${e(T.checkingN(batch.length))}</span><button class="clia-btn primary" id="ckNext" type="button"></button></div>`);
+    document.getElementById('ckSteps').insertAdjacentHTML('beforeend', `<div class="ck-sact" id="ckAct"><button class="clia-btn primary" id="ckNext" type="button"></button></div>`);
     prefetch(left.slice(BATCH, BATCH * 2));
     const cards = [...document.querySelectorAll('#ckGrid .ck-bc')];
     cards.forEach((c, i) => c.querySelectorAll('[data-a]').forEach((b) => { b.onclick = () => act(core, batch[i].map((x) => x.row), b.dataset.a, b); }));
@@ -194,7 +195,7 @@
     await Promise.all(cards.map((c, i) => (seen.has(ukey(batch[i])) ? ready(c).then(() => finalState(c, batch[i])) : scan(c, batch[i], i * 90).then(() => seen.add(ukey(batch[i]))))));
     if (C.view !== view) return;   // 그사이 다시 그렸음
     const pass = batch.filter((u) => !u.some((x) => x.status === 'working') && aiRows(u).every((x) => x.ok)), bad = batch.length - pass.length;
-    document.getElementById('ckSum').innerHTML = [pass.length ? `<b>${e(T.passedN(pass.length))}</b>` : '', bad ? `<em>${e(T.lookN(bad))}</em>` : ''].filter(Boolean).join(' · ');
+    document.getElementById('ckSum').innerHTML = [pass.length ? `<b>${e(T.passedN(pass.length))}</b>` : '', bad ? `<em>${e(T.lookN(bad))}</em>` : ''].filter(Boolean).join('<i>·</i>');   // 화면 가운데 크게
     if (batch.some((u) => u.some((x) => x.status === 'working'))) waitRedo(core, batch.filter((u) => u.some((x) => x.status === 'working')));
     if (!pass.length) return;
     const go = document.getElementById('ckNext'); go.textContent = T.confirm;
