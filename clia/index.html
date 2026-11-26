@@ -2449,7 +2449,18 @@ const fltKey=(dv,g)=>dv+'|'+g;
 const fltShown=p=>!fltOff.has(fltKey(p.dv,grpOf(p)));
 const fltEsc=v=>String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 let curSearch='',curView='all',selId=null;
-function fltCorpRows(){return P.filter(p=>productCorp(p)===CORP);}
+// 태국 목록은 Shopee/Lazada 에 라이브인 제품만 (2026-11-26) — 목록은 clia/th-live.json (매핑 엑셀에서 만든 데이터, 코드에 박지 않음).
+//   엑셀에 없는 제품(허브 주소로 새로 크롤한 것 등)은 라이브가 아니어도 보인다. 파일을 못 읽으면 예전처럼 전부.
+//   목록에서만 숨긴다 — Review · 벌크 화면은 그대로.
+const LIVE_LISTS={th:'th-live.json'},LIVE={};
+const liveKey=u=>String(u||'').trim().split(/[?#]/)[0].replace(/\/+$/,'').toLowerCase()+'/';
+Object.entries(LIVE_LISTS).forEach(([corp,f])=>fetch(f,{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(d=>{
+  if(!d||!Array.isArray(d.live))return;
+  LIVE[corp]={live:new Set(d.live.map(x=>liveKey(x.url||x))),catalog:new Set((d.catalog||[]).map(liveKey))};
+  if(typeof CORP!=='undefined'&&CORP===corp&&document.getElementById('pl'))renderList();
+}).catch(()=>{}));
+const liveShown=p=>{const L=LIVE[CORP];if(!L)return true;const u=liveKey(p.crawler_url||p.url);return L.live.has(u)||!L.catalog.has(u);};
+function fltCorpRows(){return P.filter(p=>productCorp(p)===CORP&&liveShown(p));}
 function fltViewRows(){const r=fltCorpRows();return curView==='md-only'?r.filter(p=>p.md):r;}
 // 지금 탭에 있는 본부·제품군만 [[본부,[제품군…]]] — 순서는 벌크 엑셀과 같다
 function fltTree(rows){
@@ -2507,9 +2518,9 @@ function renderList(){
     const s=curSearch;
     return p.id.toLowerCase().includes(s)||p.nm.toLowerCase().includes(s)||p.cat.toLowerCase().includes(s)||p.sub.toLowerCase().includes(s);
   });
-  tb.innerHTML=fp.map(p=>{const th=p.gal.length?I(p.gal[0].p,80):'';return`<tr class="${p.id===selId?'sel':''}" onclick="sel('${p.id}')"><td>${th?`<img class="thumb" src="${th}" onerror="this.outerHTML='<div class=thumb-ph>${p.ico}</div>'">`:`<div class="thumb-ph">${p.ico}</div>`}</td><td><span class="dt dt-${String(p.dv||'').toLowerCase()}">${p.dv}</span></td><td><b>${p.id}</b><div class="lt-sub">${p.sub}</div></td><td><span class="st ${p.crawled?'st-ok':p.md?'st-md':'st-pend'}">${p.crawled?t('st.ready'):p.md?t('st.md'):t('st.pend')}</span></td></tr>`;}).join('');
+  tb.innerHTML=fp.map(p=>{const th=p.gal.length?I(p.gal[0].p,80):'';return`<tr class="${p.id===selId?'sel':''}" onclick="sel('${p.id}')"><td>${th?`<img class="thumb" src="${th}" onerror="this.outerHTML='<div class=thumb-ph>${p.ico}</div>'">`:`<div class="thumb-ph">${p.ico}</div>`}</td><td><span class="dt dt-${String(p.dv||'').toLowerCase()}">${p.dv}</span></td><td><b>${p.id}</b><div class="lt-sub">${p.sub}</div></td><td><span class="st ${p.crawled?'st-ok':p.md?'st-md':'st-pend'}">${p.crawled?t('st.ready'):p.md?t('st.md'):t('st.pend')}</span></td><td><div class="lt-act">${p._slug?`<button type="button" class="del-btn" title="${t('list.delete')}" aria-label="${t('list.delete')}" onclick="event.stopPropagation();deleteCrawled('${p.id}',this)">${lxIc('trash',15)}</button>`:''}</div></td></tr>`;}).join('');
   document.getElementById('countLabel').textContent=t('list.count',{n:fp.length});
-  const pc=document.getElementById('prodCount');if(pc)pc.textContent=P.filter(x=>productCorp(x)===CORP).length;   // 상단 배지 = 법인 전체 제품 수
+  const pc=document.getElementById('prodCount');if(pc)pc.textContent=fltCorpRows().length;   // 상단 배지 = 법인 전체 제품 수 (태국은 라이브 제품 기준)
 }
 function sch(v){curSearch=v.toLowerCase();renderList();}
 

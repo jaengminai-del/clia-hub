@@ -1,0 +1,1358 @@
+{
+ "_about": "태국 Product List 에 보일 제품 (허브 clia/index.html 이 읽는다). catalog = 매핑 엑셀에 있는 LG.com 제품, live = 그중 Shopee Live 또는 Lazada Active 이고 단종이 아닌 것. catalog 에 없는 제품(허브에서 주소로 새로 크롤한 것 등)은 live 가 아니어도 목록에 보인다. 엑셀이 바뀌면 이 파일만 바꾸면 된다.",
+ "source": [
+  "Shopee_LG_Mapping_261105.xlsx",
+  "Lazada_LG_Mapping_261105_1.xlsx"
+ ],
+ "updated": "2026-11-26",
+ "rule": "Shopee Status = Live 또는 Lazada Status = Active 인 SKU 가 하나라도 있고, 그 SKU 의 LG Model Status 가 Discontinued 가 아님 (Airtable Products 'Sales Target')",
+ "live": [
+  {
+   "url": "https://www.lg.com/th/air-conditioner-inverter/energy-saving-air-conditioner/s3-q24sj610/",
+   "model": "S3-Q24SJ610",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/air-conditioner-inverter/energy-saving-air-conditioner/saq13a/",
+   "model": "SAQ13A",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/air-conditioner-inverter/wifi-air-air-conditioner/scq13a/",
+   "model": "SCQ13A",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/air-conditioner-inverter/wifi-air-air-conditioner/scq18a/",
+   "model": "SCQ18A",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/air-conditioner-inverter/wifi-air-air-conditioner/scq24a/",
+   "model": "SCQ24A",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/air-puricare/puricare-360/as10gdby0/",
+   "model": "AS10GDBY0",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/air-puricare/puricare-360/as30ggw10/",
+   "model": "AS30GGW10",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/air-puricare/puricare-360/as60ghwg0/",
+   "model": "AS60GHWG0",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/air-puricare/puricare-360/as65gdby0/",
+   "model": "AS65GDBY0",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/air-puricare/puricare-aerotower/as25gcby0/",
+   "model": "AS25GCBY0",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/dehumidifier/dd23gmwe1/",
+   "model": "DD23GMWE1",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/dehumidifier/md16gqsa1/",
+   "model": "MD16GQSA1",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/dehumidifier/md19gqga1/",
+   "model": "MD19GQGA1",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/f2515rnew/",
+   "model": "F2515RNEW",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/f2515sneg/",
+   "model": "F2515SNEG",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/f2515snew/",
+   "model": "F2515SNEW",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/f2520rntb/",
+   "model": "F2520RNTB",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/f2520sneg/",
+   "model": "F2520SNEG",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/f2520snew1/",
+   "model": "F2520SNEW1",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/fb1207s6w/",
+   "model": "FB1207S6W",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/fb1209d5w/",
+   "model": "FB1209D5W",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/fb1209s5m/",
+   "model": "FB1209S5M",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/fb1209s6w/",
+   "model": "FB1209S6W",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/fv1209s5wg/",
+   "model": "FV1209S5WG",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/fv1410h4w/",
+   "model": "FV1410H4W",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/fv1410s5wg1/",
+   "model": "FV1410S5WG1",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/fv1411h2ba/",
+   "model": "FV1411H2BA",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/fv1411h3m/",
+   "model": "FV1411H3M",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/fv1411s3ma/",
+   "model": "FV1411S3MA",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/fv1411s4w1/",
+   "model": "FV1411S4W1",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/fv1412s2b/",
+   "model": "FV1412S2B",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/fv1413h2ba-b452/",
+   "model": "FV1413H2BA-B452",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/fv1413h2ba/",
+   "model": "FV1413H2BA",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/fv1413h4m/",
+   "model": "FV1413H4M",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/fv1413s2ba/",
+   "model": "FV1413S2BA",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/front-load-washing-machine/fv1413s4m/",
+   "model": "FV1413S4M",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/top-load-washing-machine/t2516vbtb/",
+   "model": "T2516VBTB",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/top-load-washing-machine/t2516vbtm/",
+   "model": "T2516VBTM",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/top-load-washing-machine/t2517vbtb/",
+   "model": "T2517VBTB",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/top-load-washing-machine/t2517vbtm/",
+   "model": "T2517VBTM",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/top-load-washing-machine/t2518vbtb/",
+   "model": "T2518VBTB",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/top-load-washing-machine/t2519vbtb/",
+   "model": "T2519VBTB",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/top-load-washing-machine/tx2519dt3wt/",
+   "model": "TX2519DT3WT",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/top-load-washing-machine/tx2520dt5o/",
+   "model": "TX2520DT5O",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/top-load-washing-machine/tx2521dt5o/",
+   "model": "TX2521DT5O",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/top-load-washing-machine/tx2724st5j/",
+   "model": "TX2724ST5J",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt10narg/",
+   "model": "TT10NARG",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt12warg/",
+   "model": "TT12WARG",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt13warg/",
+   "model": "TT13WARG",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt14narg/",
+   "model": "TT14NARG",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt15narg/",
+   "model": "TT15NARG",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt15warg/",
+   "model": "TT15WARG",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt17napg/",
+   "model": "TT17NAPG",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt18napg/",
+   "model": "TT18NAPG",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt18wapg/",
+   "model": "TT18WAPG",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/wash-tower/wt1410nhen/",
+   "model": "WT1410NHEN",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/wash-tower/wt1410nhww/",
+   "model": "WT1410NHWW",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/wash-tower/wt2116shbb-b47fm/",
+   "model": "WT2116SHBB-B47FM",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/wash-tower/wt2116shbb-v257/",
+   "model": "WT2116SHBB-V257",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/wash-tower/wt2116shbb/",
+   "model": "WT2116SHBB",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/wash-tower/wt2116sheg-b47fm/",
+   "model": "WT2116SHEG-B47FM",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/laundry/wash-tower/wt2116sheg/",
+   "model": "WT2116SHEG",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/lifestyle-screens/stanbyme/27lx6tdga/",
+   "model": "27LX6TDGA",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/lifestyle-screens/stanbyme/32lx6bdga/",
+   "model": "32LX6BDGA",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/microwave-ovens/solo-microwave/ms2032gas/",
+   "model": "MS2032GAS",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/microwave-ovens/solo-microwave/ms2535gik/",
+   "model": "MS2535GIK",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/microwave-ovens/solo-microwave/ms3032jas/",
+   "model": "MS3032JAS",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/microwave-ovens/solo-microwave/ms4295dis/",
+   "model": "MS4295DIS",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/monitors/gaming/25g590b-b/",
+   "model": "25G590B-B",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/monitors/gaming/27g810a-b/",
+   "model": "27G810A-B",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/monitors/gaming/27gx704a-b/",
+   "model": "27GX704A-B",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/monitors/gaming/32gx850a-b/",
+   "model": "32GX850A-B",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/monitors/gaming/34gx90sb-w/",
+   "model": "34GX90SB-W",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/monitors/gaming/39gx950b-b/",
+   "model": "39GX950B-B",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/monitors/gaming/45gx950a-b/",
+   "model": "45GX950A-B",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/monitors/gaming/45gx950b-b/",
+   "model": "45GX950B-B",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/monitors/gaming/52g930b-b/",
+   "model": "52G930B-B",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/monitors/smart-monitors/32u889sa-w/",
+   "model": "32U889SA-W",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/monitors/uhd-4k-5k/40u990a-w/",
+   "model": "40U990A-W",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/monitors/ultrawide/29u531a-w/",
+   "model": "29U531A-W",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/portable-air-conditioners/p3c09b/",
+   "model": "P3C09B",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/1-door-refrigerator/gc-b041pqcf/",
+   "model": "GC-B041PQCF",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/1-door-refrigerator/gc-b081pqcf/",
+   "model": "GC-B081PQCF",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/1-door-refrigerator/gn-y331sls/",
+   "model": "GN-Y331SLS",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/2-door-refrigerator/gn-f392pxak/",
+   "model": "GN-F392PXAK",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/bottom-freezer/gn-b389fqdm/",
+   "model": "GN-B389FQDM",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/bottom-freezer/gn-v389fqef/",
+   "model": "GN-V389FQEF",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/freezer/gc-b155bqcf/",
+   "model": "GC-B155BQCF",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/freezer/gc-b205bqcf/",
+   "model": "GC-B205BQCF",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/freezer/gc-b305bqcf/",
+   "model": "GC-B305BQCF",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/freezer/gc-b405bqcf/",
+   "model": "GC-B405BQCF",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/freezer/gn-304slbr/",
+   "model": "GN-304SLBR",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gc-b41fpgam/",
+   "model": "GC-B41FPGAM",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gc-b48fpgam/",
+   "model": "GC-B48FPGAM",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gc-b50fpgam/",
+   "model": "GC-B50FPGAM",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gc-b52apgam/",
+   "model": "GC-B52APGAM",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gc-v22ffqmb/",
+   "model": "GC-V22FFQMB",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gv-b25ffgdb-a9k/",
+   "model": "GV-B25FFGDB-A9K",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gv-b25ffgdb/",
+   "model": "GV-B25FFGDB",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-b187jbam/",
+   "model": "GC-B187JBAM",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-b187jqam/",
+   "model": "GC-B187JQAM",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-b257kghw/",
+   "model": "GC-B257KGHW",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-b257kljw/",
+   "model": "GC-B257KLJW",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-j257sqzw/",
+   "model": "GC-J257SQZW",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-q257cmfw/",
+   "model": "GC-Q257CMFW",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-v257sfzw/",
+   "model": "GC-V257SFZW",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-x257cmew/",
+   "model": "GC-X257CMEW",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-x257sfzw/",
+   "model": "GC-X257SFZW",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-x257sqzw/",
+   "model": "GC-X257SQZW",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/top-freezer/gc-b292plbm/",
+   "model": "GC-B292PLBM",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/top-freezer/gc-b322plbm/",
+   "model": "GC-B322PLBM",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/top-freezer/gn-b202sfir/",
+   "model": "GN-B202SFIR",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/top-freezer/gn-b392pgfb/",
+   "model": "GN-B392PGFB",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/top-freezer/gn-b452pffq/",
+   "model": "GN-B452PFFQ",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/top-freezer/gn-b452pgfq/",
+   "model": "GN-B452PGFQ",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/top-freezer/gn-c702hqcm/",
+   "model": "GN-C702HQCM",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/top-freezer/gn-c702hxcm/",
+   "model": "GN-C702HXCM",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/top-freezer/gn-d382pqmb/",
+   "model": "GN-D382PQMB",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/top-freezer/gn-f392plak/",
+   "model": "GN-F392PLAK",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/top-freezer/gn-f392pqak/",
+   "model": "GN-F392PQAK",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/top-freezer/gn-f452pqak/",
+   "model": "GN-F452PQAK",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/refrigerators/top-freezer/gn-x392pbgb/",
+   "model": "GN-X392PBGB",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/speakers/party-speakers/stage301/",
+   "model": "STAGE301",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/speakers/xboom/bounce/",
+   "model": "BOUNCE",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/speakers/xboom/grab/",
+   "model": "GRAB",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/micro-rgb-evo/100mrgb96bs/",
+   "model": "100MRGB96BS",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/mini-rgb-evo/55mrgb86bsa/",
+   "model": "55MRGB86BSA",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/mini-rgb-evo/65mrgb86bsa/",
+   "model": "65MRGB86BSA",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/mini-rgb-evo/75mrgb86bsa/",
+   "model": "75MRGB86BSA",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/mini-rgb-evo/86mrgb86bsa/",
+   "model": "86MRGB86BSA",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/nano-4k-uhd/43nu805bpsc/",
+   "model": "43NU805BPSC",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/nano-4k-uhd/50nu805bpsc/",
+   "model": "50NU805BPSC",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/nano-4k-uhd/50nu855bpsa/",
+   "model": "50NU855BPSA",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/nano-4k-uhd/55nu805bpsb/",
+   "model": "55NU805BPSB",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/nano-4k-uhd/65nu805bpsb/",
+   "model": "65NU805BPSB",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/nano-4k-uhd/75nu805bpsb/",
+   "model": "75NU805BPSB",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/nano-4k-uhd/85nu805bpsb-s30a/",
+   "model": "85NU805BPSB-S30A",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/nano-4k-uhd/85nu805bpsb/",
+   "model": "85NU805BPSB",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/nano-4k-uhd/98nu855bpsb/",
+   "model": "98NU855BPSB",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/nanocell/75nano81tsa-ms2535/",
+   "model": "75NANO81TSA-MS2535",
+   "on": "Shopee only"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/oled-evo/oled42c6psa-grab/",
+   "model": "OLED42C6PSA-GRAB",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/oled-evo/oled42c6psa/",
+   "model": "OLED42C6PSA",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/oled-evo/oled48c6psa-bounce/",
+   "model": "OLED48C6PSA-BOUNCE",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/oled-evo/oled48c6psa/",
+   "model": "OLED48C6PSA",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/oled-evo/oled55g6psa/",
+   "model": "OLED55G6PSA",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/oled/oled48b6psa-grab/",
+   "model": "OLED48B6PSA-GRAB",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/oled/oled48b6psa/",
+   "model": "OLED48B6PSA",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/oled/oled55b6esa/",
+   "model": "OLED55B6ESA",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/oled/oled65b6esa/",
+   "model": "OLED65B6ESA",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/qned-evo-mini-led/65qned90bsa/",
+   "model": "65QNED90BSA",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/qned-evo-mini-led/75qned90bsa/",
+   "model": "75QNED90BSA",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/qned-evo/50qned80bsa/",
+   "model": "50QNED80BSA",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/qned/43qned70bsa/",
+   "model": "43QNED70BSA",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/qned/50qned70bsa/",
+   "model": "50QNED70BSA",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/qned/55qned70bsa/",
+   "model": "55QNED70BSA",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/qned/65qned70bsa/",
+   "model": "65QNED70BSA",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/qned/75qned70bsa/",
+   "model": "75QNED70BSA",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/tv-soundbars/qned/85qned70bsa/",
+   "model": "85QNED70BSA",
+   "on": "Lazada only"
+  },
+  {
+   "url": "https://www.lg.com/th/vacuum-cleaner/cordless-vacuum-cleaner/a9-ace/",
+   "model": "A9-ACE",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/vacuum-cleaner/cordless-vacuum-cleaner/a9t-core/",
+   "model": "A9T-CORE",
+   "on": "Shopee+Lazada"
+  },
+  {
+   "url": "https://www.lg.com/th/vacuum-cleaner/cordless-vacuum-cleaner/a9t-ultra/",
+   "model": "A9T-ULTRA",
+   "on": "Shopee only"
+  }
+ ],
+ "catalog": [
+  "https://www.lg.com/th/air-condition-inverter/energy-saving-air-condition/isc13e/",
+  "https://www.lg.com/th/air-conditioner-inverter/air-conditioner-with-air-purifier/iaq13g1/",
+  "https://www.lg.com/th/air-conditioner-inverter/air-conditioner-with-air-purifier/iaq18g1/",
+  "https://www.lg.com/th/air-conditioner-inverter/air-conditioner-with-air-purifier/ihq13r/",
+  "https://www.lg.com/th/air-conditioner-inverter/air-conditioner-with-air-purifier/ihq18r/",
+  "https://www.lg.com/th/air-conditioner-inverter/air-conditioner-with-air-purifier/inr10e/",
+  "https://www.lg.com/th/air-conditioner-inverter/air-conditioner-with-air-purifier/inr13e/",
+  "https://www.lg.com/th/air-conditioner-inverter/air-conditioner-with-air-purifier/inr18e/",
+  "https://www.lg.com/th/air-conditioner-inverter/air-conditioner-with-air-purifier/inr24e/",
+  "https://www.lg.com/th/air-conditioner-inverter/air-conditioner-with-air-purifier/seq11a/",
+  "https://www.lg.com/th/air-conditioner-inverter/air-conditioner-with-air-purifier/seq13a/",
+  "https://www.lg.com/th/air-conditioner-inverter/air-conditioner-with-air-purifier/seq18a/",
+  "https://www.lg.com/th/air-conditioner-inverter/air-conditioner-with-air-purifier/seq24a/",
+  "https://www.lg.com/th/air-conditioner-inverter/energy-saving-air-conditioner/ice11m/",
+  "https://www.lg.com/th/air-conditioner-inverter/energy-saving-air-conditioner/ice13m/",
+  "https://www.lg.com/th/air-conditioner-inverter/energy-saving-air-conditioner/ice18m/",
+  "https://www.lg.com/th/air-conditioner-inverter/energy-saving-air-conditioner/ice24m/",
+  "https://www.lg.com/th/air-conditioner-inverter/energy-saving-air-conditioner/isc10e/",
+  "https://www.lg.com/th/air-conditioner-inverter/energy-saving-air-conditioner/s3-q24sj610/",
+  "https://www.lg.com/th/air-conditioner-inverter/energy-saving-air-conditioner/saq11a/",
+  "https://www.lg.com/th/air-conditioner-inverter/energy-saving-air-conditioner/saq13a/",
+  "https://www.lg.com/th/air-conditioner-inverter/ivq13s1/",
+  "https://www.lg.com/th/air-conditioner-inverter/ivq18s1/",
+  "https://www.lg.com/th/air-conditioner-inverter/wifi-air-air-conditioner/icq11m/",
+  "https://www.lg.com/th/air-conditioner-inverter/wifi-air-air-conditioner/icq13m/",
+  "https://www.lg.com/th/air-conditioner-inverter/wifi-air-air-conditioner/icq18m/",
+  "https://www.lg.com/th/air-conditioner-inverter/wifi-air-air-conditioner/icq24m/",
+  "https://www.lg.com/th/air-conditioner-inverter/wifi-air-air-conditioner/ieq10e/",
+  "https://www.lg.com/th/air-conditioner-inverter/wifi-air-air-conditioner/ieq13e/",
+  "https://www.lg.com/th/air-conditioner-inverter/wifi-air-air-conditioner/ieq18e/",
+  "https://www.lg.com/th/air-conditioner-inverter/wifi-air-air-conditioner/ieq24e/",
+  "https://www.lg.com/th/air-conditioner-inverter/wifi-air-air-conditioner/scq11a/",
+  "https://www.lg.com/th/air-conditioner-inverter/wifi-air-air-conditioner/scq13a/",
+  "https://www.lg.com/th/air-conditioner-inverter/wifi-air-air-conditioner/scq18a/",
+  "https://www.lg.com/th/air-conditioner-inverter/wifi-air-air-conditioner/scq24a/",
+  "https://www.lg.com/th/air-puricare/puricare-360/as10gdby0/",
+  "https://www.lg.com/th/air-puricare/puricare-360/as10gdwh0/",
+  "https://www.lg.com/th/air-puricare/puricare-360/as30ggw10/",
+  "https://www.lg.com/th/air-puricare/puricare-360/as35ggw10/",
+  "https://www.lg.com/th/air-puricare/puricare-360/as55ggwx0/",
+  "https://www.lg.com/th/air-puricare/puricare-360/as60ghwg0/",
+  "https://www.lg.com/th/air-puricare/puricare-360/as65gdby0/",
+  "https://www.lg.com/th/air-puricare/puricare-360/as65gdwh0/",
+  "https://www.lg.com/th/air-puricare/puricare-360/pfsdnc01/",
+  "https://www.lg.com/th/air-puricare/puricare-aerofurniture/as20gprz0/",
+  "https://www.lg.com/th/air-puricare/puricare-aerofurniture/as20gpwz0/",
+  "https://www.lg.com/th/air-puricare/puricare-aerofurniture/as20gpyz0/",
+  "https://www.lg.com/th/air-puricare/puricare-aerotower/as25gcby0/",
+  "https://www.lg.com/th/air-puricare/puricare-aerotower/fs15gpcn0/",
+  "https://www.lg.com/th/dehumidifier/dd23gmwe1/",
+  "https://www.lg.com/th/dehumidifier/md16gqsa1/",
+  "https://www.lg.com/th/dehumidifier/md19gqga1/",
+  "https://www.lg.com/th/dehumidifier/pdaqsc01/",
+  "https://www.lg.com/th/laptops/gram/16z90r-g-af78a6/",
+  "https://www.lg.com/th/laptops/gram/16z90r-g-ah75a6/",
+  "https://www.lg.com/th/laptops/gram/16z90s-g-aj53a6/",
+  "https://www.lg.com/th/laptops/gram/16z90sp-g/",
+  "https://www.lg.com/th/laptops/gram/17z90r-g-af78a6/",
+  "https://www.lg.com/th/laptops/gram/17z90r-g-ah55a6/",
+  "https://www.lg.com/th/laptops/gram/17z90s-g-ah56a6/",
+  "https://www.lg.com/th/laptops/gram/17z90sp-e/",
+  "https://www.lg.com/th/laptops/gram/17z90sp-g/",
+  "https://www.lg.com/th/laundry/dryer/rd08nhp5w/",
+  "https://www.lg.com/th/laundry/dryer/rv09vhp4w1/",
+  "https://www.lg.com/th/laundry/dryer/rv10vhp2b/",
+  "https://www.lg.com/th/laundry/dryer/rv10vhp4b/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2515rnew/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2515rtgv-a9k/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2515rtgv/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2515rtpw/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2515sneg/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2515snew-b422mq/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2515snew-ms2032/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2515snew/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2515stgv/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2515stpw/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2520rntb/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2520rntg/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2520sneg/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2520snew1/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2725svrb-b452/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2725svrb-ms2032/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2725svrb-r5t/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2725svrb-y201cls/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2725svrb-y201cqs/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/f2725svrb/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fb1207s6w-d322/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fb1207s6w/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fb1208s6w/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fb1209d5m/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fb1209d5w/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fb1209s5m-f392/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fb1209s5m/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fb1209s6w/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fm1209n6w/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fv1209s5wg/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fv1409h4w/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fv1410h4w/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fv1410s3ma/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fv1410s5wg1/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fv1411h2ba/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fv1411h3m/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fv1411s3ma/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fv1411s4w1/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fv1412s2b-f392/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fv1412s2b/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fv1413h2ba-b452/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fv1413h2ba/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fv1413h4m/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fv1413s2ba/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fv1413s4m-b212/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fv1413s4m-b422mq/",
+  "https://www.lg.com/th/laundry/front-load-washing-machine/fv1413s4m/",
+  "https://www.lg.com/th/laundry/styler/s5goc/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2109nbtb/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2109vspm/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2310nbtb/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2310vspm/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2313vspm/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2313xtra/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2515vbtb/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2515vbtm/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2515vspb/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2516vbtb/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2516vbtm/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2517vbtb/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2517vbtm/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2517vspb/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2517vspm/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2518vbtb-d322/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2518vbtb/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2518vbtm/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2519vbtb/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2519vbtm/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/t2519vspb/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tv2516dv3m/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tv2517dv3b/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tv2519dv7b/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tv2520dv7b/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tv2520sv7j/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tv2521av7j/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tv2521dv7b/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tv2724sv9b/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tv2725av9j1/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tv2725sv9j/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tx2314dt5o/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tx2315dt5g/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tx2519dt3wt/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tx2520dt5o/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tx2521dt5o/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tx2522at7g/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tx2522dt5g/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tx2723st5j/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tx2724st5j/",
+  "https://www.lg.com/th/laundry/top-load-washing-machine/tx2725at9g/",
+  "https://www.lg.com/th/laundry/twin-tub-washing-machine/p800nonp/",
+  "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt10narg/",
+  "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt11narg/",
+  "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt12warg/",
+  "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt13warg/",
+  "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt14narg/",
+  "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt14wapg/",
+  "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt15narg/",
+  "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt15wapg/",
+  "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt15warg/",
+  "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt16wapg/",
+  "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt17napg/",
+  "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt18napg/",
+  "https://www.lg.com/th/laundry/twin-tub-washing-machine/tt18wapg/",
+  "https://www.lg.com/th/laundry/wash-tower/wt1410nhen/",
+  "https://www.lg.com/th/laundry/wash-tower/wt1410nhw-b187/",
+  "https://www.lg.com/th/laundry/wash-tower/wt1410nhw-f20/",
+  "https://www.lg.com/th/laundry/wash-tower/wt1410nhww-55q8z/",
+  "https://www.lg.com/th/laundry/wash-tower/wt1410nhww-a9kc/",
+  "https://www.lg.com/th/laundry/wash-tower/wt1410nhww-b422/",
+  "https://www.lg.com/th/laundry/wash-tower/wt1410nhww-b452/",
+  "https://www.lg.com/th/laundry/wash-tower/wt1410nhww-v257/",
+  "https://www.lg.com/th/laundry/wash-tower/wt1410nhww/",
+  "https://www.lg.com/th/laundry/wash-tower/wt2116shbb-b47fm/",
+  "https://www.lg.com/th/laundry/wash-tower/wt2116shbb-v257/",
+  "https://www.lg.com/th/laundry/wash-tower/wt2116shbb/",
+  "https://www.lg.com/th/laundry/wash-tower/wt2116sheg-b47fm/",
+  "https://www.lg.com/th/laundry/wash-tower/wt2116sheg/",
+  "https://www.lg.com/th/laundry/wash-tower/wtbb-b187jb/",
+  "https://www.lg.com/th/laundry/wash-tower/wtbb-b202/",
+  "https://www.lg.com/th/laundry/wash-tower/wtbb-f20/",
+  "https://www.lg.com/th/laundry/wash-tower/wtbb-r5-max/",
+  "https://www.lg.com/th/laundry/wash-tower/wtbb-r5t/",
+  "https://www.lg.com/th/laundry/wash-tower/wtbg-b187jb/",
+  "https://www.lg.com/th/laundry/wash-tower/wtbg-b202/",
+  "https://www.lg.com/th/laundry/wash-tower/wtbg-f20/",
+  "https://www.lg.com/th/laundry/wash-tower/wtbg-r5-max/",
+  "https://www.lg.com/th/laundry/wash-tower/wtbg-r5t/",
+  "https://www.lg.com/th/laundry/wash-tower/wtsbg-b202/",
+  "https://www.lg.com/th/laundry/wash-tower/wtsbg-d382/",
+  "https://www.lg.com/th/laundry/wash-tower/wtsbg-r5/",
+  "https://www.lg.com/th/laundry/wash-tower/wtsw-b202/",
+  "https://www.lg.com/th/lifestyle-screens/objet-collection-pose/55lx1qpsa/",
+  "https://www.lg.com/th/lifestyle-screens/objet-collection-pose/55lx1tpsa/",
+  "https://www.lg.com/th/lifestyle-screens/stanbyme/27art10akpl/",
+  "https://www.lg.com/th/lifestyle-screens/stanbyme/27lx6tdga/",
+  "https://www.lg.com/th/lifestyle-screens/stanbyme/32lx6bdga/",
+  "https://www.lg.com/th/microwave-ovens/solo-microwave/ms2032gas/",
+  "https://www.lg.com/th/microwave-ovens/solo-microwave/ms2535gik/",
+  "https://www.lg.com/th/microwave-ovens/solo-microwave/ms3032jas/",
+  "https://www.lg.com/th/microwave-ovens/solo-microwave/ms4295dis/",
+  "https://www.lg.com/th/monitors/28mq780-b/",
+  "https://www.lg.com/th/monitors/fhd-qhd/22mr410-b/",
+  "https://www.lg.com/th/monitors/fhd-qhd/24mr400-b/",
+  "https://www.lg.com/th/monitors/fhd-qhd/24qp550-b/",
+  "https://www.lg.com/th/monitors/fhd-qhd/24u421a-b/",
+  "https://www.lg.com/th/monitors/fhd-qhd/24u631a-b/",
+  "https://www.lg.com/th/monitors/fhd-qhd/27mr400-b/",
+  "https://www.lg.com/th/monitors/fhd-qhd/27u411a-b/",
+  "https://www.lg.com/th/monitors/fhd-qhd/27u631a-b/",
+  "https://www.lg.com/th/monitors/fhd-qhd/32mr50c-b/",
+  "https://www.lg.com/th/monitors/fhd-qhd/32u631a-b/",
+  "https://www.lg.com/th/monitors/gaming/24gn60r/",
+  "https://www.lg.com/th/monitors/gaming/24gq50f-b/",
+  "https://www.lg.com/th/monitors/gaming/24gs50f-b/",
+  "https://www.lg.com/th/monitors/gaming/24gs60f-b/",
+  "https://www.lg.com/th/monitors/gaming/25g590b-b/",
+  "https://www.lg.com/th/monitors/gaming/27g440a-b/",
+  "https://www.lg.com/th/monitors/gaming/27g640a-b/",
+  "https://www.lg.com/th/monitors/gaming/27g810a-b/",
+  "https://www.lg.com/th/monitors/gaming/27g850a-b-atm/",
+  "https://www.lg.com/th/monitors/gaming/27gn650-b/",
+  "https://www.lg.com/th/monitors/gaming/27gp850-b/",
+  "https://www.lg.com/th/monitors/gaming/27gq50f-b/",
+  "https://www.lg.com/th/monitors/gaming/27gr93u-b/",
+  "https://www.lg.com/th/monitors/gaming/27gs50f-b/",
+  "https://www.lg.com/th/monitors/gaming/27gs60f-b/",
+  "https://www.lg.com/th/monitors/gaming/27gs75q-b/",
+  "https://www.lg.com/th/monitors/gaming/27gs85q-b/",
+  "https://www.lg.com/th/monitors/gaming/27gs95qe-b/",
+  "https://www.lg.com/th/monitors/gaming/27gx704a-b/",
+  "https://www.lg.com/th/monitors/gaming/27gx790a-b/",
+  "https://www.lg.com/th/monitors/gaming/27up650-w/",
+  "https://www.lg.com/th/monitors/gaming/32g810sa-w/",
+  "https://www.lg.com/th/monitors/gaming/32gn650-b/",
+  "https://www.lg.com/th/monitors/gaming/32gp850-b/",
+  "https://www.lg.com/th/monitors/gaming/32gr93u-b/",
+  "https://www.lg.com/th/monitors/gaming/32gs85q-b/",
+  "https://www.lg.com/th/monitors/gaming/32gs95ue-b/",
+  "https://www.lg.com/th/monitors/gaming/32gs95uv-b/",
+  "https://www.lg.com/th/monitors/gaming/32gx850a-b/",
+  "https://www.lg.com/th/monitors/gaming/34gp63a-b/",
+  "https://www.lg.com/th/monitors/gaming/34gs95qe-b/",
+  "https://www.lg.com/th/monitors/gaming/34gx90sa-w/",
+  "https://www.lg.com/th/monitors/gaming/34gx90sb-w/",
+  "https://www.lg.com/th/monitors/gaming/39gs95qe-b/",
+  "https://www.lg.com/th/monitors/gaming/39gx950b-b/",
+  "https://www.lg.com/th/monitors/gaming/45gr75dc-b/",
+  "https://www.lg.com/th/monitors/gaming/45gr95qe-b/",
+  "https://www.lg.com/th/monitors/gaming/45gs95qe-b/",
+  "https://www.lg.com/th/monitors/gaming/45gx950a-b/",
+  "https://www.lg.com/th/monitors/gaming/45gx950b-b/",
+  "https://www.lg.com/th/monitors/gaming/52g930b-b/",
+  "https://www.lg.com/th/monitors/smart-monitors/27sr50f-w/",
+  "https://www.lg.com/th/monitors/smart-monitors/27u511sa-w/",
+  "https://www.lg.com/th/monitors/smart-monitors/32sr50f-w/",
+  "https://www.lg.com/th/monitors/smart-monitors/32sr85u-w/",
+  "https://www.lg.com/th/monitors/smart-monitors/32u731sa-w/",
+  "https://www.lg.com/th/monitors/smart-monitors/32u889sa-w/",
+  "https://www.lg.com/th/monitors/uhd-4k-5k/27up650k-w/",
+  "https://www.lg.com/th/monitors/uhd-4k-5k/32ur500-b/",
+  "https://www.lg.com/th/monitors/uhd-4k-5k/32ur500k-b/",
+  "https://www.lg.com/th/monitors/uhd-4k-5k/40u990a-w/",
+  "https://www.lg.com/th/monitors/ultrawide/29u531a-w/",
+  "https://www.lg.com/th/monitors/ultrawide/29wq600-w/",
+  "https://www.lg.com/th/monitors/ultrawide/34wp65g-b/",
+  "https://www.lg.com/th/monitors/ultrawide/34wq75c-b/",
+  "https://www.lg.com/th/monitors/ultrawide/34wr50qc-b/",
+  "https://www.lg.com/th/monitors/ultrawide/34wr50qk-b/",
+  "https://www.lg.com/th/portable-air-conditioners/p3c09b/",
+  "https://www.lg.com/th/refrigerators/1-door-refrigerator/gc-b041pqcf/",
+  "https://www.lg.com/th/refrigerators/1-door-refrigerator/gc-b081pqcf/",
+  "https://www.lg.com/th/refrigerators/1-door-refrigerator/gn-y201cls/",
+  "https://www.lg.com/th/refrigerators/1-door-refrigerator/gn-y201cqs/",
+  "https://www.lg.com/th/refrigerators/1-door-refrigerator/gn-y331cqs/",
+  "https://www.lg.com/th/refrigerators/1-door-refrigerator/gn-y331sls/",
+  "https://www.lg.com/th/refrigerators/2-door-refrigerator/gc-b202mqbr/",
+  "https://www.lg.com/th/refrigerators/2-door-refrigerator/gc-b422mqbm/",
+  "https://www.lg.com/th/refrigerators/2-door-refrigerator/gn-b392plbk/",
+  "https://www.lg.com/th/refrigerators/2-door-refrigerator/gn-b392pqgb/",
+  "https://www.lg.com/th/refrigerators/2-door-refrigerator/gn-c602hqcm/",
+  "https://www.lg.com/th/refrigerators/2-door-refrigerator/gn-c602hxcm/",
+  "https://www.lg.com/th/refrigerators/2-door-refrigerator/gn-d322pbmb/",
+  "https://www.lg.com/th/refrigerators/2-door-refrigerator/gn-d322pqmb/",
+  "https://www.lg.com/th/refrigerators/2-door-refrigerator/gn-f372pxak/",
+  "https://www.lg.com/th/refrigerators/2-door-refrigerator/gn-f392pxak/",
+  "https://www.lg.com/th/refrigerators/2-door-refrigerator/gn-x332ppgb/",
+  "https://www.lg.com/th/refrigerators/2-door-refrigerator/gn-x392pmgb/",
+  "https://www.lg.com/th/refrigerators/2-door-refrigerator/gv-b212pgmb/",
+  "https://www.lg.com/th/refrigerators/2-door-refrigerator/gv-b212pqmb/",
+  "https://www.lg.com/th/refrigerators/bottom-freezer/gn-b389fqdm/",
+  "https://www.lg.com/th/refrigerators/bottom-freezer/gn-v389fqef/",
+  "https://www.lg.com/th/refrigerators/freezer/gc-b155bqcf/",
+  "https://www.lg.com/th/refrigerators/freezer/gc-b205bqcf/",
+  "https://www.lg.com/th/refrigerators/freezer/gc-b305bqcf/",
+  "https://www.lg.com/th/refrigerators/freezer/gc-b405bqcf/",
+  "https://www.lg.com/th/refrigerators/freezer/gn-304slbr/",
+  "https://www.lg.com/th/refrigerators/freezer/gn-304slbt/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gc-b41fpgam/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gc-b47fmgah/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gc-b47fmgbb/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gc-b48fpgam/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gc-b50fpgam/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gc-b52apgam/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gc-f20ffbfb/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gc-v22ffqmb/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gc-v24ffchb-gn304/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gc-v24ffchb-r5t/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gc-v24ffchb-rd08/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gc-v24ffchb/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gr-a24fqsmb/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gv-b25ffgdb-a9k/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gv-b25ffgdb/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/gv-v25ffgrb/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/xlgr-a24-304sl/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/xlgr-a24-a9k/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/xlgr-a24-rd08/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/xlgr-a24-wtsw/",
+  "https://www.lg.com/th/refrigerators/multi-door-refrigerator/xlgr-a24/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/f20-ms2032/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-b187jbam/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-b187jqam/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-b257kghw/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-b257kljw/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-b257slvl-ms2032/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-b257slvl/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-b257sqyl/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-j257cqes/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-j257sqzw/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-l257sfzw/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-l257slnl/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-q257cmfw/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-q257cqfs/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-v257sfzw-a9k/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-v257sfzw-ms2032/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-v257sfzw/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-x257cmew/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-x257cqes/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-x257cses/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-x257sfzw/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-x257sqzw-a9kc/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/gc-x257sqzw/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/sxsbl-y201sl/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/sxsgb-y201/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/sxsgb-y201sl/",
+  "https://www.lg.com/th/refrigerators/side-by-side-refrigerator/x257sf-304/",
+  "https://www.lg.com/th/refrigerators/top-freezer/gc-b292plbm/",
+  "https://www.lg.com/th/refrigerators/top-freezer/gc-b322plbm/",
+  "https://www.lg.com/th/refrigerators/top-freezer/gn-b202sfir/",
+  "https://www.lg.com/th/refrigerators/top-freezer/gn-b202sqbb/",
+  "https://www.lg.com/th/refrigerators/top-freezer/gn-b392pgfb/",
+  "https://www.lg.com/th/refrigerators/top-freezer/gn-b452pffq/",
+  "https://www.lg.com/th/refrigerators/top-freezer/gn-b452pgfq/",
+  "https://www.lg.com/th/refrigerators/top-freezer/gn-c702hqcm/",
+  "https://www.lg.com/th/refrigerators/top-freezer/gn-c702hxcm/",
+  "https://www.lg.com/th/refrigerators/top-freezer/gn-d382pqmb/",
+  "https://www.lg.com/th/refrigerators/top-freezer/gn-f392plak/",
+  "https://www.lg.com/th/refrigerators/top-freezer/gn-f392pqak/",
+  "https://www.lg.com/th/refrigerators/top-freezer/gn-f452pqak/",
+  "https://www.lg.com/th/refrigerators/top-freezer/gn-x392pbgb/",
+  "https://www.lg.com/th/refrigerators/top-freezer/gv-d252pqmb/",
+  "https://www.lg.com/th/speakers/party-speakers/stage301/",
+  "https://www.lg.com/th/speakers/soundbars/s75q/",
+  "https://www.lg.com/th/speakers/soundbars/sn4/",
+  "https://www.lg.com/th/speakers/soundbars/sp9a/",
+  "https://www.lg.com/th/speakers/xboom/bounce/",
+  "https://www.lg.com/th/speakers/xboom/grab/",
+  "https://www.lg.com/th/speakers/xboom/on9/",
+  "https://www.lg.com/th/speakers/xboom/xl7s/",
+  "https://www.lg.com/th/tv-soundbars/4k-uhd-tvs/43ua845zpsa/",
+  "https://www.lg.com/th/tv-soundbars/4k-uhd-tvs/43uq7050psa/",
+  "https://www.lg.com/th/tv-soundbars/4k-uhd-tvs/43ur7550psc/",
+  "https://www.lg.com/th/tv-soundbars/4k-uhd-tvs/43ur8050psb/",
+  "https://www.lg.com/th/tv-soundbars/4k-uhd-tvs/43ut8050psb/",
+  "https://www.lg.com/th/tv-soundbars/4k-uhd-tvs/55ua845zpsa/",
+  "https://www.lg.com/th/tv-soundbars/4k-uhd-tvs/55ur7550psc/",
+  "https://www.lg.com/th/tv-soundbars/4k-uhd-tvs/55ur8050psb/",
+  "https://www.lg.com/th/tv-soundbars/4k-uhd-tvs/55ut8050psb/",
+  "https://www.lg.com/th/tv-soundbars/4k-uhd-tvs/65ua845zpsa/",
+  "https://www.lg.com/th/tv-soundbars/4k-uhd-tvs/65ur7550psc/",
+  "https://www.lg.com/th/tv-soundbars/4k-uhd-tvs/65ur8050psb/",
+  "https://www.lg.com/th/tv-soundbars/4k-uhd-tvs/65ut8050psb/",
+  "https://www.lg.com/th/tv-soundbars/4k-uhd-tvs/75ut8050psb/",
+  "https://www.lg.com/th/tv-soundbars/4k-uhd-tvs/86ut8050psb/",
+  "https://www.lg.com/th/tv-soundbars/full-hd-tvs/32lq630bpsa/",
+  "https://www.lg.com/th/tv-soundbars/micro-rgb-evo/100mrgb96bs/",
+  "https://www.lg.com/th/tv-soundbars/mini-rgb-evo/55mrgb86bsa/",
+  "https://www.lg.com/th/tv-soundbars/mini-rgb-evo/65mrgb86bsa/",
+  "https://www.lg.com/th/tv-soundbars/mini-rgb-evo/75mrgb86bsa/",
+  "https://www.lg.com/th/tv-soundbars/mini-rgb-evo/86mrgb86bsa/",
+  "https://www.lg.com/th/tv-soundbars/nano-4k-uhd/43nu805bpsc/",
+  "https://www.lg.com/th/tv-soundbars/nano-4k-uhd/50nu805bpsc/",
+  "https://www.lg.com/th/tv-soundbars/nano-4k-uhd/50nu855bpsa/",
+  "https://www.lg.com/th/tv-soundbars/nano-4k-uhd/55nu805bpsb/",
+  "https://www.lg.com/th/tv-soundbars/nano-4k-uhd/65nu805bpsb/",
+  "https://www.lg.com/th/tv-soundbars/nano-4k-uhd/75nu805bpsb-s30a/",
+  "https://www.lg.com/th/tv-soundbars/nano-4k-uhd/75nu805bpsb/",
+  "https://www.lg.com/th/tv-soundbars/nano-4k-uhd/85nu805bpsb-s30a/",
+  "https://www.lg.com/th/tv-soundbars/nano-4k-uhd/85nu805bpsb/",
+  "https://www.lg.com/th/tv-soundbars/nano-4k-uhd/98nu855bpsb/",
+  "https://www.lg.com/th/tv-soundbars/nanocell/43nano75sqa/",
+  "https://www.lg.com/th/tv-soundbars/nanocell/43nano80asa/",
+  "https://www.lg.com/th/tv-soundbars/nanocell/43nano81tsa/",
+  "https://www.lg.com/th/tv-soundbars/nanocell/55nano75sqa/",
+  "https://www.lg.com/th/tv-soundbars/nanocell/55nano80asa/",
+  "https://www.lg.com/th/tv-soundbars/nanocell/55nano81tsa/",
+  "https://www.lg.com/th/tv-soundbars/nanocell/65nano75sqa/",
+  "https://www.lg.com/th/tv-soundbars/nanocell/65nano81tsa/",
+  "https://www.lg.com/th/tv-soundbars/nanocell/75nano75sqa/",
+  "https://www.lg.com/th/tv-soundbars/nanocell/75nano80sqa/",
+  "https://www.lg.com/th/tv-soundbars/nanocell/75nano81tsa-ms2535/",
+  "https://www.lg.com/th/tv-soundbars/nanocell/75nano81tsa/",
+  "https://www.lg.com/th/tv-soundbars/nanocell/86nano75sqa/",
+  "https://www.lg.com/th/tv-soundbars/nanocell/86nano81tsa-f20/",
+  "https://www.lg.com/th/tv-soundbars/nanocell/86nano81tsa/",
+  "https://www.lg.com/th/tv-soundbars/oled-evo/42lx1qpsa/",
+  "https://www.lg.com/th/tv-soundbars/oled-evo/oled42c5psa-grab/",
+  "https://www.lg.com/th/tv-soundbars/oled-evo/oled42c5psa/",
+  "https://www.lg.com/th/tv-soundbars/oled-evo/oled42c6psa-grab/",
+  "https://www.lg.com/th/tv-soundbars/oled-evo/oled42c6psa/",
+  "https://www.lg.com/th/tv-soundbars/oled-evo/oled48c5psa/",
+  "https://www.lg.com/th/tv-soundbars/oled-evo/oled48c6psa-bounce/",
+  "https://www.lg.com/th/tv-soundbars/oled-evo/oled48c6psa/",
+  "https://www.lg.com/th/tv-soundbars/oled-evo/oled55c3psa/",
+  "https://www.lg.com/th/tv-soundbars/oled-evo/oled55c5zsa-boun/",
+  "https://www.lg.com/th/tv-soundbars/oled-evo/oled55c5zsa/",
+  "https://www.lg.com/th/tv-soundbars/oled-evo/oled55g3psa/",
+  "https://www.lg.com/th/tv-soundbars/oled-evo/oled55g6psa/",
+  "https://www.lg.com/th/tv-soundbars/oled-evo/oled65c5zsa-bounce/",
+  "https://www.lg.com/th/tv-soundbars/oled-evo/oled65c5zsa/",
+  "https://www.lg.com/th/tv-soundbars/oled-evo/oled65g3psa/",
+  "https://www.lg.com/th/tv-soundbars/oled-evo/oled77c3psa/",
+  "https://www.lg.com/th/tv-soundbars/oled-evo/oled77g3psa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled42c4psa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled48a3psa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled48b6psa-grab/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled48b6psa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled48c3psa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled48c4psa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled55b3psa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled55b4psa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled55b6esa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled55c4psa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled65b3psa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled65b4psa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled65b6esa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled65c3psa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled65c4psa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled65g4psa-b187/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled65g4psa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled77b4psa-f20/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled77b4psa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled77c4psa-f20/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled77c4psa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled77g4psa-f20/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled77g4psa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled83c3psa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled83c4psa-f20/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled83c4psa/",
+  "https://www.lg.com/th/tv-soundbars/oled/oled83g4psa/",
+  "https://www.lg.com/th/tv-soundbars/qned-evo-mini-led/65qned90bsa/",
+  "https://www.lg.com/th/tv-soundbars/qned-evo-mini-led/75qned90bsa/",
+  "https://www.lg.com/th/tv-soundbars/qned-evo/50qned80bsa/",
+  "https://www.lg.com/th/tv-soundbars/qned/43qned70bsa/",
+  "https://www.lg.com/th/tv-soundbars/qned/50qned70bsa/",
+  "https://www.lg.com/th/tv-soundbars/qned/55qned70bsa/",
+  "https://www.lg.com/th/tv-soundbars/qned/55qned75sra/",
+  "https://www.lg.com/th/tv-soundbars/qned/55qned7ssqa/",
+  "https://www.lg.com/th/tv-soundbars/qned/55qned80sra/",
+  "https://www.lg.com/th/tv-soundbars/qned/55qned80tsa-ms2032/",
+  "https://www.lg.com/th/tv-soundbars/qned/55qned80tsa/",
+  "https://www.lg.com/th/tv-soundbars/qned/55qned8zasa-grab/",
+  "https://www.lg.com/th/tv-soundbars/qned/55qned8zasa/",
+  "https://www.lg.com/th/tv-soundbars/qned/65qned70bsa/",
+  "https://www.lg.com/th/tv-soundbars/qned/65qned75sra/",
+  "https://www.lg.com/th/tv-soundbars/qned/65qned80sra/",
+  "https://www.lg.com/th/tv-soundbars/qned/65qned80tsa-ms3032/",
+  "https://www.lg.com/th/tv-soundbars/qned/65qned80tsa/",
+  "https://www.lg.com/th/tv-soundbars/qned/65qned86sra/",
+  "https://www.lg.com/th/tv-soundbars/qned/65qned8zasa-grab/",
+  "https://www.lg.com/th/tv-soundbars/qned/65qned8zasa/",
+  "https://www.lg.com/th/tv-soundbars/qned/65qned91sqa/",
+  "https://www.lg.com/th/tv-soundbars/qned/65qned91tsa-s70ty/",
+  "https://www.lg.com/th/tv-soundbars/qned/65qned91tsa/",
+  "https://www.lg.com/th/tv-soundbars/qned/65qned92asa-bounce/",
+  "https://www.lg.com/th/tv-soundbars/qned/65qned92asa/",
+  "https://www.lg.com/th/tv-soundbars/qned/65qned99sqb/",
+  "https://www.lg.com/th/tv-soundbars/qned/75qned70bsa/",
+  "https://www.lg.com/th/tv-soundbars/qned/75qned80asa-bounce/",
+  "https://www.lg.com/th/tv-soundbars/qned/75qned80sra/",
+  "https://www.lg.com/th/tv-soundbars/qned/75qned80tsa-b187/",
+  "https://www.lg.com/th/tv-soundbars/qned/75qned80tsa-ms4295/",
+  "https://www.lg.com/th/tv-soundbars/qned/75qned80tsa-s70ty/",
+  "https://www.lg.com/th/tv-soundbars/qned/75qned80tsa/",
+  "https://www.lg.com/th/tv-soundbars/qned/75qned86asa/",
+  "https://www.lg.com/th/tv-soundbars/qned/75qned86sra/",
+  "https://www.lg.com/th/tv-soundbars/qned/75qned91sqa/",
+  "https://www.lg.com/th/tv-soundbars/qned/75qned91tsa-s70ty/",
+  "https://www.lg.com/th/tv-soundbars/qned/75qned91tsa/",
+  "https://www.lg.com/th/tv-soundbars/qned/75qned92asa-bounce/",
+  "https://www.lg.com/th/tv-soundbars/qned/75qned92asa/",
+  "https://www.lg.com/th/tv-soundbars/qned/85qned70bsa/",
+  "https://www.lg.com/th/tv-soundbars/qned/86qned80asa-bounce/",
+  "https://www.lg.com/th/tv-soundbars/qned/86qned80sra/",
+  "https://www.lg.com/th/tv-soundbars/qned/86qned80tsa-f20/",
+  "https://www.lg.com/th/tv-soundbars/qned/86qned80tsa-s70tyr/",
+  "https://www.lg.com/th/tv-soundbars/qned/86qned80tsa/",
+  "https://www.lg.com/th/tv-soundbars/qned/86qned91tsa/",
+  "https://www.lg.com/th/tv-soundbars/qned/98qned89tsa-b187/",
+  "https://www.lg.com/th/tv-soundbars/soundbars/sn5/",
+  "https://www.lg.com/th/tv-soundbars/ultra-big-tvs/75qned75sra/",
+  "https://www.lg.com/th/tv-soundbars/ultra-big-tvs/75ur7550psc/",
+  "https://www.lg.com/th/tv-soundbars/ultra-big-tvs/75ur9050psk/",
+  "https://www.lg.com/th/tv-soundbars/ultra-big-tvs/86ur8050psb/",
+  "https://www.lg.com/th/tvs-soundbars/4k-uhd-tvs/50uq7050psa/",
+  "https://www.lg.com/th/tvs-soundbars/4k-uhd-tvs/55uq7050psa/",
+  "https://www.lg.com/th/tvs-soundbars/4k-uhd-tvs/55ut9050psb/",
+  "https://www.lg.com/th/tvs-soundbars/4k-uhd-tvs/65ut9050psb/",
+  "https://www.lg.com/th/tvs-soundbars/4k-uhd-tvs/75ut9050psb/",
+  "https://www.lg.com/th/tvs-soundbars/qned/55qned86tsa/",
+  "https://www.lg.com/th/tvs-soundbars/qned/65qned86tsa/",
+  "https://www.lg.com/th/tvs-soundbars/qned/75qned86tsa/",
+  "https://www.lg.com/th/tvs-soundbars/qned/86qned86tsa/",
+  "https://www.lg.com/th/vacuum-cleaner/cordless-vacuum-cleaner/a9-ace/",
+  "https://www.lg.com/th/vacuum-cleaner/cordless-vacuum-cleaner/a9k-core/",
+  "https://www.lg.com/th/vacuum-cleaner/cordless-vacuum-cleaner/a9k-max/",
+  "https://www.lg.com/th/vacuum-cleaner/cordless-vacuum-cleaner/a9k-ultra/",
+  "https://www.lg.com/th/vacuum-cleaner/cordless-vacuum-cleaner/a9t-core/",
+  "https://www.lg.com/th/vacuum-cleaner/cordless-vacuum-cleaner/a9t-ultra/",
+  "https://www.lg.com/th/vacuum-cleaner/dust-collector/vc3314gnt/",
+  "https://www.lg.com/th/vacuum-cleaner/dust-collector/vc5417ght/",
+  "https://www.lg.com/th/vacuum-cleaner/dust-collector/vk8317ghauq/",
+  "https://www.lg.com/th/vacuum-cleaner/robot-vacuum-cleaners/r3-core/",
+  "https://www.lg.com/th/vacuum-cleaner/robot-vacuum-cleaners/r5-max/",
+  "https://www.lg.com/th/vacuum-cleaner/robot-vacuum-cleaners/r5t-max/"
+ ]
+}

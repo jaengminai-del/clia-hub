@@ -619,11 +619,25 @@ def build_from_components(component_data: list, product_title: str = "", origin:
 # 컨텐츠가 아닌 컴포넌트 — 수집 결과에서 제외 (2026-10-26 사용자 지정)
 #   ST0018 Centered Image Block: 원래 링크가 걸리는 앵커(바로가기) 컴포넌트 — 사용 설명서·색상 바로가기 등 UI 요소, feature 카드 아님
 NON_CONTENT_COMPONENTS = {"ST0018"}
+#   PD0022 추천 상품·액세서리(2026-11-26): 페이지 맨 위 'สินค้าและอุปกรณ์เสริมที่แนะนำ' / 'Compatible products and Accessories' 제목 —
+#   CLIA 맨 위에 글 카드로 붙어 나왔다. 제목은 빼고, 섹션에 이미지가 붙어 있으면(다음 히어로 컴포넌트의 이미지가 잘못 붙은 경우 —
+#   SG 스타일러 SC5GMR80H 의 인트로 이미지·영상) 이미지는 남긴다. 이미지가 없으면 섹션째 뺀다.
+ACCESSORY_COMPONENTS = {"PD0022"}
 
 
 def drop_non_content(mirror: dict) -> dict:
     secs = mirror.get("sections") or []
-    mirror["sections"] = [s for s in secs if s.get("component_id") not in NON_CONTENT_COMPONENTS]
+    out = []
+    for s in secs:
+        cid = s.get("component_id")
+        if cid in NON_CONTENT_COMPONENTS:
+            continue
+        if cid in ACCESSORY_COMPONENTS:
+            if not s.get("media"):
+                continue
+            s = {**s, "text": "", "text_roles": [], "group_heading": ""}
+        out.append(s)
+    mirror["sections"] = out
     return mirror
 
 
