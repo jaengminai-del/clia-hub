@@ -436,7 +436,7 @@ async function run(j) {
         stop();
         if (c.text.length > CELL_MAX) throw Object.assign(new Error(`too long for one Excel cell (${c.text.length} chars)`), { stage: 'content' });
         texts.set(it.row, c.text);
-        if (j.check) { Object.assign(it, { ai: aiChecks(j, it, c), imgs: c.urls || [], hash: c.hash || '', store: storeOf(it) }); await saveTexts(j, texts, false); }
+        if (j.check) { Object.assign(it, { ai: aiChecks(j, it, c), imgs: c.urls || [], hash: c.hash || '', store: storeOf(it) }); await saveTexts(j, texts, false); require('./slice-preview').ensure(it.imgs).catch(() => {}); }
         Object.assign(it, { status: 'ok', error: '', images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: '' });
         it.flags = flagsFor(j, it, c);
         it.videos = 0;
@@ -460,7 +460,8 @@ async function run(j) {
       if (!contentBy.has(it.slug)) contentBy.set(it.slug, contentSlot(() => { stop(); return contentFor(j.channel, it.url); }));
       let c = await contentBy.get(it.slug);
       stop();
-      if (j.check) { const r = await autoRetry(j, it, c); c = r.c; Object.assign(it, { ai: r.ai, imgs: c.urls || [], hash: c.hash || '', store: storeOf(it) }); stop(); }
+      if (j.check) { const r = await autoRetry(j, it, c); c = r.c; Object.assign(it, { ai: r.ai, imgs: c.urls || [], hash: c.hash || '', store: storeOf(it) }); stop();
+        require('./slice-preview').ensure(it.imgs).catch(() => {}); }   // Check 화면용 작은 미리보기를 미리 (원본은 그대로)
       if (c.text.length > CELL_MAX) throw Object.assign(new Error(`too long for one Excel cell (${c.text.length} chars)`), { stage: 'content' });
       texts.set(it.row, c.text);
       if (j.check) await saveTexts(j, texts, false);
