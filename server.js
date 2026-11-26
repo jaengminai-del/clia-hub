@@ -2535,26 +2535,40 @@ app.post('/api/v1/slice-html', async (req, res) => {
   const rv = /^[\w.-]{1,20}$/.test(String(rev)) ? `|${rev}` : '';
   // 해시 판(v): Shopee·Lazada 는 자르기 규칙이 바뀐 v2, 그 밖의 매체는 원본과 같은 v1 (원본 서버가 만든 슬라이스 주소 그대로)
   const ver = med === 'shopee_lazada' ? 'v2' : 'v1';
-  const hash = crypto.createHash('sha1').update(`${ver}|${med}|${html}${rv}`).digest('hex').slice(0, 20);
-  const dir = path.join(SLICE_CACHE, hash);
-  try {
-    let man = null;
-    try { man = JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8')); } catch (_) {}
-    if (!man) {
-      // 재배포 뒤 로컬 캐시가 비어 있어도 버킷에 같은 묶음이 있으면 다시 그리지 않는다 (이미지는 /media/slices 가 버킷에서 가져옴)
-      const mb = await sliceStore.getBuffer(`media-slices/${hash}/manifest.json`).catch(() => null);
-      try { if (mb) { const m = JSON.parse(mb.toString('utf8')); if ((m.images || []).length) man = m; } } catch (_) {}
+  const hashOf = (r) => crypto.createHash('sha1').update(`${ver}|${med}|${html}${r}`).digest('hex').slice(0, 20);
+  // 저장된 묶음: 로컬 → 버킷 (재배포 뒤 로컬 캐시가 비어 있어도 버킷에 같은 묶음이 있으면 다시 그리지 않는다 — 이미지는 /media/slices 가 버킷에서 가져옴)
+  const loadMan = async (h) => {
+    try { return JSON.parse(fs.readFileSync(path.join(SLICE_CACHE, h, 'manifest.json'), 'utf8')); } catch (_) {}
+    const mb = await sliceStore.getBuffer(`media-slices/${h}/manifest.json`).catch(() => null);
+    try { if (mb) { const m = JSON.parse(mb.toString('utf8')); if ((m.images || []).length) return m; } } catch (_) {}
+    return null;
+  };
+  const render = async (h) => {
+    const dir = path.join(SLICE_CACHE, h);
+    const { meta } = await renderSlicesPy({ html, medium: med, name: 'slice', imagesDir: dir });
+    console.log(`[slice-html] ${meta.log}`);
+    const m = JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8'));
+    // 버킷에도 올림 (재배포·재시작 후에도 주소 유지)
+    for (const im of m.images) {
+      await sliceStore.putBuffer(`media-slices/${h}/${im.file}`, fs.readFileSync(path.join(dir, im.file)), 'image/jpeg').catch((e) =>
+        console.warn('[slice-html] 버킷 업로드 실패', im.file, e.message));
     }
-    if (!man) {
-      const { meta } = await renderSlicesPy({ html, medium: med, name: 'slice', imagesDir: dir });
-      console.log(`[slice-html] ${meta.log}`);
-      man = JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8'));
-      // 버킷에도 올림 (재배포·재시작 후에도 주소 유지)
-      for (const im of man.images) {
-        await sliceStore.putBuffer(`media-slices/${hash}/${im.file}`, fs.readFileSync(path.join(dir, im.file)), 'image/jpeg').catch((e) =>
-          console.warn('[slice-html] 버킷 업로드 실패', im.file, e.message));
-      }
-      await sliceStore.putBuffer(`media-slices/${hash}/manifest.json`, fs.readFileSync(path.join(dir, 'manifest.json')), 'application/json').catch(() => {});
+    await sliceStore.putBuffer(`media-slices/${h}/manifest.json`, fs.readFileSync(path.join(dir, 'manifest.json')), 'application/json').catch(() => {});
+    return m;
+  };
+  // 그릴 때 그림 일부를 못 받은 묶음(images_loaded 가 a<b — LG.com 이 잠깐 막는 등, 2026-11-26)은 한 번 더 그린다.
+  //   이미지 주소는 1년 캐시(immutable)라 같은 주소에 덮어쓰지 않고, 정해진 다른 주소(재시도 묶음)에 그린다.
+  //   재시도 묶음이 이미 있으면 다시 그리지 않는다 (LG.com 에 정말 없는 그림이면 매번 그리지 않게) — 한 번만.
+  const short = (m) => { const [a, b] = String((m && m.images_loaded) || '').split('/').map(Number); return b > 0 && a < b; };
+  try {
+    let hash = hashOf(rv), man = await loadMan(hash);
+    if (!man) man = await render(hash);
+    if (short(man) && !rv) {
+      const h2 = hashOf('|retry1');
+      let m2 = await loadMan(h2);
+      if (!m2) { console.log(`[slice-html] 그림 ${man.images_loaded} — 다시 그림 (${hash} → ${h2})`); m2 = await render(h2); }
+      const ld = (m) => Number(String(m.images_loaded || '').split('/')[0]) || 0;
+      if (ld(m2) >= ld(man)) { hash = h2; man = m2; }
     }
     const base = (process.env.PUBLIC_BASE_URL || `${req.get('x-forwarded-proto') || req.protocol}://${req.get('host')}`).replace(/\/$/, '');
     const esc = (t) => String(t || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
