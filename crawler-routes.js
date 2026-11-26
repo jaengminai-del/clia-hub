@@ -209,19 +209,35 @@ function launchPipeline(jobId, url, usePro, geminiKey, fullAi, html = null, base
 // 컨텐츠가 아닌 컴포넌트를 캐시된 mirror.json 에서도 뺀다 (crawler-py/component_mirror.py NON_CONTENT_COMPONENTS 와 같은 목록)
 //   ST0018 = 링크가 걸리는 앵커 컴포넌트(사용 설명서·색상 바로가기 등) — feature 카드 아님. 재크롤 없이 기존 캐시에 적용.
 const NON_CONTENT_COMPONENTS = new Set(['ST0018']);
+//   PD0022 = 페이지 맨 위 추천 상품·액세서리 제목 (2026-11-26, component_mirror.py ACCESSORY_COMPONENTS 와 같은 규칙):
+//   제목은 빼고, 이미지가 붙어 있으면(다음 히어로 이미지가 잘못 붙은 경우) 이미지만 남긴다. 이미지가 없으면 섹션째 뺀다.
+const ACCESSORY_COMPONENTS = new Set(['PD0022']);
+function cleanSections(sections) {
+  const out = [];
+  let changed = false;
+  for (const s of sections) {
+    if (NON_CONTENT_COMPONENTS.has(s.component_id)) { changed = true; continue; }
+    if (ACCESSORY_COMPONENTS.has(s.component_id)) {
+      if (!(s.media || []).length) { changed = true; continue; }
+      if (s.text || (s.text_roles || []).length || s.group_heading) { changed = true; out.push({ ...s, text: '', text_roles: [], group_heading: '' }); continue; }
+    }
+    out.push(s);
+  }
+  return { out, changed };
+}
 function stripNonContent() {
   let n = 0;
   for (const slug of fs.existsSync(OUT_DIR) ? fs.readdirSync(OUT_DIR) : []) {
     const fp = path.join(OUT_DIR, slug, 'mirror.json');
     const m = fs.existsSync(fp) ? readJson(fp) : null;
     if (!m || !Array.isArray(m.sections)) continue;
-    const keep = m.sections.filter((s) => !NON_CONTENT_COMPONENTS.has(s.component_id));
-    if (keep.length === m.sections.length) continue;
-    m.sections = keep;
+    const { out, changed } = cleanSections(m.sections);
+    if (!changed) continue;
+    m.sections = out;
     fs.writeFileSync(fp, JSON.stringify(m, null, 2));
     n++;
   }
-  if (n) console.log(`[crawl] 컨텐츠 아닌 컴포넌트(${[...NON_CONTENT_COMPONENTS]}) 제외: ${n}개 제품`);
+  if (n) console.log(`[crawl] 컨텐츠 아닌 컴포넌트(${[...NON_CONTENT_COMPONENTS, ...ACCESSORY_COMPONENTS]}) 정리: ${n}개 제품`);
   return n;
 }
 

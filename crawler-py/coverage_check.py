@@ -24,7 +24,7 @@ _ID_RE = re.compile(r"\b(ST|PD|CM|PR|PN|GN|AL|CS)\d{4}\b")
 SKIP_PREFIX = ("CM", "GN", "AL", "PN", "CS")
 SKIP_IDS = {"PD0001", "PD0002", "PD0004", "PD0006", "PD0044", "PD0056", "PD0012", "PD0033", "ST0010",
             "ST0025", "ST0049", "PD0050",   # ST0025·ST0049·PD0050 = FAQ (하단 비컨텐츠 영역 — 크롤 제외 원칙)
-            "PD0016"}   # PD0016 = 구매처(Where to buy: 매장 찾기·온라인 판매처) — 제품 썸네일이 들어 있지만 컨텐츠가 아님 (2026-11-23, TH FB1209D5M)
+            "PD0016", "PD0022"}   # PD0022 = 추천 상품·액세서리 제목(2026-11-26, 컨텐츠 아님) · PD0016 = 구매처(Where to buy: 매장 찾기·온라인 판매처) — 제품 썸네일이 들어 있지만 컨텐츠가 아님 (2026-11-23, TH FB1209D5M)
 _TEXT_TAGS = ("h1", "h2", "h3", "h4", "h5", "p", "li")
 _UI_RE = re.compile(r"(^|[-_\s])(button|cta|sr-only|blind|visually-hidden|tablist|pagination|indicator)", re.I)
 _ICON_RE = re.compile(r"\.svg($|\?)|/icon|[-_]icon[-_.]|[-_](on|off)\.(png|jpe?g)", re.I)
