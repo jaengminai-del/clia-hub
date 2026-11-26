@@ -405,10 +405,10 @@ button.eb { cursor: pointer; }
 .ck-r.ck-wait { color: var(--clia-gray-400); }
 .ck-r em { flex: none; width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-style: normal; }
 .ck-r.ck-wait em { border: 1.5px solid var(--clia-gray-300); }
-.ck-r.ck-run em, .ck-run::before { border: 2px solid var(--clia-gray-200); border-top-color: var(--clia-gray-900); animation: ckspin .7s linear infinite; }
+.ck-r.ck-run em, .ck-redo::before { border: 2px solid var(--clia-gray-200); border-top-color: var(--clia-gray-900); animation: ckspin .7s linear infinite; }
 .ck-r.ck-ok em { background: #E7F4EC; color: var(--ok); } .ck-r.ck-no em { background: #FDECEB; color: var(--bad); } .ck-r.ck-no { color: var(--bad); }
 .ck-r em svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
-.ck-run { display: flex; align-items: center; gap: 10px; color: var(--clia-gray-700); font-size: 14px; } .ck-run::before { content: ''; width: 14px; height: 14px; border-radius: 50%; }
+.ck-redo { display: flex; align-items: center; gap: 10px; color: var(--clia-gray-700); font-size: 14px; } .ck-redo::before { content: ''; width: 14px; height: 14px; border-radius: 50%; }
 @keyframes ckspin { to { transform: rotate(360deg); } }
 .ck-go { margin-top: 30px; display: flex; align-items: center; gap: 12px; }
 .ck-go .clia-btn.primary:focus-visible, .ck-go .clia-btn.primary:focus { outline: 3px solid rgba(253, 49, 46, .28); outline-offset: 2px; }

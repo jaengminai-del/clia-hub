@@ -135,7 +135,7 @@
       <div class="ck-b"><div class="ck-phone"><div class="ck-sc" id="ckSc">${pv}</div></div>
       <div class="ck-side"><h2>${e(it.model || '')}</h2><div class="ck-tt" lang="th">${e(it.title || '')}</div>
       <div class="ck-ai"><div class="ck-h">${e(T.ai)}</div><div id="ckAi"></div></div><div id="ckGo"></div></div></div>`;
-    if (u.some((x) => x.status === 'working')) { document.getElementById('ckAi').innerHTML = `<div class="ck-run">${e(T.redoing)}</div>`; return waitRedo(core, u); }
+    if (u.some((x) => x.status === 'working')) { document.getElementById('ckAi').innerHTML = `<div class="ck-redo">${e(T.redoing)}</div>`; return waitRedo(core, u); }
     // AI 체크: 미리 계산한 결과를 1초 남짓 동안 한 줄씩
     const rows = aiRows(u), box = document.getElementById('ckAi');
     box.innerHTML = rows.map((x, i) => `<div class="ck-r ck-wait" data-i="${i}"><em></em><span>${e(label(x))}</span>${x.k === 'n12' && x.all > x.used ? `<small>${e(T.used(x.used, x.all))}</small>` : ''}</div>`).join('');
