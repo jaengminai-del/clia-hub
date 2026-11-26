@@ -422,16 +422,15 @@ button.eb { cursor: pointer; }
 .ck-sact { position: absolute; inset-inline-end: 20px; top: 0; bottom: 0; display: flex; align-items: center; gap: 10px; }
 .ck-bsum { font-size: 13px; color: var(--clia-gray-700); white-space: nowrap; } .ck-bsum b { color: var(--ok); } .ck-bsum em { font-style: normal; color: var(--bad); }
 .ck-sact .clia-btn.primary { height: 30px; padding: 0 16px; font-size: 13px; border-radius: 999px; }
-.ck-sact .clia-btn.primary, .ck-sact .ck-kbd { opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; }
-.ck-sact.on .clia-btn.primary, .ck-sact.on .ck-kbd { opacity: 1; pointer-events: auto; }
+.ck-sact .clia-btn.primary { opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; }
+.ck-sact.on .clia-btn.primary { opacity: 1; pointer-events: auto; }
 .ck-sact .clia-btn.primary:focus { outline: 3px solid rgba(253,49,46,.28); outline-offset: 2px; }
-@media (max-width: 900px) { .ck-sact .ck-bsum, .ck-sact .ck-kbd { display: none; } }
+@media (max-width: 900px) { .ck-sact .ck-bsum { display: none; } }
 #ckGo { padding: 0 20px; max-width: 1240px; margin: 0 auto; width: 100%; } #ckGo .ck-why { margin: 0 0 12px; }
 .ck-redo { display: flex; align-items: center; gap: 10px; color: var(--clia-gray-700); font-size: 14px; }
 @media (max-width: 900px) { .ck-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: auto; } .ck-bph { min-height: 320px; } }
 @media (prefers-reduced-motion: reduce) { .ck-bc, .ck-bdg { animation: none; transition: none; } }
 @keyframes ckspin { to { transform: rotate(360deg); } }
-.ck-kbd { font-size: 12px; color: var(--muted); } .ck-kbd b { display: inline-block; border: 1px solid var(--clia-gray-300); border-bottom-width: 2px; border-radius: 5px; padding: 0 6px; font-weight: 500; color: var(--clia-gray-700); font-size: 11px; line-height: 18px; }
 .ck-why { margin-top: 26px; padding: 12px 14px; border-radius: 10px; background: #FDF1F0; color: var(--bad); font-size: 13px; line-height: 1.5; }
 .ck-done { text-align: center; padding: 56px 24px; } .ck-ic { width: 56px; height: 56px; border-radius: 50%; background: #E7F4EC; color: var(--ok); display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; }
 .ck-ic svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }

@@ -186,7 +186,7 @@
       <div class="ck-grid" id="ckGrid">${batch.map((u, i) => cardHtml(core, u, i)).join('')}</div>
       <div id="ckGo"></div>`;
     // 확인 버튼은 단계 줄(Attach › … › Download) 오른쪽 끝 — 다른 화면으로 가면 frame() 이 단계 줄을 다시 그려 사라짐
-    document.getElementById('ckSteps').insertAdjacentHTML('beforeend', `<div class="ck-sact" id="ckAct"><span class="ck-bsum" id="ckSum">${e(T.checkingN(batch.length))}</span><span class="ck-kbd"><b>Enter</b></span><button class="clia-btn primary" id="ckNext" type="button"></button></div>`);
+    document.getElementById('ckSteps').insertAdjacentHTML('beforeend', `<div class="ck-sact" id="ckAct"><span class="ck-bsum" id="ckSum">${e(T.checkingN(batch.length))}</span><button class="clia-btn primary" id="ckNext" type="button"></button></div>`);
     prefetch(left.slice(BATCH, BATCH * 2));
     const cards = [...document.querySelectorAll('#ckGrid .ck-bc')];
     cards.forEach((c, i) => c.querySelectorAll('[data-a]').forEach((b) => { b.onclick = () => act(core, batch[i].map((x) => x.row), b.dataset.a, b); }));
