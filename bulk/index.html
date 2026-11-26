@@ -396,10 +396,10 @@ button.eb { cursor: pointer; }
 .ck-p .ck-bar { flex: 1; margin: 0; } .ck-p .ck-c { font-size: 13px; color: var(--clia-gray-700); font-variant-numeric: tabular-nums; min-width: 64px; text-align: right; }
 .ck-p { max-width: 1240px; padding: 14px 20px 0; }
 /* 한 번에 6개 — 카드 = 작은 상품 페이지(bulk-market, 반 크기) · 점(체크 하나 = 점 하나) · 한 줄 상태. 움직임은 transform 만 */
-.ck-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; padding: 16px 20px 10px; max-width: 1240px; width: 100%; margin: 0 auto; }
-.ck-bc { display: flex; flex-direction: column; min-width: 0; min-height: 0; transition: transform .45s cubic-bezier(.4,0,.2,1), opacity .35s; animation: ckin .45s cubic-bezier(.2,.8,.2,1) both; }
-@keyframes ckin { from { transform: translateX(60px); opacity: 0; } }
-.ck-bc.ck-out { transform: translateY(-120px) scale(.6); opacity: 0; }
+.ck-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; padding: 12px 20px 20px; max-width: 1240px; width: 100%; margin: 0 auto; }
+/* 모션: HyperFrames motion.md 규칙 — 도착은 긴 꼬리(expo.out) + 살짝 블러, 나갈 땐 더 짧게 가속(power3.in), 바운스 없음 */
+.ck-bc { display: flex; flex-direction: column; min-width: 0; min-height: 0; animation: ckin .62s cubic-bezier(.16,1,.3,1) both; }
+@keyframes ckin { from { transform: translateY(16px) scale(.985); opacity: 0; filter: blur(6px); } }
 .ck-bph { position: relative; flex: 1; min-height: 0; border: 1px solid var(--line); border-radius: 14px; background: #fff; overflow: hidden; transition: border-color .25s, box-shadow .25s; }
 .ck-bsc { position: absolute; inset: 0; overflow-y: auto; scrollbar-width: none; } .ck-bsc::-webkit-scrollbar { display: none; }
 .ck-mv { will-change: transform; } .ck-mv .cm { zoom: .5; } .ck-imgs img { display: block; width: 100%; height: auto; }
@@ -407,9 +407,9 @@ button.eb { cursor: pointer; }
 @keyframes cksh { to { background-position: -200% 0; } }
 .ck-scan { position: absolute; left: 0; right: 0; top: 46%; height: 40px; pointer-events: none; opacity: 0; transition: opacity .2s; z-index: 2; background: linear-gradient(to bottom, rgba(30,127,79,0), rgba(30,127,79,.12) 50%, rgba(30,127,79,0)); }
 .ck-scan::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 2px; background: #1E7F4F; box-shadow: 0 0 10px rgba(30,127,79,.7); } .ck-scan.on { opacity: 1; }
-.ck-bdg { position: absolute; right: 8px; top: 8px; width: 30px; height: 30px; border-radius: 50%; background: #1E7F4F; color: #fff; display: flex; align-items: center; justify-content: center; z-index: 3; transform: scale(0); transition: transform .3s cubic-bezier(.3,1.6,.5,1); }
+.ck-bdg { position: absolute; right: 8px; top: 8px; width: 30px; height: 30px; border-radius: 50%; background: #1E7F4F; color: #fff; display: flex; align-items: center; justify-content: center; z-index: 3; transform: scale(.5); opacity: 0; transition: transform .5s cubic-bezier(.16,1,.3,1), opacity .2s; }
 .ck-bdg svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
-.ck-bc.ck-pass .ck-bdg { transform: scale(1); } .ck-bc.ck-pass .ck-bph { border-color: #B9DEC8; }
+.ck-bc.ck-pass .ck-bdg { transform: scale(1); opacity: 1; } .ck-bc.ck-pass .ck-bph { border-color: #B9DEC8; }
 .ck-bc.ck-fail .ck-bph { border-color: var(--bad); box-shadow: 0 0 0 3px rgba(200,36,31,.15); }
 .ck-bmeta { padding: 8px 2px 0; } .ck-bmo { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ck-bdots { display: flex; gap: 5px; margin-top: 6px; } .ck-bdots i { width: 8px; height: 8px; border-radius: 50%; background: var(--clia-gray-200); transition: background .2s, transform .2s; }
@@ -418,17 +418,25 @@ button.eb { cursor: pointer; }
 .ck-bst { margin-top: 5px; font-size: 12px; color: var(--muted); min-height: 16px; line-height: 1.35; } .ck-bc.ck-fail .ck-bst { color: var(--bad); }
 .ck-bc.ck-busy .ck-bst::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: -1px; border-radius: 50%; border: 2px solid var(--clia-gray-200); border-top-color: var(--clia-gray-900); animation: ckspin .7s linear infinite; }
 .ck-bfx { display: none; gap: 6px; margin-top: 6px; flex-wrap: wrap; } .ck-bc.ck-fail .ck-bfx { display: flex; } .ck-bfx .clia-btn { height: 28px; padding: 0 10px; font-size: 12px; }
-.ck-bact { flex: none; display: flex; align-items: center; gap: 14px; padding: 8px 20px 18px; min-height: 70px; max-width: 1240px; width: 100%; margin: 0 auto; }
-.ck-bsum { font-size: 14px; color: var(--clia-gray-700); } .ck-bsum b { color: var(--ok); } .ck-bsum em { font-style: normal; color: var(--bad); } .ck-gap { flex: 1; }
-.ck-bact .clia-btn.primary, .ck-bact .ck-kbd { opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; }
-.ck-bact.on .clia-btn.primary, .ck-bact.on .ck-kbd { opacity: 1; pointer-events: auto; }
-.ck-bact .clia-btn.primary:focus { outline: 3px solid rgba(253,49,46,.28); outline-offset: 2px; }
+.ck-steps { position: relative; }
+.ck-sact { position: absolute; inset-inline-end: 20px; top: 0; bottom: 0; display: flex; align-items: center; gap: 10px; }
+.ck-csum { flex: none; text-align: center; padding: 14px 20px 0; min-height: 52px; font-size: 15px; line-height: 44px; color: var(--clia-gray-500); }
+.ck-seg { position: relative; display: inline-flex; gap: 2px; padding: 4px; border-radius: 999px; background: var(--clia-gray-100); border: 1px solid var(--clia-gray-200); line-height: normal; vertical-align: middle; }
+.ck-seg button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; border-radius: 999px; font-size: 15px; font-weight: 600; color: var(--clia-gray-500); transition: background .2s, color .2s, box-shadow .2s; }
+.ck-seg button b { font-size: 13px; font-weight: 700; min-width: 22px; height: 22px; padding: 0 6px; box-sizing: border-box; border-radius: 11px; display: inline-flex; align-items: center; justify-content: center; color: inherit; }
+.ck-seg button { position: relative; z-index: 1; } .ck-seg button.on { color: var(--clia-gray-900); } .ck-seg button.on b { background: var(--clia-gray-100); }
+.ck-pill { position: absolute; top: 4px; bottom: 4px; left: 0; border-radius: 999px; background: #fff; box-shadow: 0 1px 2px rgba(38,38,38,.08), 0 2px 8px rgba(38,38,38,.06); transition: transform .3s cubic-bezier(.33,1,.68,1), width .3s cubic-bezier(.33,1,.68,1); }
+.ck-seg button:focus-visible { outline: 2px solid var(--clia-gray-900); outline-offset: 1px; }
+.ck-sd { width: 7px; height: 7px; border-radius: 50%; background: var(--clia-heritage); }
+.ck-sact .clia-btn.primary { height: 30px; padding: 0 16px; font-size: 13px; border-radius: 999px; }
+.ck-sact .clia-btn.primary { opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; }
+.ck-sact.on .clia-btn.primary { opacity: 1; pointer-events: auto; }
+.ck-sact .clia-btn.primary:focus { outline: 3px solid rgba(253,49,46,.28); outline-offset: 2px; }
 #ckGo { padding: 0 20px; max-width: 1240px; margin: 0 auto; width: 100%; } #ckGo .ck-why { margin: 0 0 12px; }
 .ck-redo { display: flex; align-items: center; gap: 10px; color: var(--clia-gray-700); font-size: 14px; }
 @media (max-width: 900px) { .ck-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: auto; } .ck-bph { min-height: 320px; } }
-@media (prefers-reduced-motion: reduce) { .ck-bc, .ck-bdg { animation: none; transition: none; } }
+@media (prefers-reduced-motion: reduce) { .ck-bc, .ck-bdg, .ck-pill { animation: none; transition: none; } }
 @keyframes ckspin { to { transform: rotate(360deg); } }
-.ck-kbd { font-size: 12px; color: var(--muted); } .ck-kbd b { display: inline-block; border: 1px solid var(--clia-gray-300); border-bottom-width: 2px; border-radius: 5px; padding: 0 6px; font-weight: 500; color: var(--clia-gray-700); font-size: 11px; line-height: 18px; }
 .ck-why { margin-top: 26px; padding: 12px 14px; border-radius: 10px; background: #FDF1F0; color: var(--bad); font-size: 13px; line-height: 1.5; }
 .ck-done { text-align: center; padding: 56px 24px; } .ck-ic { width: 56px; height: 56px; border-radius: 50%; background: #E7F4EC; color: var(--ok); display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; }
 .ck-ic svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }

@@ -8,35 +8,35 @@
    bulk.js 가 매칭(setData)까지 하고 BulkCheck.begin(core) 로 넘긴다. 기존 벌크 흐름은 그대로. */
 (function () {
   const TX = {
-    en: { wait: 'Waiting', checking: 'Checking…', passed: 'Passed', checkingN: (n) => `AI is checking ${n} products…`, passedN: (n) => `${n} passed`, lookN: (n) => `${n} need${n === 1 ? 's' : ''} a look`, confirmN: (n) => `Confirm ${n} & next →`, steps: ['Attach', 'Prepare', 'Check', 'Download'], rows: (n) => `${n} rows`, prep: (a, b) => `Preparing ${a} / ${b}`, liveP: 'live products',
+    en: { wait: 'Waiting', checking: 'Checking…', passed: 'Ready', checkingN: (n) => `AI is checking ${n} products…`, fAll: 'All', fReady: 'Ready', fReview: 'Needs review', confirm: 'Confirm', steps: ['Attach', 'Prepare', 'Check', 'Download'], rows: (n) => `${n} rows`, prep: (a, b) => `Preparing ${a} / ${b}`, liveP: 'live products',
       skip: (n) => `${n} not live — skipped`, view: 'View', hide: 'Hide', asOf: (d) => `Live list as of ${d}`, byStatus: 'From the Status column',
       skipRows: (n) => `${n} rows in the Excel — left as they are`, notLive: 'Not live', unknown: 'Unknown', none: 'No live products in this file.',
       ai: 'AI check', c_img: 'All images loaded', c_txt: 'Same text as lg.com', c_sum: 'Summary included', c_n12: 'Shopee: 12 images or fewer', c_spec: 'Spec table included',
       used: (u, a) => `${u} of ${a} images used`, w_img: (n) => `${n} image${n === 1 ? '' : 's'} didn't load`, w_txt: (n) => `${n} lg.com lines missing`, w_sum: "Summary couldn't be made",
       w_spec: 'No spec table', w_fail: "Couldn't prepare", w_retried: 'still there after a retry', next: 'Confirm & next →', redo: 'Prepare again', remove: 'Remove from this Excel',
       redoing: 'Preparing again', doneT: (n) => `${n} checked`, removed: (n) => `${n} removed`, skipped: (n) => `${n} not live skipped`, dl: 'Download Excel', err: 'Something went wrong: ' },
-    th: { wait: 'รอ', checking: 'กำลังตรวจ…', passed: 'ผ่าน', checkingN: (n) => `AI กำลังตรวจ ${n} รายการ…`, passedN: (n) => `ผ่าน ${n}`, lookN: (n) => `ต้องดู ${n}`, confirmN: (n) => `ยืนยัน ${n} และถัดไป →`, steps: ['แนบไฟล์', 'เตรียม', 'ตรวจ', 'ดาวน์โหลด'], rows: (n) => `${n} แถว`, prep: (a, b) => `กำลังเตรียม ${a} / ${b}`, liveP: 'สินค้าที่ไลฟ์',
+    th: { wait: 'รอ', checking: 'กำลังตรวจ…', passed: 'พร้อม', checkingN: (n) => `AI กำลังตรวจ ${n} รายการ…`, fAll: 'ทั้งหมด', fReady: 'พร้อม', fReview: 'ต้องตรวจสอบ', confirm: 'ยืนยัน', steps: ['แนบไฟล์', 'เตรียม', 'ตรวจ', 'ดาวน์โหลด'], rows: (n) => `${n} แถว`, prep: (a, b) => `กำลังเตรียม ${a} / ${b}`, liveP: 'สินค้าที่ไลฟ์',
       skip: (n) => `ไม่ได้ไลฟ์ ${n} รายการ — ข้ามไป`, view: 'ดู', hide: 'ซ่อน', asOf: (d) => `รายการไลฟ์ ณ ${d}`, byStatus: 'จากคอลัมน์ Status',
       skipRows: (n) => `${n} แถวใน Excel — คงไว้ตามเดิม`, notLive: 'ไม่ได้ไลฟ์', unknown: 'ไม่ทราบ', none: 'ไม่มีสินค้าที่ไลฟ์ในไฟล์นี้',
       ai: 'AI ตรวจ', c_img: 'โหลดรูปครบ', c_txt: 'ข้อความตรงกับ lg.com', c_sum: 'มีสรุปสินค้า', c_n12: 'Shopee: ไม่เกิน 12 รูป', c_spec: 'มีตารางสเปก',
       used: (u, a) => `ใช้ ${u} จาก ${a} รูป`, w_img: (n) => `โหลดรูปไม่ได้ ${n} รูป`, w_txt: (n) => `ข้อความจาก lg.com ขาด ${n} บรรทัด`, w_sum: 'สร้างสรุปไม่ได้',
       w_spec: 'ไม่มีตารางสเปก', w_fail: 'เตรียมไม่สำเร็จ', w_retried: 'ลองใหม่แล้วยังเหมือนเดิม', next: 'ยืนยันและถัดไป →', redo: 'เตรียมใหม่', remove: 'นำออกจาก Excel นี้',
       redoing: 'กำลังเตรียมใหม่', doneT: (n) => `ตรวจแล้ว ${n} รายการ`, removed: (n) => `นำออก ${n}`, skipped: (n) => `ข้ามที่ไม่ได้ไลฟ์ ${n}`, dl: 'ดาวน์โหลด Excel', err: 'เกิดข้อผิดพลาด: ' },
-    ko: { wait: '대기', checking: '확인 중…', passed: '통과', checkingN: (n) => `AI가 ${n}개 확인 중…`, passedN: (n) => `${n}개 통과`, lookN: (n) => `${n}개 확인 필요`, confirmN: (n) => `${n}개 확인하고 다음 →`, steps: ['첨부', '준비', 'Check', '받기'], rows: (n) => `${n}행`, prep: (a, b) => `준비 중 ${a} / ${b}`, liveP: '라이브 제품',
+    ko: { wait: '대기', checking: '확인 중…', passed: '준비됨', checkingN: (n) => `AI가 ${n}개 확인 중…`, fAll: '전체', fReady: '준비됨', fReview: '검토 필요', confirm: '확인', steps: ['첨부', '준비', 'Check', '받기'], rows: (n) => `${n}행`, prep: (a, b) => `준비 중 ${a} / ${b}`, liveP: '라이브 제품',
       skip: (n) => `라이브 아님 ${n}개 — 건너뜀`, view: '보기', hide: '닫기', asOf: (d) => `라이브 목록 기준일 ${d}`, byStatus: 'Status 칸 기준',
       skipRows: (n) => `엑셀 ${n}행 — 원래 내용 그대로`, notLive: '라이브 아님', unknown: '모름', none: '이 파일에 라이브 제품이 없어요.',
       ai: 'AI 체크', c_img: '이미지 다 불러옴', c_txt: 'lg.com 문구와 같음', c_sum: '요약 들어감', c_n12: 'Shopee 12장 이하', c_spec: '스펙표 들어감',
       used: (u, a) => `${a}장 중 ${u}장 사용`, w_img: (n) => `이미지 ${n}장 못 불러옴`, w_txt: (n) => `lg.com 문구 ${n}줄 빠짐`, w_sum: '요약을 못 만듦',
       w_spec: '스펙표 없음', w_fail: '준비 못 함', w_retried: '다시 해도 그대로', next: '확인하고 다음 →', redo: '다시 준비', remove: '이번 엑셀에서 빼기',
       redoing: '다시 준비하는 중', doneT: (n) => `${n}개 확인 완료`, removed: (n) => `${n}개 뺌`, skipped: (n) => `라이브 아님 ${n}개 건너뜀`, dl: '엑셀 받기', err: '문제가 생겼어요: ' },
-    de: { wait: 'Wartet', checking: 'Prüft…', passed: 'Bestanden', checkingN: (n) => `KI prüft ${n} Produkte…`, passedN: (n) => `${n} bestanden`, lookN: (n) => `${n} ansehen`, confirmN: (n) => `${n} bestätigen & weiter →`, steps: ['Anhängen', 'Vorbereiten', 'Prüfen', 'Herunterladen'], rows: (n) => `${n} Zeilen`, prep: (a, b) => `Vorbereitung ${a} / ${b}`, liveP: 'Live-Produkte',
+    de: { wait: 'Wartet', checking: 'Prüft…', passed: 'Bereit', checkingN: (n) => `KI prüft ${n} Produkte…`, fAll: 'Alle', fReady: 'Bereit', fReview: 'Zu prüfen', confirm: 'Bestätigen', steps: ['Anhängen', 'Vorbereiten', 'Prüfen', 'Herunterladen'], rows: (n) => `${n} Zeilen`, prep: (a, b) => `Vorbereitung ${a} / ${b}`, liveP: 'Live-Produkte',
       skip: (n) => `${n} nicht live — übersprungen`, view: 'Ansehen', hide: 'Ausblenden', asOf: (d) => `Live-Liste vom ${d}`, byStatus: 'Aus der Spalte Status',
       skipRows: (n) => `${n} Zeilen in der Excel — bleiben unverändert`, notLive: 'Nicht live', unknown: 'Unbekannt', none: 'Keine Live-Produkte in dieser Datei.',
       ai: 'KI-Prüfung', c_img: 'Alle Bilder geladen', c_txt: 'Gleicher Text wie lg.com', c_sum: 'Zusammenfassung enthalten', c_n12: 'Shopee: höchstens 12 Bilder', c_spec: 'Datenblatt enthalten',
       used: (u, a) => `${u} von ${a} Bildern verwendet`, w_img: (n) => `${n} Bild(er) nicht geladen`, w_txt: (n) => `${n} Zeilen von lg.com fehlen`, w_sum: 'Zusammenfassung fehlgeschlagen',
       w_spec: 'Kein Datenblatt', w_fail: 'Vorbereitung fehlgeschlagen', w_retried: 'auch nach erneutem Versuch', next: 'Bestätigen & weiter →', redo: 'Neu vorbereiten', remove: 'Aus dieser Excel entfernen',
       redoing: 'Wird neu vorbereitet', doneT: (n) => `${n} geprüft`, removed: (n) => `${n} entfernt`, skipped: (n) => `${n} nicht live übersprungen`, dl: 'Excel herunterladen', err: 'Fehler: ' },
-    ar: { wait: 'بانتظار', checking: 'جارٍ الفحص…', passed: 'ناجح', checkingN: (n) => `الذكاء الاصطناعي يفحص ${n} منتجات…`, passedN: (n) => `${n} ناجح`, lookN: (n) => `${n} يحتاج مراجعة`, confirmN: (n) => `تأكيد ${n} والتالي ←`, steps: ['إرفاق', 'تجهيز', 'تحقق', 'تنزيل'], rows: (n) => `${n} صف`, prep: (a, b) => `جارٍ التجهيز ${a} / ${b}`, liveP: 'منتجات نشطة',
+    ar: { wait: 'بانتظار', checking: 'جارٍ الفحص…', passed: 'جاهز', checkingN: (n) => `الذكاء الاصطناعي يفحص ${n} منتجات…`, fAll: 'الكل', fReady: 'جاهز', fReview: 'بحاجة إلى مراجعة', confirm: 'تأكيد', steps: ['إرفاق', 'تجهيز', 'تحقق', 'تنزيل'], rows: (n) => `${n} صف`, prep: (a, b) => `جارٍ التجهيز ${a} / ${b}`, liveP: 'منتجات نشطة',
       skip: (n) => `${n} غير نشط — تم تخطيه`, view: 'عرض', hide: 'إخفاء', asOf: (d) => `قائمة النشط بتاريخ ${d}`, byStatus: 'من عمود Status',
       skipRows: (n) => `${n} صف في Excel — يبقى كما هو`, notLive: 'غير نشط', unknown: 'غير معروف', none: 'لا توجد منتجات نشطة في هذا الملف.',
       ai: 'فحص الذكاء الاصطناعي', c_img: 'تم تحميل كل الصور', c_txt: 'نفس نص lg.com', c_sum: 'الملخص مضمّن', c_n12: 'Shopee: ‏12 صورة أو أقل', c_spec: 'جدول المواصفات مضمّن',
@@ -182,10 +182,13 @@
     if (!left.length) return doneView(core);
     const batch = left.slice(0, BATCH), doneN = us.length - left.length;
     const el = frame(core, 2);
+    flyOff();   // 확인한 카드는 화면 위에서 마저 사라지고, 그동안 다음 묶음이 들어옴 (겹침)
     el.innerHTML = `<div class="ck-p"><div class="ck-bar"><i style="width:${doneN / us.length * 100}%"></i></div><span class="ck-c">${doneN} / ${us.length}</span></div>
+      <div class="ck-csum" id="ckSum">${e(T.checkingN(batch.length))}</div>
       <div class="ck-grid" id="ckGrid">${batch.map((u, i) => cardHtml(core, u, i)).join('')}</div>
-      <div class="ck-bact" id="ckAct"><span class="ck-bsum" id="ckSum">${e(T.checkingN(batch.length))}</span><span class="ck-gap"></span><span class="ck-kbd"><b>Enter</b></span><button class="clia-btn primary big" id="ckNext" type="button"></button></div>
       <div id="ckGo"></div>`;
+    // 확인 버튼은 단계 줄(Attach › … › Download) 오른쪽 끝 — 다른 화면으로 가면 frame() 이 단계 줄을 다시 그려 사라짐
+    document.getElementById('ckSteps').insertAdjacentHTML('beforeend', `<div class="ck-sact" id="ckAct"><button class="clia-btn primary" id="ckNext" type="button"></button></div>`);
     prefetch(left.slice(BATCH, BATCH * 2));
     const cards = [...document.querySelectorAll('#ckGrid .ck-bc')];
     cards.forEach((c, i) => c.querySelectorAll('[data-a]').forEach((b) => { b.onclick = () => act(core, batch[i].map((x) => x.row), b.dataset.a, b); }));
@@ -193,17 +196,56 @@
     await Promise.all(cards.map((c, i) => (seen.has(ukey(batch[i])) ? ready(c).then(() => finalState(c, batch[i])) : scan(c, batch[i], i * 90).then(() => seen.add(ukey(batch[i]))))));
     if (C.view !== view) return;   // 그사이 다시 그렸음
     const pass = batch.filter((u) => !u.some((x) => x.status === 'working') && aiRows(u).every((x) => x.ok)), bad = batch.length - pass.length;
-    document.getElementById('ckSum').innerHTML = [pass.length ? `<b>${e(T.passedN(pass.length))}</b>` : '', bad ? `<em>${e(T.lookN(bad))}</em>` : ''].filter(Boolean).join(' · ');
+    // 화면 가운데: 전체 · 준비됨 · 검토 필요 — 누르면 그 카드만 보임 (확인은 보이는 것과 상관없이 준비된 것 모두)
+    const kinds = cards.map((c, i) => (pass.includes(batch[i]) ? 'ready' : 'review'));
+    const segs = [['all', T.fAll, cards.length], ['ready', T.fReady, pass.length], ['review', T.fReview, bad]].filter((x) => x[0] === 'all' || x[2]);   // 0개인 칸은 숨김
+    if (!segs.some((x) => x[0] === C.filter)) C.filter = 'all';
+    const sum = document.getElementById('ckSum');
+    sum.innerHTML = `<div class="ck-seg" role="tablist"><i class="ck-pill"></i>${segs.map(([k, label, n]) => `<button type="button" role="tab" data-f="${k}">${k === 'review' ? '<span class="ck-sd"></span>' : ''}${e(label)}<b>${n}</b></button>`).join('')}</div>`;
+    let swap = 0;
+    const setF = async (f, anim) => {
+      C.filter = f; const my = ++swap;
+      const btns = [...sum.querySelectorAll('[data-f]')], on = btns.find((b) => b.dataset.f === f), pill = sum.querySelector('.ck-pill');
+      btns.forEach((b) => { b.classList.toggle('on', b === on); b.setAttribute('aria-selected', b === on); });
+      if (!anim) pill.style.transition = 'none';
+      pill.style.width = on.offsetWidth + 'px'; pill.style.transform = `translateX(${on.offsetLeft}px)`;   // 흰 알약이 미끄러져 옮겨감 (power3.out 0.3s)
+      if (!anim) { void pill.offsetWidth; pill.style.transition = ''; }
+      const want = cards.map((c, i) => f === 'all' || kinds[i] === f);
+      if (!anim || reduced()) { cards.forEach((c, i) => { c.style.display = want[i] ? '' : 'none'; }); return; }
+      // 같은 무대에서 블러 스왑: 빠질 카드는 0.15s 블러로 사라지고 → 남는 카드는 새 자리로 미끄러지고(FLIP) → 새로 보일 카드는 블러에서 또렷하게
+      const out = cards.filter((c, i) => !want[i] && c.style.display !== 'none');
+      await Promise.all(out.map((c) => c.animate([{ opacity: 1, filter: 'blur(0px)' }, { opacity: 0, filter: 'blur(8px)', transform: 'scale(.98)' }], { duration: 150, easing: 'cubic-bezier(.32,0,.67,0)' }).finished.catch(() => {})));
+      if (my !== swap) return;
+      const stay = cards.filter((c, i) => want[i] && c.style.display !== 'none'), before = stay.map((c) => c.getBoundingClientRect());
+      cards.forEach((c, i) => { c.style.display = want[i] ? '' : 'none'; });
+      stay.forEach((c, i) => { const a = before[i], b = c.getBoundingClientRect(), dx = a.left - b.left, dy = a.top - b.top; if (dx || dy) c.animate([{ transform: `translate(${dx}px,${dy}px)` }, { transform: 'none' }], { duration: 340, easing: 'cubic-bezier(.33,1,.68,1)' }); });
+      cards.filter((c, i) => want[i] && !stay.includes(c)).forEach((c, i) => c.animate([{ opacity: 0, filter: 'blur(6px)', transform: 'translateY(8px)' }, { opacity: 1, filter: 'blur(0px)', transform: 'none' }], { duration: 380, delay: i * 50, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' }));
+    };
+    sum.querySelectorAll('[data-f]').forEach((b) => { b.onclick = () => { if (b.dataset.f !== C.filter) setF(b.dataset.f, true); if (pass.length) document.getElementById('ckNext').focus(); }; });   // Enter 는 계속 확인
+    setF(C.filter || 'all', false);
     if (batch.some((u) => u.some((x) => x.status === 'working'))) waitRedo(core, batch.filter((u) => u.some((x) => x.status === 'working')));
     if (!pass.length) return;
-    const go = document.getElementById('ckNext'); go.textContent = T.confirmN(pass.length);
+    const go = document.getElementById('ckNext'); go.textContent = T.confirm;
     document.getElementById('ckAct').classList.add('on'); go.focus();
     go.onclick = async () => {
-      go.disabled = true;
+      go.disabled = true; C.filter = 'all';   // 다음 묶음은 전체부터
       const rows = pass.flatMap((u) => u.map((x) => x.row));
-      cards.filter((c) => c.classList.contains('ck-pass')).forEach((c, i) => { c.style.transitionDelay = i * 50 + 'ms'; c.classList.add('ck-out'); });
-      await act(core, rows, 'ok', go, 450);
+      // 나가기: 들어올 때보다 짧게(0.3s) 가속하며 한 번에 — 블러 8px, 카드마다 35ms 차이
+      const leaving = cards.filter((c) => c.classList.contains('ck-pass') && c.style.display !== 'none');
+      const anims = reduced() ? [] : leaving.map((c, i) => { c.style.animation = 'none'; return c.animate([{ transform: 'none', opacity: 1, filter: 'blur(0px)' }, { transform: 'translateY(-28px) scale(.94)', opacity: 0, filter: 'blur(8px)' }], { duration: 300, delay: i * 35, easing: 'cubic-bezier(.32,0,.67,0)', fill: 'forwards' }); });
+      C.leaving = anims.length ? { grid: document.getElementById('ckGrid'), keep: leaving, anims } : null;
+      await act(core, rows, 'ok', go, anims.length ? 200 : 0);   // 첫 카드가 반쯤 사라졌을 때 다음 묶음 시작
     };
+  }
+  function flyOff() {   // 사라지는 중인 이전 묶음을 화면 위(고정 위치)로 옮겨 애니메이션을 끝까지 — 새 묶음과 겹침
+    const L = C.leaving; C.leaving = null;
+    if (!L || !L.grid || !L.grid.isConnected) return;
+    const r = L.grid.getBoundingClientRect(), g = L.grid;
+    g.removeAttribute('id');
+    [...g.children].forEach((c) => { if (!L.keep.includes(c)) c.style.visibility = 'hidden'; });
+    Object.assign(g.style, { position: 'fixed', left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px', margin: '0', pointerEvents: 'none', zIndex: 5 });
+    document.body.appendChild(g);
+    Promise.all(L.anims.map((a) => a.finished.catch(() => {}))).then(() => g.remove());
   }
   async function act(core, rows, action, btn, wait) {
     if (btn) btn.disabled = true;
@@ -215,6 +257,7 @@
       checkView(core);
     } catch (e) {   // 실패: 사라지던 카드를 되돌리고(다시 그림 — 이미 본 카드는 결과만) 아래에 이유 한 줄
       if (btn) btn.disabled = false;
+      C.leaving = null;
       const msg = C.T.err + e.message;
       await checkView(core);
       alertLine(core, msg);
