@@ -129,6 +129,7 @@ function countryOf(j) {
   return Object.keys(n).sort((a, b) => n[b] - n[a])[0] || '';
 }
 
+const units = (its) => { const m = new Map(); for (const it of its) { const k = it.bundle ? 'b:' + it.row : it.slug || it.url || 'r:' + it.row; if (!m.has(k)) m.set(k, []); m.get(k).push(it); } return [...m.values()]; };
 function jobView(j) {
   const done = j.status !== 'running' && j.status !== 'queued';
   // 동영상 수(장면 바꾸기 버튼)는 이 기능 전에 끝난 작업 기록에 없어서 다시 열 때 센다
@@ -145,7 +146,8 @@ function jobView(j) {
     notify: j.notify ? { email: !!j.notify.email, sent: !!j.notify.sent } : null,
     skus: j.skus || [], items: its, file: j.status === 'ready' ? `/api/v1/bulk/jobs/${j.id}/file` : null, fileName: j.outName, at: j.at, finishedAt: j.finishedAt,
     // 벌크 Check (?check=1): 라이브 아닌 것 건너뜀 수 · 확인 · 뺀 수
-    check: j.check ? { ...j.check, confirmed: its.filter((x) => x.check === 'ok').length, removed: its.filter((x) => x.check === 'removed').length } : null,
+    // 확인 · 뺀 수는 제품 기준 (같은 제품의 여러 행은 하나) — 진행 막대 · 건너뜀 수와 같은 단위
+    check: j.check ? { ...j.check, confirmed: units(its).filter((u) => u.every((x) => x.check === 'ok')).length, removed: units(its).filter((u) => u.every((x) => x.check === 'removed')).length } : null,
     // 검토·승인 (approvals.js): 승인 안 된 제품 수. gate 가 켜져 있으면 엑셀 받기가 잠긴다
     approval: done ? (() => { const a = require('./approvals'); const p = a.pendingOf(its); return { gate: a.gateOn(), pending: p.length, models: p.slice(0, 20).map((x) => x.model || x.slug) }; })() : null };
 }
@@ -247,6 +249,13 @@ function aiChecks(j, it, c) {
   return out;
 }
 const aiFail = (ai) => (ai || []).some((x) => !x.ok);
+// 상품 페이지 프리뷰(bulk/bulk-market.js)에 넣을 제목 · 갤러리 · 스펙 — 크롤 데이터에서 (묶음은 첫 구성품)
+function storeOf(it) {
+  const slug = it.bundle ? (it.bundle[0] || {}).slug : it.slug;
+  const m = readJson(path.join(OUT_DIR(), slug || '', 'mirror.json'));
+  const CM = require('./bulk/bulk-market.js');
+  return { title: (it.bundle ? it.bundleTitle : m && m.product_title) || it.title || it.model || '', gallery: m ? CM.galleryOf(m) : [], specs: m ? CM.specsOf(m) : [] };
+}
 // 고쳐질 수 있는 문제(이미지 · 글 누락)면 한 번 자동으로 다시: 마지막 크롤이 하루보다 오래됐으면 다시 크롤, 아니면 다시 그리기만.
 // (방금 크롤한 것은 다시 크롤해도 같다 — 크롤 비용만 든다)
 async function autoRetry(j, it, c) {
@@ -335,7 +344,7 @@ async function redo(j, it, same = []) {
     for (const x of [it, ...same]) {
       texts.set(x.row, c.text);
       Object.assign(x, { status: 'ok', error: '', images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: c.summaryErr || '',
-        imgs: c.urls || [], hash: c.hash || '', ai: aiChecks(j, x, c) });
+        imgs: c.urls || [], hash: c.hash || '', ai: aiChecks(j, x, c), store: storeOf(x) });
       x.flags = flagsFor(j, x, c);
     }
     await saveTexts(j, texts, true);
@@ -427,7 +436,7 @@ async function run(j) {
         stop();
         if (c.text.length > CELL_MAX) throw Object.assign(new Error(`too long for one Excel cell (${c.text.length} chars)`), { stage: 'content' });
         texts.set(it.row, c.text);
-        if (j.check) { Object.assign(it, { ai: aiChecks(j, it, c), imgs: c.urls || [], hash: c.hash || '' }); await saveTexts(j, texts, false); }
+        if (j.check) { Object.assign(it, { ai: aiChecks(j, it, c), imgs: c.urls || [], hash: c.hash || '', store: storeOf(it) }); await saveTexts(j, texts, false); }
         Object.assign(it, { status: 'ok', error: '', images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: '' });
         it.flags = flagsFor(j, it, c);
         it.videos = 0;
@@ -451,7 +460,7 @@ async function run(j) {
       if (!contentBy.has(it.slug)) contentBy.set(it.slug, contentSlot(() => { stop(); return contentFor(j.channel, it.url); }));
       let c = await contentBy.get(it.slug);
       stop();
-      if (j.check) { const r = await autoRetry(j, it, c); c = r.c; Object.assign(it, { ai: r.ai, imgs: c.urls || [], hash: c.hash || '' }); stop(); }
+      if (j.check) { const r = await autoRetry(j, it, c); c = r.c; Object.assign(it, { ai: r.ai, imgs: c.urls || [], hash: c.hash || '', store: storeOf(it) }); stop(); }
       if (c.text.length > CELL_MAX) throw Object.assign(new Error(`too long for one Excel cell (${c.text.length} chars)`), { stage: 'content' });
       texts.set(it.row, c.text);
       if (j.check) await saveTexts(j, texts, false);

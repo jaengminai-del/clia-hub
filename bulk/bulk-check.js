@@ -50,22 +50,18 @@
   const CK = '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>', XX = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>';
   let C = null;   // { core, T, job, units, idx, skip, el }
 
-  // 시장 상품 페이지 틀 (shared/clia-market — 있으면 씀, 없으면 이미지만)
-  function loadMarket() {
-    if (window.CliaMarket || document.getElementById('cm-css')) return;
-    const l = document.createElement('link'); l.id = 'cm-css'; l.rel = 'stylesheet'; l.href = '/shared/clia-market.css'; document.head.appendChild(l);
-    const s = document.createElement('script'); s.src = '/shared/clia-market.js'; s.onerror = () => {}; document.head.appendChild(s);
-  }
   async function liveList(corp) {
     const f = LIVE_LISTS[corp]; if (!f) return null;
-    try { const d = await (await fetch(f, { cache: 'no-cache' })).json(); return d && Array.isArray(d.live) ? { set: new Set(d.live.map((x) => liveKey(x.url || x))), asOf: d.asOf || d.updated || '' } : null; } catch (_) { return null; }
+    // 채널별: 항목의 on('Shopee only' · 'Lazada only' · 'Shopee+Lazada') — Shopee 엑셀이면 Shopee 에 라이브인 것만
+    try { const d = await (await fetch(f, { cache: 'no-cache' })).json(); return d && Array.isArray(d.live) ? { on: new Map(d.live.map((x) => [liveKey(x.url || x), String(x.on || '')])), asOf: d.asOf || d.updated || '' } : null; } catch (_) { return null; }
   }
-  const fmtDate = (s, L) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? (L === 'en' || L === 'de' ? `${+m[3]}/${+m[2]}` : `${m[2]}/${m[3]}`) : s; };
+  const fmtDate = (s) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? `${m[2]}/${m[3]}` : s; };   // 11/05
   const modelOf = (r) => (r.p && r.p.model) || String(r.parentSku || r.sku || '').split('.')[0] || String(r.name || '').slice(0, 40) || '—';
 
   // 행 → 라이브 판단: Status 칸 → 라이브 목록 → 모름
   function classify(core, list) {
     const { S, d } = core;
+    const ch = (S.channel || d.channel || 'shopee') === 'lazada' ? 'lazada' : 'shopee';
     const hasStatus = !!(d.cols && d.cols.status);
     const all = [...S.ok, ...S.reg, ...S.skip];
     const urls = (r) => (r.kind === 'bundle' ? r.p.parts.map((x) => x.url).filter(Boolean) : r.p && r.p.url ? [r.p.url] : []);
@@ -74,7 +70,7 @@
       const isProduct = r.kind === 'clia' || r.kind === 'new' || r.kind === 'bundle';
       let st;
       if (hasStatus) st = /^(live|active)$/i.test(String(r.status || '').trim()) ? 'live' : (r.status ? 'not' : 'unknown');
-      else if (list) { const u = urls(r); st = !u.length ? 'unknown' : u.some((x) => list.set.has(liveKey(x))) ? 'live' : 'not'; }
+      else if (list) { const u = urls(r); st = !u.length ? 'unknown' : u.some((x) => { const on = list.on.get(liveKey(x)); return on != null && (!on || new RegExp(ch, 'i').test(on)); }) ? 'live' : 'not'; }
       else st = 'unknown';
       if (st === 'live' && isProduct) live.push(r); else skip.push({ r, model: modelOf(r), status: hasStatus && r.status ? r.status : st === 'not' ? null : 'unknown' });
     }
@@ -110,7 +106,7 @@
     el.innerHTML = `<div class="ck-wrap"><div class="ck-card">
       <div class="ck-file"><svg viewBox="0 0 24 24"><path d="M4 3h11l5 5v13H4z"/><path d="M15 3v5h5"/></svg><b>${e(C.fileName)}</b><span>${e(T.rows(C.rowsN))}</span></div>
       ${total ? `<div class="ck-pt">${e(T.prep(done, total))}<span>${e(T.liveP)}</span></div><div class="ck-bar"><i style="width:${total ? done / total * 100 : 0}%"></i></div>` : `<div class="ck-pt">${e(T.none)}</div>`}
-      ${sk.n ? `<div class="ck-skip">${e(T.skip(sk.n))} ${sk.models.length ? `<a href="#" id="ckView">${e(C.open ? T.hide : T.view)}</a>` : ''}<span class="ck-src">${e(sk.by === 'status' ? T.byStatus : sk.asOf ? T.asOf(fmtDate(sk.asOf, core.L)) : '')}</span></div>
+      ${sk.n ? `<div class="ck-skip">${e(T.skip(sk.n))} ${sk.models.length ? `<a href="#" id="ckView">${e(C.open ? T.hide : T.view)}</a>` : ''}<span class="ck-src">${e(sk.by === 'status' ? T.byStatus : sk.asOf ? T.asOf(fmtDate(sk.asOf)) : '')}</span></div>
         ${C.open ? `<div class="ck-sl"><div class="ck-slh">${e(T.skipRows(sk.rows))}</div>${sk.models.map((x) => `<div><span>${e(x.model)}</span><span class="ck-m">${e(x.status === 'unknown' ? T.unknown : x.status || T.notLive)}${x.rows > 1 ? ` · ${e(T.rows(x.rows))}` : ''}</span></div>`).join('')}</div>` : ''}` : ''}
     </div></div>`;
     const v = document.getElementById('ckView'); if (v) v.onclick = (ev) => { ev.preventDefault(); C.open = !C.open; prepView(core); };
@@ -124,9 +120,6 @@
   }
   const label = (x) => ({ img: C.T.c_img, txt: C.T.c_txt, sum: C.T.c_sum, n12: C.T.c_n12, spec: C.T.c_spec, fail: C.T.w_fail, redo: C.T.w_fail }[x.k] || x.k);
   const why = (x) => ({ img: () => C.T.w_img(x.n), txt: () => C.T.w_txt(x.n), sum: () => C.T.w_sum, spec: () => C.T.w_spec, fail: () => C.T.w_fail + (x.msg ? ' — ' + x.msg : ''), redo: () => C.T.w_fail + (x.msg ? ' — ' + x.msg : '') }[x.k] || (() => x.k))();
-  async function storeOf(slug) {
-    try { const r = await fetch(`/api/v1/review/item/${encodeURIComponent(slug)}?channel=${C.job.channel}`); const d = await r.json(); return d.store || null; } catch (_) { return null; }
-  }
   async function checkView(core) {
     const T = C.T, e = core.esc, j = C.job, us = C.units;
     const left = us.filter((u) => !u.every((x) => x.check === 'ok' || x.check === 'removed'));
@@ -134,16 +127,14 @@
     const u = left[0], it = u[0], n = us.length - left.length + 1;
     C.cur = it.row;
     const el = frame(core, 2);
+    // 왼쪽: 실제로 내려받을 상세 이미지를 LG ELECTRONICS Shopee · Lazada 상품 페이지 틀(bulk-market.js) 안에 — 갤러리 · 제목 · 스펙은 크롤 데이터
     const imgs = (it.imgs || []).map((s) => `<img src="${e(s)}" alt="" loading="lazy">`).join('');
+    const so = it.store || {};
+    const pv = window.CliaMarket ? CliaMarket.page(j.channel, { title: so.title || it.title || it.model || '', gallery: so.gallery, specs: so.specs, body: `<div class="ck-imgs">${imgs}</div>` }) : imgs;
     el.innerHTML = `<div class="ck-p"><div class="ck-bar"><i style="width:${(n - 1) / us.length * 100}%"></i></div><span class="ck-c">${n} / ${us.length}</span></div>
-      <div class="ck-b"><div class="ck-phone"><div class="ck-sc" id="ckSc">${imgs}</div></div>
+      <div class="ck-b"><div class="ck-phone"><div class="ck-sc" id="ckSc">${pv}</div></div>
       <div class="ck-side"><h2>${e(it.model || '')}</h2><div class="ck-tt" lang="th">${e(it.title || '')}</div>
       <div class="ck-ai"><div class="ck-h">${e(T.ai)}</div><div id="ckAi"></div></div><div id="ckGo"></div></div></div>`;
-    // 상품 페이지 틀 (있으면) — 갤러리 · 제목 · 스펙은 검토 항목의 store
-    if (window.CliaMarket && it.slug && !it.bundle) storeOf(it.slug).then((so) => {
-      const sc = document.getElementById('ckSc'); if (!sc || C.cur !== it.row) return;
-      sc.innerHTML = CliaMarket.page(j.channel, { title: (so && so.title) || it.title || '', gallery: so && so.gallery, specs: so && so.specs, body: `<div class="ck-imgs">${imgs}</div>` });
-    });
     if (u.some((x) => x.status === 'working')) { document.getElementById('ckAi').innerHTML = `<div class="ck-run">${e(T.redoing)}</div>`; return waitRedo(core, u); }
     // AI 체크: 미리 계산한 결과를 1초 남짓 동안 한 줄씩
     const rows = aiRows(u), box = document.getElementById('ckAi');
@@ -210,7 +201,6 @@
   async function begin(core) {
     const { S, d } = core;
     if (!d.cols || !d.cols.desc) return false;   // 설명 칸을 못 찾은 파일은 예전 흐름(칸 고르기)으로
-    loadMarket();
     C = { core, T: TX[core.L] || TX.en, job: null, units: [], open: false, fileName: d.fileName, rowsN: d.rows.length };
     const list = await liveList(core.home());
     const k = classify(core, list);
@@ -231,7 +221,6 @@
     return true;
   }
   async function resume(core, job) {
-    loadMarket();
     C = { core, T: TX[core.L] || TX.en, job, units: units(job), open: false, fileName: job.fileName || '', rowsN: 0, liveN: units(job).length,
       // 이어 볼 때는 건너뛴 목록 없이 숫자만
       skip: { n: (job.check && job.check.skipModels) || 0, models: [], rows: (job.check && job.check.skipRows) || 0, by: job.check && job.check.by, asOf: job.check && job.check.asOf } };
