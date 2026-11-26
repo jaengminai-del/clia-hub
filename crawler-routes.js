@@ -418,6 +418,8 @@ router.delete('/api/v1/products/:slug', auth, async (req, res) => {
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
   const trash = path.join(OUT_DIR, '_trash', `${slug}-${stamp}`);
   const meta = trashMeta(productSummary(slug), slug, Date.now() / 1000);   // 복구 목록에 보일 정보 — 폴더를 옮기기 전에
+  const label = String(req.query.label || '').trim();   // 허브 목록에 보이던 이름 (같은 모델이 둘이면 GN-D382PQMB-TH 처럼 꼬리)
+  if (/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/.test(label)) meta.label = label;
   try {
     fs.mkdirSync(path.dirname(trash), { recursive: true });
     fs.renameSync(dir, trash);

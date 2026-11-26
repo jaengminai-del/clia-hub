@@ -231,6 +231,7 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f5f5f5;color:#2
 .lx-ver-t{display:flex;align-items:center;gap:6px;font-size:13px;padding-right:28px;}
 .lx-ver-del{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;border:none;background:transparent;color:var(--clia-gray-400);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s,color .15s;}
 .lx-ver-del:hover,.lx-ver-del:focus-visible{background:var(--clia-brand-soft);color:var(--clia-brand);outline:none;}
+.lx-cf-ov.fx{position:fixed;z-index:10012;}
 .lx-cf-ov{position:absolute;inset:0;z-index:5;background:rgba(38,38,38,.35);display:flex;align-items:center;justify-content:center;padding:24px;animation:lx-cf-fade .15s ease-out;}
 .lx-cf{width:min(380px,100%);background:#fff;border-radius:var(--clia-radius-lg);box-shadow:0 24px 64px rgba(38,38,38,.25);padding:28px 28px 22px;text-align:center;font-family:var(--clia-font);color:var(--clia-gray-900);animation:lx-cf-pop .18s ease-out;}
 .lx-cf-ic{width:52px;height:52px;border-radius:50%;margin:0 auto 14px;background:var(--clia-brand-soft);color:var(--clia-brand);display:flex;align-items:center;justify-content:center;}
@@ -1388,19 +1389,20 @@ function cliaGoHome(){
 // 크롤 제품 삭제 → 다시 크롤할 수 있게 (2026-11-05). 서버는 지운 결과를 보관함(trash)에 남겨 되돌릴 수 있다.
 async function deleteCrawled(id,btn){
   const p=P.find(x=>x.id===id);if(!p||!p._slug)return;
-  if(!confirm(t('list.deleteConfirm',{m:p.id,u:p.crawler_url||p.url})))return;
+  if(!await ltConfirm({title:t('list.delQ',{m:p.id}),msg:t('list.delMsg'),ok:t('lt.delOk'),host:document.body})){btn.focus();return;}
   btn.disabled=true;
   try{
-    const r=await fetch(CRAWLER_API+'/api/v1/products/'+encodeURIComponent(p._slug),{method:'DELETE'});
+    // label: 목록에 보이던 이름(GN-D382PQMB-TH 처럼 같은 모델이 둘이면 붙는 꼬리 포함) — 최근 삭제 · 안내에도 같은 이름으로
+    const r=await fetch(CRAWLER_API+'/api/v1/products/'+encodeURIComponent(p._slug)+'?label='+encodeURIComponent(p.id),{method:'DELETE'});
     const d=await r.json().catch(()=>({}));
     if(!r.ok)throw new Error(d.detail||('HTTP '+r.status));
     if(!p._crawledEntry){delete p._slug;delete p.crawler_url;p._lazy=false;}   // 기존(수동 등록) 제품은 목록에 남기고 크롤 연결만 해제
     if(selId===id)cliaGoHome();
     await loadCrawledProducts();
-    if(d.stamp){TRASH=[{slug:p._slug||d.slug,stamp:d.stamp,model:p.id,title:p.nm,url:p.crawler_url||p.url,country:String(p._corp||''),deleted_at:Date.now()/1000,recrawled:false},...TRASH.filter(e=>e.stamp!==d.stamp)];renderList();
+    if(d.stamp){TRASH=[{slug:p._slug||d.slug,stamp:d.stamp,model:p.id,label:p.id,title:p.nm,url:p.crawler_url||p.url,country:String(p._corp||''),deleted_at:Date.now()/1000,recrawled:false},...TRASH.filter(e=>e.stamp!==d.stamp)];renderList();
       const slug=d.slug,stamp=d.stamp;undoToast(t('trash.deleted',{m:p.id}),{label:t('trash.undo'),run:()=>restoreDeleted(slug,stamp)});}
     loadTrash();
-  }catch(e){alert(t('list.deleteFail')+e.message);btn.disabled=false;}
+  }catch(e){undoToast(t('list.deleteFail')+e.message,null,6000);btn.disabled=false;}
 }
 function cliaLogout(){
   sessionStorage.removeItem('clia_corp');sessionStorage.removeItem('clia_user');sessionStorage.removeItem('clia_ui_en');UI_EN=false;
@@ -2431,6 +2433,10 @@ Object.assign(I18N.de,{'tab.all':'Alle','tab.md':'Nur MD','flt.dv':'BU','flt.grp
 Object.assign(I18N.th,{'tab.all':'ทั้งหมด','tab.md':'เฉพาะ MD','flt.dv':'BU','flt.grp':'กลุ่มสินค้า','flt.all':'ทั้งหมด','flt.none':'ไม่ได้เลือก','flt.n':'เลือก {n}','flt.grpHint':'เลือกได้เฉพาะกลุ่มสินค้าของ BU ที่เลือก','list.search':'ค้นหาชื่อสินค้า...','bulk.shopee':'อัปโหลด Shopee แบบกลุ่ม','bulk.lazada':'อัปโหลด Lazada แบบกลุ่ม','bulk.tip':'อัปโหลดไฟล์ Excel แบบกลุ่มของ {ch} — CLIA จะเติมรายละเอียดสินค้า และครอว์ลสินค้าที่ยังไม่มีจาก LG.com'});
 Object.assign(I18N.ar,{'tab.all':'الكل','tab.md':'MD فقط','flt.dv':'BU','flt.grp':'فئة المنتج','flt.all':'الكل','flt.none':'لا شيء','flt.n':'{n} محدد','flt.grpHint':'يمكن اختيار فئات BU المحددة فقط','list.search':'ابحث عن اسم المنتج...','bulk.shopee':'رفع جماعي إلى Shopee','bulk.lazada':'رفع جماعي إلى Lazada','bulk.tip':'ارفع ملف Excel المجمّع لـ {ch} — يملأ CLIA أوصاف المنتجات ويزحف إلى LG.com للمنتجات غير الموجودة'});
 // 최근 삭제 · 되돌리기 (2026-11-26)
+Object.assign(I18N.en,{'list.delQ':'Delete {m}?','list.delMsg':'You can restore it from Recently deleted.'});
+Object.assign(I18N.de,{'list.delQ':'{m} löschen?','list.delMsg':'Du kannst es unter „Kürzlich gelöscht“ wiederherstellen.'});
+Object.assign(I18N.th,{'list.delQ':'ลบ {m} ใช่ไหม?','list.delMsg':'กู้คืนได้ที่ ลบล่าสุด'});
+Object.assign(I18N.ar,{'list.delQ':'حذف {m}؟','list.delMsg':'يمكنك استعادته من المحذوفة مؤخرًا.'});
 Object.assign(I18N.en,{'tab.trash':'Recently deleted','trash.deleted':'{m} deleted','trash.undo':'Undo','trash.restore':'Restore','trash.restored':'{m} restored','trash.recrawled':'{m} was crawled again after it was deleted — nothing was restored or overwritten','trash.recrawledTag':'Crawled again','trash.recrawledTip':'Crawled again after it was deleted. Restoring would overwrite it, so it is off.','trash.when':'Deleted {d}','trash.count':'{n} deleted','trash.empty':'No recently deleted products','trash.fail':'Restore failed: '});
 Object.assign(I18N.de,{'tab.trash':'Kürzlich gelöscht','trash.deleted':'{m} gelöscht','trash.undo':'Rückgängig','trash.restore':'Wiederherstellen','trash.restored':'{m} wiederhergestellt','trash.recrawled':'{m} wurde nach dem Löschen erneut gecrawlt — nichts wurde wiederhergestellt oder überschrieben','trash.recrawledTag':'Erneut gecrawlt','trash.recrawledTip':'Nach dem Löschen erneut gecrawlt. Wiederherstellen würde es überschreiben, daher aus.','trash.when':'Gelöscht {d}','trash.count':'{n} gelöscht','trash.empty':'Keine kürzlich gelöschten Produkte','trash.fail':'Wiederherstellen fehlgeschlagen: '});
 Object.assign(I18N.th,{'tab.trash':'ลบล่าสุด','trash.deleted':'ลบ {m} แล้ว','trash.undo':'เลิกทำ','trash.restore':'กู้คืน','trash.restored':'กู้คืน {m} แล้ว','trash.recrawled':'{m} ถูกครอว์ลใหม่หลังจากลบ — ไม่ได้กู้คืนและไม่ได้เขียนทับ','trash.recrawledTag':'ครอว์ลใหม่แล้ว','trash.recrawledTip':'ครอว์ลใหม่หลังจากลบแล้ว การกู้คืนจะเขียนทับ จึงปิดไว้','trash.when':'ลบเมื่อ {d}','trash.count':'ลบแล้ว {n} รายการ','trash.empty':'ไม่มีสินค้าที่ลบล่าสุด','trash.fail':'กู้คืนไม่สำเร็จ: '});
@@ -2471,11 +2477,13 @@ let curSearch='',curView='all',selId=null;
 //   목록에서만 숨긴다 — Review · 벌크 화면은 그대로.
 const LIVE_LISTS={th:'th-live.json'},LIVE={};
 const liveKey=u=>String(u||'').trim().split(/[?#]/)[0].replace(/\/+$/,'').toLowerCase()+'/';
-Object.entries(LIVE_LISTS).forEach(([corp,f])=>fetch(f,{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(d=>{
+// 같은 나라 같은 모델의 이름도 라이브 목록으로 정한다(crawledNames) → 제품을 불러올 때 이 파일을 잠깐(최대 3초) 기다린다
+const LIVE_READY=Promise.all(Object.entries(LIVE_LISTS).map(([corp,f])=>fetch(f,{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(d=>{
   if(!d||!Array.isArray(d.live))return;
   LIVE[corp]={live:new Set(d.live.map(x=>liveKey(x.url||x))),catalog:new Set((d.catalog||[]).map(liveKey))};
-  if(typeof CORP!=='undefined'&&CORP===corp&&document.getElementById('pl'))renderList();
-}).catch(()=>{}));
+  if(typeof loadCrawledProducts==='function'&&loadCrawledProducts._names)loadCrawledProducts();   // 3초 넘겨 늦게 왔으면 이름을 다시
+  else if(typeof CORP!=='undefined'&&CORP===corp&&document.getElementById('pl'))renderList();
+}).catch(()=>{})));
 const liveShown=p=>{const L=LIVE[CORP];if(!L)return true;const u=liveKey(p.crawler_url||p.url);return L.live.has(u)||!L.catalog.has(u);};
 function fltCorpRows(){return P.filter(p=>productCorp(p)===CORP&&liveShown(p));}
 function fltViewRows(){const r=fltCorpRows();return curView==='md-only'?r.filter(p=>p.md):r;}
@@ -2547,6 +2555,14 @@ function sch(v){curSearch=v.toLowerCase();renderList();}
 //   그새 같은 제품을 다시 크롤했으면 서버가 덮어쓰지 않고 409 recrawled → 알리기만 한다.
 let TRASH=[],trashKeep=false;   // trashKeep: 마지막 것을 되돌린 뒤에도 탭에 머문다
 const trashRows=()=>TRASH.filter(x=>corpOfCountry(x.country)===CORP);
+// 목록과 같은 이름: 지울 때 보이던 이름(label). 그 전에 지운 것은 목록 규칙(crawledNames)대로 — 같은 나라 같은 모델은 지운 것까지 넣어 주소 순으로
+const trashName=x=>{
+  if(x.label)return x.label;
+  const b=String(x.model||'').toUpperCase(),c=String(x.country||'');if(!b)return x.slug;
+  const me={slug:x.slug,url:x.url,country:c,crawled_at:x.crawled_at};
+  const same=(CRAWLED_SAME[b+'|'+c]||[]).filter(s=>s.slug!==x.slug).concat([me]).sort(crawledOrder);
+  return same.indexOf(me)>0||P.some(p=>p.id===b&&p._slug!==x.slug)?b+'-'+c.toUpperCase():b;
+};
 async function loadTrash(){
   try{const r=await fetch(CRAWLER_API+'/api/v1/products-trash');if(!r.ok)return;const d=await r.json();TRASH=Array.isArray(d.items)?d.items:[];}
   catch(e){return;}
@@ -2555,10 +2571,10 @@ async function loadTrash(){
 const trashWhen=sec=>{try{return new Date(sec*1000).toLocaleString(uiLang()==='en'?'en-GB':uiLang(),{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}catch(e){return '';}};
 function renderTrash(tb){
   trashKeep=true;
-  const rows=trashRows().filter(x=>!curSearch||String(x.model).toLowerCase().includes(curSearch)||String(x.title).toLowerCase().includes(curSearch));
+  const rows=trashRows().filter(x=>!curSearch||trashName(x).toLowerCase().includes(curSearch)||String(x.title).toLowerCase().includes(curSearch));
   tb.innerHTML=rows.length?rows.map(x=>{
     let v;try{v=crawledToP({...x,slug:x.slug,url:x.url||('https://www.lg.com/'+x.country+'/x/'+x.slug+'/')});}catch(e){v={id:x.model||x.slug,dv:'',sub:'',ico:'📦'};}
-    const th=x.thumb?I(x.thumb,80):'',k=fltEsc(x.slug),st=fltEsc(x.stamp),m=fltEsc(x.model||v.id);
+    const th=x.thumb?I(x.thumb,80):'',k=fltEsc(x.slug),st=fltEsc(x.stamp),m=fltEsc(trashName(x));
     const btn=x.recrawled?`<button type="button" class="del-btn" disabled title="${fltEsc(t('trash.recrawledTip'))}" aria-label="${fltEsc(t('trash.restore'))}">${lxIc('undo',15)}</button>`
       :`<button type="button" class="del-btn" title="${fltEsc(t('trash.restore'))}" aria-label="${fltEsc(t('trash.restore'))}" onclick="event.stopPropagation();restoreDeleted('${k}','${st}',this)">${lxIc('undo',15)}</button>`;
     return `<tr class="lt-trash"><td>${th?`<img class="thumb" src="${th}" onerror="this.outerHTML='<div class=thumb-ph>${v.ico}</div>'">`:`<div class="thumb-ph">${v.ico}</div>`}</td><td>${v.dv?`<span class="dt dt-${String(v.dv).toLowerCase()}">${v.dv}</span>`:''}</td><td><b>${m}</b><div class="lt-sub"${x.recrawled?` title="${fltEsc(t('trash.recrawledTip'))}"`:''}>${fltEsc(t('trash.when',{d:trashWhen(x.deleted_at)}))}${x.recrawled?` · ${fltEsc(t('trash.recrawledTag'))}`:''}</div></td><td></td><td><div class="lt-act">${btn}</div></td></tr>`;
@@ -2567,7 +2583,7 @@ function renderTrash(tb){
 }
 async function restoreDeleted(slug,stamp,btn){
   const x=TRASH.find(e=>e.slug===slug&&e.stamp===stamp)||{slug,stamp,model:''};
-  const m=x.model||slug;
+  const m=trashName(x);
   if(btn)btn.disabled=true;
   try{
     const r=await fetch(CRAWLER_API+'/api/v1/products-trash/restore',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug,stamp})});
@@ -2578,15 +2594,15 @@ async function restoreDeleted(slug,stamp,btn){
     await loadCrawledProducts();
     undoToast(t('trash.restored',{m}));
     return true;
-  }catch(e){alert(t('trash.fail')+e.message);if(btn)btn.disabled=false;return false;}
+  }catch(e){undoToast(t('trash.fail')+e.message,null,6000);if(btn)btn.disabled=false;return false;}
 }
 let _undoT=null;
-function undoToast(msg,act){
+function undoToast(msg,act,dur){
   const el=document.getElementById('undoToast');if(!el)return;
   el.querySelector('span').textContent=msg;
   const b=el.querySelector('button');b.hidden=!act;b.textContent=act?act.label:'';b.disabled=false;
   b.onclick=act?async()=>{b.disabled=true;clearTimeout(_undoT);await act.run();}:null;
-  el.classList.add('show');clearTimeout(_undoT);_undoT=setTimeout(()=>el.classList.remove('show'),act?8000:4000);
+  el.classList.add('show');clearTimeout(_undoT);_undoT=setTimeout(()=>el.classList.remove('show'),dur||(act?8000:4000));
 }
 
 function sel(id){
@@ -2957,10 +2973,11 @@ function ltPickVersion(v){
   _ltSet(ver);_lt.sel=v;_lt.from='v'+v;_ltClean();_ltMsg('');_ltRenderVersions();
 }
 // 버전 삭제 — X → "정말 지우시겠어요?" 확인 팝업 (기본 포커스는 취소 → 실수로 Enter 눌러도 안 지워짐)
-function ltConfirm({title,msg,ok}){
+//   host 를 안 주면 리스팅 편집 창(lxOv) 안에, 주면 그 위에 (Product List 휴지통은 화면 전체 — 2026-11-26)
+function ltConfirm({title,msg,ok,host}){
   return new Promise(resolve=>{
-    const ov=document.getElementById('lxOv');
-    const cf=document.createElement('div');cf.className='lx-cf-ov';
+    const ov=host||document.getElementById('lxOv');
+    const cf=document.createElement('div');cf.className='lx-cf-ov'+(host?' fx':'');
     cf.innerHTML=`<div class="lx-cf" role="alertdialog" aria-modal="true"><div class="lx-cf-ic">${lxIc('trash',24)}</div>
       <h4>${_ltEsc(title)}</h4><p>${_ltEsc(msg)}</p>
       <div class="lx-cf-btns"><button type="button" class="clia-btn" data-a="0">${_ltEsc(t('lt.cancel'))}</button><button type="button" class="clia-btn primary" data-a="1">${_ltEsc(ok)}</button></div></div>`;
@@ -7117,11 +7134,33 @@ function crwlFromMirror(m) {
 const CRAWLED_CAT=[[/tvs?[-_/]|oled|qned|stanbyme|lifestyle-(tvs|screens|ekranlar)/i,'TV'],[/soundbar|speaker|lautsprecher|audio/i,'Audio'],[/fridge|refrigerator|kuehl/i,'Fridge'],[/dishwasher/i,'Dishwasher'],[/wash|laundry|dryer|waesche/i,'Washer'],[/monitor/i,'Monitor'],[/laptop|gram/i,'Laptop'],[/microwave|cook|oven/i,'Cooking'],[/air|puricare|dehumid|condicionado/i,'Air']];
 const CRAWLED_ICO={TV:'📺',Audio:'🔈',Fridge:'🧊',Washer:'🧺',Monitor:'🖥️',Laptop:'💻',Dishwasher:'🍽️',Cooking:'🍳',Air:'🌬️'};
 const titleCase=s=>String(s||'').replace(/[-_]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+// 같은 나라에 같은 모델이 둘 이상이면(옛 주소 사본 등) 꼬리 없는 이름을 정해 고정 (2026-11-26):
+//   예전에는 불러온 순서(파일 시각 — 재배포 · 복구 때 바뀜)로 꼬리를 붙여서 GN-D382PQMB / GN-D382PQMB-TH 가 서로 바뀌었다.
+//   이제 같은 나라 안에서 ① 라이브 목록(th-live.json)에 있는 것 → ② 가장 최근에 크롤한 것 → ③ 주소 순 — 첫 번째가 예전 규칙
+//   (먼저 나온 다른 나라 제품이 있으면 -<국가>), 나머지는 -<국가>(-TH2 …). 다른 나라끼리의 이름(32GX870B-B-DE 등)은 예전 그대로.
+//   최근 삭제 목록도 같은 규칙(trashName).
+const crawledLive=s=>{const L=LIVE[corpOfCountry(s.country)];return L&&L.live.has(liveKey(s.url))?1:0;};
+const crawledOrder=(a,b)=>(crawledLive(b)-crawledLive(a))||((Number(b.crawled_at)||0)-(Number(a.crawled_at)||0))||(a.slug<b.slug?-1:a.slug>b.slug?1:0);
+let CRAWLED_NAME={},CRAWLED_SAME={};   // slug → 목록 이름 · '모델|국가' → slug 들(정렬) — loadCrawledProducts 가 채운다
+function crawledId(s,base){
+  if(CRAWLED_NAME[s.slug])return CRAWLED_NAME[s.slug];
+  return P.some(x=>x.id===base&&x._slug!==s.slug)?base+'-'+String(s.country||'').toUpperCase():base;   // 목록 밖에서 부를 때 (예전 규칙)
+}
+function crawledNames(items){
+  const taken=new Set(P.filter(x=>!x._crawledEntry).map(x=>x.id));   // 허브에 원래 있던 제품
+  const key=s=>crawledBase(s)+'|'+String(s.country||'');
+  CRAWLED_SAME={};items.forEach(s=>(CRAWLED_SAME[key(s)]=CRAWLED_SAME[key(s)]||[]).push({slug:s.slug,url:s.url,country:s.country,crawled_at:s.crawled_at}));
+  Object.values(CRAWLED_SAME).forEach(a=>a.sort(crawledOrder));
+  const rank=s=>CRAWLED_SAME[key(s)].findIndex(x=>x.slug===s.slug),cc=s=>String(s.country||'').toUpperCase();
+  CRAWLED_NAME={};
+  items.filter(s=>rank(s)===0).forEach(s=>{const b=crawledBase(s),id=taken.has(b)?b+'-'+cc(s):b;CRAWLED_NAME[s.slug]=id;taken.add(id);});
+  items.filter(s=>rank(s)>0).sort((a,b)=>rank(a)-rank(b)).forEach(s=>{const b=crawledBase(s);let id=b+'-'+cc(s),n=2;while(taken.has(id))id=b+'-'+cc(s)+(n++);CRAWLED_NAME[s.slug]=id;taken.add(id);});
+}
+const crawledBase=s=>{try{const g=new URL(s.url).pathname.split('/').filter(Boolean);return (g[g.length-1]||s.slug).toUpperCase();}catch(e){return String(s.slug||'').toUpperCase();}};
 function crawledToP(s){
   const segs=new URL(s.url).pathname.split('/').filter(Boolean);   // [국가, 카테고리, 서브, 모델]
   const cat=(CRAWLED_CAT.find(([r])=>r.test(s.url))||[0,titleCase(segs[1])])[1];
-  let id=(segs[segs.length-1]||s.slug).toUpperCase();
-  if(P.some(x=>x.id===id&&x._slug!==s.slug))id+='-'+String(s.country||'').toUpperCase();   // 국가별 동일 모델 구분
+  const id=crawledId(s,(segs[segs.length-1]||s.slug).toUpperCase());
   return {id,dv:divOf({cat,sub:titleCase(segs[segs.length-2]||segs[1]),url:s.url}),cat,sub:titleCase(segs[segs.length-2]||segs[1]),
     ico:CRAWLED_ICO[cat]||'📦',nm:s.title,pr:'',op:'',url:s.url,crawled:true,crawler_url:s.url,
     gal:s.thumb?[{a:'View 1',p:s.thumb}]:[],feat:[],sp:{},kf:[],tags:[],bul:[],kw:'',
@@ -7135,6 +7174,8 @@ async function loadCrawledProducts(){
     const d=await r.json();
     for(let i=P.length-1;i>=0;i--)if(P[i]._crawledEntry)P.splice(i,1);   // 재로드 시 중복 제거
     const norm=u=>String(u||'').replace(/[?#].*$/,'').replace(/\/+$/,'').toLowerCase();
+    await Promise.race([LIVE_READY,new Promise(r=>setTimeout(r,3000))]);loadCrawledProducts._names=true;
+    crawledNames((d.products||[]).filter(s=>!P.some(x=>!x._crawledEntry&&norm(x.url)===norm(s.url))));   // 기존 제품에 붙는 것은 이름이 따로 없다
     (d.products||[]).forEach(s=>{
       const legacy=P.find(x=>!x._crawledEntry&&norm(x.url)===norm(s.url));
       if(legacy){legacy._slug=s.slug;legacy.crawler_url=s.url;return;}   // 기존 제품 데이터 유지 + 크롤러 연결
