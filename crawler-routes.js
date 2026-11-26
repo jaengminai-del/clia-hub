@@ -417,6 +417,7 @@ router.delete('/api/v1/products/:slug', auth, async (req, res) => {
   }
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
   const trash = path.join(OUT_DIR, '_trash', `${slug}-${stamp}`);
+  const meta = trashMeta(productSummary(slug), slug, Date.now() / 1000);   // 복구 목록에 보일 정보 — 폴더를 옮기기 전에
   try {
     fs.mkdirSync(path.dirname(trash), { recursive: true });
     fs.renameSync(dir, trash);
@@ -426,11 +427,121 @@ router.delete('/api/v1/products/:slug', auth, async (req, res) => {
     }
     for (const [id, j] of jobs) if (j.slug === slug) jobs.delete(id);   // 캐시된 작업이 지운 결과를 돌려주지 않게
     let remote = 0;
-    try { remote = await store.deleteProduct(slug, stamp); }
+    try { remote = await store.deleteProduct(slug, stamp, meta); }
     catch (e) { console.warn('[crawl] 버킷 삭제 실패', slug, e.message); return res.status(502).json({ detail: 'local removed, bucket delete failed: ' + e.message }); }
     console.log(`[crawl] 제품 삭제: ${slug} (로컬 → ${path.relative(OUT_DIR, trash)}, 버킷 ${remote}개 → trash/${stamp}/)`);
-    res.json({ ok: true, slug, trash: path.relative(OUT_DIR, trash), remote });
+    res.json({ ok: true, slug, stamp, trash: path.relative(OUT_DIR, trash), remote });
   } catch (e) {
+    res.status(500).json({ detail: e.message });
+  }
+});
+
+// ── 최근 삭제한 제품 · 복구 (2026-11-26) ──
+//   삭제는 버킷 trash/<stamp>/ 에 사본(편집본 · 승인 기록 등 제품 폴더 전부)을 남기고, 서버 로컬은 out/_trash/<slug>-<stamp>/ 로 옮긴다.
+//   목록은 버킷 기준(재배포돼도 남는다) + 로컬 _trash. 복구는 원래 키로 다시 복사하고 로컬도 되돌린다.
+//   그새 같은 제품을 다시 크롤했으면 덮어쓰지 않고 409 { code: 'recrawled' }.
+const TRASH_DIR = path.join(OUT_DIR, '_trash');
+const modelOf = (url, slug) => {
+  try { const segs = new URL(url).pathname.split('/').filter(Boolean); return (segs[segs.length - 1] || slug).toUpperCase(); }
+  catch { return String(slug || '').split('-').pop().toUpperCase(); }
+};
+function trashMeta(sum, slug, deletedAt) {
+  const url = (sum && sum.url) || '';
+  return { slug, url, country: countryOf(url) || (/^www-lg-com-([a-z]{2})-/.exec(slug) || [])[1] || '',
+    model: modelOf(url, slug), title: (sum && sum.title) || '', thumb: (sum && sum.thumb) || '',
+    crawled_at: (sum && sum.crawled_at) || 0, deleted_at: deletedAt || 0 };
+}
+const stampTime = (st) => { const t = Date.parse(st.replace(/T(\d{2})-(\d{2})-(\d{2})-(\d{3})Z$/, 'T$1:$2:$3.$4Z')); return Number.isFinite(t) ? t / 1000 : 0; };
+// 로컬 휴지통 폴더 → { stamp, slug, dir }  (이름: <slug>-<stamp>)
+function localTrash() {
+  let names = [];
+  try { names = fs.readdirSync(TRASH_DIR, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name); } catch {}
+  return names.map((n) => {
+    const m = /^(.+)-(\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{3}Z)$/.exec(n);
+    return m ? { slug: m[1], stamp: m[2], dir: path.join(TRASH_DIR, n) } : null;
+  }).filter(Boolean);
+}
+// 로컬 휴지통 폴더의 정보 (source.json · mirror.json 이 폴더째 옮겨져 있다)
+function localMeta(e) {
+  const src = readJson(path.join(e.dir, 'source.json')) || {};
+  const mirror = readJson(path.join(e.dir, 'mirror.json')) || {};
+  return trashMeta({ url: src.url, title: mirror.product_title, thumb: firstImage(mirror), crawled_at: src.crawled_at }, e.slug, stampTime(e.stamp));
+}
+const trashMetaCache = new Map();   // stamp|slug → meta (사본은 바뀌지 않는다)
+async function bucketMeta(e) {
+  const k = `${e.stamp}|${e.slug}`;
+  if (trashMetaCache.has(k)) return trashMetaCache.get(k);
+  let meta = null;
+  if (e.meta) { try { meta = JSON.parse(String(await store.getBuffer(`trash/${e.stamp}/${store.TRASH_META}`))); } catch {} }
+  if (!meta || meta.slug !== e.slug) {   // 메모를 남기기 전(11/26 이전)에 지운 것 — 사본의 source.json 으로
+    let src = {};
+    try { src = JSON.parse(String(await store.getBuffer(`trash/${e.stamp}/crawler-py-out/${e.slug}/source.json`))); } catch {}
+    meta = trashMeta({ url: src.url, crawled_at: src.crawled_at }, e.slug, stampTime(e.stamp));
+  }
+  trashMetaCache.set(k, meta);
+  return meta;
+}
+const crawlingNow = (slug) => [...jobs.values()].some((j) => j.slug === slug && j.proc && !j.exited);
+
+router.get('/api/v1/products-trash', auth, async (req, res) => {
+  const country = String(req.query.country || '').toLowerCase();
+  const items = new Map();
+  try {
+    for (const e of await store.listTrash()) {
+      if (e.restored) continue;
+      items.set(`${e.stamp}|${e.slug}`, { ...(await bucketMeta(e)), stamp: e.stamp, bucket: true, local: false, files: e.keys.length });
+    }
+  } catch (e) { return res.status(502).json({ detail: 'bucket list failed: ' + e.message }); }
+  for (const e of localTrash()) {
+    const k = `${e.stamp}|${e.slug}`;
+    if (items.has(k)) items.get(k).local = true;
+    else if (!store.enabled()) items.set(k, { ...localMeta(e), stamp: e.stamp, bucket: false, local: true });
+    // 버킷이 있는데 버킷 사본이 없는 로컬 폴더 = 이미 복구했거나 버킷 삭제가 실패한 것 → 목록에 넣지 않는다
+  }
+  const list = [...items.values()]
+    .filter((x) => !country || x.country === country)
+    .map((x) => ({ ...x, recrawled: !!productSummary(x.slug) }))
+    .sort((a, b) => (a.stamp < b.stamp ? 1 : -1));
+  res.json({ count: list.length, items: list });
+});
+
+router.post('/api/v1/products-trash/restore', auth, express.json(), async (req, res) => {
+  const slug = path.basename(String((req.body || {}).slug || ''));
+  const stamp = String((req.body || {}).stamp || '');
+  if (!slug || slug.startsWith('_') || !store.STAMP_RE.test(stamp)) return res.status(400).json({ detail: 'slug and stamp required' });
+  const recrawled = () => { const s = productSummary(slug); return res.status(409).json({ code: 'recrawled', detail: 'this product was crawled again after it was deleted', crawled_at: s ? s.crawled_at : 0 }); };
+  if (crawlingNow(slug)) return res.status(409).json({ code: 'crawling', detail: 'crawl in progress' });
+  if (fs.existsSync(path.join(OUT_DIR, slug, 'mirror.json'))) return recrawled();
+  const local = localTrash().find((e) => e.slug === slug && e.stamp === stamp);
+  let keys = [];
+  try {
+    if (store.enabled()) {
+      const r = await store.restoreProduct(stamp, slug);
+      if (r.conflict) return recrawled();
+      if (r.missing && !local) return res.status(404).json({ detail: 'not in trash' });
+      keys = r.keys;
+    } else if (!local) return res.status(404).json({ detail: 'not in trash' });
+    if (local) try {
+      const dir = path.join(OUT_DIR, slug);
+      if (fs.existsSync(dir)) fs.renameSync(dir, path.join(TRASH_DIR, `${slug}-leftover-${Date.now()}`));   // mirror 없는 실패 크롤 찌꺼기
+      fs.renameSync(local.dir, dir);
+      const aux = path.join(__dirname, 'crawler', 'out');
+      for (const f of fs.readdirSync(dir).filter((n) => n.startsWith('crawler-out.'))) {
+        fs.mkdirSync(aux, { recursive: true });
+        fs.renameSync(path.join(dir, f), path.join(aux, f.slice('crawler-out.'.length)));
+      }
+    } catch (e) {   // 버킷은 이미 되돌렸으면 아래에서 버킷 사본을 내려받는다
+      if (!keys.length) throw e;
+      console.warn('[crawl] 복구: 로컬 폴더 되돌리기 실패, 버킷에서 받음', slug, e.message);
+    }
+    const pulled = await store.pullKeys(keys);   // 로컬 사본이 없으면(재배포 뒤) 버킷에서 내려받는다
+    for (const [id, j] of jobs) if (j.slug === slug) jobs.delete(id);
+    if (!fs.existsSync(path.join(OUT_DIR, slug, 'mirror.json'))) return res.status(500).json({ detail: 'restored files have no mirror.json' });
+    trashMetaCache.delete(`${stamp}|${slug}`);
+    console.log(`[crawl] 제품 복구: ${slug} (trash/${stamp}/ → 버킷 ${keys.length}개${local ? ' · 로컬 폴더' : ''} · 내려받음 ${pulled}개)`);
+    res.json({ ok: true, slug, stamp, remote: keys.length, local: !!local, pulled, product: productSummary(slug) });
+  } catch (e) {
+    console.warn('[crawl] 복구 실패', slug, stamp, e.message);
     res.status(500).json({ detail: e.message });
   }
 });
