@@ -213,7 +213,12 @@
       C.job = j; C.units = units(C.job);
       if (action === 'retry') { const u = C.units.find((x) => x.some((y) => rows.includes(y.row))); if (u) seen.delete(ukey(u)); }   // 다시 준비한 것은 다시 스캔
       checkView(core);
-    } catch (e) { if (btn) btn.disabled = false; alertLine(core, C.T.err + e.message); }
+    } catch (e) {   // 실패: 사라지던 카드를 되돌리고(다시 그림 — 이미 본 카드는 결과만) 아래에 이유 한 줄
+      if (btn) btn.disabled = false;
+      const msg = C.T.err + e.message;
+      await checkView(core);
+      alertLine(core, msg);
+    }
   }
   function alertLine(core, msg) { const g = document.getElementById('ckGo'); if (g) g.innerHTML = `<div class="ck-why">${core.esc(msg)}</div>`; }
   async function waitRedo(core, us) {
