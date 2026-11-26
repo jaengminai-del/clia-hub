@@ -2477,11 +2477,13 @@ let curSearch='',curView='all',selId=null;
 //   목록에서만 숨긴다 — Review · 벌크 화면은 그대로.
 const LIVE_LISTS={th:'th-live.json'},LIVE={};
 const liveKey=u=>String(u||'').trim().split(/[?#]/)[0].replace(/\/+$/,'').toLowerCase()+'/';
-Object.entries(LIVE_LISTS).forEach(([corp,f])=>fetch(f,{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(d=>{
+// 같은 나라 같은 모델의 이름도 라이브 목록으로 정한다(crawledNames) → 제품을 불러올 때 이 파일을 잠깐(최대 3초) 기다린다
+const LIVE_READY=Promise.all(Object.entries(LIVE_LISTS).map(([corp,f])=>fetch(f,{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(d=>{
   if(!d||!Array.isArray(d.live))return;
   LIVE[corp]={live:new Set(d.live.map(x=>liveKey(x.url||x))),catalog:new Set((d.catalog||[]).map(liveKey))};
-  if(typeof CORP!=='undefined'&&CORP===corp&&document.getElementById('pl'))renderList();
-}).catch(()=>{}));
+  if(typeof loadCrawledProducts==='function'&&loadCrawledProducts._names)loadCrawledProducts();   // 3초 넘겨 늦게 왔으면 이름을 다시
+  else if(typeof CORP!=='undefined'&&CORP===corp&&document.getElementById('pl'))renderList();
+}).catch(()=>{})));
 const liveShown=p=>{const L=LIVE[CORP];if(!L)return true;const u=liveKey(p.crawler_url||p.url);return L.live.has(u)||!L.catalog.has(u);};
 function fltCorpRows(){return P.filter(p=>productCorp(p)===CORP&&liveShown(p));}
 function fltViewRows(){const r=fltCorpRows();return curView==='md-only'?r.filter(p=>p.md):r;}
@@ -2557,8 +2559,9 @@ const trashRows=()=>TRASH.filter(x=>corpOfCountry(x.country)===CORP);
 const trashName=x=>{
   if(x.label)return x.label;
   const b=String(x.model||'').toUpperCase(),c=String(x.country||'');if(!b)return x.slug;
-  const same=[...new Set([...(CRAWLED_SAME[b+'|'+c]||[]),x.slug])].sort();
-  return same.indexOf(x.slug)>0||P.some(p=>p.id===b&&p._slug!==x.slug)?b+'-'+c.toUpperCase():b;
+  const me={slug:x.slug,url:x.url,country:c,crawled_at:x.crawled_at};
+  const same=(CRAWLED_SAME[b+'|'+c]||[]).filter(s=>s.slug!==x.slug).concat([me]).sort(crawledOrder);
+  return same.indexOf(me)>0||P.some(p=>p.id===b&&p._slug!==x.slug)?b+'-'+c.toUpperCase():b;
 };
 async function loadTrash(){
   try{const r=await fetch(CRAWLER_API+'/api/v1/products-trash');if(!r.ok)return;const d=await r.json();TRASH=Array.isArray(d.items)?d.items:[];}
@@ -7131,10 +7134,13 @@ function crwlFromMirror(m) {
 const CRAWLED_CAT=[[/tvs?[-_/]|oled|qned|stanbyme|lifestyle-(tvs|screens|ekranlar)/i,'TV'],[/soundbar|speaker|lautsprecher|audio/i,'Audio'],[/fridge|refrigerator|kuehl/i,'Fridge'],[/dishwasher/i,'Dishwasher'],[/wash|laundry|dryer|waesche/i,'Washer'],[/monitor/i,'Monitor'],[/laptop|gram/i,'Laptop'],[/microwave|cook|oven/i,'Cooking'],[/air|puricare|dehumid|condicionado/i,'Air']];
 const CRAWLED_ICO={TV:'📺',Audio:'🔈',Fridge:'🧊',Washer:'🧺',Monitor:'🖥️',Laptop:'💻',Dishwasher:'🍽️',Cooking:'🍳',Air:'🌬️'};
 const titleCase=s=>String(s||'').replace(/[-_]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
-// 같은 나라에 같은 모델이 둘 이상이면(옛 주소 사본 등) 이름을 주소(slug) 순으로 고정 (2026-11-26):
+// 같은 나라에 같은 모델이 둘 이상이면(옛 주소 사본 등) 꼬리 없는 이름을 정해 고정 (2026-11-26):
 //   예전에는 불러온 순서(파일 시각 — 재배포 · 복구 때 바뀜)로 꼬리를 붙여서 GN-D382PQMB / GN-D382PQMB-TH 가 서로 바뀌었다.
-//   이제 같은 나라 안에서 주소 순 첫 번째만 예전 규칙(먼저 나온 다른 나라 제품이 있으면 -<국가>)을 따르고, 나머지는 -<국가>(-TH2 …).
-//   다른 나라끼리의 이름(32GX870B-B-DE 등)은 예전 그대로. 최근 삭제 목록도 같은 규칙(trashName).
+//   이제 같은 나라 안에서 ① 라이브 목록(th-live.json)에 있는 것 → ② 가장 최근에 크롤한 것 → ③ 주소 순 — 첫 번째가 예전 규칙
+//   (먼저 나온 다른 나라 제품이 있으면 -<국가>), 나머지는 -<국가>(-TH2 …). 다른 나라끼리의 이름(32GX870B-B-DE 등)은 예전 그대로.
+//   최근 삭제 목록도 같은 규칙(trashName).
+const crawledLive=s=>{const L=LIVE[corpOfCountry(s.country)];return L&&L.live.has(liveKey(s.url))?1:0;};
+const crawledOrder=(a,b)=>(crawledLive(b)-crawledLive(a))||((Number(b.crawled_at)||0)-(Number(a.crawled_at)||0))||(a.slug<b.slug?-1:a.slug>b.slug?1:0);
 let CRAWLED_NAME={},CRAWLED_SAME={};   // slug → 목록 이름 · '모델|국가' → slug 들(정렬) — loadCrawledProducts 가 채운다
 function crawledId(s,base){
   if(CRAWLED_NAME[s.slug])return CRAWLED_NAME[s.slug];
@@ -7143,12 +7149,12 @@ function crawledId(s,base){
 function crawledNames(items){
   const taken=new Set(P.filter(x=>!x._crawledEntry).map(x=>x.id));   // 허브에 원래 있던 제품
   const key=s=>crawledBase(s)+'|'+String(s.country||'');
-  CRAWLED_SAME={};items.forEach(s=>(CRAWLED_SAME[key(s)]=CRAWLED_SAME[key(s)]||[]).push(s.slug));
-  Object.values(CRAWLED_SAME).forEach(a=>a.sort());
-  const rank=s=>CRAWLED_SAME[key(s)].indexOf(s.slug),cc=s=>String(s.country||'').toUpperCase();
+  CRAWLED_SAME={};items.forEach(s=>(CRAWLED_SAME[key(s)]=CRAWLED_SAME[key(s)]||[]).push({slug:s.slug,url:s.url,country:s.country,crawled_at:s.crawled_at}));
+  Object.values(CRAWLED_SAME).forEach(a=>a.sort(crawledOrder));
+  const rank=s=>CRAWLED_SAME[key(s)].findIndex(x=>x.slug===s.slug),cc=s=>String(s.country||'').toUpperCase();
   CRAWLED_NAME={};
   items.filter(s=>rank(s)===0).forEach(s=>{const b=crawledBase(s),id=taken.has(b)?b+'-'+cc(s):b;CRAWLED_NAME[s.slug]=id;taken.add(id);});
-  items.filter(s=>rank(s)>0).forEach(s=>{const b=crawledBase(s);let id=b+'-'+cc(s),n=2;while(taken.has(id))id=b+'-'+cc(s)+(n++);CRAWLED_NAME[s.slug]=id;taken.add(id);});
+  items.filter(s=>rank(s)>0).sort((a,b)=>rank(a)-rank(b)).forEach(s=>{const b=crawledBase(s);let id=b+'-'+cc(s),n=2;while(taken.has(id))id=b+'-'+cc(s)+(n++);CRAWLED_NAME[s.slug]=id;taken.add(id);});
 }
 const crawledBase=s=>{try{const g=new URL(s.url).pathname.split('/').filter(Boolean);return (g[g.length-1]||s.slug).toUpperCase();}catch(e){return String(s.slug||'').toUpperCase();}};
 function crawledToP(s){
@@ -7168,6 +7174,7 @@ async function loadCrawledProducts(){
     const d=await r.json();
     for(let i=P.length-1;i>=0;i--)if(P[i]._crawledEntry)P.splice(i,1);   // 재로드 시 중복 제거
     const norm=u=>String(u||'').replace(/[?#].*$/,'').replace(/\/+$/,'').toLowerCase();
+    await Promise.race([LIVE_READY,new Promise(r=>setTimeout(r,3000))]);loadCrawledProducts._names=true;
     crawledNames((d.products||[]).filter(s=>!P.some(x=>!x._crawledEntry&&norm(x.url)===norm(s.url))));   // 기존 제품에 붙는 것은 이름이 따로 없다
     (d.products||[]).forEach(s=>{
       const legacy=P.find(x=>!x._crawledEntry&&norm(x.url)===norm(s.url));
