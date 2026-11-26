@@ -224,22 +224,98 @@ async function removePaths(absPaths) {
 }
 
 /** 크롤 제품 삭제 (허브 목록의 삭제 버튼, 2026-11-05) — 버킷의 crawler-py-out/<slug>/ · crawler-out/<slug>.* 를
- *  trash/<stamp>/<원래 키> 로 복사해 둔 뒤 지운다 (되돌리기: trash 에서 원래 키로 복사). 반환: 지운 객체 수. */
-async function deleteProduct(slug, stamp) {
+ *  trash/<stamp>/<원래 키> 로 복사해 둔 뒤 지운다 (되돌리기: restoreProduct). 반환: 지운 객체 수. */
+async function deleteProduct(slug, stamp, meta) {
   if (!enabled()) return 0;
-  const { CopyObjectCommand, DeleteObjectsCommand } = require('@aws-sdk/client-s3');
-  const bucket = config().bucket;
-  const keys = [
-    ...(await listRemote(`${ROOTS[0].prefix}${slug}/`)).keys(),
-    ...[...(await listRemote(`${ROOTS[1].prefix}${slug}.`)).keys()],
-  ];
-  await pool(keys, 8, (key) => client().send(new CopyObjectCommand({
-    Bucket: bucket, Key: `trash/${stamp}/${key}`, CopySource: `${bucket}/${encodeURIComponent(key).replace(/%2F/g, '/')}`,
-  })));
-  for (let i = 0; i < keys.length; i += 1000) {
-    await client().send(new DeleteObjectsCommand({ Bucket: bucket, Delete: { Objects: keys.slice(i, i + 1000).map((Key) => ({ Key })) } }));
-  }
+  const keys = await productKeys(slug);
+  await pool(keys, 8, (key) => copyKey(key, `trash/${stamp}/${key}`));
+  // 복구 목록용 메모 (2026-11-26) — 재배포돼도 남게 버킷에. 제품 사본보다 나중에 써서, 메모가 있으면 사본도 다 있다.
+  if (meta) await putBuffer(`trash/${stamp}/${TRASH_META}`, Buffer.from(JSON.stringify({ ...meta, slug, stamp, files: keys.length })), 'application/json');
+  await deleteKeys(keys);
   return keys.length;
+}
+
+const copyKey = (from, to) => {
+  const { CopyObjectCommand } = require('@aws-sdk/client-s3');
+  const bucket = config().bucket;
+  return client().send(new CopyObjectCommand({ Bucket: bucket, Key: to, CopySource: `${bucket}/${encodeURIComponent(from).replace(/%2F/g, '/')}` }));
+};
+async function deleteKeys(keys) {
+  const { DeleteObjectsCommand } = require('@aws-sdk/client-s3');
+  for (let i = 0; i < keys.length; i += 1000) {
+    await client().send(new DeleteObjectsCommand({ Bucket: config().bucket, Delete: { Objects: keys.slice(i, i + 1000).map((Key) => ({ Key })) } }));
+  }
+}
+/** 버킷에 있는 제품 하나의 키 (crawler-py-out/<slug>/… + crawler-out/<slug>.*) */
+async function productKeys(slug) {
+  return [...(await listRemote(`${ROOTS[0].prefix}${slug}/`)).keys(), ...(await listRemote(`${ROOTS[1].prefix}${slug}.`)).keys()];
+}
+
+// ── 휴지통 복구 (2026-11-26) ── 버킷 trash/<stamp>/<원래 키> 를 원래 키로 다시 복사한다.
+//   trash/<stamp>/_meta.json     지울 때 남긴 메모 (모델 · 주소 · 지운 때). 그 전에 지운 것은 메모 없음 → 사본에서 읽는다.
+//   trash/<stamp>/_restored.json 복구했다는 표시 — 목록에서 뺀다 (사본은 지우지 않고 그대로 둔다).
+const TRASH_META = '_meta.json', TRASH_DONE = '_restored.json';
+const STAMP_RE = /^\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{3}Z$/;
+
+/** 버킷 휴지통 → [{ stamp, slug, keys: [원래 키…], meta: bool, restored: bool }] (최근 것부터) */
+async function listTrash() {
+  if (!enabled()) return [];
+  const byStamp = new Map();
+  for (const key of (await listRemote('trash/')).keys()) {
+    const m = /^trash\/([^/]+)\/(.+)$/.exec(key);
+    if (!m || !STAMP_RE.test(m[1])) continue;
+    const e = byStamp.get(m[1]) || { stamp: m[1], slugs: new Map(), meta: false, restored: false };
+    byStamp.set(m[1], e);
+    const orig = m[2];
+    if (orig === TRASH_META) { e.meta = true; continue; }
+    if (orig === TRASH_DONE) { e.restored = true; continue; }
+    let slug = null;
+    if (orig.startsWith(ROOTS[0].prefix)) slug = orig.slice(ROOTS[0].prefix.length).split('/')[0];
+    else if (orig.startsWith(ROOTS[1].prefix)) slug = orig.slice(ROOTS[1].prefix.length).split('.')[0];
+    if (!slug || slug.startsWith('_')) continue;
+    if (!e.slugs.has(slug)) e.slugs.set(slug, []);
+    e.slugs.get(slug).push(orig);
+  }
+  const out = [];
+  for (const e of byStamp.values()) for (const [slug, keys] of e.slugs) out.push({ stamp: e.stamp, slug, keys, meta: e.meta, restored: e.restored });
+  return out.sort((a, b) => (a.stamp < b.stamp ? 1 : -1));
+}
+
+/** 휴지통 사본을 원래 키로 복사한다. 이미 원래 키에 같은 제품이 있으면 아무것도 하지 않고 { conflict: true }.
+ *  중간에 실패하면 복사한 키를 다시 지워 반쪽짜리 제품이 남지 않게 한다. */
+async function restoreProduct(stamp, slug) {
+  if (!enabled()) return { keys: [] };
+  if (!STAMP_RE.test(stamp)) throw new Error('bad stamp');
+  const entry = (await listTrash()).find((e) => e.stamp === stamp && e.slug === slug);
+  if (!entry) return { missing: true, keys: [] };
+  if ((await productKeys(slug)).length) return { conflict: true, keys: [] };
+  const done = [];
+  try {
+    await pool(entry.keys, 8, async (key) => { await copyKey(`trash/${stamp}/${key}`, key); done.push(key); });
+  } catch (e) {
+    await deleteKeys(done).catch(() => {});
+    throw e;
+  }
+  await putBuffer(`trash/${stamp}/${TRASH_DONE}`, Buffer.from(JSON.stringify({ slug, at: Date.now() / 1000 })), 'application/json');
+  return { keys: entry.keys };
+}
+
+/** 버킷 키들을 로컬 원래 자리로 내려받는다 (로컬에 없거나 다른 것만). 반환: 내려받은 수 */
+async function pullKeys(keys) {
+  if (!enabled()) return 0;
+  let n = 0;
+  const remote = new Map();
+  for (const key of keys) {
+    const r = ROOTS.find((x) => key.startsWith(x.prefix));
+    const rel = r && key.slice(r.prefix.length);
+    if (!rel || rel.split('/').includes('..') || !shouldSync(rel)) continue;
+    remote.set(key, path.join(r.local, ...rel.split('/')));
+  }
+  await pool([...remote], 8, async ([key, abs]) => {
+    if (fs.existsSync(abs)) return;
+    await download(key, abs); n++;
+  });
+  return n;
 }
 
 /** 임의 키에 바이트 올리기 / 읽기 (이미지형 HTML 슬라이스 — media-slices/ 접두사, 시작 시 pull 대상 아님) */
@@ -271,7 +347,8 @@ async function getToFile(key, abs) {
   try { await download(key, abs); return true; } catch (e) { return false; }
 }
 
-module.exports = { enabled, listRemote, pullAll, whenPulled, pushAll, pushPaths, removePaths, pushProduct, pushCrawlerOut, putBuffer, getBuffer, putFile, getToFile, deleteProduct };
+module.exports = { enabled, listRemote, pullAll, whenPulled, pushAll, pushPaths, removePaths, pushProduct, pushCrawlerOut, putBuffer, getBuffer, putFile, getToFile, deleteProduct,
+  listTrash, restoreProduct, pullKeys, TRASH_META, STAMP_RE };
 
 if (require.main === module) {
   require('dotenv').config({ path: path.join(__dirname, '.env') });
