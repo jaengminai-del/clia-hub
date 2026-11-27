@@ -19,13 +19,14 @@ const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (
 const siteOk = (s) => /^[a-z]{2}(_[a-z]{2})?$/.test(String(s || ''));
 const cache = new Map();   // site → { at, idx: Map<key, [{url, lastmod}]>, count } | Promise
 
-async function getText(url) {
+async function getText(url, directOnly) {
   try {
     const r = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'application/xml,text/xml;q=0.9,*/*;q=0.8' }, signal: AbortSignal.timeout(60000) });
     const t = await r.text();
     if (r.ok && /<(urlset|sitemapindex)\b/.test(t)) return t;
   } catch (_) {}
   // 서버 위치에 따라 LG.com 이 봇 요청을 막을 때 — 크롤과 같은 Firecrawl 로 받는다
+  if (directOnly) return '';
   const key = process.env.FIRECRAWL_API_KEY;
   if (!key) return '';
   try {
@@ -40,15 +41,18 @@ async function getText(url) {
 
 const unesc = (s) => s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 
-async function build(site) {
+async function build(site, directOnly) {
   const file = path.join(DIR, `${site}.xml`);
   let xml = '';
   try { if (Date.now() - fs.statSync(file).mtimeMs < TTL) xml = fs.readFileSync(file, 'utf8'); } catch (_) {}
   if (!xml) {
-    xml = await getText(`https://www.lg.com/${site}/sitemap.xml`);
+    xml = await getText(`https://www.lg.com/${site}/sitemap.xml`, directOnly);
     // 사이트맵 목록(sitemapindex)이면 하위 사이트맵을 이어 붙인다 (최대 30개)
     const subs = /<sitemapindex\b/.test(xml) ? [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => unesc(m[1])).slice(0, 30) : [];
-    for (const u of subs) xml += await getText(u);
+    for (const u of subs) {
+      if (directOnly && !/^https:\/\/www\.lg\.com\//.test(u)) continue;
+      xml += await getText(u, directOnly);
+    }
     if (!xml) throw new Error(`LG.com sitemap not available for ${site}`);
     fs.mkdirSync(DIR, { recursive: true });
     fs.writeFileSync(file, xml);
@@ -69,13 +73,14 @@ async function build(site) {
   return { at: Date.now(), idx, count };
 }
 
-async function index(site) {
+async function index(site, { directOnly = false } = {}) {
   if (!siteOk(site)) throw new Error('bad site');
-  const c = cache.get(site);
+  const cacheKey = directOnly ? `${site}:direct` : site;
+  const c = cache.get(cacheKey);
   if (c && !(c instanceof Promise) && Date.now() - c.at < TTL) return c;
   if (c instanceof Promise) return c;
-  const p = build(site).then((v) => { cache.set(site, v); return v; }).catch((e) => { cache.delete(site); throw e; });
-  cache.set(site, p);
+  const p = build(site, directOnly).then((v) => { cache.set(cacheKey, v); return v; }).catch((e) => { cache.delete(cacheKey); throw e; });
+  cache.set(cacheKey, p);
   return p;
 }
 

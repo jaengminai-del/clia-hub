@@ -1,43 +1,43 @@
 /* bulk-check.js — 벌크 업로드 Check 단계 (?check=1 일 때만, 2026-11-26)
    흐름: 첨부 › 준비 › Check › 받기. 라이브 제품만 준비 · 결과가 나오는 대로 덱에서 두 더미로(통과 · 검토 필요), 사람은 검토 필요만 하나씩.
-   - 라이브: 올린 엑셀에 Status 칸이 있으면 그것(Shopee Live · Lazada Active), 없으면 CLIA 라이브 목록(clia/th-live.json).
-     라이브가 아니거나 상태를 모르는 행은 크롤 · 생성하지 않고 엑셀 그 행은 원래 내용 그대로.
+   - Status 칸이 있으면 Live/Active만, 없으면 모든 상품 행을 공개 LG.com 매칭 후보로 삼는다.
+     매칭되지 않았거나 라이브가 아닌 행의 원래 내용은 그대로 둔다.
    - 건너뛴 수는 제품(모델) 기준 — 진행 막대와 같은 단위. 목록에는 엑셀 행 수도.
    - AI 체크는 서버가 계산(bulk-jobs.js aiChecks) · 화면은 기다리게 하지 않는다 (스캔 띠는 날아가는 카드 위에서만).
    - 확인 = 승인 기록(approvals.js, via 'bulk' + 본 이미지 해시). 실제 다운로드 잠금은 APPROVAL_GATE 켤 때만.
    bulk.js 가 매칭(setData)까지 하고 BulkCheck.begin(core) 로 넘긴다. 기존 벌크 흐름은 그대로. */
 (function () {
   const TX = {
-    en: { steps: ['Attach', 'Prepare', 'Check', 'Download'], rows: (n) => `${n} rows`, prep: (a, b) => `Preparing ${a} / ${b}`, liveP: 'live products',
-      skip: (n) => `${n} not live — skipped`, view: 'View', hide: 'Hide', asOf: (d) => `Live list as of ${d}`, byStatus: 'From the Status column',
-      skipRows: (n) => `${n} rows in the Excel — left as they are`, notLive: 'Not live', unknown: 'Unknown', none: 'No live products in this file.',
+    en: { steps: ['Attach', 'Prepare', 'Check', 'Download'], rows: (n) => `${n} rows`, prep: (a, b) => `Preparing ${a} / ${b}`, liveP: "matched products",
+      skip: n=>`${n} products left unchanged`, view: 'View', hide: 'Hide', asOf: (d) => `Live list as of ${d}`, byStatus: 'From the Status column',
+      skipRows: (n) => `${n} rows in the Excel — left as they are`, notLive: 'Not live', unknown: 'Unknown', none: "No eligible LG.com matches in this file.", unmatched: "LG.com match not verified",
       
       w_fail: "Couldn't prepare", w_retried: 'still there after a retry', redo: 'Prepare again', remove: 'Remove from this Excel',
-      redoing: 'Preparing again', doneT: (n) => `${n} checked`, removed: (n) => `${n} removed`, skipped: (n) => `${n} not live skipped`, dl: 'Download Excel', err: 'Something went wrong: ', reviewChanged: 'The PDP changed. Review the updated version before confirming.' },
-    th: { steps: ['แนบไฟล์', 'เตรียม', 'ตรวจ', 'ดาวน์โหลด'], rows: (n) => `${n} แถว`, prep: (a, b) => `กำลังเตรียม ${a} / ${b}`, liveP: 'สินค้าที่ไลฟ์',
-      skip: (n) => `ไม่ได้ไลฟ์ ${n} รายการ — ข้ามไป`, view: 'ดู', hide: 'ซ่อน', asOf: (d) => `รายการไลฟ์ ณ ${d}`, byStatus: 'จากคอลัมน์ Status',
-      skipRows: (n) => `${n} แถวใน Excel — คงไว้ตามเดิม`, notLive: 'ไม่ได้ไลฟ์', unknown: 'ไม่ทราบ', none: 'ไม่มีสินค้าที่ไลฟ์ในไฟล์นี้',
+      redoing: 'Preparing again', doneT: (n) => `${n} checked`, removed: (n) => `${n} removed`, skipped: n=>`${n} products left unchanged`, dl: 'Download Excel', err: 'Something went wrong: ', reviewChanged: 'The PDP changed. Review the updated version before confirming.' },
+    th: { steps: ['แนบไฟล์', 'เตรียม', 'ตรวจ', 'ดาวน์โหลด'], rows: (n) => `${n} แถว`, prep: (a, b) => `กำลังเตรียม ${a} / ${b}`, liveP: "สินค้าที่จับคู่ได้",
+      skip: n=>`คงเดิม ${n} รายการ`, view: 'ดู', hide: 'ซ่อน', asOf: (d) => `รายการไลฟ์ ณ ${d}`, byStatus: 'จากคอลัมน์ Status',
+      skipRows: (n) => `${n} แถวใน Excel — คงไว้ตามเดิม`, notLive: 'ไม่ได้ไลฟ์', unknown: 'ไม่ทราบ', none: "ไม่พบสินค้าที่จับคู่กับ LG.com และเข้าเงื่อนไข", unmatched: "ยังยืนยันการจับคู่กับ LG.com ไม่ได้",
       
       w_fail: 'เตรียมไม่สำเร็จ', w_retried: 'ลองใหม่แล้วยังเหมือนเดิม', redo: 'เตรียมใหม่', remove: 'นำออกจาก Excel นี้',
-      redoing: 'กำลังเตรียมใหม่', doneT: (n) => `ตรวจแล้ว ${n} รายการ`, removed: (n) => `นำออก ${n}`, skipped: (n) => `ข้ามที่ไม่ได้ไลฟ์ ${n}`, dl: 'ดาวน์โหลด Excel', err: 'เกิดข้อผิดพลาด: ', reviewChanged: 'PDP มีการเปลี่ยนแปลง โปรดตรวจสอบฉบับล่าสุดก่อนยืนยัน' },
-    ko: { steps: ['첨부', '준비', 'Check', '받기'], rows: (n) => `${n}행`, prep: (a, b) => `준비 중 ${a} / ${b}`, liveP: '라이브 제품',
-      skip: (n) => `라이브 아님 ${n}개 — 건너뜀`, view: '보기', hide: '닫기', asOf: (d) => `라이브 목록 기준일 ${d}`, byStatus: 'Status 칸 기준',
-      skipRows: (n) => `엑셀 ${n}행 — 원래 내용 그대로`, notLive: '라이브 아님', unknown: '모름', none: '이 파일에 라이브 제품이 없어요.',
+      redoing: 'กำลังเตรียมใหม่', doneT: (n) => `ตรวจแล้ว ${n} รายการ`, removed: (n) => `นำออก ${n}`, skipped: n=>`คงเดิม ${n} รายการ`, dl: 'ดาวน์โหลด Excel', err: 'เกิดข้อผิดพลาด: ', reviewChanged: 'PDP มีการเปลี่ยนแปลง โปรดตรวจสอบฉบับล่าสุดก่อนยืนยัน' },
+    ko: { steps: ['첨부', '준비', 'Check', '받기'], rows: (n) => `${n}행`, prep: (a, b) => `준비 중 ${a} / ${b}`, liveP: "매칭된 제품",
+      skip: n=>`${n}개 제품 원본 유지`, view: '보기', hide: '닫기', asOf: (d) => `라이브 목록 기준일 ${d}`, byStatus: 'Status 칸 기준',
+      skipRows: (n) => `엑셀 ${n}행 — 원래 내용 그대로`, notLive: '라이브 아님', unknown: '모름', none: "LG.com 공개 상품과 매칭된 대상이 없어요.", unmatched: "LG.com 매칭 미확인",
       
       w_fail: '준비 못 함', w_retried: '다시 해도 그대로', redo: '다시 준비', remove: '이번 엑셀에서 빼기',
-      redoing: '다시 준비하는 중', doneT: (n) => `${n}개 확인 완료`, removed: (n) => `${n}개 뺌`, skipped: (n) => `라이브 아님 ${n}개 건너뜀`, dl: '엑셀 받기', err: '문제가 생겼어요: ', reviewChanged: 'PDP가 바뀌었어요. 최신 내용을 다시 보고 확인해 주세요.' },
-    de: { steps: ['Anhängen', 'Vorbereiten', 'Prüfen', 'Herunterladen'], rows: (n) => `${n} Zeilen`, prep: (a, b) => `Vorbereitung ${a} / ${b}`, liveP: 'Live-Produkte',
-      skip: (n) => `${n} nicht live — übersprungen`, view: 'Ansehen', hide: 'Ausblenden', asOf: (d) => `Live-Liste vom ${d}`, byStatus: 'Aus der Spalte Status',
-      skipRows: (n) => `${n} Zeilen in der Excel — bleiben unverändert`, notLive: 'Nicht live', unknown: 'Unbekannt', none: 'Keine Live-Produkte in dieser Datei.',
+      redoing: '다시 준비하는 중', doneT: (n) => `${n}개 확인 완료`, removed: (n) => `${n}개 뺌`, skipped: n=>`${n}개 제품 원본 유지`, dl: '엑셀 받기', err: '문제가 생겼어요: ', reviewChanged: 'PDP가 바뀌었어요. 최신 내용을 다시 보고 확인해 주세요.' },
+    de: { steps: ['Anhängen', 'Vorbereiten', 'Prüfen', 'Herunterladen'], rows: (n) => `${n} Zeilen`, prep: (a, b) => `Vorbereitung ${a} / ${b}`, liveP: "zugeordnete Produkte",
+      skip: n=>`${n} Produkte unverändert`, view: 'Ansehen', hide: 'Ausblenden', asOf: (d) => `Live-Liste vom ${d}`, byStatus: 'Aus der Spalte Status',
+      skipRows: (n) => `${n} Zeilen in der Excel — bleiben unverändert`, notLive: 'Nicht live', unknown: 'Unbekannt', none: "Keine passenden LG.com-Produkte in der Datei.", unmatched: "LG.com-Zuordnung nicht bestätigt",
       
       w_fail: 'Vorbereitung fehlgeschlagen', w_retried: 'auch nach erneutem Versuch', redo: 'Neu vorbereiten', remove: 'Aus dieser Excel entfernen',
-      redoing: 'Wird neu vorbereitet', doneT: (n) => `${n} geprüft`, removed: (n) => `${n} entfernt`, skipped: (n) => `${n} nicht live übersprungen`, dl: 'Excel herunterladen', err: 'Fehler: ', reviewChanged: 'Die PDP wurde geändert. Bitte prüfen Sie die aktuelle Version vor der Bestätigung.' },
-    ar: { steps: ['إرفاق', 'تجهيز', 'تحقق', 'تنزيل'], rows: (n) => `${n} صف`, prep: (a, b) => `جارٍ التجهيز ${a} / ${b}`, liveP: 'منتجات نشطة',
-      skip: (n) => `${n} غير نشط — تم تخطيه`, view: 'عرض', hide: 'إخفاء', asOf: (d) => `قائمة النشط بتاريخ ${d}`, byStatus: 'من عمود Status',
-      skipRows: (n) => `${n} صف في Excel — يبقى كما هو`, notLive: 'غير نشط', unknown: 'غير معروف', none: 'لا توجد منتجات نشطة في هذا الملف.',
+      redoing: 'Wird neu vorbereitet', doneT: (n) => `${n} geprüft`, removed: (n) => `${n} entfernt`, skipped: n=>`${n} Produkte unverändert`, dl: 'Excel herunterladen', err: 'Fehler: ', reviewChanged: 'Die PDP wurde geändert. Bitte prüfen Sie die aktuelle Version vor der Bestätigung.' },
+    ar: { steps: ['إرفاق', 'تجهيز', 'تحقق', 'تنزيل'], rows: (n) => `${n} صف`, prep: (a, b) => `جارٍ التجهيز ${a} / ${b}`, liveP: "منتجات مطابقة",
+      skip: n=>`${n} منتج دون تغيير`, view: 'عرض', hide: 'إخفاء', asOf: (d) => `قائمة النشط بتاريخ ${d}`, byStatus: 'من عمود Status',
+      skipRows: (n) => `${n} صف في Excel — يبقى كما هو`, notLive: 'غير نشط', unknown: 'غير معروف', none: "لا توجد منتجات مطابقة مؤهلة على LG.com.", unmatched: "لم يتم تأكيد المطابقة على LG.com",
       
       w_fail: 'تعذّر التجهيز', w_retried: 'ما زال بعد إعادة المحاولة', redo: 'إعادة التجهيز', remove: 'إزالة من ملف Excel هذا',
-      redoing: 'جارٍ إعادة التجهيز', doneT: (n) => `تم فحص ${n}`, removed: (n) => `أُزيل ${n}`, skipped: (n) => `تم تخطي ${n} غير نشط`, dl: 'تنزيل Excel', err: 'حدث خطأ: ', reviewChanged: 'تغيّرت صفحة تفاصيل المنتج. راجع النسخة المحدّثة قبل التأكيد.' },
+      redoing: 'جارٍ إعادة التجهيز', doneT: (n) => `تم فحص ${n}`, removed: (n) => `أُزيل ${n}`, skipped: n=>`${n} منتج دون تغيير`, dl: 'تنزيل Excel', err: 'حدث خطأ: ', reviewChanged: 'تغيّرت صفحة تفاصيل المنتج. راجع النسخة المحدّثة قبل التأكيد.' },
   };
   // 덱 화면 (2026-11-27) 문구 — 위 TX 에 덧붙인다
   const TXD = {
@@ -76,40 +76,32 @@
       w_img: (n) => `${n} صورة مفقودة`, w_txt: (n) => `${n} سطر مفقود`, w_spec: 'جدول مواصفات مفقود', w_sum: 'لا يوجد ملخص تايلاندي', nextP: 'التالي' },
   };
   const tOf = (L) => Object.assign({}, TX.en, TXD.en, TXP.en, TX[L] || {}, TXD[L] || {}, TXP[L] || {});
-  const LIVE_LISTS = { th: '/clia/th-live.json' };   // 법인별 라이브 목록 (허브 Product List 와 같은 파일)
-  const liveKey = (u) => String(u || '').trim().split(/[?#]/)[0].replace(/\/+$/, '').toLowerCase() + '/';
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const DN = '<svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
   const CK = '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>', XX = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>';
   let C = null;   // { core, T, job, units, idx, skip, el }
 
-  async function liveList(corp) {
-    const f = LIVE_LISTS[corp]; if (!f) return null;
-    // 채널별: 항목의 on('Shopee only' · 'Lazada only' · 'Shopee+Lazada') — Shopee 엑셀이면 Shopee 에 라이브인 것만
-    try { const d = await (await fetch(f, { cache: 'no-cache' })).json(); return d && Array.isArray(d.live) ? { on: new Map(d.live.map((x) => [liveKey(x.url || x), String(x.on || '')])), asOf: d.asOf || d.updated || '' } : null; } catch (_) { return null; }
-  }
   const fmtDate = (s) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? `${m[2]}/${m[3]}` : s; };   // 11/05
   const modelOf = (r) => (r.p && r.p.model) || String(r.parentSku || r.sku || '').split('.')[0] || String(r.name || '').slice(0, 40) || '—';
 
-  // 행 → 라이브 판단: Status 칸 → 라이브 목록 → 모름
-  function classify(core, list) {
+  // Status is optional. The server only supplies verified public PDP matches.
+  function classify(core) {
     const { S, d } = core;
-    const ch = (S.channel || d.channel || 'shopee') === 'lazada' ? 'lazada' : 'shopee';
-    const hasStatus = !!(d.cols && d.cols.status);
-    const all = [...S.ok, ...S.reg, ...S.skip];
-    const urls = (r) => (r.kind === 'bundle' ? r.p.parts.map((x) => x.url).filter(Boolean) : r.p && r.p.url ? [r.p.url] : []);
+    const hasStatus = !!d.cols?.status;
     const live = [], skip = [];
-    for (const r of all) {
-      const isProduct = r.kind === 'clia' || r.kind === 'new' || r.kind === 'bundle';
-      let st;
-      if (hasStatus) st = /^(live|active)$/i.test(String(r.status || '').trim()) ? 'live' : (r.status ? 'not' : 'unknown');
-      else if (list) { const u = urls(r); st = !u.length ? 'unknown' : u.some((x) => { const on = list.on.get(liveKey(x)); return on != null && (!on || new RegExp(ch, 'i').test(on)); }) ? 'live' : 'not'; }
-      else st = 'unknown';
-      if (st === 'live' && isProduct) live.push(r); else skip.push({ r, model: modelOf(r), status: hasStatus && r.status ? r.status : st === 'not' ? null : 'unknown' });
+    for (const r of [...S.ok, ...S.reg, ...S.skip]) {
+      const isProduct = ['clia', 'new', 'bundle'].includes(r.kind);
+      const eligible = !hasStatus || /^(live|active)$/i.test(String(r.status || '').trim());
+      if (eligible && isProduct) live.push(r);
+      else skip.push({ r, model: modelOf(r), status: eligible ? 'unmatched' : r.status || 'unknown' });
     }
     const models = new Map();
-    for (const x of skip) { const k = x.model.toUpperCase(); if (!models.has(k)) models.set(k, { model: x.model, status: x.status, rows: 0 }); models.get(k).rows++; }
-    return { live, skip, models: [...models.values()], by: hasStatus ? 'status' : 'list', asOf: hasStatus ? '' : (list && list.asOf) || '' };
+    for (const x of skip) {
+      const k = x.model.toUpperCase() + ':' + x.status;
+      if (!models.has(k)) models.set(k, { model: x.model, status: x.status, rows: 0 });
+      models.get(k).rows++;
+    }
+    return { live, skip, models: [...models.values()], by: hasStatus ? 'status' : 'match', asOf: '' };
   }
 
   // ── 화면 틀 ──
@@ -143,7 +135,7 @@
       <div class="ck-file"><svg viewBox="0 0 24 24"><path d="M4 3h11l5 5v13H4z"/><path d="M15 3v5h5"/></svg><b>${e(C.fileName)}</b><span>${e(T.rows(C.rowsN))}</span></div>
       ${total ? `<div class="ck-pt">${e(T.prep(done, total))}<span>${e(T.liveP)}</span></div><div class="ck-bar"><i style="width:${total ? done / total * 100 : 0}%"></i></div>` : `<div class="ck-pt">${e(T.none)}</div>`}
       ${sk.n ? `<div class="ck-skip">${e(T.skip(sk.n))} ${sk.models.length ? `<a href="#" id="ckView">${e(C.open ? T.hide : T.view)}</a>` : ''}<span class="ck-src">${e(sk.by === 'status' ? T.byStatus : sk.asOf ? T.asOf(fmtDate(sk.asOf)) : '')}</span></div>
-        ${C.open ? `<div class="ck-sl"><div class="ck-slh">${e(T.skipRows(sk.rows))}</div>${sk.models.map((x) => `<div><span>${e(x.model)}</span><span class="ck-m">${e(x.status === 'unknown' ? T.unknown : x.status || T.notLive)}${x.rows > 1 ? ` · ${e(T.rows(x.rows))}` : ''}</span></div>`).join('')}</div>` : ''}` : ''}
+        ${C.open ? `<div class="ck-sl"><div class="ck-slh">${e(T.skipRows(sk.rows))}</div>${sk.models.map((x) => `<div><span>${e(x.model)}</span><span class="ck-m">${e(x.status === 'unmatched' ? T.unmatched : x.status === 'unknown' ? T.unknown : x.status || T.notLive)}${x.rows > 1 ? ` · ${e(T.rows(x.rows))}` : ''}</span></div>`).join('')}</div>` : ''}` : ''}
     </div></div>`;
     const v = document.getElementById('ckView'); if (v) v.onclick = (ev) => { ev.preventDefault(); C.open = !C.open; prepView(core); };
   }
@@ -800,8 +792,7 @@
     const { S, d } = core;
     if (!d.cols || !d.cols.desc) return false;   // 설명 칸을 못 찾은 파일은 예전 흐름(칸 고르기)으로
     C = { core, T: tOf(core.L), job: null, units: [], open: false, fileName: d.fileName, rowsN: d.rows.length };
-    const list = await liveList(core.home());
-    const k = classify(core, list);
+    const k = classify(core);
     const liveProducts = new Set(k.live.map((r) => (r.kind === 'bundle' ? 'b:' + r.row : r.p.slug || r.p.url)));
     C.skip = { n: k.models.length, models: k.models, rows: k.skip.length, by: k.by, asOf: k.asOf };
     C.liveN = liveProducts.size;
@@ -813,6 +804,7 @@
     try {
       C.job = await core.api('/api/v1/bulk/build', { id: d.id, channel: S.channel || d.channel || 'shopee', sheet: d.sheet, descCol: d.cols.desc, country: core.home(), lang: core.L, items,
         check: { skipModels: k.models.length, skipRows: k.skip.length, by: k.by, asOf: k.asOf } });
+      C.skip = { ...C.skip, n: C.job.check?.skipModels ?? C.skip.n, rows: C.job.check?.skipRows ?? C.skip.rows };
       core.remember(C.job.id);
       await rush(core);
     } catch (e) { alertLine(core, C.T.err + e.message); }

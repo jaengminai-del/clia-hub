@@ -24,6 +24,7 @@ const xlsx = require('./bulk-xlsx');
 const { productIndex, matchRow, skuKeys, classifyUrl, norm } = require('./bulk-catalog');
 const sitemap = require('./bulk-sitemap');
 const bulkJobs = require('./bulk-jobs');
+const checkMatch = require('./bulk-check-match');
 
 const cleanName = (s) => String(s || 'bulk.xlsx').replace(/[\x00-\x1f\\/:*?"<>|]+/g, '_').slice(0, 150) || 'bulk.xlsx';
 
@@ -61,24 +62,23 @@ function columnsOf(sheet) {
 function detect(sheet) {
   const cols = columnsOf(sheet);
   let headEnd = 0;   // 머리글이 끝나는 행 = 머리글 이름이 맞은 칸 가운데 가장 아래 행 (데이터 행은 세지 않는다)
+  let dataStart = null;
   const pick = (test, not, skip) => {
     for (const c of cols) {
       if (skip && skip.includes(c.col)) continue;
       // Shopee 내부 키(et_title_product_description 등)의 'title' 은 이름 칸 표시가 아니므로 빼고 본다
-      const i = c.labels.findIndex((l) => test.test(l) && !(not && not.test(l.replace(/^et_title_/i, ''))));
+      const i = c.labels.findIndex((l, n) => (!dataStart || c.rows[n] < dataStart) && test.test(l) && !(not && not.test(l.replace(/^et_title_/i, ''))));
       if (i >= 0) { headEnd = Math.max(headEnd, c.rows[i]); return c.col; }
     }
     return null;
   };
-  const found = { desc: pick(HEAD.desc, HEAD.descNot), parentSku: pick(HEAD.parentSku), id: pick(HEAD.id, HEAD.idNot), name: pick(HEAD.name), status: pick(HEAD.status) };
-  found.sku = pick(HEAD.sku, HEAD.parentSku, [found.parentSku]);
-  // 같은 열의 아래 머리글 행(현지어 이름·필수 표시·설명)까지: 맞은 행 바로 아래의 짧은 글 행들도 머리글로 본다
-  const dataStart = (() => {
-    const idc = found.id;
-    if (!idc) return null;
+  const id = pick(HEAD.id, HEAD.idNot);
+  if (id) {
     const rows = [...sheet.rows.keys()].sort((a, b) => a - b);
-    return rows.find((r) => r > headEnd && /^\d{3,}$/.test(String((sheet.rows.get(r) || new Map()).get(idc) || '').trim())) || null;
-  })();
+    dataStart = rows.find(r => r > headEnd && /^\d{3,}$/.test(String(sheet.rows.get(r)?.get(id) || '').trim())) || null;
+  }
+  const found = { desc: pick(HEAD.desc, HEAD.descNot), parentSku: pick(HEAD.parentSku), id, name: pick(HEAD.name), status: pick(HEAD.status) };
+  found.sku = pick(HEAD.sku, HEAD.parentSku, [found.parentSku]);
   if (dataStart) headEnd = dataStart - 1;
   return { cols, found, headEnd };
 }
@@ -200,6 +200,21 @@ function fileProblem(buf, fileName) {
   return 'not_xlsx';
 }
 
+async function addCheckMatches(out, country) {
+  const idx = productIndex(), { hits, by } = await checkMatch.select(out, country, idx);
+  const products = {};
+  for (const row of out.rows) {
+    const parts = hits.get(row.row);
+    row.candidates = [];
+    if (!parts) continue;
+    for (const p of parts) if (p.slug) products[p.slug] = p;
+    if (row.bundle) row.bundleParts = parts;
+    else if (parts[0].slug) row.candidates = [parts[0].slug];
+    else row.lg = parts[0];
+  }
+  return { ...out, products, checkMatchBy: by };
+}
+
 router.post('/api/v1/bulk/upload', raw, async (req, res) => {
   const buf = req.body;
   if (!Buffer.isBuffer(buf) || !buf.length) return res.status(400).json({ error: 'file required (.xlsx body)' });
@@ -208,9 +223,11 @@ router.post('/api/v1/bulk/upload', raw, async (req, res) => {
   try { wb = await xlsx.load(buf); }
   catch (e) { return res.status(400).json({ error: e.message, code: fileProblem(buf, fileName) }); }
   try {
-    const bad = await wrongCountry(analyze(wb, fileName), req.query.country);
+    const a = analyze(wb, fileName);
+    const bad = await wrongCountry(a, req.query.country);
     if (bad) { console.log(`[bulk] upload ${fileName}: 나라가 다름 (${bad.selected} 화면 → ${bad.detected}, ${bad.by} ${bad.n}/${bad.all})`); return res.status(400).json(bad); }
-    const out = await addLgUrls(analyze(wb, fileName), req.query.country);
+    const check = req.query.check === '1' && !!a.cols.desc;
+    const out = await (check ? addCheckMatches(a, req.query.country) : addLgUrls(a, req.query.country));
     const id = crypto.randomBytes(8).toString('hex');
     await bulkJobs.saveUpload(id, buf, { fileName, at: Date.now() });
     console.log(`[bulk] upload ${fileName}: ${out.rows.length} rows, matched ${out.rows.filter((r) => r.candidates.length).length}, LG.com found ${out.rows.filter((r) => r.lg).length}`);
@@ -280,11 +297,6 @@ router.post('/api/v1/bulk/build', async (req, res) => {
     } else continue;
     seen.add(row);
   }
-  if (!items.length) return res.status(400).json({ error: 'select at least one product' });
-  if (items.length > 2000) return res.status(400).json({ error: 'too many rows (max 2000)' });
-  // 크롤 비용·시간: 한 번에 새로 등록(크롤)하는 제품은 300개까지
-  const MAX_REG = Math.max(1, parseInt(process.env.BULK_MAX_REGISTER, 10) || 300);
-  if (items.reduce((n, x) => n + (x.bundle ? x.bundle.filter((y) => y.register).length : (x.register || x.force ? 1 : 0)), 0) > MAX_REG) return res.status(400).json({ error: `too many products to register at once (max ${MAX_REG})`, code: 'too_many_register', max: MAX_REG });
   const wb = await xlsx.load(up.buf).catch(() => null);
   if (!wb || !wb.sheets.some((s) => s.path === b.sheet)) return res.status(400).json({ error: 'sheet not found' });
   const sheetOut = analyze(wb, up.meta.fileName, { sheet: b.sheet });
@@ -303,12 +315,36 @@ router.post('/api/v1/bulk/build', async (req, res) => {
   if (bulkJobs.skuConflict({ descCol, skuCol, skus })) {
     return res.status(400).json({ error: 'SKU and PDP description must use different columns', code: 'sku_description_conflict' });
   }
+  // In Check mode rederive the permitted rows and LG URLs from the uploaded
+  // workbook. Never trust a stale/browser-supplied SKU, slug or arbitrary row.
+  const isCheck = !!b.check && typeof b.check === 'object';
+  let ck = null;
+  if (isCheck) {
+    if (descCol !== sheetOut.cols.desc) return res.status(400).json({ error: 'use the workbook product description column', code: 'description_column_required' });
+    const selected = await checkMatch.select(sheetOut, country, idx);
+    const candidateRows = new Set((Array.isArray(b.items) ? b.items : []).map(it => Number(it?.row)));
+    const unchanged = [];
+    items.length = 0; skus.length = 0;  // Check never writes SKUs, including unmatched rows.
+    const itemPart = p => ({ url: p.url, model: p.model, slug: p.slug || cr.slugify(p.url), ...(p.register ? { register: true } : {}) });
+    for (const row of sheetOut.rows) {
+      const parts = selected.hits.get(row.row);
+      if (!parts || !candidateRows.has(row.row)) { unchanged.push(row); continue; }
+      const ps = parts.map(itemPart);
+      if (row.bundle) items.push({ row: row.row, bundle: ps, bundleTitle: row.name.replace(/^(\s*\[[^\]]*\]\s*)+/, '').slice(0, 120), model: ps.map(p => p.model).join(' + '), slug: '', url: '', register: ps.some(p => p.register), status: 'queued' });
+      else items.push({ row: row.row, ...ps[0], status: 'queued' });
+    }
+    const names = new Set(unchanged.map(r => (r.parentSku || r.sku || r.name || String(r.row)).split('.')[0].toUpperCase()));
+    ck = { skipModels: names.size, skipRows: unchanged.length, by: selected.by, asOf: '' };
+  }
+  if (!items.length) return res.status(400).json({ error: 'select at least one product' });
+  if (items.length > 2000) return res.status(400).json({ error: 'too many rows (max 2000)' });
+  // Preserve the configured registration cap; repeated rows do not trigger separate crawls.
+  const MAX_REG = Math.max(1, parseInt(process.env.BULK_MAX_REGISTER, 10) || 300);
+  const regs = items.flatMap(x => x.bundle ? x.bundle.filter(y => y.register).map(y => y.url) : x.register || x.force ? [x.url] : []);
+  if ((isCheck ? new Set(regs).size : regs.length) > MAX_REG) return res.status(400).json({ error: `too many products to register at once (max ${MAX_REG})`, code: 'too_many_register', max: MAX_REG });
   const email = b.notify && b.notify.email ? String(b.notify.email).trim() : '';
   if (email && !bulkJobs.emailOk(email)) return res.status(400).json({ error: 'email address not allowed', code: 'bad_email' });
   const base = `${req.get('x-forwarded-proto') || req.protocol}://${req.get('host')}`;
-  // 벌크 Check (?check=1, 2026-11-26): 라이브 아닌 행은 화면이 이미 뺐다 — 건너뛴 수 · 기준만 기록 (완료 화면 · 메일)
-  const ck = b.check && typeof b.check === 'object' ? { skipModels: Math.max(0, parseInt(b.check.skipModels, 10) || 0), skipRows: Math.max(0, parseInt(b.check.skipRows, 10) || 0),
-    by: b.check.by === 'status' ? 'status' : 'list', asOf: /^\d{4}-\d{2}-\d{2}$/.test(b.check.asOf || '') ? b.check.asOf : '' } : null;
   const j = bulkJobs.create({ upload: b.id, channel: b.channel, country, sheet: b.sheet, descCol, items, base, skus, skuCol, check: ck,
     outName: `${up.meta.fileName.replace(/\.xlsx$/i, '')}-clia-${b.channel}.xlsx`,
     notify: email && bulkJobs.mailReady() ? { email } : null, lang: /^[a-z]{2}$/.test(b.lang || '') ? b.lang : 'en' });
