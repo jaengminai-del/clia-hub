@@ -35,6 +35,10 @@ function limiter(n) {
   return (fn) => new Promise((ok, no) => { q.push({ fn, ok, no }); next(); });
 }
 const crawlSlot = limiter(CRAWL_CONC);
+// 내용 만들기(페이지 생성 · 슬라이스 · 요약)도 서버 전체 공용. 예전엔 작업마다 2개 — 운영 측정(2026-11-27, 100개 같은 호출):
+//   동시 2 → 45s · 4 → 22s · 8 → 12s · 16 → 6s (거의 비례). 기본 16, BULK_CONTENT_CONC 로 1~24
+const CONTENT_CONC = Math.max(1, Math.min(24, parseInt(process.env.BULK_CONTENT_CONC, 10) || 16));
+const contentSlot = limiter(CONTENT_CONC);
 
 // ── 올린 파일 (로컬 + 버킷) ──
 async function saveUpload(id, buf, meta) {
@@ -98,7 +102,7 @@ async function getJob(id) {
   if (jobs.has(id)) return jobs.get(id);
   let j = readJson(jobFile(id));
   if (!j) { const b = await store.getBuffer(`bulk/jobs/${id}.json`).catch(() => null); try { j = b && JSON.parse(b.toString('utf8')); } catch (_) {} }
-  if (j) jobs.set(id, j);
+  if (j) { jobs.set(id, j); if (j.status === 'ready') kickRetries(j); }   // 재배포로 끊긴 뒤의 자동 재시도는 다시
   return j || null;
 }
 
@@ -228,7 +232,8 @@ function qaOf(slug) {
   const gone = (cov.missing_images || []).filter(real).filter((x) => !dead.has(imgKey(x.image)));
   const images = gone.length + (chk.images_missing_url || 0);
   const files = gone.slice(0, 3).map((x) => String(x.image || '').split('/').pop());   // 어떤 이미지가 빠졌는지 (화면에서 마우스를 올리면 보임)
-  return { images, texts, files, mirror };
+  const srcs = gone.slice(0, 3).map((x) => String(x.image || '')).filter((u) => /^https?:\/\//.test(u));   // 벌크 Check 검토 화면: lg.com 원본 (여기선 빠짐)
+  return { images, texts, files, srcs, mirror };
 }
 
 // ── 벌크 Check (?check=1, 2026-11-26) ──
@@ -240,7 +245,7 @@ function aiChecks(j, it, c) {
   const notLoaded = m ? Math.max(0, +m[2] - +m[1]) : 0;
   const q = it.bundle ? { images: 0, texts: 0, mirror: null } : qaOf(it.slug);
   const lgImg = q.images;
-  out.push({ k: 'img', ok: !notLoaded && !lgImg, n: notLoaded + lgImg });
+  out.push({ k: 'img', ok: !notLoaded && !lgImg, n: notLoaded + lgImg, src: q.srcs || [] });
   out.push({ k: 'txt', ok: q.texts < 5, n: q.texts });   // 글 몇 줄은 캐러셀 버튼 글자 같은 오탐이 많다 — 확인 필요 규칙과 같게 5줄부터
   if (!it.bundle && /lg\.com\/th\//i.test(it.url || '')) out.push({ k: 'sum', ok: !(c && c.summaryErr) });
   if (j.channel === 'shopee') out.push({ k: 'n12', ok: true, used: c ? c.images : 0, all: c ? c.allImages : 0 });
@@ -256,23 +261,9 @@ function storeOf(it) {
   const CM = require('./bulk/bulk-market.js');
   return { title: (it.bundle ? it.bundleTitle : m && m.product_title) || it.title || it.model || '', gallery: m ? CM.galleryOf(m) : [], specs: m ? CM.specsOf(m) : [] };
 }
-// 고쳐질 수 있는 문제(이미지 · 글 누락)면 한 번 자동으로 다시: 마지막 크롤이 하루보다 오래됐으면 다시 크롤, 아니면 다시 그리기만.
-// (방금 크롤한 것은 다시 크롤해도 같다 — 크롤 비용만 든다)
-async function autoRetry(j, it, c) {
-  const ai = aiChecks(j, it, c);
-  if (it.bundle || !aiFail(ai) || it.retried) return { c, ai };
-  const bad = new Set(ai.filter((x) => !x.ok).map((x) => x.k));
-  if (!bad.has('img') && !bad.has('txt')) return { c, ai };
-  it.retried = 1;
-  const cr = require('./crawler-routes');
-  const src = readJson(path.join(OUT_DIR(), it.slug, 'source.json')) || {};
-  if (Date.now() / 1000 - (Number(src.crawled_at) || 0) > 24 * 3600) {
-    await crawlSlot(() => cr.crawl(it.url, { force: true, base: j.base })).catch((e) => console.warn('[bulk] check retry crawl', it.slug, e.message));
-    catalog.invalidate();
-  }
-  try { const c2 = await contentFor(j.channel, it.url); return { c: c2, ai: aiChecks(j, it, c2) }; }
-  catch (e) { console.warn('[bulk] check retry content', it.slug, e.message); return { c, ai }; }
-}
+// 고쳐질 수 있는 문제(이미지 · 글 누락)면 한 번 자동으로 다시 (retryLater — 작업이 끝난 뒤 뒤에서):
+// 마지막 크롤이 하루보다 오래됐으면 다시 크롤, 아니면 다시 그리기만 (방금 크롤한 것은 다시 크롤해도 같다 — 크롤 비용만 든다)
+const retryable = (it, ai) => !it.bundle && !it.retried && ai.some((x) => !x.ok && (x.k === 'img' || x.k === 'txt'));
 // 작업 결과 글(행 → 설명 칸)을 남겨 둔다 — Check 에서 뺀 행만 빼고 엑셀을 다시 만들 때 (로컬 + 버킷)
 const textsFile = (j) => path.join(DIR, j.upload, `texts-${j.id}.json`);
 async function saveTexts(j, texts, bucket) {
@@ -309,7 +300,7 @@ async function writeResult(j, texts) {
 }
 // Check 화면의 버튼 — 한 제품(같은 제품의 여러 행)에 한 번: ok(확인하고 다음 → 승인 기록 via 'bulk' + 본 이미지 해시) ·
 //   remove(이번 엑셀에서 빼기 — 그 행들은 원래 내용 그대로) · retry(다시 준비)
-async function checkAction(j, rows, action, by) {
+async function checkAction(j, rows, action, by, override) {
   const its = j.items.filter((x) => rows.includes(x.row));
   if (!j.check || !its.length) return { error: 'not found', status: 404 };
   if (j.status !== 'ready') return { error: 'job is not ready', status: 409 };
@@ -319,18 +310,60 @@ async function checkAction(j, rows, action, by) {
     for (const it of its) {
       it.check = 'ok'; it.checkedBy = who; it.checkedAt = Date.now();
       // 묶음 상품은 구성품마다 따로 검토 — 여기서는 기록하지 않는다
-      if (!it.bundle && it.hash && it.slug && !done.has(it.slug)) { done.add(it.slug); require('./approvals').write(it.slug, { state: 'approved', by: who, via: 'bulk', hashes: { [j.channel]: it.hash } }); }
+      if (!it.bundle && it.hash && it.slug && !done.has(it.slug)) { done.add(it.slug); require('./approvals').write(it.slug, { state: 'approved', by: who, via: override ? 'bulk-override' : 'bulk', hashes: { [j.channel]: it.hash } }); }   // override: AI 가 검토 필요라 했지만 사람이 통과
     }
   } else if (action === 'remove') {
     for (const it of its) it.check = 'removed';
-    await writeResult(j, await loadTexts(j));
+    await rewrite(j, await loadTexts(j));
   } else if (action === 'retry') {
-    if (its.some((it) => it.status === 'working')) return { error: 'already preparing', status: 409 };
+    if (its.some((it) => it.status === 'working' || it.retrying)) return { error: 'already preparing', status: 409 };
     for (const it of its) { it.check = null; it.status = 'working'; }
     redoAll(j, its).catch((e) => console.warn('[bulk] check redo', j.id, rows.join(','), e.message));
   } else return { error: 'unknown action', status: 400 };
   await persist(j, true);
   return { ok: true };
+}
+// 결과 엑셀 다시 쓰기는 작업마다 한 줄로 (뒤의 자동 재시도 · 빼기 · 다시 준비가 겹쳐도 차례로)
+const writeChain = new Map();
+function rewrite(j, texts) {
+  const p = (writeChain.get(j.id) || Promise.resolve()).then(() => writeResult(j, texts), () => writeResult(j, texts));
+  writeChain.set(j.id, p.catch(() => {}));
+  return p;
+}
+// 자동 재시도 (2026-11-27): 작업이 끝난 뒤 뒤에서 — 사람은 결과를 바로 보고, 고쳐지면 그 제품이 '준비됨'으로 옮겨 간다
+const retryingJobs = new Set();
+function kickRetries(j) {
+  if (!j.check || retryingJobs.has(j.id)) return;
+  const its = j.items.filter((x) => x.retrying && x.status === 'ok');
+  if (!its.length) return;
+  retryingJobs.add(j.id);
+  const by = new Map(); for (const it of its) { const k = it.slug || it.url; if (!by.has(k)) by.set(k, []); by.get(k).push(it); }
+  Promise.all([...by.values()].map(([it, ...same]) => retryLater(j, it, same)))
+    .finally(() => retryingJobs.delete(j.id));
+}
+async function retryLater(j, it, same) {
+  const cr = require('./crawler-routes'), all = [it, ...same];
+  try {
+    it.retried = 1;
+    const src = readJson(path.join(OUT_DIR(), it.slug, 'source.json')) || {};
+    if (Date.now() / 1000 - (Number(src.crawled_at) || 0) > 24 * 3600) {   // 방금 크롤한 것은 다시 크롤해도 같다 — 다시 그리기만
+      await crawlSlot(() => cr.crawl(it.url, { force: true, base: j.base })).catch((e) => console.warn('[bulk] check retry crawl', it.slug, e.message));
+      catalog.invalidate();
+    }
+    const c = await contentSlot(() => contentFor(j.channel, it.url));
+    const texts = await loadTexts(j);
+    for (const x of all) {
+      texts.set(x.row, c.text);
+      Object.assign(x, { retried: 1, images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: c.summaryErr || '',
+        imgs: c.urls || [], hash: c.hash || '', ai: aiChecks(j, x, c), store: storeOf(x) });
+      x.flags = flagsFor(j, x, c);
+      require('./slice-preview').ensure(x.imgs).catch(() => {});
+    }
+    await saveTexts(j, texts, true);
+    await rewrite(j, texts);
+  } catch (e) { console.warn('[bulk] check retry', j.id, it.slug, e.message); }
+  for (const x of all) delete x.retrying;
+  await persist(j, true);
 }
 async function redoAll(j, its) { const [first, ...rest] = its; await redo(j, first, rest); }
 // 다시 준비 (사람이 누름): 다시 크롤 → 내용 → AI 체크(자동 재시도 없이) → 엑셀 다시
@@ -348,7 +381,7 @@ async function redo(j, it, same = []) {
       x.flags = flagsFor(j, x, c);
     }
     await saveTexts(j, texts, true);
-    await writeResult(j, texts);
+    await rewrite(j, texts);
   } catch (e) {
     for (const x of [it, ...same]) Object.assign(x, { status: x.error && !x.imgs ? 'failed' : 'ok', ai: [...(x.ai || []).filter((y) => y.k !== 'redo'), { k: 'redo', ok: false, msg: String(e.message || e).slice(0, 200) }] });
   }
@@ -401,7 +434,6 @@ async function run(j) {
   if (!sheet) throw new Error('sheet not found');
   const contentBy = new Map();     // slug → Promise<content>
   const texts = new Map();         // row → 설명 칸 내용 (작업 기록에는 넣지 않는다)
-  const contentSlot = limiter(2);
   // 같은 제품은 작업 안에서 한 번만 크롤 (단품 행과 여러 묶음의 구성품이 겹칠 수 있다 — 같은 폴더에 두 크롤이 동시에 쓰지 않게)
   const crawlBy = new Map();
   const crawlOnce = (url, force, onStart) => {   // onStart: 차례가 와서 실제로 크롤을 시작할 때 ('등록 대기' → '가져오는 중')
@@ -460,7 +492,10 @@ async function run(j) {
       if (!contentBy.has(it.slug)) contentBy.set(it.slug, contentSlot(() => { stop(); return contentFor(j.channel, it.url); }));
       let c = await contentBy.get(it.slug);
       stop();
-      if (j.check) { const r = await autoRetry(j, it, c); c = r.c; Object.assign(it, { ai: r.ai, imgs: c.urls || [], hash: c.hash || '', store: storeOf(it) }); stop();
+      if (j.check) {   // 자동 재시도(다시 크롤)는 기다리지 않는다 — 작업이 끝난 뒤 뒤에서 (retryLater). 그동안 화면엔 '검토 필요 · 다시 시도 중'
+        const ai = aiChecks(j, it, c);
+        if (retryable(it, ai)) it.retrying = 1;
+        Object.assign(it, { ai, imgs: c.urls || [], hash: c.hash || '', store: storeOf(it) }); stop();
         require('./slice-preview').ensure(it.imgs).catch(() => {}); }   // Check 화면용 작은 미리보기를 미리 (원본은 그대로)
       if (c.text.length > CELL_MAX) throw Object.assign(new Error(`too long for one Excel cell (${c.text.length} chars)`), { stage: 'content' });
       texts.set(it.row, c.text);
@@ -517,6 +552,7 @@ function start(j) {
       if (j.status === 'failed') await alertAdmin(j).catch((e) => console.warn('[bulk] admin alert', e.message));
       await persist(j, true);
       await activeList((ids) => ids.filter((x) => x !== j.id)).catch(() => {});
+      if (j.status === 'ready') kickRetries(j);
     });
   return j;
 }

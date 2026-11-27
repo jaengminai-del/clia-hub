@@ -357,13 +357,14 @@ router.get('/api/v1/bulk/jobs/:job', async (req, res) => {
 });
 
 // 중단 (실수로 내보내기를 눌렀을 때) — 진행 중일 때만
-// 벌크 Check 버튼 (2026-11-26): { rows: [행…] (한 제품), action: 'ok' | 'remove' | 'retry', by }
+// 벌크 Check 버튼 (2026-11-26): { rows: [행…], action: 'ok' | 'remove' | 'retry', by, override (검토 필요였지만 사람이 통과) }
 router.post('/api/v1/bulk/jobs/:job/check', async (req, res) => {
   const j = await bulkJobs.getJob(req.params.job);
   if (!j) return res.status(404).json({ error: 'job not found' });
   const b = req.body || {};
-  const rows = (Array.isArray(b.rows) ? b.rows : [b.row]).map((x) => parseInt(x, 10)).filter((x) => x >= 1).slice(0, 50);
-  const r = await bulkJobs.checkAction(j, rows, String(b.action || ''), b.by).catch((e) => ({ error: e.message, status: 500 }));
+  // 'ok' 은 준비된 것을 한 번에 확인 (몇백 행) · 나머지는 한 제품씩
+  const rows = (Array.isArray(b.rows) ? b.rows : [b.row]).map((x) => parseInt(x, 10)).filter((x) => x >= 1).slice(0, b.action === 'ok' ? 5000 : 50);
+  const r = await bulkJobs.checkAction(j, rows, String(b.action || ''), b.by, !!b.override).catch((e) => ({ error: e.message, status: 500 }));
   if (r.error) return res.status(r.status || 400).json({ error: r.error });
   res.json(bulkJobs.jobView(j));
 });
