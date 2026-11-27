@@ -429,15 +429,6 @@ button.eb { cursor: pointer; }
 .dk-card.dk-ok .dk-ph { border-color: var(--line); box-shadow: none; } .dk-card.dk-ok .dk-st { color: var(--muted); }
 .dk-card.dk-busy .dk-st { color: var(--muted); } .dk-card.dk-busy .dk-st::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: -1px; border-radius: 50%; border: 2px solid var(--clia-gray-200); border-top-color: var(--clia-gray-900); animation: ckspin .7s linear infinite; }
 .dk-title { position: absolute; left: 0; right: 0; top: 16px; text-align: center; pointer-events: none; } .dk-title h2 { margin: 0; font-size: 26px; letter-spacing: -.3px; } .dk-title p { margin: 6px 0 0; font-size: 14px; color: var(--clia-gray-500); }
-.dk-panel { position: absolute; display: flex; flex-direction: column; gap: 14px; }
-.dk-panel .dk-q { font-size: 13px; color: var(--clia-gray-500); } .dk-panel h3 { margin: 2px 0 0; font-size: 24px; } .dk-panel .dk-ti { font-size: 13px; color: var(--clia-gray-500); margin-top: 2px; }
-.dk-box { border: 1px solid var(--clia-gray-200); border-radius: 14px; padding: 14px; background: #fff; display: flex; flex-direction: column; gap: 10px; }
-.dk-box .dk-r { display: flex; gap: 8px; font-size: 13.5px; } .dk-box .dk-r i { width: 7px; height: 7px; border-radius: 50%; background: var(--clia-heritage); margin-top: 6px; flex: none; } .dk-box .dk-r small { display: block; color: var(--clia-gray-500); font-size: 12px; margin-top: 2px; }
-.dk-th { display: flex; gap: 8px; flex-wrap: wrap; } .dk-th figure { margin: 0; } .dk-th img { width: 132px; height: 88px; object-fit: cover; border-radius: 8px; border: 1px solid var(--clia-gray-200); background: #fff; display: block; } .dk-th figcaption { font-size: 11px; color: var(--clia-gray-500); margin-top: 4px; }
-.dk-acts { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; } .dk-acts .dk-sp { flex: 1; }
-.dk-acts .dk-txt, .dk-strip .dk-txt { background: none; border: 0; color: var(--clia-gray-600); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; padding: 0 8px; height: 40px; }
-.dk-acts .dk-ink { background: var(--clia-gray-900); border-color: var(--clia-gray-900); color: #fff; }
-.dk-wait { position: absolute; left: 0; right: 0; top: 45%; text-align: center; font-size: 14px; color: var(--clia-gray-600); }
 @media (prefers-reduced-motion: reduce) { .dk-mini::before, .dk-mini.ok::after, .dk.dk-run .dk-sweep { animation: none; } }
 /* 전체 보기 (선택) — 큰 카드 한 장씩, 좌우로 넘기기 */
 .dk-rs.dk-click { cursor: pointer; transition: border-color .2s, background .2s; } .dk-rs.dk-click:hover { border-color: var(--clia-gray-500); background: rgba(38,38,38,.03); }
@@ -445,9 +436,6 @@ button.eb { cursor: pointer; }
 .ck-sback { position: absolute; inset-inline-start: 20px; top: 0; bottom: 0; margin: auto 0; height: 30px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--clia-gray-200); background: #fff; font: inherit; font-size: 13px; font-weight: 600; color: var(--clia-gray-700); cursor: pointer; }
 .ck-sback:hover { border-color: var(--clia-gray-400); color: var(--clia-gray-900); }
 .dk-strip { position: absolute; left: 0; right: 0; top: 60px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; padding: 0 5%; font-size: 14px; min-height: 38px; }
-.dk-strip b { font-size: 15px; } .dk-strip .dk-why { color: var(--clia-heritage); font-size: 13px; } .dk-strip .dk-gap { width: 14px; }
-.dk-strip .clia-btn { height: 34px; } .dk-strip .dk-txt { height: 34px; font-size: 13px; border-radius: 999px; } .dk-strip .dk-txt:hover { color: var(--clia-gray-900); }
-.dk-chip { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--clia-gray-100); color: var(--clia-gray-700); } .dk-chip.dk-warn { background: rgba(165,0,52,.08); color: var(--clia-heritage); }
 .dk-side { position: absolute; height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--clia-gray-200); background: #fff; font: inherit; font-size: 14px; font-weight: 600; color: var(--clia-gray-800); cursor: pointer; box-shadow: 0 1px 2px rgba(38,38,38,.05); z-index: 5; white-space: nowrap; }
 .dk-side:hover:not([disabled]) { border-color: var(--clia-gray-500); } .dk-side[disabled] { opacity: .3; cursor: default; }
 .dk-card.dk-full .dk-mo, .dk-card.dk-full .dk-st { display: none; }
@@ -459,6 +447,20 @@ button.eb { cursor: pointer; }
 .dk-more { position: absolute; left: 0; right: 12px; bottom: 0; height: 84px; border: 0; padding: 0 0 12px; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,.95) 70%); display: flex; align-items: flex-end; justify-content: center; cursor: pointer; z-index: 3; border-radius: 0 0 14px 14px; transition: opacity .25s; font: inherit; }
 .dk-more span { background: var(--clia-gray-900); color: #fff; font-size: 12.5px; font-weight: 600; padding: 6px 14px; border-radius: 999px; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
 .dk-more.dk-end { opacity: 0; pointer-events: none; }
+/* 검수 화면 (검토 필요 · 전체 보기): 상태가 화면 배경부터 다르다 — 검토 필요는 와인 톤, 준비됨은 기본, 뺌은 회색 */
+.dk-br { background: var(--clia-page, #F8F7F5); transition: background-color .35s ease; }
+.dk-br[data-st="review"] { background: #F6E6EC; } .dk-br[data-st="rm"] { background: #ECEBE8; }
+.dk-br[data-st="review"] .dk-card .dk-ph { border: 2px solid var(--clia-heritage); box-shadow: 0 0 0 6px rgba(165,0,52,.10); }
+.dk-br[data-st="ok"] .dk-card .dk-ph { border-color: var(--line); box-shadow: 0 1px 2px rgba(38,38,38,.04), 0 8px 24px rgba(38,38,38,.06); }
+.dk-strip b { font-size: 15px; } .dk-strip .dk-why { color: var(--clia-heritage); font-size: 13.5px; font-weight: 600; }
+.dk-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; padding: 5px 12px; border-radius: 999px; background: var(--clia-gray-200); color: var(--clia-gray-700); }
+.dk-chip svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.dk-br[data-st="review"] .dk-chip { background: var(--clia-heritage); color: #fff; } .dk-br[data-st="ok"] .dk-chip { background: var(--clia-gray-900); color: #fff; }
+.dk-lg { width: 42px; height: 28px; object-fit: cover; border-radius: 5px; border: 1px solid rgba(165,0,52,.3); background: #fff; }
+/* 버튼 셋 — 같은 모양 · 늘 같은 자리 (카드 · 스크롤과 상관없이 화면 아래) */
+.dk-bar { position: absolute; left: 0; right: 0; bottom: 18px; display: flex; justify-content: center; gap: 12px; z-index: 6; }
+.dk-act { min-width: 176px; height: 46px; padding: 0 20px; border-radius: 999px; border: 1px solid var(--clia-gray-300); background: #fff; font: inherit; font-size: 14.5px; font-weight: 600; color: var(--clia-gray-900); cursor: pointer; box-shadow: 0 1px 2px rgba(38,38,38,.06); transition: border-color .15s, opacity .2s; }
+.dk-act:hover:not([disabled]) { border-color: var(--clia-gray-700); } .dk-act:focus-visible { outline: 2px solid var(--clia-gray-900); outline-offset: 2px; } .dk-act[disabled] { opacity: .35; cursor: default; }
 #ckGo { padding: 0 20px; max-width: 1240px; margin: 0 auto; width: 100%; } #ckGo .ck-why { margin: 0 0 12px; }
 @keyframes ckspin { to { transform: rotate(360deg); } }
 .ck-why { margin-top: 26px; padding: 12px 14px; border-radius: 10px; background: #FDF1F0; color: var(--bad); font-size: 13px; line-height: 1.5; }

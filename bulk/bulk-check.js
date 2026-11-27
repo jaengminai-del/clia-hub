@@ -41,26 +41,26 @@
   };
   // 덱 화면 (2026-11-27) 문구 — 위 TX 에 덧붙인다
   const TXD = {
-    en: { viewAll: (n) => `View all ${n}`, moreBelow: 'More below', back: '← Back', prev: 'Previous', next: 'Next', removedL: 'Removed from this Excel', fReady: 'Ready', fReview: 'Needs review', checkingAll: (n) => `AI is checking all ${n} at once`, sumT: (r, m) => `${r} ready · ${m} need${m === 1 ? 's' : ''} your review`,
-      sumS: (n, s, m) => `Checked ${n} in ${s} s — now just ${m === 1 ? 'this one' : 'these ' + m}`, reviewN: (i, n) => `Review ${i} of ${n}`, okIn: 'Looks fine · include',
-      retryingA: 'Retrying automatically…', waitRetry: (n) => `${n} retrying automatically — they come back here when done`, onLg: 'On lg.com · missing here',
-      allDone: 'All checked', confirmDl: (n) => `Confirm ${n} & download`, youOk: 'Ready · you checked' },
-    th: { viewAll: (n) => `ดูทั้งหมด ${n}`, moreBelow: 'ยังมีด้านล่าง', back: '← กลับ', prev: 'ก่อนหน้า', next: 'ถัดไป', removedL: 'นำออกจาก Excel นี้แล้ว', fReady: 'พร้อม', fReview: 'ต้องตรวจสอบ', checkingAll: (n) => `AI กำลังตรวจทั้ง ${n} รายการพร้อมกัน`, sumT: (r, m) => `พร้อม ${r} · ต้องตรวจสอบ ${m}`,
-      sumS: (n, s, m) => `ตรวจ ${n} รายการใน ${s} วินาที — เหลือดูแค่ ${m}`, reviewN: (i, n) => `ตรวจสอบ ${i} จาก ${n}`, okIn: 'ดูแล้วโอเค · ใส่ไว้',
-      retryingA: 'กำลังลองใหม่อัตโนมัติ…', waitRetry: (n) => `กำลังลองใหม่อัตโนมัติ ${n} รายการ — เสร็จแล้วจะกลับมาที่นี่`, onLg: 'บน lg.com · ไม่มีที่นี่',
-      allDone: 'ตรวจครบแล้ว', confirmDl: (n) => `ยืนยัน ${n} และดาวน์โหลด`, youOk: 'พร้อม · คุณตรวจแล้ว' },
-    ko: { viewAll: (n) => `전체 보기 ${n}`, moreBelow: '아래에 더 있음', back: '← 돌아가기', prev: '이전', next: '다음', removedL: '이번 엑셀에서 뺌', fReady: '준비됨', fReview: '검토 필요', checkingAll: (n) => `AI가 ${n}개를 한꺼번에 확인 중`, sumT: (r, m) => `${r}개 준비됨 · ${m}개 검토 필요`,
-      sumS: (n, s, m) => `${n}개를 ${s}초에 확인 — 이제 ${m}개만 보면 돼요`, reviewN: (i, n) => `검토 ${i} / ${n}`, okIn: '괜찮음 · 포함',
-      retryingA: '자동으로 다시 시도 중…', waitRetry: (n) => `${n}개 자동으로 다시 시도 중 — 끝나면 여기로 와요`, onLg: 'lg.com 원본 · 여기선 빠짐',
-      allDone: '모두 확인함', confirmDl: (n) => `${n}개 확인하고 받기`, youOk: '준비됨 · 직접 확인' },
-    de: { viewAll: (n) => `Alle ${n} ansehen`, moreBelow: 'Weiter unten', back: '← Zurück', prev: 'Zurück', next: 'Weiter', removedL: 'Aus dieser Excel entfernt', fReady: 'Bereit', fReview: 'Zu prüfen', checkingAll: (n) => `KI prüft alle ${n} gleichzeitig`, sumT: (r, m) => `${r} bereit · ${m} zu prüfen`,
-      sumS: (n, s, m) => `${n} in ${s} s geprüft — jetzt nur noch ${m}`, reviewN: (i, n) => `Prüfung ${i} von ${n}`, okIn: 'Passt · übernehmen',
-      retryingA: 'Wird automatisch erneut versucht…', waitRetry: (n) => `${n} werden automatisch erneut versucht — sie kommen hierher zurück`, onLg: 'Auf lg.com · fehlt hier',
-      allDone: 'Alles geprüft', confirmDl: (n) => `${n} bestätigen & herunterladen`, youOk: 'Bereit · von dir geprüft' },
-    ar: { viewAll: (n) => `عرض الكل ${n}`, moreBelow: 'المزيد بالأسفل', back: 'رجوع →', prev: 'السابق', next: 'التالي', removedL: 'أُزيل من ملف Excel هذا', fReady: 'جاهز', fReview: 'بحاجة إلى مراجعة', checkingAll: (n) => `الذكاء الاصطناعي يفحص جميع ${n} معًا`, sumT: (r, m) => `${r} جاهز · ${m} بحاجة إلى مراجعتك`,
-      sumS: (n, s, m) => `تم فحص ${n} في ${s} ث — تبقّى ${m} فقط`, reviewN: (i, n) => `مراجعة ${i} من ${n}`, okIn: 'يبدو جيدًا · تضمين',
-      retryingA: 'جارٍ إعادة المحاولة تلقائيًا…', waitRetry: (n) => `${n} قيد إعادة المحاولة تلقائيًا — ستعود هنا`, onLg: 'على lg.com · مفقود هنا',
-      allDone: 'تم فحص الكل', confirmDl: (n) => `تأكيد ${n} والتنزيل`, youOk: 'جاهز · راجعته أنت' },
+    en: { rmS: 'Remove', viewAll: (n) => `View all ${n}`, moreBelow: 'More below', back: '← Back', prev: 'Previous', next: 'Next', removedL: 'Removed from this Excel', fReady: 'Ready', fReview: 'Needs review', checkingAll: (n) => `AI is checking all ${n} at once`, sumT: (r, m) => `${r} ready · ${m} need${m === 1 ? 's' : ''} your review`,
+      sumS: (n, s, m) => `Checked ${n} in ${s} s — now just ${m === 1 ? 'this one' : 'these ' + m}`, okIn: 'Looks fine · include',
+      retryingA: 'Retrying automatically…', onLg: 'On lg.com · missing here',
+      allDone: 'All checked', confirmDl: (n) => `Confirm ${n} & download` },
+    th: { rmS: 'นำออก', viewAll: (n) => `ดูทั้งหมด ${n}`, moreBelow: 'ยังมีด้านล่าง', back: '← กลับ', prev: 'ก่อนหน้า', next: 'ถัดไป', removedL: 'นำออกจาก Excel นี้แล้ว', fReady: 'พร้อม', fReview: 'ต้องตรวจสอบ', checkingAll: (n) => `AI กำลังตรวจทั้ง ${n} รายการพร้อมกัน`, sumT: (r, m) => `พร้อม ${r} · ต้องตรวจสอบ ${m}`,
+      sumS: (n, s, m) => `ตรวจ ${n} รายการใน ${s} วินาที — เหลือดูแค่ ${m}`, okIn: 'ดูแล้วโอเค · ใส่ไว้',
+      retryingA: 'กำลังลองใหม่อัตโนมัติ…', onLg: 'บน lg.com · ไม่มีที่นี่',
+      allDone: 'ตรวจครบแล้ว', confirmDl: (n) => `ยืนยัน ${n} และดาวน์โหลด` },
+    ko: { rmS: '빼기', viewAll: (n) => `전체 보기 ${n}`, moreBelow: '아래에 더 있음', back: '← 돌아가기', prev: '이전', next: '다음', removedL: '이번 엑셀에서 뺌', fReady: '준비됨', fReview: '검토 필요', checkingAll: (n) => `AI가 ${n}개를 한꺼번에 확인 중`, sumT: (r, m) => `${r}개 준비됨 · ${m}개 검토 필요`,
+      sumS: (n, s, m) => `${n}개를 ${s}초에 확인 — 이제 ${m}개만 보면 돼요`, okIn: '괜찮음 · 포함',
+      retryingA: '자동으로 다시 시도 중…', onLg: 'lg.com 원본 · 여기선 빠짐',
+      allDone: '모두 확인함', confirmDl: (n) => `${n}개 확인하고 받기` },
+    de: { rmS: 'Entfernen', viewAll: (n) => `Alle ${n} ansehen`, moreBelow: 'Weiter unten', back: '← Zurück', prev: 'Zurück', next: 'Weiter', removedL: 'Aus dieser Excel entfernt', fReady: 'Bereit', fReview: 'Zu prüfen', checkingAll: (n) => `KI prüft alle ${n} gleichzeitig`, sumT: (r, m) => `${r} bereit · ${m} zu prüfen`,
+      sumS: (n, s, m) => `${n} in ${s} s geprüft — jetzt nur noch ${m}`, okIn: 'Passt · übernehmen',
+      retryingA: 'Wird automatisch erneut versucht…', onLg: 'Auf lg.com · fehlt hier',
+      allDone: 'Alles geprüft', confirmDl: (n) => `${n} bestätigen & herunterladen` },
+    ar: { rmS: 'إزالة', viewAll: (n) => `عرض الكل ${n}`, moreBelow: 'المزيد بالأسفل', back: 'رجوع →', prev: 'السابق', next: 'التالي', removedL: 'أُزيل من ملف Excel هذا', fReady: 'جاهز', fReview: 'بحاجة إلى مراجعة', checkingAll: (n) => `الذكاء الاصطناعي يفحص جميع ${n} معًا`, sumT: (r, m) => `${r} جاهز · ${m} بحاجة إلى مراجعتك`,
+      sumS: (n, s, m) => `تم فحص ${n} في ${s} ث — تبقّى ${m} فقط`, okIn: 'يبدو جيدًا · تضمين',
+      retryingA: 'جارٍ إعادة المحاولة تلقائيًا…', onLg: 'على lg.com · مفقود هنا',
+      allDone: 'تم فحص الكل', confirmDl: (n) => `تأكيد ${n} والتنزيل` },
   };
   const tOf = (L) => Object.assign({}, TX.en, TXD.en, TX[L] || {}, TXD[L] || {});
   const LIVE_LISTS = { th: '/clia/th-live.json' };   // 법인별 라이브 목록 (허브 Product List 와 같은 파일)
@@ -263,7 +263,7 @@
     t.innerHTML = `<h2>${core.esc(h)}</h2>${p ? `<p>${core.esc(p)}</p>` : ''}`;
   }
   async function reviewFlow(core, instant) {
-    const T = C.T, D = C.dk;
+    const T = C.T, D = C.dk, token = C.flow = {};
     const big = document.getElementById('dkBig');
     if (big) { if (!instant && !reduced()) await big.animate([{ opacity: 1 }, { opacity: 0, filter: 'blur(6px)' }], { duration: 220, fill: 'forwards' }).finished.catch(() => {}); big.remove(); }
     await settle(core);
@@ -271,121 +271,86 @@
     if (!total) return finishView(core);
     // 체크가 끝났으면 오른쪽 Ready 더미를 눌러 전체 보기 (선택)
     const rs = document.getElementById('dkRs');
-    if (rs) { rs.classList.add('dk-click'); rs.title = T.viewAll(C.units.length); rs.onclick = () => { if (C.abortReview) C.abortReview(); browse(core, Math.max(0, C.units.findIndex(passed)), 'deck'); }; }
+    if (rs) { rs.classList.add('dk-click'); rs.title = T.viewAll(C.units.length); rs.onclick = () => { C.flow = null; viewer(core, 'all', Math.max(0, C.units.findIndex(passed)), 'deck'); }; }
     header(core, T.sumT(D.readyN, total), instant ? '' : T.sumS(C.units.length, D.secs, total));
     if (!instant) await sleep(1100);
-    let n = 0;
-    for (;;) {
-      await settle(core);
-      const left = needs();
-      if (!left.length) break;
-      const u = left.find((x) => !busy(x));
-      if (!u) {   // 남은 건 자동 재시도 · 다시 준비 중 — 끝나면 여기로
-        header(core, T.sumT(D.readyN, left.length), T.waitRetry(left.length));
-        await sleep(2000); await refresh(core); continue;
-      }
-      n++;
-      const r = await reviewOne(core, u, n, n + left.length - 1);
-      if (r === 'abort') return;   // 전체 보기로 나감 — 돌아오면 다시 그림
-      await refresh(core);
-      if (r === 'error') n--;
-    }
-    return finishView(core);
+    if (C.flow !== token) return;   // 그사이 전체 보기로 들어감
+    return viewer(core, 'review', 0, 'deck');
   }
-  function reviewOne(core, u, n, total) {
-    const T = C.T, e = core.esc, D = C.dk, k = ukey(u), it = u[0];
-    let el = D.els.get(k); if (!el) { el = cardEl(core, u); D.els.set(k, el); el._pos = pileAt(0); el.style.transform = T3(el._pos); }
-    cardState(el, u);
-    header(core, T.reviewN(n, total), '');
-    const st = rel(D.root), sc = Math.min(1, (st.h - 140) / 540), x = Math.max(st.w * 0.2, 200), y = 70;
-    el.style.zIndex = 60; el.classList.remove('dk-pile');
-    const go = moveTo(el, { x, y, s: sc }, 620, EZ.io);
-    const bad = aiRows(u).filter((x) => !x.ok), img = aiRows(u).find((x) => x.k === 'img' && !x.ok);
-    const srcs = (img && img.src) || [];
-    const p = document.createElement('div'); p.className = 'dk-panel';
-    const px = x + CW * sc + 36, rx = rel(document.getElementById('dkRs')).x - 28;   // 오른쪽 더미 앞까지
-    p.style.left = px + 'px'; p.style.top = y + 'px'; p.style.width = Math.max(320, Math.min(600, rx - px)) + 'px';
-    p.innerHTML = `<div><div class="dk-q">${e(T.fReview)}</div><h3>${e(it.model || '')}</h3><div class="dk-ti">${e(((it.store || {}).title || it.title || '').slice(0, 80))}</div></div>
-      <div class="dk-box">${bad.map((x) => `<div class="dk-r"><i></i><div><b>${e(why(x))}</b>${it.retried ? `<small>${e(T.w_retried)}</small>` : ''}</div></div>`).join('')}
-        ${srcs.length ? `<div class="dk-th">${srcs.map((s) => `<figure><img src="${e(s)}" alt="" loading="lazy"><figcaption>${e(T.onLg)}</figcaption></figure>`).join('')}</div>` : ''}</div>
-      <div class="dk-acts"><button class="dk-txt" data-a="remove" type="button">${e(T.remove)}</button><button class="clia-btn" data-a="retry" type="button">${e(T.redo)}</button><span class="dk-sp"></span>${it.status === 'ok' ? `<button class="clia-btn dk-ink" data-a="ok" type="button">${e(T.okIn)}</button>` : ''}</div>`;
-    D.root.appendChild(p);
-    if (!reduced()) p.animate([{ opacity: 0, transform: 'translateX(24px)', filter: 'blur(6px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }], { duration: 520, easing: EZ.out, fill: 'backwards' });
-    return new Promise((done) => {
-      C.abortReview = () => { C.abortReview = null; done('abort'); };
-      p.querySelectorAll('[data-a]').forEach((b) => { b.onclick = async () => {
-        C.abortReview = null;
-        p.querySelectorAll('button').forEach((x) => { x.disabled = true; });
-        const a = b.dataset.a;
-        const ok = await act(core, rowsOf(u), a, a === 'ok' ? { override: true } : null);
-        if (!ok) { p.querySelectorAll('button').forEach((x) => { x.disabled = false; }); return; }
-        await go;
-        const fade = reduced() ? Promise.resolve() : p.animate([{ opacity: 1 }, { opacity: 0, filter: 'blur(6px)' }], { duration: 200, fill: 'forwards' }).finished.catch(() => {});
-        fade.then(() => p.remove());
-        if (a === 'ok') {   // 사람이 통과 → ✓ → 오른쪽 더미
-          D.side.set(k, 'ready'); D.pile = D.pile.filter((x) => x !== k); bump('dkLn', D.pile.length);
-          el.classList.add('dk-ok'); el.querySelector('.dk-st').textContent = T.youOk;
-          await sleep(300); const r = readyAt(D.readyN);
-          await moveTo(el, { ...r, s: r.s * 74 / CW }, 520, EZ.p3in, { to: { opacity: 0 }, keep: true }); el.remove(); D.els.delete(k);
-          D.readyN++; bump('dkRn', D.readyN);
-        } else if (a === 'remove') {   // 이번 엑셀에서 빼기 → 아래로 떨어지며
-          D.side.set(k, 'removed'); D.pile = D.pile.filter((x) => x !== k); bump('dkLn', D.pile.length);
-          await moveTo(el, { x, y: y + 280, s: sc, r: -4 }, 380, EZ.p3in, { to: { opacity: 0, filter: 'blur(8px)' }, keep: true }); el.remove(); D.els.delete(k);
-        } else {   // 다시 준비 → 왼쪽 더미 맨 아래로 (끝나면 다시 차례가 오거나 통과면 오른쪽으로)
-          const uu = C.units.find((x) => ukey(x) === k) || u; cardState(el, uu);
-          el.classList.add('dk-pile'); await moveTo(el, pileAt(Math.max(0, D.pile.length - 1)), 520, EZ.p3out); el.style.zIndex = 19;
-        }
-        done(a);
-      }; });
-    });
-  }
-  // ── 전체 보기 (선택, 2026-11-27): 체크가 끝난 뒤 통과한 것까지 큰 카드로 한 장씩 — 좌우 화살표 · 키보드(← →, Esc) ──
-  // 기본 흐름(빠르게)은 그대로. 보다가 문제가 있으면 여기서도 빼기 · 다시 준비 (검토 필요면 괜찮음 · 포함도). 나가면 온 곳으로.
-  function browse(core, start, from) {
-    const T = C.T, e = core.esc, rtl = document.documentElement.dir === 'rtl';
-    let list = C.units.slice(), i = Math.max(0, Math.min(list.length - 1, start)), el = null, alive = true, polling = false;
+
+  // ── 검수 화면 (2026-11-27): 검토 필요만(review) · 전체 보기(all, 선택) 같은 화면 ──
+  // PDP 는 가운데 크게 · 이전/다음은 양옆 · 위에 'n / N' 과 한 줄(상태 · 모델 · 이유 — 한 번만) · 아래 고정 버튼 셋(빼기 · 다시 준비 · 괜찮음·포함).
+  // 검토 필요 카드면 화면 배경부터 다르게 (와인 톤) — 준비됨(기본 톤) · 뺌(회색)과 한눈에 구분. 하나 처리하면 다음 건으로 자동으로.
+  // 키보드: ← → 넘기기 · ↑ ↓ · 스페이스로 PDP 내리기 · (전체 보기) Esc 돌아가기
+  function viewer(core, mode, start, from) {
+    const T = C.T, e = core.esc, rtl = document.documentElement.dir === 'rtl', all = mode === 'all';
+    const open = (u) => !isRemoved(u) && !isOk(u) && !passed(u);   // 사람이 아직 정하지 않은 것
+    let list = all ? C.units.slice() : needs(), i = Math.max(0, Math.min(list.length - 1, start)), el = null, alive = true, polling = false;
+    if (!all) { const j = list.findIndex((u) => open(u) && !busy(u)); if (j >= 0) i = j; }
     const view = frame(core, 2);
     view.innerHTML = '<div class="dk dk-br" id="dk"></div><div id="ckGo"></div>';
-    // 돌아가기는 단계 줄(첨부 › 준비 › Check › 받기) 왼쪽 끝에
-    document.getElementById('ckSteps').insertAdjacentHTML('afterbegin', `<button class="ck-sback" id="dkBack" type="button">${e(T.back)}</button>`);
+    if (all) document.getElementById('ckSteps').insertAdjacentHTML('afterbegin', `<button class="ck-sback" id="dkBack" type="button">${e(T.back)}</button>`);
     C.dk = { root: document.getElementById('dk'), els: new Map(), side: new Map(), pile: [], minis: [], q: [], readyN: 0, shown: 0 };
     const D = C.dk;
-    // PDP 를 가운데 크게 — 위에 '37 / 100' 과 한 줄(상태 · 모델 · 손볼 버튼), 양옆에 이전 · 다음
     const strip = document.createElement('div'); strip.className = 'dk-strip'; D.root.appendChild(strip);
-    D.root.insertAdjacentHTML('beforeend', `<button class="dk-side dk-prev" id="dkPrev" type="button">${rtl ? e(T.next) + ' ‹' : '‹ ' + e(T.prev)}</button><button class="dk-side dk-next" id="dkNext" type="button">${rtl ? '› ' + e(T.prev) : e(T.next) + ' ›'}</button>`);
+    D.root.insertAdjacentHTML('beforeend', `<button class="dk-side dk-prev" id="dkPrev" type="button">${rtl ? e(T.next) + ' ‹' : '‹ ' + e(T.prev)}</button><button class="dk-side dk-next" id="dkNext" type="button">${rtl ? '› ' + e(T.prev) : e(T.next) + ' ›'}</button>
+      <div class="dk-bar"><button class="dk-act" data-a="remove" type="button">${e(T.rmS)}</button><button class="dk-act" data-a="retry" type="button">${e(T.redo)}</button><button class="dk-act" data-a="ok" type="button">${e(T.okIn)}</button></div>`);
     const prevB = document.getElementById('dkPrev'), nextB = document.getElementById('dkNext');   // 왼쪽 · 오른쪽 (아랍어는 왼쪽이 다음)
     prevB.onclick = () => go(rtl ? 1 : -1); nextB.onclick = () => go(rtl ? -1 : 1);
-    // 카드는 화면 높이에 맞춰 크게 (상세 이미지까지 보게) — 폭은 높이의 ~75%, 320~520px, 가운데
-    const geo = () => { const st = rel(D.root), y = 108, ch = Math.max(360, st.h - y - 22), cw = Math.round(Math.max(320, Math.min(520, ch * 0.75, st.w * 0.4))), x = Math.round((st.w - cw) / 2);
+    const acts = [...D.root.querySelectorAll('.dk-act')];
+    // 카드는 화면 높이에 맞춰 크게 (상세 이미지까지 보게) — 폭은 높이의 ~75%, 320~520px, 가운데. 아래 72px 는 버튼 줄
+    const geo = () => { const st = rel(D.root), y = 108, ch = Math.max(340, st.h - y - 84), cw = Math.round(Math.max(320, Math.min(520, ch * 0.75, st.w * 0.4))), x = Math.round((st.w - cw) / 2);
       return { x, y, ch, cw }; };
-    const kind = (u) => (isRemoved(u) ? T.removedL : busy(u) ? T.redoing : passed(u) || isOk(u) ? T.fReady : T.fReview);
+    const stateOf = (u) => (isRemoved(u) ? 'rm' : busy(u) ? 'busy' : passed(u) || isOk(u) ? 'ok' : 'review');
+    const label = { rm: T.removedL, busy: T.redoing, ok: T.fReady, review: T.fReview };
     function panel() {
-      const u = list[i], it = u[0], g = geo(), bad = aiRows(u).filter((x) => !x.ok);
-      const canAct = !isRemoved(u) && !busy(u), review = !passed(u) && !isOk(u);
-      strip.innerHTML = `<span class="dk-chip${review && !isRemoved(u) ? ' dk-warn' : ''}">${e(kind(u))}</span><b>${e(it.model || '')}</b>
-        ${review && bad.length && !isRemoved(u) ? `<span class="dk-why">${e(bad.map(why).join(' · '))}</span>` : ''}
-        ${canAct ? `<span class="dk-gap"></span><button class="dk-txt" data-a="remove" type="button">${e(T.remove)}</button><button class="clia-btn" data-a="retry" type="button">${e(T.redo)}</button>
-          ${review && it.status === 'ok' ? `<button class="clia-btn dk-ink" data-a="ok" type="button">${e(T.okIn)}</button>` : ''}` : ''}`;
+      const u = list[i], it = u[0], g = geo(), s = stateOf(u), bad = aiRows(u).filter((x) => !x.ok);
+      const img = aiRows(u).find((x) => x.k === 'img' && !x.ok), srcs = s === 'review' && img && img.src ? img.src : [];
+      D.root.dataset.st = s;   // 화면 배경 · 카드 테두리가 상태를 따른다
+      strip.innerHTML = `<span class="dk-chip">${s === 'ok' ? CK : ''}${e(label[s])}</span><b>${e(it.model || '')}</b>
+        ${s === 'review' && bad.length ? `<span class="dk-why">${e(bad.map(why).join(' · '))}</span>` : ''}
+        ${srcs.map((x) => `<img class="dk-lg" src="${e(x)}" alt="" title="${e(T.onLg)}" loading="lazy">`).join('')}`;
       const mid = g.y + g.ch / 2 - 22;
       prevB.style.top = nextB.style.top = mid + 'px';
       prevB.style.right = (rel(D.root).w - g.x + 24) + 'px'; nextB.style.left = (g.x + g.cw + 24) + 'px';
       (rtl ? nextB : prevB).disabled = !i; (rtl ? prevB : nextB).disabled = i >= list.length - 1;
-      strip.querySelectorAll('[data-a]').forEach((b) => { b.onclick = async () => {
-        strip.querySelectorAll('[data-a]').forEach((x) => { x.disabled = true; });
-        if (await act(core, rowsOf(u), b.dataset.a, b.dataset.a === 'ok' ? { override: true } : null)) sync();
-        else strip.querySelectorAll('[data-a]').forEach((x) => { x.disabled = false; });
-      }; });
+      // 버튼 셋은 늘 같은 자리 — 상태에 맞지 않는 것은 흐리게
+      const can = { remove: s !== 'rm' && s !== 'busy', retry: s !== 'rm' && s !== 'busy', ok: s === 'review' && it.status === 'ok' };
+      acts.forEach((b) => { b.disabled = !can[b.dataset.a]; });
+      header(core, `${i + 1} / ${list.length}`, '');
     }
-    function sync() {   // 서버 상태로 목록 · 지금 카드 · 패널 다시
+    acts.forEach((b) => { b.onclick = async () => {
+      const u = list[i], a = b.dataset.a;
+      acts.forEach((x) => { x.disabled = true; });
+      if (!(await act(core, rowsOf(u), a, a === 'ok' ? { override: true } : null))) { panel(); return; }
+      sync();
+      if (!alive) return;
+      if (all) { if (i < list.length - 1) go(1); return; }
+      // 검토: 아직 정하지 않은 다음 건으로 (다시 준비 중인 것은 건너뜀) — 없으면 다시 준비가 끝나길 기다렸다가 완료로
+      const n = list.length, j = [...Array(n).keys()].map((k) => (i + 1 + k) % n).find((k) => open(list[k]) && !busy(list[k]));
+      if (j != null && j !== i) { const d = j > i ? 1 : -1; i = j; show(d); return; }
+      if (j === i && open(list[i]) && !busy(list[i])) return;
+      if (!list.some((x) => open(x))) { leave(); return; }
+    }; });
+    function sync() {   // 서버 상태로 목록 · 지금 카드 · 줄 다시
       const by = new Map(C.units.map((u) => [ukey(u), u]));
       list = list.map((u) => by.get(ukey(u)) || u);
       if (el) cardState(el, list[i]);
       panel();
-      if (!polling && list.some((u) => busy(u) && !isRemoved(u))) { polling = true; (async () => { while (alive && list.some((u) => busy(u) && !isRemoved(u))) { await sleep(2000); await refresh(core); if (alive) sync(); } polling = false; })(); }
+      if (!polling && list.some((u) => busy(u) && !isRemoved(u))) {
+        polling = true;
+        (async () => {
+          while (alive && list.some((u) => busy(u) && !isRemoved(u))) {
+            await sleep(2000); await refresh(core); if (!alive) break; sync();
+            if (!all && !list.some((x) => open(x))) { leave(); break; }   // 다시 준비가 통과로 끝나 남은 게 없으면 완료로
+            if (!all && busy(list[i]) === false && !open(list[i])) { const j = list.findIndex((x) => open(x) && !busy(x)); if (j >= 0 && j !== i) { const d = j > i ? 1 : -1; i = j; show(d); } }
+          }
+          polling = false;
+        })();
+      }
     }
-    function show(dir) {   // 한 장씩: 나가는 카드는 짧게 가속하며, 들어오는 카드는 길게 안착 (HyperFrames 규칙)
+    function show(dir) {   // 한 장씩: 나가는 카드는 짧게 가속하며, 들어오는 카드는 길게 안착 (HyperFrames 규칙). 새 카드라 늘 맨 위부터
       const g = geo(), u = list[i], old = el;
-      header(core, `${i + 1} / ${list.length}`, '');
       el = cardEl(core, u); el.style.zIndex = 30; fullCard(el, g);
       const dx = (rtl ? -1 : 1) * 90 * dir;
       el._pos = { x: g.x + dx, y: g.y, s: 1 };
@@ -395,7 +360,7 @@
       for (const v of [list[i + 1], list[i - 1]]) if (v) for (const src of (v[0].imgs || []).slice(0, 2).map(small)) { const im = new Image(); im.src = src; }   // 다음 장 미리
     }
     function go(d) { const j = i + d; if (j < 0 || j >= list.length) return; i = j; show(d); }
-    function fullCard(c, g) {   // 크게 + 스크롤바 + '아래로 더 있음' (끝까지 내리면 사라짐). 새 카드라 늘 맨 위부터
+    function fullCard(c, g) {   // 크게 + 위치 막대 + '아래에 더 있음' (끝까지 내리면 사라짐)
       c.classList.add('dk-full'); c.style.width = g.cw + 'px';
       const ph = c.querySelector('.dk-ph'), sc = c.querySelector('.dk-sc'); ph.style.height = g.ch + 'px';
       const cm = c.querySelector('.cm'); if (cm) cm.style.zoom = (g.cw / 426).toFixed(3);   // 260px 카드의 .61 과 같은 비율
@@ -420,14 +385,15 @@
       if (k === 'ArrowDown' || k === 'ArrowUp') { ev.preventDefault(); scrollBy(0, k === 'ArrowDown' ? 160 : -160); return; }
       if (k === ' ' || k === 'PageDown' || k === 'PageUp') { ev.preventDefault(); scrollBy(k === 'PageUp' || (k === ' ' && ev.shiftKey) ? -1 : 1); return; }
       if (k === 'Home' || k === 'End') { ev.preventDefault(); const sc = el && el.querySelector('.dk-sc'); if (sc) sc.scrollTo({ top: k === 'Home' ? 0 : sc.scrollHeight, behavior: reduced() ? 'auto' : 'smooth' }); return; }
-      if (ev.key === 'ArrowRight') { ev.preventDefault(); go(rtl ? -1 : 1); } else if (ev.key === 'ArrowLeft') { ev.preventDefault(); go(rtl ? 1 : -1); } else if (ev.key === 'Escape') { ev.preventDefault(); leave(); }
+      if (k === 'ArrowRight') { ev.preventDefault(); go(rtl ? -1 : 1); } else if (k === 'ArrowLeft') { ev.preventDefault(); go(rtl ? 1 : -1); } else if (k === 'Escape' && all) { ev.preventDefault(); leave(); }
     }
     function leave() {
+      if (!alive) return;
       alive = false; document.removeEventListener('keydown', key);
-      if (from === 'deck') rush(core, true); else finishView(core);
+      if (all && from === 'deck') rush(core, true); else finishView(core);
     }
     document.addEventListener('keydown', key);
-    document.getElementById('dkBack').onclick = () => leave();
+    if (all) document.getElementById('dkBack').onclick = () => leave();
     show(0); sync();
   }
   async function act(core, rows, action, opts) {
@@ -451,7 +417,7 @@
     el.innerHTML = `<div class="ck-wrap"><div class="ck-card ck-done"><div class="ck-ic">${CK}</div><div class="ck-dt">${e(T.allDone)}</div>
       <div class="ck-ds">${e([T.fReady + ' ' + todo.length, removed ? T.removed(removed) : '', T.skipped(ck.skipModels || 0)].filter(Boolean).join(' · '))}</div>
       <div class="dk-fin"><button class="clia-btn big" id="ckView" type="button">${e(T.viewAll(C.units.length))}</button><button class="clia-btn primary big" id="ckAll" type="button">${e(T.confirmDl(todo.length))}</button></div></div></div><div id="ckGo"></div>`;
-    document.getElementById('ckView').onclick = () => browse(core, 0, 'finish');
+    document.getElementById('ckView').onclick = () => viewer(core, 'all', 0, 'finish');
     const b = document.getElementById('ckAll'); b.focus();
     b.onclick = async () => {
       b.disabled = true;
