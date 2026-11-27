@@ -41,23 +41,23 @@
   };
   // 덱 화면 (2026-11-27) 문구 — 위 TX 에 덧붙인다
   const TXD = {
-    en: { viewAll: (n) => `View all ${n}`, browseT: 'All products — ← → to move, Esc to go back', back: '← Back', prev: 'Previous', next: 'Next', removedL: 'Removed from this Excel', fReady: 'Ready', fReview: 'Needs review', checkingAll: (n) => `AI is checking all ${n} at once`, sumT: (r, m) => `${r} ready · ${m} need${m === 1 ? 's' : ''} your review`,
+    en: { viewAll: (n) => `View all ${n}`, browseT: 'All products — ← → next card · ↑ ↓ or Space to scroll · Esc back', moreBelow: 'More below', back: '← Back', prev: 'Previous', next: 'Next', removedL: 'Removed from this Excel', fReady: 'Ready', fReview: 'Needs review', checkingAll: (n) => `AI is checking all ${n} at once`, sumT: (r, m) => `${r} ready · ${m} need${m === 1 ? 's' : ''} your review`,
       sumS: (n, s, m) => `Checked ${n} in ${s} s — now just ${m === 1 ? 'this one' : 'these ' + m}`, reviewN: (i, n) => `Review ${i} of ${n}`, okIn: 'Looks fine · include',
       retryingA: 'Retrying automatically…', waitRetry: (n) => `${n} retrying automatically — they come back here when done`, onLg: 'On lg.com · missing here',
       allDone: 'All checked', confirmDl: (n) => `Confirm ${n} & download`, youOk: 'Ready · you checked' },
-    th: { viewAll: (n) => `ดูทั้งหมด ${n}`, browseT: 'สินค้าทั้งหมด — ← → เพื่อเลื่อน, Esc เพื่อกลับ', back: '← กลับ', prev: 'ก่อนหน้า', next: 'ถัดไป', removedL: 'นำออกจาก Excel นี้แล้ว', fReady: 'พร้อม', fReview: 'ต้องตรวจสอบ', checkingAll: (n) => `AI กำลังตรวจทั้ง ${n} รายการพร้อมกัน`, sumT: (r, m) => `พร้อม ${r} · ต้องตรวจสอบ ${m}`,
+    th: { viewAll: (n) => `ดูทั้งหมด ${n}`, browseT: 'สินค้าทั้งหมด — ← → การ์ดถัดไป · ↑ ↓ หรือ Space เพื่อเลื่อนลง · Esc กลับ', moreBelow: 'ยังมีด้านล่าง', back: '← กลับ', prev: 'ก่อนหน้า', next: 'ถัดไป', removedL: 'นำออกจาก Excel นี้แล้ว', fReady: 'พร้อม', fReview: 'ต้องตรวจสอบ', checkingAll: (n) => `AI กำลังตรวจทั้ง ${n} รายการพร้อมกัน`, sumT: (r, m) => `พร้อม ${r} · ต้องตรวจสอบ ${m}`,
       sumS: (n, s, m) => `ตรวจ ${n} รายการใน ${s} วินาที — เหลือดูแค่ ${m}`, reviewN: (i, n) => `ตรวจสอบ ${i} จาก ${n}`, okIn: 'ดูแล้วโอเค · ใส่ไว้',
       retryingA: 'กำลังลองใหม่อัตโนมัติ…', waitRetry: (n) => `กำลังลองใหม่อัตโนมัติ ${n} รายการ — เสร็จแล้วจะกลับมาที่นี่`, onLg: 'บน lg.com · ไม่มีที่นี่',
       allDone: 'ตรวจครบแล้ว', confirmDl: (n) => `ยืนยัน ${n} และดาวน์โหลด`, youOk: 'พร้อม · คุณตรวจแล้ว' },
-    ko: { viewAll: (n) => `전체 보기 ${n}`, browseT: '전체 제품 — ← → 로 넘기기, Esc 로 돌아가기', back: '← 돌아가기', prev: '이전', next: '다음', removedL: '이번 엑셀에서 뺌', fReady: '준비됨', fReview: '검토 필요', checkingAll: (n) => `AI가 ${n}개를 한꺼번에 확인 중`, sumT: (r, m) => `${r}개 준비됨 · ${m}개 검토 필요`,
+    ko: { viewAll: (n) => `전체 보기 ${n}`, browseT: '전체 제품 — ← → 다음 카드 · ↑ ↓ 나 스페이스로 내리기 · Esc 돌아가기', moreBelow: '아래에 더 있음', back: '← 돌아가기', prev: '이전', next: '다음', removedL: '이번 엑셀에서 뺌', fReady: '준비됨', fReview: '검토 필요', checkingAll: (n) => `AI가 ${n}개를 한꺼번에 확인 중`, sumT: (r, m) => `${r}개 준비됨 · ${m}개 검토 필요`,
       sumS: (n, s, m) => `${n}개를 ${s}초에 확인 — 이제 ${m}개만 보면 돼요`, reviewN: (i, n) => `검토 ${i} / ${n}`, okIn: '괜찮음 · 포함',
       retryingA: '자동으로 다시 시도 중…', waitRetry: (n) => `${n}개 자동으로 다시 시도 중 — 끝나면 여기로 와요`, onLg: 'lg.com 원본 · 여기선 빠짐',
       allDone: '모두 확인함', confirmDl: (n) => `${n}개 확인하고 받기`, youOk: '준비됨 · 직접 확인' },
-    de: { viewAll: (n) => `Alle ${n} ansehen`, browseT: 'Alle Produkte — ← → zum Blättern, Esc zurück', back: '← Zurück', prev: 'Zurück', next: 'Weiter', removedL: 'Aus dieser Excel entfernt', fReady: 'Bereit', fReview: 'Zu prüfen', checkingAll: (n) => `KI prüft alle ${n} gleichzeitig`, sumT: (r, m) => `${r} bereit · ${m} zu prüfen`,
+    de: { viewAll: (n) => `Alle ${n} ansehen`, browseT: 'Alle Produkte — ← → nächste Karte · ↑ ↓ oder Leertaste zum Scrollen · Esc zurück', moreBelow: 'Weiter unten', back: '← Zurück', prev: 'Zurück', next: 'Weiter', removedL: 'Aus dieser Excel entfernt', fReady: 'Bereit', fReview: 'Zu prüfen', checkingAll: (n) => `KI prüft alle ${n} gleichzeitig`, sumT: (r, m) => `${r} bereit · ${m} zu prüfen`,
       sumS: (n, s, m) => `${n} in ${s} s geprüft — jetzt nur noch ${m}`, reviewN: (i, n) => `Prüfung ${i} von ${n}`, okIn: 'Passt · übernehmen',
       retryingA: 'Wird automatisch erneut versucht…', waitRetry: (n) => `${n} werden automatisch erneut versucht — sie kommen hierher zurück`, onLg: 'Auf lg.com · fehlt hier',
       allDone: 'Alles geprüft', confirmDl: (n) => `${n} bestätigen & herunterladen`, youOk: 'Bereit · von dir geprüft' },
-    ar: { viewAll: (n) => `عرض الكل ${n}`, browseT: 'كل المنتجات — ← → للتنقل، Esc للرجوع', back: 'رجوع →', prev: 'السابق', next: 'التالي', removedL: 'أُزيل من ملف Excel هذا', fReady: 'جاهز', fReview: 'بحاجة إلى مراجعة', checkingAll: (n) => `الذكاء الاصطناعي يفحص جميع ${n} معًا`, sumT: (r, m) => `${r} جاهز · ${m} بحاجة إلى مراجعتك`,
+    ar: { viewAll: (n) => `عرض الكل ${n}`, browseT: 'كل المنتجات — ← → البطاقة التالية · ↑ ↓ أو المسافة للتمرير · Esc للرجوع', moreBelow: 'المزيد بالأسفل', back: 'رجوع →', prev: 'السابق', next: 'التالي', removedL: 'أُزيل من ملف Excel هذا', fReady: 'جاهز', fReview: 'بحاجة إلى مراجعة', checkingAll: (n) => `الذكاء الاصطناعي يفحص جميع ${n} معًا`, sumT: (r, m) => `${r} جاهز · ${m} بحاجة إلى مراجعتك`,
       sumS: (n, s, m) => `تم فحص ${n} في ${s} ث — تبقّى ${m} فقط`, reviewN: (i, n) => `مراجعة ${i} من ${n}`, okIn: 'يبدو جيدًا · تضمين',
       retryingA: 'جارٍ إعادة المحاولة تلقائيًا…', waitRetry: (n) => `${n} قيد إعادة المحاولة تلقائيًا — ستعود هنا`, onLg: 'على lg.com · مفقود هنا',
       allDone: 'تم فحص الكل', confirmDl: (n) => `تأكيد ${n} والتنزيل`, youOk: 'جاهز · راجعته أنت' },
@@ -348,7 +348,9 @@
     view.innerHTML = `<div class="dk dk-br" id="dk"><a href="#" class="dk-back" id="dkBack">${e(T.back)}</a></div><div id="ckGo"></div>`;
     C.dk = { root: document.getElementById('dk'), els: new Map(), side: new Map(), pile: [], minis: [], q: [], readyN: 0, shown: 0 };
     const D = C.dk, p = document.createElement('div'); p.className = 'dk-panel'; D.root.appendChild(p);
-    const geo = () => { const st = rel(D.root), sc = Math.min(1, (st.h - 170) / 540), x = Math.max(st.w * 0.16, 120), y = 104, px = x + CW * sc + 40; return { x, y, sc, px, w: Math.max(320, Math.min(620, st.w - px - 48)) }; };
+    // 전체 보기 카드는 화면 높이에 맞춰 크게 (상세 이미지까지 보게) — 폭은 높이의 ~75%, 320~520px
+    const geo = () => { const st = rel(D.root), y = 104, ch = Math.max(360, st.h - y - 56), cw = Math.round(Math.max(320, Math.min(520, ch * 0.75, st.w * 0.36))), x = Math.max(st.w * 0.08, 40), px = x + cw + 40;
+      return { x, y, ch, cw, px, w: Math.max(300, Math.min(620, st.w - px - 48)) }; };
     const kind = (u) => (isRemoved(u) ? T.removedL : busy(u) ? T.redoing : passed(u) || isOk(u) ? T.fReady : T.fReview);
     function panel() {
       const u = list[i], it = u[0], g = geo(), bad = aiRows(u).filter((x) => !x.ok), img = aiRows(u).find((x) => x.k === 'img' && !x.ok), srcs = (img && img.src) || [];
@@ -378,17 +380,40 @@
     function show(dir) {   // 한 장씩: 나가는 카드는 짧게 가속하며, 들어오는 카드는 길게 안착 (HyperFrames 규칙)
       const g = geo(), u = list[i], old = el;
       header(core, `${i + 1} / ${list.length}`, T.browseT);
-      el = cardEl(core, u); el.style.zIndex = 30;
+      el = cardEl(core, u); el.style.zIndex = 30; fullCard(el, g);
       const dx = (rtl ? -1 : 1) * 90 * dir;
-      el._pos = { x: g.x + dx, y: g.y, s: g.sc };
-      moveTo(el, { x: g.x, y: g.y, s: g.sc }, dir ? 360 : 0, EZ.out, { from: { opacity: dir ? 0 : 1 }, to: { opacity: 1 } });
-      if (old) moveTo(old, { x: g.x - dx, y: g.y, s: g.sc }, 180, EZ.p3in, { to: { opacity: 0 }, keep: true }).then(() => old.remove());
+      el._pos = { x: g.x + dx, y: g.y, s: 1 };
+      moveTo(el, { x: g.x, y: g.y, s: 1 }, dir ? 360 : 0, EZ.out, { from: { opacity: dir ? 0 : 1 }, to: { opacity: 1 } });
+      if (old) moveTo(old, { x: g.x - dx, y: g.y, s: 1 }, 180, EZ.p3in, { to: { opacity: 0 }, keep: true }).then(() => old.remove());
       panel();
       for (const v of [list[i + 1], list[i - 1]]) if (v) for (const src of (v[0].imgs || []).slice(0, 2).map(small)) { const im = new Image(); im.src = src; }   // 다음 장 미리
     }
     function go(d) { const j = i + d; if (j < 0 || j >= list.length) return; i = j; show(d); }
+    function fullCard(c, g) {   // 크게 + 스크롤바 + '아래로 더 있음' (끝까지 내리면 사라짐). 새 카드라 늘 맨 위부터
+      c.classList.add('dk-full'); c.style.width = g.cw + 'px';
+      const ph = c.querySelector('.dk-ph'), sc = c.querySelector('.dk-sc'); ph.style.height = g.ch + 'px';
+      const cm = c.querySelector('.cm'); if (cm) cm.style.zoom = (g.cw / 426).toFixed(3);   // 260px 카드의 .61 과 같은 비율
+      const more = document.createElement('button'); more.type = 'button'; more.className = 'dk-more'; more.innerHTML = `<span>${e(T.moreBelow)} ↓</span>`;
+      more.onclick = () => scrollBy(1); ph.appendChild(more);
+      // 위치 막대: 맥은 스크롤바가 숨어 있어서 직접 그린다 (어디쯤인지 · 얼마나 남았는지)
+      const rail = document.createElement('div'); rail.className = 'dk-rail'; rail.innerHTML = '<i></i>'; ph.appendChild(rail);
+      const upd = () => {
+        const max = sc.scrollHeight - sc.clientHeight, k = max > 0 ? sc.scrollTop / max : 0, hh = Math.max(24, rail.clientHeight * sc.clientHeight / Math.max(1, sc.scrollHeight));
+        rail.firstChild.style.height = hh + 'px'; rail.firstChild.style.transform = `translateY(${(rail.clientHeight - hh) * k}px)`; rail.hidden = max <= 4;
+        more.classList.toggle('dk-end', sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 4);
+      };
+      sc.addEventListener('scroll', upd, { passive: true }); setTimeout(upd, 60); c.querySelectorAll('img').forEach((im) => im.addEventListener('load', upd, { once: true }));
+    }
+    function scrollBy(page, px) {   // ↓ · ↑ 조금, 스페이스 · Page Down 한 화면
+      const sc = el && el.querySelector('.dk-sc'); if (!sc) return;
+      sc.scrollBy({ top: px != null ? px : page * sc.clientHeight * 0.85, behavior: reduced() ? 'auto' : 'smooth' });
+    }
     function key(ev) {
       if (ev.target && /input|textarea|select/i.test(ev.target.tagName)) return;
+      const k = ev.key;
+      if (k === 'ArrowDown' || k === 'ArrowUp') { ev.preventDefault(); scrollBy(0, k === 'ArrowDown' ? 160 : -160); return; }
+      if (k === ' ' || k === 'PageDown' || k === 'PageUp') { ev.preventDefault(); scrollBy(k === 'PageUp' || (k === ' ' && ev.shiftKey) ? -1 : 1); return; }
+      if (k === 'Home' || k === 'End') { ev.preventDefault(); const sc = el && el.querySelector('.dk-sc'); if (sc) sc.scrollTo({ top: k === 'Home' ? 0 : sc.scrollHeight, behavior: reduced() ? 'auto' : 'smooth' }); return; }
       if (ev.key === 'ArrowRight') { ev.preventDefault(); go(rtl ? -1 : 1); } else if (ev.key === 'ArrowLeft') { ev.preventDefault(); go(rtl ? 1 : -1); } else if (ev.key === 'Escape') { ev.preventDefault(); leave(); }
     }
     function leave() {

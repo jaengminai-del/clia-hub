@@ -447,6 +447,12 @@ button.eb { cursor: pointer; }
 .dk-nav .clia-btn[disabled] { opacity: .35; }
 .dk-card.dk-rm .dk-ph { opacity: .45; border-color: var(--line); box-shadow: none; } .dk-card.dk-rm .dk-st { color: var(--muted); text-decoration: line-through; }
 .dk-fin { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 26px; } .ck-done .dk-fin .clia-btn { margin-top: 0; }
+/* 전체 보기 카드: 크게 · 스크롤바 보이게 · '아래에 더 있음' (끝이면 사라짐) */
+.dk-rail { position: absolute; top: 10px; bottom: 10px; right: 4px; width: 5px; border-radius: 3px; background: rgba(38,38,38,.08); z-index: 4; pointer-events: none; }
+.dk-rail i { display: block; width: 100%; border-radius: 3px; background: rgba(38,38,38,.55); will-change: transform; }
+.dk-more { position: absolute; left: 0; right: 12px; bottom: 0; height: 84px; border: 0; padding: 0 0 12px; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,.95) 70%); display: flex; align-items: flex-end; justify-content: center; cursor: pointer; z-index: 3; border-radius: 0 0 14px 14px; transition: opacity .25s; font: inherit; }
+.dk-more span { background: var(--clia-gray-900); color: #fff; font-size: 12.5px; font-weight: 600; padding: 6px 14px; border-radius: 999px; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+.dk-more.dk-end { opacity: 0; pointer-events: none; }
 #ckGo { padding: 0 20px; max-width: 1240px; margin: 0 auto; width: 100%; } #ckGo .ck-why { margin: 0 0 12px; }
 @keyframes ckspin { to { transform: rotate(360deg); } }
 .ck-why { margin-top: 26px; padding: 12px 14px; border-radius: 10px; background: #FDF1F0; color: var(--bad); font-size: 13px; line-height: 1.5; }
