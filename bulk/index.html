@@ -455,7 +455,7 @@ button.eb { cursor: pointer; }
 .dk-rail s.on { left: -5px; right: -5px; height: 9px; margin-top: -4px; box-shadow: 0 0 0 2px #fff; }
 #dkCap > span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #dkCap > span svg { display: inline-block; vertical-align: -2px; margin-inline-end: 5px; }
-.dk-cr { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.dk-cr { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
 .dk-card .dk-mo { margin-top: 8px; font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dk-card .dk-st { margin-top: 3px; font-size: 12px; color: var(--clia-heritage); line-height: 1.35; }
 .dk-card.dk-pile .dk-mo, .dk-card.dk-pile .dk-st { opacity: 0; }
@@ -484,7 +484,8 @@ button.eb { cursor: pointer; }
 .dk-br[data-st="review"] .dk-prog i { background: var(--clia-heritage); }
 .dk-bar { position: absolute; left: 0; right: 0; top: 56px; display: flex; justify-content: center; gap: 12px; z-index: 40; }
 .dk-cap { position: absolute; top: 114px; display: flex; flex-direction: column; gap: 3px; pointer-events: none; }
-.dk-cap b { font-size: 17px; font-weight: 700; color: var(--clia-gray-900); }
+.dk-cap b { font-size: 22px; font-weight: 700; letter-spacing: -.2px; color: var(--clia-gray-900); }
+#dkCap .dk-fam { font-size: 16px; font-weight: 500; color: var(--clia-gray-600); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* 제품군 (모델명 옆) */
 .dk-cap span { display: inline-flex; align-items: center; gap: 5px; font-size: 13.5px; color: var(--clia-gray-600); }
 .dk-cap span svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .dk-br[data-st="review"] .dk-cap span { color: var(--clia-heritage); font-weight: 600; } .dk-br[data-st="ok"] .dk-cap span { color: var(--clia-gray-800); font-weight: 600; }

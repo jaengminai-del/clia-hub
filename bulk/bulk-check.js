@@ -64,15 +64,20 @@
   };
   // 문제 문구 (2026-11-27 장혁 피드백 '단순하게'): 오른쪽 칸 맨 위 큰 한 문장 · 다섯 언어 같은 톤. w_* 는 덱 더미 카드 아래 짧은 글
   const TXP = {
-    en: { bImg: 'lg.com image is missing', bLines: 'lg.com text is missing', bSum: 'Thai summary not made', bSpec: 'lg.com spec table is missing', bFail: "PDP couldn't be made", noOrig: 'Not on lg.com either',
+    en: { fam: { dish: 'Dishwasher', tower: 'WashTower', wd: 'Washer-dryer', styler: 'Styler', dryer: 'Dryer', washer: 'Washer', fridge: 'Refrigerator', buds: 'Earbuds', soundbar: 'Soundbar', speaker: 'Speaker', monitor: 'Monitor', tv: 'TV', ac: 'Air conditioner', purifier: 'Air purifier', dehum: 'Dehumidifier', micro: 'Microwave', vacuum: 'Vacuum', laptop: 'Laptop', projector: 'Projector' },
+      bImg: 'lg.com image is missing', bLines: 'lg.com text is missing', bSum: 'Thai summary not made', bSpec: 'lg.com spec table is missing', bFail: "PDP couldn't be made", noOrig: 'Not on lg.com either',
       w_img: (n) => `${n} missing image${n === 1 ? '' : 's'}`, w_txt: (n) => `${n} missing line${n === 1 ? '' : 's'}`, w_spec: 'Missing spec table', w_sum: 'No Thai summary', nextP: 'Next' },
-    th: { bImg: 'รูปจาก lg.com หายไป', bLines: 'ข้อความจาก lg.com หายไป', bSum: 'สร้างสรุปภาษาไทยไม่ได้', bSpec: 'ตารางสเปกจาก lg.com หายไป', bFail: 'สร้าง PDP ไม่ได้', noOrig: 'ไม่มีบน lg.com เช่นกัน',
+    th: { fam: { dish: 'เครื่องล้างจาน', tower: 'WashTower', wd: 'เครื่องซักอบผ้า', styler: 'สไตเลอร์', dryer: 'เครื่องอบผ้า', washer: 'เครื่องซักผ้า', fridge: 'ตู้เย็น', buds: 'หูฟังไร้สาย', soundbar: 'ซาวด์บาร์', speaker: 'ลำโพง', monitor: 'จอมอนิเตอร์', tv: 'ทีวี', ac: 'เครื่องปรับอากาศ', purifier: 'เครื่องฟอกอากาศ', dehum: 'เครื่องลดความชื้น', micro: 'ไมโครเวฟ', vacuum: 'เครื่องดูดฝุ่น', laptop: 'แล็ปท็อป', projector: 'โปรเจคเตอร์' },
+      bImg: 'รูปจาก lg.com หายไป', bLines: 'ข้อความจาก lg.com หายไป', bSum: 'สร้างสรุปภาษาไทยไม่ได้', bSpec: 'ตารางสเปกจาก lg.com หายไป', bFail: 'สร้าง PDP ไม่ได้', noOrig: 'ไม่มีบน lg.com เช่นกัน',
       w_img: (n) => `รูปหายไป ${n} รูป`, w_txt: (n) => `ข้อความหายไป ${n} บรรทัด`, w_spec: 'ตารางสเปกหายไป', w_sum: 'ไม่มีสรุปภาษาไทย', nextP: 'ถัดไป' },
-    ko: { bImg: 'lg.com 원본 이미지가 빠졌어요', bLines: 'lg.com 원본 문구가 빠졌어요', bSum: '태국어 요약을 못 만들었어요', bSpec: 'lg.com 원본 스펙 표가 빠졌어요', bFail: 'PDP를 만들지 못했어요', noOrig: 'lg.com에도 없음',
+    ko: { fam: { dish: '식기세척기', tower: '워시타워', wd: '세탁건조기', styler: '스타일러', dryer: '건조기', washer: '세탁기', fridge: '냉장고', buds: '이어버드', soundbar: '사운드바', speaker: '스피커', monitor: '모니터', tv: 'TV', ac: '에어컨', purifier: '공기청정기', dehum: '제습기', micro: '전자레인지', vacuum: '청소기', laptop: '노트북', projector: '프로젝터' },
+      bImg: 'lg.com 원본 이미지가 빠졌어요', bLines: 'lg.com 원본 문구가 빠졌어요', bSum: '태국어 요약을 못 만들었어요', bSpec: 'lg.com 원본 스펙 표가 빠졌어요', bFail: 'PDP를 만들지 못했어요', noOrig: 'lg.com에도 없음',
       w_img: (n) => `빠진 이미지 ${n}장`, w_txt: (n) => `빠진 문구 ${n}줄`, w_spec: '빠진 스펙 표', w_sum: '태국어 요약 없음', nextP: '다음' },
-    de: { bImg: 'lg.com-Bild fehlt', bLines: 'lg.com-Text fehlt', bSum: 'Thai-Zusammenfassung fehlt', bSpec: 'lg.com-Datentabelle fehlt', bFail: 'PDP nicht erstellt', noOrig: 'Auch nicht auf lg.com',
+    de: { fam: { dish: 'Geschirrspüler', tower: 'WashTower', wd: 'Waschtrockner', styler: 'Styler', dryer: 'Trockner', washer: 'Waschmaschine', fridge: 'Kühlschrank', buds: 'Ohrhörer', soundbar: 'Soundbar', speaker: 'Lautsprecher', monitor: 'Monitor', tv: 'Fernseher', ac: 'Klimaanlage', purifier: 'Luftreiniger', dehum: 'Luftentfeuchter', micro: 'Mikrowelle', vacuum: 'Staubsauger', laptop: 'Laptop', projector: 'Beamer' },
+      bImg: 'lg.com-Bild fehlt', bLines: 'lg.com-Text fehlt', bSum: 'Thai-Zusammenfassung fehlt', bSpec: 'lg.com-Datentabelle fehlt', bFail: 'PDP nicht erstellt', noOrig: 'Auch nicht auf lg.com',
       w_img: (n) => `${n} fehlende(s) Bild(er)`, w_txt: (n) => `${n} fehlende Zeile(n)`, w_spec: 'Fehlende Datentabelle', w_sum: 'Keine thailändische Zusammenfassung', nextP: 'Weiter' },
-    ar: { bImg: 'صورة lg.com مفقودة', bLines: 'نص lg.com مفقود', bSum: 'لم يُنشأ الملخص التايلاندي', bSpec: 'جدول مواصفات lg.com مفقود', bFail: 'تعذّر إنشاء PDP', noOrig: 'غير موجود في lg.com أيضًا',
+    ar: { fam: { dish: 'غسالة صحون', tower: 'WashTower', wd: 'غسالة ومجففة', styler: 'ستايلر', dryer: 'مجفف ملابس', washer: 'غسالة', fridge: 'ثلاجة', buds: 'سماعات أذن', soundbar: 'ساوندبار', speaker: 'مكبر صوت', monitor: 'شاشة', tv: 'تلفزيون', ac: 'مكيف هواء', purifier: 'منقي هواء', dehum: 'مزيل رطوبة', micro: 'ميكروويف', vacuum: 'مكنسة كهربائية', laptop: 'حاسوب محمول', projector: 'جهاز عرض' },
+      bImg: 'صورة lg.com مفقودة', bLines: 'نص lg.com مفقود', bSum: 'لم يُنشأ الملخص التايلاندي', bSpec: 'جدول مواصفات lg.com مفقود', bFail: 'تعذّر إنشاء PDP', noOrig: 'غير موجود في lg.com أيضًا',
       w_img: (n) => `${n} صورة مفقودة`, w_txt: (n) => `${n} سطر مفقود`, w_spec: 'جدول مواصفات مفقود', w_sum: 'لا يوجد ملخص تايلاندي', nextP: 'التالي' },
   };
   const tOf = (L) => Object.assign({}, TX.en, TXD.en, TXP.en, TX[L] || {}, TXD[L] || {}, TXP[L] || {});
@@ -155,6 +160,19 @@
   // 자동 재시도는 서버가 뒤에서 — 고쳐지면 그 카드가 왼쪽에서 오른쪽으로 옮겨 간다.
   const small = (u) => String(u || '').replace('/media/slices/', '/media/slices-p/');
   const ukey = (u) => (u[0].bundle ? 'b:' + u[0].row : u[0].slug || u[0].url || 'r:' + u[0].row);
+  // 제품군 (2026-11-27 장혁 피드백): 크롤 데이터엔 카테고리가 따로 없어 lg.com 주소의 카테고리 경로로 — 묶음은 첫 구성품.
+  //   순서가 중요하다 (워시타워 · 세탁건조기 · 식기세척기가 '세탁'보다 먼저, 'tv-soundbars/qned' 는 TV · 'speakers/soundbars' 는 사운드바)
+  const FAM_RULES = [['dish', /dishwasher|geschirrsp/], ['tower', /wash-?tower/], ['wd', /washer-dryer|waschtrockner/], ['styler', /styler/], ['dryer', /(?<!washers-)dryers?|trockner/],
+    ['washer', /wash|waesche|laundry/], ['fridge', /refrigerator|fridge|freezer|kuehl/], ['buds', /earbuds|xboombuds/], ['soundbar', /(speakers|lautsprecher)[\/-]soundbars?|\/soundbars?\//],
+    ['speaker', /speaker|xboom|lautsprecher|soundsuite/], ['monitor', /monitor/], ['tv', /(^|[\/-])tvs?([\/-]|$)|qned|oled|nanocell|uhd|lifestyle-screens|stanbyme|fernseher/],
+    ['ac', /air-condition|klimaanlage/], ['dehum', /dehumidifier|entfeuchter/], ['purifier', /puricare|purifier|luftreiniger/], ['micro', /microwave|mikrowelle/],
+    ['vacuum', /vacuum|staubsauger/], ['laptop', /gram|laptop|notebook/], ['projector', /projector|beamer/]];
+  function familyOf(u) {
+    const it = u[0], b = (it.bundle || [])[0] || {};
+    const s = String(it.bundle ? b.url || b.slug || '' : it.url || it.slug || '').toLowerCase().replace(/^https?:\/\/[^/]+\/[a-z_]+\//, '').replace(/^www-lg-com-[a-z_]+-/, '');
+    const hit = FAM_RULES.find(([, re]) => re.test(s));
+    return hit ? (C.T.fam[hit[0]] || '') : '';
+  }
   const aiRows = (u) => (u[0].status === 'failed' ? [{ k: 'fail', ok: false, msg: u[0].error }] : u[0].ai || []);
   // 이미지: 슬라이스에서 못 가져온 것이나 크롤에서 빠진 것이나 사람 눈에는 같은 '빠진 이미지'
   const whyImg = (x) => C.T.w_img(x.n);
@@ -443,8 +461,9 @@
       D.root.dataset.st = s;   // 화면 배경 · 카드 테두리가 상태를 따른다
       document.getElementById('dkI').textContent = i + 1; document.getElementById('dkNn').textContent = ' / ' + list.length;
       document.getElementById('dkProg').style.width = ((i + 1) / list.length * 100) + '%';
-      // 모델명만 — 검토 중엔 상태 줄 없음(무슨 일인지는 오른쪽 칸 한 문장). 준비됨 · 뺌 · 다시 준비 중만 짧게
-      cap.innerHTML = `<div class="dk-cr"><b>${e(it.model || '')}</b></div>` + (s === 'review' ? '' : `<span>${s === 'ok' ? CK : ''}${e(label[s])}</span>`);
+      // 위엔 타이틀만 크게: 모델명 + 제품군 (상태는 배경색 · 버튼으로). 다시 준비 중일 때만 짧게
+      const fam = familyOf(u);
+      cap.innerHTML = `<div class="dk-cr"><b>${e(it.model || '')}</b>${fam ? `<span class="dk-fam">${e(fam)}</span>` : ''}</div>` + (s === 'busy' ? `<span>${e(label[s])}</span>` : '');
       cmp();
       cap.style.left = g.x + 'px'; cap.style.width = g.cw + 'px';
       (rtl ? nextB : prevB).disabled = !i; (rtl ? prevB : nextB).disabled = i >= list.length - 1;
