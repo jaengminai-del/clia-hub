@@ -225,7 +225,7 @@ function qaOf(slug) {
   // 실제로 빠진 이미지가 있거나, 본문 글이 5개 이상 빠졌을 때만
   const cov = qa.coverage || {}, chk = qa.checks || {};
   const real = (x) => x && !NON_CONTENT.has(x.component_id);
-  const texts = (cov.missing_texts || []).filter((x) => real(x) && !GALLERY.has(x.component_id) && !x.only_in_cards).length;
+  const tx = (cov.missing_texts || []).filter((x) => real(x) && !GALLERY.has(x.component_id) && !x.only_in_cards), texts = tx.length;
   // 예전에 크롤한 결과의 검사 기록에는 '크롤러가 일부러 뺀 이미지(LG 가 404·자리표시를 내줌)'가 누락으로 들어 있다 — 그것은 빼고 센다.
   // 새 크롤은 검사가 이미 제외한다. 주소가 겹쳐 있던 것은 실제로 이미지를 잃은 것이라 그대로 센다 (다시 가져오면 고쳐진다).
   const dead = new Set(((mirror && mirror._dead_media_dropped) || []).filter((d) => !DUP_DAM.test(d.url || '')).map((d) => imgKey(d.url)));
@@ -235,7 +235,21 @@ function qaOf(slug) {
   const gone = (cov.missing_images || []).filter(real).filter((x) => !GALLERY.has(x.component_id) && !gal.has(imgKey(x.image)) && !dead.has(imgKey(x.image)));
   const images = gone.length + (chk.images_missing_url || 0);
   const files = gone.slice(0, 3).map((x) => String(x.image || '').split('/').pop());   // 어떤 이미지가 빠졌는지 (화면에서 마우스를 올리면 보임)
-  return { images, texts, files, mirror };
+  // 벌크 Check 검토 화면이 크게 보여 줄 근거: 빠진 lg.com 원본 그림 주소(최대 3) · 빠진 글(최대 5줄)
+  const src = gone.slice(0, 3).map((x) => fullImg(dir, x.image)).filter(Boolean);
+  const lines = tx.slice(0, 5).map((x) => String(x.text || '').slice(0, 160));
+  return { images, texts, files, mirror, src, lines };
+}
+
+// 검사 기록의 이미지 주소는 끝 120자만 남아 있을 수 있다 → 크롤한 원문(pc.html)에서 그 끝으로 끝나는 전체 주소를 찾는다
+function fullImg(dir, tail) {
+  tail = String(tail || '');
+  const abs = (u) => (/^https?:\/\//.test(u) ? u : u.startsWith('//') ? 'https:' + u : u.startsWith('/') ? 'https://www.lg.com' + u : null);
+  if (/^(https?:)?\/\/|^\/content\//.test(tail)) return abs(tail);
+  let html = ''; try { html = fs.readFileSync(path.join(dir, 'pc.html'), 'utf8'); } catch (_) { return null; }
+  const i = html.indexOf(tail); if (i < 0) return null;
+  let s = i; while (s > 0 && !/["'\s(,=]/.test(html[s - 1])) s--;
+  return abs(html.slice(s, i + tail.length));
 }
 
 // ── 벌크 Check (?check=1, 2026-11-26) ──
@@ -252,8 +266,8 @@ function aiChecks(j, it, c) {
   const used = (c && c.urls && c.urls.length) || 0;
   const at = c && Array.isArray(c.broken) ? c.broken.filter((b) => !used || b.slice <= used).slice(0, 12) : null;
   const bad = at ? at.length : notLoaded;
-  out.push({ k: 'img', ok: !bad && !lgImg, n: bad + lgImg, bad, lg: lgImg, ...(at && at.length ? { at } : {}) });
-  out.push({ k: 'txt', ok: q.texts < 5, n: q.texts });   // 글 몇 줄은 캐러셀 버튼 글자 같은 오탐이 많다 — 확인 필요 규칙과 같게 5줄부터
+  out.push({ k: 'img', ok: !bad && !lgImg, n: bad + lgImg, bad, lg: lgImg, ...(at && at.length ? { at } : {}), ...(lgImg && q.src && q.src.length ? { src: q.src } : {}) });
+  out.push({ k: 'txt', ok: q.texts < 5, n: q.texts, ...(q.texts >= 5 && q.lines ? { lines: q.lines } : {}) });   // 글 몇 줄은 캐러셀 버튼 글자 같은 오탐이 많다 — 확인 필요 규칙과 같게 5줄부터
   if (!it.bundle && /lg\.com\/th\//i.test(it.url || '')) out.push({ k: 'sum', ok: !(c && c.summaryErr) });
   if (j.channel === 'shopee') out.push({ k: 'n12', ok: true, used: c ? c.images : 0, all: c ? c.allImages : 0 });
   const specs = q.mirror ? (q.mirror.sections || []).reduce((n, s) => n + ((s.specs || []).length), 0) : (it.bundle ? 1 : 0);

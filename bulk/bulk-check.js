@@ -11,31 +11,31 @@
     en: { steps: ['Attach', 'Prepare', 'Check', 'Download'], rows: (n) => `${n} rows`, prep: (a, b) => `Preparing ${a} / ${b}`, liveP: 'live products',
       skip: (n) => `${n} not live — skipped`, view: 'View', hide: 'Hide', asOf: (d) => `Live list as of ${d}`, byStatus: 'From the Status column',
       skipRows: (n) => `${n} rows in the Excel — left as they are`, notLive: 'Not live', unknown: 'Unknown', none: 'No live products in this file.',
-      w_lgimg: (n) => `${n} lg.com image${n === 1 ? '' : 's'} not in the PDP`, w_at: 'marked in the PDP', badM: "Didn't load", w_img: (n) => `${n} image${n === 1 ? '' : 's'} didn't load`, w_txt: (n) => `${n} lg.com lines missing`, w_sum: "Summary couldn't be made",
+      pBad: "This image didn't load", pLg: 'This lg.com image is missing from the PDP', pLgN: (n) => `${n} lg.com image${n === 1 ? ' is' : 's are'} missing from the PDP`, pTxt: 'These lg.com lines are missing from the PDP', pSpec: 'No spec table in the PDP', pBadN: (n) => `${n} image${n === 1 ? '' : 's'} didn't load — place unknown`, probN: (a, b) => `Problem ${a} / ${b}`, nextP: 'Next problem', orig: 'lg.com original', w_lgimg: (n) => `${n} lg.com image${n === 1 ? '' : 's'} not in the PDP`, w_at: 'marked in the PDP', badM: "Didn't load", w_img: (n) => `${n} image${n === 1 ? '' : 's'} didn't load`, w_txt: (n) => `${n} lg.com lines missing`, w_sum: "Summary couldn't be made",
       w_spec: 'No spec table', w_fail: "Couldn't prepare", w_retried: 'still there after a retry', redo: 'Prepare again', remove: 'Remove from this Excel',
       redoing: 'Preparing again', doneT: (n) => `${n} checked`, removed: (n) => `${n} removed`, skipped: (n) => `${n} not live skipped`, dl: 'Download Excel', err: 'Something went wrong: ' },
     th: { steps: ['แนบไฟล์', 'เตรียม', 'ตรวจ', 'ดาวน์โหลด'], rows: (n) => `${n} แถว`, prep: (a, b) => `กำลังเตรียม ${a} / ${b}`, liveP: 'สินค้าที่ไลฟ์',
       skip: (n) => `ไม่ได้ไลฟ์ ${n} รายการ — ข้ามไป`, view: 'ดู', hide: 'ซ่อน', asOf: (d) => `รายการไลฟ์ ณ ${d}`, byStatus: 'จากคอลัมน์ Status',
       skipRows: (n) => `${n} แถวใน Excel — คงไว้ตามเดิม`, notLive: 'ไม่ได้ไลฟ์', unknown: 'ไม่ทราบ', none: 'ไม่มีสินค้าที่ไลฟ์ในไฟล์นี้',
-      w_lgimg: (n) => `รูปจาก lg.com ไม่อยู่ใน PDP ${n} รูป`, w_at: 'ทำเครื่องหมายไว้ใน PDP', badM: 'โหลดไม่ได้', w_img: (n) => `โหลดรูปไม่ได้ ${n} รูป`, w_txt: (n) => `ข้อความจาก lg.com ขาด ${n} บรรทัด`, w_sum: 'สร้างสรุปไม่ได้',
+      pBad: 'โหลดรูปนี้ไม่ได้', pLg: 'รูปนี้จาก lg.com ขาดไปจาก PDP', pLgN: (n) => `รูปจาก lg.com ขาดไปจาก PDP ${n} รูป`, pTxt: 'ข้อความเหล่านี้จาก lg.com ขาดไปจาก PDP', pSpec: 'ไม่มีตารางสเปกใน PDP', pBadN: (n) => `โหลดรูปไม่ได้ ${n} รูป — ไม่ทราบตำแหน่ง`, probN: (a, b) => `ปัญหา ${a} / ${b}`, nextP: 'ปัญหาถัดไป', orig: 'ต้นฉบับ lg.com', w_lgimg: (n) => `รูปจาก lg.com ไม่อยู่ใน PDP ${n} รูป`, w_at: 'ทำเครื่องหมายไว้ใน PDP', badM: 'โหลดไม่ได้', w_img: (n) => `โหลดรูปไม่ได้ ${n} รูป`, w_txt: (n) => `ข้อความจาก lg.com ขาด ${n} บรรทัด`, w_sum: 'สร้างสรุปไม่ได้',
       w_spec: 'ไม่มีตารางสเปก', w_fail: 'เตรียมไม่สำเร็จ', w_retried: 'ลองใหม่แล้วยังเหมือนเดิม', redo: 'เตรียมใหม่', remove: 'นำออกจาก Excel นี้',
       redoing: 'กำลังเตรียมใหม่', doneT: (n) => `ตรวจแล้ว ${n} รายการ`, removed: (n) => `นำออก ${n}`, skipped: (n) => `ข้ามที่ไม่ได้ไลฟ์ ${n}`, dl: 'ดาวน์โหลด Excel', err: 'เกิดข้อผิดพลาด: ' },
     ko: { steps: ['첨부', '준비', 'Check', '받기'], rows: (n) => `${n}행`, prep: (a, b) => `준비 중 ${a} / ${b}`, liveP: '라이브 제품',
       skip: (n) => `라이브 아님 ${n}개 — 건너뜀`, view: '보기', hide: '닫기', asOf: (d) => `라이브 목록 기준일 ${d}`, byStatus: 'Status 칸 기준',
       skipRows: (n) => `엑셀 ${n}행 — 원래 내용 그대로`, notLive: '라이브 아님', unknown: '모름', none: '이 파일에 라이브 제품이 없어요.',
-      w_lgimg: (n) => `lg.com 이미지 ${n}장이 PDP에 없음`, w_at: 'PDP에 표시', badM: '못 불러옴', w_img: (n) => `이미지 ${n}장 못 불러옴`, w_txt: (n) => `lg.com 문구 ${n}줄 빠짐`, w_sum: '요약을 못 만듦',
+      pBad: '이 이미지 못 불러옴', pLg: 'lg.com 원본에 있는 이 이미지가 빠짐', pLgN: (n) => `lg.com 원본 이미지 ${n}장이 빠짐`, pTxt: 'lg.com 원본에 있는 이 문구가 빠짐', pSpec: 'PDP에 스펙 표가 없음', pBadN: (n) => `이미지 ${n}장 못 불러옴 — 자리 모름`, probN: (a, b) => `문제 ${a} / ${b}`, nextP: '다음 문제', orig: 'lg.com 원본', w_lgimg: (n) => `lg.com 이미지 ${n}장이 PDP에 없음`, w_at: 'PDP에 표시', badM: '못 불러옴', w_img: (n) => `이미지 ${n}장 못 불러옴`, w_txt: (n) => `lg.com 문구 ${n}줄 빠짐`, w_sum: '요약을 못 만듦',
       w_spec: '스펙표 없음', w_fail: '준비 못 함', w_retried: '다시 해도 그대로', redo: '다시 준비', remove: '이번 엑셀에서 빼기',
       redoing: '다시 준비하는 중', doneT: (n) => `${n}개 확인 완료`, removed: (n) => `${n}개 뺌`, skipped: (n) => `라이브 아님 ${n}개 건너뜀`, dl: '엑셀 받기', err: '문제가 생겼어요: ' },
     de: { steps: ['Anhängen', 'Vorbereiten', 'Prüfen', 'Herunterladen'], rows: (n) => `${n} Zeilen`, prep: (a, b) => `Vorbereitung ${a} / ${b}`, liveP: 'Live-Produkte',
       skip: (n) => `${n} nicht live — übersprungen`, view: 'Ansehen', hide: 'Ausblenden', asOf: (d) => `Live-Liste vom ${d}`, byStatus: 'Aus der Spalte Status',
       skipRows: (n) => `${n} Zeilen in der Excel — bleiben unverändert`, notLive: 'Nicht live', unknown: 'Unbekannt', none: 'Keine Live-Produkte in dieser Datei.',
-      w_lgimg: (n) => `${n} lg.com-Bild(er) fehlen im PDP`, w_at: 'im PDP markiert', badM: 'Nicht geladen', w_img: (n) => `${n} Bild(er) nicht geladen`, w_txt: (n) => `${n} Zeilen von lg.com fehlen`, w_sum: 'Zusammenfassung fehlgeschlagen',
+      pBad: 'Dieses Bild wurde nicht geladen', pLg: 'Dieses lg.com-Bild fehlt im PDP', pLgN: (n) => `${n} lg.com-Bild(er) fehlen im PDP`, pTxt: 'Diese lg.com-Zeilen fehlen im PDP', pSpec: 'Keine Spezifikationstabelle im PDP', pBadN: (n) => `${n} Bild(er) nicht geladen — Stelle unbekannt`, probN: (a, b) => `Problem ${a} / ${b}`, nextP: 'Nächstes Problem', orig: 'lg.com-Original', w_lgimg: (n) => `${n} lg.com-Bild(er) fehlen im PDP`, w_at: 'im PDP markiert', badM: 'Nicht geladen', w_img: (n) => `${n} Bild(er) nicht geladen`, w_txt: (n) => `${n} Zeilen von lg.com fehlen`, w_sum: 'Zusammenfassung fehlgeschlagen',
       w_spec: 'Kein Datenblatt', w_fail: 'Vorbereitung fehlgeschlagen', w_retried: 'auch nach erneutem Versuch', redo: 'Neu vorbereiten', remove: 'Aus dieser Excel entfernen',
       redoing: 'Wird neu vorbereitet', doneT: (n) => `${n} geprüft`, removed: (n) => `${n} entfernt`, skipped: (n) => `${n} nicht live übersprungen`, dl: 'Excel herunterladen', err: 'Fehler: ' },
     ar: { steps: ['إرفاق', 'تجهيز', 'تحقق', 'تنزيل'], rows: (n) => `${n} صف`, prep: (a, b) => `جارٍ التجهيز ${a} / ${b}`, liveP: 'منتجات نشطة',
       skip: (n) => `${n} غير نشط — تم تخطيه`, view: 'عرض', hide: 'إخفاء', asOf: (d) => `قائمة النشط بتاريخ ${d}`, byStatus: 'من عمود Status',
       skipRows: (n) => `${n} صف في Excel — يبقى كما هو`, notLive: 'غير نشط', unknown: 'غير معروف', none: 'لا توجد منتجات نشطة في هذا الملف.',
-      w_lgimg: (n) => `${n} صورة من lg.com غير موجودة في PDP`, w_at: 'محدّد في PDP', badM: 'لم يتم التحميل', w_img: (n) => `تعذّر تحميل ${n} صورة`, w_txt: (n) => `${n} سطر من lg.com مفقود`, w_sum: 'تعذّر إنشاء الملخص',
+      pBad: 'تعذّر تحميل هذه الصورة', pLg: 'هذه الصورة من lg.com مفقودة في PDP', pLgN: (n) => `${n} صورة من lg.com مفقودة في PDP`, pTxt: 'هذه الأسطر من lg.com مفقودة في PDP', pSpec: 'لا يوجد جدول مواصفات في PDP', pBadN: (n) => `تعذّر تحميل ${n} صورة — الموضع غير معروف`, probN: (a, b) => `المشكلة ${a} / ${b}`, nextP: 'المشكلة التالية', orig: 'الأصل من lg.com', w_lgimg: (n) => `${n} صورة من lg.com غير موجودة في PDP`, w_at: 'محدّد في PDP', badM: 'لم يتم التحميل', w_img: (n) => `تعذّر تحميل ${n} صورة`, w_txt: (n) => `${n} سطر من lg.com مفقود`, w_sum: 'تعذّر إنشاء الملخص',
       w_spec: 'لا يوجد جدول مواصفات', w_fail: 'تعذّر التجهيز', w_retried: 'ما زال بعد إعادة المحاولة', redo: 'إعادة التجهيز', remove: 'إزالة من ملف Excel هذا',
       redoing: 'جارٍ إعادة التجهيز', doneT: (n) => `تم فحص ${n}`, removed: (n) => `أُزيل ${n}`, skipped: (n) => `تم تخطي ${n} غير نشط`, dl: 'تنزيل Excel', err: 'حدث خطأ: ' },
   };
@@ -99,15 +99,18 @@
   }
 
   // ── 화면 틀 ──
-  function frame(core, step) {
+  function steps(core, step) {
     const T = C.T;
     let st = document.getElementById('ckSteps');
     if (!st) { st = document.createElement('div'); st.id = 'ckSteps'; st.className = 'ck-steps'; document.querySelector('.hd').after(st); }
     st.innerHTML = T.steps.map((x, i) => `<span class="ck-st ${i < step ? 'ck-d' : i === step ? 'ck-o' : ''}">${core.esc(x)}</span>`).join('<span class="ck-sep">›</span>');
+  }
+  function frame(core, step, full) {   // full: 화면 전체 틀 (검수 · 끝 · 완료 — 버튼 줄이 늘 같은 자리)
+    steps(core, step);
     document.querySelector('.body').classList.add('hidden');
     let el = document.getElementById('ck');
     if (!el) { el = document.createElement('div'); el.id = 'ck'; el.className = 'ck'; document.querySelector('.body').after(el); }
-    el.classList.toggle('ck-full', step === 2);
+    el.classList.toggle('ck-full', step === 2 || !!full);
     return el;
   }
   const units = (j) => {   // 한 제품 = 같은 제품의 행들 (진행 막대 · 건너뜀 수와 같은 단위)
@@ -176,20 +179,35 @@
     const b = document.getElementById(id); if (!b) return; b.textContent = n;
     if (!reduced()) b.animate([{ transform: 'translateY(-60%)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 260, easing: EZ.out });
   }
-  function cardEl(core, u) {   // 큰 카드 = 상품 페이지 프리뷰 (bulk-market) + 모델 + 이유 한 줄
-    const e = core.esc, it = u[0];
-    // 엑셀 설명 칸에 들어가는 상세 이미지만 (갤러리 · 제목 · 스펙 없음). 못 불러온 이미지 자리는 그 장 위에 표시
-    const img = (it.ai || []).find((x) => x.k === 'img') || {}, at = img.at || [];
-    const mark = (k) => at.filter((b) => b.slice === k + 1).map((b) => `<span class="dk-bad" style="top:${(b.y * 100).toFixed(2)}%;height:${(Math.max(b.h, 0.02) * 100).toFixed(2)}%"><b>${e(C.T.badM)}</b></span>`).join('');
+  function cardEl(core, u) {   // 큰 카드 = 엑셀 설명 칸에 들어가는 상세 이미지 (bulk-market 틀) + 모델 + 이유 한 줄
+    const e = core.esc, it = u[0], T = C.T, ai = it.ai || [];
+    // 사람이 볼 문제 (2026-11-27): 자리를 아는 것(못 불러온 이미지)은 그 장 위에 굵은 테두리 + 큰 글자,
+    // 자리가 없는 것(lg.com 원본에만 있는 그림 · 글, 요약 · 스펙 표)은 PDP 맨 위 문제 칸에 — 원본 그림은 크게
+    const img = ai.find((x) => x.k === 'img') || {}, at = img.at || [];
+    const mark = (k) => at.filter((b) => b.slice === k + 1).map((b) => `<span class="dk-bad" style="top:${(b.y * 100).toFixed(2)}%;height:${(Math.max(b.h, 0.03) * 100).toFixed(2)}%"><b>${e(T.pBad)}</b></span>`).join('');
+    const pb = (title, inner) => `<div class="dk-pb"><div class="dk-pt">${e(title)}</div>${inner || ''}</div>`;
+    const pbs = [];
+    if (!img.ok) {
+      if ((img.bad == null ? img.n : img.bad) && !at.length) pbs.push(pb(T.pBadN(img.bad == null ? img.n : img.bad)));
+      (img.src || []).forEach((s) => pbs.push(pb(T.pLg, `<figure class="dk-po"><img src="${e(s)}" alt="" decoding="async"><figcaption>${e(T.orig)}</figcaption></figure>`)));
+      if (img.lg > (img.src || []).length) pbs.push(pb(T.pLgN(img.lg - (img.src || []).length)));
+    }
+    for (const x of ai) {
+      if (x.ok) continue;
+      if (x.k === 'txt') pbs.push(pb(T.pTxt, x.lines && x.lines.length ? `<ul class="dk-pl">${x.lines.map((l) => `<li>${e(l)}</li>`).join('')}</ul>` : `<p class="dk-pl">${e(T.w_txt(x.n))}</p>`));
+      else if (x.k === 'sum') pbs.push(pb(T.w_sum)); else if (x.k === 'spec') pbs.push(pb(T.pSpec));
+    }
     const body = `<div class="ck-imgs">${(it.imgs || []).map(small).map((s, k) => { const m = mark(k); return m ? `<span class="dk-si"><img src="${e(s)}" alt="" decoding="async">${m}</span>` : `<img src="${e(s)}" alt="" decoding="async">`; }).join('')}</div>`;
     const pv = window.CliaMarket ? CliaMarket.page(C.job.channel, { body }) : body;
     const el = document.createElement('div'); el.className = 'dk-card';
-    el.innerHTML = `<div class="dk-ph"><div class="dk-sc">${pv}</div></div><div class="dk-mo">${e(it.model || '')}</div><div class="dk-st"></div>`;
+    el.innerHTML = `<div class="dk-ph"><div class="dk-sc">${pbs.length ? `<div class="dk-pbs">${pbs.join('')}</div>` : ''}${pv}</div></div><div class="dk-mo">${e(it.model || '')}</div><div class="dk-st"></div>`;
     C.dk.root.appendChild(el); cardState(el, u); return el;
   }
   function cardState(el, u) {
     const bad = aiRows(u).filter((x) => !x.ok);
     el.classList.toggle('dk-busy', busy(u)); el.classList.toggle('dk-ok', passed(u)); el.classList.toggle('dk-rm', isRemoved(u));
+    // 사람이 정할 문제가 남은 카드: 나머지 장은 어둡게, 문제 장만 선명하게 (CSS .dk-prob)
+    el.classList.toggle('dk-prob', !passed(u) && !isRemoved(u) && !busy(u) && !isOk(u) && !!el.querySelector('.dk-pb, .dk-bad'));
     el.querySelector('.dk-st').textContent = isRemoved(u) ? C.T.removedL : busy(u) ? (u.some((x) => x.retrying) ? C.T.retryingA : C.T.redoing)
       : passed(u) ? C.T.fReady : bad.map(why).join(' · ') + (u[0].retried ? ' — ' + C.T.w_retried : '');
   }
@@ -384,7 +402,10 @@
       document.getElementById('dkI').textContent = i + 1; document.getElementById('dkNn').textContent = ' / ' + list.length;
       document.getElementById('dkProg').style.width = ((i + 1) / list.length * 100) + '%';
       const line = s === 'review' ? T.fReview + (bad.length ? ' — ' + bad.map(why).join(' · ') : '') : label[s];   // 제목 아래 한 줄 (글자만)
-      cap.innerHTML = `<b>${e(it.model || '')}</b><span>${s === 'ok' ? CK : ''}${e(line)}</span>`;
+      const ps = el && el.classList.contains('dk-prob') ? probs(el) : [];
+      const nav = ps.length ? `<div class="dk-pn"><em>${e(T.probN((el._pi || 0) + 1, ps.length))}</em>${ps.length > 1 ? `<button type="button" id="dkNp">${e(T.nextP)} ↓</button>` : ''}</div>` : '';
+      cap.innerHTML = `<div class="dk-cr"><b>${e(it.model || '')}</b>${nav}</div><span>${s === 'ok' ? CK : ''}${e(line)}</span>`;
+      const np = document.getElementById('dkNp'); if (np) np.onclick = () => seek(el, (el._pi || 0) + 1);
       cap.style.left = g.x + 'px'; cap.style.width = g.cw + 'px';
       (rtl ? nextB : prevB).disabled = !i; (rtl ? prevB : nextB).disabled = i >= list.length - 1;
       // 버튼 셋은 늘 같은 자리 — 상태에 맞지 않는 것은 흐리게
@@ -426,26 +447,40 @@
       c.classList.add('dk-full'); c.style.width = g.cw + 'px';
       const ph = c.querySelector('.dk-ph'), sc = c.querySelector('.dk-sc'); ph.style.height = g.ch + 'px';
       const cm = c.querySelector('.cm'); if (cm) cm.style.zoom = (g.cw / 426).toFixed(3);   // 260px 카드의 .61 과 같은 비율
-      const more = document.createElement('button'); more.type = 'button'; more.className = 'dk-more'; more.innerHTML = `<span>${e(T.moreBelow)} ↓</span>`;
-      more.onclick = () => scrollBy(1); ph.appendChild(more);
+      const more = document.createElement('div'); more.className = 'dk-more'; more.setAttribute('aria-hidden', 'true'); more.innerHTML = `<span>${e(T.moreBelow)} ↓</span>`;   // 표시만 (누르는 것 아님 — 버튼은 위에만)
+      ph.appendChild(more);
       // 위치 막대: 맥은 스크롤바가 숨어 있어서 직접 그린다 (어디쯤인지 · 얼마나 남았는지)
       const rail = document.createElement('div'); rail.className = 'dk-rail'; rail.innerHTML = '<i></i>'; ph.appendChild(rail);
       const upd = () => {
         const max = sc.scrollHeight - sc.clientHeight, k = max > 0 ? sc.scrollTop / max : 0, hh = Math.max(24, rail.clientHeight * sc.clientHeight / Math.max(1, sc.scrollHeight));
         rail.firstChild.style.height = hh + 'px'; rail.firstChild.style.transform = `translateY(${(rail.clientHeight - hh) * k}px)`; rail.hidden = max <= 4;
         more.classList.toggle('dk-end', sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 4);
+        // 위치 막대 위 빨간 표시 = 문제 자리 (지금 보는 문제는 더 굵게)
+        const ps = c.classList.contains('dk-prob') ? probs(c) : [], H = Math.max(1, sc.scrollHeight);
+        rail.querySelectorAll('s').forEach((x) => x.remove());
+        ps.forEach((p, k) => { const s = document.createElement('s'); if (k === c._pi) s.className = 'on'; s.style.top = (Math.min(1, topIn(sc, p) / H) * 100).toFixed(2) + '%'; rail.appendChild(s); });
       };
+      c._upd = upd;
       sc.addEventListener('scroll', upd, { passive: true }); setTimeout(upd, 60); c.querySelectorAll('img').forEach((im) => im.addEventListener('load', upd, { once: true }));
     }
-    function seek(c) {   // 못 불러온 이미지 표시가 있으면 가운데 온 뒤 그 자리로 (그 위 이미지가 다 불러와져야 자리가 맞다)
-      const m = c.querySelector('.dk-bad'); if (!m) return;
-      const ims = [...c.querySelectorAll('.ck-imgs img')], upto = ims.slice(0, ims.indexOf(m.parentNode.querySelector('img')) + 1);
+    // 문제 보기: 카드가 가운데 오면 첫 문제로 가서 멈춤 (그 위 이미지가 다 불러와져야 자리가 맞다). 다음 문제 버튼 · N 키로 차례로
+    const probs = (c) => [...c.querySelectorAll('.dk-pb, .dk-bad')];
+    const topIn = (sc, n) => n.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
+    function seek(c, k) {
+      const ps = probs(c); if (!ps.length || !c.classList.contains('dk-prob')) return;
+      k = ((k || 0) % ps.length + ps.length) % ps.length; c._pi = k;
+      const p = ps[k], hot = p.classList.contains('dk-bad') ? p.closest('.dk-si') : p;
+      c.querySelectorAll('.dk-hot').forEach((x) => x.classList.remove('dk-hot')); c.querySelectorAll('.dk-cur').forEach((x) => x.classList.remove('dk-cur'));
+      hot.classList.add('dk-hot'); p.classList.add('dk-cur');
+      if (c === el) panel();
+      const ims = [...c.querySelectorAll('.ck-imgs img')], own = hot.querySelector('img'), upto = own && ims.includes(own) ? ims.slice(0, ims.indexOf(own) + 1) : [];
       Promise.all(upto.map((im) => (im.complete ? 0 : new Promise((r) => { im.addEventListener('load', r, { once: true }); im.addEventListener('error', r, { once: true }); }))))
         .then(() => setTimeout(() => {
-          const sc = c.querySelector('.dk-sc'); if (!sc || !c.classList.contains('dk-on')) return;
-          const y = m.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
-          sc.scrollTo({ top: Math.max(0, y - sc.clientHeight * 0.3), behavior: reduced() ? 'auto' : 'smooth' });
-        }, 600));
+          const sc = c.querySelector('.dk-sc'); if (!sc || !c.classList.contains('dk-on') || c._pi !== k) return;
+          const y = p.classList.contains('dk-bad') ? topIn(sc, p) - 64 : topIn(sc, hot) - 12;   // 큰 글자(표시 위)까지 보이게
+          sc.scrollTo({ top: Math.max(0, y - sc.clientHeight * 0.12), behavior: reduced() ? 'auto' : 'smooth' });
+          if (c._upd) setTimeout(c._upd, 400);
+        }, upto.length ? 560 : 0));
     }
     function scrollBy(page, px) {   // ↓ · ↑ 조금, 스페이스 · Page Down 한 화면
       const sc = el && el.querySelector('.dk-sc'); if (!sc) return;
@@ -457,6 +492,7 @@
       if (k === 'ArrowDown' || k === 'ArrowUp') { ev.preventDefault(); scrollBy(0, k === 'ArrowDown' ? 160 : -160); return; }
       if (k === ' ' || k === 'PageDown' || k === 'PageUp') { ev.preventDefault(); scrollBy(k === 'PageUp' || (k === ' ' && ev.shiftKey) ? -1 : 1); return; }
       if (k === 'Home' || k === 'End') { ev.preventDefault(); const sc = el && el.querySelector('.dk-sc'); if (sc) sc.scrollTo({ top: k === 'Home' ? 0 : sc.scrollHeight, behavior: reduced() ? 'auto' : 'smooth' }); return; }
+      if ((k === 'n' || k === 'N') && el && el.classList.contains('dk-prob')) { ev.preventDefault(); seek(el, (el._pi || 0) + 1); return; }
       if (k === 'ArrowRight') { ev.preventDefault(); go(rtl ? -1 : 1); } else if (k === 'ArrowLeft') { ev.preventDefault(); go(rtl ? 1 : -1); } else if (k === 'Escape' && all) { ev.preventDefault(); leave(); }
     }
     function onResize() { if (!alive) return; place(); for (const [k, c] of cards) { c.style.left = cardLeft(k) + 'px'; c.style.width = G.cw + 'px'; c.querySelector('.dk-ph').style.height = G.ch + 'px'; } layout(false); }
@@ -478,65 +514,75 @@
     } catch (e) { alertLine(core, C.T.err + e.message); return false; }
   }
   function alertLine(core, msg) { const g = document.getElementById('ckGo'); if (g) g.innerHTML = msg ? `<div class="ck-why">${core.esc(msg)}</div>` : ''; }
-  // 끝: 준비된 것을 한 번에 확인 (승인 기록 via 'bulk' + 본 이미지 해시) → 받기
+  // 끝 · 완료 (2026-11-27): 검수 화면과 같은 틀 — 맨 위 한 줄(상태) · 그 아래 같은 자리의 버튼 줄 · 본문은 엑셀 시트.
+  //   버튼은 늘 위 (벌크 Check 전체 규칙 — 아래에는 누르는 것을 두지 않는다)
+  function pageFrame(core, step, line, btns, body) {
+    const el = frame(core, step, true);
+    el.innerHTML = `<div class="dk dk-br dk-pg" id="dk"><div class="dk-top"><div class="dk-line" id="dkLine">${line}</div></div><div class="dk-bar" id="dkBar">${btns}</div>
+      <div class="dk-body"><div class="xs-wrap">${body}</div></div></div><div id="ckGo"></div>`;
+    return el;
+  }
+  const finLine = (core, todo) => { const T = C.T, ck = C.job.check || {}, removed = C.units.filter(isRemoved).length;
+    return `<b>${core.esc(T.allDone)}</b><span>${core.esc([T.fReady + ' ' + todo.length, removed ? T.removed(removed) : '', T.skipped(ck.skipModels || 0)].filter(Boolean).join(' · '))}</span>`; };
+  const doneLine = (core) => { const T = C.T, ck = C.job.check || {};
+    return `${CK}<b>${core.esc(T.doneT(ck.confirmed || 0))}</b><span>${core.esc([ck.removed ? T.removed(ck.removed) : '', T.skipped(ck.skipModels || 0)].filter(Boolean).join(' · '))}</span>`; };
+  const dlBtn = (core) => `<a class="dk-act pri" id="ckDl" href="${core.esc(C.job.file || '#')}" download>${core.esc(C.T.dl)}</a>`;
+  // 끝: 준비된 것을 한 번에 확인 (승인 기록 via 'bulk' + 본 이미지 해시) → 받기. 시트는 설명 칸이 빈 채로 미리 보이고, 확인하면 채워진다
   async function finishView(core) {
-    const T = C.T, e = core.esc, ck = C.job.check || {};
+    const T = C.T, e = core.esc;
     // 전체 보기에서 다시 준비한 것: 끝날 때까지 기다렸다가, 걸리면 검토로
     while (C.units.some((u) => busy(u) && !isRemoved(u))) { alertLine(core, T.redoing + '…'); await sleep(2000); await refresh(core); }
     if (C.units.some((u) => !passed(u) && !isRemoved(u) && !isOk(u))) return rush(core, true);
     const todo = C.units.filter((u) => passed(u) && !isOk(u) && !isRemoved(u));
     if (!todo.length) return doneView(core);
-    const removed = C.units.filter(isRemoved).length;
-    const el = frame(core, 2);
-    el.innerHTML = `<div class="ck-wrap"><div class="ck-card ck-done"><div class="ck-ic">${CK}</div><div class="ck-dt">${e(T.allDone)}</div>
-      <div class="ck-ds">${e([T.fReady + ' ' + todo.length, removed ? T.removed(removed) : '', T.skipped(ck.skipModels || 0)].filter(Boolean).join(' · '))}</div>
-      <div class="dk-fin"><button class="clia-btn big" id="ckView" type="button">${e(T.viewAll(C.units.length))}</button><button class="clia-btn primary big" id="ckAll" type="button">${e(T.confirmDl(todo.length))}</button></div></div></div><div id="ckGo"></div>`;
+    const sh = sheet(core);
+    pageFrame(core, 2, finLine(core, todo), `<button class="dk-act" id="ckView" type="button">${e(T.viewAll(C.units.length))}</button><button class="dk-act pri" id="ckAll" type="button">${e(T.confirmDl(todo.length))}</button>`, sh.html);
     document.getElementById('ckView').onclick = () => viewer(core, 'all', 0, 'finish');
     const b = document.getElementById('ckAll'); b.focus();
     b.onclick = async () => {
-      b.disabled = true;
-      const okP = act(core, todo.flatMap(rowsOf), 'ok');
-      if (reduced()) { if (!(await okP)) { b.disabled = false; return; } doneView(core); download(); return; }
-      exportView(core, okP);   // 시트 연출은 바로 시작, 다운로드는 확인 요청이 끝나는 대로 (연출을 기다리지 않음)
+      document.querySelectorAll('#dkBar .dk-act').forEach((x) => { x.disabled = true; });
+      const anim = !reduced(), okP = act(core, todo.flatMap(rowsOf), 'ok');
+      if (anim) fillSheet(core, sh, true);   // 시트 연출은 바로, 다운로드는 확인 요청이 끝나는 대로 (연출을 기다리지 않음)
+      if (!(await okP)) { const msg = (document.getElementById('ckGo') || {}).textContent || ''; await finishView(core); alertLine(core, msg); return; }
+      download(); doneTop(core);
+      if (!anim) fillSheet(core, sh, false);
     };
   }
   function download() { if (C.job.file) { const a = document.createElement('a'); a.href = C.job.file; a.download = ''; document.body.appendChild(a); a.click(); a.remove(); } }
-  function doneHtml(core) {   // 완료 카드 안 (시트 아래에서는 한 줄로 — CSS .xs-done)
-    const T = C.T, e = core.esc, ck = C.job.check || {};
-    const sub = [ck.removed ? T.removed(ck.removed) : '', T.skipped(ck.skipModels || 0)].filter(Boolean).join(' · ');
-    return `<div class="ck-ic">${CK}</div><div class="xs-tx"><div class="ck-dt">${e(T.doneT(ck.confirmed || 0))}</div>
-      <div class="ck-ds">${e(sub)}</div></div><a class="clia-btn primary big" href="${e(C.job.file || '#')}" download>${e(T.dl)}</a>`;
+  function doneTop(core) {   // 같은 자리에서: 확인 버튼 → 엑셀 받기, 위 한 줄 → 완료
+    steps(core, 3);
+    const line = document.getElementById('dkLine'), bar = document.getElementById('dkBar'); if (!line || !bar) return;
+    line.innerHTML = doneLine(core); bar.innerHTML = dlBtn(core);
+    if (!reduced()) [line, bar].forEach((x) => x.animate([{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none' }], { duration: 360, easing: EZ.out }));
   }
-  function doneView(core) { frame(core, 3).innerHTML = `<div class="ck-wrap"><div class="ck-card ck-done">${doneHtml(core)}</div></div>`; }
-  // 내보내기 (2026-11-27): 엑셀 시트(행 = 제품, 설명 칸 강조)가 나오고 통과한 PDP 카드가 작아지며 그 행의 설명 칸으로 들어가 칸이 채워진다.
-  //   앞 몇 장(최대 5)만 날아가고 나머지 행은 한꺼번에 · 아래 행은 '+N행' 막대로 — 100개여도 ~2초. 뺀 행은 처음부터 회색
-  //   모션: 도착 expo.out · 시차 90ms · 겹쳐서 (HyperFrames). 동작 줄이기면 이 화면 없이 바로 완료
-  async function exportView(core, okP) {
-    const T = C.T, e = core.esc, rtl = document.documentElement.dir === 'rtl';   // 아랍어: 설명 칸은 오른쪽부터 채워진다
+  function doneView(core) { const sh = sheet(core); pageFrame(core, 3, doneLine(core), dlBtn(core), sh.html); fillSheet(core, sh, false); }
+  // 엑셀 시트: 행 = 제품(엑셀 순서) · 행 번호 · 모델 · 설명 칸(강조). 9행 넘으면 앞 8행 + '+N행' 막대. 뺀 행은 처음부터 회색 빗금
+  function sheet(core) {
+    const T = C.T, e = core.esc;
     const rows = C.units.flatMap((u) => u.map((x) => ({ row: x.row, model: x.model || x.title || '', u, rm: isRemoved(u) }))).sort((a, b) => a.row - b.row);
     const MAXR = 9, vis = rows.length > MAXR ? rows.slice(0, MAXR - 1) : rows, rest = rows.slice(vis.length), restOk = rest.filter((r) => !r.rm).length;
     const fill = (r) => (r.rm ? `<span class="xs-rmv">${e(T.removedL)}</span>`
       : `<span class="xs-fill">${(r.u[0].imgs || []).slice(0, 3).map((s) => `<img src="${e(small(s))}" alt="">`).join('')}<em>${e(T.imgsN((r.u[0].imgs || []).length))}</em></span>`);
-    const el = frame(core, 3);
-    el.innerHTML = `<div class="ck-wrap xs-wrap"><div class="xs" id="xs"><div class="xs-hd"><i></i>${e(C.fileName || 'result.xlsx')}</div>
+    const html = `<div class="xs" id="xs"><div class="xs-hd"><i></i>${e(C.fileName || 'result.xlsx')}</div>
       <div class="xs-row xs-h"><span class="xs-n"></span><span class="xs-m">${e(T.colModel)}</span><span class="xs-d">${e(T.colDesc)}</span></div>
       ${vis.map((r, k) => `<div class="xs-row${r.rm ? ' xs-out' : ''}" data-k="${k}"><span class="xs-n">${r.row}</span><span class="xs-m">${e(r.model)}</span><span class="xs-d">${fill(r)}</span></div>`).join('')}
-      ${rest.length ? `<div class="xs-row xs-more"><span class="xs-n">…</span><span class="xs-m" id="xsMore">${e(T.moreRows(rest.length))}</span><span class="xs-d"><span class="xs-bar"><i id="xsBar"></i></span></span></div>` : ''}</div>
-      <div class="ck-card ck-done xs-done" id="xsDone"></div><div id="ckGo"></div></div>`;
-    const wrap = el.querySelector('.xs-wrap'), xs = document.getElementById('xs'), done = document.getElementById('xsDone');
-    const rowEl = (k) => xs.querySelector(`.xs-row[data-k="${k}"]`);
-    xs.animate([{ opacity: 0, transform: 'translateY(16px)' }, { opacity: 1, transform: 'none' }], { duration: 420, easing: EZ.out });
-    okP.then((ok) => {   // 확인이 끝나면 바로 받기 — 실패하면 시트를 접고 마지막 화면으로
-      if (ok) { done.innerHTML = doneHtml(core); download(); return; }
-      const msg = (document.getElementById('ckGo') || {}).textContent || ''; finishView(core).then(() => alertLine(core, msg));
-    });
-    const okRows = vis.map((r, k) => ({ r, k })).filter((x) => !x.r.rm), fly = okRows.slice(0, 5), rel2 = (n) => { const a = n.getBoundingClientRect(), b = wrap.getBoundingClientRect(); return { x: a.left - b.left, y: a.top - b.top, w: a.width, h: a.height }; };
-    await sleep(240);
+      ${rest.length ? `<div class="xs-row xs-more"><span class="xs-n">…</span><span class="xs-m">${e(T.moreRows(rest.length))}</span><span class="xs-d"><span class="xs-bar"><i id="xsBar"></i></span></span></div>` : ''}</div>`;
+    return { html, vis, rest, restOk };
+  }
+  // 내보내기 (확인하고 받기): 통과한 PDP 카드가 작아지며 그 행의 설명 칸으로 들어가 칸이 채워진다.
+  //   앞 몇 장(최대 5)만 날아가고 나머지 행은 한꺼번에 · 아래 행은 막대로 — 100개여도 ~2초. anim 이 없으면 바로 채운 상태
+  //   모션: 나타나기 expo.out → 칸으로 power3.out · 시차 90ms · 겹침 (HyperFrames). 아랍어는 칸 오른쪽부터
+  async function fillSheet(core, sh, anim) {
+    const e = core.esc, rtl = document.documentElement.dir === 'rtl', { vis, rest, restOk } = sh;
+    const xs = document.getElementById('xs'); if (!xs) return;
+    const wrap = xs.parentNode, rowEl = (k) => xs.querySelector(`.xs-row[data-k="${k}"]`), bar = document.getElementById('xsBar');
+    const okRows = vis.map((r, k) => ({ r, k })).filter((x) => !x.r.rm), barTo = (rest.length ? restOk / rest.length * 100 : 100) + '%';
+    if (!anim) { okRows.forEach(({ k }) => rowEl(k).classList.add('xs-on', 'xs-now')); if (bar) bar.style.width = barTo; return; }
+    const fly = okRows.slice(0, 5), rel2 = (n) => { const a = n.getBoundingClientRect(), b = wrap.getBoundingClientRect(); return { x: a.left - b.left, y: a.top - b.top, w: a.width, h: a.height }; };
     const src = rel2(xs), sx = src.x + src.w / 2 - 60, sy = src.y + src.h * 0.5 - 85;   // 카드 120×170 이 시트 가운데에서 나와
     fly.forEach(({ r, k }, n) => {
       const c = document.createElement('div'); c.className = 'xs-card'; c.innerHTML = `<img src="${e(small((r.u[0].imgs || [])[0] || ''))}" alt="">`; wrap.appendChild(c);
       const d = rel2(rowEl(k).querySelector('.xs-d')), s = (d.h - 8) / 170, tx = rtl ? d.x + d.w - 16 - 120 * s : d.x + 6, ty = d.y + 4, x0 = sx + (n - 2) * 14, y0 = sy + Math.abs(n - 2) * 6;
-      // 나타나기(0.2초, expo.out) → 그 행 설명 칸으로 작아지며 들어감(power3.out — 날아가는 길이 보이게)
       const a = c.animate([{ transform: `translate(${x0}px,${y0 + 16}px) scale(.86)`, opacity: 0, easing: EZ.out },
         { transform: `translate(${x0}px,${y0}px) scale(1) rotate(${(n - 2) * 2}deg)`, opacity: 1, offset: 0.24, easing: EZ.p3out },
         { transform: `translate(${tx}px,${ty}px) scale(${s})`, opacity: 1 }], { duration: 820, delay: n * 90, fill: 'both' });
@@ -545,10 +591,7 @@
     });
     await sleep(Math.max(0, fly.length - 1) * 90 + 640);
     okRows.slice(fly.length).forEach(({ k }, n) => setTimeout(() => { const x = rowEl(k); if (x) x.classList.add('xs-on'); }, n * 40));   // 나머지는 한꺼번에
-    const bar = document.getElementById('xsBar');   // 아래 행들: 막대가 차며 한꺼번에 (뺀 행 비율만큼은 회색으로 남음)
-    if (bar) bar.animate([{ width: '0%' }, { width: (rest.length ? restOk / rest.length * 100 : 100) + '%' }], { duration: 520, easing: EZ.out, fill: 'forwards' });
-    await sleep(420);
-    done.classList.add('xs-in');
+    if (bar) bar.animate([{ width: '0%' }, { width: barTo }], { duration: 520, easing: EZ.out, fill: 'forwards' });
   }
 
   // ── 시작 · 이어 보기 ──
