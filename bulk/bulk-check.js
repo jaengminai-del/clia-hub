@@ -62,29 +62,24 @@
       retryingA: 'جارٍ إعادة المحاولة تلقائيًا…',
       allDone: 'تم فحص الكل', colModel: 'الطراز', colDesc: 'الوصف', imgsN: (n) => `${n} صور`, moreRows: (n) => `+ ${n} صفوف أخرى`, confirmDl: (n) => `تأكيد ${n} والتنزيل` },
   };
-  // 문제 문구 (2026-11-27): 짧게, 다섯 언어 같은 톤 — 빨간 줄 '빠진 이미지', 옆 칸 'lg.com 원본', 위 한 줄 '빠진 이미지 1장'
+  // 문제 문구 (2026-11-27 장혁 피드백 '단순하게'): 오른쪽 칸 맨 위 큰 한 문장 · 다섯 언어 같은 톤. w_* 는 덱 더미 카드 아래 짧은 글
   const TXP = {
-    en: { pGone: 'Missing image', pBlank: 'Empty image', orig: 'lg.com original', noOrig: 'Not on lg.com either', cImg: (n) => `${n} missing image${n === 1 ? '' : 's'}`, cTxt: (n) => `${n} missing line${n === 1 ? '' : 's'}`, cSum: 'No Thai summary', cSpec: 'Missing spec table', cFail: 'PDP not made',
-      triedLg: (n) => `Re-fetched ${n}× — still missing from lg.com`, triedN: (n) => `Retried ${n}× automatically`,
+    en: { bImg: 'lg.com image is missing', bLines: 'lg.com text is missing', bSum: 'Thai summary not made', bSpec: 'lg.com spec table is missing', bFail: "PDP couldn't be made", noOrig: 'Not on lg.com either',
       w_img: (n) => `${n} missing image${n === 1 ? '' : 's'}`, w_txt: (n) => `${n} missing line${n === 1 ? '' : 's'}`, w_spec: 'Missing spec table', w_sum: 'No Thai summary', nextP: 'Next' },
-    th: { pGone: 'รูปที่หายไป', pBlank: 'รูปว่าง', orig: 'ต้นฉบับ lg.com', noOrig: 'ไม่มีบน lg.com เช่นกัน', cImg: (n) => `รูปหายไป ${n} รูป`, cTxt: (n) => `ข้อความหายไป ${n} บรรทัด`, cSum: 'ไม่มีสรุปภาษาไทย', cSpec: 'ตารางสเปกหายไป', cFail: 'สร้าง PDP ไม่ได้',
-      triedLg: (n) => `ดึงใหม่ ${n} ครั้งแล้ว — ยังไม่ได้จาก lg.com`, triedN: (n) => `ลองใหม่อัตโนมัติ ${n} ครั้ง`,
+    th: { bImg: 'รูปจาก lg.com หายไป', bLines: 'ข้อความจาก lg.com หายไป', bSum: 'สร้างสรุปภาษาไทยไม่ได้', bSpec: 'ตารางสเปกจาก lg.com หายไป', bFail: 'สร้าง PDP ไม่ได้', noOrig: 'ไม่มีบน lg.com เช่นกัน',
       w_img: (n) => `รูปหายไป ${n} รูป`, w_txt: (n) => `ข้อความหายไป ${n} บรรทัด`, w_spec: 'ตารางสเปกหายไป', w_sum: 'ไม่มีสรุปภาษาไทย', nextP: 'ถัดไป' },
-    ko: { pGone: '빠진 이미지', pBlank: '빈 이미지', orig: 'lg.com 원본', noOrig: 'lg.com에도 없음', cImg: (n) => `빠진 이미지 ${n}장`, cTxt: (n) => `빠진 문구 ${n}줄`, cSum: '태국어 요약 없음', cSpec: '빠진 스펙 표', cFail: 'PDP 못 만듦',
-      triedLg: (n) => `${n}번 다시 가져와도 lg.com에서 못 가져옴`, triedN: (n) => `자동으로 ${n}번 다시 함`,
+    ko: { bImg: 'lg.com 원본 이미지가 빠졌어요', bLines: 'lg.com 원본 문구가 빠졌어요', bSum: '태국어 요약을 못 만들었어요', bSpec: 'lg.com 원본 스펙 표가 빠졌어요', bFail: 'PDP를 만들지 못했어요', noOrig: 'lg.com에도 없음',
       w_img: (n) => `빠진 이미지 ${n}장`, w_txt: (n) => `빠진 문구 ${n}줄`, w_spec: '빠진 스펙 표', w_sum: '태국어 요약 없음', nextP: '다음' },
-    de: { pGone: 'Fehlendes Bild', pBlank: 'Leeres Bild', orig: 'lg.com-Original', noOrig: 'Auch nicht auf lg.com', cImg: (n) => `${n} fehlende(s) Bild(er)`, cTxt: (n) => `${n} fehlende Zeile(n)`, cSum: 'Keine thailändische Zusammenfassung', cSpec: 'Fehlende Datentabelle', cFail: 'PDP nicht erstellt',
-      triedLg: (n) => `${n}× neu geholt — fehlt weiter auf lg.com`, triedN: (n) => `${n}× automatisch wiederholt`,
+    de: { bImg: 'lg.com-Bild fehlt', bLines: 'lg.com-Text fehlt', bSum: 'Thai-Zusammenfassung fehlt', bSpec: 'lg.com-Datentabelle fehlt', bFail: 'PDP nicht erstellt', noOrig: 'Auch nicht auf lg.com',
       w_img: (n) => `${n} fehlende(s) Bild(er)`, w_txt: (n) => `${n} fehlende Zeile(n)`, w_spec: 'Fehlende Datentabelle', w_sum: 'Keine thailändische Zusammenfassung', nextP: 'Weiter' },
-    ar: { pGone: 'صورة مفقودة', pBlank: 'صورة فارغة', orig: 'الأصل من lg.com', noOrig: 'غير موجود في lg.com أيضًا', cImg: (n) => `${n} صورة مفقودة`, cTxt: (n) => `${n} سطر مفقود`, cSum: 'لا يوجد ملخص تايلاندي', cSpec: 'جدول مواصفات مفقود', cFail: 'لم يُنشأ PDP',
-      triedLg: (n) => `أُعيد الجلب ${n} مرات — ما زال مفقودًا من lg.com`, triedN: (n) => `أُعيدت المحاولة تلقائيًا ${n} مرات`,
+    ar: { bImg: 'صورة lg.com مفقودة', bLines: 'نص lg.com مفقود', bSum: 'لم يُنشأ الملخص التايلاندي', bSpec: 'جدول مواصفات lg.com مفقود', bFail: 'تعذّر إنشاء PDP', noOrig: 'غير موجود في lg.com أيضًا',
       w_img: (n) => `${n} صورة مفقودة`, w_txt: (n) => `${n} سطر مفقود`, w_spec: 'جدول مواصفات مفقود', w_sum: 'لا يوجد ملخص تايلاندي', nextP: 'التالي' },
   };
   const tOf = (L) => Object.assign({}, TX.en, TXD.en, TXP.en, TX[L] || {}, TXD[L] || {}, TXP[L] || {});
   const LIVE_LISTS = { th: '/clia/th-live.json' };   // 법인별 라이브 목록 (허브 Product List 와 같은 파일)
   const liveKey = (u) => String(u || '').trim().split(/[?#]/)[0].replace(/\/+$/, '').toLowerCase() + '/';
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  const DN = '<svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>', RE = '<svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>';
+  const DN = '<svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
   const CK = '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>', XX = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>';
   let C = null;   // { core, T, job, units, idx, skip, el }
 
@@ -161,17 +156,6 @@
   const small = (u) => String(u || '').replace('/media/slices/', '/media/slices-p/');
   const ukey = (u) => (u[0].bundle ? 'b:' + u[0].row : u[0].slug || u[0].url || 'r:' + u[0].row);
   const aiRows = (u) => (u[0].status === 'failed' ? [{ k: 'fail', ok: false, msg: u[0].error }] : u[0].ai || []);
-  // 검토 한 줄 (2026-11-27 장혁 피드백 '단순하고 깔끔하게'): '이미지 2장 빠짐 · 글 6줄 빠짐' 만. 자동으로 다시 했는지는 작은 아이콘(마우스를 올리면 설명)
-  function askOf(u) {
-    const T = C.T, rows = aiRows(u).filter((x) => !x.ok), cl = [];
-    for (const x of rows) {
-      if (x.k === 'img') cl.push(T.cImg(x.n));   // 사람 눈에는 슬라이스에서 못 가져온 것이나 크롤에서 빠진 것이나 같은 '빠진 이미지'
-      else if (x.k === 'txt') cl.push(T.cTxt(x.n)); else if (x.k === 'sum') cl.push(T.cSum); else if (x.k === 'spec') cl.push(T.cSpec);
-      else if (x.k === 'fail' || x.k === 'redo') cl.push(T.cFail);
-    }
-    const it = u[0], tried = it.crawls ? T.triedLg(it.crawls) : it.tries ? T.triedN(it.tries) : '';
-    return { tried, what: cl.join(' · ') };
-  }
   // 이미지: 슬라이스에서 못 가져온 것이나 크롤에서 빠진 것이나 사람 눈에는 같은 '빠진 이미지'
   const whyImg = (x) => C.T.w_img(x.n);
   const why = (x) => ({ img: () => whyImg(x), txt: () => C.T.w_txt(x.n), sum: () => C.T.w_sum, spec: () => C.T.w_spec, fail: () => C.T.w_fail + (x.msg ? ' — ' + x.msg : ''), redo: () => C.T.w_fail + (x.msg ? ' — ' + x.msg : '') }[x.k] || (() => x.k))();
@@ -216,12 +200,17 @@
     // 슬라이스를 만들 때 못 가져온 이미지는 크기가 없어 접힌다 → 사람 눈에는 그 자리에 이미지가 '없음'(아래 글이 당겨 올라옴).
     //   그래서 '빈 칸'이 아니라 들어갈 자리에 굵은 선 + '여기 들어갈 이미지가 빠져 있어요', 옆에 lg.com 원본(비교 칸). 크기가 있어 비어 보이는 칸이면 칸 표시
     const kindOf = (b) => b.kind || (b.h < 0.03 ? 'gone' : 'blank');
-    const mark = (k) => at.filter((b) => b.slice === k + 1).map((b) => `<span class="dk-bad ${kindOf(b)}" data-src="${e(b.src || '')}" style="top:${(b.y * 100).toFixed(2)}%${kindOf(b) === 'blank' ? `;height:${(b.h * 100).toFixed(2)}%` : ''}"><b>${e(kindOf(b) === 'gone' ? T.pGone : T.pBlank)}</b></span>`).join('');
+    const mark = (k) => at.filter((b) => b.slice === k + 1).map((b) => `<span class="dk-bad ${kindOf(b)}" data-kind="img" data-src="${e(b.src || '')}" style="top:${(b.y * 100).toFixed(2)}%${kindOf(b) === 'blank' ? `;height:${(b.h * 100).toFixed(2)}%` : ''}"></span>`).join('');   // 표시만 (글자 없이)
     // 자리가 없는 문제(lg.com 에만 있는 그림 · 글)는 카드 안에 글 없이 — 보이지 않는 표시만 두고 옆 'lg.com 원본' 칸에 그 그림 · 글을 보여 준다
-    const pb = (inner, src) => `<div class="dk-pb"${src ? ` data-src="${e(src)}"` : ''}>${inner || ''}</div>`;
+    const pb = (kind, inner, src) => `<div class="dk-pb" data-kind="${kind}"${src ? ` data-src="${e(src)}"` : ''}>${inner || ''}</div>`;
     const pbs = [];
-    if (!img.ok) (img.src || []).forEach((s) => pbs.push(pb('', s)));
-    for (const x of ai) if (!x.ok && x.k === 'txt' && x.lines && x.lines.length) pbs.push(pb(`<ul class="dk-pl">${x.lines.map((l) => `<li>${e(l)}</li>`).join('')}</ul>`));
+    if (it.status === 'failed') pbs.push(pb('fail'));
+    if (!img.ok) { (img.src || []).forEach((s) => pbs.push(pb('img', '', s))); if (!at.length && !(img.src || []).length) pbs.push(pb('img')); }
+    for (const x of ai) {
+      if (x.ok) continue;
+      if (x.k === 'txt') pbs.push(pb('lines', x.lines && x.lines.length ? `<ul class="dk-pl">${x.lines.map((l) => `<li>${e(l)}</li>`).join('')}</ul>` : ''));
+      else if (x.k === 'sum' || x.k === 'spec') pbs.push(pb(x.k));
+    }
     const body = `<div class="ck-imgs">${(it.imgs || []).map(small).map((s, k) => { const m = mark(k); return m ? `<span class="dk-si"><img src="${e(s)}" alt="" decoding="async">${m}</span>` : `<img src="${e(s)}" alt="" decoding="async">`; }).join('')}</div>`;
     const pv = window.CliaMarket ? CliaMarket.page(C.job.channel, { body }) : body;
     const el = document.createElement('div'); el.className = 'dk-card';
@@ -347,35 +336,37 @@
     D.root.insertAdjacentHTML('beforeend', `<div class="dk-top"><div class="dk-count"><b id="dkI"></b><span id="dkNn"></span></div><div class="dk-prog"><i id="dkProg"></i></div></div><div class="dk-cap" id="dkCap"></div>
       <div class="dk-car" id="dkCar"><div class="dk-track" id="dkTrack"></div></div>
       <button class="dk-arw" id="dkPrev" type="button" aria-label="${e(rtl ? T.next : T.prev)}">${ARL}</button><button class="dk-arw" id="dkNext" type="button" aria-label="${e(rtl ? T.prev : T.next)}">${ARR}</button>
-      <div class="dk-cmp" id="dkCmp" hidden><div class="dk-cmp-h"></div><div class="dk-cmp-b"></div><div class="dk-cmp-s"></div></div>
+      <div class="dk-cmp" id="dkCmp" hidden><div class="dk-cmp-box"><div class="dk-cmp-h"></div><div class="dk-cmp-b"></div><div class="dk-cmp-s"></div></div><div class="dk-cnav"></div></div>
       <div class="dk-bar"><button class="dk-act" data-a="remove" type="button">${e(T.rmS)}</button><button class="dk-act" data-a="retry" type="button">${e(T.redo)}</button><button class="dk-act" data-a="ok" type="button">${e(T.okIn)}</button></div>`);
     const cap = document.getElementById('dkCap'), car = document.getElementById('dkCar'), track = document.getElementById('dkTrack');
     const prevB = document.getElementById('dkPrev'), nextB = document.getElementById('dkNext');   // 왼쪽 · 오른쪽 (아랍어는 왼쪽이 다음)
     prevB.onclick = () => go(rtl ? 1 : -1); nextB.onclick = () => go(rtl ? -1 : 1);
     const acts = [...D.root.querySelectorAll('.dk-act')];
-    // 비교 칸: 지금 보는 문제가 '빠진 이미지'면 카드 바로 옆에 lg.com 원본(원래 들어가야 할 이미지)을 표시 선 높이에 맞춰 나란히
-    const cmpEl = document.getElementById('dkCmp'), cmpH = cmpEl.querySelector('.dk-cmp-h'), cmpB = cmpEl.querySelector('.dk-cmp-b'), cmpS = cmpEl.querySelector('.dk-cmp-s');
+    // 오른쪽 칸 (2026-11-27 장혁 피드백 '단순하게'): 맨 위 큰 한 문장(무슨 일인지) + 그 아래 lg.com 원본(빠진 문구 · 이미지). 화면에 같은 말은 한 번만.
+    //   카드 바로 옆, 꼭지가 문제 자리를 가리킴. 문제가 여럿이면 칸 바로 밑에 '1/3 ⌄' — 누르면 다음 문제로, 칸 내용도 그 문제 것으로
+    const cmpEl = document.getElementById('dkCmp'), cmpBox = cmpEl.querySelector('.dk-cmp-box'), cmpH = cmpEl.querySelector('.dk-cmp-h'), cmpB = cmpEl.querySelector('.dk-cmp-b'), cmpS = cmpEl.querySelector('.dk-cmp-s'), cmpN = cmpEl.querySelector('.dk-cnav');
+    const HEAD = { img: T.bImg, lines: T.bLines, sum: T.bSum, spec: T.bSpec, fail: T.bFail };
     let cmpT = 0;
-    // 비교 칸: 지금 보는 문제에 lg.com 쪽 비교할 것(빠진 이미지의 원본 · 빠진 문구)이 있으면 카드 바로 옆에 나란히 — 꼭지가 그 자리를 가리킴.
-    //   PDP 를 내려 보며 비교할 수 있게 문제 자리가 위로 지나가도 칸은 화면 안에 남는다
     function cmp(later) {
       clearTimeout(cmpT); if (later) { cmpEl.hidden = true; cmpT = setTimeout(cmp, later); return; }
-      const c = el, p = c && c.classList.contains('dk-prob') ? probs(c)[c._pi || 0] : null;
-      const src = p && p.dataset.src, lines = p && !src && p.querySelector('ul.dk-pl');
-      if ((!src && !lines) || (drag && drag.on) || !alive) { cmpEl.hidden = true; return; }
-      const key = src || 'txt:' + (c._pi || 0) + ':' + (list[i][0].row);
+      const c = el, ps = c && c.classList.contains('dk-prob') ? probs(c) : [], k = c ? c._pi || 0 : 0, p = ps[k];
+      const kind = p && p.dataset.kind;
+      if (!kind || (drag && drag.on) || !alive) { cmpEl.hidden = true; return; }
+      const src = p.dataset.src || '', lines = p.querySelector('ul.dk-pl');
+      const key = [kind, src, k, list[i][0].row].join('|');
       if (cmpEl.dataset.k !== key) {
-        cmpEl.dataset.k = key; cmpEl.classList.remove('dk-cmp-x'); cmpS.textContent = '';
-        cmpH.textContent = T.orig;
+        cmpEl.dataset.k = key; cmpS.textContent = ''; cmpH.textContent = HEAD[kind] || '';
         if (src) { cmpB.innerHTML = '<img alt="" decoding="async">';
-          const im = cmpB.firstChild; im.onerror = () => { cmpEl.classList.add('dk-cmp-x'); im.hidden = true; cmpS.textContent = T.noOrig; cmp(); }; im.onload = () => cmp(); im.src = src;
-        } else cmpB.innerHTML = lines.outerHTML;
+          const im = cmpB.firstChild; im.onerror = () => { im.hidden = true; cmpS.textContent = T.noOrig; cmp(); }; im.onload = () => cmp(); im.src = src;
+        } else cmpB.innerHTML = lines ? lines.outerHTML : '';
+        cmpN.innerHTML = ps.length > 1 ? `<em>${k + 1}/${ps.length}</em><button type="button" aria-label="${e(T.nextP)}" title="${e(T.nextP)}">${DN}</button>` : '';
+        const nb = cmpN.querySelector('button'); if (nb) nb.onclick = () => seek(el, k + 1);
       }
       const rc = rel(c.querySelector('.dk-ph')), rp = rel(p), W = Math.round(Math.max(200, Math.min(320, G.side + GAP + 6)));   // 캐러셀 가장자리 · 화살표 바로 앞까지
       cmpEl.style.width = W + 'px'; cmpEl.hidden = false;
-      const H = cmpEl.offsetHeight, y = Math.round(Math.max(G.y, Math.min(G.y + G.ch - H, rp.y - H * 0.4)));
+      const H = cmpEl.offsetHeight, y = Math.round(Math.max(G.y, Math.min(G.y + G.ch - H, rp.y - cmpBox.offsetHeight * 0.4)));
       cmpEl.style.transform = `translate(${Math.round(rtl ? rc.x - 12 - W : rc.x + rc.w + 12)}px,${y}px)`;
-      cmpEl.style.setProperty('--ay', Math.max(18, Math.min(H - 18, rp.y - y)) + 'px');   // 꼭지가 문제 자리를 가리키게
+      cmpEl.style.setProperty('--ay', Math.max(18, Math.min(cmpBox.offsetHeight - 18, rp.y - y)) + 'px');   // 꼭지가 문제 자리를 가리키게
     }
     const sgn = rtl ? -1 : 1, GAP = 28, PAR = 64, WIN = 2;   // 다음 카드 방향 · 카드 사이 · 패럴랙스 폭 · 앞뒤로 둘 카드 수
     // 카드는 화면 높이에 맞춰 크게 (상세 이미지까지 보게) — 폭은 높이의 ~75%, 320~520px, 가운데. 위 168px 는 숫자 · 버튼 · 모델 · 짧은 한 줄
@@ -452,14 +443,9 @@
       D.root.dataset.st = s;   // 화면 배경 · 카드 테두리가 상태를 따른다
       document.getElementById('dkI').textContent = i + 1; document.getElementById('dkNn').textContent = ' / ' + list.length;
       document.getElementById('dkProg').style.width = ((i + 1) / list.length * 100) + '%';
-      const line = label[s], ask = s === 'review' ? askOf(u) : null;   // 검토: 무엇을 확인할지 한 문장 + 할 수 있는 선택
-      const ps = el && el.classList.contains('dk-prob') ? probs(el) : [];
-      // 문제가 여럿이면 작게 '1/3' + 작은 화살표 (위치 막대에도 빨간 표시)
-      const nav = ps.length > 1 ? `<div class="dk-pn"><em>${(el._pi || 0) + 1}/${ps.length}</em><button type="button" id="dkNp" aria-label="${e(T.nextP)}" title="${e(T.nextP)}">${DN}</button></div>` : '';
-      cap.innerHTML = `<div class="dk-cr"><b>${e(it.model || '')}</b>${nav}</div>` + (ask
-        ? `<span class="dk-why">${ask.tried ? `<i class="dk-re" title="${e(ask.tried)}" aria-label="${e(ask.tried)}">${RE}</i>` : ''}${e(ask.what)}</span>`
-        : `<span>${s === 'ok' ? CK : ''}${e(line)}</span>`);
-      const np = document.getElementById('dkNp'); if (np) np.onclick = () => seek(el, (el._pi || 0) + 1);
+      // 모델명만 — 검토 중엔 상태 줄 없음(무슨 일인지는 오른쪽 칸 한 문장). 준비됨 · 뺌 · 다시 준비 중만 짧게
+      cap.innerHTML = `<div class="dk-cr"><b>${e(it.model || '')}</b></div>` + (s === 'review' ? '' : `<span>${s === 'ok' ? CK : ''}${e(label[s])}</span>`);
+      cmp();
       cap.style.left = g.x + 'px'; cap.style.width = g.cw + 'px';
       (rtl ? nextB : prevB).disabled = !i; (rtl ? prevB : nextB).disabled = i >= list.length - 1;
       // 버튼 셋은 늘 같은 자리 — 상태에 맞지 않는 것은 흐리게

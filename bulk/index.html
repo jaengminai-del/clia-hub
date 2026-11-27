@@ -430,28 +430,27 @@ button.eb { cursor: pointer; }
 .dk-card.dk-prob .dk-si.dk-hot img { filter: none; }
 .dk-card .dk-bad { position: absolute; left: 3px; right: 3px; min-height: 28px; z-index: 2; border: 5px solid var(--clia-heritage); border-radius: 8px; pointer-events: none;
   background: repeating-linear-gradient(135deg, rgba(165,0,52,.26) 0 10px, rgba(165,0,52,.08) 10px 20px); box-shadow: 0 0 0 3px #fff, 0 0 0 8px rgba(165,0,52,.35); }
-.dk-card .dk-bad b { position: absolute; inset-inline-start: -5px; bottom: calc(100% + 6px); padding: 2px 8px 3px; border-radius: 4px; background: var(--clia-heritage); color: #fff; font-size: 13px; font-weight: 700; line-height: 1.3; white-space: nowrap; }
+/* 오른쪽 칸: 큰 한 문장 + lg.com 원본, 칸 바로 밑에 '1/3 ⌄' (2026-11-27 장혁 피드백 '단순하게') */
+.dk-cmp { position: absolute; left: 0; top: 0; z-index: 45; transition: transform .32s cubic-bezier(.16,1,.3,1); }
+.dk-cmp-box { position: relative; padding: 12px 12px 10px; border: 3px solid var(--clia-heritage); border-radius: 12px; background: #fff; box-shadow: 0 12px 32px rgba(38,38,38,.18); }
+.dk-cmp-box::before { content: ''; position: absolute; top: var(--ay, 40px); inset-inline-start: -15px; margin-top: -10px; border: 10px solid transparent; border-inline-end-color: var(--clia-heritage); border-inline-start-width: 4px; }
+.dk-cmp-h { font-size: 18px; font-weight: 700; line-height: 1.3; color: var(--clia-heritage); } .dk-cmp-b:not(:empty) { margin-top: 10px; }
+.dk-cmp-s:not(:empty) { margin-top: 8px; font-size: 14px; font-weight: 600; color: var(--clia-gray-900); }
+.dk-cnav { display: flex; align-items: center; gap: 8px; width: fit-content; margin: 10px auto 0; padding: 4px 4px 4px 12px; border-radius: 999px; background: #fff; box-shadow: 0 4px 14px rgba(38,38,38,.12); } .dk-cnav:empty { display: none; }
+.dk-cnav em { font-style: normal; font-size: 14px; font-weight: 700; color: var(--clia-heritage); font-variant-numeric: tabular-nums; }
+.dk-cnav button { width: 30px; height: 30px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; border: 1.5px solid var(--clia-heritage); background: #fff; color: var(--clia-heritage); cursor: pointer; }
+.dk-cnav button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; } .dk-cnav button:hover { background: #FBEFF3; }
 /* 빠진 이미지(접혀 없어짐): 칸이 아니라 '여기에 들어가야 함' 굵은 선 — 사람 눈에 보이는 그대로 */
 .dk-card .dk-bad.gone { height: 0; min-height: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
 .dk-card .dk-bad.gone::before { content: ''; position: absolute; left: -2px; right: -2px; top: -5px; height: 10px; border-radius: 5px; background: var(--clia-heritage); box-shadow: 0 0 0 3px #fff, 0 0 22px 6px rgba(165,0,52,.45); }
-.dk-card .dk-bad.gone b { bottom: 10px; }
 .dk-card .dk-bad:not(.dk-cur) { opacity: .5; }
 .dk-card:not(.dk-prob) .dk-bad, .dk-card:not(.dk-prob) .dk-pbs { display: none; }
 /* 비교 칸: 카드 옆 lg.com 원본 — 꼭지가 표시 선을 가리킴 */
-.dk-cmp { position: absolute; left: 0; top: 0; z-index: 45; padding: 10px 10px 8px; border: 3px solid var(--clia-heritage); border-radius: 12px; background: #fff; box-shadow: 0 12px 32px rgba(38,38,38,.18); transition: transform .32s cubic-bezier(.16,1,.3,1); }
 .dk-cmp[hidden] { display: none; }
-.dk-cmp::before { content: ''; position: absolute; top: var(--ay, 40px); inset-inline-start: -15px; margin-top: -10px; border: 10px solid transparent; border-inline-end-color: var(--clia-heritage); border-inline-start-width: 4px; }
-.dk-cmp-h { margin-bottom: 8px; font-size: 16px; font-weight: 700; line-height: 1.3; color: var(--clia-heritage); }
 .dk-cmp img { display: block; width: 100%; min-height: 120px; max-height: 360px; object-fit: contain; border: 1px solid #EEE; border-radius: 6px; background: #fff; }
-.dk-cmp-s { margin-top: 6px; font-size: 12.5px; color: var(--muted); } .dk-cmp.dk-cmp-x .dk-cmp-s { font-size: 14px; font-weight: 600; color: var(--clia-gray-900); }
 /* 단순하게 (2026-11-27 장혁 피드백): 카드 안에는 글 없이 문제 자리 표시만 — 자리가 없는 문제는 보이지 않는 표시, 비교할 것은 옆 'lg.com 원본' 칸 하나 */
 .dk-pbs { height: 0; } .dk-pb { height: 0; overflow: hidden; }
 .dk-cmp .dk-pl { margin: 0; padding-inline-start: 18px; font-size: 14px; line-height: 1.5; color: var(--clia-gray-900); } .dk-cmp .dk-pl li + li { margin-top: 4px; }
-#dkCap > .dk-why { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: var(--clia-heritage); }
-.dk-re { display: inline-flex; color: var(--clia-gray-500); cursor: help; pointer-events: auto; } .dk-re svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
-.dk-pn { display: flex; align-items: center; gap: 6px; pointer-events: auto; } .dk-pn em { font-style: normal; font-size: 13px; font-weight: 700; color: var(--clia-heritage); font-variant-numeric: tabular-nums; }
-.dk-pn button { width: 26px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; border: 1.5px solid var(--clia-heritage); background: #fff; color: var(--clia-heritage); cursor: pointer; }
-.dk-pn button svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; } .dk-pn button:hover { background: #FBEFF3; }
 .dk-rail s { position: absolute; left: -3px; right: -3px; height: 4px; margin-top: -2px; border-radius: 2px; background: #D0002F; }
 .dk-rail s.on { left: -5px; right: -5px; height: 9px; margin-top: -4px; box-shadow: 0 0 0 2px #fff; }
 #dkCap > span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
