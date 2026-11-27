@@ -412,7 +412,7 @@ button.eb { cursor: pointer; }
 .dk-big .l { font-size: 15px; color: var(--clia-gray-500); margin-top: 2px; }
 .dk-big .ck-bar { width: 420px; max-width: 60%; margin: 18px auto 0; } .dk-big .ck-bar i { transition: width .25s; }
 .dk-big .dk-sk { margin-top: 14px; font-size: 12.5px; color: var(--clia-gray-400); }
-.dk-mini { position: absolute; left: 0; top: 0; width: 74px; height: 104px; border-radius: 9px; background: #fff; border: 1px solid var(--clia-gray-200); box-shadow: 0 2px 8px rgba(38,38,38,.08); overflow: hidden; transform-origin: 0 0; will-change: transform; }
+.dk-mini { pointer-events: none; position: absolute; left: 0; top: 0; width: 74px; height: 104px; border-radius: 9px; background: #fff; border: 1px solid var(--clia-gray-200); box-shadow: 0 2px 8px rgba(38,38,38,.08); overflow: hidden; transform-origin: 0 0; will-change: transform; }
 .dk-mini img { width: 100%; height: 62px; object-fit: contain; display: block; margin-top: 8px; } .dk-mini b { display: block; font-size: 8px; padding: 4px 6px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* 스캔 띠: 덱에서 나오며 한 번 빠르게 훑고(0.28s) → ✓ */
 .dk-mini::before { content: ''; position: absolute; left: 0; right: 0; top: -30%; height: 30%; z-index: 2; background: linear-gradient(to bottom, rgba(38,38,38,0), rgba(38,38,38,.12) 80%, rgba(38,38,38,.75) 82%, rgba(38,38,38,0) 86%); animation: dkscan .28s linear .04s both; }
@@ -439,6 +439,14 @@ button.eb { cursor: pointer; }
 .dk-acts .dk-ink { background: var(--clia-gray-900); border-color: var(--clia-gray-900); color: #fff; }
 .dk-wait { position: absolute; left: 0; right: 0; top: 45%; text-align: center; font-size: 14px; color: var(--clia-gray-600); }
 @media (prefers-reduced-motion: reduce) { .dk-mini::before, .dk-mini.ok::after, .dk.dk-run .dk-sweep { animation: none; } }
+/* 전체 보기 (선택) — 큰 카드 한 장씩, 좌우로 넘기기 */
+.dk-rs.dk-click { cursor: pointer; transition: border-color .2s, background .2s; } .dk-rs.dk-click:hover { border-color: var(--clia-gray-500); background: rgba(38,38,38,.03); }
+.dk-back { position: absolute; top: 20px; inset-inline-start: 5%; font-size: 13px; font-weight: 600; color: var(--clia-gray-600); text-decoration: none; z-index: 5; } .dk-back:hover { color: var(--clia-gray-900); }
+.dk-nav { display: flex; align-items: center; gap: 12px; margin-top: 6px; padding-top: 14px; border-top: 1px solid var(--clia-gray-200); }
+.dk-nav .dk-pos { flex: 1; text-align: center; font-size: 14px; font-weight: 600; color: var(--clia-gray-700); font-variant-numeric: tabular-nums; }
+.dk-nav .clia-btn[disabled] { opacity: .35; }
+.dk-card.dk-rm .dk-ph { opacity: .45; border-color: var(--line); box-shadow: none; } .dk-card.dk-rm .dk-st { color: var(--muted); text-decoration: line-through; }
+.dk-fin { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 26px; } .ck-done .dk-fin .clia-btn { margin-top: 0; }
 #ckGo { padding: 0 20px; max-width: 1240px; margin: 0 auto; width: 100%; } #ckGo .ck-why { margin: 0 0 12px; }
 @keyframes ckspin { to { transform: rotate(360deg); } }
 .ck-why { margin-top: 26px; padding: 12px 14px; border-radius: 10px; background: #FDF1F0; color: var(--bad); font-size: 13px; line-height: 1.5; }
