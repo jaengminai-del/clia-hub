@@ -44,23 +44,23 @@
     en: { rmS: 'Remove', viewAll: (n) => `View all ${n}`, moreBelow: 'More below', back: '← Back', prev: 'Previous', next: 'Next', removedL: 'Removed from this Excel', fReady: 'Ready', fReview: 'Needs review', checkingAll: (n) => `AI is checking all ${n} at once`, sumT: (r, m) => `${r} ready · ${m} need${m === 1 ? 's' : ''} your review`,
       sumS: (n, s, m) => `Checked ${n} in ${s} s — now just ${m === 1 ? 'this one' : 'these ' + m}`, okIn: 'Looks fine · include',
       retryingA: 'Retrying automatically…',
-      allDone: 'All checked', confirmDl: (n) => `Confirm ${n} & download` },
+      allDone: 'All checked', colModel: 'Model', colDesc: 'Description', imgsN: (n) => `${n} images`, moreRows: (n) => `+ ${n} more rows`, confirmDl: (n) => `Confirm ${n} & download` },
     th: { rmS: 'นำออก', viewAll: (n) => `ดูทั้งหมด ${n}`, moreBelow: 'ยังมีด้านล่าง', back: '← กลับ', prev: 'ก่อนหน้า', next: 'ถัดไป', removedL: 'นำออกจาก Excel นี้แล้ว', fReady: 'พร้อม', fReview: 'ต้องตรวจสอบ', checkingAll: (n) => `AI กำลังตรวจทั้ง ${n} รายการพร้อมกัน`, sumT: (r, m) => `พร้อม ${r} · ต้องตรวจสอบ ${m}`,
       sumS: (n, s, m) => `ตรวจ ${n} รายการใน ${s} วินาที — เหลือดูแค่ ${m}`, okIn: 'ดูแล้วโอเค · ใส่ไว้',
       retryingA: 'กำลังลองใหม่อัตโนมัติ…',
-      allDone: 'ตรวจครบแล้ว', confirmDl: (n) => `ยืนยัน ${n} และดาวน์โหลด` },
+      allDone: 'ตรวจครบแล้ว', colModel: 'รุ่น', colDesc: 'คำอธิบาย', imgsN: (n) => `${n} รูป`, moreRows: (n) => `+ อีก ${n} แถว`, confirmDl: (n) => `ยืนยัน ${n} และดาวน์โหลด` },
     ko: { rmS: '빼기', viewAll: (n) => `전체 보기 ${n}`, moreBelow: '아래에 더 있음', back: '← 돌아가기', prev: '이전', next: '다음', removedL: '이번 엑셀에서 뺌', fReady: '준비됨', fReview: '검토 필요', checkingAll: (n) => `AI가 ${n}개를 한꺼번에 확인 중`, sumT: (r, m) => `${r}개 준비됨 · ${m}개 검토 필요`,
       sumS: (n, s, m) => `${n}개를 ${s}초에 확인 — 이제 ${m}개만 보면 돼요`, okIn: '괜찮음 · 포함',
       retryingA: '자동으로 다시 시도 중…',
-      allDone: '모두 확인함', confirmDl: (n) => `${n}개 확인하고 받기` },
+      allDone: '모두 확인함', colModel: '모델', colDesc: '설명', imgsN: (n) => `이미지 ${n}장`, moreRows: (n) => `+ ${n}행 더`, confirmDl: (n) => `${n}개 확인하고 받기` },
     de: { rmS: 'Entfernen', viewAll: (n) => `Alle ${n} ansehen`, moreBelow: 'Weiter unten', back: '← Zurück', prev: 'Zurück', next: 'Weiter', removedL: 'Aus dieser Excel entfernt', fReady: 'Bereit', fReview: 'Zu prüfen', checkingAll: (n) => `KI prüft alle ${n} gleichzeitig`, sumT: (r, m) => `${r} bereit · ${m} zu prüfen`,
       sumS: (n, s, m) => `${n} in ${s} s geprüft — jetzt nur noch ${m}`, okIn: 'Passt · übernehmen',
       retryingA: 'Wird automatisch erneut versucht…',
-      allDone: 'Alles geprüft', confirmDl: (n) => `${n} bestätigen & herunterladen` },
+      allDone: 'Alles geprüft', colModel: 'Modell', colDesc: 'Beschreibung', imgsN: (n) => `${n} Bilder`, moreRows: (n) => `+ ${n} weitere Zeilen`, confirmDl: (n) => `${n} bestätigen & herunterladen` },
     ar: { rmS: 'إزالة', viewAll: (n) => `عرض الكل ${n}`, moreBelow: 'المزيد بالأسفل', back: 'رجوع →', prev: 'السابق', next: 'التالي', removedL: 'أُزيل من ملف Excel هذا', fReady: 'جاهز', fReview: 'بحاجة إلى مراجعة', checkingAll: (n) => `الذكاء الاصطناعي يفحص جميع ${n} معًا`, sumT: (r, m) => `${r} جاهز · ${m} بحاجة إلى مراجعتك`,
       sumS: (n, s, m) => `تم فحص ${n} في ${s} ث — تبقّى ${m} فقط`, okIn: 'يبدو جيدًا · تضمين',
       retryingA: 'جارٍ إعادة المحاولة تلقائيًا…',
-      allDone: 'تم فحص الكل', confirmDl: (n) => `تأكيد ${n} والتنزيل` },
+      allDone: 'تم فحص الكل', colModel: 'الطراز', colDesc: 'الوصف', imgsN: (n) => `${n} صور`, moreRows: (n) => `+ ${n} صفوف أخرى`, confirmDl: (n) => `تأكيد ${n} والتنزيل` },
   };
   const tOf = (L) => Object.assign({}, TX.en, TXD.en, TX[L] || {}, TXD[L] || {});
   const LIVE_LISTS = { th: '/clia/th-live.json' };   // 법인별 라이브 목록 (허브 Product List 와 같은 파일)
@@ -182,7 +182,7 @@
     const img = (it.ai || []).find((x) => x.k === 'img') || {}, at = img.at || [];
     const mark = (k) => at.filter((b) => b.slice === k + 1).map((b) => `<span class="dk-bad" style="top:${(b.y * 100).toFixed(2)}%;height:${(Math.max(b.h, 0.02) * 100).toFixed(2)}%"><b>${e(C.T.badM)}</b></span>`).join('');
     const body = `<div class="ck-imgs">${(it.imgs || []).map(small).map((s, k) => { const m = mark(k); return m ? `<span class="dk-si"><img src="${e(s)}" alt="" decoding="async">${m}</span>` : `<img src="${e(s)}" alt="" decoding="async">`; }).join('')}</div>`;
-    const pv = window.CliaMarket ? CliaMarket.page(C.job.channel, { detailOnly: true, body }) : body;
+    const pv = window.CliaMarket ? CliaMarket.page(C.job.channel, { body }) : body;
     const el = document.createElement('div'); el.className = 'dk-card';
     el.innerHTML = `<div class="dk-ph"><div class="dk-sc">${pv}</div></div><div class="dk-mo">${e(it.model || '')}</div><div class="dk-st"></div>`;
     C.dk.root.appendChild(el); cardState(el, u); return el;
@@ -495,17 +495,60 @@
     const b = document.getElementById('ckAll'); b.focus();
     b.onclick = async () => {
       b.disabled = true;
-      if (!(await act(core, todo.flatMap(rowsOf), 'ok'))) { b.disabled = false; return; }
-      doneView(core);
-      if (C.job.file) { const a = document.createElement('a'); a.href = C.job.file; a.download = ''; document.body.appendChild(a); a.click(); a.remove(); }
+      const okP = act(core, todo.flatMap(rowsOf), 'ok');
+      if (reduced()) { if (!(await okP)) { b.disabled = false; return; } doneView(core); download(); return; }
+      exportView(core, okP);   // 시트 연출은 바로 시작, 다운로드는 확인 요청이 끝나는 대로 (연출을 기다리지 않음)
     };
   }
-  function doneView(core) {
+  function download() { if (C.job.file) { const a = document.createElement('a'); a.href = C.job.file; a.download = ''; document.body.appendChild(a); a.click(); a.remove(); } }
+  function doneHtml(core) {   // 완료 카드 안 (시트 아래에서는 한 줄로 — CSS .xs-done)
     const T = C.T, e = core.esc, ck = C.job.check || {};
-    const el = frame(core, 3);
     const sub = [ck.removed ? T.removed(ck.removed) : '', T.skipped(ck.skipModels || 0)].filter(Boolean).join(' · ');
-    el.innerHTML = `<div class="ck-wrap"><div class="ck-card ck-done"><div class="ck-ic">${CK}</div><div class="ck-dt">${e(T.doneT(ck.confirmed || 0))}</div>
-      <div class="ck-ds">${e(sub)}</div><a class="clia-btn primary big" href="${e(C.job.file || '#')}" download>${e(T.dl)}</a></div></div>`;
+    return `<div class="ck-ic">${CK}</div><div class="xs-tx"><div class="ck-dt">${e(T.doneT(ck.confirmed || 0))}</div>
+      <div class="ck-ds">${e(sub)}</div></div><a class="clia-btn primary big" href="${e(C.job.file || '#')}" download>${e(T.dl)}</a>`;
+  }
+  function doneView(core) { frame(core, 3).innerHTML = `<div class="ck-wrap"><div class="ck-card ck-done">${doneHtml(core)}</div></div>`; }
+  // 내보내기 (2026-11-27): 엑셀 시트(행 = 제품, 설명 칸 강조)가 나오고 통과한 PDP 카드가 작아지며 그 행의 설명 칸으로 들어가 칸이 채워진다.
+  //   앞 몇 장(최대 5)만 날아가고 나머지 행은 한꺼번에 · 아래 행은 '+N행' 막대로 — 100개여도 ~2초. 뺀 행은 처음부터 회색
+  //   모션: 도착 expo.out · 시차 90ms · 겹쳐서 (HyperFrames). 동작 줄이기면 이 화면 없이 바로 완료
+  async function exportView(core, okP) {
+    const T = C.T, e = core.esc, rtl = document.documentElement.dir === 'rtl';   // 아랍어: 설명 칸은 오른쪽부터 채워진다
+    const rows = C.units.flatMap((u) => u.map((x) => ({ row: x.row, model: x.model || x.title || '', u, rm: isRemoved(u) }))).sort((a, b) => a.row - b.row);
+    const MAXR = 9, vis = rows.length > MAXR ? rows.slice(0, MAXR - 1) : rows, rest = rows.slice(vis.length), restOk = rest.filter((r) => !r.rm).length;
+    const fill = (r) => (r.rm ? `<span class="xs-rmv">${e(T.removedL)}</span>`
+      : `<span class="xs-fill">${(r.u[0].imgs || []).slice(0, 3).map((s) => `<img src="${e(small(s))}" alt="">`).join('')}<em>${e(T.imgsN((r.u[0].imgs || []).length))}</em></span>`);
+    const el = frame(core, 3);
+    el.innerHTML = `<div class="ck-wrap xs-wrap"><div class="xs" id="xs"><div class="xs-hd"><i></i>${e(C.fileName || 'result.xlsx')}</div>
+      <div class="xs-row xs-h"><span class="xs-n"></span><span class="xs-m">${e(T.colModel)}</span><span class="xs-d">${e(T.colDesc)}</span></div>
+      ${vis.map((r, k) => `<div class="xs-row${r.rm ? ' xs-out' : ''}" data-k="${k}"><span class="xs-n">${r.row}</span><span class="xs-m">${e(r.model)}</span><span class="xs-d">${fill(r)}</span></div>`).join('')}
+      ${rest.length ? `<div class="xs-row xs-more"><span class="xs-n">…</span><span class="xs-m" id="xsMore">${e(T.moreRows(rest.length))}</span><span class="xs-d"><span class="xs-bar"><i id="xsBar"></i></span></span></div>` : ''}</div>
+      <div class="ck-card ck-done xs-done" id="xsDone"></div><div id="ckGo"></div></div>`;
+    const wrap = el.querySelector('.xs-wrap'), xs = document.getElementById('xs'), done = document.getElementById('xsDone');
+    const rowEl = (k) => xs.querySelector(`.xs-row[data-k="${k}"]`);
+    xs.animate([{ opacity: 0, transform: 'translateY(16px)' }, { opacity: 1, transform: 'none' }], { duration: 420, easing: EZ.out });
+    okP.then((ok) => {   // 확인이 끝나면 바로 받기 — 실패하면 시트를 접고 마지막 화면으로
+      if (ok) { done.innerHTML = doneHtml(core); download(); return; }
+      const msg = (document.getElementById('ckGo') || {}).textContent || ''; finishView(core).then(() => alertLine(core, msg));
+    });
+    const okRows = vis.map((r, k) => ({ r, k })).filter((x) => !x.r.rm), fly = okRows.slice(0, 5), rel2 = (n) => { const a = n.getBoundingClientRect(), b = wrap.getBoundingClientRect(); return { x: a.left - b.left, y: a.top - b.top, w: a.width, h: a.height }; };
+    await sleep(240);
+    const src = rel2(xs), sx = src.x + src.w / 2 - 60, sy = src.y + src.h * 0.5 - 85;   // 카드 120×170 이 시트 가운데에서 나와
+    fly.forEach(({ r, k }, n) => {
+      const c = document.createElement('div'); c.className = 'xs-card'; c.innerHTML = `<img src="${e(small((r.u[0].imgs || [])[0] || ''))}" alt="">`; wrap.appendChild(c);
+      const d = rel2(rowEl(k).querySelector('.xs-d')), s = (d.h - 8) / 170, tx = rtl ? d.x + d.w - 16 - 120 * s : d.x + 6, ty = d.y + 4, x0 = sx + (n - 2) * 14, y0 = sy + Math.abs(n - 2) * 6;
+      // 나타나기(0.2초, expo.out) → 그 행 설명 칸으로 작아지며 들어감(power3.out — 날아가는 길이 보이게)
+      const a = c.animate([{ transform: `translate(${x0}px,${y0 + 16}px) scale(.86)`, opacity: 0, easing: EZ.out },
+        { transform: `translate(${x0}px,${y0}px) scale(1) rotate(${(n - 2) * 2}deg)`, opacity: 1, offset: 0.24, easing: EZ.p3out },
+        { transform: `translate(${tx}px,${ty}px) scale(${s})`, opacity: 1 }], { duration: 820, delay: n * 90, fill: 'both' });
+      setTimeout(() => rowEl(k).classList.add('xs-on'), n * 90 + 700);   // 칸에 닿을 즈음 채워지기 시작 (겹침)
+      a.finished.then(() => c.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, easing: EZ.p3in, fill: 'forwards' }).finished.then(() => c.remove()), () => c.remove());
+    });
+    await sleep(Math.max(0, fly.length - 1) * 90 + 640);
+    okRows.slice(fly.length).forEach(({ k }, n) => setTimeout(() => { const x = rowEl(k); if (x) x.classList.add('xs-on'); }, n * 40));   // 나머지는 한꺼번에
+    const bar = document.getElementById('xsBar');   // 아래 행들: 막대가 차며 한꺼번에 (뺀 행 비율만큼은 회색으로 남음)
+    if (bar) bar.animate([{ width: '0%' }, { width: (rest.length ? restOk / rest.length * 100 : 100) + '%' }], { duration: 520, easing: EZ.out, fill: 'forwards' });
+    await sleep(420);
+    done.classList.add('xs-in');
   }
 
   // ── 시작 · 이어 보기 ──

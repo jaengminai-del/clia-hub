@@ -225,7 +225,7 @@ function qaOf(slug) {
   // 실제로 빠진 이미지가 있거나, 본문 글이 5개 이상 빠졌을 때만
   const cov = qa.coverage || {}, chk = qa.checks || {};
   const real = (x) => x && !NON_CONTENT.has(x.component_id);
-  const texts = (cov.missing_texts || []).filter((x) => real(x) && !x.only_in_cards).length;
+  const texts = (cov.missing_texts || []).filter((x) => real(x) && !GALLERY.has(x.component_id) && !x.only_in_cards).length;
   // 예전에 크롤한 결과의 검사 기록에는 '크롤러가 일부러 뺀 이미지(LG 가 404·자리표시를 내줌)'가 누락으로 들어 있다 — 그것은 빼고 센다.
   // 새 크롤은 검사가 이미 제외한다. 주소가 겹쳐 있던 것은 실제로 이미지를 잃은 것이라 그대로 센다 (다시 가져오면 고쳐진다).
   const dead = new Set(((mirror && mirror._dead_media_dropped) || []).filter((d) => !DUP_DAM.test(d.url || '')).map((d) => imgKey(d.url)));
@@ -261,13 +261,6 @@ function aiChecks(j, it, c) {
   return out;
 }
 const aiFail = (ai) => (ai || []).some((x) => !x.ok);
-// 상품 페이지 프리뷰(bulk/bulk-market.js)에 넣을 제목 · 갤러리 · 스펙 — 크롤 데이터에서 (묶음은 첫 구성품)
-function storeOf(it) {
-  const slug = it.bundle ? (it.bundle[0] || {}).slug : it.slug;
-  const m = readJson(path.join(OUT_DIR(), slug || '', 'mirror.json'));
-  const CM = require('./bulk/bulk-market.js');
-  return { title: (it.bundle ? it.bundleTitle : m && m.product_title) || it.title || it.model || '', gallery: m ? CM.galleryOf(m) : [], specs: m ? CM.specsOf(m) : [] };
-}
 // 고쳐질 수 있는 문제(이미지 · 글 누락)면 한 번 자동으로 다시 (retryLater — 작업이 끝난 뒤 뒤에서):
 // 마지막 크롤이 하루보다 오래됐으면 다시 크롤, 아니면 다시 그리기만 (방금 크롤한 것은 다시 크롤해도 같다 — 크롤 비용만 든다)
 const retryable = (it, ai) => !it.bundle && !it.retried && ai.some((x) => !x.ok && (x.k === 'img' || x.k === 'txt'));
@@ -362,7 +355,7 @@ async function retryLater(j, it, same) {
     for (const x of all) {
       texts.set(x.row, c.text);
       Object.assign(x, { retried: 1, images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: c.summaryErr || '',
-        imgs: c.urls || [], hash: c.hash || '', ai: aiChecks(j, x, c), store: storeOf(x) });
+        imgs: c.urls || [], hash: c.hash || '', ai: aiChecks(j, x, c) });
       x.flags = flagsFor(j, x, c);
       require('./slice-preview').ensure(x.imgs).catch(() => {});
     }
@@ -384,7 +377,7 @@ async function redo(j, it, same = []) {
     for (const x of [it, ...same]) {
       texts.set(x.row, c.text);
       Object.assign(x, { status: 'ok', error: '', images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: c.summaryErr || '',
-        imgs: c.urls || [], hash: c.hash || '', ai: aiChecks(j, x, c), store: storeOf(x) });
+        imgs: c.urls || [], hash: c.hash || '', ai: aiChecks(j, x, c) });
       x.flags = flagsFor(j, x, c);
     }
     await saveTexts(j, texts, true);
@@ -476,7 +469,7 @@ async function run(j) {
         stop();
         if (c.text.length > CELL_MAX) throw Object.assign(new Error(`too long for one Excel cell (${c.text.length} chars)`), { stage: 'content' });
         texts.set(it.row, c.text);
-        if (j.check) { Object.assign(it, { ai: aiChecks(j, it, c), imgs: c.urls || [], hash: c.hash || '', store: storeOf(it) }); await saveTexts(j, texts, false); require('./slice-preview').ensure(it.imgs).catch(() => {}); }
+        if (j.check) { Object.assign(it, { ai: aiChecks(j, it, c), imgs: c.urls || [], hash: c.hash || '' }); await saveTexts(j, texts, false); require('./slice-preview').ensure(it.imgs).catch(() => {}); }
         Object.assign(it, { status: 'ok', error: '', images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: '' });
         it.flags = flagsFor(j, it, c);
         it.videos = 0;
@@ -503,7 +496,7 @@ async function run(j) {
       if (j.check) {   // 자동 재시도(다시 크롤)는 기다리지 않는다 — 작업이 끝난 뒤 뒤에서 (retryLater). 그동안 화면엔 '검토 필요 · 다시 시도 중'
         const ai = aiChecks(j, it, c);
         if (retryable(it, ai)) it.retrying = 1;
-        Object.assign(it, { ai, imgs: c.urls || [], hash: c.hash || '', store: storeOf(it) }); stop();
+        Object.assign(it, { ai, imgs: c.urls || [], hash: c.hash || '' }); stop();
         require('./slice-preview').ensure(it.imgs).catch(() => {}); }   // Check 화면용 작은 미리보기를 미리 (원본은 그대로)
       if (c.text.length > CELL_MAX) throw Object.assign(new Error(`too long for one Excel cell (${c.text.length} chars)`), { stage: 'content' });
       texts.set(it.row, c.text);

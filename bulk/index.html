@@ -483,6 +483,34 @@ button.eb { cursor: pointer; }
 #ckGo { padding: 0 20px; max-width: 1240px; margin: 0 auto; width: 100%; } #ckGo .ck-why { margin: 0 0 12px; }
 @keyframes ckspin { to { transform: rotate(360deg); } }
 .ck-why { margin-top: 26px; padding: 12px 14px; border-radius: 10px; background: #FDF1F0; color: var(--bad); font-size: 13px; line-height: 1.5; }
+/* 내보내기 시트 (2026-11-27): 행 = 제품, 설명 칸 강조 → PDP 카드가 그 칸으로 들어가 채워진다 */
+.xs-wrap { position: relative; }
+.xs { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; font-size: 13px; font-variant-numeric: tabular-nums; }
+.xs-hd { display: flex; align-items: center; gap: 8px; padding: 10px 14px; font-weight: 600; border-bottom: 1px solid var(--line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.xs-hd i { flex: none; width: 16px; height: 16px; border-radius: 3px; border: 1.5px solid var(--clia-gray-500); background: linear-gradient(var(--clia-gray-500), var(--clia-gray-500)) 0 5px / 100% 1.5px no-repeat, linear-gradient(var(--clia-gray-500), var(--clia-gray-500)) 5px 0 / 1.5px 100% no-repeat; }
+.xs-row { display: grid; grid-template-columns: 52px minmax(0, 190px) minmax(0, 1fr); height: 36px; border-bottom: 1px solid #EEECE7; }
+.xs-row > span { display: flex; align-items: center; padding: 0 10px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.xs-row > span + span { border-inline-start: 1px solid #EEECE7; }
+.xs-n { justify-content: center; color: var(--clia-gray-500); background: #F7F6F3; font-size: 12px; }
+.xs-h { height: 30px; background: #F7F6F3; font-size: 12px; color: var(--clia-gray-500); font-weight: 600; }
+.xs-h .xs-d { background: #F6E6EC; color: var(--clia-heritage); }
+.xs-d { background: rgba(165,0,52,.03); position: relative; }
+.xs-fill { display: flex; align-items: center; gap: 3px; opacity: 0; transform: translateX(-6px); transition: opacity .32s cubic-bezier(.16,1,.3,1), transform .32s cubic-bezier(.16,1,.3,1); }
+.xs-fill img { width: 18px; height: 24px; object-fit: cover; object-position: top; border-radius: 2px; border: 1px solid #EEE; }
+.xs-fill em { font-style: normal; color: var(--muted); font-size: 12px; margin-inline-start: 6px; }
+.xs-row.xs-on .xs-fill { opacity: 1; transform: none; }
+.xs-row.xs-on .xs-d { animation: xsflash .7s cubic-bezier(.16,1,.3,1) both; }
+@keyframes xsflash { from { background: rgba(165,0,52,.16); } to { background: rgba(165,0,52,.03); } }
+.xs-out { color: var(--clia-gray-400, #A3A09A); } .xs-out .xs-d { background: repeating-linear-gradient(135deg, #F1F0EC 0 6px, #F7F6F3 6px 12px); }
+.xs-rmv { color: var(--muted); font-size: 12px; }
+.xs-more { border-bottom: 0; color: var(--muted); }
+.xs-bar { display: block; width: 100%; height: 6px; border-radius: 3px; background: #ECEBE8; overflow: hidden; } .xs-bar i { display: block; height: 100%; width: 0; background: var(--clia-heritage); opacity: .55; }
+.xs-card { position: absolute; left: 0; top: 0; width: 120px; height: 170px; border-radius: 6px; background: #fff; overflow: hidden; transform-origin: 0 0; z-index: 5; pointer-events: none; box-shadow: 0 8px 22px rgba(38,38,38,.18), 0 0 0 1px rgba(38,38,38,.06); }
+.xs-card img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+.ck-done.xs-done { margin-top: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 14px; text-align: start; opacity: 0; transform: translateY(8px); transition: opacity .4s cubic-bezier(.16,1,.3,1), transform .4s cubic-bezier(.16,1,.3,1); }
+.ck-done.xs-done:empty { display: none; } .ck-done.xs-done.xs-in { opacity: 1; transform: none; }
+.ck-done.xs-done .ck-ic { flex: none; width: 40px; height: 40px; margin: 0; } .xs-done .xs-tx { flex: 1; min-width: 0; } .ck-done.xs-done .ck-dt { font-size: 17px; } .ck-done.xs-done .ck-ds { margin-top: 2px; }
+.ck-done.xs-done .clia-btn { flex: none; margin: 0; }
 .ck-done { text-align: center; padding: 56px 24px; } .ck-ic { width: 56px; height: 56px; border-radius: 50%; background: var(--clia-gray-100); color: var(--clia-gray-900); display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; }
 .ck-ic svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .ck-dt { font-size: 20px; font-weight: 700; } .ck-ds { margin-top: 8px; font-size: 14px; color: var(--muted); } .ck-done .clia-btn { margin-top: 26px; }

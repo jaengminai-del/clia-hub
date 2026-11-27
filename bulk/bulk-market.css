@@ -1,5 +1,5 @@
 /* bulk-market.css — 벌크 Check 프리뷰를 Shopee · Lazada 상품 페이지처럼 (2026-11-26)
- * LG 공식 스토어(LG ELECTRONICS) 상품 페이지 모양. '상세' 칸에 실제로 내려받을 상세 이미지를 그대로 넣는다.
+ * 상단 바 + '상세' 칸만 — 엑셀 설명 칸에 실제로 들어가는 상세 이미지를 그대로 넣는다.
  * 벌크 Check(?check=1) 왼쪽 프리뷰에만 쓴다. 만드는 함수는 bulk-market.js. */
 .cm { --cm-c: #D0011B; font-family: Roboto, 'Helvetica Neue', Helvetica, Arial, 'LINESeedSansTH', sans-serif; color: #222; background: #F5F5F5; font-size: 14px; line-height: 1.45; text-align: left; }
 .cm.lz { --cm-c: #FF0066; background: #EFF0F5; }
@@ -25,58 +25,11 @@
 .cm-cart { flex: none; width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .cm.lz .cm-cart { stroke: #0F146D; }
 
-/* 카드 */
-.cm-card { background: #fff; margin: 8px 0 0; padding: 14px 12px; }
-.cm-top { display: flex; flex-wrap: wrap; gap: 16px; }
-.cm-gal { flex: 1 1 260px; min-width: 0; max-width: 450px; }
-.cm-info { flex: 1 1 280px; min-width: 0; }
-.cm-main { aspect-ratio: 1 / 1; background: #fff; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #F0F0F0; }
-.cm-main img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
-.cm-thumbs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
-.cm-thumbs span { aspect-ratio: 1 / 1; border: 1px solid #EEE; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #fff; }
-.cm-thumbs span:first-child { border: 2px solid var(--cm-c); }
-.cm-thumbs img { max-width: 100%; max-height: 100%; object-fit: contain; }
-.cm-noimg { color: #BBB; font-size: 12px; }
-
-.cm-title { font-size: 18px; font-weight: 500; line-height: 1.35; margin: 0; word-break: break-word; }
-.cm-badge { display: inline-block; vertical-align: 2px; margin-right: 6px; padding: 1px 4px; border-radius: 2px; font-size: 11px; font-weight: 700; line-height: 15px; color: #fff; background: #D0011B; }
-.cm.lz .cm-badge { background: #E2001A; }
-.cm-ph { display: inline-block; height: 10px; border-radius: 3px; background: #E6E6E6; vertical-align: middle; }
-.cm-meta { display: flex; gap: 14px; align-items: center; margin-top: 10px; }
-.cm-price { margin-top: 12px; padding: 14px 12px; display: flex; align-items: center; gap: 10px; }
-.cm.sp .cm-price { background: #FAFAFA; }
-.cm.lz .cm-price { padding: 10px 0; border-top: 1px solid #F0F0F0; border-bottom: 1px solid #F0F0F0; }
-.cm-price .cur { font-size: 26px; font-weight: 500; color: var(--cm-c); line-height: 1; }
-.cm-price .cm-ph { height: 18px; width: 120px; background: #EDE6E7; }
-.cm.lz .cm-price .cm-ph { background: #F2E4EB; }
-.cm-btns { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
-.cm-btns span { flex: 1 1 140px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 15px; border-radius: 2px; border: 1px solid var(--cm-c); color: var(--cm-c); white-space: nowrap; padding: 0 10px; }
-.cm.sp .cm-btns span:first-child { background: rgba(208, 1, 27, .08); }
-.cm-btns span.f { background: var(--cm-c); color: #fff; }
-.cm.lz .cm-btns span { border-radius: 6px; height: 46px; font-weight: 500; }
-
-/* 스토어 줄 */
-.cm-store { display: flex; align-items: center; gap: 12px; }
-.cm-store .lgo { flex: none; width: 48px; height: 48px; border-radius: 50%; background: #111; color: #fff; display: flex; align-items: center; justify-content: center; font: 700 15px/1 Arial, sans-serif; letter-spacing: -.02em; }
-.cm.lz .cm-store .lgo { border-radius: 4px; }
-.cm-store .nm { font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
-.cm-store .st { font-size: 12px; color: #757575; margin-top: 3px; display: flex; align-items: center; gap: 5px; }
-.cm-store .st i { width: 7px; height: 7px; border-radius: 50%; background: #26AA99; }
-
-/* 블록 (Shopee: 회색 제목 바 · Lazada: 탭) */
+/* 상세 칸 — 엑셀 설명 칸에 들어가는 상세 이미지 */
 .cm-dt { background: #fff; margin: 8px 0 0; }
 .cm-bh { margin: 0; padding: 12px; font-size: 16px; font-weight: 500; background: #F5F5F5; }
 .cm.sp .cm-dt { padding: 12px 12px 0; }
 .cm.sp .cm-dt > .cm-bh { margin: 0 0 4px; }
-.cm-specs { display: grid; grid-template-columns: minmax(96px, 38%) minmax(0, 1fr); gap: 10px 14px; padding: 12px 0 16px; font-size: 13px; }
-.cm.lz .cm-specs { padding: 8px 12px 14px; }
-.cm-specs dt { color: #757575; margin: 0; word-break: break-word; }
-.cm-specs dd { margin: 0; color: #222; word-break: break-word; }
-.cm-tabs { display: flex; gap: 22px; padding: 0 12px; border-bottom: 1px solid #EEE; font-size: 15px; color: #222; }
-.cm-tabs span { padding: 12px 0 10px; border-bottom: 3px solid transparent; white-space: nowrap; }
-.cm-tabs span.on { color: #FF0066; border-bottom-color: #FF0066; font-weight: 500; }
-.cm-sub { padding: 14px 12px 0; font-size: 15px; font-weight: 500; color: #222; }
 .cm-body { padding: 0; }
 .cm.sp .cm-body { margin: 0 -12px; }
-.cm-sep { height: 1px; background: #EEE; margin: 0 12px; }
 
