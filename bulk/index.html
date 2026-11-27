@@ -432,6 +432,10 @@ button.eb { cursor: pointer; }
   background: repeating-linear-gradient(135deg, rgba(165,0,52,.26) 0 10px, rgba(165,0,52,.08) 10px 20px); box-shadow: 0 0 0 3px #fff, 0 0 0 8px rgba(165,0,52,.35); }
 .dk-card .dk-bad b { position: absolute; inset-inline-start: -5px; bottom: calc(100% + 10px); max-width: calc(100% + 10px); padding: 8px 14px 9px; border-radius: 8px; background: var(--clia-heritage); color: #fff;
   font-size: 21px; font-weight: 700; line-height: 1.25; box-shadow: 0 6px 18px rgba(165,0,52,.35); }
+/* 빠진 이미지(접혀 없어짐): 칸이 아니라 '여기에 들어가야 함' 굵은 선 — 사람 눈에 보이는 그대로 */
+.dk-card .dk-bad.gone { height: 0; min-height: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.dk-card .dk-bad.gone::before { content: ''; position: absolute; left: -2px; right: -2px; top: -5px; height: 10px; border-radius: 5px; background: var(--clia-heritage); box-shadow: 0 0 0 3px #fff, 0 0 22px 6px rgba(165,0,52,.45); }
+.dk-card .dk-bad.gone b { bottom: 14px; font-size: 18px; padding: 6px 12px 7px; }
 .dk-card .dk-bad:not(.dk-cur) { opacity: .55; } .dk-card .dk-bad:not(.dk-cur) b { font-size: 15px; padding: 4px 10px; }
 .dk-card:not(.dk-prob) .dk-bad, .dk-card:not(.dk-prob) .dk-pbs { display: none; }
 .dk-pbs { display: flex; flex-direction: column; gap: 12px; padding: 14px 14px 12px; background: #fff; }
@@ -441,6 +445,13 @@ button.eb { cursor: pointer; }
 .dk-po { margin: 12px 0 0; } .dk-po img { display: block; width: 100%; max-height: 380px; object-fit: contain; background: #fff; border: 1px solid #EEE; border-radius: 6px; }
 .dk-po figcaption { margin-top: 6px; font-size: 12.5px; color: var(--muted); }
 .dk-pl { margin: 10px 0 0; padding-inline-start: 20px; font-size: 15px; line-height: 1.5; color: var(--clia-gray-900); } p.dk-pl { padding: 0; }
+/* 비교 칸: 카드 옆 lg.com 원본 — 꼭지가 표시 선을 가리킴 */
+.dk-cmp { position: absolute; left: 0; top: 0; z-index: 45; padding: 10px 10px 8px; border: 3px solid var(--clia-heritage); border-radius: 12px; background: #fff; box-shadow: 0 12px 32px rgba(38,38,38,.18); transition: transform .32s cubic-bezier(.16,1,.3,1); }
+.dk-cmp[hidden] { display: none; }
+.dk-cmp::before { content: ''; position: absolute; top: var(--ay, 40px); inset-inline-start: -15px; margin-top: -10px; border: 10px solid transparent; border-inline-end-color: var(--clia-heritage); border-inline-start-width: 4px; }
+.dk-cmp-h { margin-bottom: 8px; font-size: 16px; font-weight: 700; line-height: 1.3; color: var(--clia-heritage); }
+.dk-cmp img { display: block; width: 100%; max-height: 360px; object-fit: contain; border: 1px solid #EEE; border-radius: 6px; background: #fff; }
+.dk-cmp-s { margin-top: 6px; font-size: 12.5px; color: var(--muted); } .dk-cmp.dk-cmp-x .dk-cmp-s { font-size: 14px; font-weight: 600; color: var(--clia-gray-900); }
 .dk-rail s { position: absolute; left: -3px; right: -3px; height: 4px; margin-top: -2px; border-radius: 2px; background: #D0002F; }
 .dk-rail s.on { left: -5px; right: -5px; height: 9px; margin-top: -4px; box-shadow: 0 0 0 2px #fff; }
 #dkCap > span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

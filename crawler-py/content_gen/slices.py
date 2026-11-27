@@ -52,13 +52,15 @@ _JS_WAIT_ASSETS = """async (perImgMs) => {
 }"""
 
 # 못 불러온 이미지의 자리 (slice-root 위에서부터 CSS px) — 벌크 Check 가 PDP 안에서 어디가 비었는지 표시 (2026-11-27)
-# 크기 지정이 없어 0 으로 접힌 이미지도 있어서 최소 24px 로 본다
+# 크기 지정이 없어 0 으로 접힌 이미지도 있어서 최소 24px 로 본다 · 원래 주소(src)도 남긴다 — 화면이 lg.com 원본을 옆에 보여 준다
 _JS_BROKEN = """() => {
   const root = document.getElementById('slice-root');
   const top0 = root.getBoundingClientRect().top + window.scrollY;
   return Array.from(root.querySelectorAll('img')).filter(im => !(im.complete && im.naturalWidth > 0)).map(im => {
     const r = im.getBoundingClientRect();
-    return { top: Math.round(r.top + window.scrollY - top0), h: Math.max(24, Math.round(r.height)) };
+    // gone: 크기 지정이 없어 0 으로 접힘 → 사람 눈에는 그 자리에 이미지가 '없음'(아래 내용이 당겨 올라옴). 아니면 빈 칸
+    return { top: Math.round(r.top + window.scrollY - top0), h: Math.max(24, Math.round(r.height)), gone: r.height < 2,
+             src: (im.getAttribute('src') || '').slice(0, 400) };
   }).slice(0, 20);
 }"""
 
@@ -262,14 +264,15 @@ def _open_page(browser, vw: int, scale: float, doc: str):
 
 
 def _broken_at(boxes, cuts, manifest):
-    """못 불러온 이미지 자리(CSS px) → [{slice, y, h}] — 몇 번째 장의 어디쯤(장 높이에 대한 비율)."""
+    """못 불러온 이미지 자리(CSS px) → [{slice, y, h, kind, src}] — 몇 번째 장의 어디쯤(장 높이에 대한 비율) · 접혀 없어짐(gone)/빈 칸(blank) · 원래 주소."""
     out = []
     for b in boxes or []:
         for m in manifest:
             a, z = cuts[m["slice"] - 1], cuts[m["slice"] - 1] + m["css_height"]
             if a <= b["top"] < z:
                 out.append({"slice": m["slice"], "y": round((b["top"] - a) / m["css_height"], 4),
-                            "h": round(min(b["h"], z - b["top"]) / m["css_height"], 4)})
+                            "h": round(min(b["h"], z - b["top"]) / m["css_height"], 4),
+                            "kind": "gone" if b.get("gone") else "blank", "src": b.get("src") or ""})
                 break
     return out
 

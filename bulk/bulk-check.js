@@ -11,31 +11,31 @@
     en: { steps: ['Attach', 'Prepare', 'Check', 'Download'], rows: (n) => `${n} rows`, prep: (a, b) => `Preparing ${a} / ${b}`, liveP: 'live products',
       skip: (n) => `${n} not live — skipped`, view: 'View', hide: 'Hide', asOf: (d) => `Live list as of ${d}`, byStatus: 'From the Status column',
       skipRows: (n) => `${n} rows in the Excel — left as they are`, notLive: 'Not live', unknown: 'Unknown', none: 'No live products in this file.',
-      pBad: "This image didn't load", pLg: 'This lg.com image is missing from the PDP', pLgN: (n) => `${n} lg.com image${n === 1 ? ' is' : 's are'} missing from the PDP`, pTxt: 'These lg.com lines are missing from the PDP', pSpec: 'No spec table in the PDP', pBadN: (n) => `${n} image${n === 1 ? '' : 's'} didn't load — place unknown`, probN: (a, b) => `Problem ${a} / ${b}`, nextP: 'Next problem', orig: 'lg.com original', w_lgimg: (n) => `${n} lg.com image${n === 1 ? '' : 's'} not in the PDP`, w_at: 'marked in the PDP', badM: "Didn't load", w_img: (n) => `${n} image${n === 1 ? '' : 's'} didn't load`, w_txt: (n) => `${n} lg.com lines missing`, w_sum: "Summary couldn't be made",
+      pGone: 'The image that should be here is missing', pBlank: 'This image spot is empty', should: 'The image that should be here', noOrig: "Doesn't open on lg.com either — the original may be gone", pBad: "This image didn't load", pLg: 'This lg.com image is missing from the PDP', pLgN: (n) => `${n} lg.com image${n === 1 ? ' is' : 's are'} missing from the PDP`, pTxt: 'These lg.com lines are missing from the PDP', pSpec: 'No spec table in the PDP', pBadN: (n) => `${n} image${n === 1 ? '' : 's'} missing — place unknown`, probN: (a, b) => `Problem ${a} / ${b}`, nextP: 'Next problem', orig: 'lg.com original', w_lgimg: (n) => `${n} lg.com image${n === 1 ? '' : 's'} not in the PDP`, w_at: 'marked', badM: "Didn't load", w_img: (n) => `${n} image${n === 1 ? '' : 's'} missing in the PDP`, w_txt: (n) => `${n} lg.com lines missing`, w_sum: "Summary couldn't be made",
       w_spec: 'No spec table', w_fail: "Couldn't prepare", w_retried: 'still there after a retry', redo: 'Prepare again', remove: 'Remove from this Excel',
       redoing: 'Preparing again', doneT: (n) => `${n} checked`, removed: (n) => `${n} removed`, skipped: (n) => `${n} not live skipped`, dl: 'Download Excel', err: 'Something went wrong: ' },
     th: { steps: ['แนบไฟล์', 'เตรียม', 'ตรวจ', 'ดาวน์โหลด'], rows: (n) => `${n} แถว`, prep: (a, b) => `กำลังเตรียม ${a} / ${b}`, liveP: 'สินค้าที่ไลฟ์',
       skip: (n) => `ไม่ได้ไลฟ์ ${n} รายการ — ข้ามไป`, view: 'ดู', hide: 'ซ่อน', asOf: (d) => `รายการไลฟ์ ณ ${d}`, byStatus: 'จากคอลัมน์ Status',
       skipRows: (n) => `${n} แถวใน Excel — คงไว้ตามเดิม`, notLive: 'ไม่ได้ไลฟ์', unknown: 'ไม่ทราบ', none: 'ไม่มีสินค้าที่ไลฟ์ในไฟล์นี้',
-      pBad: 'โหลดรูปนี้ไม่ได้', pLg: 'รูปนี้จาก lg.com ขาดไปจาก PDP', pLgN: (n) => `รูปจาก lg.com ขาดไปจาก PDP ${n} รูป`, pTxt: 'ข้อความเหล่านี้จาก lg.com ขาดไปจาก PDP', pSpec: 'ไม่มีตารางสเปกใน PDP', pBadN: (n) => `โหลดรูปไม่ได้ ${n} รูป — ไม่ทราบตำแหน่ง`, probN: (a, b) => `ปัญหา ${a} / ${b}`, nextP: 'ปัญหาถัดไป', orig: 'ต้นฉบับ lg.com', w_lgimg: (n) => `รูปจาก lg.com ไม่อยู่ใน PDP ${n} รูป`, w_at: 'ทำเครื่องหมายไว้ใน PDP', badM: 'โหลดไม่ได้', w_img: (n) => `โหลดรูปไม่ได้ ${n} รูป`, w_txt: (n) => `ข้อความจาก lg.com ขาด ${n} บรรทัด`, w_sum: 'สร้างสรุปไม่ได้',
+      pGone: 'รูปที่ควรอยู่ตรงนี้หายไป', pBlank: 'ช่องรูปนี้ว่างเปล่า', should: 'รูปที่ควรอยู่ตรงนี้', noOrig: 'เปิดบน lg.com ไม่ได้เช่นกัน — ต้นฉบับอาจถูกลบไปแล้ว', pBad: 'โหลดรูปนี้ไม่ได้', pLg: 'รูปนี้จาก lg.com ขาดไปจาก PDP', pLgN: (n) => `รูปจาก lg.com ขาดไปจาก PDP ${n} รูป`, pTxt: 'ข้อความเหล่านี้จาก lg.com ขาดไปจาก PDP', pSpec: 'ไม่มีตารางสเปกใน PDP', pBadN: (n) => `รูปหายไป ${n} รูป — ไม่ทราบตำแหน่ง`, probN: (a, b) => `ปัญหา ${a} / ${b}`, nextP: 'ปัญหาถัดไป', orig: 'ต้นฉบับ lg.com', w_lgimg: (n) => `รูปจาก lg.com ไม่อยู่ใน PDP ${n} รูป`, w_at: 'ทำเครื่องหมายไว้ใน PDP', badM: 'โหลดไม่ได้', w_img: (n) => `รูปหายไปจาก PDP ${n} รูป`, w_txt: (n) => `ข้อความจาก lg.com ขาด ${n} บรรทัด`, w_sum: 'สร้างสรุปไม่ได้',
       w_spec: 'ไม่มีตารางสเปก', w_fail: 'เตรียมไม่สำเร็จ', w_retried: 'ลองใหม่แล้วยังเหมือนเดิม', redo: 'เตรียมใหม่', remove: 'นำออกจาก Excel นี้',
       redoing: 'กำลังเตรียมใหม่', doneT: (n) => `ตรวจแล้ว ${n} รายการ`, removed: (n) => `นำออก ${n}`, skipped: (n) => `ข้ามที่ไม่ได้ไลฟ์ ${n}`, dl: 'ดาวน์โหลด Excel', err: 'เกิดข้อผิดพลาด: ' },
     ko: { steps: ['첨부', '준비', 'Check', '받기'], rows: (n) => `${n}행`, prep: (a, b) => `준비 중 ${a} / ${b}`, liveP: '라이브 제품',
       skip: (n) => `라이브 아님 ${n}개 — 건너뜀`, view: '보기', hide: '닫기', asOf: (d) => `라이브 목록 기준일 ${d}`, byStatus: 'Status 칸 기준',
       skipRows: (n) => `엑셀 ${n}행 — 원래 내용 그대로`, notLive: '라이브 아님', unknown: '모름', none: '이 파일에 라이브 제품이 없어요.',
-      pBad: '이 이미지 못 불러옴', pLg: 'lg.com 원본에 있는 이 이미지가 빠짐', pLgN: (n) => `lg.com 원본 이미지 ${n}장이 빠짐`, pTxt: 'lg.com 원본에 있는 이 문구가 빠짐', pSpec: 'PDP에 스펙 표가 없음', pBadN: (n) => `이미지 ${n}장 못 불러옴 — 자리 모름`, probN: (a, b) => `문제 ${a} / ${b}`, nextP: '다음 문제', orig: 'lg.com 원본', w_lgimg: (n) => `lg.com 이미지 ${n}장이 PDP에 없음`, w_at: 'PDP에 표시', badM: '못 불러옴', w_img: (n) => `이미지 ${n}장 못 불러옴`, w_txt: (n) => `lg.com 문구 ${n}줄 빠짐`, w_sum: '요약을 못 만듦',
+      pGone: '여기 들어갈 이미지가 빠져 있어요', pBlank: '이 자리 이미지가 비어 있어요', should: '원래 들어가야 할 이미지', noOrig: 'lg.com 에서도 열리지 않아요 — 원본이 없어졌을 수 있어요', pBad: '이 이미지 못 불러옴', pLg: 'lg.com 원본에 있는 이 이미지가 빠짐', pLgN: (n) => `lg.com 원본 이미지 ${n}장이 빠짐`, pTxt: 'lg.com 원본에 있는 이 문구가 빠짐', pSpec: 'PDP에 스펙 표가 없음', pBadN: (n) => `이미지 ${n}장이 빠짐 — 자리 모름`, probN: (a, b) => `문제 ${a} / ${b}`, nextP: '다음 문제', orig: 'lg.com 원본', w_lgimg: (n) => `lg.com 이미지 ${n}장이 PDP에 없음`, w_at: '표시함', badM: '못 불러옴', w_img: (n) => `PDP에서 이미지 ${n}장이 빠짐`, w_txt: (n) => `lg.com 문구 ${n}줄 빠짐`, w_sum: '요약을 못 만듦',
       w_spec: '스펙표 없음', w_fail: '준비 못 함', w_retried: '다시 해도 그대로', redo: '다시 준비', remove: '이번 엑셀에서 빼기',
       redoing: '다시 준비하는 중', doneT: (n) => `${n}개 확인 완료`, removed: (n) => `${n}개 뺌`, skipped: (n) => `라이브 아님 ${n}개 건너뜀`, dl: '엑셀 받기', err: '문제가 생겼어요: ' },
     de: { steps: ['Anhängen', 'Vorbereiten', 'Prüfen', 'Herunterladen'], rows: (n) => `${n} Zeilen`, prep: (a, b) => `Vorbereitung ${a} / ${b}`, liveP: 'Live-Produkte',
       skip: (n) => `${n} nicht live — übersprungen`, view: 'Ansehen', hide: 'Ausblenden', asOf: (d) => `Live-Liste vom ${d}`, byStatus: 'Aus der Spalte Status',
       skipRows: (n) => `${n} Zeilen in der Excel — bleiben unverändert`, notLive: 'Nicht live', unknown: 'Unbekannt', none: 'Keine Live-Produkte in dieser Datei.',
-      pBad: 'Dieses Bild wurde nicht geladen', pLg: 'Dieses lg.com-Bild fehlt im PDP', pLgN: (n) => `${n} lg.com-Bild(er) fehlen im PDP`, pTxt: 'Diese lg.com-Zeilen fehlen im PDP', pSpec: 'Keine Spezifikationstabelle im PDP', pBadN: (n) => `${n} Bild(er) nicht geladen — Stelle unbekannt`, probN: (a, b) => `Problem ${a} / ${b}`, nextP: 'Nächstes Problem', orig: 'lg.com-Original', w_lgimg: (n) => `${n} lg.com-Bild(er) fehlen im PDP`, w_at: 'im PDP markiert', badM: 'Nicht geladen', w_img: (n) => `${n} Bild(er) nicht geladen`, w_txt: (n) => `${n} Zeilen von lg.com fehlen`, w_sum: 'Zusammenfassung fehlgeschlagen',
+      pGone: 'Hier fehlt ein Bild', pBlank: 'Diese Bildstelle ist leer', should: 'Das Bild, das hierher gehört', noOrig: 'Öffnet auch auf lg.com nicht — das Original ist evtl. weg', pBad: 'Dieses Bild wurde nicht geladen', pLg: 'Dieses lg.com-Bild fehlt im PDP', pLgN: (n) => `${n} lg.com-Bild(er) fehlen im PDP`, pTxt: 'Diese lg.com-Zeilen fehlen im PDP', pSpec: 'Keine Spezifikationstabelle im PDP', pBadN: (n) => `${n} Bild(er) fehlen — Stelle unbekannt`, probN: (a, b) => `Problem ${a} / ${b}`, nextP: 'Nächstes Problem', orig: 'lg.com-Original', w_lgimg: (n) => `${n} lg.com-Bild(er) fehlen im PDP`, w_at: 'im PDP markiert', badM: 'Nicht geladen', w_img: (n) => `${n} Bild(er) fehlen im PDP`, w_txt: (n) => `${n} Zeilen von lg.com fehlen`, w_sum: 'Zusammenfassung fehlgeschlagen',
       w_spec: 'Kein Datenblatt', w_fail: 'Vorbereitung fehlgeschlagen', w_retried: 'auch nach erneutem Versuch', redo: 'Neu vorbereiten', remove: 'Aus dieser Excel entfernen',
       redoing: 'Wird neu vorbereitet', doneT: (n) => `${n} geprüft`, removed: (n) => `${n} entfernt`, skipped: (n) => `${n} nicht live übersprungen`, dl: 'Excel herunterladen', err: 'Fehler: ' },
     ar: { steps: ['إرفاق', 'تجهيز', 'تحقق', 'تنزيل'], rows: (n) => `${n} صف`, prep: (a, b) => `جارٍ التجهيز ${a} / ${b}`, liveP: 'منتجات نشطة',
       skip: (n) => `${n} غير نشط — تم تخطيه`, view: 'عرض', hide: 'إخفاء', asOf: (d) => `قائمة النشط بتاريخ ${d}`, byStatus: 'من عمود Status',
       skipRows: (n) => `${n} صف في Excel — يبقى كما هو`, notLive: 'غير نشط', unknown: 'غير معروف', none: 'لا توجد منتجات نشطة في هذا الملف.',
-      pBad: 'تعذّر تحميل هذه الصورة', pLg: 'هذه الصورة من lg.com مفقودة في PDP', pLgN: (n) => `${n} صورة من lg.com مفقودة في PDP`, pTxt: 'هذه الأسطر من lg.com مفقودة في PDP', pSpec: 'لا يوجد جدول مواصفات في PDP', pBadN: (n) => `تعذّر تحميل ${n} صورة — الموضع غير معروف`, probN: (a, b) => `المشكلة ${a} / ${b}`, nextP: 'المشكلة التالية', orig: 'الأصل من lg.com', w_lgimg: (n) => `${n} صورة من lg.com غير موجودة في PDP`, w_at: 'محدّد في PDP', badM: 'لم يتم التحميل', w_img: (n) => `تعذّر تحميل ${n} صورة`, w_txt: (n) => `${n} سطر من lg.com مفقود`, w_sum: 'تعذّر إنشاء الملخص',
+      pGone: 'الصورة التي يجب أن تكون هنا مفقودة', pBlank: 'مكان هذه الصورة فارغ', should: 'الصورة التي يجب أن تكون هنا', noOrig: 'لا تفتح على lg.com أيضًا — ربما حُذف الأصل', pBad: 'تعذّر تحميل هذه الصورة', pLg: 'هذه الصورة من lg.com مفقودة في PDP', pLgN: (n) => `${n} صورة من lg.com مفقودة في PDP`, pTxt: 'هذه الأسطر من lg.com مفقودة في PDP', pSpec: 'لا يوجد جدول مواصفات في PDP', pBadN: (n) => `${n} صورة مفقودة — الموضع غير معروف`, probN: (a, b) => `المشكلة ${a} / ${b}`, nextP: 'المشكلة التالية', orig: 'الأصل من lg.com', w_lgimg: (n) => `${n} صورة من lg.com غير موجودة في PDP`, w_at: 'محدّد في PDP', badM: 'لم يتم التحميل', w_img: (n) => `${n} صورة مفقودة في PDP`, w_txt: (n) => `${n} سطر من lg.com مفقود`, w_sum: 'تعذّر إنشاء الملخص',
       w_spec: 'لا يوجد جدول مواصفات', w_fail: 'تعذّر التجهيز', w_retried: 'ما زال بعد إعادة المحاولة', redo: 'إعادة التجهيز', remove: 'إزالة من ملف Excel هذا',
       redoing: 'جارٍ إعادة التجهيز', doneT: (n) => `تم فحص ${n}`, removed: (n) => `أُزيل ${n}`, skipped: (n) => `تم تخطي ${n} غير نشط`, dl: 'تنزيل Excel', err: 'حدث خطأ: ' },
   };
@@ -184,12 +184,15 @@
     // 사람이 볼 문제 (2026-11-27): 자리를 아는 것(못 불러온 이미지)은 그 장 위에 굵은 테두리 + 큰 글자,
     // 자리가 없는 것(lg.com 원본에만 있는 그림 · 글, 요약 · 스펙 표)은 PDP 맨 위 문제 칸에 — 원본 그림은 크게
     const img = ai.find((x) => x.k === 'img') || {}, at = img.at || [];
-    const mark = (k) => at.filter((b) => b.slice === k + 1).map((b) => `<span class="dk-bad" style="top:${(b.y * 100).toFixed(2)}%;height:${(Math.max(b.h, 0.03) * 100).toFixed(2)}%"><b>${e(T.pBad)}</b></span>`).join('');
+    // 슬라이스를 만들 때 못 가져온 이미지는 크기가 없어 접힌다 → 사람 눈에는 그 자리에 이미지가 '없음'(아래 글이 당겨 올라옴).
+    //   그래서 '빈 칸'이 아니라 들어갈 자리에 굵은 선 + '여기 들어갈 이미지가 빠져 있어요', 옆에 lg.com 원본(비교 칸). 크기가 있어 비어 보이는 칸이면 칸 표시
+    const kindOf = (b) => b.kind || (b.h < 0.03 ? 'gone' : 'blank');
+    const mark = (k) => at.filter((b) => b.slice === k + 1).map((b) => `<span class="dk-bad ${kindOf(b)}" data-src="${e(b.src || '')}" style="top:${(b.y * 100).toFixed(2)}%${kindOf(b) === 'blank' ? `;height:${(b.h * 100).toFixed(2)}%` : ''}"><b>${e(kindOf(b) === 'gone' ? T.pGone : T.pBlank)}</b></span>`).join('');
     const pb = (title, inner) => `<div class="dk-pb"><div class="dk-pt">${e(title)}</div>${inner || ''}</div>`;
     const pbs = [];
     if (!img.ok) {
       if ((img.bad == null ? img.n : img.bad) && !at.length) pbs.push(pb(T.pBadN(img.bad == null ? img.n : img.bad)));
-      (img.src || []).forEach((s) => pbs.push(pb(T.pLg, `<figure class="dk-po"><img src="${e(s)}" alt="" decoding="async"><figcaption>${e(T.orig)}</figcaption></figure>`)));
+      (img.src || []).forEach((s) => pbs.push(pb(T.pLg, `<figure class="dk-po"><img src="${e(s)}" alt="" decoding="async"><figcaption>${e(T.should)} · ${e(T.orig)}</figcaption></figure>`)));
       if (img.lg > (img.src || []).length) pbs.push(pb(T.pLgN(img.lg - (img.src || []).length)));
     }
     for (const x of ai) {
@@ -322,11 +325,30 @@
     D.root.insertAdjacentHTML('beforeend', `<div class="dk-top"><div class="dk-count"><b id="dkI"></b><span id="dkNn"></span></div><div class="dk-prog"><i id="dkProg"></i></div></div><div class="dk-cap" id="dkCap"></div>
       <div class="dk-car" id="dkCar"><div class="dk-track" id="dkTrack"></div></div>
       <button class="dk-arw" id="dkPrev" type="button" aria-label="${e(rtl ? T.next : T.prev)}">${ARL}</button><button class="dk-arw" id="dkNext" type="button" aria-label="${e(rtl ? T.prev : T.next)}">${ARR}</button>
+      <div class="dk-cmp" id="dkCmp" hidden><div class="dk-cmp-h">${e(T.should)}</div><img alt="" decoding="async"><div class="dk-cmp-s">${e(T.orig)}</div></div>
       <div class="dk-bar"><button class="dk-act" data-a="remove" type="button">${e(T.rmS)}</button><button class="dk-act" data-a="retry" type="button">${e(T.redo)}</button><button class="dk-act" data-a="ok" type="button">${e(T.okIn)}</button></div>`);
     const cap = document.getElementById('dkCap'), car = document.getElementById('dkCar'), track = document.getElementById('dkTrack');
     const prevB = document.getElementById('dkPrev'), nextB = document.getElementById('dkNext');   // 왼쪽 · 오른쪽 (아랍어는 왼쪽이 다음)
     prevB.onclick = () => go(rtl ? 1 : -1); nextB.onclick = () => go(rtl ? -1 : 1);
     const acts = [...D.root.querySelectorAll('.dk-act')];
+    // 비교 칸: 지금 보는 문제가 '빠진 이미지'면 카드 바로 옆에 lg.com 원본(원래 들어가야 할 이미지)을 표시 선 높이에 맞춰 나란히
+    const cmpEl = document.getElementById('dkCmp'), cmpImg = cmpEl.querySelector('img'), cmpS = cmpEl.querySelector('.dk-cmp-s');
+    let cmpT = 0;
+    function cmp(later) {
+      clearTimeout(cmpT); if (later) { cmpEl.hidden = true; cmpT = setTimeout(cmp, later); return; }
+      const c = el, p = c && c.classList.contains('dk-prob') ? probs(c)[c._pi || 0] : null, src = p && p.classList.contains('dk-bad') ? p.dataset.src : '';
+      if (!src || (drag && drag.on) || !alive) { cmpEl.hidden = true; return; }
+      if (cmpImg.dataset.s !== src) {
+        cmpImg.dataset.s = src; cmpEl.classList.remove('dk-cmp-x'); cmpS.textContent = T.orig; cmpImg.hidden = false;
+        cmpImg.onerror = () => { cmpEl.classList.add('dk-cmp-x'); cmpImg.hidden = true; cmpS.textContent = T.noOrig; cmp(); };
+        cmpImg.onload = () => cmp(); cmpImg.src = src;
+      }
+      const rc = rel(c.querySelector('.dk-ph')), rp = rel(p), W = Math.round(Math.max(200, Math.min(320, G.side + GAP + 6)));   // 캐러셀 가장자리 · 화살표 바로 앞까지
+      cmpEl.style.width = W + 'px'; cmpEl.hidden = false;
+      const H = cmpEl.offsetHeight, y = Math.round(Math.max(G.y, Math.min(G.y + G.ch - H, rp.y - H * 0.4)));
+      cmpEl.style.transform = `translate(${Math.round(rtl ? rc.x - 12 - W : rc.x + rc.w + 12)}px,${y}px)`;
+      cmpEl.style.setProperty('--ay', Math.max(18, Math.min(H - 18, rp.y - y)) + 'px');   // 화살표 꼭지가 표시 선을 가리키게
+    }
     const sgn = rtl ? -1 : 1, GAP = 28, PAR = 64, WIN = 2;   // 다음 카드 방향 · 카드 사이 · 패럴랙스 폭 · 앞뒤로 둘 카드 수
     // 카드는 화면 높이에 맞춰 크게 (상세 이미지까지 보게) — 폭은 높이의 ~75%, 320~520px, 가운데. 위 164px 는 숫자 · 버튼 · 제목
     const geo = () => { const st = rel(D.root), y = 164, ch = Math.max(340, st.h - y - 16), cw = Math.round(Math.max(320, Math.min(520, ch * 0.75, st.w * 0.36))), x = Math.round((st.w - cw) / 2);
@@ -359,6 +381,7 @@
     function layout(anim, kick) {   // kick: 넘긴 방향(+1 다음 · -1 이전) — 패럴랙스 시작점
       if (anim && !reduced()) track.style.transition = 'transform .52s cubic-bezier(.16,1,.3,1)'; else track.style.transition = 'none';
       track.style.transform = `translate3d(${-sgn * i * G.step}px,0,0)`;
+      cmp(anim ? 620 : 60);
       for (let k = i - WIN; k <= i + WIN; k++) if (k >= 0 && k < list.length && !cards.has(k)) mk(k);
       for (const [k, c] of cards) {
         const on = k === i; if (c.classList.contains('dk-on') && !on) setTimeout(() => { const sc = c.querySelector('.dk-sc'); if (sc) sc.scrollTop = 0; }, 560);   // 다시 오면 맨 위부터
@@ -377,7 +400,7 @@
     car.addEventListener('pointermove', (ev) => {
       if (!drag || ev.pointerId !== drag.id) return;
       const dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
-      if (!drag.on) { if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return; if (Math.abs(dy) >= Math.abs(dx)) { drag = null; return; } drag.on = true; moved = true; car.setPointerCapture(ev.pointerId); car.classList.add('dk-drag'); }
+      if (!drag.on) { if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return; if (Math.abs(dy) >= Math.abs(dx)) { drag = null; return; } drag.on = true; moved = true; cmpEl.hidden = true; car.setPointerCapture(ev.pointerId); car.classList.add('dk-drag'); }
       const edge = (sgn * dx > 0 && i === 0) || (sgn * dx < 0 && i === list.length - 1), ddx = edge ? dx * 0.3 : dx;   // 끝에서는 덜 끌림
       track.style.transition = 'none'; track.style.transform = `translate3d(${-sgn * i * G.step + ddx}px,0,0)`;
       parallax(-ddx * 0.22, false);   // 끄는 동안 내용은 덜 따라옴
@@ -461,7 +484,7 @@
         ps.forEach((p, k) => { const s = document.createElement('s'); if (k === c._pi) s.className = 'on'; s.style.top = (Math.min(1, topIn(sc, p) / H) * 100).toFixed(2) + '%'; rail.appendChild(s); });
       };
       c._upd = upd;
-      sc.addEventListener('scroll', upd, { passive: true }); setTimeout(upd, 60); c.querySelectorAll('img').forEach((im) => im.addEventListener('load', upd, { once: true }));
+      sc.addEventListener('scroll', () => { upd(); if (c === el) cmp(); }, { passive: true }); setTimeout(upd, 60); c.querySelectorAll('img').forEach((im) => im.addEventListener('load', upd, { once: true }));
     }
     // 문제 보기: 카드가 가운데 오면 첫 문제로 가서 멈춤 (그 위 이미지가 다 불러와져야 자리가 맞다). 다음 문제 버튼 · N 키로 차례로
     const probs = (c) => [...c.querySelectorAll('.dk-pb, .dk-bad')];
@@ -480,6 +503,7 @@
           const y = p.classList.contains('dk-bad') ? topIn(sc, p) - 64 : topIn(sc, hot) - 12;   // 큰 글자(표시 위)까지 보이게
           sc.scrollTo({ top: Math.max(0, y - sc.clientHeight * 0.12), behavior: reduced() ? 'auto' : 'smooth' });
           if (c._upd) setTimeout(c._upd, 400);
+          cmp(); setTimeout(() => cmp(), 520);
         }, upto.length ? 560 : 0));
     }
     function scrollBy(page, px) {   // ↓ · ↑ 조금, 스페이스 · Page Down 한 화면
@@ -495,7 +519,7 @@
       if ((k === 'n' || k === 'N') && el && el.classList.contains('dk-prob')) { ev.preventDefault(); seek(el, (el._pi || 0) + 1); return; }
       if (k === 'ArrowRight') { ev.preventDefault(); go(rtl ? -1 : 1); } else if (k === 'ArrowLeft') { ev.preventDefault(); go(rtl ? 1 : -1); } else if (k === 'Escape' && all) { ev.preventDefault(); leave(); }
     }
-    function onResize() { if (!alive) return; place(); for (const [k, c] of cards) { c.style.left = cardLeft(k) + 'px'; c.style.width = G.cw + 'px'; c.querySelector('.dk-ph').style.height = G.ch + 'px'; } layout(false); }
+    function onResize() { if (!alive) return; cmp(200); place(); for (const [k, c] of cards) { c.style.left = cardLeft(k) + 'px'; c.style.width = G.cw + 'px'; c.querySelector('.dk-ph').style.height = G.ch + 'px'; } layout(false); }
     function leave() {
       if (!alive) return;
       alive = false; document.removeEventListener('keydown', key); removeEventListener('resize', onResize);
