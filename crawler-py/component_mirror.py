@@ -446,6 +446,7 @@ def stitch_orphans(built: dict) -> int:
                 if img_only and abs(t["component_dom_index"] - s["component_dom_index"]) <= 2:
                     s = dict(s)
                     s["media"] = t["media"]
+                    s["source_keys"] = list(dict.fromkeys(s.get("source_keys", []) + t.get("source_keys", [])))
                     for k in ("compare", "stacked", "text_overlay", "award_list"):   # 비교·이어 붙은 히어로·텍스트 오버레이 정보도 함께 옮긴다
                         if t.get(k):
                             s[k] = t[k]
@@ -504,6 +505,7 @@ def to_mirror_format(built: dict, product_title: str = "") -> dict:
             "media": s["media"],
             "component_id": s["component_id"],
             "component_dom_index": s["component_dom_index"],
+            **({"source_keys": s["source_keys"]} if s.get("source_keys") else {}),
             "layout_type": s["layout_type"],
             "columns": s["columns"],
             "column_count": s["columns"],
@@ -589,6 +591,7 @@ def merge_stacked_heroes(built: dict, component_data: list) -> int:
         if j - i >= 2:
             group = secs[i:j]
             m = dict(group[0])
+            m["source_keys"] = list(dict.fromkeys(k for sec in group for k in sec.get("source_keys", [])))
             seen = set()
             m["media"] = [x for g in group for x in g["media"] if not (x["pc_url"] in seen or seen.add(x["pc_url"]))]
             for f in ("eyebrow", "headline", "body", "disclaimer"):
@@ -610,6 +613,11 @@ def merge_stacked_heroes(built: dict, component_data: list) -> int:
 def build_from_components(component_data: list, product_title: str = "", origin: str = _LG_ORIGIN) -> dict:
     """엔드투엔드: components.json → mirror 스키마 (그룹핑·컬럼·노출조건 적용)."""
     built = build_component_sections(component_data, origin)
+    source_keys = {(c.get("component_id"), c.get("dom_index")): c.get("source_key") for c in component_data}
+    for section in built["sections"]:
+        key = source_keys.get((section.get("component_id"), section.get("component_dom_index")))
+        if key:
+            section["source_keys"] = [key]
     merge_stacked_heroes(built, component_data)
     stitch_orphans(built)
     keep_image_only_heroes(built)

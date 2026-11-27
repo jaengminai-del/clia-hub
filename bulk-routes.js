@@ -300,6 +300,9 @@ router.post('/api/v1/bulk/build', async (req, res) => {
       if (empty.has(row) && sku && sku.length <= 100 && !/[\x00-\x1f]/.test(sku)) skus.push({ row, sku });
     }
   }
+  if (bulkJobs.skuConflict({ descCol, skuCol, skus })) {
+    return res.status(400).json({ error: 'SKU and PDP description must use different columns', code: 'sku_description_conflict' });
+  }
   const email = b.notify && b.notify.email ? String(b.notify.email).trim() : '';
   if (email && !bulkJobs.emailOk(email)) return res.status(400).json({ error: 'email address not allowed', code: 'bad_email' });
   const base = `${req.get('x-forwarded-proto') || req.protocol}://${req.get('host')}`;
@@ -357,14 +360,15 @@ router.get('/api/v1/bulk/jobs/:job', async (req, res) => {
 });
 
 // 중단 (실수로 내보내기를 눌렀을 때) — 진행 중일 때만
-// 벌크 Check 버튼 (2026-11-26): { rows: [행…] (한 제품), action: 'ok' | 'remove' | 'retry', by }
+// 벌크 Check 버튼 (2026-11-26): { rows: [행…], action: 'ok' | 'remove' | 'retry', by, override, reviewed (ok: row → hash/contentDigest) }
 router.post('/api/v1/bulk/jobs/:job/check', async (req, res) => {
   const j = await bulkJobs.getJob(req.params.job);
   if (!j) return res.status(404).json({ error: 'job not found' });
   const b = req.body || {};
-  const rows = (Array.isArray(b.rows) ? b.rows : [b.row]).map((x) => parseInt(x, 10)).filter((x) => x >= 1).slice(0, 50);
-  const r = await bulkJobs.checkAction(j, rows, String(b.action || ''), b.by).catch((e) => ({ error: e.message, status: 500 }));
-  if (r.error) return res.status(r.status || 400).json({ error: r.error });
+  // 'ok' 은 준비된 것을 한 번에 확인 (몇백 행) · 나머지는 한 제품씩
+  const rows = (Array.isArray(b.rows) ? b.rows : [b.row]).map((x) => parseInt(x, 10)).filter((x) => x >= 1).slice(0, b.action === 'ok' ? 5000 : 50);
+  const r = await bulkJobs.checkAction(j, rows, String(b.action || ''), b.by, !!b.override, b.reviewed).catch((e) => ({ error: e.message, status: 500 }));
+  if (r.error) return res.status(r.status || 400).json({ error: r.error, code: r.code });
   res.json(bulkJobs.jobView(j));
 });
 
@@ -401,22 +405,35 @@ async function resultFile(j) {
 }
 
 // 한 행의 설명 칸 (2026-11-24): 벌크 화면에서 행을 눌렀을 때 '엑셀에 들어간 설명' 미리보기
+// Bulk artifacts are private to the gated endpoints, including on the root static mount.
+function protectBulkFiles(req, res, next) {
+  let pathname;
+  try { pathname = path.posix.normalize('/' + decodeURIComponent(req.path).replace(/^\/+/, '')).toLowerCase(); }
+  catch (_) { return res.sendStatus(400); }
+  if (pathname === '/media-cache/bulk' || pathname.startsWith('/media-cache/bulk/')) return res.sendStatus(404);
+  next();
+}
+router.use(protectBulkFiles);
+
 //   GET /api/v1/bulk/jobs/:job/cell?row= → { row, text }   (끝난 작업만, 그 작업이 채운 행만)
 const cellCache = new Map();   // job id → Map(row → text) — 결과 엑셀을 한 번만 읽는다 (최근 3개 작업)
 router.get('/api/v1/bulk/jobs/:job/cell', async (req, res) => {
   const j = await bulkJobs.getJob(req.params.job);
   if (!j || j.status !== 'ready') return res.status(404).json({ error: 'file not ready' });
   const row = parseInt(req.query.row, 10);
-  if (!(j.items || []).some((x) => x.row === row && x.status === 'ok')) return res.status(404).json({ error: 'row not filled by this job', code: 'not_filled' });
-  let cells = cellCache.get(j.id);
+  if (!j.check && !(j.items || []).some((x) => x.row === row && x.status === 'ok')) return res.status(404).json({ error: 'row not filled by this job', code: 'not_filled' });
+  const delivery = j.check ? await bulkJobs.deliver(j, row) : null;
+  if (delivery?.error) return res.status(delivery.status).json(delivery);
+  let cells = j.check ? null : cellCache.get(j.id);
   if (!cells) {
-    const fp = await resultFile(j);
-    if (!fp) return res.status(404).json({ error: 'file expired' });
-    const wb = await xlsx.load(fs.readFileSync(fp));
+    const fp = delivery ? null : await resultFile(j);
+    if (!delivery && !fp) return res.status(404).json({ error: 'file expired' });
+    const wb = await xlsx.load(delivery ? delivery.bytes : fs.readFileSync(fp));
     const sheet = wb.sheets.find((s) => s.path === j.sheet);
     if (!sheet) return res.status(404).json({ error: 'sheet not found' });
+    if (j.check) return res.json({ row, text: String(sheet.rows.get(row)?.get(j.descCol) || '') });
     cells = new Map(j.items.filter((x) => x.status === 'ok').map((x) => [x.row, String((sheet.rows.get(x.row) || new Map()).get(j.descCol) || '')]));
-    cellCache.set(j.id, cells);
+    if (!j.check) cellCache.set(j.id, cells);
     while (cellCache.size > 3) cellCache.delete(cellCache.keys().next().value);
   }
   res.json({ row, text: cells.get(row) || '' });
@@ -425,16 +442,10 @@ router.get('/api/v1/bulk/jobs/:job/cell', async (req, res) => {
 router.get('/api/v1/bulk/jobs/:job/file', async (req, res) => {
   const j = await bulkJobs.getJob(req.params.job);
   if (!j || j.status !== 'ready') return res.status(404).json({ error: 'file not ready' });
-  // 검토·승인 잠금 (APPROVAL_GATE=1): 엑셀은 들어간 제품이 모두 승인돼야 받을 수 있다
-  const approvals = require('./approvals');
-  if (approvals.gateOn()) {
-    const pending = approvals.pendingOf(j.items);
-    if (pending.length) return res.status(409).json({ error: 'not approved', code: 'not_approved', pending: pending.length, models: pending.slice(0, 20).map((x) => x.model || x.slug) });
-  }
-  const fp = await resultFile(j);
-  if (!fp) return res.status(404).json({ error: 'file expired' });
+  const result = await bulkJobs.deliver(j);
+  if (result.error) return res.status(result.status).json(result);
   res.set('Content-Disposition', `attachment; filename="clia-bulk.xlsx"; filename*=UTF-8''${encodeURIComponent(j.outName)}`);
-  res.type('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet').sendFile(fp);
+  res.type('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet').send(result.bytes);
 });
 
 module.exports = { router, analyze, matchRow, skuKeys, addLgUrls, wrongCountry };

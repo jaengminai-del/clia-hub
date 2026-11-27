@@ -631,7 +631,7 @@ def _mark_video(section: dict, html: str) -> str:
     return html
 
 
-def render_blocks(st: Style, blocks: list, align: str) -> list:
+def render_blocks(st: Style, blocks: list, align: str, map_sections: bool = False) -> list:
     out = []
     blocks = [dict(b, section=prefer_mobile_media(st, b["section"])) if "section" in b else b for b in blocks]
     _warm_logo_trims(st, blocks)
@@ -653,5 +653,19 @@ def render_blocks(st: Style, blocks: list, align: str) -> list:
                                                                                for d in text_v2.disclaimers_of(c)])
                                          if b["kind"] == "card_row" else text_v2.disclaimers_of(b.get("section") or {}))
         if h:
+            if map_sections:
+                source = b.get("section") or b
+                keys = [key for key in source.get("source_keys", [])
+                        if re.fullmatch(r"[A-Z]{2}\d{4}:\d+:[0-9a-f]{16}", key)]
+                cid = source.get("component_id") or ""
+                if not keys and re.fullmatch(r"[A-Z]{2}\d{4}", cid):
+                    keys = [cid]
+                if keys:
+                    # Keep all original source sections when the renderer combines them.
+                    h = re.sub(r"^(\s*<[a-z][\w-]*)", rf'\1 data-pdp-section="{" ".join(keys)}"', h, count=1)
+                if isinstance(source.get("bundle_part"), int) and source["bundle_part"] > 0:
+                    h = re.sub(r"^(\s*<[a-z][\w-]*)", rf'\1 data-pdp-part="{source["bundle_part"]}"', h, count=1)
+                if any(m.get("role") == "gallery_fallback" for m in source.get("media", [])):
+                    h = re.sub(r"^(\s*<[a-z][\w-]*)", r'\1 data-pdp-gallery="true"', h, count=1)
             out.append(h)
     return out
