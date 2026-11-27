@@ -279,19 +279,22 @@ function aiChecks(j, it, c) {
 const aiFail = (ai) => (ai || []).some((x) => !x.ok);
 // 고쳐질 수 있는 문제(이미지 · 글 누락)면 한 번 자동으로 다시 (retryLater — 작업이 끝난 뒤 뒤에서):
 // 마지막 크롤이 하루보다 오래됐으면 다시 크롤, 아니면 다시 그리기만 (방금 크롤한 것은 다시 크롤해도 같다 — 크롤 비용만 든다)
-// 자동으로 고칠 수 있는 것 (2026-11-27, PR #103 표): 사람에게 묻기 전에 최대 2번 다시.
-//   다시 그리기(draw): 슬라이스에서 못 가져온 이미지 · 요약 실패 — 슬라이스 캐시를 무시하고 새로
-//   다시 크롤(crawl): lg.com 이미지 · 글 · 스펙 표가 빠짐, 준비 실패 — 첫 번째만 다시 크롤, 그다음은 다시 그리기만
-//   Shopee 12장은 자동(앞 12장)이라 묻지 않는다. 2번 해도 안 된 것만 사람에게 (it.tries 로 '자동으로 n번 해봤음')
-const MAX_TRIES = 2;
+// 자동으로 고칠 수 있는 것 (2026-11-27, PR #103 표 · 장혁 결정): 사람에게 묻기 전에 뒤에서 다시.
+//   누락(lg.com 이미지 · 글 · 스펙 표, 준비 실패) → 크롤 시점과 상관없이 force 로 다시 크롤 — 누락이 없어질 때까지, 안전장치: 최대 3번 · 간격 0 / 30초 / 90초
+//     (운영 로그 11-25~27 크롤 41건: 중앙값 31초 · 느린 것 ~2분. 하루 전 새로 크롤한 제품도 같은 글이 계속 빠져 있어 — 크롤러가 못 읽는 구조 —
+//      더 돌려도 크롤 비용과 기다림만 늘어난다. 3번이면 일시적 실패(네트워크 · 차단)에 간격을 두고 두 번 더 기회)
+//   슬라이스에서 못 가져온 이미지 · 요약 실패 → 다시 그리기(슬라이스 캐시 무시) 최대 2번
+//   Shopee 12장은 자동(앞 12장)이라 묻지 않는다. 다 하고도 남은 것만 사람에게 (it.crawls · it.tries)
+const MAX_CRAWLS = 3, CRAWL_GAP = [0, 30 * 1000, 90 * 1000], MAX_DRAWS = 2;
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 function fixPlan(it, ai) {
-  if (it.status === 'failed') return { crawl: !it.bundle, draw: true };
+  if (it.status === 'failed') return it.bundle ? { crawl: false, draw: true } : { crawl: true, draw: false };
   const bad = (k) => (ai || []).some((x) => x.k === k && !x.ok);
   const img = (ai || []).find((x) => x.k === 'img') || {};
   const crawl = !it.bundle && ((!img.ok && img.lg > 0) || bad('txt') || bad('spec')), draw = (!img.ok && img.bad > 0) || bad('sum');
-  return crawl || draw ? { crawl, draw: true } : null;
+  return crawl || draw ? { crawl, draw } : null;
 }
-const retryable = (it, ai) => (it.tries || 0) < MAX_TRIES && !!fixPlan(it, ai);
+const retryable = (it, ai) => { const p = fixPlan(it, ai); return !!p && ((p.crawl && (it.crawls || 0) < MAX_CRAWLS) || (p.draw && (it.tries || 0) < MAX_DRAWS)); };
 // 다시 해도 못 가져온 이미지: lg.com 원본 주소를 직접 열어 본다 — lg.com 에서도 없으면(404 · 410) PDP 에 없는 게 맞다 → 문제 아님
 async function settleImg(ai) {
   const img = (ai || []).find((x) => x.k === 'img'); if (!img || img.ok || !(img.at || []).length) return ai;
@@ -382,20 +385,24 @@ function kickRetries(j) {
 }
 async function retryLater(j, it, same) {
   const cr = require('./crawler-routes'), all = [it, ...same];
-  let crawled = false;
-  while ((it.tries || 0) < MAX_TRIES) {
+  for (;;) {
     const plan = fixPlan(it, it.ai); if (!plan) break;
-    const n = (it.tries || 0) + 1; for (const x of all) x.tries = n;
+    const doCrawl = plan.crawl && (it.crawls || 0) < MAX_CRAWLS, doDraw = plan.draw && (it.tries || 0) < MAX_DRAWS;
+    if (!doCrawl && !doDraw) break;
     try {
-      if (plan.crawl && !crawled) {   // 다시 크롤은 한 번만 (같은 페이지를 두 번 크롤해도 같다)
-        crawled = true;
+      if (doCrawl) {   // 누락이면 크롤 시점과 상관없이 force 로 — 간격을 두고 (화면은 기다리지 않는다, 뒤에서)
+        const k = it.crawls || 0;
+        if (CRAWL_GAP[k]) await sleep(CRAWL_GAP[k]);
+        for (const x of all) x.crawls = k + 1;
+        await persist(j, true);
         await crawlSlot(() => cr.crawl(it.url, { force: true, base: j.base })).catch((e) => console.warn('[bulk] check auto crawl', it.slug, e.message));
         catalog.invalidate();
       }
+      if (doDraw) for (const x of all) x.tries = (it.tries || 0) + 1;
       const c = await contentSlot(() => (it.bundle ? contentForBundle(j.channel, it, it.bundleTitle, { fresh: true }) : contentFor(j.channel, it.url, { fresh: true })));
       if (c.text.length > CELL_MAX) throw new Error(`too long for one Excel cell (${c.text.length} chars)`);
       const ai = aiChecks(j, it, c);
-      if (n >= MAX_TRIES || !fixPlan({ ...it, status: 'ok' }, ai)) await settleImg(ai);   // 마지막이면 lg.com 원본도 확인
+      if (!retryable({ ...it, status: 'ok' }, ai)) await settleImg(ai);   // 마지막이면 lg.com 원본도 확인
       const texts = await loadTexts(j);
       for (const x of all) {
         texts.set(x.row, c.text);
@@ -407,7 +414,7 @@ async function retryLater(j, it, same) {
       await saveTexts(j, texts, true);
       await rewrite(j, texts);
     } catch (e) {
-      console.warn('[bulk] check auto retry', j.id, it.slug, n, e.message);
+      console.warn('[bulk] check auto retry', j.id, it.slug, it.crawls || 0, it.tries || 0, e.message);
       if (it.status === 'failed') for (const x of all) x.error = String(e.message || e).slice(0, 300);
     }
     await persist(j, true);
@@ -560,7 +567,7 @@ async function run(j) {
       const msg = String(e.message || e).slice(0, 300);
       const stage = (it.register || it.force) && !it.crawled ? 'crawl' : 'content';
       Object.assign(it, { status: 'failed', error: msg, flags: [{ code: stage, sev: 'error', msg }] });
-      if (j.check && (it.tries || 0) < MAX_TRIES) it.retrying = 1;   // 벌크 Check: 준비 실패도 작업이 끝난 뒤 자동으로 다시
+      if (j.check && retryable(it, [])) it.retrying = 1;   // 벌크 Check: 준비 실패도 작업이 끝난 뒤 자동으로 다시 크롤
     }
     persist(j);
   }));
@@ -695,4 +702,4 @@ function emailOk(e) {
   return !allow.length || allow.some((d) => String(e).toLowerCase().endsWith('@' + d) || String(e).toLowerCase().endsWith('.' + d));
 }
 
-module.exports = { countryOf, create, cancel, setNotify, getJob, jobView, resumeAll, saveUpload, readUpload, mailReady, emailOk, CRAWL_CONC, DIR, checkAction, aiChecks, _fixPlan: fixPlan, _settleImg: settleImg };
+module.exports = { countryOf, create, cancel, setNotify, getJob, jobView, resumeAll, saveUpload, readUpload, mailReady, emailOk, CRAWL_CONC, DIR, checkAction, aiChecks, _fixPlan: fixPlan, _settleImg: settleImg, _retryable: retryable };
