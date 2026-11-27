@@ -232,8 +232,7 @@ function qaOf(slug) {
   const gone = (cov.missing_images || []).filter(real).filter((x) => !dead.has(imgKey(x.image)));
   const images = gone.length + (chk.images_missing_url || 0);
   const files = gone.slice(0, 3).map((x) => String(x.image || '').split('/').pop());   // 어떤 이미지가 빠졌는지 (화면에서 마우스를 올리면 보임)
-  const srcs = gone.slice(0, 3).map((x) => String(x.image || '')).filter((u) => /^https?:\/\//.test(u));   // 벌크 Check 검토 화면: lg.com 원본 (여기선 빠짐)
-  return { images, texts, files, srcs, mirror };
+  return { images, texts, files, mirror };
 }
 
 // ── 벌크 Check (?check=1, 2026-11-26) ──
@@ -245,7 +244,7 @@ function aiChecks(j, it, c) {
   const notLoaded = m ? Math.max(0, +m[2] - +m[1]) : 0;
   const q = it.bundle ? { images: 0, texts: 0, mirror: null } : qaOf(it.slug);
   const lgImg = q.images;
-  out.push({ k: 'img', ok: !notLoaded && !lgImg, n: notLoaded + lgImg, src: q.srcs || [] });
+  out.push({ k: 'img', ok: !notLoaded && !lgImg, n: notLoaded + lgImg });
   out.push({ k: 'txt', ok: q.texts < 5, n: q.texts });   // 글 몇 줄은 캐러셀 버튼 글자 같은 오탐이 많다 — 확인 필요 규칙과 같게 5줄부터
   if (!it.bundle && /lg\.com\/th\//i.test(it.url || '')) out.push({ k: 'sum', ok: !(c && c.summaryErr) });
   if (j.channel === 'shopee') out.push({ k: 'n12', ok: true, used: c ? c.images : 0, all: c ? c.allImages : 0 });

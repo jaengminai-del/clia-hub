@@ -43,23 +43,23 @@
   const TXD = {
     en: { rmS: 'Remove', viewAll: (n) => `View all ${n}`, moreBelow: 'More below', back: '← Back', prev: 'Previous', next: 'Next', removedL: 'Removed from this Excel', fReady: 'Ready', fReview: 'Needs review', checkingAll: (n) => `AI is checking all ${n} at once`, sumT: (r, m) => `${r} ready · ${m} need${m === 1 ? 's' : ''} your review`,
       sumS: (n, s, m) => `Checked ${n} in ${s} s — now just ${m === 1 ? 'this one' : 'these ' + m}`, okIn: 'Looks fine · include',
-      retryingA: 'Retrying automatically…', onLg: 'On lg.com · missing here',
+      retryingA: 'Retrying automatically…',
       allDone: 'All checked', confirmDl: (n) => `Confirm ${n} & download` },
     th: { rmS: 'นำออก', viewAll: (n) => `ดูทั้งหมด ${n}`, moreBelow: 'ยังมีด้านล่าง', back: '← กลับ', prev: 'ก่อนหน้า', next: 'ถัดไป', removedL: 'นำออกจาก Excel นี้แล้ว', fReady: 'พร้อม', fReview: 'ต้องตรวจสอบ', checkingAll: (n) => `AI กำลังตรวจทั้ง ${n} รายการพร้อมกัน`, sumT: (r, m) => `พร้อม ${r} · ต้องตรวจสอบ ${m}`,
       sumS: (n, s, m) => `ตรวจ ${n} รายการใน ${s} วินาที — เหลือดูแค่ ${m}`, okIn: 'ดูแล้วโอเค · ใส่ไว้',
-      retryingA: 'กำลังลองใหม่อัตโนมัติ…', onLg: 'บน lg.com · ไม่มีที่นี่',
+      retryingA: 'กำลังลองใหม่อัตโนมัติ…',
       allDone: 'ตรวจครบแล้ว', confirmDl: (n) => `ยืนยัน ${n} และดาวน์โหลด` },
     ko: { rmS: '빼기', viewAll: (n) => `전체 보기 ${n}`, moreBelow: '아래에 더 있음', back: '← 돌아가기', prev: '이전', next: '다음', removedL: '이번 엑셀에서 뺌', fReady: '준비됨', fReview: '검토 필요', checkingAll: (n) => `AI가 ${n}개를 한꺼번에 확인 중`, sumT: (r, m) => `${r}개 준비됨 · ${m}개 검토 필요`,
       sumS: (n, s, m) => `${n}개를 ${s}초에 확인 — 이제 ${m}개만 보면 돼요`, okIn: '괜찮음 · 포함',
-      retryingA: '자동으로 다시 시도 중…', onLg: 'lg.com 원본 · 여기선 빠짐',
+      retryingA: '자동으로 다시 시도 중…',
       allDone: '모두 확인함', confirmDl: (n) => `${n}개 확인하고 받기` },
     de: { rmS: 'Entfernen', viewAll: (n) => `Alle ${n} ansehen`, moreBelow: 'Weiter unten', back: '← Zurück', prev: 'Zurück', next: 'Weiter', removedL: 'Aus dieser Excel entfernt', fReady: 'Bereit', fReview: 'Zu prüfen', checkingAll: (n) => `KI prüft alle ${n} gleichzeitig`, sumT: (r, m) => `${r} bereit · ${m} zu prüfen`,
       sumS: (n, s, m) => `${n} in ${s} s geprüft — jetzt nur noch ${m}`, okIn: 'Passt · übernehmen',
-      retryingA: 'Wird automatisch erneut versucht…', onLg: 'Auf lg.com · fehlt hier',
+      retryingA: 'Wird automatisch erneut versucht…',
       allDone: 'Alles geprüft', confirmDl: (n) => `${n} bestätigen & herunterladen` },
     ar: { rmS: 'إزالة', viewAll: (n) => `عرض الكل ${n}`, moreBelow: 'المزيد بالأسفل', back: 'رجوع →', prev: 'السابق', next: 'التالي', removedL: 'أُزيل من ملف Excel هذا', fReady: 'جاهز', fReview: 'بحاجة إلى مراجعة', checkingAll: (n) => `الذكاء الاصطناعي يفحص جميع ${n} معًا`, sumT: (r, m) => `${r} جاهز · ${m} بحاجة إلى مراجعتك`,
       sumS: (n, s, m) => `تم فحص ${n} في ${s} ث — تبقّى ${m} فقط`, okIn: 'يبدو جيدًا · تضمين',
-      retryingA: 'جارٍ إعادة المحاولة تلقائيًا…', onLg: 'على lg.com · مفقود هنا',
+      retryingA: 'جارٍ إعادة المحاولة تلقائيًا…',
       allDone: 'تم فحص الكل', confirmDl: (n) => `تأكيد ${n} والتنزيل` },
   };
   const tOf = (L) => Object.assign({}, TX.en, TXD.en, TX[L] || {}, TXD[L] || {});
@@ -292,32 +292,55 @@
     if (all) document.getElementById('ckSteps').insertAdjacentHTML('afterbegin', `<button class="ck-sback" id="dkBack" type="button">${e(T.back)}</button>`);
     C.dk = { root: document.getElementById('dk'), els: new Map(), side: new Map(), pile: [], minis: [], q: [], readyN: 0, shown: 0 };
     const D = C.dk;
-    const strip = document.createElement('div'); strip.className = 'dk-strip'; D.root.appendChild(strip);
+    // 위: 'n / N' + 진행 막대 · 그 아래 고정 버튼 셋 · 카드 바로 위 제목(모델 / 상태 · 이유) · 오른쪽엔 다음 카드들이 어둡게 줄 서 있음
+    D.root.insertAdjacentHTML('beforeend', '<div class="dk-top"><div class="dk-count"><b id="dkI"></b><span id="dkNn"></span></div><div class="dk-prog"><i id="dkProg"></i></div></div><div class="dk-queue" id="dkQ"></div><div class="dk-cap" id="dkCap"></div><div class="dk-rest" id="dkRest"></div>');
+    const cap = document.getElementById('dkCap'), queue = document.getElementById('dkQ'), rest = document.getElementById('dkRest');
     D.root.insertAdjacentHTML('beforeend', `<button class="dk-side dk-prev" id="dkPrev" type="button">${rtl ? e(T.next) + ' ‹' : '‹ ' + e(T.prev)}</button><button class="dk-side dk-next" id="dkNext" type="button">${rtl ? '› ' + e(T.prev) : e(T.next) + ' ›'}</button>
       <div class="dk-bar"><button class="dk-act" data-a="remove" type="button">${e(T.rmS)}</button><button class="dk-act" data-a="retry" type="button">${e(T.redo)}</button><button class="dk-act" data-a="ok" type="button">${e(T.okIn)}</button></div>`);
     const prevB = document.getElementById('dkPrev'), nextB = document.getElementById('dkNext');   // 왼쪽 · 오른쪽 (아랍어는 왼쪽이 다음)
     prevB.onclick = () => go(rtl ? 1 : -1); nextB.onclick = () => go(rtl ? -1 : 1);
     const acts = [...D.root.querySelectorAll('.dk-act')];
-    // 카드는 화면 높이에 맞춰 크게 (상세 이미지까지 보게) — 폭은 높이의 ~75%, 320~520px, 가운데. 아래 72px 는 버튼 줄
-    const geo = () => { const st = rel(D.root), y = 108, ch = Math.max(340, st.h - y - 84), cw = Math.round(Math.max(320, Math.min(520, ch * 0.75, st.w * 0.4))), x = Math.round((st.w - cw) / 2);
-      return { x, y, ch, cw }; };
+    // 카드는 화면 높이에 맞춰 크게 (상세 이미지까지 보게) — 폭은 높이의 ~75%, 320~520px, 가운데. 위 164px 는 숫자 · 버튼 · 제목
+    const geo = () => { const st = rel(D.root), y = 164, ch = Math.max(340, st.h - y - 16), cw = Math.round(Math.max(320, Math.min(520, ch * 0.75, st.w * 0.36))), x = Math.round((st.w - cw) / 2);
+      return { x, y, ch, cw, w: st.w }; };
+    // 줄 서 있는 다음 카드: 가운데 카드 뒤에서 오른쪽으로 22px 씩 삐져나오고, 뒤로 갈수록 조금 작게
+    const SL = 22, MAXG = 6;
+    const slot = (k, g) => { const sc = 1 - 0.04 * k; return { x: rtl ? g.x - SL * k : g.x + g.cw + SL * k - g.cw * sc, y: g.y + g.ch * (1 - sc) / 2, s: sc }; };   // 아랍어는 왼쪽(다음 쪽)으로
+    const ghosts = new Map();   // list 번호 → 어두운 카드
+    function drawQueue(g, enter) {
+      const want = new Set(); for (let k = 1; k <= MAXG && i + k < list.length; k++) want.add(i + k);
+      for (const [n, d] of ghosts) if (!want.has(n)) { d.remove(); ghosts.delete(n); }
+      for (const n of want) {
+        const k = n - i; let d = ghosts.get(n);
+        if (!d) {
+          d = document.createElement('div'); d.className = 'dk-ghost'; d.style.width = g.cw + 'px'; d.style.height = g.ch + 'px';
+          const src = smallG((((list[n][0] || {}).store || {}).gallery || [])[0] || ''); if (src) d.innerHTML = `<img src="${e(src)}" alt="" decoding="async">`;
+          queue.appendChild(d); ghosts.set(n, d);
+          const from = enter && enter[n] != null ? enter[n] : k + 1;
+          d.style.transition = 'none'; d.style.transform = T3(slot(from, g)); d.style.opacity = from > k ? 0 : 1; void d.offsetWidth; d.style.transition = '';
+        }
+        d.style.zIndex = 20 - k; d.style.transform = T3(slot(k, g)); d.style.opacity = 1;
+      }
+      const left = list.length - 1 - i, vis = Math.min(MAXG, left), gap = SL * vis + 22;
+      if (rtl) { prevB.style.right = (g.w - g.x + gap) + 'px'; nextB.style.left = (g.x + g.cw + 24) + 'px'; rest.style.left = ''; rest.style.right = (g.w - g.x + gap) + 'px'; }
+      else { nextB.style.left = (g.x + g.cw + gap) + 'px'; prevB.style.right = (g.w - g.x + 24) + 'px'; rest.style.right = ''; rest.style.left = (g.x + g.cw + gap) + 'px'; }
+      rest.textContent = left > MAXG ? '+' + (left - MAXG) : ''; rest.style.top = (g.y + g.ch / 2 + 34) + 'px';
+    }
     const stateOf = (u) => (isRemoved(u) ? 'rm' : busy(u) ? 'busy' : passed(u) || isOk(u) ? 'ok' : 'review');
     const label = { rm: T.removedL, busy: T.redoing, ok: T.fReady, review: T.fReview };
     function panel() {
       const u = list[i], it = u[0], g = geo(), s = stateOf(u), bad = aiRows(u).filter((x) => !x.ok);
-      const img = aiRows(u).find((x) => x.k === 'img' && !x.ok), srcs = s === 'review' && img && img.src ? img.src : [];
       D.root.dataset.st = s;   // 화면 배경 · 카드 테두리가 상태를 따른다
-      strip.innerHTML = `<span class="dk-chip">${s === 'ok' ? CK : ''}${e(label[s])}</span><b>${e(it.model || '')}</b>
-        ${s === 'review' && bad.length ? `<span class="dk-why">${e(bad.map(why).join(' · '))}</span>` : ''}
-        ${srcs.map((x) => `<img class="dk-lg" src="${e(x)}" alt="" title="${e(T.onLg)}" loading="lazy">`).join('')}`;
-      const mid = g.y + g.ch / 2 - 22;
-      prevB.style.top = nextB.style.top = mid + 'px';
-      prevB.style.right = (rel(D.root).w - g.x + 24) + 'px'; nextB.style.left = (g.x + g.cw + 24) + 'px';
+      document.getElementById('dkI').textContent = i + 1; document.getElementById('dkNn').textContent = ' / ' + list.length;
+      document.getElementById('dkProg').style.width = ((i + 1) / list.length * 100) + '%';
+      const line = s === 'review' ? T.fReview + (bad.length ? ' — ' + bad.map(why).join(' · ') : '') : label[s];   // 제목 아래 한 줄 (글자만)
+      cap.innerHTML = `<b>${e(it.model || '')}</b><span>${s === 'ok' ? CK : ''}${e(line)}</span>`;
+      cap.style.left = g.x + 'px'; cap.style.width = g.cw + 'px';
+      prevB.style.top = nextB.style.top = (g.y + g.ch / 2 - 22) + 'px';
       (rtl ? nextB : prevB).disabled = !i; (rtl ? prevB : nextB).disabled = i >= list.length - 1;
       // 버튼 셋은 늘 같은 자리 — 상태에 맞지 않는 것은 흐리게
       const can = { remove: s !== 'rm' && s !== 'busy', retry: s !== 'rm' && s !== 'busy', ok: s === 'review' && it.status === 'ok' };
       acts.forEach((b) => { b.disabled = !can[b.dataset.a]; });
-      header(core, `${i + 1} / ${list.length}`, '');
     }
     acts.forEach((b) => { b.onclick = async () => {
       const u = list[i], a = b.dataset.a;
@@ -349,13 +372,20 @@
         })();
       }
     }
-    function show(dir) {   // 한 장씩: 나가는 카드는 짧게 가속하며, 들어오는 카드는 길게 안착 (HyperFrames 규칙). 새 카드라 늘 맨 위부터
-      const g = geo(), u = list[i], old = el;
+    function show(dir) {   // 다음: 줄 서 있던 첫 카드가 가운데로 나오며 밝아짐(하이라이트) · 지금 카드는 왼쪽으로 빠짐. 이전: 반대로. 새 카드라 늘 맨 위부터
+      const g = geo(), u = list[i], old = el, gh = ghosts.get(i);
       el = cardEl(core, u); el.style.zIndex = 30; fullCard(el, g);
-      const dx = (rtl ? -1 : 1) * 90 * dir;
-      el._pos = { x: g.x + dx, y: g.y, s: 1 };
-      moveTo(el, { x: g.x, y: g.y, s: 1 }, dir ? 360 : 0, EZ.out, { from: { opacity: dir ? 0 : 1 }, to: { opacity: 1 } });
-      if (old) moveTo(old, { x: g.x - dx, y: g.y, s: 1 }, 180, EZ.p3in, { to: { opacity: 0 }, keep: true }).then(() => old.remove());
+      const fwd = dir > 0;
+      if (gh) { gh.remove(); ghosts.delete(i); }
+      const away = rtl ? 90 : -90;   // 지나간 쪽 (아랍어는 오른쪽)
+      el._pos = dir === 0 ? { x: g.x, y: g.y, s: 1 } : fwd ? slot(1, g) : { x: g.x + away, y: g.y, s: 1 };
+      if (dir) { el.classList.add('dk-dim'); requestAnimationFrame(() => el.classList.remove('dk-dim')); }
+      moveTo(el, { x: g.x, y: g.y, s: 1 }, dir ? 420 : 0, EZ.out, { from: { opacity: fwd || !dir ? 1 : 0 }, to: { opacity: 1 } });
+      if (old) {
+        if (fwd) moveTo(old, { x: g.x + away, y: g.y, s: 1 }, 200, EZ.p3in, { to: { opacity: 0 }, keep: true }).then(() => old.remove());
+        else { old.classList.add('dk-dim'); old.style.zIndex = 25; moveTo(old, slot(1, g), 300, EZ.p3out).then(() => old.remove()); }
+      }
+      drawQueue(g, !fwd && dir ? { [i + 1]: 1 } : null);
       panel();
       for (const v of [list[i + 1], list[i - 1]]) if (v) for (const src of (v[0].imgs || []).slice(0, 2).map(small)) { const im = new Image(); im.src = src; }   // 다음 장 미리
     }
