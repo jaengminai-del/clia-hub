@@ -163,7 +163,7 @@ async function post(p, body, timeoutMs) {
   if (!r.ok) throw new Error(j.error || j.detail || `HTTP ${r.status} ${p}`);
   return j;
 }
-async function contentFor(channel, url) {
+async function contentFor(channel, url, opt = {}) {   // opt.fresh: 슬라이스를 새로 그림(캐시 무시 — 자동 다시 하기)
   const listing = channel === 'lazada';
   // PDP 요약(태국어)은 태국 제품만 — 싱가포르 등은 요약 없이 이미지만 (2026-11-23). Shopee 도 (2026-11-24, 글로 이미지 주소 위에)
   const summaryP = /lg\.com\/th\//i.test(url) ? post('/api/v1/pdp-summary', { url }, 7 * 60 * 1000).catch((e) => ({ error: e.message })) : null;
@@ -171,7 +171,7 @@ async function contentFor(channel, url) {
   const ed = require('./edits').getEdit(require('./crawler-routes').slugify(url), channel);
   const g = ed ? { html: ed.html } : await post('/api/ebay-generate', { url, medium: 'shopee_lazada', listing }, 5 * 60 * 1000);
   if (!g.html) throw new Error('generate returned no HTML');
-  const sl = await post('/api/v1/slice-html', { html: g.html, medium: 'shopee_lazada' }, 12 * 60 * 1000);
+  const sl = await post('/api/v1/slice-html', { html: g.html, medium: 'shopee_lazada', ...(opt.fresh ? { rev: 'r' + Date.now().toString(36) } : {}) }, 12 * 60 * 1000);
   const sm = await summaryP;
   if (channel === 'shopee') {
     // Shopee 설명은 HTML 을 받지 않는다 → Promotion(상품 설명 정보) · 요약(태국)은 태그 없는 글로 위, 그 아래 이미지 주소 (한 줄에 하나, 앞 12장),
@@ -198,7 +198,7 @@ const python = () => process.env.CRAWLER_PYTHON || (fs.existsSync(path.join(PY_D
 const runPy = (args, timeoutMs) => new Promise((resolve, reject) => require('child_process').execFile(python(), args, { cwd: PY_DIR, timeout: timeoutMs },
   (err, out, stderr) => (err ? reject(new Error(String(stderr || err.message).trim().split('\n').pop().slice(0, 300))) : resolve(String(out)))));
 const bundleKey = (it) => crypto.createHash('sha1').update(it.bundle.map((x) => x.slug).join('+')).digest('hex').slice(0, 16);
-async function contentForBundle(channel, it, title) {
+async function contentForBundle(channel, it, title, opt = {}) {
   const dir = path.join(DIR, 'bundles', bundleKey(it));
   fs.mkdirSync(dir, { recursive: true });
   const spec = { title: title || it.model, components: it.bundle.map((x) => ({ model: x.model || '', url: x.url, slug: x.slug })) };
@@ -206,7 +206,7 @@ async function contentForBundle(channel, it, title) {
   await runPy(['bundle_pto.py', 'combine', dir, path.join(dir, 'spec.json')], 60 * 1000);
   await runPy(['ebay_builder.py', dir, '--fragment', '--medium', 'shopee_lazada', '-o', 'content.html'], 3 * 60 * 1000);
   const html = fs.readFileSync(path.join(dir, 'content.html'), 'utf8');
-  const sl = await post('/api/v1/slice-html', { html, medium: 'shopee_lazada' }, 12 * 60 * 1000);
+  const sl = await post('/api/v1/slice-html', { html, medium: 'shopee_lazada', ...(opt.fresh ? { rev: 'r' + Date.now().toString(36) } : {}) }, 12 * 60 * 1000);
   if (channel === 'shopee') {
     const urls = (sl.urls || []).slice(0, SHOPEE_MAX_IMAGES);
     if (!urls.length) throw new Error('no images');
@@ -238,7 +238,9 @@ function qaOf(slug) {
   // 벌크 Check 검토 화면이 크게 보여 줄 근거: 빠진 lg.com 원본 그림 주소(최대 3) · 빠진 글(최대 5줄)
   const src = gone.slice(0, 3).map((x) => fullImg(dir, x.image)).filter(Boolean);
   const lines = tx.slice(0, 5).map((x) => String(x.text || '').slice(0, 160));
-  return { images, texts, files, mirror, src, lines };
+  // lg.com 페이지에 스펙 표(PD0008)가 있는데 우리 결과에 빠졌는지 — 검사 기록이 없는 예전 크롤은 모름(있다고 봄, 다시 크롤하면 알게 됨)
+  const specLg = !qa.coverage || (cov.missing_texts || []).some((x) => x.component_id === 'PD0008');
+  return { images, texts, files, mirror, src, lines, specLg };
 }
 
 // 검사 기록의 이미지 주소는 끝 120자만 남아 있을 수 있다 → 크롤한 원문(pc.html)에서 그 끝으로 끝나는 전체 주소를 찾는다
@@ -271,13 +273,36 @@ function aiChecks(j, it, c) {
   if (!it.bundle && /lg\.com\/th\//i.test(it.url || '')) out.push({ k: 'sum', ok: !(c && c.summaryErr) });
   if (j.channel === 'shopee') out.push({ k: 'n12', ok: true, used: c ? c.images : 0, all: c ? c.allImages : 0 });
   const specs = q.mirror ? (q.mirror.sections || []).reduce((n, s) => n + ((s.specs || []).length), 0) : (it.bundle ? 1 : 0);
-  out.push({ k: 'spec', ok: specs > 0 });
+  out.push({ k: 'spec', ok: specs > 0 || !q.specLg });   // lg.com 에도 스펙 표가 없으면 문제 아님 (2026-11-27)
   return out;
 }
 const aiFail = (ai) => (ai || []).some((x) => !x.ok);
 // 고쳐질 수 있는 문제(이미지 · 글 누락)면 한 번 자동으로 다시 (retryLater — 작업이 끝난 뒤 뒤에서):
 // 마지막 크롤이 하루보다 오래됐으면 다시 크롤, 아니면 다시 그리기만 (방금 크롤한 것은 다시 크롤해도 같다 — 크롤 비용만 든다)
-const retryable = (it, ai) => !it.bundle && !it.retried && ai.some((x) => !x.ok && (x.k === 'img' || x.k === 'txt'));
+// 자동으로 고칠 수 있는 것 (2026-11-27, PR #103 표): 사람에게 묻기 전에 최대 2번 다시.
+//   다시 그리기(draw): 슬라이스에서 못 가져온 이미지 · 요약 실패 — 슬라이스 캐시를 무시하고 새로
+//   다시 크롤(crawl): lg.com 이미지 · 글 · 스펙 표가 빠짐, 준비 실패 — 첫 번째만 다시 크롤, 그다음은 다시 그리기만
+//   Shopee 12장은 자동(앞 12장)이라 묻지 않는다. 2번 해도 안 된 것만 사람에게 (it.tries 로 '자동으로 n번 해봤음')
+const MAX_TRIES = 2;
+function fixPlan(it, ai) {
+  if (it.status === 'failed') return { crawl: !it.bundle, draw: true };
+  const bad = (k) => (ai || []).some((x) => x.k === k && !x.ok);
+  const img = (ai || []).find((x) => x.k === 'img') || {};
+  const crawl = !it.bundle && ((!img.ok && img.lg > 0) || bad('txt') || bad('spec')), draw = (!img.ok && img.bad > 0) || bad('sum');
+  return crawl || draw ? { crawl, draw: true } : null;
+}
+const retryable = (it, ai) => (it.tries || 0) < MAX_TRIES && !!fixPlan(it, ai);
+// 다시 해도 못 가져온 이미지: lg.com 원본 주소를 직접 열어 본다 — lg.com 에서도 없으면(404 · 410) PDP 에 없는 게 맞다 → 문제 아님
+async function settleImg(ai) {
+  const img = (ai || []).find((x) => x.k === 'img'); if (!img || img.ok || !(img.at || []).length) return ai;
+  await Promise.all(img.at.map(async (b) => {
+    if (!/^https:\/\/www\.lg\.com\//.test(b.src || '')) return;
+    try { const r = await fetch(b.src, { method: 'HEAD', signal: AbortSignal.timeout(8000), headers: { 'User-Agent': 'Mozilla/5.0', Referer: 'https://www.lg.com/' } }); if (r.status === 404 || r.status === 410) b.lgGone = 1; } catch (_) {}
+  }));
+  const left = img.at.filter((b) => !b.lgGone).length;
+  img.goneOnLg = img.at.length - left; img.bad = left; img.n = left + (img.lg || 0); img.ok = !img.n;
+  return ai;
+}
 // 작업 결과 글(행 → 설명 칸)을 남겨 둔다 — Check 에서 뺀 행만 빼고 엑셀을 다시 만들 때 (로컬 + 버킷)
 const textsFile = (j) => path.join(DIR, j.upload, `texts-${j.id}.json`);
 async function saveTexts(j, texts, bucket) {
@@ -348,7 +373,7 @@ function rewrite(j, texts) {
 const retryingJobs = new Set();
 function kickRetries(j) {
   if (!j.check || retryingJobs.has(j.id)) return;
-  const its = j.items.filter((x) => x.retrying && x.status === 'ok');
+  const its = j.items.filter((x) => x.retrying && (x.status === 'ok' || x.status === 'failed'));
   if (!its.length) return;
   retryingJobs.add(j.id);
   const by = new Map(); for (const it of its) { const k = it.slug || it.url; if (!by.has(k)) by.set(k, []); by.get(k).push(it); }
@@ -357,25 +382,36 @@ function kickRetries(j) {
 }
 async function retryLater(j, it, same) {
   const cr = require('./crawler-routes'), all = [it, ...same];
-  try {
-    it.retried = 1;
-    const src = readJson(path.join(OUT_DIR(), it.slug, 'source.json')) || {};
-    if (Date.now() / 1000 - (Number(src.crawled_at) || 0) > 24 * 3600) {   // 방금 크롤한 것은 다시 크롤해도 같다 — 다시 그리기만
-      await crawlSlot(() => cr.crawl(it.url, { force: true, base: j.base })).catch((e) => console.warn('[bulk] check retry crawl', it.slug, e.message));
-      catalog.invalidate();
+  let crawled = false;
+  while ((it.tries || 0) < MAX_TRIES) {
+    const plan = fixPlan(it, it.ai); if (!plan) break;
+    const n = (it.tries || 0) + 1; for (const x of all) x.tries = n;
+    try {
+      if (plan.crawl && !crawled) {   // 다시 크롤은 한 번만 (같은 페이지를 두 번 크롤해도 같다)
+        crawled = true;
+        await crawlSlot(() => cr.crawl(it.url, { force: true, base: j.base })).catch((e) => console.warn('[bulk] check auto crawl', it.slug, e.message));
+        catalog.invalidate();
+      }
+      const c = await contentSlot(() => (it.bundle ? contentForBundle(j.channel, it, it.bundleTitle, { fresh: true }) : contentFor(j.channel, it.url, { fresh: true })));
+      if (c.text.length > CELL_MAX) throw new Error(`too long for one Excel cell (${c.text.length} chars)`);
+      const ai = aiChecks(j, it, c);
+      if (n >= MAX_TRIES || !fixPlan({ ...it, status: 'ok' }, ai)) await settleImg(ai);   // 마지막이면 lg.com 원본도 확인
+      const texts = await loadTexts(j);
+      for (const x of all) {
+        texts.set(x.row, c.text);
+        Object.assign(x, { status: 'ok', error: '', images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: c.summaryErr || '',
+          imgs: c.urls || [], hash: c.hash || '', ai: JSON.parse(JSON.stringify(ai)) });
+        x.flags = flagsFor(j, x, c);
+        require('./slice-preview').ensure(x.imgs).catch(() => {});
+      }
+      await saveTexts(j, texts, true);
+      await rewrite(j, texts);
+    } catch (e) {
+      console.warn('[bulk] check auto retry', j.id, it.slug, n, e.message);
+      if (it.status === 'failed') for (const x of all) x.error = String(e.message || e).slice(0, 300);
     }
-    const c = await contentSlot(() => contentFor(j.channel, it.url));
-    const texts = await loadTexts(j);
-    for (const x of all) {
-      texts.set(x.row, c.text);
-      Object.assign(x, { retried: 1, images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: c.summaryErr || '',
-        imgs: c.urls || [], hash: c.hash || '', ai: aiChecks(j, x, c) });
-      x.flags = flagsFor(j, x, c);
-      require('./slice-preview').ensure(x.imgs).catch(() => {});
-    }
-    await saveTexts(j, texts, true);
-    await rewrite(j, texts);
-  } catch (e) { console.warn('[bulk] check retry', j.id, it.slug, e.message); }
+    await persist(j, true);
+  }
   for (const x of all) delete x.retrying;
   await persist(j, true);
 }
@@ -524,6 +560,7 @@ async function run(j) {
       const msg = String(e.message || e).slice(0, 300);
       const stage = (it.register || it.force) && !it.crawled ? 'crawl' : 'content';
       Object.assign(it, { status: 'failed', error: msg, flags: [{ code: stage, sev: 'error', msg }] });
+      if (j.check && (it.tries || 0) < MAX_TRIES) it.retrying = 1;   // 벌크 Check: 준비 실패도 작업이 끝난 뒤 자동으로 다시
     }
     persist(j);
   }));
@@ -658,4 +695,4 @@ function emailOk(e) {
   return !allow.length || allow.some((d) => String(e).toLowerCase().endsWith('@' + d) || String(e).toLowerCase().endsWith('.' + d));
 }
 
-module.exports = { countryOf, create, cancel, setNotify, getJob, jobView, resumeAll, saveUpload, readUpload, mailReady, emailOk, CRAWL_CONC, DIR, checkAction, aiChecks };
+module.exports = { countryOf, create, cancel, setNotify, getJob, jobView, resumeAll, saveUpload, readUpload, mailReady, emailOk, CRAWL_CONC, DIR, checkAction, aiChecks, _fixPlan: fixPlan, _settleImg: settleImg };
