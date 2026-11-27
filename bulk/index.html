@@ -435,16 +435,22 @@ button.eb { cursor: pointer; }
 .dk-box .dk-r { display: flex; gap: 8px; font-size: 13.5px; } .dk-box .dk-r i { width: 7px; height: 7px; border-radius: 50%; background: var(--clia-heritage); margin-top: 6px; flex: none; } .dk-box .dk-r small { display: block; color: var(--clia-gray-500); font-size: 12px; margin-top: 2px; }
 .dk-th { display: flex; gap: 8px; flex-wrap: wrap; } .dk-th figure { margin: 0; } .dk-th img { width: 132px; height: 88px; object-fit: cover; border-radius: 8px; border: 1px solid var(--clia-gray-200); background: #fff; display: block; } .dk-th figcaption { font-size: 11px; color: var(--clia-gray-500); margin-top: 4px; }
 .dk-acts { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; } .dk-acts .dk-sp { flex: 1; }
-.dk-acts .dk-txt { background: none; border: 0; color: var(--clia-gray-600); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; padding: 0 8px; height: 40px; }
+.dk-acts .dk-txt, .dk-strip .dk-txt { background: none; border: 0; color: var(--clia-gray-600); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; padding: 0 8px; height: 40px; }
 .dk-acts .dk-ink { background: var(--clia-gray-900); border-color: var(--clia-gray-900); color: #fff; }
 .dk-wait { position: absolute; left: 0; right: 0; top: 45%; text-align: center; font-size: 14px; color: var(--clia-gray-600); }
 @media (prefers-reduced-motion: reduce) { .dk-mini::before, .dk-mini.ok::after, .dk.dk-run .dk-sweep { animation: none; } }
 /* 전체 보기 (선택) — 큰 카드 한 장씩, 좌우로 넘기기 */
 .dk-rs.dk-click { cursor: pointer; transition: border-color .2s, background .2s; } .dk-rs.dk-click:hover { border-color: var(--clia-gray-500); background: rgba(38,38,38,.03); }
-.dk-back { position: absolute; top: 20px; inset-inline-start: 5%; font-size: 13px; font-weight: 600; color: var(--clia-gray-600); text-decoration: none; z-index: 5; } .dk-back:hover { color: var(--clia-gray-900); }
-.dk-nav { display: flex; align-items: center; gap: 12px; margin-top: 6px; padding-top: 14px; border-top: 1px solid var(--clia-gray-200); }
-.dk-nav .dk-pos { flex: 1; text-align: center; font-size: 14px; font-weight: 600; color: var(--clia-gray-700); font-variant-numeric: tabular-nums; }
-.dk-nav .clia-btn[disabled] { opacity: .35; }
+.ck-steps { position: relative; }
+.ck-sback { position: absolute; inset-inline-start: 20px; top: 0; bottom: 0; margin: auto 0; height: 30px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--clia-gray-200); background: #fff; font: inherit; font-size: 13px; font-weight: 600; color: var(--clia-gray-700); cursor: pointer; }
+.ck-sback:hover { border-color: var(--clia-gray-400); color: var(--clia-gray-900); }
+.dk-strip { position: absolute; left: 0; right: 0; top: 60px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; padding: 0 5%; font-size: 14px; min-height: 38px; }
+.dk-strip b { font-size: 15px; } .dk-strip .dk-why { color: var(--clia-heritage); font-size: 13px; } .dk-strip .dk-gap { width: 14px; }
+.dk-strip .clia-btn { height: 34px; } .dk-strip .dk-txt { height: 34px; font-size: 13px; border-radius: 999px; } .dk-strip .dk-txt:hover { color: var(--clia-gray-900); }
+.dk-chip { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--clia-gray-100); color: var(--clia-gray-700); } .dk-chip.dk-warn { background: rgba(165,0,52,.08); color: var(--clia-heritage); }
+.dk-side { position: absolute; height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--clia-gray-200); background: #fff; font: inherit; font-size: 14px; font-weight: 600; color: var(--clia-gray-800); cursor: pointer; box-shadow: 0 1px 2px rgba(38,38,38,.05); z-index: 5; white-space: nowrap; }
+.dk-side:hover:not([disabled]) { border-color: var(--clia-gray-500); } .dk-side[disabled] { opacity: .3; cursor: default; }
+.dk-card.dk-full .dk-mo, .dk-card.dk-full .dk-st { display: none; }
 .dk-card.dk-rm .dk-ph { opacity: .45; border-color: var(--line); box-shadow: none; } .dk-card.dk-rm .dk-st { color: var(--muted); text-decoration: line-through; }
 .dk-fin { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 26px; } .ck-done .dk-fin .clia-btn { margin-top: 0; }
 /* 전체 보기 카드: 크게 · 스크롤바 보이게 · '아래에 더 있음' (끝이면 사라짐) */
