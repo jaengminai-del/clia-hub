@@ -2,6 +2,7 @@
  * 벌크 Check(?check=1)의 왼쪽 프리뷰에만 쓴다 (bulk-check.js). 서버(bulk-jobs.js)도 galleryOf · specsOf 를 같이 쓴다.
  *
  *   CliaMarket.page(ch, { title, gallery, specs, body })  → 전체 틀 HTML. body 는 '상세' 칸에 그대로 들어간다.
+ *   CliaMarket.page(ch, { detailOnly: true, body })        → 상단 바 + '상세' 칸만 (엑셀에 들어가는 것만)
  *   CliaMarket.specsOf(mirror) · CliaMarket.galleryOf(mirror) → 크롤 데이터(mirror.json)에서 스펙 · 갤러리
  *
  * ch: 'shopee' | 'lazada'. 가격 · 별점 · 판매 수는 실제 데이터가 없어 회색 자리표시.
@@ -28,6 +29,8 @@
 
   function page(ch, o) {
     const t = tOf(ch), lz = t.cls === 'lz';
+    // detailOnly: 엑셀 설명 칸에 들어가는 것(상세)만 — 갤러리 · 제목 · 가격 · 스펙 없이 (벌크 Check 큰 카드, 2026-11-27)
+    if (o.detailOnly) return `<div class="cm ${t.cls}">${barHtml(t)}<div class="cm-dt"><h2 class="cm-bh" lang="th">${t.detail}</h2><div class="cm-body">${o.body || ''}</div></div></div>`;
     const gal = (o.gallery || []).filter(Boolean);
     const main = gal[0] ? `<img src="${esc(gal[0])}" alt="" loading="lazy">` : '<span class="cm-noimg">—</span>';
     const thumbs = gal.slice(0, 5).map((u) => `<span><img src="${esc(u)}" alt="" loading="lazy"></span>`).join('');

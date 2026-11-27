@@ -2564,7 +2564,7 @@ app.post('/api/v1/slice-html', async (req, res) => {
       + `style="width:100%;max-width:100%;height:auto;display:block;border:0;margin:0;padding:0;">`);
     const out = `<div style="max-width:${man.images[0] ? man.images[0].width : 1000}px;margin:0 auto;">\n${imgs.join('\n')}\n</div>`;
     res.json({ html: out, hash, count: man.images.length, width: man.images[0] && man.images[0].width,
-               images_loaded: man.images_loaded, urls: man.images.map((im) => `${base}/media/slices/${hash}/${im.file}`) });
+               images_loaded: man.images_loaded, broken: man.broken || null, urls: man.images.map((im) => `${base}/media/slices/${hash}/${im.file}`) });
   } catch (e) {
     console.error('/api/v1/slice-html error:', e.message);
     res.status(500).json({ error: e.message });

@@ -185,10 +185,10 @@ async function contentFor(channel, url) {
     if (!urls.length) throw new Error('no images');
     const text = head + urls.join('\n') + tail;
     return { text, images: urls.length, allImages: sl.count, summaryErr: sm && sm.error ? sm.error.slice(0, 200) : '', edited: !!ed,
-             tooLong: text.length > SHOPEE_DESC_MAX ? text.length : 0, urls, hash: sl.hash, loaded: sl.images_loaded };
+             tooLong: text.length > SHOPEE_DESC_MAX ? text.length : 0, urls, hash: sl.hash, loaded: sl.images_loaded, broken: sl.broken || null };
   }
   return { text: (sm && sm.html ? sm.html + '\n' : '') + sl.html, images: sl.count, allImages: sl.count, summaryErr: sm && sm.error ? sm.error.slice(0, 200) : '', edited: !!ed,
-           urls: sl.urls || [], hash: sl.hash, loaded: sl.images_loaded };
+           urls: sl.urls || [], hash: sl.hash, loaded: sl.images_loaded, broken: sl.broken || null };
 }
 
 // 묶음 상품 ('A + B' 행, 2026-11-23): 구성품 크롤 결과를 빌더 번들과 같은 모양으로 합쳐(crawler-py/bundle_pto.py combine)
@@ -210,9 +210,9 @@ async function contentForBundle(channel, it, title) {
   if (channel === 'shopee') {
     const urls = (sl.urls || []).slice(0, SHOPEE_MAX_IMAGES);
     if (!urls.length) throw new Error('no images');
-    return { text: urls.join('\n'), images: urls.length, allImages: sl.count, summaryErr: '', urls, hash: sl.hash, loaded: sl.images_loaded };
+    return { text: urls.join('\n'), images: urls.length, allImages: sl.count, summaryErr: '', urls, hash: sl.hash, loaded: sl.images_loaded, broken: sl.broken || null };
   }
-  return { text: sl.html, images: sl.count, allImages: sl.count, summaryErr: '', urls: sl.urls || [], hash: sl.hash, loaded: sl.images_loaded };   // 묶음은 PDP 요약 없이 (요약은 제품 하나 기준)
+  return { text: sl.html, images: sl.count, allImages: sl.count, summaryErr: '', urls: sl.urls || [], hash: sl.hash, loaded: sl.images_loaded, broken: sl.broken || null };   // 묶음은 PDP 요약 없이 (요약은 제품 하나 기준)
 }
 
 // 크롤 검사 기록(qa_report)으로 센 원문 누락 — 확인 필요(flagsFor) · 벌크 Check 의 AI 체크(aiChecks)가 같이 쓴다
@@ -229,7 +229,10 @@ function qaOf(slug) {
   // 예전에 크롤한 결과의 검사 기록에는 '크롤러가 일부러 뺀 이미지(LG 가 404·자리표시를 내줌)'가 누락으로 들어 있다 — 그것은 빼고 센다.
   // 새 크롤은 검사가 이미 제외한다. 주소가 겹쳐 있던 것은 실제로 이미지를 잃은 것이라 그대로 센다 (다시 가져오면 고쳐진다).
   const dead = new Set(((mirror && mirror._dead_media_dropped) || []).filter((d) => !DUP_DAM.test(d.url || '')).map((d) => imgKey(d.url)));
-  const gone = (cov.missing_images || []).filter(real).filter((x) => !dead.has(imgKey(x.image)));
+  // 갤러리는 우리가 만드는 것(엑셀 설명 칸)이 아니다 — 갤러리 컴포넌트(PD0012 · PD0033)나 갤러리 사진과 같은 그림은 세지 않는다.
+  // 새 크롤은 검사(coverage_check.py)가 이미 빼지만, 예전 기록에 섞여 있어도 걸리지 않게 (2026-11-27)
+  const gal = new Set(((mirror && mirror._gallery) || []).flatMap((g) => [g.pc_url, g.mobile_url]).filter(Boolean).map(imgKey));
+  const gone = (cov.missing_images || []).filter(real).filter((x) => !GALLERY.has(x.component_id) && !gal.has(imgKey(x.image)) && !dead.has(imgKey(x.image)));
   const images = gone.length + (chk.images_missing_url || 0);
   const files = gone.slice(0, 3).map((x) => String(x.image || '').split('/').pop());   // 어떤 이미지가 빠졌는지 (화면에서 마우스를 올리면 보임)
   return { images, texts, files, mirror };
@@ -244,7 +247,12 @@ function aiChecks(j, it, c) {
   const notLoaded = m ? Math.max(0, +m[2] - +m[1]) : 0;
   const q = it.bundle ? { images: 0, texts: 0, mirror: null } : qaOf(it.slug);
   const lgImg = q.images;
-  out.push({ k: 'img', ok: !notLoaded && !lgImg, n: notLoaded + lgImg });
+  // 못 불러온 이미지는 엑셀에 실제로 들어가는 장(Shopee 는 앞 12장)만 센다. 자리(몇 번째 장 · 어디쯤)를 알면 화면이 PDP 위에 표시한다.
+  // 자리를 모르는 예전 슬라이스(캐시)는 개수만
+  const used = (c && c.urls && c.urls.length) || 0;
+  const at = c && Array.isArray(c.broken) ? c.broken.filter((b) => !used || b.slice <= used).slice(0, 12) : null;
+  const bad = at ? at.length : notLoaded;
+  out.push({ k: 'img', ok: !bad && !lgImg, n: bad + lgImg, bad, lg: lgImg, ...(at && at.length ? { at } : {}) });
   out.push({ k: 'txt', ok: q.texts < 5, n: q.texts });   // 글 몇 줄은 캐러셀 버튼 글자 같은 오탐이 많다 — 확인 필요 규칙과 같게 5줄부터
   if (!it.bundle && /lg\.com\/th\//i.test(it.url || '')) out.push({ k: 'sum', ok: !(c && c.summaryErr) });
   if (j.channel === 'shopee') out.push({ k: 'n12', ok: true, used: c ? c.images : 0, all: c ? c.allImages : 0 });
@@ -400,6 +408,7 @@ const imgKey = (u) => {
   try { k = decodeURIComponent(k); } catch (_) {}
   return k.replace(/[._-]\d{2,4}x\d{2,4}/g, '');
 };
+const GALLERY = new Set(['PD0012', 'PD0033']);   // 제품 갤러리 (큰 사진 + 썸네일) — 상세(PDP)가 아니다
 const NON_CONTENT = new Set(['ST0018', 'PD0016']);   // 누락으로 세지 않는 영역: 바로가기 링크(ST0018) · 구매처(PD0016)
 const DUP_DAM = /(?:\/content\/dam\/channel\/wcms){2,}/;   // LG 페이지가 경로를 두 번 붙인 주소 — 이미지가 실제로 있어서 크롤러가 바로잡는다
 function flagsFor(j, it, c) {

@@ -11,31 +11,31 @@
     en: { steps: ['Attach', 'Prepare', 'Check', 'Download'], rows: (n) => `${n} rows`, prep: (a, b) => `Preparing ${a} / ${b}`, liveP: 'live products',
       skip: (n) => `${n} not live — skipped`, view: 'View', hide: 'Hide', asOf: (d) => `Live list as of ${d}`, byStatus: 'From the Status column',
       skipRows: (n) => `${n} rows in the Excel — left as they are`, notLive: 'Not live', unknown: 'Unknown', none: 'No live products in this file.',
-      w_img: (n) => `${n} image${n === 1 ? '' : 's'} didn't load`, w_txt: (n) => `${n} lg.com lines missing`, w_sum: "Summary couldn't be made",
+      w_lgimg: (n) => `${n} lg.com image${n === 1 ? '' : 's'} not in the PDP`, w_at: 'marked in the PDP', badM: "Didn't load", w_img: (n) => `${n} image${n === 1 ? '' : 's'} didn't load`, w_txt: (n) => `${n} lg.com lines missing`, w_sum: "Summary couldn't be made",
       w_spec: 'No spec table', w_fail: "Couldn't prepare", w_retried: 'still there after a retry', redo: 'Prepare again', remove: 'Remove from this Excel',
       redoing: 'Preparing again', doneT: (n) => `${n} checked`, removed: (n) => `${n} removed`, skipped: (n) => `${n} not live skipped`, dl: 'Download Excel', err: 'Something went wrong: ' },
     th: { steps: ['แนบไฟล์', 'เตรียม', 'ตรวจ', 'ดาวน์โหลด'], rows: (n) => `${n} แถว`, prep: (a, b) => `กำลังเตรียม ${a} / ${b}`, liveP: 'สินค้าที่ไลฟ์',
       skip: (n) => `ไม่ได้ไลฟ์ ${n} รายการ — ข้ามไป`, view: 'ดู', hide: 'ซ่อน', asOf: (d) => `รายการไลฟ์ ณ ${d}`, byStatus: 'จากคอลัมน์ Status',
       skipRows: (n) => `${n} แถวใน Excel — คงไว้ตามเดิม`, notLive: 'ไม่ได้ไลฟ์', unknown: 'ไม่ทราบ', none: 'ไม่มีสินค้าที่ไลฟ์ในไฟล์นี้',
-      w_img: (n) => `โหลดรูปไม่ได้ ${n} รูป`, w_txt: (n) => `ข้อความจาก lg.com ขาด ${n} บรรทัด`, w_sum: 'สร้างสรุปไม่ได้',
+      w_lgimg: (n) => `รูปจาก lg.com ไม่อยู่ใน PDP ${n} รูป`, w_at: 'ทำเครื่องหมายไว้ใน PDP', badM: 'โหลดไม่ได้', w_img: (n) => `โหลดรูปไม่ได้ ${n} รูป`, w_txt: (n) => `ข้อความจาก lg.com ขาด ${n} บรรทัด`, w_sum: 'สร้างสรุปไม่ได้',
       w_spec: 'ไม่มีตารางสเปก', w_fail: 'เตรียมไม่สำเร็จ', w_retried: 'ลองใหม่แล้วยังเหมือนเดิม', redo: 'เตรียมใหม่', remove: 'นำออกจาก Excel นี้',
       redoing: 'กำลังเตรียมใหม่', doneT: (n) => `ตรวจแล้ว ${n} รายการ`, removed: (n) => `นำออก ${n}`, skipped: (n) => `ข้ามที่ไม่ได้ไลฟ์ ${n}`, dl: 'ดาวน์โหลด Excel', err: 'เกิดข้อผิดพลาด: ' },
     ko: { steps: ['첨부', '준비', 'Check', '받기'], rows: (n) => `${n}행`, prep: (a, b) => `준비 중 ${a} / ${b}`, liveP: '라이브 제품',
       skip: (n) => `라이브 아님 ${n}개 — 건너뜀`, view: '보기', hide: '닫기', asOf: (d) => `라이브 목록 기준일 ${d}`, byStatus: 'Status 칸 기준',
       skipRows: (n) => `엑셀 ${n}행 — 원래 내용 그대로`, notLive: '라이브 아님', unknown: '모름', none: '이 파일에 라이브 제품이 없어요.',
-      w_img: (n) => `이미지 ${n}장 못 불러옴`, w_txt: (n) => `lg.com 문구 ${n}줄 빠짐`, w_sum: '요약을 못 만듦',
+      w_lgimg: (n) => `lg.com 이미지 ${n}장이 PDP에 없음`, w_at: 'PDP에 표시', badM: '못 불러옴', w_img: (n) => `이미지 ${n}장 못 불러옴`, w_txt: (n) => `lg.com 문구 ${n}줄 빠짐`, w_sum: '요약을 못 만듦',
       w_spec: '스펙표 없음', w_fail: '준비 못 함', w_retried: '다시 해도 그대로', redo: '다시 준비', remove: '이번 엑셀에서 빼기',
       redoing: '다시 준비하는 중', doneT: (n) => `${n}개 확인 완료`, removed: (n) => `${n}개 뺌`, skipped: (n) => `라이브 아님 ${n}개 건너뜀`, dl: '엑셀 받기', err: '문제가 생겼어요: ' },
     de: { steps: ['Anhängen', 'Vorbereiten', 'Prüfen', 'Herunterladen'], rows: (n) => `${n} Zeilen`, prep: (a, b) => `Vorbereitung ${a} / ${b}`, liveP: 'Live-Produkte',
       skip: (n) => `${n} nicht live — übersprungen`, view: 'Ansehen', hide: 'Ausblenden', asOf: (d) => `Live-Liste vom ${d}`, byStatus: 'Aus der Spalte Status',
       skipRows: (n) => `${n} Zeilen in der Excel — bleiben unverändert`, notLive: 'Nicht live', unknown: 'Unbekannt', none: 'Keine Live-Produkte in dieser Datei.',
-      w_img: (n) => `${n} Bild(er) nicht geladen`, w_txt: (n) => `${n} Zeilen von lg.com fehlen`, w_sum: 'Zusammenfassung fehlgeschlagen',
+      w_lgimg: (n) => `${n} lg.com-Bild(er) fehlen im PDP`, w_at: 'im PDP markiert', badM: 'Nicht geladen', w_img: (n) => `${n} Bild(er) nicht geladen`, w_txt: (n) => `${n} Zeilen von lg.com fehlen`, w_sum: 'Zusammenfassung fehlgeschlagen',
       w_spec: 'Kein Datenblatt', w_fail: 'Vorbereitung fehlgeschlagen', w_retried: 'auch nach erneutem Versuch', redo: 'Neu vorbereiten', remove: 'Aus dieser Excel entfernen',
       redoing: 'Wird neu vorbereitet', doneT: (n) => `${n} geprüft`, removed: (n) => `${n} entfernt`, skipped: (n) => `${n} nicht live übersprungen`, dl: 'Excel herunterladen', err: 'Fehler: ' },
     ar: { steps: ['إرفاق', 'تجهيز', 'تحقق', 'تنزيل'], rows: (n) => `${n} صف`, prep: (a, b) => `جارٍ التجهيز ${a} / ${b}`, liveP: 'منتجات نشطة',
       skip: (n) => `${n} غير نشط — تم تخطيه`, view: 'عرض', hide: 'إخفاء', asOf: (d) => `قائمة النشط بتاريخ ${d}`, byStatus: 'من عمود Status',
       skipRows: (n) => `${n} صف في Excel — يبقى كما هو`, notLive: 'غير نشط', unknown: 'غير معروف', none: 'لا توجد منتجات نشطة في هذا الملف.',
-      w_img: (n) => `تعذّر تحميل ${n} صورة`, w_txt: (n) => `${n} سطر من lg.com مفقود`, w_sum: 'تعذّر إنشاء الملخص',
+      w_lgimg: (n) => `${n} صورة من lg.com غير موجودة في PDP`, w_at: 'محدّد في PDP', badM: 'لم يتم التحميل', w_img: (n) => `تعذّر تحميل ${n} صورة`, w_txt: (n) => `${n} سطر من lg.com مفقود`, w_sum: 'تعذّر إنشاء الملخص',
       w_spec: 'لا يوجد جدول مواصفات', w_fail: 'تعذّر التجهيز', w_retried: 'ما زال بعد إعادة المحاولة', redo: 'إعادة التجهيز', remove: 'إزالة من ملف Excel هذا',
       redoing: 'جارٍ إعادة التجهيز', doneT: (n) => `تم فحص ${n}`, removed: (n) => `أُزيل ${n}`, skipped: (n) => `تم تخطي ${n} غير نشط`, dl: 'تنزيل Excel', err: 'حدث خطأ: ' },
   };
@@ -137,10 +137,12 @@
   // 다 끝나면 사람은 검토 필요만 큰 카드로 하나씩 (괜찮음 · 다시 준비 · 빼기). 마지막에 준비된 것을 한 번에 확인 → 받기.
   // 자동 재시도는 서버가 뒤에서 — 고쳐지면 그 카드가 왼쪽에서 오른쪽으로 옮겨 간다.
   const small = (u) => String(u || '').replace('/media/slices/', '/media/slices-p/');
-  const smallG = (u) => String(u || '').replace(/([?&])w=\d+/, '$1w=400');
   const ukey = (u) => (u[0].bundle ? 'b:' + u[0].row : u[0].slug || u[0].url || 'r:' + u[0].row);
   const aiRows = (u) => (u[0].status === 'failed' ? [{ k: 'fail', ok: false, msg: u[0].error }] : u[0].ai || []);
-  const why = (x) => ({ img: () => C.T.w_img(x.n), txt: () => C.T.w_txt(x.n), sum: () => C.T.w_sum, spec: () => C.T.w_spec, fail: () => C.T.w_fail + (x.msg ? ' — ' + x.msg : ''), redo: () => C.T.w_fail + (x.msg ? ' — ' + x.msg : '') }[x.k] || (() => x.k))();
+  // 이미지: 못 불러옴(PDP 위에 표시) · lg.com 그림이 PDP 에 없음을 따로. 예전 결과(bad · lg 없음)는 개수만
+  const whyImg = (x) => x.bad == null && x.lg == null ? C.T.w_img(x.n)
+    : [x.bad ? C.T.w_img(x.bad) + (x.at && x.at.length ? ' (' + C.T.w_at + ')' : '') : '', x.lg ? C.T.w_lgimg(x.lg) : ''].filter(Boolean).join(' · ');
+  const why = (x) => ({ img: () => whyImg(x), txt: () => C.T.w_txt(x.n), sum: () => C.T.w_sum, spec: () => C.T.w_spec, fail: () => C.T.w_fail + (x.msg ? ' — ' + x.msg : ''), redo: () => C.T.w_fail + (x.msg ? ' — ' + x.msg : '') }[x.k] || (() => x.k))();
   const reduced = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (_) { return false; } };
   const EZ = { out: 'cubic-bezier(.16,1,.3,1)', p3out: 'cubic-bezier(.33,1,.68,1)', p3in: 'cubic-bezier(.32,0,.67,0)', io: 'cubic-bezier(.45,0,.55,1)' };
   const busy = (u) => u.some((x) => x.status === 'working' || x.retrying);
@@ -175,9 +177,12 @@
     if (!reduced()) b.animate([{ transform: 'translateY(-60%)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 260, easing: EZ.out });
   }
   function cardEl(core, u) {   // 큰 카드 = 상품 페이지 프리뷰 (bulk-market) + 모델 + 이유 한 줄
-    const e = core.esc, it = u[0], so = it.store || {};
-    const body = `<div class="ck-imgs">${(it.imgs || []).map(small).map((s) => `<img src="${e(s)}" alt="" decoding="async">`).join('')}</div>`;
-    const pv = window.CliaMarket ? CliaMarket.page(C.job.channel, { title: so.title || it.title || it.model || '', gallery: (so.gallery || []).map(smallG), specs: so.specs, body }) : body;
+    const e = core.esc, it = u[0];
+    // 엑셀 설명 칸에 들어가는 상세 이미지만 (갤러리 · 제목 · 스펙 없음). 못 불러온 이미지 자리는 그 장 위에 표시
+    const img = (it.ai || []).find((x) => x.k === 'img') || {}, at = img.at || [];
+    const mark = (k) => at.filter((b) => b.slice === k + 1).map((b) => `<span class="dk-bad" style="top:${(b.y * 100).toFixed(2)}%;height:${(Math.max(b.h, 0.02) * 100).toFixed(2)}%"><b>${e(C.T.badM)}</b></span>`).join('');
+    const body = `<div class="ck-imgs">${(it.imgs || []).map(small).map((s, k) => { const m = mark(k); return m ? `<span class="dk-si"><img src="${e(s)}" alt="" decoding="async">${m}</span>` : `<img src="${e(s)}" alt="" decoding="async">`; }).join('')}</div>`;
+    const pv = window.CliaMarket ? CliaMarket.page(C.job.channel, { detailOnly: true, body }) : body;
     const el = document.createElement('div'); el.className = 'dk-card';
     el.innerHTML = `<div class="dk-ph"><div class="dk-sc">${pv}</div></div><div class="dk-mo">${e(it.model || '')}</div><div class="dk-st"></div>`;
     C.dk.root.appendChild(el); cardState(el, u); return el;
@@ -194,9 +199,9 @@
   function toReady(core, u, anim) {   // 덱 → (가운데를 스치며 스캔) → 오른쪽 더미. 날아가는 동안만 DOM 에, 더미엔 위 몇 장만
     const D = C.dk, k = D.readyN++;
     if (!anim || reduced()) { bump('dkRn', D.readyN); return; }
-    const it = u[0], so = it.store || {}, e = core.esc;
+    const it = u[0], e = core.esc;
     const m = document.createElement('div'); m.className = 'dk-mini ok';
-    m.innerHTML = `<img src="${e(smallG((so.gallery || [])[0] || ''))}" alt=""><b>${e(it.model || '')}</b>`;
+    m.innerHTML = `<img src="${e(small((it.imgs || [])[0] || ''))}" alt=""><b>${e(it.model || '')}</b>`;   // 상세 첫 장 (갤러리 아님)
     m.style.zIndex = 30 + (k % 50); D.root.appendChild(m);
     const a = deckAt(), to = readyAt(k), mid = { x: (a.x + to.x) / 2 - 40, y: Math.min(a.y, to.y) + (Math.abs(a.y - to.y) * 0.45) };
     m.animate([{ transform: `translate(${a.x}px,${a.y}px) scale(1)` }, { transform: `translate(${mid.x}px,${mid.y}px) scale(1.4) rotate(-6deg)`, offset: 0.45 }, { transform: T3(to) }], { duration: 520, easing: EZ.p3out, fill: 'forwards' })
@@ -339,6 +344,7 @@
       for (let k = i - WIN; k <= i + WIN; k++) if (k >= 0 && k < list.length && !cards.has(k)) mk(k);
       for (const [k, c] of cards) {
         const on = k === i; if (c.classList.contains('dk-on') && !on) setTimeout(() => { const sc = c.querySelector('.dk-sc'); if (sc) sc.scrollTop = 0; }, 560);   // 다시 오면 맨 위부터
+        if (on && !c.classList.contains('dk-on')) seek(c);
         c.classList.toggle('dk-on', on);
         if (Math.abs(k - i) > WIN) { cards.delete(k); setTimeout(() => c.remove(), anim ? 560 : 0); }
       }
@@ -430,6 +436,16 @@
         more.classList.toggle('dk-end', sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 4);
       };
       sc.addEventListener('scroll', upd, { passive: true }); setTimeout(upd, 60); c.querySelectorAll('img').forEach((im) => im.addEventListener('load', upd, { once: true }));
+    }
+    function seek(c) {   // 못 불러온 이미지 표시가 있으면 가운데 온 뒤 그 자리로 (그 위 이미지가 다 불러와져야 자리가 맞다)
+      const m = c.querySelector('.dk-bad'); if (!m) return;
+      const ims = [...c.querySelectorAll('.ck-imgs img')], upto = ims.slice(0, ims.indexOf(m.parentNode.querySelector('img')) + 1);
+      Promise.all(upto.map((im) => (im.complete ? 0 : new Promise((r) => { im.addEventListener('load', r, { once: true }); im.addEventListener('error', r, { once: true }); }))))
+        .then(() => setTimeout(() => {
+          const sc = c.querySelector('.dk-sc'); if (!sc || !c.classList.contains('dk-on')) return;
+          const y = m.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
+          sc.scrollTo({ top: Math.max(0, y - sc.clientHeight * 0.3), behavior: reduced() ? 'auto' : 'smooth' });
+        }, 600));
     }
     function scrollBy(page, px) {   // ↓ · ↑ 조금, 스페이스 · Page Down 한 화면
       const sc = el && el.querySelector('.dk-sc'); if (!sc) return;

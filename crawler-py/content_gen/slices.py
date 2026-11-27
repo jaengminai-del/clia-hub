@@ -51,6 +51,17 @@ _JS_WAIT_ASSETS = """async (perImgMs) => {
   return { total: imgs.length, loaded: results.filter(Boolean).length };
 }"""
 
+# 못 불러온 이미지의 자리 (slice-root 위에서부터 CSS px) — 벌크 Check 가 PDP 안에서 어디가 비었는지 표시 (2026-11-27)
+# 크기 지정이 없어 0 으로 접힌 이미지도 있어서 최소 24px 로 본다
+_JS_BROKEN = """() => {
+  const root = document.getElementById('slice-root');
+  const top0 = root.getBoundingClientRect().top + window.scrollY;
+  return Array.from(root.querySelectorAll('img')).filter(im => !(im.complete && im.naturalWidth > 0)).map(im => {
+    const r = im.getBoundingClientRect();
+    return { top: Math.round(r.top + window.scrollY - top0), h: Math.max(24, Math.round(r.height)) };
+  }).slice(0, 20);
+}"""
+
 _JS_LAYOUT = """() => {
   const root = document.getElementById('slice-root');
   const H = Math.ceil(root.scrollHeight);
@@ -250,6 +261,19 @@ def _open_page(browser, vw: int, scale: float, doc: str):
     return ctx, page, stat
 
 
+def _broken_at(boxes, cuts, manifest):
+    """못 불러온 이미지 자리(CSS px) → [{slice, y, h}] — 몇 번째 장의 어디쯤(장 높이에 대한 비율)."""
+    out = []
+    for b in boxes or []:
+        for m in manifest:
+            a, z = cuts[m["slice"] - 1], cuts[m["slice"] - 1] + m["css_height"]
+            if a <= b["top"] < z:
+                out.append({"slice": m["slice"], "y": round((b["top"] - a) / m["css_height"], 4),
+                            "h": round(min(b["h"], z - b["top"]) / m["css_height"], 4)})
+                break
+    return out
+
+
 def _launch(p):
     """기본 headless-shell은 LG.com DAM(Akamai)에서 이미지가 차단된다 → 정식 Chromium(신형 headless) 우선,
     없으면 설치된 Chrome, 마지막으로 기본값."""
@@ -318,6 +342,8 @@ def render(req: dict, zip_path: Path) -> dict:
                 i = next((k for k in range(n) if cuts[k] <= b["top"] < cuts[k + 1]), n - 1)
                 slice_texts[i].append(f'{b["kind"]}: {b["txt"]}')
 
+            # 찍을 페이지(배율 적용 후)에서 — 위치는 CSS px 라 배율과 무관
+            broken_px = page.evaluate(_JS_BROKEN) if stat["loaded"] < stat["total"] else []
             manifest = []
             buf = io.BytesIO()
             ext = "jpg" if fmt == "jpeg" else "png"
@@ -353,6 +379,7 @@ def render(req: dict, zip_path: Path) -> dict:
                     f'=== {m["slice"]:02d} · {m["file"]} ===\n' + ("\n".join(slice_texts[m["slice"] - 1]) or "(no text)")
                     for m in manifest) + "\n")
                 images_loaded = f'{stat["loaded"]}/{stat["total"]}'
+                broken = _broken_at(broken_px, cuts, manifest)
                 zf.writestr(f"{name}-manifest.json", json.dumps({
                     "viewport_width": vw,
                     "content_width_css": layout["contentWidth"],
@@ -363,6 +390,7 @@ def render(req: dict, zip_path: Path) -> dict:
                     "slices": len(manifest),
                     "format": fmt, "quality": q if fmt == "jpeg" else None,
                     "images_loaded": images_loaded,
+                    "broken": broken,
                     "images": manifest,
                 }, indent=2, ensure_ascii=False))
             ctx.close()
@@ -372,6 +400,7 @@ def render(req: dict, zip_path: Path) -> dict:
     if images_dir:      # 슬라이스 목록 + 슬라이스별 글자 (이미지 alt 용)
         (images_dir / "manifest.json").write_text(json.dumps({
             "images_loaded": images_loaded,
+            "broken": broken,
             "images": [dict(m, text=" ".join(t.split(": ", 1)[-1] for t in slice_texts[m["slice"] - 1]))
                        for m in manifest],
         }, ensure_ascii=False, indent=1), encoding="utf-8")
