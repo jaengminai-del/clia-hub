@@ -78,7 +78,7 @@ def _fill(template: str, **values) -> str:
     return re.sub(r"\{(\w+)\}", lambda m: values.get(m.group(1), m.group(0)), template)
 
 
-def generate(mirror: dict, medium: str = "ebay", fragment: bool = False, listing: dict = None) -> str:
+def generate(mirror: dict, medium: str = "ebay", fragment: bool = False, listing: dict = None, map_sections: bool = False) -> str:
     """mirror → 매체용 1차 컨텐츠 HTML.
     fragment=True: 설명란 삽입용 조각(<style>+컨테이너), False: 브라우저 미리보기용 완전한 문서.
     listing: 제품별 리스팅 문구 {"fields", "titles"} — 프로모션은 맨 위, 제품 상세·배송·사후 서비스·반품은 맨 아래 카드."""
@@ -91,7 +91,8 @@ def generate(mirror: dict, medium: str = "ebay", fragment: bool = False, listing
         rules = dict(rules, v2=True)
     set_image_prefer(rules.get("image_prefer", "mobile"))   # 매체별 이미지 우선순위 (모바일 | PC)
     blocks = build_blocks(mirror, rules)
-    body_cards = render_blocks(st, blocks, rules.get("text_alignment", "center"))
+    body_cards = render_blocks(st, blocks, rules.get("text_alignment", "center"),
+                               map_sections=map_sections)
     if listing:
         from .listing import render as render_listing
         body_cards = render_listing(st, listing, "top") + list(body_cards) + render_listing(st, listing, "bottom")

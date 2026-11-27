@@ -52,17 +52,80 @@ _JS_WAIT_ASSETS = """async (perImgMs) => {
 }"""
 
 # 못 불러온 이미지의 자리 (slice-root 위에서부터 CSS px) — 벌크 Check 가 PDP 안에서 어디가 비었는지 표시 (2026-11-27)
-# 크기 지정이 없어 0 으로 접힌 이미지도 있어서 최소 24px 로 본다 · 원래 주소(src)도 남긴다 — 화면이 lg.com 원본을 옆에 보여 준다
+# 접힌 이미지도 삽입점과 원래 주소를 남긴다.
 _JS_BROKEN = """() => {
   const root = document.getElementById('slice-root');
-  const top0 = root.getBoundingClientRect().top + window.scrollY;
   return Array.from(root.querySelectorAll('img')).filter(im => !(im.complete && im.naturalWidth > 0)).map(im => {
     const r = im.getBoundingClientRect();
     // gone: 크기 지정이 없어 0 으로 접힘 → 사람 눈에는 그 자리에 이미지가 '없음'(아래 내용이 당겨 올라옴). 아니면 빈 칸
-    return { top: Math.round(r.top + window.scrollY - top0), h: Math.max(24, Math.round(r.height)), gone: r.height < 2,
-             src: (im.getAttribute('src') || '').slice(0, 400) };
+    return { top: r.top + scrollY, h: r.height, left: r.left + scrollX, w: r.width,
+             src: im.getAttribute('src') || '' };
   }).slice(0, 20);
 }"""
+
+_JS_SECTIONS = """() => {
+  const root = document.getElementById('slice-root');
+  const blocks = [...root.querySelectorAll('.lg-container > [data-pdp-section]')];
+  const idsFor = (el) => el.dataset.pdpSection.split(/\\s+/).filter(Boolean);
+  const aliases = new Map();
+  for (const el of blocks) {
+    for (const cid of new Set(idsFor(el).map(key => key.split(':')[0]))) {
+      aliases.set(cid, (aliases.get(cid) || 0) + 1);
+    }
+  }
+  return blocks.flatMap(el => {
+    const ids = new Set();
+    for (const key of idsFor(el)) {
+      const cid = key.split(':')[0];
+      if (key !== cid) ids.add(key);
+      if (aliases.get(cid) === 1) ids.add(cid);
+    }
+    const rect = (node) => {
+      const r = node.getBoundingClientRect();
+      return { top: r.top + scrollY, bottom: r.bottom + scrollY, left: r.left + scrollX, right: r.right + scrollX };
+    };
+    const table = el.querySelector('.lg-spec-table');
+    return [...ids].flatMap(id => [
+      { id: el.dataset.pdpPart ? `part:${el.dataset.pdpPart}:${id}` : id, ...rect(el) },
+      ...(table ? [{ id: el.dataset.pdpPart ? `part:${el.dataset.pdpPart}:${id}` : id, table: true, ...rect(table) }] : [])
+    ]);
+  });
+}"""
+
+
+_JS_SPEC_TABLES = """() => [...document.querySelectorAll('#slice-root table.lg-spec-table')].flatMap((table, id) => {
+  const rect = table.getBoundingClientRect();
+  const style = getComputedStyle(table);
+  if (!rect.width || !rect.height || style.visibility !== 'visible' || !table.rows.length) return [];
+  return [{
+    id, top: rect.top + scrollY, bottom: rect.bottom + scrollY,
+    left: rect.left + scrollX, right: rect.right + scrollX,
+    part: Number(table.closest('[data-pdp-part]')?.dataset.pdpPart) || 0,
+    rows: [...table.rows].filter(row => row.cells.length === 2 && row.getClientRects().length &&
+      getComputedStyle(row).visibility === 'visible').map(row => [...row.cells].map(cell => cell.innerText)),
+    sourceKeys: (table.closest('[data-pdp-section]')?.dataset.pdpSection || '').split(' ').filter(Boolean),
+  }];
+})"""
+
+
+
+def _section_regions(boxes, cuts, manifest, layout):
+    regions = {}
+    left, width = layout["contentLeft"], layout["contentWidth"]
+    for b in boxes:
+        x0, x1 = max(left, b["left"]), min(left + width, b["right"])
+        if x1 <= x0:
+            continue
+        for index, m in enumerate(manifest, 1):
+            start, height = cuts[m["slice"] - 1], m["css_height"]
+            y0, y1 = max(start, b["top"]), min(start + height, b["bottom"])
+            if y1 > y0:
+                regions.setdefault(b["id"], []).append({
+                    "slice": index, "x": (x0 - left) / width, "w": (x1 - x0) / width,
+                    "y": (y0 - start) / height, "h": (y1 - y0) / height,
+                })
+    return regions
+
 
 _JS_LAYOUT = """() => {
   const root = document.getElementById('slice-root');
@@ -263,17 +326,29 @@ def _open_page(browser, vw: int, scale: float, doc: str):
     return ctx, page, stat
 
 
-def _broken_at(boxes, cuts, manifest):
-    """못 불러온 이미지 자리(CSS px) → [{slice, y, h, kind, src}] — 몇 번째 장의 어디쯤(장 높이에 대한 비율) · 접혀 없어짐(gone)/빈 칸(blank) · 원래 주소."""
+def _broken_at(boxes, cuts, manifest, layout):
+    """One problem per unloaded image, clipped to the exported slice rectangles."""
     out = []
-    for b in boxes or []:
-        for m in manifest:
-            a, z = cuts[m["slice"] - 1], cuts[m["slice"] - 1] + m["css_height"]
-            if a <= b["top"] < z:
-                out.append({"slice": m["slice"], "y": round((b["top"] - a) / m["css_height"], 4),
-                            "h": round(min(b["h"], z - b["top"]) / m["css_height"], 4),
-                            "kind": "gone" if b.get("gone") else "blank", "src": b.get("src") or ""})
-                break
+    left, width = layout["contentLeft"], layout["contentWidth"]
+    for b in boxes:
+        gone = b["h"] < 2
+        x0 = max(left, b["left"])
+        # A collapsed image still has an insertion point.
+        x1 = min(left + width, b["left"] + max(2, b["w"]))
+        regions = []
+        if x1 > x0:
+            for index, m in enumerate(manifest, 1):
+                start, height = cuts[m["slice"] - 1], m["css_height"]
+                y0 = max(start, b["top"])
+                y1 = min(start + height, b["top"] + max(1, b["h"]))
+                if y1 > y0:
+                    regions.append({
+                        "slice": index, "x": (x0 - left) / width, "w": (x1 - x0) / width,
+                        "y": (y0 - start) / height, "h": (y1 - y0) / height,
+                        "kind": "gone" if gone else "blank",
+                    })
+        # Distinguish an image that could not be positioned from one in a later slice.
+        out.append({"src": b["src"], "regions": regions})
     return out
 
 
@@ -290,11 +365,42 @@ def _launch(p):
     raise RuntimeError("Chromium을 실행할 수 없습니다 (playwright install chromium 필요)")
 
 
+def _review_html(html, gallery_keys):
+    """Filter builder chrome on a copy used only for review screenshots."""
+    from bs4 import BeautifulSoup
+    from urllib.parse import unquote
+    from coverage_check import _img_key
+
+    soup = BeautifulSoup(html, "html.parser")
+    containers = soup.select(".lg-container")
+    if not containers:
+        raise ValueError("Unknown PDP layout")
+    for block in soup.select(".lg-listing, .lg-gallery, .lg-gallery-main, .lg-gallery-thumbs, [data-pdp-gallery]"):
+        block.decompose()
+    for container in containers:
+        for block in container.find_all(recursive=False):
+            images = block.find_all("img")
+            if not images or block.has_attr("data-pdp-section"):
+                continue
+            gallery_images = [img for img in images if _img_key(unquote(img.get("src", ""))) in gallery_keys]
+            if len(gallery_images) == len(images) and not block.select_one(".lg-spec-table"):
+                block.decompose()
+            else:
+                for img in gallery_images:
+                    (img.find_parent("picture") or img).decompose()
+    if not any(container.find(recursive=False) for container in containers):
+        raise ValueError("No PDP detail to review")
+    styles = "".join(str(style) for style in soup.select("style") if not style.find_parent(class_="lg-container"))
+    return styles + "".join(str(container) for container in containers if not container.find_parent(class_="lg-container"))
+
+
 def render(req: dict, zip_path: Path) -> dict:
     """요청(html·slices·outputWidth·format·quality·name·viewportWidth·medium·fontsCss) → ZIP 파일. 메타 반환."""
     html = req.get("html")
     if not isinstance(html, str) or not html:
         raise ValueError("html required")
+    if req.get("review") is True:
+        html = _review_html(html, set(req.get("reviewGallery") or []))
     o = options(req)
     n, vw, ow, fmt, q, name = o["n"], o["vw"], o["ow"], o["fmt"], o["q"], o["name"]
     doc = _document(html, vw, req.get("fontsCss") or "")
@@ -347,6 +453,9 @@ def render(req: dict, zip_path: Path) -> dict:
 
             # 찍을 페이지(배율 적용 후)에서 — 위치는 CSS px 라 배율과 무관
             broken_px = page.evaluate(_JS_BROKEN) if stat["loaded"] < stat["total"] else []
+            section_boxes = page.evaluate(_JS_SECTIONS)
+            table_boxes = page.evaluate(_JS_SPEC_TABLES) if req.get("review") is True else []
+            has_table = page.locator("#slice-root table:visible").count() > 0
             manifest = []
             buf = io.BytesIO()
             ext = "jpg" if fmt == "jpeg" else "png"
@@ -382,7 +491,12 @@ def render(req: dict, zip_path: Path) -> dict:
                     f'=== {m["slice"]:02d} · {m["file"]} ===\n' + ("\n".join(slice_texts[m["slice"] - 1]) or "(no text)")
                     for m in manifest) + "\n")
                 images_loaded = f'{stat["loaded"]}/{stat["total"]}'
-                broken = _broken_at(broken_px, cuts, manifest)
+                broken = _broken_at(broken_px, cuts, manifest, layout)
+                sections = _section_regions([b for b in section_boxes if not b.get("table")], cuts, manifest, layout)
+                spec_sections = _section_regions([b for b in section_boxes if b.get("table")], cuts, manifest, layout)
+                table_regions = _section_regions(table_boxes, cuts, manifest, layout)
+                spec_tables = [{"sourceKeys": b["sourceKeys"], "part": b["part"], "rows": b["rows"], "regions": table_regions.get(b["id"], [])}
+                               for b in table_boxes]
                 zf.writestr(f"{name}-manifest.json", json.dumps({
                     "viewport_width": vw,
                     "content_width_css": layout["contentWidth"],
@@ -394,6 +508,10 @@ def render(req: dict, zip_path: Path) -> dict:
                     "format": fmt, "quality": q if fmt == "jpeg" else None,
                     "images_loaded": images_loaded,
                     "broken": broken,
+                    "sections": sections,
+                    "spec_sections": spec_sections,
+                    "has_table": has_table,
+                    "spec_tables": spec_tables,
                     "images": manifest,
                 }, indent=2, ensure_ascii=False))
             ctx.close()
@@ -404,6 +522,10 @@ def render(req: dict, zip_path: Path) -> dict:
         (images_dir / "manifest.json").write_text(json.dumps({
             "images_loaded": images_loaded,
             "broken": broken,
+            "sections": sections,
+            "spec_sections": spec_sections,
+            "has_table": has_table,
+            "spec_tables": spec_tables,
             "images": [dict(m, text=" ".join(t.split(": ", 1)[-1] for t in slice_texts[m["slice"] - 1]))
                        for m in manifest],
         }, ensure_ascii=False, indent=1), encoding="utf-8")

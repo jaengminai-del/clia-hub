@@ -66,13 +66,32 @@ function write(slug, { state, by = '', via = '', comment = '', hashes = null }) 
 }
 
 /** 벌크 엑셀 작업의 행들 중 승인 안 된 제품 (묶음 상품은 구성품 모두) → [{ slug, model, status }] */
-function pendingOf(items) {
+function pendingOf(items, channel) {
   const out = new Map();
   for (const it of items || []) {
-    if (it.status !== 'ok') continue;
+    if (it.status !== 'ok' || (channel && it.check === 'removed')) continue;
+    if (channel) {
+      if (it.bundle?.length) {
+        if (!it.hash || it.check !== 'ok' || it.checkedChannel !== channel || it.checkedHash !== it.hash ||
+            !it.contentDigest || it.checkedContentDigest !== it.contentDigest) {
+          out.set(`bundle:${it.row}`, { slug: '', model: it.model || '', status: 'pending' });
+        }
+      } else {
+        const record = status(it.slug);
+        if (!it.hash || record.status !== 'approved' || record.hashes?.[channel] !== it.hash) {
+          out.set(`${it.slug}:${it.hash}`, { slug: it.slug, model: it.model || '',
+            status: record.status === 'approved' ? 'stale' : record.status });
+        }
+        continue;
+      }
+    }
     const slugs = it.bundle && it.bundle.length ? it.bundle.map((x) => x.slug) : [it.slug];
     for (const s of slugs) {
-      if (!s || out.has(s)) continue;
+      if (!s) {
+        if (channel) out.set(`bundle:${it.row}`, { slug: '', model: it.model || '', status: 'pending' });
+        continue;
+      }
+      if (out.has(s)) continue;
       const st = status(s).status;
       if (st !== 'approved') out.set(s, { slug: s, model: it.model || '', status: st });
     }

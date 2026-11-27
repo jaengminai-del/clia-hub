@@ -13,71 +13,66 @@
       skipRows: (n) => `${n} rows in the Excel — left as they are`, notLive: 'Not live', unknown: 'Unknown', none: 'No live products in this file.',
       
       w_fail: "Couldn't prepare", w_retried: 'still there after a retry', redo: 'Prepare again', remove: 'Remove from this Excel',
-      redoing: 'Preparing again', doneT: (n) => `${n} checked`, removed: (n) => `${n} removed`, skipped: (n) => `${n} not live skipped`, dl: 'Download Excel', err: 'Something went wrong: ' },
+      redoing: 'Preparing again', doneT: (n) => `${n} checked`, removed: (n) => `${n} removed`, skipped: (n) => `${n} not live skipped`, dl: 'Download Excel', err: 'Something went wrong: ', reviewChanged: 'The PDP changed. Review the updated version before confirming.' },
     th: { steps: ['แนบไฟล์', 'เตรียม', 'ตรวจ', 'ดาวน์โหลด'], rows: (n) => `${n} แถว`, prep: (a, b) => `กำลังเตรียม ${a} / ${b}`, liveP: 'สินค้าที่ไลฟ์',
       skip: (n) => `ไม่ได้ไลฟ์ ${n} รายการ — ข้ามไป`, view: 'ดู', hide: 'ซ่อน', asOf: (d) => `รายการไลฟ์ ณ ${d}`, byStatus: 'จากคอลัมน์ Status',
       skipRows: (n) => `${n} แถวใน Excel — คงไว้ตามเดิม`, notLive: 'ไม่ได้ไลฟ์', unknown: 'ไม่ทราบ', none: 'ไม่มีสินค้าที่ไลฟ์ในไฟล์นี้',
       
       w_fail: 'เตรียมไม่สำเร็จ', w_retried: 'ลองใหม่แล้วยังเหมือนเดิม', redo: 'เตรียมใหม่', remove: 'นำออกจาก Excel นี้',
-      redoing: 'กำลังเตรียมใหม่', doneT: (n) => `ตรวจแล้ว ${n} รายการ`, removed: (n) => `นำออก ${n}`, skipped: (n) => `ข้ามที่ไม่ได้ไลฟ์ ${n}`, dl: 'ดาวน์โหลด Excel', err: 'เกิดข้อผิดพลาด: ' },
+      redoing: 'กำลังเตรียมใหม่', doneT: (n) => `ตรวจแล้ว ${n} รายการ`, removed: (n) => `นำออก ${n}`, skipped: (n) => `ข้ามที่ไม่ได้ไลฟ์ ${n}`, dl: 'ดาวน์โหลด Excel', err: 'เกิดข้อผิดพลาด: ', reviewChanged: 'PDP มีการเปลี่ยนแปลง โปรดตรวจสอบฉบับล่าสุดก่อนยืนยัน' },
     ko: { steps: ['첨부', '준비', 'Check', '받기'], rows: (n) => `${n}행`, prep: (a, b) => `준비 중 ${a} / ${b}`, liveP: '라이브 제품',
       skip: (n) => `라이브 아님 ${n}개 — 건너뜀`, view: '보기', hide: '닫기', asOf: (d) => `라이브 목록 기준일 ${d}`, byStatus: 'Status 칸 기준',
       skipRows: (n) => `엑셀 ${n}행 — 원래 내용 그대로`, notLive: '라이브 아님', unknown: '모름', none: '이 파일에 라이브 제품이 없어요.',
       
       w_fail: '준비 못 함', w_retried: '다시 해도 그대로', redo: '다시 준비', remove: '이번 엑셀에서 빼기',
-      redoing: '다시 준비하는 중', doneT: (n) => `${n}개 확인 완료`, removed: (n) => `${n}개 뺌`, skipped: (n) => `라이브 아님 ${n}개 건너뜀`, dl: '엑셀 받기', err: '문제가 생겼어요: ' },
+      redoing: '다시 준비하는 중', doneT: (n) => `${n}개 확인 완료`, removed: (n) => `${n}개 뺌`, skipped: (n) => `라이브 아님 ${n}개 건너뜀`, dl: '엑셀 받기', err: '문제가 생겼어요: ', reviewChanged: 'PDP가 바뀌었어요. 최신 내용을 다시 보고 확인해 주세요.' },
     de: { steps: ['Anhängen', 'Vorbereiten', 'Prüfen', 'Herunterladen'], rows: (n) => `${n} Zeilen`, prep: (a, b) => `Vorbereitung ${a} / ${b}`, liveP: 'Live-Produkte',
       skip: (n) => `${n} nicht live — übersprungen`, view: 'Ansehen', hide: 'Ausblenden', asOf: (d) => `Live-Liste vom ${d}`, byStatus: 'Aus der Spalte Status',
       skipRows: (n) => `${n} Zeilen in der Excel — bleiben unverändert`, notLive: 'Nicht live', unknown: 'Unbekannt', none: 'Keine Live-Produkte in dieser Datei.',
       
       w_fail: 'Vorbereitung fehlgeschlagen', w_retried: 'auch nach erneutem Versuch', redo: 'Neu vorbereiten', remove: 'Aus dieser Excel entfernen',
-      redoing: 'Wird neu vorbereitet', doneT: (n) => `${n} geprüft`, removed: (n) => `${n} entfernt`, skipped: (n) => `${n} nicht live übersprungen`, dl: 'Excel herunterladen', err: 'Fehler: ' },
+      redoing: 'Wird neu vorbereitet', doneT: (n) => `${n} geprüft`, removed: (n) => `${n} entfernt`, skipped: (n) => `${n} nicht live übersprungen`, dl: 'Excel herunterladen', err: 'Fehler: ', reviewChanged: 'Die PDP wurde geändert. Bitte prüfen Sie die aktuelle Version vor der Bestätigung.' },
     ar: { steps: ['إرفاق', 'تجهيز', 'تحقق', 'تنزيل'], rows: (n) => `${n} صف`, prep: (a, b) => `جارٍ التجهيز ${a} / ${b}`, liveP: 'منتجات نشطة',
       skip: (n) => `${n} غير نشط — تم تخطيه`, view: 'عرض', hide: 'إخفاء', asOf: (d) => `قائمة النشط بتاريخ ${d}`, byStatus: 'من عمود Status',
       skipRows: (n) => `${n} صف في Excel — يبقى كما هو`, notLive: 'غير نشط', unknown: 'غير معروف', none: 'لا توجد منتجات نشطة في هذا الملف.',
       
       w_fail: 'تعذّر التجهيز', w_retried: 'ما زال بعد إعادة المحاولة', redo: 'إعادة التجهيز', remove: 'إزالة من ملف Excel هذا',
-      redoing: 'جارٍ إعادة التجهيز', doneT: (n) => `تم فحص ${n}`, removed: (n) => `أُزيل ${n}`, skipped: (n) => `تم تخطي ${n} غير نشط`, dl: 'تنزيل Excel', err: 'حدث خطأ: ' },
+      redoing: 'جارٍ إعادة التجهيز', doneT: (n) => `تم فحص ${n}`, removed: (n) => `أُزيل ${n}`, skipped: (n) => `تم تخطي ${n} غير نشط`, dl: 'تنزيل Excel', err: 'حدث خطأ: ', reviewChanged: 'تغيّرت صفحة تفاصيل المنتج. راجع النسخة المحدّثة قبل التأكيد.' },
   };
   // 덱 화면 (2026-11-27) 문구 — 위 TX 에 덧붙인다
   const TXD = {
     en: { rmS: 'Remove', viewAll: (n) => `View all ${n}`, moreBelow: 'More below', back: '← Back', prev: 'Previous', next: 'Next', removedL: 'Removed from this Excel', fReady: 'Ready', fReview: 'Needs review', checkingAll: (n) => `AI is checking all ${n} at once`, sumT: (r, m) => `${r} ready · ${m} need${m === 1 ? 's' : ''} your review`,
       sumS: (n, s, m) => `Checked ${n} in ${s} s — now just ${m === 1 ? 'this one' : 'these ' + m}`, okIn: 'Looks fine · include',
-      retryingA: 'Retrying automatically…',
       allDone: 'All checked', colModel: 'Model', colDesc: 'Description', imgsN: (n) => `${n} images`, moreRows: (n) => `+ ${n} more rows`, confirmDl: (n) => `Confirm ${n} & download` },
     th: { rmS: 'นำออก', viewAll: (n) => `ดูทั้งหมด ${n}`, moreBelow: 'ยังมีด้านล่าง', back: '← กลับ', prev: 'ก่อนหน้า', next: 'ถัดไป', removedL: 'นำออกจาก Excel นี้แล้ว', fReady: 'พร้อม', fReview: 'ต้องตรวจสอบ', checkingAll: (n) => `AI กำลังตรวจทั้ง ${n} รายการพร้อมกัน`, sumT: (r, m) => `พร้อม ${r} · ต้องตรวจสอบ ${m}`,
       sumS: (n, s, m) => `ตรวจ ${n} รายการใน ${s} วินาที — เหลือดูแค่ ${m}`, okIn: 'ดูแล้วโอเค · ใส่ไว้',
-      retryingA: 'กำลังลองใหม่อัตโนมัติ…',
       allDone: 'ตรวจครบแล้ว', colModel: 'รุ่น', colDesc: 'คำอธิบาย', imgsN: (n) => `${n} รูป`, moreRows: (n) => `+ อีก ${n} แถว`, confirmDl: (n) => `ยืนยัน ${n} และดาวน์โหลด` },
     ko: { rmS: '빼기', viewAll: (n) => `전체 보기 ${n}`, moreBelow: '아래에 더 있음', back: '← 돌아가기', prev: '이전', next: '다음', removedL: '이번 엑셀에서 뺌', fReady: '준비됨', fReview: '검토 필요', checkingAll: (n) => `AI가 ${n}개를 한꺼번에 확인 중`, sumT: (r, m) => `${r}개 준비됨 · ${m}개 검토 필요`,
       sumS: (n, s, m) => `${n}개를 ${s}초에 확인 — 이제 ${m}개만 보면 돼요`, okIn: '괜찮음 · 포함',
-      retryingA: '자동으로 다시 시도 중…',
       allDone: '모두 확인함', colModel: '모델', colDesc: '설명', imgsN: (n) => `이미지 ${n}장`, moreRows: (n) => `+ ${n}행 더`, confirmDl: (n) => `${n}개 확인하고 받기` },
     de: { rmS: 'Entfernen', viewAll: (n) => `Alle ${n} ansehen`, moreBelow: 'Weiter unten', back: '← Zurück', prev: 'Zurück', next: 'Weiter', removedL: 'Aus dieser Excel entfernt', fReady: 'Bereit', fReview: 'Zu prüfen', checkingAll: (n) => `KI prüft alle ${n} gleichzeitig`, sumT: (r, m) => `${r} bereit · ${m} zu prüfen`,
       sumS: (n, s, m) => `${n} in ${s} s geprüft — jetzt nur noch ${m}`, okIn: 'Passt · übernehmen',
-      retryingA: 'Wird automatisch erneut versucht…',
       allDone: 'Alles geprüft', colModel: 'Modell', colDesc: 'Beschreibung', imgsN: (n) => `${n} Bilder`, moreRows: (n) => `+ ${n} weitere Zeilen`, confirmDl: (n) => `${n} bestätigen & herunterladen` },
     ar: { rmS: 'إزالة', viewAll: (n) => `عرض الكل ${n}`, moreBelow: 'المزيد بالأسفل', back: 'رجوع →', prev: 'السابق', next: 'التالي', removedL: 'أُزيل من ملف Excel هذا', fReady: 'جاهز', fReview: 'بحاجة إلى مراجعة', checkingAll: (n) => `الذكاء الاصطناعي يفحص جميع ${n} معًا`, sumT: (r, m) => `${r} جاهز · ${m} بحاجة إلى مراجعتك`,
       sumS: (n, s, m) => `تم فحص ${n} في ${s} ث — تبقّى ${m} فقط`, okIn: 'يبدو جيدًا · تضمين',
-      retryingA: 'جارٍ إعادة المحاولة تلقائيًا…',
       allDone: 'تم فحص الكل', colModel: 'الطراز', colDesc: 'الوصف', imgsN: (n) => `${n} صور`, moreRows: (n) => `+ ${n} صفوف أخرى`, confirmDl: (n) => `تأكيد ${n} والتنزيل` },
   };
   // 문제 문구 (2026-11-27 장혁 피드백 '단순하게'): 오른쪽 칸 맨 위 큰 한 문장 · 다섯 언어 같은 톤. w_* 는 덱 더미 카드 아래 짧은 글
   const TXP = {
     en: { fam: { dish: 'Dishwasher', tower: 'WashTower', wd: 'Washer-dryer', styler: 'Styler', dryer: 'Dryer', washer: 'Washer', fridge: 'Refrigerator', buds: 'Earbuds', soundbar: 'Soundbar', speaker: 'Speaker', monitor: 'Monitor', tv: 'TV', ac: 'Air conditioner', purifier: 'Air purifier', dehum: 'Dehumidifier', micro: 'Microwave', vacuum: 'Vacuum', laptop: 'Laptop', projector: 'Projector' },
-      bImg: 'lg.com image is missing', bLines: 'lg.com text is missing', bSum: 'Thai summary not made', bSpec: 'lg.com spec table is missing', bFail: "PDP couldn't be made", noOrig: 'Not on lg.com either',
+      bImg: 'lg.com image is missing', bLines: 'lg.com text is missing', bSum: 'Thai summary not made', bSpec: 'lg.com spec table is missing', bFail: "PDP couldn't be made", noOrig: 'Original image unavailable', noLocation: 'Location in PDP unknown', bSpecUnknown: 'Could not verify lg.com specifications', bPreview: 'Excel PDP needs to be prepared again', bLimit: 'Shopee limits cut off part of the Excel PDP',
       w_img: (n) => `${n} missing image${n === 1 ? '' : 's'}`, w_txt: (n) => `${n} missing line${n === 1 ? '' : 's'}`, w_spec: 'Missing spec table', w_sum: 'No Thai summary', nextP: 'Next' },
     th: { fam: { dish: 'เครื่องล้างจาน', tower: 'WashTower', wd: 'เครื่องซักอบผ้า', styler: 'สไตเลอร์', dryer: 'เครื่องอบผ้า', washer: 'เครื่องซักผ้า', fridge: 'ตู้เย็น', buds: 'หูฟังไร้สาย', soundbar: 'ซาวด์บาร์', speaker: 'ลำโพง', monitor: 'จอมอนิเตอร์', tv: 'ทีวี', ac: 'เครื่องปรับอากาศ', purifier: 'เครื่องฟอกอากาศ', dehum: 'เครื่องลดความชื้น', micro: 'ไมโครเวฟ', vacuum: 'เครื่องดูดฝุ่น', laptop: 'แล็ปท็อป', projector: 'โปรเจคเตอร์' },
-      bImg: 'รูปจาก lg.com หายไป', bLines: 'ข้อความจาก lg.com หายไป', bSum: 'สร้างสรุปภาษาไทยไม่ได้', bSpec: 'ตารางสเปกจาก lg.com หายไป', bFail: 'สร้าง PDP ไม่ได้', noOrig: 'ไม่มีบน lg.com เช่นกัน',
+      bImg: 'รูปจาก lg.com หายไป', bLines: 'ข้อความจาก lg.com หายไป', bSum: 'สร้างสรุปภาษาไทยไม่ได้', bSpec: 'ตารางสเปกจาก lg.com หายไป', bFail: 'สร้าง PDP ไม่ได้', noOrig: 'โหลดรูปต้นฉบับไม่ได้', noLocation: 'ไม่ทราบตำแหน่งใน PDP', bSpecUnknown: 'ตรวจสอบสเปกจาก lg.com ไม่ได้', bPreview: 'ต้องเตรียม PDP สำหรับ Excel ใหม่', bLimit: 'ข้อจำกัดของ Shopee ตัดเนื้อหา PDP ใน Excel',
       w_img: (n) => `รูปหายไป ${n} รูป`, w_txt: (n) => `ข้อความหายไป ${n} บรรทัด`, w_spec: 'ตารางสเปกหายไป', w_sum: 'ไม่มีสรุปภาษาไทย', nextP: 'ถัดไป' },
     ko: { fam: { dish: '식기세척기', tower: '워시타워', wd: '세탁건조기', styler: '스타일러', dryer: '건조기', washer: '세탁기', fridge: '냉장고', buds: '이어버드', soundbar: '사운드바', speaker: '스피커', monitor: '모니터', tv: 'TV', ac: '에어컨', purifier: '공기청정기', dehum: '제습기', micro: '전자레인지', vacuum: '청소기', laptop: '노트북', projector: '프로젝터' },
-      bImg: 'lg.com 원본 이미지가 빠졌어요', bLines: 'lg.com 원본 문구가 빠졌어요', bSum: '태국어 요약을 못 만들었어요', bSpec: 'lg.com 원본 스펙 표가 빠졌어요', bFail: 'PDP를 만들지 못했어요', noOrig: 'lg.com에도 없음',
+      bImg: 'lg.com 원본 이미지가 빠졌어요', bLines: 'lg.com 원본 문구가 빠졌어요', bSum: '태국어 요약을 못 만들었어요', bSpec: 'lg.com 원본 스펙 표가 빠졌어요', bFail: 'PDP를 만들지 못했어요', noOrig: '원본 이미지를 표시할 수 없어요', noLocation: 'PDP에서 위치를 확인할 수 없어요', bSpecUnknown: 'lg.com 원본 스펙을 확인할 수 없어요', bPreview: 'Excel용 PDP를 다시 준비해야 해요', bLimit: 'Shopee 제한으로 Excel에 PDP 전체를 담지 못했어요',
       w_img: (n) => `빠진 이미지 ${n}장`, w_txt: (n) => `빠진 문구 ${n}줄`, w_spec: '빠진 스펙 표', w_sum: '태국어 요약 없음', nextP: '다음' },
     de: { fam: { dish: 'Geschirrspüler', tower: 'WashTower', wd: 'Waschtrockner', styler: 'Styler', dryer: 'Trockner', washer: 'Waschmaschine', fridge: 'Kühlschrank', buds: 'Ohrhörer', soundbar: 'Soundbar', speaker: 'Lautsprecher', monitor: 'Monitor', tv: 'Fernseher', ac: 'Klimaanlage', purifier: 'Luftreiniger', dehum: 'Luftentfeuchter', micro: 'Mikrowelle', vacuum: 'Staubsauger', laptop: 'Laptop', projector: 'Beamer' },
-      bImg: 'lg.com-Bild fehlt', bLines: 'lg.com-Text fehlt', bSum: 'Thai-Zusammenfassung fehlt', bSpec: 'lg.com-Datentabelle fehlt', bFail: 'PDP nicht erstellt', noOrig: 'Auch nicht auf lg.com',
+      bImg: 'lg.com-Bild fehlt', bLines: 'lg.com-Text fehlt', bSum: 'Thai-Zusammenfassung fehlt', bSpec: 'lg.com-Datentabelle fehlt', bFail: 'PDP nicht erstellt', noOrig: 'Originalbild nicht verfügbar', noLocation: 'Position in der PDP unbekannt', bSpecUnknown: 'lg.com-Spezifikationen konnten nicht geprüft werden', bPreview: 'Excel-PDP muss neu vorbereitet werden', bLimit: 'Das Shopee-Limit kürzt die Excel-PDP',
       w_img: (n) => `${n} fehlende(s) Bild(er)`, w_txt: (n) => `${n} fehlende Zeile(n)`, w_spec: 'Fehlende Datentabelle', w_sum: 'Keine thailändische Zusammenfassung', nextP: 'Weiter' },
     ar: { fam: { dish: 'غسالة صحون', tower: 'WashTower', wd: 'غسالة ومجففة', styler: 'ستايلر', dryer: 'مجفف ملابس', washer: 'غسالة', fridge: 'ثلاجة', buds: 'سماعات أذن', soundbar: 'ساوندبار', speaker: 'مكبر صوت', monitor: 'شاشة', tv: 'تلفزيون', ac: 'مكيف هواء', purifier: 'منقي هواء', dehum: 'مزيل رطوبة', micro: 'ميكروويف', vacuum: 'مكنسة كهربائية', laptop: 'حاسوب محمول', projector: 'جهاز عرض' },
-      bImg: 'صورة lg.com مفقودة', bLines: 'نص lg.com مفقود', bSum: 'لم يُنشأ الملخص التايلاندي', bSpec: 'جدول مواصفات lg.com مفقود', bFail: 'تعذّر إنشاء PDP', noOrig: 'غير موجود في lg.com أيضًا',
+      bImg: 'صورة lg.com مفقودة', bLines: 'نص lg.com مفقود', bSum: 'لم يُنشأ الملخص التايلاندي', bSpec: 'جدول مواصفات lg.com مفقود', bFail: 'تعذّر إنشاء PDP', noOrig: 'الصورة الأصلية غير متاحة', noLocation: 'الموضع في صفحة التفاصيل غير معروف', bSpecUnknown: 'تعذّر التحقق من مواصفات lg.com', bPreview: 'يجب إعادة تجهيز صفحة التفاصيل لملف Excel', bLimit: 'حدود Shopee قطعت جزءًا من صفحة التفاصيل في Excel',
       w_img: (n) => `${n} صورة مفقودة`, w_txt: (n) => `${n} سطر مفقود`, w_spec: 'جدول مواصفات مفقود', w_sum: 'لا يوجد ملخص تايلاندي', nextP: 'التالي' },
   };
   const tOf = (L) => Object.assign({}, TX.en, TXD.en, TXP.en, TX[L] || {}, TXD[L] || {}, TXP[L] || {});
@@ -176,7 +171,7 @@
   const aiRows = (u) => (u[0].status === 'failed' ? [{ k: 'fail', ok: false, msg: u[0].error }] : u[0].ai || []);
   // 이미지: 슬라이스에서 못 가져온 것이나 크롤에서 빠진 것이나 사람 눈에는 같은 '빠진 이미지'
   const whyImg = (x) => C.T.w_img(x.n);
-  const why = (x) => ({ img: () => whyImg(x), txt: () => C.T.w_txt(x.n), sum: () => C.T.w_sum, spec: () => C.T.w_spec, fail: () => C.T.w_fail + (x.msg ? ' — ' + x.msg : ''), redo: () => C.T.w_fail + (x.msg ? ' — ' + x.msg : '') }[x.k] || (() => x.k))();
+  const why = (x) => ({ img: () => whyImg(x), txt: () => C.T.w_txt(x.n), sum: () => C.T.w_sum, spec: () => x.unknown ? C.T.bSpecUnknown : C.T.w_spec, preview: () => C.T.bPreview, n12: () => C.T.bLimit, fail: () => C.T.w_fail + (x.msg ? ' — ' + x.msg : ''), redo: () => C.T.w_fail + (x.msg ? ' — ' + x.msg : '') }[x.k] || (() => x.k))();
   const reduced = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (_) { return false; } };
   const EZ = { out: 'cubic-bezier(.16,1,.3,1)', p3out: 'cubic-bezier(.33,1,.68,1)', p3in: 'cubic-bezier(.32,0,.67,0)', io: 'cubic-bezier(.45,0,.55,1)' };
   const busy = (u) => u.some((x) => x.status === 'working' || x.retrying);
@@ -184,7 +179,6 @@
   const passed = (u) => !busy(u) && u.every((x) => x.status === 'ok') && aiRows(u).every((x) => x.ok);
   const isRemoved = (u) => u.every((x) => x.check === 'removed');
   const isOk = (u) => u.every((x) => x.check === 'ok');
-  const rowsOf = (u) => u.map((x) => x.row);
   const CW = 260;   // 큰 카드 폭 (검토 · 왼쪽 더미는 이걸 줄여서)
 
   function deckView(core) {
@@ -210,37 +204,59 @@
     const b = document.getElementById(id); if (!b) return; b.textContent = n;
     if (!reduced()) b.animate([{ transform: 'translateY(-60%)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 260, easing: EZ.out });
   }
-  function cardEl(core, u) {   // 큰 카드 = 엑셀 설명 칸에 들어가는 상세 이미지 (bulk-market 틀) + 모델 + 이유 한 줄
-    const e = core.esc, it = u[0], T = C.T, ai = it.ai || [];
-    // 사람이 볼 문제 (2026-11-27): 자리를 아는 것(못 불러온 이미지)은 그 장 위에 굵은 테두리 + 큰 글자,
-    // 자리가 없는 것(lg.com 원본에만 있는 그림 · 글, 요약 · 스펙 표)은 PDP 맨 위 문제 칸에 — 원본 그림은 크게
-    const img = ai.find((x) => x.k === 'img') || {}, at = (img.at || []).filter((b) => !b.lgGone);   // lg.com 에서도 없는 그림은 문제 아님
-    // 슬라이스를 만들 때 못 가져온 이미지는 크기가 없어 접힌다 → 사람 눈에는 그 자리에 이미지가 '없음'(아래 글이 당겨 올라옴).
-    //   그래서 '빈 칸'이 아니라 들어갈 자리에 굵은 선 + '여기 들어갈 이미지가 빠져 있어요', 옆에 lg.com 원본(비교 칸). 크기가 있어 비어 보이는 칸이면 칸 표시
-    const kindOf = (b) => b.kind || (b.h < 0.03 ? 'gone' : 'blank');
-    const mark = (k) => at.filter((b) => b.slice === k + 1).map((b) => `<span class="dk-bad ${kindOf(b)}" data-kind="img" data-src="${e(b.src || '')}" style="top:${(b.y * 100).toFixed(2)}%${kindOf(b) === 'blank' ? `;height:${(b.h * 100).toFixed(2)}%` : ''}"></span>`).join('');   // 표시만 (글자 없이)
-    // 자리가 없는 문제(lg.com 에만 있는 그림 · 글)는 카드 안에 글 없이 — 보이지 않는 표시만 두고 옆 'lg.com 원본' 칸에 그 그림 · 글을 보여 준다
-    const pb = (kind, inner, src) => `<div class="dk-pb" data-kind="${kind}"${src ? ` data-src="${e(src)}"` : ''}>${inner || ''}</div>`;
-    const pbs = [];
-    if (it.status === 'failed') pbs.push(pb('fail'));
-    if (!img.ok) { (img.src || []).forEach((s) => pbs.push(pb('img', '', s))); if (!at.length && !(img.src || []).length) pbs.push(pb('img')); }
-    for (const x of ai) {
-      if (x.ok) continue;
-      if (x.k === 'txt') pbs.push(pb('lines', x.lines && x.lines.length ? `<ul class="dk-pl">${x.lines.map((l) => `<li>${e(l)}</li>`).join('')}</ul>` : ''));
-      else if (x.k === 'sum' || x.k === 'spec') pbs.push(pb(x.k));
+  function problems(it) {
+    if (it.status === 'failed') return [{ kind: 'fail' }];
+    const out = [];
+    for (const check of it.ai || []) {
+      if (check.ok) continue;
+      if (check.k === 'img') {
+        const broken = (check.at || []).filter((b) => !b.lgGone);
+        for (const b of broken) out.push({ kind: 'img', src: b.src, regions: b.regions || [b] });
+        const missing = check.issues || (check.src || []).map((src) => ({ src }));
+        for (const issue of missing) out.push({ kind: 'img', ...issue });
+        if ((check.bad || 0) > broken.length || (check.lg || 0) > missing.length || (!broken.length && !missing.length)) {
+          out.push({ kind: 'img' });
+        }
+      } else if (check.k === 'txt' || check.k === 'spec' || check.k === 'sum' || check.k === 'preview' || check.k === 'n12') {
+        const kind = check.k === 'txt' ? 'lines' : check.unknown && check.k === 'spec' ? 'specUnknown' : check.k;
+        const issues = check.issues && check.issues.length ? check.issues : [{ lines: check.lines }];
+        for (const issue of issues) out.push({ kind: check.k === 'spec' && issue.unknown ? 'specUnknown' : kind, ...issue });
+      }
     }
-    const body = `<div class="ck-imgs">${(it.imgs || []).map(small).map((s, k) => { const m = mark(k); return m ? `<span class="dk-si"><img src="${e(s)}" alt="" decoding="async">${m}</span>` : `<img src="${e(s)}" alt="" decoding="async">`; }).join('')}</div>`;
-    const pv = window.CliaMarket ? CliaMarket.page(C.job.channel, { body }) : body;
+    return out;
+  }
+
+  const pdpImgs = it => it.imgs || [];
+  function cardEl(core, u) {
+    const e = core.esc, it = u[0], issues = problems(it);
+    const images = it.status === 'failed' ? [] : pdpImgs(it);
+    const marks = images.map(() => []);
+    issues.forEach((issue, index) => {
+      for (const r of issue.regions || []) {
+        if (!marks[r.slice - 1] || !Number.isFinite(r.y) || !Number.isFinite(r.h) ||
+            r.y < 0 || r.y >= 1 || r.h <= 0 || r.h > 1) continue;
+        const x = r.x ?? 0, w = r.w ?? 1;
+        if (!Number.isFinite(x) || !Number.isFinite(w) || x < 0 || w <= 0 || x + w > 1.00001) continue;
+        marks[r.slice - 1].push(
+          `<span class="dk-bad${r.kind === 'gone' ? ' gone' : ''}${issue.kind === 'img' ? '' : ' dk-copy-mark'}" data-issue="${index}" aria-hidden="true" style="top:${r.y * 100}%;height:${r.h * 100}%;left:${x * 100}%;width:${w * 100}%"></span>`);
+      }
+    });
+    const slices = images.map((src, k) =>
+      `<span class="dk-si"><img src="${e(small(src))}" alt="" decoding="async">${marks[k].join('')}</span>`).join('');
     const el = document.createElement('div'); el.className = 'dk-card';
-    el.innerHTML = `<div class="dk-ph"><div class="dk-sc">${pbs.length ? `<div class="dk-pbs">${pbs.join('')}</div>` : ''}${pv}</div></div><div class="dk-mo">${e(it.model || '')}</div><div class="dk-st"></div>`;
+    const detail = `<div class="ck-imgs">${slices}</div>`;
+    const body = images.length && window.CliaMarket ? CliaMarket.page(C.job.channel, { body: detail }) : detail;
+    el._issues = issues;
+    el._content = JSON.stringify([it.status === 'failed', pdpImgs(it), it.ai]);
+    el.innerHTML = `<div class="dk-ph"><div class="dk-sc">${body}</div></div><div class="dk-mo">${e(it.model || '')}</div><div class="dk-st"></div>`;
     C.dk.root.appendChild(el); cardState(el, u); return el;
   }
   function cardState(el, u) {
     const bad = aiRows(u).filter((x) => !x.ok);
     el.classList.toggle('dk-busy', busy(u)); el.classList.toggle('dk-ok', passed(u)); el.classList.toggle('dk-rm', isRemoved(u));
     // 사람이 정할 문제가 남은 카드: 나머지 장은 어둡게, 문제 장만 선명하게 (CSS .dk-prob)
-    el.classList.toggle('dk-prob', !passed(u) && !isRemoved(u) && !busy(u) && !isOk(u) && !!el.querySelector('.dk-pb, .dk-bad'));
-    el.querySelector('.dk-st').textContent = isRemoved(u) ? C.T.removedL : busy(u) ? (u.some((x) => x.retrying) ? C.T.retryingA : C.T.redoing)
+    el.classList.toggle('dk-prob', !passed(u) && !isRemoved(u) && !busy(u) && !isOk(u) && el._issues.length > 0);
+    el.querySelector('.dk-st').textContent = isRemoved(u) ? C.T.removedL : busy(u) ? C.T.redoing
       : passed(u) ? C.T.fReady : bad.map(why).join(' · ');
   }
   const pileAt = (k) => { const s = rel(document.getElementById('dkLs')); const sc = s.w / CW; return { x: s.x + Math.min(k, 7) * 4, y: s.y + Math.min(k, 7) * 8, s: sc, r: [-2.5, 2, -1, 1.5][k % 4] }; };
@@ -251,7 +267,7 @@
     if (!anim || reduced()) { bump('dkRn', D.readyN); return; }
     const it = u[0], e = core.esc;
     const m = document.createElement('div'); m.className = 'dk-mini ok';
-    m.innerHTML = `<img src="${e(small((it.imgs || [])[0] || ''))}" alt=""><b>${e(it.model || '')}</b>`;   // 상세 첫 장 (갤러리 아님)
+    m.innerHTML = `<img src="${e(small(pdpImgs(it)[0] || ''))}" alt=""><b>${e(it.model || '')}</b>`;   // 상세 첫 장 (갤러리 아님)
     m.style.zIndex = 30 + (k % 50); D.root.appendChild(m);
     const a = deckAt(), to = readyAt(k), mid = { x: (a.x + to.x) / 2 - 40, y: Math.min(a.y, to.y) + (Math.abs(a.y - to.y) * 0.45) };
     m.animate([{ transform: `translate(${a.x}px,${a.y}px) scale(1)` }, { transform: `translate(${mid.x}px,${mid.y}px) scale(1.4) rotate(-6deg)`, offset: 0.45 }, { transform: T3(to) }], { duration: 520, easing: EZ.p3out, fill: 'forwards' })
@@ -352,56 +368,113 @@
     //         카드 안 이미지는 살짝 늦게 따라옴(패럴랙스). 드래그 · 스와이프 · 가로 휠 · ← → 로 넘기기. 라이브러리 없이 CSS 전환 + 포인터 이벤트
     const ARL = '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>', ARR = '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
     D.root.insertAdjacentHTML('beforeend', `<div class="dk-top"><div class="dk-count"><b id="dkI"></b><span id="dkNn"></span></div><div class="dk-prog"><i id="dkProg"></i></div></div><div class="dk-cap" id="dkCap"></div>
-      <div class="dk-car" id="dkCar"><div class="dk-track" id="dkTrack"></div></div>
+      <div class="dk-viewport" tabindex="0"><div class="dk-stage"><div class="dk-car" id="dkCar"><div class="dk-track" id="dkTrack"></div></div>
       <button class="dk-arw" id="dkPrev" type="button" aria-label="${e(rtl ? T.next : T.prev)}">${ARL}</button><button class="dk-arw" id="dkNext" type="button" aria-label="${e(rtl ? T.prev : T.next)}">${ARR}</button>
-      <div class="dk-cmp" id="dkCmp" hidden><div class="dk-cmp-box"><div class="dk-cmp-h"></div><div class="dk-cmp-b"></div><div class="dk-cmp-s"></div></div><div class="dk-cnav"></div></div>
+      <div class="dk-cmp" id="dkCmp" hidden><div class="dk-cmp-box"><div class="dk-cmp-h"></div><div class="dk-cmp-b"></div><div class="dk-cmp-s"></div><div class="dk-cmp-location"></div></div><div class="dk-cnav"></div></div></div></div>
       <div class="dk-bar"><button class="dk-act" data-a="remove" type="button">${e(T.rmS)}</button><button class="dk-act" data-a="retry" type="button">${e(T.redo)}</button><button class="dk-act" data-a="ok" type="button">${e(T.okIn)}</button></div>`);
     const cap = document.getElementById('dkCap'), car = document.getElementById('dkCar'), track = document.getElementById('dkTrack');
+    const stage = car.closest('.dk-stage'), viewport = stage.parentElement;
+    const stageRel = node => {
+      const r = node.getBoundingClientRect(), origin = (G.compact ? stage : D.root).getBoundingClientRect();
+      return { x: r.left - origin.left, y: r.top - origin.top, w: r.width, h: r.height };
+    };
     const prevB = document.getElementById('dkPrev'), nextB = document.getElementById('dkNext');   // 왼쪽 · 오른쪽 (아랍어는 왼쪽이 다음)
     prevB.onclick = () => go(rtl ? 1 : -1); nextB.onclick = () => go(rtl ? -1 : 1);
     const acts = [...D.root.querySelectorAll('.dk-act')];
     // 오른쪽 칸 (2026-11-27 장혁 피드백 '단순하게'): 맨 위 큰 한 문장(무슨 일인지) + 그 아래 lg.com 원본(빠진 문구 · 이미지). 화면에 같은 말은 한 번만.
     //   카드 바로 옆, 꼭지가 문제 자리를 가리킴. 문제가 여럿이면 칸 바로 밑에 '1/3 ⌄' — 누르면 다음 문제로, 칸 내용도 그 문제 것으로
     const cmpEl = document.getElementById('dkCmp'), cmpBox = cmpEl.querySelector('.dk-cmp-box'), cmpH = cmpEl.querySelector('.dk-cmp-h'), cmpB = cmpEl.querySelector('.dk-cmp-b'), cmpS = cmpEl.querySelector('.dk-cmp-s'), cmpN = cmpEl.querySelector('.dk-cnav');
-    const HEAD = { img: T.bImg, lines: T.bLines, sum: T.bSum, spec: T.bSpec, fail: T.bFail };
-    let cmpT = 0;
+    const HEAD = { img: T.bImg, lines: T.bLines, sum: T.bSum, spec: T.bSpec, specUnknown: T.bSpecUnknown, preview: T.bPreview, n12: T.bLimit, fail: T.bFail };
+    let cmpT = 0, pointFrame = 0, sliding = false;
     function cmp(later) {
-      clearTimeout(cmpT); if (later) { cmpEl.hidden = true; cmpT = setTimeout(cmp, later); return; }
-      const c = el, ps = c && c.classList.contains('dk-prob') ? probs(c) : [], k = c ? c._pi || 0 : 0, p = ps[k];
-      const kind = p && p.dataset.kind;
-      if (!kind || (drag && drag.on) || !alive) { cmpEl.hidden = true; return; }
-      const src = p.dataset.src || '', lines = p.querySelector('ul.dk-pl');
-      const key = [kind, src, k, list[i][0].row].join('|');
-      if (cmpEl.dataset.k !== key) {
-        cmpEl.dataset.k = key; cmpS.textContent = ''; cmpH.textContent = HEAD[kind] || '';
-        if (src) { cmpB.innerHTML = '<img alt="" decoding="async">';
-          const im = cmpB.firstChild; im.onerror = () => { im.hidden = true; cmpS.textContent = T.noOrig; cmp(); }; im.onload = () => cmp(); im.src = src;
-        } else cmpB.innerHTML = lines ? lines.outerHTML : '';
-        cmpN.innerHTML = ps.length > 1 ? `<em>${k + 1}/${ps.length}</em><button type="button" aria-label="${e(T.nextP)}" title="${e(T.nextP)}">${DN}</button>` : '';
-        const nb = cmpN.querySelector('button'); if (nb) nb.onclick = () => seek(el, k + 1);
+      if (later) {
+        clearTimeout(cmpT);
+        sliding = true; cmpEl.hidden = true;
+        cmpT = setTimeout(() => { sliding = false; cmp(); }, later);
+        return;
       }
-      const rc = rel(c.querySelector('.dk-ph')), rp = rel(p), W = Math.round(Math.max(200, Math.min(320, G.side + GAP + 6)));   // 캐러셀 가장자리 · 화살표 바로 앞까지
+      const c = el, ps = c && c.classList.contains('dk-prob') ? c._issues : [];
+      const k = c ? c._pi || 0 : 0, p = ps[k];
+      if (!p || sliding || (drag && drag.on) || !alive) { cmpEl.hidden = true; return; }
+      const marks = issueMarks(c, k);
+      const src = /^(https?:)?\/\//i.test(p.src || '') ? p.src : '';
+      if (cmpEl._issue !== p) {
+        cmpEl._issue = p;
+        cmpS.textContent = '';
+        cmpH.textContent = HEAD[p.kind];
+        if (src) {
+          cmpB.innerHTML = '<img alt="" decoding="async">';
+          const im = cmpB.firstChild;
+          im.onerror = () => { if (cmpEl._issue !== p) return; im.hidden = true; cmpS.textContent = T.noOrig; cmp(); };
+          im.onload = () => cmp();
+          im.src = src;
+        } else if (p.rows && p.rows.length) {
+          cmpB.innerHTML = `<ul class="dk-pl">${p.rows.map(r => `<li>${e(r.label)} · ${e(r.value)}</li>`).join('')}</ul>`;
+        } else {
+          cmpB.innerHTML = p.lines && p.lines.length ? `<ul class="dk-pl">${p.lines.map((line) => `<li>${e(line)}</li>`).join('')}</ul>` : '';
+        }
+        if (p.model) cmpB.insertAdjacentHTML('afterbegin', `<p><strong>${e(p.model)}</strong></p>`);
+        const keepFocus = cmpN.contains(document.activeElement);
+        cmpN.innerHTML = ps.length > 1 ? `<em>${k + 1}/${ps.length}</em><button type="button" aria-label="${e(T.nextP)}" title="${e(T.nextP)}">${DN}</button>` : '';
+        const nb = cmpN.querySelector('button'); if (nb) { nb.onclick = () => seek(el, k + 1); if (keepFocus) nb.focus({ preventScroll: true }); }
+      }
+      cmpBox.dataset.location = marks.length ? 'mapped' : 'unknown';
+      cmpBox.querySelector('.dk-cmp-location').textContent = ['fail', 'preview', 'specUnknown', 'n12'].includes(p.kind) || marks.length ? '' : T.noLocation;
+      const rc = stageRel(c.querySelector('.dk-sc'));
+      // Point to the visible part of this issue only. A scrolled-out region has no arrow.
+      const visible = marks.map(stageRel).find((r) => r.w > 0 && r.y + r.h >= rc.y && r.y < rc.y + rc.h);
+      const target = visible && (Math.max(rc.y, visible.y) + Math.min(rc.y + rc.h, visible.y + visible.h)) / 2;
+      const room = rtl ? rc.x - 12 : G.w - rc.x - rc.w - 12;
+      const W = Math.round(Math.max(0, Math.min(320, G.panel, G.stacked ? G.w - 32 : room - 4)));
       cmpEl.style.width = W + 'px'; cmpEl.hidden = false;
-      const H = cmpEl.offsetHeight, y = Math.round(Math.max(G.y, Math.min(G.y + G.ch - H, rp.y - cmpBox.offsetHeight * 0.4)));
-      cmpEl.style.transform = `translate(${Math.round(rtl ? rc.x - 12 - W : rc.x + rc.w + 12)}px,${y}px)`;
-      cmpEl.style.setProperty('--ay', Math.max(18, Math.min(cmpBox.offsetHeight - 18, rp.y - y)) + 'px');   // 꼭지가 문제 자리를 가리키게
+      // Keep natural source image sizing. Scroll only evidence longer than the available card.
+      cmpEl.style.setProperty('--evidence-height', Math.max(100, G.ch - (cmpEl.offsetHeight - cmpB.offsetHeight) - 4) + 'px');
+      const H = cmpEl.offsetHeight, boxH = cmpBox.offsetHeight;
+      const y = G.stacked ? G.y + G.ch + 10 : Math.round(Math.max(G.y, Math.min(G.y + Math.max(0, G.ch - H), visible ? target - boxH * 0.4 : G.y)));
+      const x = G.stacked ? (G.w - W) / 2 : rtl ? rc.x - 12 - W : rc.x + rc.w + 12;
+      cmpEl.style.transform = `translate(${Math.round(x)}px,${y}px)`;
+      stage.style.minHeight = Math.max(G.y + G.ch + 16, y + H + 16) + 'px';
+      const alignPoint = () => {
+        const offset = target - stageRel(cmpBox).y - cmpBox.clientTop;
+        const show = !G.stacked && !!visible && offset >= 0 && offset <= cmpBox.clientHeight;
+        cmpBox.classList.toggle('dk-point', show);
+        if (show) cmpEl.style.setProperty('--ay', offset + 'px');
+        if (alive && cmpEl.getAnimations().some(a => a.playState === 'running')) pointFrame = requestAnimationFrame(alignPoint);
+      };
+      cancelAnimationFrame(pointFrame);
+      alignPoint();
     }
     const sgn = rtl ? -1 : 1, GAP = 28, PAR = 64, WIN = 2;   // 다음 카드 방향 · 카드 사이 · 패럴랙스 폭 · 앞뒤로 둘 카드 수
     // 카드는 화면 높이에 맞춰 크게 (상세 이미지까지 보게) — 폭은 높이의 ~75%, 320~520px, 가운데. 위 168px 는 숫자 · 버튼 · 모델 · 짧은 한 줄
-    const geo = () => { const st = rel(D.root), y = 168, ch = Math.max(340, st.h - y - 16), cw = Math.round(Math.max(320, Math.min(520, ch * 0.75, st.w * 0.36))), x = Math.round((st.w - cw) / 2);
-      const side = Math.max(60, Math.min(cw * 0.55, (st.w - cw) / 2 - GAP - 72));   // 앞뒤 카드가 보이는 폭
-      return { x, y, ch, cw, w: st.w, side, step: cw + GAP }; };
+    const geo = () => {
+      const root = rel(D.root), compact = root.w <= 700 || root.h < 520;
+      D.root.classList.toggle('dk-compact', compact);
+      viewport.tabIndex = compact ? 0 : -1;
+      if (!compact) {
+        const y = 168, ch = Math.max(340, root.h - y - 16);
+        const cw = Math.round(Math.max(320, Math.min(520, ch * 0.75, root.w * 0.36)));
+        const x = Math.round((root.w - cw) / 2);
+        const side = Math.max(60, Math.min(cw * 0.55, (root.w - cw) / 2 - GAP - 72));
+        return { x, y, ch, cw, w: root.w, side, step: cw + GAP, panel: Math.max(200, side + GAP + 6) };
+      }
+      const st = rel(viewport), y = 18, stacked = st.w < 700;
+      const ch = Math.max(190, st.h - y - (stacked ? 265 : 16));
+      const cw = Math.round(Math.min(stacked ? st.w - 104 : st.w * 0.36, 520, Math.max(250, ch * 0.75)));
+      const x = Math.round((st.w - cw) / 2);
+      const side = Math.max(0, Math.min(cw * 0.55, x - GAP - 52));
+      return { x, y, ch, cw, w: st.w, side, step: cw + GAP, compact, stacked, panel: stacked ? st.w - 32 : x - 60 };
+    };
     let G = geo();
     const cards = new Map();   // list 번호 → 카드 (가운데 ± WIN 장만)
     function place() {   // 캐러셀 틀 · 화살표 · 끝으로 갈수록 흐려지는 가장자리
-      G = geo(); const L = G.x - GAP - G.side, W = G.cw + 2 * (GAP + G.side), f = ((G.side + GAP) / W * 100).toFixed(1);
+      G = geo(); stage.style.minHeight = (G.y + G.ch + 16) + 'px'; const L = G.x - GAP - G.side, W = G.cw + 2 * (GAP + G.side), f = ((G.side + GAP) / W * 100).toFixed(1);
       Object.assign(car.style, { left: L + 'px', top: G.y + 'px', width: W + 'px', height: G.ch + 'px' });
       const m = `linear-gradient(to right, transparent 0%, #000 ${f}%, #000 ${100 - f}%, transparent 100%)`; car.style.webkitMaskImage = m; car.style.maskImage = m;
-      prevB.style.top = nextB.style.top = (G.y + G.ch / 2 - 20) + 'px'; prevB.style.left = (L - 52) + 'px'; nextB.style.left = (L + W + 12) + 'px';
+      prevB.style.top = nextB.style.top = (G.y + G.ch / 2 - 20) + 'px'; prevB.style.left = (G.compact ? 6 : L - 52) + 'px'; nextB.style.left = (G.compact ? G.w - 46 : L + W + 12) + 'px';
     }
     const cardLeft = (k) => G.side + GAP + sgn * k * G.step;
-    function mk(k) {
-      const c = cardEl(core, list[k]); track.appendChild(c); c.classList.add('dk-cc'); fullCard(c, G);
+    function mk(k, before) {
+      const c = cardEl(core, list[k]); track.insertBefore(c, before || null); c.classList.add('dk-cc'); fullCard(c, G);
       c.style.left = cardLeft(k) + 'px'; c.style.top = '0px';
       c.addEventListener('click', () => { if (!moved && k !== i) go(k - i); });
       cards.set(k, c); return c;
@@ -418,18 +491,21 @@
     function layout(anim, kick) {   // kick: 넘긴 방향(+1 다음 · -1 이전) — 패럴랙스 시작점
       if (anim && !reduced()) track.style.transition = 'transform .52s cubic-bezier(.16,1,.3,1)'; else track.style.transition = 'none';
       track.style.transform = `translate3d(${-sgn * i * G.step}px,0,0)`;
-      cmp(anim ? 620 : 60);
+      if (anim && !reduced()) cmp(620);
+      else { clearTimeout(cmpT); sliding = false; }
       for (let k = i - WIN; k <= i + WIN; k++) if (k >= 0 && k < list.length && !cards.has(k)) mk(k);
       for (const [k, c] of cards) {
-        const on = k === i; if (c.classList.contains('dk-on') && !on) setTimeout(() => { const sc = c.querySelector('.dk-sc'); if (sc) sc.scrollTop = 0; }, 560);   // 다시 오면 맨 위부터
-        if (on && !c.classList.contains('dk-on')) seek(c);
+        const on = k === i; if (c.classList.contains('dk-on') && !on) setTimeout(() => { if (!c.classList.contains('dk-on')) c.querySelector('.dk-sc').scrollTop = 0; }, 560);   // 다시 오면 맨 위부터
+        const entering = on && !c.classList.contains('dk-on');
         c.classList.toggle('dk-on', on);
+        if (entering) seek(c, 0);
         if (Math.abs(k - i) > WIN) { cards.delete(k); setTimeout(() => c.remove(), anim ? 560 : 0); }
       }
+      if (el !== cards.get(i)) viewport.scrollTop = 0;
       el = cards.get(i);
       parallax(kick ? sgn * kick * PAR : null, anim);
       panel();
-      for (const v of [list[i + WIN + 1], list[i - WIN - 1]]) if (v) for (const src of (v[0].imgs || []).slice(0, 2).map(small)) { const im = new Image(); im.src = src; }   // 그다음 장 미리
+      for (const v of [list[i + WIN + 1], list[i - WIN - 1]]) if (v) for (const src of pdpImgs(v[0]).slice(0, 2).map(small)) { const im = new Image(); im.src = src; }   // 그다음 장 미리
     }
     // 드래그 · 스와이프 (세로로 움직이면 PDP 스크롤에 양보) · 트랙패드 가로 밀기
     let drag = null, moved = false, wheelLock = 0;
@@ -455,26 +531,25 @@
       wheelLock = now + 450; go(sgn * Math.sign(ev.deltaX));
     }, { passive: false });
     const stateOf = (u) => (isRemoved(u) ? 'rm' : busy(u) ? 'busy' : passed(u) || isOk(u) ? 'ok' : 'review');
-    const label = { rm: T.removedL, busy: T.redoing, ok: T.fReady, review: T.fReview };
     function panel() {
-      const u = list[i], it = u[0], g = G, s = stateOf(u), bad = aiRows(u).filter((x) => !x.ok);
+      const u = list[i], it = u[0], g = G, s = stateOf(u);
       D.root.dataset.st = s;   // 화면 배경 · 카드 테두리가 상태를 따른다
       document.getElementById('dkI').textContent = i + 1; document.getElementById('dkNn').textContent = ' / ' + list.length;
       document.getElementById('dkProg').style.width = ((i + 1) / list.length * 100) + '%';
-      // 위엔 타이틀만 크게: 모델명 + 제품군 (상태는 배경색 · 버튼으로). 다시 준비 중일 때만 짧게
+      // 위엔 모델명과 제품군만 표시.
       const fam = familyOf(u);
-      cap.innerHTML = `<div class="dk-cr"><b>${e(it.model || '')}</b>${fam ? `<span class="dk-fam">${e(fam)}</span>` : ''}</div>` + (s === 'busy' ? `<span>${e(label[s])}</span>` : '');
+      cap.innerHTML = `<div class="dk-cr"><b>${e(it.model || '')}</b>${fam ? `<span class="dk-fam">${e(fam)}</span>` : ''}</div>` + (s === 'busy' ? `<span>${e(T.redoing)}</span>` : '');
       cmp();
       cap.style.left = g.x + 'px'; cap.style.width = g.cw + 'px';
       (rtl ? nextB : prevB).disabled = !i; (rtl ? prevB : nextB).disabled = i >= list.length - 1;
       // 버튼 셋은 늘 같은 자리 — 상태에 맞지 않는 것은 흐리게
-      const can = { remove: s !== 'rm' && s !== 'busy', retry: s !== 'rm' && s !== 'busy', ok: s === 'review' && it.status === 'ok' };
+      const can = { remove: s !== 'rm' && s !== 'busy', retry: s !== 'rm' && s !== 'busy', ok: s === 'review' && u.every(x => x.status === 'ok' && !(x.ai || []).some(a => !a.ok && a.blocked)) };
       acts.forEach((b) => { b.disabled = !can[b.dataset.a]; });
     }
     acts.forEach((b) => { b.onclick = async () => {
       const u = list[i], a = b.dataset.a;
       acts.forEach((x) => { x.disabled = true; });
-      if (!(await act(core, rowsOf(u), a, a === 'ok' ? { override: true } : null))) { panel(); return; }
+      if ((await act(core, u, a, a === 'ok' ? { override: true } : null)) !== true) { sync(); return; }
       sync();
       if (!alive) return;
       if (all) { if (i < list.length - 1) go(1); return; }
@@ -487,7 +562,21 @@
     function sync() {   // 서버 상태로 목록 · 지금 카드 · 줄 다시
       const by = new Map(C.units.map((u) => [ukey(u), u]));
       list = list.map((u) => by.get(ukey(u)) || u);
-      for (const [k, c] of cards) cardState(c, list[k]);
+      for (const [k, c] of cards) {
+        const it = list[k][0];
+        if (c._content === JSON.stringify([it.status === 'failed', pdpImgs(it), it.ai])) {
+          cardState(c, list[k]);
+          if (c === el && c.classList.contains('dk-prob') && c._pi == null) seek(c, 0);
+        } else {
+          const replacement = mk(k, c);
+          c.remove();
+          if (c === el) {
+            el = replacement;
+            el.classList.add('dk-on');
+            seek(el, 0);
+          }
+        }
+      }
       panel();
       if (!polling && list.some((u) => busy(u) && !isRemoved(u))) {
         polling = true;
@@ -505,7 +594,7 @@
     function fullCard(c, g) {   // 크게 + 위치 막대 + '아래에 더 있음' (끝까지 내리면 사라짐)
       c.classList.add('dk-full'); c.style.width = g.cw + 'px';
       const ph = c.querySelector('.dk-ph'), sc = c.querySelector('.dk-sc'); ph.style.height = g.ch + 'px';
-      const cm = c.querySelector('.cm'); if (cm) cm.style.zoom = (g.cw / 426).toFixed(3);   // 260px 카드의 .61 과 같은 비율
+      const cm = c.querySelector('.cm'); if (cm) cm.style.zoom = (g.cw / 426).toFixed(3);
       const more = document.createElement('div'); more.className = 'dk-more'; more.setAttribute('aria-hidden', 'true'); more.innerHTML = `<span>${e(T.moreBelow)} ↓</span>`;   // 표시만 (누르는 것 아님 — 버튼은 위에만)
       ph.appendChild(more);
       // 위치 막대: 맥은 스크롤바가 숨어 있어서 직접 그린다 (어디쯤인지 · 얼마나 남았는지)
@@ -515,50 +604,80 @@
         rail.firstChild.style.height = hh + 'px'; rail.firstChild.style.transform = `translateY(${(rail.clientHeight - hh) * k}px)`; rail.hidden = max <= 4;
         more.classList.toggle('dk-end', sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 4);
         // 위치 막대 위 빨간 표시 = 문제 자리 (지금 보는 문제는 더 굵게)
-        const ps = c.classList.contains('dk-prob') ? probs(c) : [], H = Math.max(1, sc.scrollHeight);
+        const ps = c.classList.contains('dk-prob') ? c._issues : [];
         rail.querySelectorAll('s').forEach((x) => x.remove());
-        ps.forEach((p, k) => { const s = document.createElement('s'); if (k === c._pi) s.className = 'on'; s.style.top = (Math.min(1, topIn(sc, p) / H) * 100).toFixed(2) + '%'; rail.appendChild(s); });
+        ps.forEach((_, k) => {
+          const mark = issueMarks(c, k)[0];
+          if (!mark) return;
+          const tick = document.createElement('s');
+          if (k === c._pi) tick.className = 'on';
+          tick.style.top = (Math.min(1, topIn(sc, mark) / Math.max(1, sc.scrollHeight)) * 100) + '%';
+          rail.appendChild(tick);
+        });
       };
       c._upd = upd;
-      sc.addEventListener('scroll', () => { upd(); if (c === el) cmp(); }, { passive: true }); setTimeout(upd, 60); c.querySelectorAll('img').forEach((im) => im.addEventListener('load', upd, { once: true }));
+      const update = () => { upd(); if (c === el) cmp(); };
+      sc.addEventListener('scroll', update, { passive: true });
+      c.querySelectorAll('img').forEach((im) => {
+        im.addEventListener('load', update, { once: true });
+        im.addEventListener('error', update, { once: true });
+      });
+      requestAnimationFrame(update);
     }
-    // 문제 보기: 카드가 가운데 오면 첫 문제로 가서 멈춤 (그 위 이미지가 다 불러와져야 자리가 맞다). 다음 문제 버튼 · N 키로 차례로
-    const probs = (c) => [...c.querySelectorAll('.dk-pb, .dk-bad')];
+    const issueMarks = (c, k) => [...c.querySelectorAll(`.dk-bad[data-issue="${k}"]`)].filter((mark) => {
+      const im = mark.parentElement.firstElementChild;
+      return im.complete && im.naturalWidth > 0;
+    });
     const topIn = (sc, n) => n.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
     function seek(c, k) {
-      const ps = probs(c); if (!ps.length || !c.classList.contains('dk-prob')) return;
-      k = ((k || 0) % ps.length + ps.length) % ps.length; c._pi = k;
-      const p = ps[k], hot = p.classList.contains('dk-bad') ? p.closest('.dk-si') : p;
-      c.querySelectorAll('.dk-hot').forEach((x) => x.classList.remove('dk-hot')); c.querySelectorAll('.dk-cur').forEach((x) => x.classList.remove('dk-cur'));
-      hot.classList.add('dk-hot'); p.classList.add('dk-cur'); c.classList.toggle('dk-hotsi', hot.classList.contains('dk-si'));   // 슬라이스 자리 문제일 때만 나머지를 어둡게 (글 비교 중엔 PDP 를 그대로)
-      if (c === el) panel();
-      const ims = [...c.querySelectorAll('.ck-imgs img')], own = hot.querySelector('img'), upto = own && ims.includes(own) ? ims.slice(0, ims.indexOf(own) + 1) : [];
-      Promise.all(upto.map((im) => (im.complete ? 0 : new Promise((r) => { im.addEventListener('load', r, { once: true }); im.addEventListener('error', r, { once: true }); }))))
-        .then(() => setTimeout(() => {
-          const sc = c.querySelector('.dk-sc'); if (!sc || !c.classList.contains('dk-on') || c._pi !== k) return;
-          const y = p.classList.contains('dk-bad') ? topIn(sc, p) - 64 : topIn(sc, hot) - 12;   // 큰 글자(표시 위)까지 보이게
-          sc.scrollTo({ top: Math.max(0, y - sc.clientHeight * 0.12), behavior: reduced() ? 'auto' : 'smooth' });
-          if (c._upd) setTimeout(c._upd, 400);
-          cmp(); setTimeout(() => cmp(), 520);
-        }, upto.length ? 560 : 0));
+      if (!c || !c._issues.length || !c.classList.contains('dk-prob')) return;
+      const n = c._issues.length;
+      k = ((k % n) + n) % n;
+      c._pi = k;
+      c.querySelectorAll('.dk-bad').forEach((r) => r.classList.toggle('dk-cur', Number(r.dataset.issue) === k));
+      const hot = c.querySelectorAll('.dk-cur');
+      c.querySelectorAll('.dk-hot').forEach(slice => slice.classList.remove('dk-hot'));
+      for (const mark of hot) mark.closest('.dk-si').classList.add('dk-hot');
+      c.classList.toggle('dk-hotsi', hot.length > 0 && c._issues[k].kind === 'img');
+      if (c === el) cmp();
+      const first = c.querySelector('.dk-cur'), sc = c.querySelector('.dk-sc'), token = c._seek = {};
+      sc.scrollTo({ top: sc.scrollTop, behavior: 'instant' });
+      if (!first) { c._upd(); return; }
+      const ims = [...c.querySelectorAll('.ck-imgs img')];
+      const upto = ims.slice(0, ims.indexOf(first.parentElement.firstElementChild) + 1);
+      const apply = () => {
+        if (!alive || c !== el || c._seek !== token || c._pi !== k || !c.classList.contains('dk-prob')) return;
+        const mark = issueMarks(c, k)[0];
+        if (mark) sc.scrollTo({ top: Math.max(0, topIn(sc, mark) - 64 - sc.clientHeight * 0.12), behavior: reduced() ? 'instant' : 'smooth' });
+        c._upd();
+        cmp();
+      };
+      Promise.all(upto.map((im) => im.complete ? null : new Promise((resolve) => {
+        im.addEventListener('load', resolve, { once: true });
+        im.addEventListener('error', resolve, { once: true });
+      }))).then(() => { if (reduced()) apply(); else setTimeout(apply, 560); }); // 9ce27fd: 카드가 정착한 뒤 문제 위치로 스크롤
     }
     function scrollBy(page, px) {   // ↓ · ↑ 조금, 스페이스 · Page Down 한 화면
       const sc = el && el.querySelector('.dk-sc'); if (!sc) return;
       sc.scrollBy({ top: px != null ? px : page * sc.clientHeight * 0.85, behavior: reduced() ? 'auto' : 'smooth' });
     }
     function key(ev) {
-      if (ev.target && /input|textarea|select/i.test(ev.target.tagName)) return;
+      if (ev.target && (ev.target.closest?.('.dk-cmp') || /input|textarea|select/i.test(ev.target.tagName))) return;
+      if (ev.target === viewport && ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(ev.key)) return;
       const k = ev.key;
       if (k === 'ArrowDown' || k === 'ArrowUp') { ev.preventDefault(); scrollBy(0, k === 'ArrowDown' ? 160 : -160); return; }
+      if (k === ' ' && ev.target && ev.target.closest('button, a')) return;
       if (k === ' ' || k === 'PageDown' || k === 'PageUp') { ev.preventDefault(); scrollBy(k === 'PageUp' || (k === ' ' && ev.shiftKey) ? -1 : 1); return; }
       if (k === 'Home' || k === 'End') { ev.preventDefault(); const sc = el && el.querySelector('.dk-sc'); if (sc) sc.scrollTo({ top: k === 'Home' ? 0 : sc.scrollHeight, behavior: reduced() ? 'auto' : 'smooth' }); return; }
       if ((k === 'n' || k === 'N') && el && el.classList.contains('dk-prob')) { ev.preventDefault(); seek(el, (el._pi || 0) + 1); return; }
       if (k === 'ArrowRight') { ev.preventDefault(); go(rtl ? -1 : 1); } else if (k === 'ArrowLeft') { ev.preventDefault(); go(rtl ? 1 : -1); } else if (k === 'Escape' && all) { ev.preventDefault(); leave(); }
     }
-    function onResize() { if (!alive) return; cmp(200); place(); for (const [k, c] of cards) { c.style.left = cardLeft(k) + 'px'; c.style.width = G.cw + 'px'; c.querySelector('.dk-ph').style.height = G.ch + 'px'; } layout(false); }
+    function onResize() { if (!alive) return; place(); for (const [k, c] of cards) { c.style.left = cardLeft(k) + 'px'; c.style.width = G.cw + 'px'; c.querySelector('.dk-ph').style.height = G.ch + 'px'; const cm = c.querySelector('.cm'); if (cm) cm.style.zoom = (G.cw / 426).toFixed(3); c._upd(); } layout(false); if (el) seek(el, el._pi || 0); }
+    const cmpSize = new ResizeObserver(() => cmp());
+    cmpSize.observe(cmpBox);
     function leave() {
       if (!alive) return;
-      alive = false; document.removeEventListener('keydown', key); removeEventListener('resize', onResize);
+      alive = false; cancelAnimationFrame(pointFrame); clearTimeout(cmpT); cmpSize.disconnect(); document.removeEventListener('keydown', key); removeEventListener('resize', onResize);
       if (all && from === 'deck') rush(core, true); else finishView(core);
     }
     document.addEventListener('keydown', key);
@@ -566,12 +685,23 @@
     place(); layout(false); sync();
     addEventListener('resize', onResize);
   }
-  async function act(core, rows, action, opts) {
+  async function act(core, items, action, opts) {
     let who = ''; try { who = sessionStorage.getItem('clia_user') || localStorage.getItem('clia-bulk-mail') || ''; } catch (_) {}
+    const rows = items.map(it => it.row);
+    const reviewed = action === 'ok' ? Object.fromEntries(items.map(it =>
+      [it.row, { hash: it.hash, contentDigest: it.contentDigest }])) : undefined;
     try {
-      C.job = await core.api(`/api/v1/bulk/jobs/${C.job.id}/check`, { rows, action, by: who, override: !!(opts && opts.override) });
+      C.job = await core.api(`/api/v1/bulk/jobs/${C.job.id}/check`, { rows, action, by: who, override: !!(opts && opts.override), reviewed });
       C.units = units(C.job); alertLine(core, ''); return true;
-    } catch (e) { alertLine(core, C.T.err + e.message); return false; }
+    } catch (e) {
+      if (e.code === 'review_changed') {
+        await refresh(core);
+        alertLine(core, C.T.reviewChanged);
+        return 'review_changed';
+      }
+      alertLine(core, C.T.err + e.message);
+      return false;
+    }
   }
   function alertLine(core, msg) { const g = document.getElementById('ckGo'); if (g) g.innerHTML = msg ? `<div class="ck-why">${core.esc(msg)}</div>` : ''; }
   // 끝 · 완료 (2026-11-27): 검수 화면과 같은 틀 — 맨 위 한 줄(상태) · 그 아래 같은 자리의 버튼 줄 · 본문은 엑셀 시트.
@@ -601,9 +731,20 @@
     const b = document.getElementById('ckAll'); b.focus();
     b.onclick = async () => {
       document.querySelectorAll('#dkBar .dk-act').forEach((x) => { x.disabled = true; });
-      const anim = !reduced(), okP = act(core, todo.flatMap(rowsOf), 'ok');
+      const anim = !reduced(), okP = act(core, todo.flat(), 'ok');
       if (anim) fillSheet(core, sh, true);   // 시트 연출은 바로, 다운로드는 확인 요청이 끝나는 대로 (연출을 기다리지 않음)
-      if (!(await okP)) { const msg = (document.getElementById('ckGo') || {}).textContent || ''; await finishView(core); alertLine(core, msg); return; }
+      const outcome = await okP;
+      if (outcome === 'review_changed') {
+        const seen = new Map(todo.flat().map(it => [it.row, it]));
+        const changed = C.units.findIndex(u => u.some(it => {
+          const prior = seen.get(it.row);
+          return prior && (prior.hash !== it.hash || prior.contentDigest !== it.contentDigest);
+        }));
+        viewer(core, 'all', Math.max(0, changed), 'finish');
+        alertLine(core, T.reviewChanged);
+        return;
+      }
+      if (!outcome) { const msg = (document.getElementById('ckGo') || {}).textContent || ''; await finishView(core); alertLine(core, msg); return; }
       download(); doneTop(core);
       if (!anim) fillSheet(core, sh, false);
     };

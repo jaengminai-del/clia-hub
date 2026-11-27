@@ -162,7 +162,7 @@ function failKind(j) {
 const admins = () => String(process.env.BULK_ADMIN_EMAIL || '').split(',').map((x) => x.trim()).filter((x) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x));
 
 // admin: BULK_ADMIN_EMAIL 의 주소들 — 첫 번째가 받는 사람(To), 나머지는 참조(CC)
-function build(j, { base = '', attached = false, lang, admin = admins() } = {}) {
+function build(j, { base = '', attached = false, reviewRequired = false, lang, admin = admins() } = {}) {
   const adm = [].concat(admin || []).filter(Boolean);
   const want = lang || (j.notify && j.notify.lang) || j.lang;
   const L = TX[want] ? want : 'en';
@@ -187,17 +187,25 @@ function build(j, { base = '', attached = false, lang, admin = admins() } = {}) 
       text: [t.hFail, '', t.pFail, '', `${t.open}: ${open}`, ...(adm.length ? [`${t.ask}: ${adm[0]}${adm.length > 1 ? ` (cc ${adm.slice(1).join(', ')})` : ''}`] : [])].join('\n'),
     };
   }
-  const p = attached ? t.pOk : t.pBig;
+  const reviewText = {
+    ko: '엑셀을 받으려면 CLIA에서 검수를 마쳐 주세요.',
+    en: 'Finish reviewing the PDPs in CLIA to download the Excel file.',
+    th: 'ตรวจสอบ PDP ใน CLIA ให้เสร็จเพื่อดาวน์โหลดไฟล์ Excel',
+    de: 'Schließen Sie die PDP-Prüfung in CLIA ab, um die Excel-Datei herunterzuladen.',
+    ar: 'أكمل مراجعة صفحات التفاصيل في CLIA لتنزيل ملف Excel.',
+  };
+  const p = reviewRequired ? reviewText[L] : attached ? t.pOk : t.pBig;
   // 표: 매칭된 SKU → 확인 필요한 SKU → 벌크 업로드 파일명 (메일에 첨부했으면 "메일 첨부 완료")
   const file = `${esc(j.outName || '')}${attached ? `<br>${tag(t.att)}` : ''}`;
   const skip = j.check ? j.check.skipModels || 0 : null;   // 벌크 Check: 라이브 아닌 제품(모델) 수 — 화면 완료 화면과 같은 숫자
   const rows = dataRow(t.rOk, t.n(ok), T.fg, false, true) + dataRow(t.rRv, t.n(rv), rv ? T.accent : T.fg) + (skip != null ? dataRow(t.rSkip, t.n(skip), T.fg) : '') + dataRow(t.rFile, file, T.fg, true);
-  const content = `${heading(t.hOk)}${paragraph(p)}${panel(rows)}${button(t.open, open)}`;
-  const subject = t.sOk(ok, rv);
+  const title = reviewRequired ? reviewText[L] : t.hOk;
+  const content = `${heading(title)}${reviewRequired ? '' : paragraph(p)}${panel(rows)}${button(t.open, open)}`;
+  const subject = reviewRequired ? title : t.sOk(ok, rv);
   return {
     subject,
     html: shell({ lang: L, title: subject, logo, preheader: `${p} ${t.rOk} ${t.n(ok)} · ${t.rRv} ${t.n(rv)}`, content }),
-    text: [t.hOk, '', p, '', `${t.rOk}: ${t.n(ok)}`, `${t.rRv}: ${t.n(rv)}`, ...(skip != null ? [`${t.rSkip}: ${t.n(skip)}`] : []), `${t.rFile}: ${j.outName || ''}${attached ? ` (${t.att})` : ''}`, '', `${t.open}: ${open}`].join('\n'),
+    text: [title, '', ...(reviewRequired ? [] : [p, '']), `${t.rOk}: ${t.n(ok)}`, `${t.rRv}: ${t.n(rv)}`, ...(skip != null ? [`${t.rSkip}: ${t.n(skip)}`] : []), `${t.rFile}: ${j.outName || ''}${attached ? ` (${t.att})` : ''}`, '', `${t.open}: ${open}`].join('\n'),
   };
 }
 
