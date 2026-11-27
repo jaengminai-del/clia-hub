@@ -435,8 +435,6 @@ button.eb { cursor: pointer; }
 .ck-steps { position: relative; }
 .ck-sback { position: absolute; inset-inline-start: 20px; top: 0; bottom: 0; margin: auto 0; height: 30px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--clia-gray-200); background: #fff; font: inherit; font-size: 13px; font-weight: 600; color: var(--clia-gray-700); cursor: pointer; }
 .ck-sback:hover { border-color: var(--clia-gray-400); color: var(--clia-gray-900); }
-.dk-side { position: absolute; height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--clia-gray-200); background: #fff; font: inherit; font-size: 14px; font-weight: 600; color: var(--clia-gray-800); cursor: pointer; box-shadow: 0 1px 2px rgba(38,38,38,.05); z-index: 5; white-space: nowrap; }
-.dk-side:hover:not([disabled]) { border-color: var(--clia-gray-500); } .dk-side[disabled] { opacity: .3; cursor: default; }
 .dk-card.dk-full .dk-mo, .dk-card.dk-full .dk-st { display: none; }
 .dk-card.dk-rm .dk-ph { opacity: .45; border-color: var(--line); box-shadow: none; } .dk-card.dk-rm .dk-st { color: var(--muted); text-decoration: line-through; }
 .dk-fin { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 26px; } .ck-done .dk-fin .clia-btn { margin-top: 0; }
@@ -457,18 +455,24 @@ button.eb { cursor: pointer; }
 .dk-cap span { display: inline-flex; align-items: center; gap: 5px; font-size: 13.5px; color: var(--clia-gray-600); }
 .dk-cap span svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .dk-br[data-st="review"] .dk-cap span { color: var(--clia-heritage); font-weight: 600; } .dk-br[data-st="ok"] .dk-cap span { color: var(--clia-gray-800); font-weight: 600; }
-/* 줄 서 있는 다음 카드 — 어둡게, 가운데 카드 뒤에서 조금씩 */
-.dk-ghost { position: absolute; left: 0; top: 0; transform-origin: 0 0; border-radius: 14px; background: #232323; overflow: hidden; box-shadow: -8px 0 16px rgba(0,0,0,.16); transition: transform .38s cubic-bezier(.33,1,.68,1), opacity .3s; will-change: transform; }
-.dk-ghost img { display: block; width: 70%; height: 30%; margin: 22% auto 0; object-fit: contain; opacity: .16; }
-.dk-rest { position: absolute; font-size: 13px; font-weight: 600; color: var(--clia-gray-500); font-variant-numeric: tabular-nums; pointer-events: none; }
-.dk-card.dk-full .dk-ph::after { content: ''; position: absolute; inset: 0; background: #1f1f1f; opacity: 0; pointer-events: none; transition: opacity .42s ease; z-index: 6; border-radius: inherit; }
-.dk-card.dk-full.dk-dim .dk-ph::after { opacity: .72; transition: none; }
-@media (prefers-reduced-motion: reduce) { .dk-ghost, .dk-card.dk-full .dk-ph::after { transition: none; } }
+/* 캐러셀 — 가운데 카드가 크고, 앞뒤 PDP 는 일부만 · 작게 · 흐리게 (틀의 양 끝은 마스크로 흐려짐). 끌어서 넘기기 */
+.dk-car { position: absolute; overflow: hidden; touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; z-index: 5; }
+.dk-car.dk-drag { cursor: grabbing; } .dk-car img { -webkit-user-drag: none; user-drag: none; }
+.dk-track { position: absolute; left: 0; top: 0; height: 100%; will-change: transform; }
+.dk-cc .dk-ph { transform-origin: 50% 50%; transition: transform .52s cubic-bezier(.16,1,.3,1), opacity .52s cubic-bezier(.16,1,.3,1), border-color .3s, box-shadow .3s; border-color: var(--line); box-shadow: none; }
+.dk-cc:not(.dk-on) { cursor: pointer; } .dk-cc:not(.dk-on) .dk-ph { transform: scale(.9); opacity: .55; }
+.dk-cc:not(.dk-on) .dk-sc { overflow: hidden; pointer-events: none; } .dk-cc:not(.dk-on) .dk-more, .dk-cc:not(.dk-on) .dk-rail { opacity: 0; pointer-events: none; }
+.dk-sc > * { will-change: transform; }
+/* 이전 · 다음 — 작은 화살표만 */
+.dk-arw { position: absolute; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--clia-gray-700); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 6; }
+.dk-arw svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.dk-arw:hover:not([disabled]) { background: rgba(38,38,38,.07); color: var(--clia-gray-900); } .dk-arw:focus-visible { outline: 2px solid var(--clia-gray-900); } .dk-arw[disabled] { opacity: .22; cursor: default; }
+@media (prefers-reduced-motion: reduce) { .dk-cc .dk-ph, .dk-track { transition: none !important; } }
 /* 검수 화면 (검토 필요 · 전체 보기): 상태가 화면 배경부터 다르다 — 검토 필요는 와인 톤, 준비됨은 기본, 뺌은 회색 */
 .dk-br { background: var(--clia-page, #F8F7F5); transition: background-color .35s ease; }
 .dk-br[data-st="review"] { background: #F6E6EC; } .dk-br[data-st="rm"] { background: #ECEBE8; }
-.dk-br[data-st="review"] .dk-card .dk-ph { border: 2px solid var(--clia-heritage); box-shadow: 0 0 0 6px rgba(165,0,52,.10); }
-.dk-br[data-st="ok"] .dk-card .dk-ph { border-color: var(--line); box-shadow: 0 1px 2px rgba(38,38,38,.04), 0 8px 24px rgba(38,38,38,.06); }
+.dk-br[data-st="review"] .dk-cc.dk-on .dk-ph { border: 2px solid var(--clia-heritage); box-shadow: 0 0 0 6px rgba(165,0,52,.10); }
+.dk-br[data-st="ok"] .dk-cc.dk-on .dk-ph { border-color: var(--line); box-shadow: 0 1px 2px rgba(38,38,38,.04), 0 8px 24px rgba(38,38,38,.06); }
 .dk-act { min-width: 176px; height: 46px; padding: 0 20px; border-radius: 999px; border: 1px solid var(--clia-gray-300); background: #fff; font: inherit; font-size: 14.5px; font-weight: 600; color: var(--clia-gray-900); cursor: pointer; box-shadow: 0 1px 2px rgba(38,38,38,.06); transition: border-color .15s, opacity .2s; }
 .dk-act:hover:not([disabled]) { border-color: var(--clia-gray-700); } .dk-act:focus-visible { outline: 2px solid var(--clia-gray-900); outline-offset: 2px; } .dk-act[disabled] { opacity: .35; cursor: default; }
 #ckGo { padding: 0 20px; max-width: 1240px; margin: 0 auto; width: 100%; } #ckGo .ck-why { margin: 0 0 12px; }

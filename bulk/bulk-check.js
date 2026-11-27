@@ -292,51 +292,94 @@
     if (all) document.getElementById('ckSteps').insertAdjacentHTML('afterbegin', `<button class="ck-sback" id="dkBack" type="button">${e(T.back)}</button>`);
     C.dk = { root: document.getElementById('dk'), els: new Map(), side: new Map(), pile: [], minis: [], q: [], readyN: 0, shown: 0 };
     const D = C.dk;
-    // 위: 'n / N' + 진행 막대 · 그 아래 고정 버튼 셋 · 카드 바로 위 제목(모델 / 상태 · 이유) · 오른쪽엔 다음 카드들이 어둡게 줄 서 있음
-    D.root.insertAdjacentHTML('beforeend', '<div class="dk-top"><div class="dk-count"><b id="dkI"></b><span id="dkNn"></span></div><div class="dk-prog"><i id="dkProg"></i></div></div><div class="dk-queue" id="dkQ"></div><div class="dk-cap" id="dkCap"></div><div class="dk-rest" id="dkRest"></div>');
-    const cap = document.getElementById('dkCap'), queue = document.getElementById('dkQ'), rest = document.getElementById('dkRest');
-    D.root.insertAdjacentHTML('beforeend', `<button class="dk-side dk-prev" id="dkPrev" type="button">${rtl ? e(T.next) + ' ‹' : '‹ ' + e(T.prev)}</button><button class="dk-side dk-next" id="dkNext" type="button">${rtl ? '› ' + e(T.prev) : e(T.next) + ' ›'}</button>
+    // 위: 'n / N' + 진행 막대 · 그 아래 고정 버튼 셋 · 카드 바로 위 제목(모델 / 상태 · 이유)
+    // 가운데: 캐러셀 — 카드가 가로 한 줄, 가운데 카드가 크고 앞뒤 PDP 는 일부만 보이며 끝으로 갈수록 흐려짐. 넘기면 줄 전체가 미끄러지고
+    //         카드 안 이미지는 살짝 늦게 따라옴(패럴랙스). 드래그 · 스와이프 · 가로 휠 · ← → 로 넘기기. 라이브러리 없이 CSS 전환 + 포인터 이벤트
+    const ARL = '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>', ARR = '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
+    D.root.insertAdjacentHTML('beforeend', `<div class="dk-top"><div class="dk-count"><b id="dkI"></b><span id="dkNn"></span></div><div class="dk-prog"><i id="dkProg"></i></div></div><div class="dk-cap" id="dkCap"></div>
+      <div class="dk-car" id="dkCar"><div class="dk-track" id="dkTrack"></div></div>
+      <button class="dk-arw" id="dkPrev" type="button" aria-label="${e(rtl ? T.next : T.prev)}">${ARL}</button><button class="dk-arw" id="dkNext" type="button" aria-label="${e(rtl ? T.prev : T.next)}">${ARR}</button>
       <div class="dk-bar"><button class="dk-act" data-a="remove" type="button">${e(T.rmS)}</button><button class="dk-act" data-a="retry" type="button">${e(T.redo)}</button><button class="dk-act" data-a="ok" type="button">${e(T.okIn)}</button></div>`);
+    const cap = document.getElementById('dkCap'), car = document.getElementById('dkCar'), track = document.getElementById('dkTrack');
     const prevB = document.getElementById('dkPrev'), nextB = document.getElementById('dkNext');   // 왼쪽 · 오른쪽 (아랍어는 왼쪽이 다음)
     prevB.onclick = () => go(rtl ? 1 : -1); nextB.onclick = () => go(rtl ? -1 : 1);
     const acts = [...D.root.querySelectorAll('.dk-act')];
+    const sgn = rtl ? -1 : 1, GAP = 28, PAR = 64, WIN = 2;   // 다음 카드 방향 · 카드 사이 · 패럴랙스 폭 · 앞뒤로 둘 카드 수
     // 카드는 화면 높이에 맞춰 크게 (상세 이미지까지 보게) — 폭은 높이의 ~75%, 320~520px, 가운데. 위 164px 는 숫자 · 버튼 · 제목
     const geo = () => { const st = rel(D.root), y = 164, ch = Math.max(340, st.h - y - 16), cw = Math.round(Math.max(320, Math.min(520, ch * 0.75, st.w * 0.36))), x = Math.round((st.w - cw) / 2);
-      return { x, y, ch, cw, w: st.w }; };
-    // 줄 서 있는 다음 카드: 가운데 카드 뒤에서 오른쪽으로 22px 씩 삐져나오고, 뒤로 갈수록 조금 작게
-    const SL = 22, MAXG = 6;
-    const slot = (k, g) => { const sc = 1 - 0.04 * k; return { x: rtl ? g.x - SL * k : g.x + g.cw + SL * k - g.cw * sc, y: g.y + g.ch * (1 - sc) / 2, s: sc }; };   // 아랍어는 왼쪽(다음 쪽)으로
-    const ghosts = new Map();   // list 번호 → 어두운 카드
-    function drawQueue(g, enter) {
-      const want = new Set(); for (let k = 1; k <= MAXG && i + k < list.length; k++) want.add(i + k);
-      for (const [n, d] of ghosts) if (!want.has(n)) { d.remove(); ghosts.delete(n); }
-      for (const n of want) {
-        const k = n - i; let d = ghosts.get(n);
-        if (!d) {
-          d = document.createElement('div'); d.className = 'dk-ghost'; d.style.width = g.cw + 'px'; d.style.height = g.ch + 'px';
-          const src = smallG((((list[n][0] || {}).store || {}).gallery || [])[0] || ''); if (src) d.innerHTML = `<img src="${e(src)}" alt="" decoding="async">`;
-          queue.appendChild(d); ghosts.set(n, d);
-          const from = enter && enter[n] != null ? enter[n] : k + 1;
-          d.style.transition = 'none'; d.style.transform = T3(slot(from, g)); d.style.opacity = from > k ? 0 : 1; void d.offsetWidth; d.style.transition = '';
-        }
-        d.style.zIndex = 20 - k; d.style.transform = T3(slot(k, g)); d.style.opacity = 1;
-      }
-      const left = list.length - 1 - i, vis = Math.min(MAXG, left), gap = SL * vis + 22;
-      if (rtl) { prevB.style.right = (g.w - g.x + gap) + 'px'; nextB.style.left = (g.x + g.cw + 24) + 'px'; rest.style.left = ''; rest.style.right = (g.w - g.x + gap) + 'px'; }
-      else { nextB.style.left = (g.x + g.cw + gap) + 'px'; prevB.style.right = (g.w - g.x + 24) + 'px'; rest.style.right = ''; rest.style.left = (g.x + g.cw + gap) + 'px'; }
-      rest.textContent = left > MAXG ? '+' + (left - MAXG) : ''; rest.style.top = (g.y + g.ch / 2 + 34) + 'px';
+      const side = Math.max(60, Math.min(cw * 0.55, (st.w - cw) / 2 - GAP - 72));   // 앞뒤 카드가 보이는 폭
+      return { x, y, ch, cw, w: st.w, side, step: cw + GAP }; };
+    let G = geo();
+    const cards = new Map();   // list 번호 → 카드 (가운데 ± WIN 장만)
+    function place() {   // 캐러셀 틀 · 화살표 · 끝으로 갈수록 흐려지는 가장자리
+      G = geo(); const L = G.x - GAP - G.side, W = G.cw + 2 * (GAP + G.side), f = ((G.side + GAP) / W * 100).toFixed(1);
+      Object.assign(car.style, { left: L + 'px', top: G.y + 'px', width: W + 'px', height: G.ch + 'px' });
+      const m = `linear-gradient(to right, transparent 0%, #000 ${f}%, #000 ${100 - f}%, transparent 100%)`; car.style.webkitMaskImage = m; car.style.maskImage = m;
+      prevB.style.top = nextB.style.top = (G.y + G.ch / 2 - 20) + 'px'; prevB.style.left = (L - 52) + 'px'; nextB.style.left = (L + W + 12) + 'px';
     }
+    const cardLeft = (k) => G.side + GAP + sgn * k * G.step;
+    function mk(k) {
+      const c = cardEl(core, list[k]); track.appendChild(c); c.classList.add('dk-cc'); fullCard(c, G);
+      c.style.left = cardLeft(k) + 'px'; c.style.top = '0px';
+      c.addEventListener('click', () => { if (!moved && k !== i) go(k - i); });
+      cards.set(k, c); return c;
+    }
+    // 패럴랙스: 줄이 미끄러질 때 카드 안 내용이 반대쪽으로 조금 밀렸다가 더 늦게(0.78초) 제자리로 — 쉬고 있을 땐 늘 0 (가장자리가 비지 않게)
+    const inners = () => [...cards.values()].map((c) => c.querySelector('.dk-sc > *')).filter(Boolean);
+    function parallax(from, anim) {   // from: 움직이기 시작할 때 내용이 뒤처진 정도(px). anim 이 없으면 그 자리 (끄는 중)
+      for (const n of inners()) {
+        if (!anim || reduced()) { n.style.transition = 'none'; n.style.transform = from ? `translate3d(${from}px,0,0)` : ''; continue; }
+        if (from != null) { n.style.transition = 'none'; n.style.transform = `translate3d(${from}px,0,0)`; void n.offsetWidth; }
+        n.style.transition = 'transform .78s cubic-bezier(.16,1,.3,1) .04s'; n.style.transform = 'translate3d(0,0,0)';
+      }
+    }
+    function layout(anim, kick) {   // kick: 넘긴 방향(+1 다음 · -1 이전) — 패럴랙스 시작점
+      if (anim && !reduced()) track.style.transition = 'transform .52s cubic-bezier(.16,1,.3,1)'; else track.style.transition = 'none';
+      track.style.transform = `translate3d(${-sgn * i * G.step}px,0,0)`;
+      for (let k = i - WIN; k <= i + WIN; k++) if (k >= 0 && k < list.length && !cards.has(k)) mk(k);
+      for (const [k, c] of cards) {
+        const on = k === i; if (c.classList.contains('dk-on') && !on) setTimeout(() => { const sc = c.querySelector('.dk-sc'); if (sc) sc.scrollTop = 0; }, 560);   // 다시 오면 맨 위부터
+        c.classList.toggle('dk-on', on);
+        if (Math.abs(k - i) > WIN) { cards.delete(k); setTimeout(() => c.remove(), anim ? 560 : 0); }
+      }
+      el = cards.get(i);
+      parallax(kick ? sgn * kick * PAR : null, anim);
+      panel();
+      for (const v of [list[i + WIN + 1], list[i - WIN - 1]]) if (v) for (const src of (v[0].imgs || []).slice(0, 2).map(small)) { const im = new Image(); im.src = src; }   // 그다음 장 미리
+    }
+    // 드래그 · 스와이프 (세로로 움직이면 PDP 스크롤에 양보) · 트랙패드 가로 밀기
+    let drag = null, moved = false, wheelLock = 0;
+    car.addEventListener('pointerdown', (ev) => { if (ev.button !== 0) return; drag = { x: ev.clientX, y: ev.clientY, t: performance.now(), on: false, id: ev.pointerId }; moved = false; });
+    car.addEventListener('pointermove', (ev) => {
+      if (!drag || ev.pointerId !== drag.id) return;
+      const dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
+      if (!drag.on) { if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return; if (Math.abs(dy) >= Math.abs(dx)) { drag = null; return; } drag.on = true; moved = true; car.setPointerCapture(ev.pointerId); car.classList.add('dk-drag'); }
+      const edge = (sgn * dx > 0 && i === 0) || (sgn * dx < 0 && i === list.length - 1), ddx = edge ? dx * 0.3 : dx;   // 끝에서는 덜 끌림
+      track.style.transition = 'none'; track.style.transform = `translate3d(${-sgn * i * G.step + ddx}px,0,0)`;
+      parallax(-ddx * 0.22, false);   // 끄는 동안 내용은 덜 따라옴
+    });
+    const endDrag = (ev) => {
+      const d = drag; drag = null; car.classList.remove('dk-drag'); if (!d || !d.on) return;
+      const dx = ev.clientX - d.x, v = dx / Math.max(1, performance.now() - d.t), s = sgn * dx, sv = sgn * v;
+      if ((s < -60 || sv < -0.45) && go(1)) return; if ((s > 60 || sv > 0.45) && go(-1)) return;
+      layout(true);   // 제자리로
+    };
+    car.addEventListener('pointerup', endDrag); car.addEventListener('pointercancel', endDrag);
+    car.addEventListener('wheel', (ev) => {
+      if (Math.abs(ev.deltaX) <= Math.abs(ev.deltaY)) return;
+      ev.preventDefault(); const now = performance.now(); if (now < wheelLock || Math.abs(ev.deltaX) < 20) return;
+      wheelLock = now + 450; go(sgn * Math.sign(ev.deltaX));
+    }, { passive: false });
     const stateOf = (u) => (isRemoved(u) ? 'rm' : busy(u) ? 'busy' : passed(u) || isOk(u) ? 'ok' : 'review');
     const label = { rm: T.removedL, busy: T.redoing, ok: T.fReady, review: T.fReview };
     function panel() {
-      const u = list[i], it = u[0], g = geo(), s = stateOf(u), bad = aiRows(u).filter((x) => !x.ok);
+      const u = list[i], it = u[0], g = G, s = stateOf(u), bad = aiRows(u).filter((x) => !x.ok);
       D.root.dataset.st = s;   // 화면 배경 · 카드 테두리가 상태를 따른다
       document.getElementById('dkI').textContent = i + 1; document.getElementById('dkNn').textContent = ' / ' + list.length;
       document.getElementById('dkProg').style.width = ((i + 1) / list.length * 100) + '%';
       const line = s === 'review' ? T.fReview + (bad.length ? ' — ' + bad.map(why).join(' · ') : '') : label[s];   // 제목 아래 한 줄 (글자만)
       cap.innerHTML = `<b>${e(it.model || '')}</b><span>${s === 'ok' ? CK : ''}${e(line)}</span>`;
       cap.style.left = g.x + 'px'; cap.style.width = g.cw + 'px';
-      prevB.style.top = nextB.style.top = (g.y + g.ch / 2 - 22) + 'px';
       (rtl ? nextB : prevB).disabled = !i; (rtl ? prevB : nextB).disabled = i >= list.length - 1;
       // 버튼 셋은 늘 같은 자리 — 상태에 맞지 않는 것은 흐리게
       const can = { remove: s !== 'rm' && s !== 'busy', retry: s !== 'rm' && s !== 'busy', ok: s === 'review' && it.status === 'ok' };
@@ -351,14 +394,14 @@
       if (all) { if (i < list.length - 1) go(1); return; }
       // 검토: 아직 정하지 않은 다음 건으로 (다시 준비 중인 것은 건너뜀) — 없으면 다시 준비가 끝나길 기다렸다가 완료로
       const n = list.length, j = [...Array(n).keys()].map((k) => (i + 1 + k) % n).find((k) => open(list[k]) && !busy(list[k]));
-      if (j != null && j !== i) { const d = j > i ? 1 : -1; i = j; show(d); return; }
+      if (j != null && j !== i) { const d = Math.sign(j - i); i = j; layout(true, d); return; }
       if (j === i && open(list[i]) && !busy(list[i])) return;
       if (!list.some((x) => open(x))) { leave(); return; }
     }; });
     function sync() {   // 서버 상태로 목록 · 지금 카드 · 줄 다시
       const by = new Map(C.units.map((u) => [ukey(u), u]));
       list = list.map((u) => by.get(ukey(u)) || u);
-      if (el) cardState(el, list[i]);
+      for (const [k, c] of cards) cardState(c, list[k]);
       panel();
       if (!polling && list.some((u) => busy(u) && !isRemoved(u))) {
         polling = true;
@@ -366,30 +409,13 @@
           while (alive && list.some((u) => busy(u) && !isRemoved(u))) {
             await sleep(2000); await refresh(core); if (!alive) break; sync();
             if (!all && !list.some((x) => open(x))) { leave(); break; }   // 다시 준비가 통과로 끝나 남은 게 없으면 완료로
-            if (!all && busy(list[i]) === false && !open(list[i])) { const j = list.findIndex((x) => open(x) && !busy(x)); if (j >= 0 && j !== i) { const d = j > i ? 1 : -1; i = j; show(d); } }
+            if (!all && busy(list[i]) === false && !open(list[i])) { const j = list.findIndex((x) => open(x) && !busy(x)); if (j >= 0 && j !== i) { const d = Math.sign(j - i); i = j; layout(true, d); } }
           }
           polling = false;
         })();
       }
     }
-    function show(dir) {   // 다음: 줄 서 있던 첫 카드가 가운데로 나오며 밝아짐(하이라이트) · 지금 카드는 왼쪽으로 빠짐. 이전: 반대로. 새 카드라 늘 맨 위부터
-      const g = geo(), u = list[i], old = el, gh = ghosts.get(i);
-      el = cardEl(core, u); el.style.zIndex = 30; fullCard(el, g);
-      const fwd = dir > 0;
-      if (gh) { gh.remove(); ghosts.delete(i); }
-      const away = rtl ? 90 : -90;   // 지나간 쪽 (아랍어는 오른쪽)
-      el._pos = dir === 0 ? { x: g.x, y: g.y, s: 1 } : fwd ? slot(1, g) : { x: g.x + away, y: g.y, s: 1 };
-      if (dir) { el.classList.add('dk-dim'); requestAnimationFrame(() => el.classList.remove('dk-dim')); }
-      moveTo(el, { x: g.x, y: g.y, s: 1 }, dir ? 420 : 0, EZ.out, { from: { opacity: fwd || !dir ? 1 : 0 }, to: { opacity: 1 } });
-      if (old) {
-        if (fwd) moveTo(old, { x: g.x + away, y: g.y, s: 1 }, 200, EZ.p3in, { to: { opacity: 0 }, keep: true }).then(() => old.remove());
-        else { old.classList.add('dk-dim'); old.style.zIndex = 25; moveTo(old, slot(1, g), 300, EZ.p3out).then(() => old.remove()); }
-      }
-      drawQueue(g, !fwd && dir ? { [i + 1]: 1 } : null);
-      panel();
-      for (const v of [list[i + 1], list[i - 1]]) if (v) for (const src of (v[0].imgs || []).slice(0, 2).map(small)) { const im = new Image(); im.src = src; }   // 다음 장 미리
-    }
-    function go(d) { const j = i + d; if (j < 0 || j >= list.length) return; i = j; show(d); }
+    function go(d) { const j = i + d; if (j < 0 || j >= list.length) return false; i = j; layout(true, Math.sign(d)); return true; }
     function fullCard(c, g) {   // 크게 + 위치 막대 + '아래에 더 있음' (끝까지 내리면 사라짐)
       c.classList.add('dk-full'); c.style.width = g.cw + 'px';
       const ph = c.querySelector('.dk-ph'), sc = c.querySelector('.dk-sc'); ph.style.height = g.ch + 'px';
@@ -417,14 +443,16 @@
       if (k === 'Home' || k === 'End') { ev.preventDefault(); const sc = el && el.querySelector('.dk-sc'); if (sc) sc.scrollTo({ top: k === 'Home' ? 0 : sc.scrollHeight, behavior: reduced() ? 'auto' : 'smooth' }); return; }
       if (k === 'ArrowRight') { ev.preventDefault(); go(rtl ? -1 : 1); } else if (k === 'ArrowLeft') { ev.preventDefault(); go(rtl ? 1 : -1); } else if (k === 'Escape' && all) { ev.preventDefault(); leave(); }
     }
+    function onResize() { if (!alive) return; place(); for (const [k, c] of cards) { c.style.left = cardLeft(k) + 'px'; c.style.width = G.cw + 'px'; c.querySelector('.dk-ph').style.height = G.ch + 'px'; } layout(false); }
     function leave() {
       if (!alive) return;
-      alive = false; document.removeEventListener('keydown', key);
+      alive = false; document.removeEventListener('keydown', key); removeEventListener('resize', onResize);
       if (all && from === 'deck') rush(core, true); else finishView(core);
     }
     document.addEventListener('keydown', key);
     if (all) document.getElementById('dkBack').onclick = () => leave();
-    show(0); sync();
+    place(); layout(false); sync();
+    addEventListener('resize', onResize);
   }
   async function act(core, rows, action, opts) {
     let who = ''; try { who = sessionStorage.getItem('clia_user') || localStorage.getItem('clia-bulk-mail') || ''; } catch (_) {}
