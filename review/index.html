@@ -109,8 +109,6 @@ td .m,.cb .m{font-weight:700}td .s{font-size:12px;color:var(--g500);max-width:42
 .mk .nosum{padding:12px;font-size:12px;color:#999;background:#fafafa}
 .segbox{position:absolute;pointer-events:none;border:3px solid var(--red);border-radius:6px;box-shadow:0 0 0 9999px rgba(31,29,26,.06) inset}
 .segbox.pop{animation:segpop .35s ease-out}@keyframes segpop{from{border-width:6px}to{border-width:3px}}
-.segtag i{font-style:normal;font-weight:400;opacity:.85;margin-left:8px}
-.segtag{position:absolute;left:18px;max-width:calc(100% - 36px);pointer-events:none;color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 8px rgba(0,0,0,.18);z-index:3}
 .prep{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#F8F7F5;z-index:5}.prep[hidden]{display:none}
 .prep .box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 26px;min-width:380px;max-width:560px}
 .prep h3{margin:0 0 10px;font-size:16px}.prep ol{margin:0 0 12px;padding-left:20px;font-size:13px;color:var(--g500)}.prep li.on{color:var(--g900);font-weight:700}.prep li.done{color:var(--ok)}
@@ -174,8 +172,8 @@ aside{display:flex;flex-direction:column;min-height:0;background:#fff;border-lef
      <div class="crop-ed" id="cropEd" hidden><span data-t="cropTop"></span><button class="btn sm" onclick="nudge('top',-100)">−100</button><button class="btn sm" onclick="nudge('top',-10)">−10</button><input id="cTop" type="number" onchange="cropInput()"><button class="btn sm" onclick="nudge('top',10)">+10</button><button class="btn sm" onclick="nudge('top',100)">+100</button>
       <span data-t="cropBottom" style="margin-left:8px"></span><button class="btn sm" onclick="nudge('bottom',-100)">−100</button><button class="btn sm" onclick="nudge('bottom',-10)">−10</button><input id="cBot" type="number" onchange="cropInput()"><button class="btn sm" onclick="nudge('bottom',10)">+10</button><button class="btn sm" onclick="nudge('bottom',100)">+100</button>
       <span class="sp" style="flex:1"></span><button class="btn sm" onclick="cropAuto()" data-t="cropAuto"></button><button class="btn sm" onclick="recapture()" data-t="recapture"></button><button class="btn sm pri" onclick="cropSave()" data-t="cropSave"></button></div>
-     <div class="vp" id="vpL"><div class="mv" id="mvL"></div><div class="segbox" id="segL" hidden></div><span class="segtag" id="segTagL"></span></div></section>
-    <section class="pane"><div class="ph"><div class="seg big ttl" id="chSeg"><button data-c="shopee" onclick="setCh('shopee')">Shopee</button><button data-c="lazada" onclick="setCh('lazada')">Lazada</button></div><span class="r"><span class="badge b-warn" id="imgWarn" hidden></span></span></div><div class="vp" id="vpR"><div class="mv" id="mvR"></div><div class="segbox" id="segR" hidden></div><span class="segtag" id="segTagR"></span></div></section>
+     <div class="vp" id="vpL"><div class="mv" id="mvL"></div><div class="segbox" id="segL" hidden></div></div></section>
+    <section class="pane"><div class="ph"><div class="seg big ttl" id="chSeg"><button data-c="shopee" onclick="setCh('shopee')">Shopee</button><button data-c="lazada" onclick="setCh('lazada')">Lazada</button></div><span class="r"><span class="badge b-warn" id="imgWarn" hidden></span></span></div><div class="vp" id="vpR"><div class="mv" id="mvR"></div><div class="segbox" id="segR" hidden></div></div></section>
    </div>
    <div id="spacer"></div><div id="snaps"></div>
    <div class="prep" id="prep"><div class="box" id="prepBox"></div></div>
@@ -589,19 +587,15 @@ function update(){
   track(r);   // 지금 체크리스트 항목을 먼저 정해 두고 → 이름표가 그 항목 이름을 쓴다
   segMark(g,l,r,doneL&&!doneR,doneR&&!doneL);
 }
-// 같은 영역 표시: 지금 구간을 양쪽에 같은 색 테두리 + 같은 이름표(번호 · 섹션 제목)로
+// 같은 영역 표시: 지금 구간을 양쪽에 같은 색 테두리로. 테두리 위 초록 이름표(섹션 이름 · 기다리는 중 · 카피 차이 N)는 뺐다 (2026-11-27, 강재영 선임 —
+// 매칭이 안 맞는 경우가 많아 영역만 보이면 됨). 카피 차이는 체크리스트 위 패널(copyPanel)에 그대로 나온다.
 let lastSeg=-1;
 function segMark(g,l,r,waitL,waitR){
   if(g.n!==lastSeg){lastSeg=g.n;['segL','segR'].forEach(id=>{const e=$(id);e.classList.remove('pop');void e.offsetWidth;e.classList.add('pop');});copyPanel(g);}
-  const col=SEG_COLOR,label=segLabel(g);
+  const col=SEG_COLOR;
   [['L',g.l-l,g.dl,g.bl0-l,g.bl1-g.bl0],['R',g.r-r,g.dr,g.br0-r,g.br1-g.br0]].forEach(([k,y,h,by,bh])=>{
-    const box=$('seg'+k),tag=$('segTag'+k);
+    const box=$('seg'+k);
     box.hidden=h<2;box.style.borderColor=col;box.style.top=by+'px';box.style.height=Math.max(h,bh)+'px';
-    tag.style.background=col;tag.style.top=Math.max(6,Math.min(by+6,G.vh-30))+'px';
-    // 이름표 = 오른쪽 체크리스트 항목 이름 그대로. 기다리는 쪽 · 없는 쪽은 옆에 작은 글씨로 (이름 글자는 그대로)
-    const note=h<2?t(k==='L'?'segNoneL':'segNoneR'):(k==='L'?waitL:waitR)?t('waitShort'):'';
-    const nc=g.copy?(g.copy.nMissing||0)+(g.copy.nExtra||0):0;
-    tag.innerHTML=`<b>${esc(label)}</b>${note?`<i>${esc(note)}</i>`:''}${k==='R'&&nc?`<i style="color:#FFD2D2;font-weight:700">${esc(t('copyN',nc))}</i>`:''}`;
   });
   const mkR=$('mvR').querySelector('.mk');$('segR').style.left=mkR.offsetLeft+'px';$('segR').style.width=mkR.clientWidth+'px';
   const cr=$('mvL').querySelector('.crop');if(cr){$('segL').style.left=cr.offsetLeft+'px';$('segL').style.width=cr.clientWidth+'px';}
@@ -613,15 +607,6 @@ function copyPanel(g){
   const li=a=>a.map(x=>`<li lang="th">${esc(x)}</li>`).join('');
   e.innerHTML=`<h4>${esc(t('copyHead',n))}</h4>${c.missing&&c.missing.length?`<span class="k">${esc(t('copyLg'))}</span><ul>${li(c.missing)}</ul>`:''}${c.extra&&c.extra.length?`<span class="k">${esc(t('copyClia'))}</span><ul>${li(c.extra)}</ul>`:''}`;
   e.hidden=false;
-}
-// 같은 영역 이름표: 오른쪽 체크리스트 항목 이름과 똑같이 — 지금 항목이 이 구간 안이면 그 항목, 아니면 구간이 시작하는 자리의 항목
-function segLabel(g){
-  const list=items(C.ch),inSeg=it=>{const y=G.anchors[it.anchor];return y!=null&&y>=g.r-8&&y<g.r+Math.max(g.dr,1);};
-  const cur=list.find(it=>it.id===curId);
-  if(cur&&inSeg(cur))return cur.title;
-  const first=list.find(inSeg);if(first)return first.title;
-  let last=null;for(const it of list){const y=G.anchors[it.anchor];if(y!=null&&y<=g.r)last=it;}
-  return (last||list[0]||{title:g.label}).title;
 }
 // 체크리스트: 지금 보는 항목(화면 위에서 35% 선을 지난 마지막 항목), 화면 55% 선을 지난 항목은 「봤음」
 let curId=null;

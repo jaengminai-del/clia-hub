@@ -42,18 +42,18 @@ if (/railway\.app|lgecreativehub/i.test(base)) { console.error('운영 주소에
       const wantL = Math.min(g.l + Math.min(tt, g.dl), G.lmax), wantR = Math.min(g.r + Math.min(tt, g.dr), G.rmax);
       if (Math.abs(ty($('mvL')) - wantL) > 1.5 || Math.abs(ty($('mvR')) - wantR) > 1.5) bad.push(`${g.n}@${f}`);
     }
-    // 이름표: 지금 구간의 이름이 양쪽에 같게
+    // 테두리 위 초록 이름표는 뺐다 (2026-11-27) — 영역 테두리만 양쪽에 보이고 이름표는 없어야 한다
     sc.scrollTop = G.segs[Math.min(2, G.segs.length - 1)].S + 5; update();
-    const tags = [$('segTagL').querySelector('b').textContent, $('segTagR').querySelector('b').textContent];
-    const inList = items(C.ch).some((it) => it.title === tags[1]);
+    const tags = document.querySelectorAll('.segtag').length;
+    const boxes = !$('segL').hidden && !$('segR').hidden;
     const im = [...document.querySelectorAll('#mvR img.sl')].filter((e) => e.complete && e.naturalWidth);
     const distorted = im.filter((e) => Math.abs(e.clientHeight / e.clientWidth - e.naturalHeight / e.naturalWidth) > 0.01).length;
-    return { bad, distorted, loaded: im.length, segs: G.segs.length, aligned: G.aligned, tags, inList };
+    return { bad, distorted, loaded: im.length, segs: G.segs.length, aligned: G.aligned, tags, boxes };
   });
-  console.log('     segments', r.segs, 'anchors', r.aligned, 'tags', JSON.stringify(r.tags));
+  console.log('     segments', r.segs, 'anchors', r.aligned, 'tags', r.tags);
   check(r.segs >= 3 && r.aligned >= 1, `same-area anchors used (${r.aligned} anchors, ${r.segs} segments)`);
-  check(r.tags[0] === r.tags[1], 'same area label on both sides');
-  check(r.inList, 'area label is exactly a checklist item name');
+  check(r.tags === 0, 'no green label above the area box');
+  check(r.boxes, 'same-area box shown on both sides');
   check(!r.bad.length, `same-area scroll rule (${r.bad.length} mismatches ${r.bad.slice(0, 5).join(',')})`);
   check(!r.distorted, `slice aspect ratio (${r.distorted} distorted of ${r.loaded} loaded)`);
   check(await page.locator('#bOk').isDisabled(), 'approve locked before checklist');
