@@ -1,6 +1,6 @@
 """벌크 Check 전체 그리드 (2026-11-28, bulk/bulk-check.js grid) — Chromium 에서 화면 · 동작 확인.
 
-스캔은 그리드로 → 자동 재시도까지 다 끝나면 결과 알림('N개 확인이 필요해요' · 확인 시작) → 검토 필요는 하나씩(검수 화면 'review').
+스캔은 그리드로 → 자동 재시도까지 다 끝나면 결과 화면(확인이 필요한 PDP 만 · '확인이 필요한 PDP N개' · 검토) → 검토 필요는 하나씩(검수 화면 'review').
 
 작업 API(/api/v1/bulk/jobs/**)는 page.route 로 흉내 낸다: 처음엔 진행 중(반은 아직) → 다 끝남,
 자동 재시도 중인 한 제품은 끝난 뒤 몇 번 더 물으면 통과로 바뀐다. 운영 · 승인 기록은 건드리지 않는다.
@@ -156,7 +156,7 @@ class BulkCheckGridTest(unittest.TestCase):
         expect(page.locator("#gdA")).to_have_text(str(PASSED))
         expect(page.locator('.gd-it[data-row="103"]')).to_have_class("gd-it gd-busy")
         expect(page.locator("#gdNote")).to_have_text(re.compile("1"))
-        expect(page.locator("#gdSum")).to_have_count(0)
+        expect(page.locator("#gdRh")).to_have_count(0)
         expect(page.locator("#gdRev")).to_be_disabled()
         expect(page.locator("#gdGo")).to_be_disabled()
         bad_img = page.locator('.gd-it[data-row="100"]')
@@ -170,27 +170,38 @@ class BulkCheckGridTest(unittest.TestCase):
         self.assertLessEqual(page.evaluate("document.documentElement.scrollWidth"), width)
         self.assertLessEqual(page.evaluate("(() => { const l = document.getElementById('gdList'); return l.scrollWidth - l.clientWidth; })()"), 0)
         spot = page.locator("#gdGo").bounding_box()
-        # 2) 재시도가 통과로 끝나면 결과 알림 (최종 숫자): 3개 확인 필요 · 10 준비됨 · 13 확인함 — 저절로 넘어가지 않음
-        summary = page.locator("#gdSum")
-        expect(summary).to_be_visible(timeout=15000)
-        expect(page.locator('.gd-it[data-row="103"]')).to_have_class("gd-it gd-ok")
-        expect(page.locator("#gdNote")).to_have_text("")
-        expect(page.locator("#gdSumH b")).to_have_text("3")
+        # 2) 재시도가 통과로 끝나면 결과 화면 (최종 숫자): 그리드는 사라지고 확인이 필요한 PDP 3개만, 머리글은 검정 · 숫자와 글 같은 크기
+        head = page.locator("#gdRhH")
+        expect(head).to_be_visible(timeout=15000)
+        expect(page.locator("#gdNote")).to_be_hidden()
+        expect(page.locator(".gd-top")).to_be_hidden()
+        shown = page.locator(".gd-it:not(.gd-hide)")
+        expect(shown).to_have_count(3)
+        self.assertEqual(sorted(shown.evaluate_all("ts => ts.map(t => t.dataset.row)")), ["100", "101", "102"])
+        expect(page.locator('.gd-it[data-row="103"]')).to_have_class("gd-it gd-ok gd-hide")
+        expect(page.locator(".gd-it:not(.gd-hide) .gd-ra, .gd-it:not(.gd-hide) button")).to_have_count(0)
+        expect(head.locator("b")).to_have_text("3")
         if lang == "en":
-            expect(page.locator("#gdSumH")).to_have_text("3need your check")
-            expect(summary.locator("p")).to_have_text(f"{PASSED + 1} ready · {PASSED + 4} checked")
-            expect(page.locator("#gdStart")).to_have_text("Start checking")
-        else:
-            expect(summary.locator("p")).to_contain_text(str(PASSED + 1))
-        expect(page.locator("#gdStart")).to_be_focused()
-        inside("#gdSumH", "#gdSum p", "#gdStart")
+            expect(head).to_have_text("3 PDPs need to be checked")
+            expect(page.locator("#gdRhGo")).to_have_text("Review")
+        if lang == "ar":
+            expect(head).to_have_text("3 صفحات تفاصيل تحتاج إلى مراجعة")
+            expect(page.locator("#gdRhGo")).to_have_text("مراجعة")
+        style = head.evaluate("h => { const b = h.querySelector('b'), a = getComputedStyle(h), c = getComputedStyle(b); return [a.color, c.color, a.fontSize, c.fontSize, a.fontWeight, c.fontWeight]; }")
+        self.assertEqual(style[0], style[1])
+        self.assertEqual(style[0], "rgb(38, 38, 38)")   # 검정 (--clia-gray-900)
+        self.assertEqual((style[2], style[4]), (style[3], style[5]))
+        self.assertFalse(head.evaluate("h => h.scrollWidth > h.clientWidth"))   # 한 줄
+        go_box, head_box = page.locator("#gdRhGo").bounding_box(), head.bounding_box()
+        self.assertAlmostEqual(go_box["x"] + go_box["width"] / 2, width / 2, delta=1)
+        inside("#gdRhH", "#gdRhGo")
         page.wait_for_timeout(500)
-        expect(page.locator("#dkCmp")).to_have_count(0)
-        # 3) 확인 시작(Enter 도) → 하나씩: 가운데 큰 카드 · 비교 칸 · 돌아가기
+        expect(page.locator("#dkCmp")).to_have_count(0)   # 저절로 넘어가지 않음
+        # 3) 검토(Enter 도) → 장면이 바로 바뀌어 하나씩: 버튼 줄이 결과 화면 버튼과 거의 같은 자리 · 가운데 큰 카드 · 비교 칸
         if width == 700:
             page.keyboard.press("Enter")
         else:
-            page.locator("#gdStart").click()
+            page.locator("#gdRhGo").click()
         expect(page.locator("#dkCmp")).to_be_visible()
         expect(page.locator("#dkCap b")).to_have_text("BAD-IMG")
         expect(page.locator("#dkNn")).to_have_text(" / 3")
@@ -199,19 +210,24 @@ class BulkCheckGridTest(unittest.TestCase):
             self.assertAlmostEqual(card["x"] + card["width"] / 2, width / 2, delta=2)
         inside(".dk-bar .dk-act", "#dkBack")
         bar = page.locator(".dk-bar").bounding_box()
-        # 돌아가기 → 그리드 (알림은 한 번만 — 이제 '검토 3' 버튼)
+        mid = page.locator('.dk-bar [data-a="retry"]').bounding_box()
+        self.assertAlmostEqual(mid["y"], go_box["y"], delta=3)
+        self.assertAlmostEqual(mid["x"] + mid["width"] / 2, go_box["x"] + go_box["width"] / 2, delta=3)
+        count = page.locator(".dk-count").bounding_box()
+        self.assertAlmostEqual(count["y"] + count["height"] / 2, head_box["y"] + head_box["height"] / 2, delta=6)
+        # 돌아가기 → 그리드 (결과 화면은 한 번만 — 이제 위 '검토' 버튼)
         page.locator("#dkBack").click()
         expect(page.locator(".gd-it")).to_have_count(PASSED + 4)
         expect(page.locator("#gdRev")).to_be_enabled()
         page.wait_for_timeout(700)
-        expect(page.locator("#gdSum")).to_have_count(0)
+        expect(page.locator("#gdRh")).to_have_count(0)
         self.assertEqual(page.locator("#gdGo").bounding_box()["y"], spot["y"])
         # 칸을 누르면 자세히 보기 → 돌아가기
         page.locator('.gd-it[data-row="10"] .gd-pdp').click()
         expect(page.locator(".dk-on .ck-imgs img")).to_have_count(4)
         page.locator("#dkBack").click()
         expect(page.locator(".gd-it")).to_have_count(PASSED + 4)
-        expect(page.locator("#gdSum")).to_have_count(0)
+        expect(page.locator("#gdRh")).to_have_count(0)
         # 4) '검토 3' → 포함(검토한 해시 · 내용 요약) · 빼기 · 다시 준비 — 정하면 다음으로
         page.locator("#gdRev").click()
         expect(page.locator("#dkCap b")).to_have_text("BAD-IMG")
@@ -252,21 +268,23 @@ class BulkCheckGridTest(unittest.TestCase):
         # 검토할 것이 없으면: '모두 준비됨' + 확인하고 받기 (바로 받기로)
         job = FakeJob(origin, clean=True)
         page, errors = open_page(browser, origin, width, height, lang, job)
-        expect(page.locator("#gdSum")).to_be_visible(timeout=10000)
-        expect(page.locator("#gdSumH b")).to_have_text(str(PASSED))
-        expect(page.locator("#gdSumH")).to_have_class("ok")
+        head = page.locator("#gdRhH")
+        expect(head).to_be_visible(timeout=10000)
+        expect(head.locator("b")).to_have_text(str(PASSED))
+        expect(page.locator(".gd-it:not(.gd-hide)")).to_have_count(0)
         if lang == "en":
-            expect(page.locator("#gdSumH")).to_have_text(f"{PASSED}all ready")
-            expect(page.locator("#gdStart")).to_have_text("Confirm & download")
-        self.inside(page, width, height, "#gdSumH", "#gdSum p", "#gdStart")
+            expect(head).to_have_text(f"All {PASSED} PDPs are ready")
+            expect(page.locator("#gdRhGo")).to_have_text("Confirm & download")
+        self.assertEqual(head.evaluate("h => getComputedStyle(h).color"), "rgb(38, 38, 38)")
+        self.inside(page, width, height, "#gdRhH", "#gdRhGo")
         with page.expect_download():
-            page.locator("#gdStart").click()
+            page.locator("#gdRhGo").click()
         expect(page.locator("#ckDl")).to_be_visible()
         self.assertEqual(sorted(job.posts[-1]["rows"]), [10 + k for k in range(PASSED)])
         self.assertEqual(errors, [])
         page.close()
 
-    def test_grid_scan_summary_then_one_by_one_review_and_download(self):
+    def test_grid_scan_result_screen_then_one_by_one_review_and_download(self):
         with serve() as origin, sync_playwright() as p:
             options = {"headless": True}
             if os.environ.get("CLIA_CHROMIUM"):

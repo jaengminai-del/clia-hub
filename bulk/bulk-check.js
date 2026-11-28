@@ -41,25 +41,25 @@
   };
   // Check 화면 (덱 2026-11-27 → 그리드 2026-11-28) 문구 — 위 TX 에 덧붙인다
   const TXD = {
-    en: { rmS: 'Remove', viewAll: (n) => `View all ${n}`, moreBelow: 'More below', back: '← Back', prev: 'Previous', next: 'Next', removedL: 'Removed from this Excel', fReady: 'Ready', fReview: 'Needs review', aiChk: 'AI checking', revN: (n) => `Review ${n}`, goDl: 'Confirm & download',
+    en: { rmS: 'Remove', viewAll: (n) => `View all ${n}`, moreBelow: 'More below', back: '← Back', prev: 'Previous', next: 'Next', removedL: 'Removed from this Excel', fReady: 'Ready', fReview: 'Needs review', aiChk: 'AI checking', goDl: 'Confirm & download',
       okIn: 'Looks fine · include',
-      sumNeed: (n) => (n === 1 ? 'needs your check' : 'need your check'), sumAll: 'all ready', sumLine: (r, n) => `${r} ready · ${n} checked`, start: 'Start checking', redoN: (n) => `Preparing ${n} again…`,
+      rsNeed: (n) => (n === 1 ? `${n} PDP needs to be checked` : `${n} PDPs need to be checked`), rsAll: (n) => `All ${n} PDPs are ready`, rv: 'Review', redoN: (n) => `Preparing ${n} again…`,
       allDone: 'All checked', colModel: 'Model', colDesc: 'Description', imgsN: (n) => `${n} images`, moreRows: (n) => `+ ${n} more rows`, confirmDl: (n) => `Confirm ${n} & download` },
-    th: { rmS: 'นำออก', viewAll: (n) => `ดูทั้งหมด ${n}`, moreBelow: 'ยังมีด้านล่าง', back: '← กลับ', prev: 'ก่อนหน้า', next: 'ถัดไป', removedL: 'นำออกจาก Excel นี้แล้ว', fReady: 'พร้อม', fReview: 'ต้องตรวจสอบ', aiChk: 'AI กำลังตรวจ', revN: (n) => `ตรวจสอบ ${n} รายการ`, goDl: 'ยืนยันและดาวน์โหลด',
+    th: { rmS: 'นำออก', viewAll: (n) => `ดูทั้งหมด ${n}`, moreBelow: 'ยังมีด้านล่าง', back: '← กลับ', prev: 'ก่อนหน้า', next: 'ถัดไป', removedL: 'นำออกจาก Excel นี้แล้ว', fReady: 'พร้อม', fReview: 'ต้องตรวจสอบ', aiChk: 'AI กำลังตรวจ', goDl: 'ยืนยันและดาวน์โหลด',
       okIn: 'ดูแล้วโอเค · ใส่ไว้',
-      sumNeed: () => 'รายการต้องตรวจสอบ', sumAll: 'พร้อมทั้งหมด', sumLine: (r, n) => `พร้อม ${r} · ตรวจแล้ว ${n}`, start: 'เริ่มตรวจสอบ', redoN: (n) => `กำลังเตรียมใหม่ ${n} รายการ…`,
+      rsNeed: (n) => `PDP ที่ต้องตรวจสอบ ${n} รายการ`, rsAll: (n) => `PDP ทั้ง ${n} รายการพร้อมแล้ว`, rv: 'ตรวจสอบ', redoN: (n) => `กำลังเตรียมใหม่ ${n} รายการ…`,
       allDone: 'ตรวจครบแล้ว', colModel: 'รุ่น', colDesc: 'คำอธิบาย', imgsN: (n) => `${n} รูป`, moreRows: (n) => `+ อีก ${n} แถว`, confirmDl: (n) => `ยืนยัน ${n} และดาวน์โหลด` },
-    ko: { rmS: '빼기', viewAll: (n) => `전체 보기 ${n}`, moreBelow: '아래에 더 있음', back: '← 돌아가기', prev: '이전', next: '다음', removedL: '이번 엑셀에서 뺌', fReady: '준비됨', fReview: '검토 필요', aiChk: 'AI 확인 중', revN: (n) => `${n}개 검토하기`, goDl: '확인하고 받기',
+    ko: { rmS: '빼기', viewAll: (n) => `전체 보기 ${n}`, moreBelow: '아래에 더 있음', back: '← 돌아가기', prev: '이전', next: '다음', removedL: '이번 엑셀에서 뺌', fReady: '준비됨', fReview: '검토 필요', aiChk: 'AI 확인 중', goDl: '확인하고 받기',
       okIn: '괜찮음 · 포함',
-      sumNeed: () => '개 확인이 필요해요', sumAll: '모두 준비됨', sumLine: (r, n) => `${r}개 준비됨 · ${n}개 확인함`, start: '확인 시작', redoN: (n) => `${n}개 다시 준비 중…`,
+      rsNeed: (n) => `확인이 필요한 PDP ${n}개`, rsAll: (n) => `PDP ${n}개 모두 준비됨`, rv: '검토', redoN: (n) => `${n}개 다시 준비 중…`,
       allDone: '모두 확인함', colModel: '모델', colDesc: '설명', imgsN: (n) => `이미지 ${n}장`, moreRows: (n) => `+ ${n}행 더`, confirmDl: (n) => `${n}개 확인하고 받기` },
-    de: { rmS: 'Entfernen', viewAll: (n) => `Alle ${n} ansehen`, moreBelow: 'Weiter unten', back: '← Zurück', prev: 'Zurück', next: 'Weiter', removedL: 'Aus dieser Excel entfernt', fReady: 'Bereit', fReview: 'Zu prüfen', aiChk: 'KI prüft', revN: (n) => `${n} prüfen`, goDl: 'Bestätigen & herunterladen',
+    de: { rmS: 'Entfernen', viewAll: (n) => `Alle ${n} ansehen`, moreBelow: 'Weiter unten', back: '← Zurück', prev: 'Zurück', next: 'Weiter', removedL: 'Aus dieser Excel entfernt', fReady: 'Bereit', fReview: 'Zu prüfen', aiChk: 'KI prüft', goDl: 'Bestätigen & herunterladen',
       okIn: 'Passt · übernehmen',
-      sumNeed: (n) => (n === 1 ? 'braucht Ihre Prüfung' : 'brauchen Ihre Prüfung'), sumAll: 'alle bereit', sumLine: (r, n) => `${r} bereit · ${n} geprüft`, start: 'Prüfung starten', redoN: (n) => `${n} werden neu vorbereitet…`,
+      rsNeed: (n) => (n === 1 ? `${n} PDP muss geprüft werden` : `${n} PDPs müssen geprüft werden`), rsAll: (n) => `Alle ${n} PDPs sind bereit`, rv: 'Prüfen', redoN: (n) => `${n} werden neu vorbereitet…`,
       allDone: 'Alles geprüft', colModel: 'Modell', colDesc: 'Beschreibung', imgsN: (n) => `${n} Bilder`, moreRows: (n) => `+ ${n} weitere Zeilen`, confirmDl: (n) => `${n} bestätigen & herunterladen` },
-    ar: { rmS: 'إزالة', viewAll: (n) => `عرض الكل ${n}`, moreBelow: 'المزيد بالأسفل', back: 'رجوع →', prev: 'السابق', next: 'التالي', removedL: 'أُزيل من ملف Excel هذا', fReady: 'جاهز', fReview: 'بحاجة إلى مراجعة', aiChk: 'الذكاء الاصطناعي يفحص', revN: (n) => `مراجعة ${n}`, goDl: 'تأكيد وتنزيل',
+    ar: { rmS: 'إزالة', viewAll: (n) => `عرض الكل ${n}`, moreBelow: 'المزيد بالأسفل', back: 'رجوع →', prev: 'السابق', next: 'التالي', removedL: 'أُزيل من ملف Excel هذا', fReady: 'جاهز', fReview: 'بحاجة إلى مراجعة', aiChk: 'الذكاء الاصطناعي يفحص', goDl: 'تأكيد وتنزيل',
       okIn: 'يبدو جيدًا · تضمين',
-      sumNeed: () => 'بحاجة إلى مراجعتك', sumAll: 'جاهزة كلها', sumLine: (r, n) => `${r} جاهز · تم فحص ${n}`, start: 'ابدأ المراجعة', redoN: (n) => `جارٍ إعادة تجهيز ${n}…`,
+      rsNeed: (n) => `${n} صفحات تفاصيل تحتاج إلى مراجعة`, rsAll: (n) => `جميع صفحات التفاصيل (${n}) جاهزة`, rv: 'مراجعة', redoN: (n) => `جارٍ إعادة تجهيز ${n}…`,
       allDone: 'تم فحص الكل', colModel: 'الطراز', colDesc: 'الوصف', imgsN: (n) => `${n} صور`, moreRows: (n) => `+ ${n} صفوف أخرى`, confirmDl: (n) => `تأكيد ${n} والتنزيل` },
   };
   // 문제 문구 (2026-11-27 장혁 피드백 '단순하게'): 오른쪽 칸 맨 위 큰 한 문장 · 다섯 언어 같은 톤. w_* 는 그리드 칸 아래 짧은 글
@@ -151,9 +151,11 @@
   // 위 고정 줄: 가운데 큰 숫자(진행 중엔 'AI 확인 중 n / N' + 얇은 막대) · 버튼은 늘 같은 자리(끝 쪽) — '검토 N' · '확인하고 받기'.
   // 사람이 정할 것은 목록으로 늘어놓지 않는다 (2026-11-28 장혁 피드백): 하나씩 검수 화면(viewer 'review') — 가운데 큰 카드 · 비교 칸 · 위 고정 버튼 셋,
   // 하나 정하면 다음으로. 돌아가기는 그리드로, 다 정하면 끝 화면(확인하고 받기).
-  // 결과 알림 (2026-11-28 운영 140개 보고 장혁 피드백 '너무 빨리 넘어감'): 자동 재시도 · 다시 준비가 다 끝나면(그동안은 그리드에 '다시 준비 중 N…')
-  // 흐린 그리드 위 가운데 큰 글 '9개 확인이 필요해요' + 작은 한 줄 + 버튼 하나('확인 시작' — 저절로 넘어가지 않음). 0개면 '모두 준비됨' + 확인하고 받기.
-  // 알림은 한 번만 (돌아온 뒤엔 위 '검토 N' 버튼으로).
+  // 결과 화면 (2026-11-28 장혁 시안 확정): 자동 재시도 · 다시 준비가 다 끝나면(그동안은 그리드에 '다시 준비 중 N…') 장면이 바로 바뀐다 —
+  // 그리드는 사라지고 확인이 필요한 PDP 만 위쪽에 큰 칸으로 한 줄(문제 자리까지 내려 둠 · 빨간 칸), 가운데 위 '확인이 필요한 PDP 6개'(검정 · 숫자와 글 같은 크기)
+  // 바로 아래 가운데 버튼 하나 '검토' — 다음 화면(검수 화면)의 'n / N' · 버튼 줄과 같은 자리. 저절로 넘어가지 않음(Enter 도). 0개면 '모두 준비됨' + 확인하고 받기.
+  // 모션: 스프링(stiffness 260 · damping 26, 라이브러리 없이 linear() 이징)으로 아주 조금 올라옴 — PDP 14px(50ms 차례) · 머리글 8px · 검수 화면 가운데 카드 16px.
+  // 결과 화면은 한 번만 (돌아온 뒤엔 위 '검토' 버튼으로).
   // 칸을 누르면 그 제품의 자세히 보기(viewer 'all'), 돌아오면 같은 상태.
   // 자동 재시도는 서버가 뒤에서 — 고쳐지면 그 칸이 준비됨으로 옮겨 간다. 100~300개여도 부드럽게: 작은 미리보기 앞 몇 장만 · lazy, 연출은 보이는 몇십 개만.
   const small = (u) => String(u || '').replace('/media/slices/', '/media/slices-p/');
@@ -249,6 +251,17 @@
   const needs = () => C.units.filter((u) => !isRemoved(u) && !isOk(u) && !passed(u));   // 사람이 아직 정하지 않은 것 (다시 준비 중 포함)
   // 칸 상태: wait(결과 전) · ok(통과) · bad(검토 필요) · busy(다시 준비 중) · in(사람이 포함) · out(뺌)
   const catOf = (u, landed) => (!landed ? 'wait' : isRemoved(u) ? 'out' : busy(u) ? 'busy' : passed(u) ? 'ok' : isOk(u) ? 'in' : 'bad');
+  // Framer Motion 식 스프링을 라이브러리 없이: 물리 시뮬레이션 → CSS linear() 이징 + 실제 길이(ms). linear() 를 모르는 브라우저는 EZ.out
+  function spring({ stiffness = 260, damping = 26, mass = 1 } = {}) {
+    let x = 0, v = 0, t = 0; const dt = 1 / 240, pts = [];
+    for (; t < 3; t += dt) { v += ((-stiffness * (x - 1) - damping * v) / mass) * dt; x += v * dt; pts.push(x); if (t > 0.1 && Math.abs(1 - x) < 0.0005 && Math.abs(v) < 0.001) break; }
+    const out = []; for (let i = 0; i <= 48; i++) out.push(pts[Math.min(pts.length - 1, Math.round((pts.length - 1) * i / 48))].toFixed(4));
+    const ease = `linear(${out.join(',')})`, ok = (() => { try { return CSS.supports('animation-timing-function', ease); } catch (_) { return false; } })();
+    return { easing: ok ? ease : EZ.out, duration: Math.round(t * 1000) };
+  }
+  const SPR = spring();
+  // 아래에서 아주 조금 올라오며 나타남 (위치는 transform 만) — 모션 줄이기면 움직이지 않음
+  const rise = (x, dy, delay = 0) => (reduced() || !x ? null : x.animate([{ transform: `translateY(${dy}px)`, opacity: 0 }, { transform: 'translateY(0)', opacity: 1 }], { duration: SPR.duration, easing: SPR.easing, delay, fill: 'backwards' }));
   const fadeIn = (x, ms, dy) => (reduced() ? null : x.animate([{ opacity: 0, transform: `translateY(${dy}px)`, filter: 'blur(6px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }], { duration: ms, easing: EZ.out, fill: 'backwards' }));
   function roll(id, v) {   // 숫자가 바뀔 때 위에서 내려앉기 (블러 · 페이드). 진행 중 숫자는 연출 없이 (몰려오면 계속 다시 시작돼 안 보임)
     const b = document.getElementById(id); if (!b || b.textContent === String(v)) return; b.textContent = v;
@@ -262,7 +275,7 @@
     C.units = units(C.job);
     const N = C.units.length, byId = (id) => document.getElementById(id), restore = gv.seen;
     const el = frame(core, 2);
-    el.innerHTML = `<div class="gd" id="gd"><div class="gd-top"><div class="gd-acts"><button class="dk-act" id="gdRev" type="button" disabled>${e(T.revN(0))}</button><button class="dk-act pri" id="gdGo" type="button" disabled>${e(T.goDl)}</button></div>
+    el.innerHTML = `<div class="gd" id="gd"><div class="gd-top"><div class="gd-acts"><button class="dk-act" id="gdRev" type="button" disabled>${e(T.rv)}</button><button class="dk-act pri" id="gdGo" type="button" disabled>${e(T.goDl)}</button></div>
       <div class="gd-nums" id="gdNums" aria-live="polite"></div><div class="gd-sub"><div class="gd-prog" id="gdProgW"><i id="gdProg"></i></div><div class="gd-note" id="gdNote" aria-live="polite"></div></div></div>
       <div class="gd-list" id="gdList"><div class="gd-grid" id="gdGrid"></div></div></div><div id="ckGo"></div>`;
     const G = C.g = { alive: true, root: byId('gd'), list: byId('gdList'), tiles: new Map(), landed: new Set(), q: [], qs: new Set(), follow: !restore, chain: Promise.resolve(), mode: running() ? 'scan' : 'done', fT: 0 };
@@ -342,7 +355,7 @@
       if (note.textContent !== nt) note.textContent = nt;
       if (G.mode === 'scan') { byId('gdA').textContent = G.landed.size; byId('gdProg').style.width = (G.landed.size / Math.max(1, N) * 100) + '%'; }
       else { roll('gdA', ok); roll('gdB', rev); const c = byId('gdC'); if (c) c.textContent = T.removed(out); }
-      const rb = byId('gdRev'), rl = T.revN(rev); if (rb.textContent !== rl) rb.textContent = rl;
+      const rb = byId('gdRev');
       rb.disabled = G.mode === 'scan' || !rev || bz > 0;   // 다 끝날 때까지 (끝나면 알림)
       byId('gdGo').disabled = G.mode === 'scan' || C.job.status !== 'ready' || rev > 0;
     }
@@ -372,34 +385,33 @@
     }
     const onResize = () => {
       if (!G.alive) { removeEventListener('resize', onResize); return; }
-      clearTimeout(G.rz); G.rz = setTimeout(() => { for (const t of G.tiles.values()) if (t._marks) focus(t, false); }, 150);
+      clearTimeout(G.rz); G.rz = setTimeout(() => {
+        if (byId('gdRh')) bigVars([...G.tiles.values()].filter((t) => !t.classList.contains('gd-hide')).length);
+        for (const t of G.tiles.values()) if (t._marks) focus(t, false);
+      }, 150);
     };
     addEventListener('resize', onResize);
-    function leaveGrid() { if (!G.alive) return false; G.alive = false; document.removeEventListener('keydown', G.sumKey); gv.scroll = G.list.scrollTop; removeEventListener('resize', onResize); G.io.disconnect(); return true; }
+    function leaveGrid() { if (!G.alive) return false; G.alive = false; document.removeEventListener('keydown', G.rsKey); gv.scroll = G.list.scrollTop; removeEventListener('resize', onResize); G.io.disconnect(); return true; }
     // 칸을 누르면 그 제품의 자세히 보기 (비교 칸 포함) — 돌아가기는 이 그리드 같은 상태로
     function openAt(t) {
       if (!t || t._cat === 'wait' || !leaveGrid()) return;
       viewer(core, 'all', Math.max(0, C.units.findIndex((u) => ukey(u) === t._k)), 'grid');
     }
-    // 검토 필요는 하나씩 (가운데 큰 카드 · 비교 칸 · 위 고정 버튼 셋) — 그리드가 블러 · 페이드로 물러나고 검수 화면이 올라온다
-    async function review() {
-      if (!G.alive) return;
-      const anim = !reduced();
-      hideSum();
-      if (anim) await G.list.animate([{ opacity: 1, filter: 'blur(0)', transform: 'none' }, { opacity: 0, filter: 'blur(6px)', transform: 'scale(.985)' }], { duration: 240, easing: EZ.p3in, fill: 'forwards' }).finished.catch(() => {});
+    // 검토 필요는 하나씩 (가운데 큰 카드 · 비교 칸 · 위 고정 버튼 셋) — 장면은 바로 바뀌고 가운데 카드만 아래에서 16px 올라온다 (스프링)
+    function review() {
       if (!leaveGrid()) return;
       viewer(core, 'review', 0, 'grid');
-      const dk = byId('dk'); if (anim && dk) fadeIn(dk, 420, 8);
+      rise(document.querySelector('#dk .dk-cc.dk-on'), 16);
     }
     gridEl.addEventListener('click', (ev) => {
       const t = ev.target.closest('.gd-it');
-      if (t && ev.target.closest('.gd-pdp, .gd-mt')) openAt(t);
+      if (t && ev.target.closest('.gd-pdp, .gd-mt')) { if (G.root.classList.contains('gd-rs')) review(); else openAt(t); }   // 결과 화면의 칸 = 검토
     });
     gridEl.addEventListener('keydown', (ev) => {
       if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.classList.contains('gd-pdp')) { ev.preventDefault(); openAt(ev.target.closest('.gd-it')); }
     });
     byId('gdRev').onclick = () => review();
-    const confirmGo = () => { hideSum(); if (leaveGrid()) finishView(core, true); };
+    const confirmGo = () => { if (leaveGrid()) finishView(core, true); };
     byId('gdGo').onclick = confirmGo;
     // 자동 재시도 · 다시 준비 중인 칸: 끝날 때까지 2초마다 (통과하면 그 칸이 준비됨으로) → 다 끝나면 결과 알림 (한 번만)
     const anyBusy = () => C.units.some((u) => busy(u) && !isRemoved(u));
@@ -410,29 +422,42 @@
       G.watching = false;
       if (!G.alive || gv.summed || anyBusy() || C.job.status !== 'ready') return;
       if (!reduced()) await sleep(500);   // 숫자가 자리 잡은 뒤
-      if (G.alive && !gv.summed) summary();
+      if (G.alive && !gv.summed) result();
     }
-    // 결과 알림: 흐린 그리드(위 줄 포함) 위 가운데 큰 숫자 · 작은 한 줄 · 버튼 하나 (Enter 도). Esc 는 닫고 그리드에 남음 ('검토 N' 으로 다시)
-    function summary() {
+    // 결과 화면: 장면이 바로 바뀐다 — 그리드 · 위 줄은 숨고 확인이 필요한 칸만 크게, 머리글 · 버튼 '검토' 는 검수 화면의 'n / N' · 버튼 줄 자리.
+    //   Enter 도 '검토', Esc 는 그리드로 (그 뒤엔 위 '검토' 버튼)
+    function result() {
       gv.summed = true;
-      const n = needs().length, done = C.units.filter((u) => passed(u) || isOk(u)).length, out = C.units.filter(isRemoved).length;
-      const line = [n ? T.sumLine(done, N) : T.doneT(N), out ? T.removed(out) : ''].filter(Boolean).join(' · ');
-      const box = document.createElement('div'); box.className = 'gd-sum'; box.id = 'gdSum';
-      box.innerHTML = `<div class="gd-sbox" role="dialog" aria-modal="false" aria-labelledby="gdSumH"><h2 id="gdSumH" class="${n ? 'bad' : 'ok'}">${n ? '' : `<span class="ck">${CK}</span>`}<b>${n || N}</b><span>${e(n ? T.sumNeed(n) : T.sumAll)}</span></h2>
-        <p>${e(line)}</p><button class="dk-act pri" id="gdStart" type="button">${e(n ? T.start : T.goDl)}</button></div>`;
-      G.root.appendChild(box);   // 위 줄까지 덮는다 (낮은 화면에서도 버튼이 보이게)
-      G.root.classList.add('gd-summ');
-      const b = byId('gdStart'); b.onclick = () => (n ? review() : confirmGo());
-      G.sumKey = (ev) => { if (ev.key === 'Escape') { ev.preventDefault(); hideSum(true); } else if (ev.key === 'Enter' && !ev.target.closest?.('button, a, input')) { ev.preventDefault(); b.click(); } };
-      document.addEventListener('keydown', G.sumKey);
-      b.focus({ preventScroll: true });
-      if (!reduced()) fadeIn(box.firstElementChild, 560, 16);
+      const bad = [...G.tiles.values()].filter((t) => t._cat === 'bad'), n = bad.length;
+      const num = n || N, full = (n ? T.rsNeed : T.rsAll)(num), at = full.indexOf(String(num));   // 숫자는 글과 같은 크기 · 굵기 (자리만 <b>)
+      const txt = [full.slice(0, at), full.slice(at + String(num).length)].map(e);
+      const head = document.createElement('div'); head.className = 'gd-rh'; head.id = 'gdRh';
+      head.innerHTML = `<h2 id="gdRhH">${txt[0]}<b>${num}</b>${txt[1]}</h2><button class="dk-act pri" id="gdRhGo" type="button">${e(n ? T.rv : T.goDl)}</button>`;
+      G.root.insertBefore(head, G.list);
+      G.root.classList.add('gd-rs');
+      for (const t of G.tiles.values()) t.classList.toggle('gd-hide', !bad.includes(t));
+      G.list.scrollTop = 0; bigVars(n);
+      for (const t of bad) if (t._marks) { t._ty = 0; t.querySelector('.gd-mv').style.transform = ''; focus(t, false); }   // 큰 칸 크기로 문제 자리 다시
+      const b = byId('gdRhGo'); b.onclick = () => (n ? review() : confirmGo());
+      G.rsKey = (ev) => {
+        if (ev.key === 'Escape') { ev.preventDefault(); leaveResult(); }
+        else if (ev.key === 'Enter' && !ev.target.closest?.('button, a, input')) { ev.preventDefault(); b.click(); }
+      };
+      document.addEventListener('keydown', G.rsKey);   // 버튼에 포커스를 두지 않는다 (검수 화면 버튼 자리에 포커스 테두리가 남지 않게) — Enter 는 위에서
+      rise(byId('gdRhH'), 8);
+      bad.slice(0, 24).forEach((t, k) => rise(t, 14, 40 + k * 50));
     }
-    function hideSum(anim) {
-      const box = byId('gdSum'); if (!box) return;
-      document.removeEventListener('keydown', G.sumKey); G.root.classList.remove('gd-summ');
-      if (anim && !reduced()) box.animate([{ opacity: 1, filter: 'blur(0)' }, { opacity: 0, filter: 'blur(6px)' }], { duration: 220, easing: EZ.p3in, fill: 'forwards' }).finished.then(() => box.remove(), () => box.remove());
-      else box.remove();
+    function leaveResult() {
+      const head = byId('gdRh'); if (!head) return;
+      document.removeEventListener('keydown', G.rsKey); head.remove(); G.root.classList.remove('gd-rs');
+      for (const t of G.tiles.values()) { t.classList.remove('gd-hide'); if (t._marks) { t._ty = 0; t.querySelector('.gd-mv').style.transform = ''; focus(t, false); } }
+    }
+    // 결과 화면 칸 크기: 한 줄에 다 들어가면 그 폭(150~196px), 아니면 196px 로 여러 줄(좁으면 두 칸씩) · PDP 높이는 남은 높이에 맞춰 (430px 까지)
+    function bigVars(n) {
+      const w = G.list.clientWidth, h = G.list.clientHeight, narrow = innerWidth <= 560, gap = narrow ? 14 : 22, avail = w - (narrow ? 28 : 48);
+      const fit = (avail - gap * (Math.max(1, n) - 1)) / Math.max(1, n);
+      const bw = Math.floor(fit >= 150 ? Math.min(196, fit) : Math.max(128, Math.min(196, (avail - gap) / 2))), bh = Math.round(Math.max(150, Math.min(430, h - 64, bw * 2.2)));
+      G.root.style.setProperty('--bw', bw + 'px'); G.root.style.setProperty('--bh', bh + 'px');
     }
 
     (async () => {
@@ -808,7 +833,10 @@
     }
     document.addEventListener('keydown', key);
     if (back) document.getElementById('dkBack').onclick = () => leave(true);
+    // 처음 자리 · 배경색은 바로 (비교 칸이 왼쪽 위에서 날아오지 않게, 배경이 물들지 않게) — 그 뒤 문제 자리를 따라갈 때만 움직인다
+    cmpEl.style.transition = D.root.style.transition = 'none';
     place(); layout(false); sync();
+    requestAnimationFrame(() => requestAnimationFrame(() => { cmpEl.style.transition = D.root.style.transition = ''; }));
     addEventListener('resize', onResize);
   }
   async function act(core, items, action, opts) {

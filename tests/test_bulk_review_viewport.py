@@ -71,8 +71,8 @@ def open_review(page, origin, lang, before=False, blocked=False):
 
 
 def start_review(page):
-    # 2026-11-28: 자동 체크가 끝나면 결과 알림('N개 확인이 필요해요') — 그 버튼으로 하나씩 검수 화면에 들어간다
-    page.locator("#gdStart").click()
+    # 2026-11-28: 자동 체크가 끝나면 결과 화면('확인이 필요한 PDP N개') — 그 '검토' 버튼으로 하나씩 검수 화면에 들어간다
+    page.locator("#gdRhGo").click()
 
 
 class ReviewViewportTest(unittest.TestCase):

@@ -422,23 +422,20 @@ button.eb { cursor: pointer; }
 .gd-prog.off { opacity: 0; }
 .gd-pg .gd-nums.dk-line { font-size: 18px; gap: 4px 10px; align-items: center; } .gd-pg .dk-line span { font-size: 15px; }
 .gd .dk-body { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 28px 40px; }
-/* 결과 알림 (2026-11-28): 흐린 그리드(위 줄까지) 위 가운데 — 큰 숫자 · 작은 한 줄 · 버튼 하나 */
-.gd > .gd-list, .gd > .gd-top { transition: filter .45s cubic-bezier(.16,1,.3,1), opacity .45s cubic-bezier(.16,1,.3,1); }
-.gd-summ > .gd-list, .gd-summ > .gd-top { filter: blur(5px); opacity: .3; pointer-events: none; }
-.gd-sum { position: absolute; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; padding: 16px; overflow: auto; }
-.gd-sbox { max-width: 560px; text-align: center; margin: auto; }
-.gd-sbox h2 { margin: 0; display: flex; align-items: baseline; justify-content: center; flex-wrap: wrap; gap: 4px 14px; font-size: 30px; font-weight: 700; letter-spacing: -.4px; line-height: 1.15; }
-.gd-sbox h2 b { font-size: 96px; letter-spacing: -3px; line-height: .95; font-variant-numeric: tabular-nums; }
-.gd-sbox h2.bad b, .gd-sbox h2.bad span { color: var(--clia-heritage); }
-.gd-sbox h2 .ck { align-self: center; width: 40px; height: 40px; border-radius: 50%; background: var(--clia-gray-900); display: inline-flex; align-items: center; justify-content: center; }
-.gd-sbox h2 .ck svg { width: 22px; height: 22px; fill: none; stroke: #fff; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
-.gd-sbox p { margin: 14px 0 0; font-size: 16px; color: var(--clia-gray-600); }
-.gd-sbox .dk-act { margin-top: 28px; min-width: 220px; height: 52px; font-size: 16px; }
-@media (max-width: 560px), (max-height: 520px) {
-  .gd-sbox h2 { font-size: 20px; gap: 2px 10px; } .gd-sbox h2 b { font-size: 56px; letter-spacing: -2px; }
-  .gd-sbox h2 .ck { width: 28px; height: 28px; } .gd-sbox h2 .ck svg { width: 16px; height: 16px; }
-  .gd-sbox p { margin-top: 8px; font-size: 14px; } .gd-sbox .dk-act { margin-top: 14px; min-width: 180px; height: 44px; font-size: 15px; }
-}
+/* 결과 화면 (2026-11-28 시안): 장면이 바로 바뀜 — 위 줄 · 통과 칸은 숨고 확인이 필요한 칸만 크게. 머리글 · 버튼은 검수 화면(.dk-br)의
+   'n / N'(위 12px) · 버튼 줄(위 56px, 높이 46px)과 같은 자리 — 누르면 버튼이 거의 그 자리에 다시 나온다. 머리글은 검정 · 숫자와 글 같은 크기 */
+.gd-rs > .gd-top { display: none; }
+.gd-rh { flex: none; position: relative; height: 116px; }
+.gd-rh h2 { position: absolute; left: 16px; right: 16px; top: -2px; height: 48px; margin: 0; overflow: hidden; text-align: center; white-space: nowrap; text-overflow: ellipsis; font-size: 40px; font-weight: 700; line-height: 48px; letter-spacing: -.8px; color: var(--clia-gray-900); }
+.gd-rh h2 b { font: inherit; letter-spacing: inherit; color: inherit; font-variant-numeric: tabular-nums; }
+.gd-rh .dk-act { position: absolute; top: 56px; left: 0; right: 0; width: fit-content; margin: 0 auto; }
+.gd-hide { display: none !important; }
+.gd-rs .gd-grid { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 22px; padding-top: 4px; }
+.gd-rs .gd-it { width: var(--bw, 196px); }
+.gd-rs .gd-pdp { aspect-ratio: auto; height: var(--bh, 430px); }
+.gd-rs .gd-mo { font-size: 14px; } .gd-rs .gd-st { min-height: 0; font-size: 12.5px; line-height: 1.35; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+@media (max-width: 760px) { .gd-rh h2 { font-size: 26px; letter-spacing: -.4px; } }
+@media (max-width: 420px) { .gd-rh h2 { font-size: 20px; letter-spacing: -.2px; } .gd-rs .gd-grid { gap: 14px; } }
 .gd-list { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
 .gd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--tw, 104px), 1fr)); gap: 18px 14px; max-width: 1680px; margin: 0 auto; padding: 6px 24px 40px; }
 .gd-it { position: relative; min-width: 0; }
@@ -481,7 +478,7 @@ button.eb { cursor: pointer; }
   .gd-acts .dk-act { height: 36px; }
   .gd-n b { font-size: 26px; } .gd-n span { font-size: 13px; } .gd-n .of { font-size: 15px; }
 }
-@media (prefers-reduced-motion: reduce) { .gd-mv, .gd-mk, .gd-prog i, .gd-pdp::after, .gd > .gd-list, .gd > .gd-top { transition: none; } .gd-busy .gd-st::before, .gd-note::before { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .gd-mv, .gd-mk, .gd-prog i, .gd-pdp::after { transition: none; } .gd-busy .gd-st::before, .gd-note::before { animation: none; } }
 .dk-card { position: absolute; left: 0; top: 0; width: 260px; transform-origin: 0 0; will-change: transform; }
 .dk-card .dk-ph { position: relative; height: 480px; border: 1px solid var(--clia-heritage); box-shadow: 0 0 0 3px rgba(165,0,52,.08); border-radius: 14px; background: #fff; overflow: hidden; transition: border-color .25s, box-shadow .25s; }
 .dk-card .dk-sc { position: absolute; inset: 0; overflow-y: auto; scrollbar-width: none; } .dk-card .dk-sc::-webkit-scrollbar { display: none; } .dk-card .cm { zoom: .61; }
