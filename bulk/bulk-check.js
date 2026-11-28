@@ -1,5 +1,5 @@
 /* bulk-check.js — 벌크 업로드 Check 단계 (?check=1 일 때만, 2026-11-26)
-   흐름: 첨부 › 준비 › Check › 받기. 라이브 제품만 준비 · 모든 제품을 한 그리드에 나열하고 결과가 나오는 대로 칸마다 통과(✓) · 검토 필요(빨강) (2026-11-28 예시 A).
+   흐름: 첨부 › 준비 › Check › 받기. 라이브 제품만 준비 · 모든 제품을 한 그리드에 나열하고 결과가 나오는 대로 칸마다 검토 필요만 빨강 (통과 칸엔 표시 없음) (2026-11-28 예시 A).
    - Status 칸이 있으면 Live/Active만, 없으면 모든 상품 행을 공개 LG.com 매칭 후보로 삼는다.
      매칭되지 않았거나 라이브가 아닌 행의 원래 내용은 그대로 둔다.
    - 건너뛴 수는 제품(모델) 기준 — 진행 막대와 같은 단위. 목록에는 엑셀 행 수도.
@@ -142,7 +142,7 @@
 
   // ── Check: 전체 그리드 (2026-11-28 결정 · 예시 A — 덱 · 양쪽 더미를 대신) ──
   // 처음부터 모든 제품이 한 그리드에 칸으로 있고, 서버(bulk-jobs.js CONTENT_CONC)의 결과가 닿는 대로 그 칸만 스캔 띠가 한 번 훑는다 →
-  // 통과는 작은 ✓, 검토 필요는 빨간 테두리 + 문제 자리 빨간 칸(PDP 를 그 자리까지 내려 둠). 연출 때문에 기다리게 하지 않는다 — 몰리면 간격을 줄인다.
+  // 통과 칸엔 표시를 두지 않고(11/28), 검토 필요는 빨간 테두리 + 문제 자리 빨간 칸(PDP 를 그 자리까지 내려 둠). 연출 때문에 기다리게 하지 않는다 — 몰리면 간격을 줄인다.
   // 위 고정 줄: 가운데 큰 숫자(진행 중엔 'AI 확인 중 n / N' + 얇은 막대) · 버튼은 늘 같은 자리(끝 쪽) — '검토 N' · '확인하고 받기'.
   // 사람이 정할 것은 목록으로 늘어놓지 않는다 (2026-11-28 장혁 피드백): 다 끝나면 숫자를 잠깐(~1초) 보여 주고 하나씩 검수 화면(viewer 'review')으로 —
   // 가운데 큰 카드 · 비교 칸 · 위 고정 버튼 셋, 하나 정하면 다음으로. 돌아가기는 그리드로, 다 정하면 끝 화면(확인하고 받기).
@@ -265,7 +265,7 @@
     for (const u of C.units) {
       const t = document.createElement('div'), it = u[0];
       t.className = 'gd-it gd-wait'; t._k = ukey(u); t._cat = 'wait'; t.dataset.row = it.row;
-      t.innerHTML = `<div class="gd-pdp" tabindex="-1" aria-label="${e(it.model || '')}"><div class="gd-mv"></div><span class="gd-band"></span><span class="gd-bdg">${CK}</span></div>
+      t.innerHTML = `<div class="gd-pdp" tabindex="-1" aria-label="${e(it.model || '')}"><div class="gd-mv"></div><span class="gd-band"></span></div>
         <div class="gd-mt"><div class="gd-mo">${e(it.model || '')}</div><div class="gd-st"></div></div>`;
       G.tiles.set(t._k, t); frag.appendChild(t);
     }
@@ -297,7 +297,7 @@
       t._ty = ty; mv.style.transform = `translateY(${-ty}px)`;
       if (anim && !reduced()) mv.animate([{ transform: `translateY(${-from}px)` }, { transform: `translateY(${-ty}px)` }], { duration: 600, easing: EZ.io });
     }
-    // 스캔 띠: 결과가 닿은 칸을 한 번 훑고(0.42초) → ✓ 또는 빨강 (그동안 결과 표시는 숨김)
+    // 스캔 띠: 결과가 닿은 칸을 한 번 훑고(0.42초) → 검토 필요면 빨강 (그동안 결과 표시는 숨김)
     //   띠는 칸 높이만 한 투명 판의 아래 끝에 그려져 있어 transform 의 % 만으로 위 → 아래 (칸 크기를 읽지 않음 — 많아도 레이아웃을 다시 하지 않게)
     function sweep(t) {
       const band = t.querySelector('.gd-band');
