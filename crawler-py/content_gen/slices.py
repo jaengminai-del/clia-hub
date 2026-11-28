@@ -20,8 +20,10 @@ import math
 import re
 import sys
 import time
+import os
 import zipfile
 from pathlib import Path
+from urllib.parse import quote
 
 from . import load_medium
 
@@ -355,9 +357,36 @@ def _document(html: str, vw: int, fonts_css: str) -> str:
 </style></head><body><div id="slice-root">{html}</div></body></html>"""
 
 
+# lg.com 이미지는 서버의 사본(image-cache.js, CLIA_IMAGE_CACHE)으로 받는다 (2026-11-28). 크로미움이 lg.com 을 직접 부르면
+# 제품을 한꺼번에 많이 그릴 때 lg.com 이 막아 이미지가 빈칸으로 잘렸다 (운영 140개 Check — '이미지 46/46장 로드 실패').
+# 사본도 끝내 못 받은 이미지는 실패로 둔다 → 벌크 Check 가 '빠진 이미지'로 그 자리를 보여 준다
+_LG = re.compile(r"^https://(?:[a-z0-9-]+\.)*lg\.com(?:/|$)", re.I)
+
+
+def _route_images(ctx):
+    cache = os.environ.get("CLIA_IMAGE_CACHE")
+    if not cache:
+        return
+
+    def via_cache(route):
+        req = route.request
+        if req.resource_type != "image":
+            return route.continue_()
+        try:
+            res = route.fetch(url=cache + quote(req.url, safe=""), timeout=60000)
+            if res.ok:
+                return route.fulfill(response=res)
+        except Exception:
+            pass
+        route.abort()
+
+    ctx.route(_LG, via_cache)
+
+
 def _open_page(browser, vw: int, scale: float, doc: str):
     ctx = browser.new_context(viewport={"width": vw, "height": 1400}, device_scale_factor=scale,
                               user_agent=UA, extra_http_headers={"Referer": "https://www.lg.com/"})
+    _route_images(ctx)
     page = ctx.new_page()
     page.set_content(doc, wait_until="domcontentloaded", timeout=60000)
     stat = page.evaluate(_JS_WAIT_ASSETS, 25000)
