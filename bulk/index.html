@@ -433,7 +433,7 @@ button.eb { cursor: pointer; }
 .gd-rs .gd-grid { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 22px; padding-top: 4px; }
 .gd-rs .gd-it { width: var(--bw, 196px); }
 .gd-rs .gd-pdp { aspect-ratio: auto; height: var(--bh, 430px); }
-.gd-rs .gd-busy .gd-pdp { opacity: .6; transition: opacity .3s; }   /* 자동 재시도 중 — 줄에 두되 살짝 흐리게, 아래 '다시 준비 중' */
+.gd-rs .gd-busy:not(.gd-rd) .gd-pdp, .gd-rs .gd-queue .gd-pdp { opacity: .6; transition: opacity .3s; }   /* 자동 재시도 중 — 줄에 두되 살짝 흐리게, 아래 '다시 준비 중' */
 .gd-rs .gd-mo { font-size: 14px; } .gd-rs .gd-st { min-height: 0; font-size: 12.5px; line-height: 1.35; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 @media (max-width: 760px) { .gd-rh h2 { font-size: 26px; letter-spacing: -.4px; } }
 @media (max-width: 420px) { .gd-rh h2 { font-size: 20px; letter-spacing: -.2px; } .gd-rs .gd-grid { gap: 14px; } }
@@ -478,6 +478,27 @@ button.eb { cursor: pointer; }
   .gd-top { min-height: 0; padding-block: 8px; gap: 6px; } .gd-acts { top: 8px; }
   .gd-acts .dk-act { height: 36px; }
   .gd-n b { font-size: 26px; } .gd-n span { font-size: 13px; } .gd-n .of { font-size: 15px; }
+}
+/* 자동 재시도 중인 칸 (2026-11-28): 찾은 문제(와인) · 지금 하는 일(lg.com 다시 크롤 · PDP 다시 그림 · 차례 기다림) · '성공하면 확인됨'(회색).
+   다시 크롤은 스캔 띠가 천천히 반복해 훑고(1.6초), 다시 그림은 더 옅게 · 느리게 — 보이는 칸(gd-vis)만. 통과하면 잠깐 ✓ 확인됨 */
+.gd-st > span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gd-rd .gd-st::before { display: none; }
+.gd-rs .gd-rd .gd-st, .gd-rs .gd-checked .gd-st { display: block; -webkit-line-clamp: unset; }
+.gd-rd .gd-l1 { color: var(--clia-heritage); font-weight: 600; }
+.gd-rd .gd-l2 { color: var(--clia-gray-800, #3a3632); font-weight: 600; }
+.gd-rd .gd-l3 { color: var(--clia-gray-500); font-weight: 400; font-size: .92em; }
+.gd-crawl .gd-l2::before, .gd-draw .gd-l2::before { content: ''; display: inline-block; width: 9px; height: 9px; margin-inline-end: 5px; vertical-align: -1px; border-radius: 50%; border: 2px solid var(--clia-gray-200); border-top-color: var(--clia-gray-900); animation: ckspin .7s linear infinite; }
+.gd-crawl .gd-mv, .gd-draw .gd-mv { opacity: .55; }
+@keyframes gdloop { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+.gd-vis.gd-crawl .gd-band { opacity: 1; animation: gdloop 1.6s cubic-bezier(.45,0,.55,1) infinite; }
+.gd-vis.gd-draw .gd-band { opacity: .45; animation: gdloop 2.2s cubic-bezier(.45,0,.55,1) infinite; }
+.gd-checked .gd-band { animation: none !important; opacity: 0 !important; }
+.gd-checked .gd-mv { opacity: 1; } .gd-checked .gd-mk { opacity: 0; }
+.gd-okl { display: inline-flex !important; align-items: center; gap: 6px; font-weight: 700; color: var(--clia-gray-900); }
+.gd-okl svg { flex: none; width: 16px; height: 16px; padding: 3px; box-sizing: border-box; border-radius: 50%; background: var(--clia-gray-900); fill: none; stroke: #fff; stroke-width: 3.6; stroke-linecap: round; stroke-linejoin: round; }
+@media (prefers-reduced-motion: reduce) {   /* 움직이지 않는 표시: 띠가 가운데 멈춰 있음 */
+  .gd-crawl .gd-band, .gd-draw .gd-band { animation: none !important; opacity: 1; transform: translateY(-50%); } .gd-draw .gd-band { opacity: .45; }
+  .gd-crawl .gd-l2::before, .gd-draw .gd-l2::before { animation: none; }
 }
 @media (prefers-reduced-motion: reduce) { .gd-mv, .gd-mk, .gd-prog i, .gd-pdp::after { transition: none; } .gd-busy .gd-st::before, .gd-note::before { animation: none; } }
 .dk-card { position: absolute; left: 0; top: 0; width: 260px; transform-origin: 0 0; will-change: transform; }

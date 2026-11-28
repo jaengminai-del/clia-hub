@@ -51,18 +51,28 @@ OK_AI = [{"k": "img", "ok": True, "n": 0}, {"k": "txt", "ok": True}, {"k": "spec
 class FakeJob:
     """GET 할 때마다 한 걸음: 1번째 = 진행 중(뒤 절반은 대기), 2번째부터 다 끝남. 재시도 중인 것은 끝난 뒤 3번 더 물으면 통과."""
 
-    def __init__(self, origin, clean=False, retry_only=False):
+    def __init__(self, origin, clean=False, retry_only=False, retry_states=False):
         self.img = img = lambda k, n=4: [f"{origin}/fixture/p{k}.svg?s={i}" for i in range(1, n + 1)]
         items = [{"row": 10 + k, "slug": f"p-{k}", "model": f"MODEL-{k:02d}", "status": "ok", "imgs": img(k),
                   "hash": f"h{k}", "contentDigest": f"d{k}", "ai": copy.deepcopy(OK_AI)} for k in range(PASSED)]
         self.posts = []
         self.gets = 0
         self.ready_gets = 0
+        if retry_states:   # 자동 재시도 셋: lg.com 다시 크롤(먼저 통과) · PDP 다시 그림 · 차례 기다림 (서버 retryLater 의 redo)
+            for row, redo, at in [(103, "crawl", 3), (104, "draw", 99), (105, None, 99)]:
+                it = {"row": row, "slug": f"retry-{row}", "model": f"RETRY-{row}", "status": "ok", "retrying": 1, "imgs": img(row),
+                      "hash": f"h{row}", "contentDigest": f"d{row}", "_passAt": at,
+                      "ai": [{"k": "img", "ok": False, "n": 3, "bad": 3, "lg": 0, "at": [{"src": "https://www.lg.com/x.jpg", "regions": [{"slice": 2, "y": 0.5, "h": 0.1}]}]}]}
+                if redo:
+                    it["redo"] = redo
+                items.append(it)
+            self.items = items
+            return
         if clean or retry_only:   # 검토할 것 없음 · 자동 재시도 하나뿐 (통과하면 모두 준비됨)
             if retry_only:
                 items.append({"row": 103, "slug": "retry", "model": "RETRY-OK", "status": "ok", "retrying": 1, "imgs": img(103),
                               "hash": "hR", "contentDigest": "dR",
-                              "ai": [{"k": "txt", "ok": False, "issues": [{"lines": ["Line"], "regions": [{"slice": 1, "y": 0.2, "h": 0.1}]}]}]})
+                              "ai": [{"k": "txt", "ok": False, "n": 1, "issues": [{"lines": ["Line"], "regions": [{"slice": 1, "y": 0.2, "h": 0.1}]}]}]})
             self.items = items
             return
         items.insert(2, {"row": 100, "slug": "bad-img", "model": "BAD-IMG", "status": "ok", "imgs": img(100),
@@ -76,7 +86,7 @@ class FakeJob:
         items.insert(7, {"row": 102, "slug": "bad-fail", "model": "BAD-FAIL", "status": "failed", "error": "generate returned no HTML", "imgs": []})
         items.append({"row": 103, "slug": "retry", "model": "RETRY-OK", "status": "ok", "retrying": 1, "imgs": img(103),
                       "hash": "hR", "contentDigest": "dR",
-                      "ai": [{"k": "txt", "ok": False, "issues": [{"lines": ["Line"], "regions": [{"slice": 1, "y": 0.2, "h": 0.1}]}]}]})
+                      "ai": [{"k": "txt", "ok": False, "n": 1, "issues": [{"lines": ["Line"], "regions": [{"slice": 1, "y": 0.2, "h": 0.1}]}]}]})
         self.items = items
         self.gets = 0
         self.ready_gets = 0
@@ -92,8 +102,9 @@ class FakeJob:
             it = dict(it)
             if status == "running" and k >= len(self.items) // 2:
                 it.update(status="queued", imgs=[], ai=[])
-            if it.get("retrying") and self.ready_gets > 3:
+            if it.get("retrying") and self.ready_gets > it.get("_passAt", 3):   # 서버처럼 retrying · redo 가 같이 빠진다
                 it.pop("retrying")
+                it.pop("redo", None)
                 it["ai"] = copy.deepcopy(OK_AI)
                 self.items[k] = it
             if "_redo" in it:   # 다시 준비: 두 번 더 물으면 통과
@@ -163,14 +174,16 @@ class BulkCheckGridTest(unittest.TestCase):
         expect(shown).to_have_count(4)
         self.assertEqual(sorted(shown.evaluate_all("ts => ts.map(t => t.dataset.row)")), ["100", "101", "102", "103"])
         retry = page.locator('.gd-it[data-row="103"]')
-        expect(retry).to_have_class("gd-it gd-busy")
-        if lang == "en":
-            expect(retry.locator(".gd-st")).to_have_text("Preparing again")
+        expect(retry).to_have_class(re.compile(r"\bgd-busy\b.*\bgd-queue\b"))
+        if lang == "en":   # 찾은 문제 · 차례 기다림 · 성공하면 확인됨
+            expect(retry.locator(".gd-l1")).to_have_text("1 missing line")
+            expect(retry.locator(".gd-l2")).to_have_text("Waiting to retry…")
+            expect(retry.locator(".gd-l3")).to_have_text("Checked when it succeeds")
         expect(head.locator("b")).to_have_text("4")
         expect(page.locator("#gdRhGo")).to_be_enabled()
         expect(page.locator(".gd-it:not(.gd-hide) .gd-ra, .gd-it:not(.gd-hide) button")).to_have_count(0)
         bad_img = page.locator('.gd-it[data-row="100"]')
-        expect(bad_img).to_have_class("gd-it gd-bad")
+        expect(bad_img).to_have_class(re.compile(r"\bgd-bad\b"))
         expect(bad_img.locator(".gd-mk")).to_have_count(1)
         expect(bad_img.locator(".gd-mv")).to_have_attribute("style", re.compile(r"translateY\(-\d+px\)"))
         mk, pdp = bad_img.locator(".gd-mk").bounding_box(), bad_img.locator(".gd-pdp").bounding_box()
@@ -180,7 +193,8 @@ class BulkCheckGridTest(unittest.TestCase):
         self.assertLessEqual(page.evaluate("document.documentElement.scrollWidth"), width)
         self.assertLessEqual(page.evaluate("(() => { const l = document.getElementById('gdList'); return l.scrollWidth - l.clientWidth; })()"), 0)
         # 2) 재시도가 통과하면 그 칸은 줄에서 빠지고 숫자가 줄어든다 (머리글은 검정 · 숫자와 글 같은 크기)
-        expect(retry).to_have_class("gd-it gd-ok gd-hide", timeout=15000)
+        expect(retry.locator(".gd-okl")).to_be_visible(timeout=15000)   # 잠깐 ✓ 확인됨 → 빠짐
+        expect(retry).to_have_class(re.compile(r"\bgd-ok\b.*\bgd-hide\b"), timeout=5000)
         expect(shown).to_have_count(3)
         self.assertEqual(sorted(shown.evaluate_all("ts => ts.map(t => t.dataset.row)")), ["100", "101", "102"])
         expect(head.locator("b")).to_have_text("3")
@@ -296,7 +310,7 @@ class BulkCheckGridTest(unittest.TestCase):
         head, go = page.locator("#gdRhH"), page.locator("#gdRhGo")
         expect(head).to_be_visible(timeout=10000)
         expect(page.locator(".gd-it:not(.gd-hide)")).to_have_count(1)
-        expect(page.locator('.gd-it[data-row="103"]')).to_have_class("gd-it gd-busy")
+        expect(page.locator('.gd-it[data-row="103"]')).to_have_class(re.compile(r"\bgd-busy\b"))
         expect(head.locator("b")).to_have_text("1")
         if lang == "en":
             expect(head).to_have_text("1 PDP needs to be checked")
@@ -314,6 +328,58 @@ class BulkCheckGridTest(unittest.TestCase):
         self.assertEqual(sorted(job.posts[-1]["rows"]), [10 + k for k in range(PASSED)] + [103])
         self.assertEqual(errors, [])
         page.close()
+
+    def run_retry_states(self, browser, origin, width, height, lang, motion):
+        # 자동 재시도 중인 칸: 찾은 문제 · 지금 하는 일(다시 크롤 · 다시 그림 · 기다림) · 성공하면 확인됨, 다시 크롤 · 그림이면 띠가 반복해 훑음
+        job = FakeJob(origin, retry_states=True)
+        page = browser.new_page(viewport={"width": width, "height": height}, reduced_motion=motion)
+        errors = []
+        page.on("pageerror", lambda e: errors.append(str(e)))
+        page.route("**/api/v1/bulk/jobs/**", job.handle)
+        page.route("**/fixture/*.svg*", lambda route: route.fulfill(content_type="image/svg+xml", body=SVG))
+        page.route("**/*", lambda route: route.fallback() if route.request.url.startswith(origin) else route.abort())
+        page.goto(f"{origin}/bulk/?check=1&lang={lang}&job={JOB_ID}")
+        head = page.locator("#gdRhH")
+        expect(head).to_be_visible(timeout=10000)
+        expect(head.locator("b")).to_have_text("3")
+        tile = lambda row: page.locator(f'.gd-it[data-row="{row}"]')
+        for row, cls, line in [(103, "gd-crawl", "Re-crawling from lg.com…"), (104, "gd-draw", "Preparing the PDP again…"), (105, "gd-queue", "Waiting to retry…")]:
+            expect(tile(row)).to_have_class(re.compile(rf"\bgd-busy\b.*\b{cls}\b"))
+            if lang == "en":
+                expect(tile(row).locator(".gd-l1")).to_have_text("3 missing images")
+                expect(tile(row).locator(".gd-l2")).to_have_text(line)
+                expect(tile(row).locator(".gd-l3")).to_have_text("Checked when it succeeds")
+            else:
+                expect(tile(row).locator(".gd-l2")).not_to_have_text("")
+        self.inside(page, width, height, "#gdRhH", "#gdRhGo")
+        band = lambda row: tile(row).locator(".gd-band").evaluate("b => getComputedStyle(b).animationName")
+        if motion == "reduce":   # 움직이지 않는 표시
+            self.assertEqual([band(103), band(104), band(105)], ["none", "none", "none"])
+        else:
+            expect(tile(103)).to_have_class(re.compile(r"\bgd-vis\b"))
+            self.assertEqual([band(103), band(104), band(105)], ["gdloop", "gdloop", "none"])
+        # 다시 크롤이 통과하면: 잠깐 ✓ 확인됨 → 줄에서 빠지고 숫자가 줄어든다
+        ok = tile(103).locator(".gd-okl")
+        expect(ok).to_be_visible(timeout=15000)
+        if lang == "en":
+            expect(ok).to_have_text("Checked")
+        expect(head.locator("b")).to_have_text("3")
+        expect(tile(103)).to_have_class(re.compile(r"\bgd-hide\b"), timeout=5000)
+        expect(head.locator("b")).to_have_text("2")
+        expect(page.locator(".gd-it:not(.gd-hide)")).to_have_count(2)
+        self.assertEqual(errors, [])
+        page.close()
+
+    def test_retry_status_lines_animation_and_checked(self):
+        with serve() as origin, sync_playwright() as p:
+            options = {"headless": True}
+            if os.environ.get("CLIA_CHROMIUM"):
+                options["executable_path"] = os.environ["CLIA_CHROMIUM"]
+            browser = p.chromium.launch(**options)
+            for width, height, lang, motion in [(1366, 768, "en", "no-preference"), (1366, 768, "en", "reduce"), (360, 340, "ar", "reduce")]:
+                with self.subTest(width=width, height=height, lang=lang, motion=motion):
+                    self.run_retry_states(browser, origin, width, height, lang, motion)
+            browser.close()
 
     def test_grid_scan_result_screen_then_one_by_one_review_and_download(self):
         with serve() as origin, sync_playwright() as p:

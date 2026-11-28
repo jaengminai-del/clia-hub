@@ -44,22 +44,27 @@
     en: { rmS: 'Remove', viewAll: (n) => `View all ${n}`, moreBelow: 'More below', back: '← Back', prev: 'Previous', next: 'Next', removedL: 'Removed from this Excel', fReady: 'Ready', fReview: 'Needs review', aiChk: 'AI checking', goDl: 'Confirm & download',
       okIn: 'Looks fine · include',
       rsNeed: (n) => (n === 1 ? `${n} PDP needs to be checked` : `${n} PDPs need to be checked`), rsAll: (n) => `All ${n} PDPs are ready`, rv: 'Review', redoN: (n) => `Preparing ${n} again…`,
+      rcCrawl: 'Re-crawling from lg.com…', rcDraw: 'Preparing the PDP again…', rcWait: 'Waiting to retry…', rcHint: 'Checked when it succeeds', chk: 'Checked',
       allDone: 'All checked', colModel: 'Model', colDesc: 'Description', imgsN: (n) => `${n} images`, moreRows: (n) => `+ ${n} more rows`, confirmDl: (n) => `Confirm ${n} & download` },
     th: { rmS: 'นำออก', viewAll: (n) => `ดูทั้งหมด ${n}`, moreBelow: 'ยังมีด้านล่าง', back: '← กลับ', prev: 'ก่อนหน้า', next: 'ถัดไป', removedL: 'นำออกจาก Excel นี้แล้ว', fReady: 'พร้อม', fReview: 'ต้องตรวจสอบ', aiChk: 'AI กำลังตรวจ', goDl: 'ยืนยันและดาวน์โหลด',
       okIn: 'ดูแล้วโอเค · ใส่ไว้',
       rsNeed: (n) => `PDP ที่ต้องตรวจสอบ ${n} รายการ`, rsAll: (n) => `PDP ทั้ง ${n} รายการพร้อมแล้ว`, rv: 'ตรวจสอบ', redoN: (n) => `กำลังเตรียมใหม่ ${n} รายการ…`,
+      rcCrawl: 'กำลังดึงข้อมูลจาก lg.com ใหม่…', rcDraw: 'กำลังเตรียม PDP ใหม่…', rcWait: 'รอลองใหม่…', rcHint: 'สำเร็จแล้วจะเป็น “ตรวจแล้ว”', chk: 'ตรวจแล้ว',
       allDone: 'ตรวจครบแล้ว', colModel: 'รุ่น', colDesc: 'คำอธิบาย', imgsN: (n) => `${n} รูป`, moreRows: (n) => `+ อีก ${n} แถว`, confirmDl: (n) => `ยืนยัน ${n} และดาวน์โหลด` },
     ko: { rmS: '빼기', viewAll: (n) => `전체 보기 ${n}`, moreBelow: '아래에 더 있음', back: '← 돌아가기', prev: '이전', next: '다음', removedL: '이번 엑셀에서 뺌', fReady: '준비됨', fReview: '검토 필요', aiChk: 'AI 확인 중', goDl: '확인하고 받기',
       okIn: '괜찮음 · 포함',
       rsNeed: (n) => `확인이 필요한 PDP ${n}개`, rsAll: (n) => `PDP ${n}개 모두 준비됨`, rv: '검토', redoN: (n) => `${n}개 다시 준비 중…`,
+      rcCrawl: 'lg.com에서 다시 크롤링 중…', rcDraw: 'PDP 다시 만드는 중…', rcWait: '다시 시도 대기 중…', rcHint: '성공하면 확인됨으로 바뀌어요', chk: '확인됨',
       allDone: '모두 확인함', colModel: '모델', colDesc: '설명', imgsN: (n) => `이미지 ${n}장`, moreRows: (n) => `+ ${n}행 더`, confirmDl: (n) => `${n}개 확인하고 받기` },
     de: { rmS: 'Entfernen', viewAll: (n) => `Alle ${n} ansehen`, moreBelow: 'Weiter unten', back: '← Zurück', prev: 'Zurück', next: 'Weiter', removedL: 'Aus dieser Excel entfernt', fReady: 'Bereit', fReview: 'Zu prüfen', aiChk: 'KI prüft', goDl: 'Bestätigen & herunterladen',
       okIn: 'Passt · übernehmen',
       rsNeed: (n) => (n === 1 ? `${n} PDP muss geprüft werden` : `${n} PDPs müssen geprüft werden`), rsAll: (n) => `Alle ${n} PDPs sind bereit`, rv: 'Prüfen', redoN: (n) => `${n} werden neu vorbereitet…`,
+      rcCrawl: 'Wird neu von lg.com geladen…', rcDraw: 'PDP wird neu erstellt…', rcWait: 'Wartet auf neuen Versuch…', rcHint: 'Bei Erfolg als geprüft markiert', chk: 'Geprüft',
       allDone: 'Alles geprüft', colModel: 'Modell', colDesc: 'Beschreibung', imgsN: (n) => `${n} Bilder`, moreRows: (n) => `+ ${n} weitere Zeilen`, confirmDl: (n) => `${n} bestätigen & herunterladen` },
     ar: { rmS: 'إزالة', viewAll: (n) => `عرض الكل ${n}`, moreBelow: 'المزيد بالأسفل', back: 'رجوع →', prev: 'السابق', next: 'التالي', removedL: 'أُزيل من ملف Excel هذا', fReady: 'جاهز', fReview: 'بحاجة إلى مراجعة', aiChk: 'الذكاء الاصطناعي يفحص', goDl: 'تأكيد وتنزيل',
       okIn: 'يبدو جيدًا · تضمين',
       rsNeed: (n) => `${n} صفحات تفاصيل تحتاج إلى مراجعة`, rsAll: (n) => `جميع صفحات التفاصيل (${n}) جاهزة`, rv: 'مراجعة', redoN: (n) => `جارٍ إعادة تجهيز ${n}…`,
+      rcCrawl: 'جارٍ الجلب من lg.com مجددًا…', rcDraw: 'جارٍ تجهيز صفحة التفاصيل مجددًا…', rcWait: 'بانتظار إعادة المحاولة…', rcHint: 'ستُعلَّم كمُتحقَّق منها عند النجاح', chk: 'تم التحقق',
       allDone: 'تم فحص الكل', colModel: 'الطراز', colDesc: 'الوصف', imgsN: (n) => `${n} صور`, moreRows: (n) => `+ ${n} صفوف أخرى`, confirmDl: (n) => `تأكيد ${n} والتنزيل` },
   };
   // 문제 문구 (2026-11-27 장혁 피드백 '단순하게'): 오른쪽 칸 맨 위 큰 한 문장 · 다섯 언어 같은 톤. w_* 는 그리드 칸 아래 짧은 글
@@ -155,7 +160,8 @@
   // 그리드는 사라지고 확인이 필요한 PDP 만 위쪽에 큰 칸으로 한 줄(문제 자리까지 내려 둠 · 빨간 칸), 가운데 위 '확인이 필요한 PDP 6개'(검정 · 숫자와 글 같은 크기)
   // 바로 아래 가운데 버튼 하나 '검토' — 다음 화면(검수 화면)의 'n / N' · 버튼 줄과 같은 자리. 저절로 넘어가지 않음(Enter 도). 0개면 '모두 준비됨' + 확인하고 받기.
   // 모션: 스프링(stiffness 260 · damping 26, 라이브러리 없이 linear() 이징)으로 아주 조금 올라옴 — PDP 14px(50ms 차례) · 머리글 8px · 검수 화면 가운데 카드 16px.
-  // 자동 재시도 중인 것도 그 줄에 '다시 준비 중'으로 — 계속 물어보다 통과하면 그 칸이 줄에서 빠지고 숫자가 줄어든다(다 빠지면 '모두 준비됨').
+  // 자동 재시도 중인 것도 그 줄에 — 칸 아래 찾은 문제 · 지금 하는 일(lg.com 다시 크롤 · PDP 다시 그림 · 차례 기다림) · '성공하면 확인됨',
+  // 다시 크롤 · 그림 중이면 띠가 천천히 반복해 훑는다(보이는 칸만). 계속 물어보다 통과하면 잠깐 ✓ 확인됨 → 줄에서 빠지고 숫자가 줄어든다(다 빠지면 '모두 준비됨').
   // 결과 화면은 한 번만 (돌아온 뒤엔 위 '검토' 버튼으로).
   // 칸을 누르면 그 제품의 자세히 보기(viewer 'all'), 돌아오면 같은 상태.
   // 자동 재시도는 서버가 뒤에서 — 고쳐지면 그 칸이 준비됨으로 옮겨 간다. 100~300개여도 부드럽게: 작은 미리보기 앞 몇 장만 · lazy, 연출은 보이는 몇십 개만.
@@ -181,6 +187,9 @@
   const reduced = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (_) { return false; } };
   const EZ = { out: 'cubic-bezier(.16,1,.3,1)', p3out: 'cubic-bezier(.33,1,.68,1)', p3in: 'cubic-bezier(.32,0,.67,0)', io: 'cubic-bezier(.45,0,.55,1)' };
   const busy = (u) => u.some((x) => x.status === 'working' || x.retrying);
+  // 자동 재시도에서 지금 하는 일 (2026-11-28, 서버 retryLater 가 it.redo 를 둔다): crawl lg.com 다시 크롤 · draw PDP 다시 그림 · 없으면 차례 기다림. 사람이 누른 '다시 준비'는 null
+  const redoOf = (u) => { const it = u.find((x) => x.retrying); return !it ? null : it.redo === 'crawl' || it.redo === 'draw' ? it.redo : 'wait'; };
+  const redoLine = (u) => ({ crawl: C.T.rcCrawl, draw: C.T.rcDraw, wait: C.T.rcWait }[redoOf(u)] || C.T.redoing);
   const settled = (u) => u.every((x) => x.status === 'ok' || x.status === 'failed' || x.status === 'cancelled');
   const passed = (u) => !busy(u) && u.every((x) => x.status === 'ok') && aiRows(u).every((x) => x.ok);
   const isRemoved = (u) => u.every((x) => x.check === 'removed');
@@ -329,12 +338,18 @@
     }
     function paint(t, u, anim) {
       const prev = t._cat, cat = catOf(u, G.landed.has(t._k)), changed = cat !== 'wait' && fill(t, u);
+      const rd = cat === 'busy' ? redoOf(u) : null, reasons = aiRows(u).filter((x) => !x.ok).map(why).join(' · '), sk = [cat, rd, reasons].join('|');
+      if (t._sk !== sk && !t._checked) {   // 상태 줄 (다시 크롤 · 다시 그림 · 기다림이 바뀌어도)
+        t._sk = sk;
+        t.className = `gd-it gd-${cat}${rd ? ' gd-rd gd-' + (rd === 'wait' ? 'queue' : rd) : ''}${G.vis.has(t) ? ' gd-vis' : ''}${t.classList.contains('gd-hide') ? ' gd-hide' : ''}`;
+        const st = t.querySelector('.gd-st');
+        if (rd) {   // 자동 재시도: 찾은 문제 · 지금 하는 일 · 성공하면 확인됨 (세 줄, 짧게)
+          st.innerHTML = `<span class="gd-l1">${e(reasons)}</span><span class="gd-l2">${e(redoLine(u))}</span><span class="gd-l3">${e(T.rcHint)}</span>`;
+          st.title = [reasons, redoLine(u), T.rcHint].filter(Boolean).join(' · ');
+        } else st.textContent = st.title = { wait: '', ok: T.fReady, busy: T.redoing, in: T.okIn, out: T.removedL }[cat] ?? reasons;   // 사람이 정한 것: 포함 · 뺌 (검수 화면과 같은 말)
+      }
       if (cat !== prev || changed) {
         t._cat = cat;
-        t.className = `gd-it gd-${cat}`;
-        const reasons = aiRows(u).filter((x) => !x.ok).map(why).join(' · ');
-        const st = t.querySelector('.gd-st');   // 사람이 정한 것: 포함 · 뺌 (검수 화면과 같은 말)
-        st.textContent = st.title = { wait: '', ok: T.fReady, busy: T.redoing, in: T.okIn, out: T.removedL }[cat] ?? reasons;
         t.querySelector('.gd-pdp').tabIndex = cat === 'wait' ? -1 : 0;
         const scan = anim && !reduced() && G.vis.has(t) && cat !== 'wait' && cat !== 'busy' && (prev === 'wait' || prev === 'busy' || changed);   // 보이는 칸만
         if (scan) sweep(t);
@@ -369,7 +384,7 @@
     }
     // 보이는 칸 (연출 · 따라가기는 이것만): 칸 위치를 매번 읽지 않게 IntersectionObserver 로
     G.vis = new Set();
-    G.io = new IntersectionObserver((es) => { for (const en of es) { if (en.isIntersecting) G.vis.add(en.target); else G.vis.delete(en.target); } }, { root: G.list, rootMargin: '80px 0px' });
+    G.io = new IntersectionObserver((es) => { for (const en of es) { if (en.isIntersecting) G.vis.add(en.target); else G.vis.delete(en.target); en.target.classList.toggle('gd-vis', en.isIntersecting); } }, { root: G.list, rootMargin: '80px 0px' });   // gd-vis: 보이는 칸만 반복 띠
     for (const t of G.tiles.values()) G.io.observe(t);
     ['wheel', 'touchstart', 'pointerdown', 'keydown'].forEach((ev) => G.list.addEventListener(ev, () => { G.follow = false; }, { passive: true }));
     function land(k, anim) {
@@ -463,11 +478,25 @@
       const tiles = [...G.tiles.values()], out = tiles.filter((t) => !t.classList.contains('gd-hide') && !inRow(t)), back = tiles.filter((t) => t.classList.contains('gd-hide') && inRow(t));
       const n = tiles.filter(inRow).length;
       if (!out.length && !back.length) { headline(n); return; }
+      // 자동 재시도가 통과한 칸: 잠깐(~1초) ✓ '확인됨' 을 보여 준 뒤 줄에서 빠진다
+      const won = out.filter((t) => t._cat === 'ok' && !t._checked);
+      if (won.length) {
+        for (const t of won) {
+          t._checked = true; t.classList.add('gd-checked');
+          const st = t.querySelector('.gd-st'); st.innerHTML = `<span class="gd-okl">${CK}${e(T.chk)}</span>`; st.title = T.chk;
+          if (!reduced()) rise(st.firstElementChild, 6);
+        }
+        await sleep(1000);
+        if (!G.alive || !byId('gdRh')) return;
+      }
       anim = anim && !reduced();
       const stay = tiles.filter((t) => !t.classList.contains('gd-hide') && inRow(t)), first = new Map(anim ? stay.map((t) => [t, t.getBoundingClientRect()]) : []);
       if (anim) await Promise.all(out.map((t) => t.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-6px) scale(.94)' }], { duration: 260, easing: EZ.p3in, fill: 'forwards' }).finished.catch(() => {})));
       if (!G.alive || !byId('gdRh')) return;
-      for (const t of out) { t.classList.add('gd-hide'); t.getAnimations().forEach((a) => a.cancel()); }
+      for (const t of out) {   // 그리드로 돌아가면 보통 통과 칸
+        t.classList.add('gd-hide'); t.getAnimations().forEach((a) => a.cancel());
+        if (t._checked) { t._checked = false; t._sk = null; t.classList.remove('gd-checked'); const u = unitOf(t._k); if (u) paint(t, u, false); }
+      }
       for (const t of back) t.classList.remove('gd-hide');
       bigVars(n); headline(n);
       for (const t of back) { if (t._marks) { t._ty = 0; t.querySelector('.gd-mv').style.transform = ''; focus(t, false); } if (anim) rise(t, 14); }
@@ -718,7 +747,7 @@
       document.getElementById('dkProg').style.width = ((i + 1) / list.length * 100) + '%';
       // 위엔 모델명과 제품군만 표시.
       const fam = familyOf(u);
-      cap.innerHTML = `<div class="dk-cr"><b>${e(it.model || '')}</b>${fam ? `<span class="dk-fam">${e(fam)}</span>` : ''}</div>` + (s === 'busy' ? `<span>${e(T.redoing)}</span>` : '');
+      cap.innerHTML = `<div class="dk-cr"><b>${e(it.model || '')}</b>${fam ? `<span class="dk-fam">${e(fam)}</span>` : ''}</div>` + (s === 'busy' ? `<span>${e(redoLine(u))}</span>` : '');
       cmp();
       cap.style.left = g.x + 'px'; cap.style.width = g.cw + 'px';
       (rtl ? nextB : prevB).disabled = !i; (rtl ? prevB : nextB).disabled = i >= list.length - 1;
