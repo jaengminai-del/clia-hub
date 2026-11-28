@@ -92,6 +92,8 @@ class FakeJob:
                          "hash": "hS", "contentDigest": "dS",
                          "ai": [{"k": "img", "ok": True, "n": 0}, {"k": "spec", "ok": False, "issues": [{"lines": ["Screen width: 42 cm"], "regions": []}]}]})
         items.insert(7, {"row": 102, "slug": "bad-fail", "model": "BAD-FAIL", "status": "failed", "error": "generate returned no HTML", "imgs": []})
+        # lg.com 에 내용이 없는 제품: 확인할 것이 아님 — 엑셀 행은 그대로 (서버가 확인 · 받기에서 뺀다)
+        items.insert(9, {"row": 104, "slug": "no-lg", "model": "NO-LG", "status": "failed", "empty": True, "error": "no content on lg.com", "imgs": []})
         items.append({"row": 103, "slug": "retry", "model": "RETRY-OK", "status": "ok", "retrying": 1, "imgs": img(103),
                       "hash": "hR", "contentDigest": "dR",
                       "ai": [{"k": "txt", "ok": False, "n": 1, "issues": [{"lines": ["Line"], "regions": [{"slice": 1, "y": 0.2, "h": 0.1}]}]}]})
@@ -201,6 +203,10 @@ class BulkCheckGridTest(unittest.TestCase):
         expect(page.locator('.gd-it[data-row="102"] .gd-pdp')).to_have_class("gd-pdp none")
         # 실패 이유는 짧은 안내만 — 서버의 기술 오류 문구(영어)는 화면에 내지 않음
         expect(page.locator('.gd-it[data-row="102"]')).not_to_contain_text("returned no HTML")
+        no_lg = page.locator('.gd-it[data-row="104"]')   # lg.com 에 내용 없음: 결과 화면 줄에 없음 · 검토 수에 안 들어감
+        expect(no_lg).to_have_class(re.compile(r"\bgd-none\b.*\bgd-hide\b"))
+        if lang == "en":
+            self.assertEqual(no_lg.locator(".gd-st").evaluate("e => e.textContent"), "No content on lg.com")
         self.assertLessEqual(page.evaluate("document.documentElement.scrollWidth"), width)
         self.assertLessEqual(page.evaluate("(() => { const l = document.getElementById('gdList'); return l.scrollWidth - l.clientWidth; })()"), 0)
         # 2) 재시도가 통과하면 그 칸은 줄에서 빠지고 숫자가 줄어든다 (머리글은 검정 · 숫자와 글 같은 크기)
@@ -248,9 +254,11 @@ class BulkCheckGridTest(unittest.TestCase):
         self.assertAlmostEqual(count["y"] + count["height"] / 2, head_box["y"] + head_box["height"] / 2, delta=6)
         # 돌아가기 → 그리드 (결과 화면은 한 번만 — 이제 위 '검토' 버튼)
         page.locator("#dkBack").click()
-        expect(page.locator(".gd-it")).to_have_count(PASSED + 4)
+        expect(page.locator(".gd-it")).to_have_count(PASSED + 5)
         expect(page.locator("#gdRev")).to_be_enabled()
         expect(page.locator("#gdGo")).to_be_disabled()
+        if lang == "en":
+            expect(page.locator("#gdC")).to_have_text("1 with no content on lg.com")
         page.wait_for_timeout(700)
         expect(page.locator("#gdRh")).to_have_count(0)
         inside("#gdRev", "#gdGo")
@@ -259,7 +267,7 @@ class BulkCheckGridTest(unittest.TestCase):
         page.locator('.gd-it[data-row="10"] .gd-pdp').click()
         expect(page.locator(".dk-on .ck-imgs img")).to_have_count(4)
         page.locator("#dkBack").click()
-        expect(page.locator(".gd-it")).to_have_count(PASSED + 4)
+        expect(page.locator(".gd-it")).to_have_count(PASSED + 5)
         expect(page.locator("#gdRh")).to_have_count(0)
         # 4) '검토 3' → 포함(검토한 해시 · 내용 요약) · 빼기 · 다시 준비 — 정하면 다음으로
         page.locator("#gdRev").click()

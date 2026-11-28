@@ -41,27 +41,27 @@
   };
   // Check 화면 (덱 2026-11-27 → 그리드 2026-11-28) 문구 — 위 TX 에 덧붙인다
   const TXD = {
-    en: { rmS: 'Remove', viewAll: (n) => `View all ${n}`, moreBelow: 'More below', back: '← Back', prev: 'Previous', next: 'Next', removedL: 'Removed from this Excel', fReady: 'Ready', fReview: 'Needs review', aiChk: 'AI checking', goDl: 'Confirm & download',
+    en: { rmS: 'Remove', viewAll: (n) => `View all ${n}`, moreBelow: 'More below', back: '← Back', prev: 'Previous', next: 'Next', removedL: 'Removed from this Excel', fReady: 'Ready', noLg: 'No content on lg.com', noneN: n => `${n} with no content on lg.com`, fReview: 'Needs review', aiChk: 'AI checking', goDl: 'Confirm & download',
       okIn: 'Looks fine · include',
       rsNeed: (n) => (n === 1 ? `${n} PDP needs to be checked` : `${n} PDPs need to be checked`), rsAll: (n) => `All ${n} PDPs are ready`, rv: 'Review', redoN: (n) => `Preparing ${n} again…`,
       rcCrawl: 'Re-crawling from lg.com…', rcDraw: 'Preparing the PDP again…', rcWait: 'Waiting to retry…', rcHint: 'Checked when it succeeds', chk: 'Checked',
       allDone: 'All checked', colModel: 'Model', colDesc: 'Description', imgsN: (n) => `${n} images`, moreRows: (n) => `+ ${n} more rows`, confirmDl: (n) => `Confirm ${n} & download` },
-    th: { rmS: 'นำออก', viewAll: (n) => `ดูทั้งหมด ${n}`, moreBelow: 'ยังมีด้านล่าง', back: '← กลับ', prev: 'ก่อนหน้า', next: 'ถัดไป', removedL: 'นำออกจาก Excel นี้แล้ว', fReady: 'พร้อม', fReview: 'ต้องตรวจสอบ', aiChk: 'AI กำลังตรวจ', goDl: 'ยืนยันและดาวน์โหลด',
+    th: { rmS: 'นำออก', viewAll: (n) => `ดูทั้งหมด ${n}`, moreBelow: 'ยังมีด้านล่าง', back: '← กลับ', prev: 'ก่อนหน้า', next: 'ถัดไป', removedL: 'นำออกจาก Excel นี้แล้ว', fReady: 'พร้อม', noLg: 'ไม่มีเนื้อหาบน lg.com', noneN: n => `${n} รายการไม่มีเนื้อหาบน lg.com`, fReview: 'ต้องตรวจสอบ', aiChk: 'AI กำลังตรวจ', goDl: 'ยืนยันและดาวน์โหลด',
       okIn: 'ดูแล้วโอเค · ใส่ไว้',
       rsNeed: (n) => `PDP ที่ต้องตรวจสอบ ${n} รายการ`, rsAll: (n) => `PDP ทั้ง ${n} รายการพร้อมแล้ว`, rv: 'ตรวจสอบ', redoN: (n) => `กำลังเตรียมใหม่ ${n} รายการ…`,
       rcCrawl: 'กำลังดึงข้อมูลจาก lg.com ใหม่…', rcDraw: 'กำลังเตรียม PDP ใหม่…', rcWait: 'รอลองใหม่…', rcHint: 'สำเร็จแล้วจะเป็น “ตรวจแล้ว”', chk: 'ตรวจแล้ว',
       allDone: 'ตรวจครบแล้ว', colModel: 'รุ่น', colDesc: 'คำอธิบาย', imgsN: (n) => `${n} รูป`, moreRows: (n) => `+ อีก ${n} แถว`, confirmDl: (n) => `ยืนยัน ${n} และดาวน์โหลด` },
-    ko: { rmS: '빼기', viewAll: (n) => `전체 보기 ${n}`, moreBelow: '아래에 더 있음', back: '← 돌아가기', prev: '이전', next: '다음', removedL: '이번 엑셀에서 뺌', fReady: '준비됨', fReview: '검토 필요', aiChk: 'AI 확인 중', goDl: '확인하고 받기',
+    ko: { rmS: '빼기', viewAll: (n) => `전체 보기 ${n}`, moreBelow: '아래에 더 있음', back: '← 돌아가기', prev: '이전', next: '다음', removedL: '이번 엑셀에서 뺌', fReady: '준비됨', noLg: 'lg.com에 내용 없음', noneN: n => `lg.com에 내용 없음 ${n}`, fReview: '검토 필요', aiChk: 'AI 확인 중', goDl: '확인하고 받기',
       okIn: '괜찮음 · 포함',
       rsNeed: (n) => `확인이 필요한 PDP ${n}개`, rsAll: (n) => `PDP ${n}개 모두 준비됨`, rv: '검토', redoN: (n) => `${n}개 다시 준비 중…`,
       rcCrawl: 'lg.com에서 다시 크롤링 중…', rcDraw: 'PDP 다시 만드는 중…', rcWait: '다시 시도 대기 중…', rcHint: '성공하면 확인됨으로 바뀌어요', chk: '확인됨',
       allDone: '모두 확인함', colModel: '모델', colDesc: '설명', imgsN: (n) => `이미지 ${n}장`, moreRows: (n) => `+ ${n}행 더`, confirmDl: (n) => `${n}개 확인하고 받기` },
-    de: { rmS: 'Entfernen', viewAll: (n) => `Alle ${n} ansehen`, moreBelow: 'Weiter unten', back: '← Zurück', prev: 'Zurück', next: 'Weiter', removedL: 'Aus dieser Excel entfernt', fReady: 'Bereit', fReview: 'Zu prüfen', aiChk: 'KI prüft', goDl: 'Bestätigen & herunterladen',
+    de: { rmS: 'Entfernen', viewAll: (n) => `Alle ${n} ansehen`, moreBelow: 'Weiter unten', back: '← Zurück', prev: 'Zurück', next: 'Weiter', removedL: 'Aus dieser Excel entfernt', fReady: 'Bereit', noLg: 'Kein Inhalt auf lg.com', noneN: n => `${n} ohne Inhalt auf lg.com`, fReview: 'Zu prüfen', aiChk: 'KI prüft', goDl: 'Bestätigen & herunterladen',
       okIn: 'Passt · übernehmen',
       rsNeed: (n) => (n === 1 ? `${n} PDP muss geprüft werden` : `${n} PDPs müssen geprüft werden`), rsAll: (n) => `Alle ${n} PDPs sind bereit`, rv: 'Prüfen', redoN: (n) => `${n} werden neu vorbereitet…`,
       rcCrawl: 'Wird neu von lg.com geladen…', rcDraw: 'PDP wird neu erstellt…', rcWait: 'Wartet auf neuen Versuch…', rcHint: 'Bei Erfolg als geprüft markiert', chk: 'Geprüft',
       allDone: 'Alles geprüft', colModel: 'Modell', colDesc: 'Beschreibung', imgsN: (n) => `${n} Bilder`, moreRows: (n) => `+ ${n} weitere Zeilen`, confirmDl: (n) => `${n} bestätigen & herunterladen` },
-    ar: { rmS: 'إزالة', viewAll: (n) => `عرض الكل ${n}`, moreBelow: 'المزيد بالأسفل', back: 'رجوع →', prev: 'السابق', next: 'التالي', removedL: 'أُزيل من ملف Excel هذا', fReady: 'جاهز', fReview: 'بحاجة إلى مراجعة', aiChk: 'الذكاء الاصطناعي يفحص', goDl: 'تأكيد وتنزيل',
+    ar: { rmS: 'إزالة', viewAll: (n) => `عرض الكل ${n}`, moreBelow: 'المزيد بالأسفل', back: 'رجوع →', prev: 'السابق', next: 'التالي', removedL: 'أُزيل من ملف Excel هذا', fReady: 'جاهز', noLg: 'لا يوجد محتوى على lg.com', noneN: n => `${n} بلا محتوى على lg.com`, fReview: 'بحاجة إلى مراجعة', aiChk: 'الذكاء الاصطناعي يفحص', goDl: 'تأكيد وتنزيل',
       okIn: 'يبدو جيدًا · تضمين',
       rsNeed: (n) => `${n} صفحات تفاصيل تحتاج إلى مراجعة`, rsAll: (n) => `جميع صفحات التفاصيل (${n}) جاهزة`, rv: 'مراجعة', redoN: (n) => `جارٍ إعادة تجهيز ${n}…`,
       rcCrawl: 'جارٍ الجلب من lg.com مجددًا…', rcDraw: 'جارٍ تجهيز صفحة التفاصيل مجددًا…', rcWait: 'بانتظار إعادة المحاولة…', rcHint: 'ستُعلَّم كمُتحقَّق منها عند النجاح', chk: 'تم التحقق',
@@ -181,7 +181,7 @@
     const hit = FAM_RULES.find(([, re]) => re.test(s));
     return hit ? (C.T.fam[hit[0]] || '') : '';
   }
-  const aiRows = (u) => (u[0].status === 'failed' ? [{ k: 'fail', ok: false, msg: u[0].error }] : u[0].ai || []);
+  const aiRows = (u) => (u[0].empty ? [] : u[0].status === 'failed' ? [{ k: 'fail', ok: false, msg: u[0].error }] : u[0].ai || []);
   // 이미지: 슬라이스에서 못 가져온 것이나 크롤에서 빠진 것이나 사람 눈에는 같은 '빠진 이미지'
   const whyImg = (x) => C.T.w_img(x.n);
   const why = (x) => ({ img: () => whyImg(x), txt: () => C.T.w_txt(x.n), sum: () => C.T.w_sum, spec: () => x.unknown ? C.T.bSpecUnknown : C.T.w_spec, preview: () => C.T.bPreview, n12: () => C.T.bLimit, fail: () => C.T.w_fail, redo: () => C.T.w_fail }[x.k] || (() => x.k))();   // 실패 이유: 서버의 기술 오류 문구(영어)는 화면에 내지 않는다 — 로그 · 작업 기록에만 (2026-11-28)
@@ -194,10 +194,12 @@
   const settled = (u) => u.every((x) => x.status === 'ok' || x.status === 'failed' || x.status === 'cancelled');
   const passed = (u) => !busy(u) && u.every((x) => x.status === 'ok') && aiRows(u).every((x) => x.ok);
   const isRemoved = (u) => u.every((x) => x.check === 'removed');
+  const empty = (u) => u.every((x) => x.empty);   // lg.com 에 내용 없음 — 엑셀 행은 그대로, 확인할 것 없음 (2026-11-28)
   const isOk = (u) => u.every((x) => x.check === 'ok');
 
   const rel = (el) => { const a = el.getBoundingClientRect(), b = C.dk.root.getBoundingClientRect(); return { x: a.left - b.left, y: a.top - b.top, w: a.width, h: a.height }; };
   function problems(it) {
+    if (it.empty) return [];
     if (it.status === 'failed') return [{ kind: 'fail' }];
     const out = [];
     for (const check of it.ai || []) {
@@ -254,7 +256,7 @@
     el.classList.toggle('dk-busy', busy(u)); el.classList.toggle('dk-ok', passed(u)); el.classList.toggle('dk-rm', isRemoved(u));
     // 사람이 정할 문제가 남은 카드: 나머지 장은 어둡게, 문제 장만 선명하게 (CSS .dk-prob)
     el.classList.toggle('dk-prob', !passed(u) && !isRemoved(u) && !busy(u) && !isOk(u) && el._issues.length > 0);
-    el.querySelector('.dk-st').textContent = isRemoved(u) ? C.T.removedL : busy(u) ? C.T.redoing
+    el.querySelector('.dk-st').textContent = isRemoved(u) ? C.T.removedL : busy(u) ? C.T.redoing : empty(u) ? C.T.noLg
       : passed(u) ? C.T.fReady : bad.map(why).join(' · ');
     // 다시 준비 · 자동 재시도 중인 카드 (2026-11-28, 결과 화면 칸과 같은 모양): 어둡게 · 흐리게 덮고 가운데 지금 하는 일 + '성공하면 확인됨'.
     //   다시 크롤 · 그림이면 밝은 띠가 반복. 비교 칸은 없음(dk-prob 아님) · 버튼 셋은 흐리게 (panel)
@@ -273,9 +275,9 @@
   }
   async function refresh(core) { try { C.job = await core.api('/api/v1/bulk/jobs/' + C.job.id); C.units = units(C.job); } catch (_) {} }
   const running = () => C.job.status === 'running' || C.job.status === 'queued';
-  const needs = () => C.units.filter((u) => !isRemoved(u) && !isOk(u) && !passed(u));   // 사람이 아직 정하지 않은 것 (다시 준비 중 포함)
+  const needs = () => C.units.filter((u) => !isRemoved(u) && !isOk(u) && !passed(u) && !empty(u));   // 사람이 아직 정하지 않은 것 (다시 준비 중 포함)
   // 칸 상태: wait(결과 전) · ok(통과) · bad(검토 필요) · busy(다시 준비 중) · in(사람이 포함) · out(뺌)
-  const catOf = (u, landed) => (!landed ? 'wait' : isRemoved(u) ? 'out' : busy(u) ? 'busy' : passed(u) ? 'ok' : isOk(u) ? 'in' : 'bad');
+  const catOf = (u, landed) => (!landed ? 'wait' : isRemoved(u) ? 'out' : busy(u) ? 'busy' : empty(u) ? 'none' : passed(u) ? 'ok' : isOk(u) ? 'in' : 'bad');
   // Framer Motion 식 스프링을 라이브러리 없이: 물리 시뮬레이션 → CSS linear() 이징 + 실제 길이(ms). linear() 를 모르는 브라우저는 EZ.out
   function spring({ stiffness = 260, damping = 26, mass = 1 } = {}) {
     let x = 0, v = 0, t = 0; const dt = 1 / 240, pts = [];
@@ -378,7 +380,7 @@
           st.textContent = st.title = reasons;
         } else {
           cover(t, null);
-          st.textContent = st.title = { wait: '', ok: T.fReady, busy: T.redoing, in: T.okIn, out: T.removedL }[cat] ?? reasons;   // 사람이 정한 것: 포함 · 뺌 (검수 화면과 같은 말)
+          st.textContent = st.title = { wait: '', ok: T.fReady, busy: T.redoing, in: T.okIn, out: T.removedL, none: T.noLg }[cat] ?? reasons;   // 사람이 정한 것: 포함 · 뺌 (검수 화면과 같은 말)
         }
       }
       if (cat !== prev || changed) {
@@ -391,19 +393,19 @@
       return cat !== prev;
     }
     function nums() {
-      let ok = 0, rev = 0, out = 0, bz = 0;
-      for (const t of G.tiles.values()) { const c = t._cat; if (c === 'ok' || c === 'in') ok++; if (c === 'bad' || c === 'busy') rev++; if (c === 'out') out++; if (c === 'busy') bz++; }
-      const box = byId('gdNums'), key = G.mode + (out ? 'o' : '');
+      let ok = 0, rev = 0, out = 0, bz = 0, none = 0;
+      for (const t of G.tiles.values()) { const c = t._cat; if (c === 'ok' || c === 'in') ok++; if (c === 'bad' || c === 'busy') rev++; if (c === 'out') out++; if (c === 'busy') bz++; if (c === 'none') none++; }
+      const box = byId('gdNums'), key = G.mode + (out || none ? 'o' : '');
       if (box._key !== key) {
         box._key = key;
         box.innerHTML = G.mode === 'scan' ? `<div class="gd-n"><span>${e(T.aiChk)}</span><b id="gdA">${G.landed.size}</b><span class="of">/ ${N}</span></div>`
-          : `<div class="gd-n"><span class="ck">${CK}</span><b id="gdA">${ok}</b><span>${e(T.fReady)}</span></div><div class="gd-n bad"><i class="dot"></i><b id="gdB">${rev}</b><span>${e(T.fReview)}</span></div>${out ? '<div class="gd-n out"><span id="gdC"></span></div>' : ''}`;
+          : `<div class="gd-n"><span class="ck">${CK}</span><b id="gdA">${ok}</b><span>${e(T.fReady)}</span></div><div class="gd-n bad"><i class="dot"></i><b id="gdB">${rev}</b><span>${e(T.fReview)}</span></div>${out || none ? '<div class="gd-n out"><span id="gdC"></span></div>' : ''}`;
       }
       byId('gdProgW').classList.toggle('off', G.mode !== 'scan');
       const note = byId('gdNote'), nt = G.mode === 'done' && bz ? T.redoN(bz) : '';   // 스캔 뒤 자동 재시도 · 다시 준비 중: 끝날 때까지 그리드에서
       if (note.textContent !== nt) note.textContent = nt;
       if (G.mode === 'scan') { byId('gdA').textContent = G.landed.size; byId('gdProg').style.width = (G.landed.size / Math.max(1, N) * 100) + '%'; }
-      else { roll('gdA', ok); roll('gdB', rev); const c = byId('gdC'); if (c) c.textContent = T.removed(out); }
+      else { roll('gdA', ok); roll('gdB', rev); const c = byId('gdC'); if (c) c.textContent = [out ? T.removed(out) : '', none ? T.noneN(none) : ''].filter(Boolean).join(' · '); }
       const rb = byId('gdRev');
       rb.disabled = G.mode === 'scan' || !rev;   // 다시 준비 중인 것은 검수 화면이 건너뛴다
       byId('gdGo').disabled = G.mode === 'scan' || C.job.status !== 'ready' || rev > 0;
@@ -976,8 +978,8 @@
       <div class="dk-body"><div class="xs-wrap">${body}</div></div></div><div id="ckGo"></div>`;
     return el;
   }
-  const finLine = (core, todo) => { const T = C.T, ck = C.job.check || {}, removed = C.units.filter(isRemoved).length;
-    return `<b>${core.esc(T.allDone)}</b><span>${core.esc([T.fReady + ' ' + todo.length, removed ? T.removed(removed) : '', ck.skipModels ? T.skipped(ck.skipModels) : ''].filter(Boolean).join(' · '))}</span>`; };
+  const finLine = (core, todo) => { const T = C.T, ck = C.job.check || {}, removed = C.units.filter(isRemoved).length, none = C.units.filter(empty).length;
+    return `<b>${core.esc(T.allDone)}</b><span>${core.esc([T.fReady + ' ' + todo.length, removed ? T.removed(removed) : '', none ? T.noneN(none) : '', ck.skipModels ? T.skipped(ck.skipModels) : ''].filter(Boolean).join(' · '))}</span>`; };
   const doneLine = (core) => { const T = C.T, ck = C.job.check || {};
     return `${CK}<b>${core.esc(T.doneT(ck.confirmed || 0))}</b><span>${core.esc([ck.removed ? T.removed(ck.removed) : '', ck.skipModels ? T.skipped(ck.skipModels) : ''].filter(Boolean).join(' · '))}</span>`; };
   const dlBtn = (core) => `<a class="dk-act pri" id="ckDl" href="${core.esc(C.job.file || '#')}" download>${core.esc(C.T.dl)}</a>`;
