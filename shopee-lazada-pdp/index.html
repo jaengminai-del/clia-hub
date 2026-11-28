@@ -273,7 +273,7 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
       <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;min-width:0;align-items:center;flex:1">
         <!-- 툴바 (2026-11-25): 왼쪽 lg.com 원본 보기 · 오른쪽 편집 · 상품 정보 · 저장. 상태 · 내보내기는 허브 머리줄에(허브 밖에서는 여기 끝에) -->
         <button class="btn-sm" id="btnFull" type="button" onclick="openFullPage()" disabled>View lg.com page</button>
-        <button class="btn-sm sg-switch" id="btnSlices" type="button" role="switch" aria-checked="true" onclick="toggleSliceGuide()" title="Show where the page is split into Shopee images (Shopee shows up to 12)" hidden><span class="sw" aria-hidden="true"></span><span>Shopee images</span><span class="sw-count" id="btnSlicesCount"></span></button>
+        <button class="btn-sm sg-switch" id="btnSlices" type="button" role="switch" aria-checked="true" onclick="toggleSliceGuide()" title="Show where the page is split into Shopee description images (Shopee shows up to 12)" hidden><span class="sw" aria-hidden="true"></span><span>Description images</span><span class="sw-count" id="btnSlicesCount"></span></button>
         <span class="tb-gap"></span>
         <span class="saved-info" id="savedInfo" hidden></span>
         <span class="save-note" id="saveNote" hidden>Saving sends it back for review</span>
@@ -829,7 +829,7 @@ function updateContentInfo() {
   const show = () => {
     bar.textContent = '';   // 높이 · 장수 안내는 없앴다 (2026-11-25)
     bar.classList.remove('shp-over');
-    // 장수 · 12장 초과 표시는 툴바 「Shopee images N / 12」 스위치 (drawSliceGuide, 2026-11-28 — 예전 빨간 칩과 합침)
+    // 장수 · 12장 초과 표시는 툴바 「Description images N / 12」 스위치 (drawSliceGuide, 2026-11-28 — 예전 빨간 칩과 합침)
   };
   show();
   frame.querySelectorAll('img').forEach(img => { if (!img.complete) img.addEventListener('load', show, { once: true }); });
@@ -840,8 +840,8 @@ function updateContentInfo() {
 // 다운로드 이미지(/api/v1/slice-html → crawler-py/content_gen/slices.py)가 「실제로」 잘리는 자리를 미리보기에 그린다.
 // 자르는 규칙은 slices.py 의 _JS_LAYOUT · _cuts · 자동 장수와 같은 계산 (Shopee 규격: 폭 1000px, 한 장 ≤ 폭 × 1.95,
 // 섹션 경계 → 표 행 · 문단 경계 → 이미지 안쪽은 피함). 미리보기와 서버는 같은 HTML · 같은 폭(.lg-container 800px)이라 위치가 같다.
-//   · 장마다 파랑 · 주황 번갈아 옅은 색 띠 + 왼쪽 위 「Shopee image N / 12」 태그, 경계엔 ✂ 절취선 (컨텐츠 카드와 헷갈리지 않게)
-//   · 툴바 「Shopee images N / 12」 스위치로 켜고 끔 (기본 켬, 브라우저에 기억). 장수도 여기 — 12장 넘으면 빨강
+//   · 장마다 파랑 · 주황 번갈아 옅은 색 띠 + 왼쪽 위 「Description image N / 12」 태그, 경계엔 ✂ 절취선 (컨텐츠 카드와 헷갈리지 않게)
+//   · 툴바 「Description images N / 12」 스위치로 켜고 끔 (기본 켬, 브라우저에 기억). 장수도 여기 — 12장 넘으면 빨강
 //   · 12장이 끝나는 자리는 굵은 빨간 선, 그 아래(13장~)는 Shopee 에 노출 안 됨 — 빨간 사선
 //   · 안전장치: 그래도 선이 글자 줄 · 이미지 가운데를 지나가면 주황 선 + 「⚠ cuts …」 (정상이면 안 나옴 — 나오면 slices.py 를 고칠 일)
 // 미리보기 바깥 형제 요소에 그려 결과물 · 편집 감시와 무관. slices.py 의 자르기 규칙을 바꾸면 여기도 같이 바꿀 것.
@@ -987,18 +987,18 @@ function drawSliceGuide() {
     const y1 = Y(S.cuts[k]), ab = k % 2 ? 'a' : 'b';
     html += `<div class="sg-band ${ab}" style="top:${y}px;height:${y1 - y}px"></div>`;
     if (k > 1) html += `<div class="sg-line${cls}" style="top:${y}px"></div><div class="sg-sc${cls}" style="top:${y}px">✂</div>`;
-    html += `<div class="sg-tag ${ab}" style="top:${y}px"><span>Shopee image</span><b>${k}</b><s>/ ${N}</s></div>`;
+    html += `<div class="sg-tag ${ab}" style="top:${y}px"><span>Description image</span><b>${k}</b><s>/ ${N}</s></div>`;
     if (hits.length) html += `<div class="sg-warn" style="top:${y}px">⚠ cuts ${what(hits)}</div>`;
   }
   if (S.n > N) {   // 12장이 끝나는 자리 = 13장의 시작
     const y = Y(S.cuts[N]), hits = cutsAt(S.cuts[N]);
     if (hits.length) { bad++; html += hits.map(hitBox).join(''); }
     html += `<div class="sg-dead" style="top:${y}px;height:${h - y}px"></div><div class="sg-endline" style="top:${y}px"></div>`
-          + `<div class="sg-endtag" style="top:${y}px">▲ ${N} / ${N} end · Shopee shows up to here — below is cut${hits.length ? ` · ⚠ cuts ${what(hits)}` : ''}</div>`;
+          + `<div class="sg-endtag" style="top:${y}px">▲ ${N} / ${N} end · Shopee shows up to ${N} description images — below is cut${hits.length ? ` · ⚠ cuts ${what(hits)}` : ''}</div>`;
   }
   g.innerHTML = html; g.hidden = false; g.dataset.cuts = bad; g.dataset.n = S.n;
 }
-// 이미지 나눔 보기 스위치 (툴바 「Shopee images N / 12」, 2026-11-28): 기본 켬 · 끄면 이 브라우저에 기억
+// 이미지 나눔 보기 스위치 (툴바 「Description images N / 12」, 2026-11-28): 기본 켬 · 끄면 이 브라우저에 기억
 let sliceShow = true;
 try { sliceShow = localStorage.getItem('clia.sliceGuide') !== 'off'; } catch (_) {}
 function toggleSliceGuide() {
