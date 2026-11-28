@@ -44,6 +44,7 @@ async function workbook(status) {
     ['1009','QAABB101BAD','Not the verified SKU','original-10','110','Live'],
     ['1010','QAABB110','Only in Thailand','original-11','111','Live'],
     ['1011','QAABB111','Known but absent from sitemap','original-12','112','Live'],
+    ['1012','QAABB112','New to CLIA and LG blocked temporarily','original-13','113','Live'],
   ];
   zip.file('xl/worksheets/sheet1.xml', '<worksheet><sheetData>' + rows.map((row, i) => `<row r="${i+1}">` + row.slice(0,status?6:5).map((v,j) => `<c r="${String.fromCharCode(65+j)}${i+1}" t="inlineStr"><is><t>${v.replaceAll('&','&amp;')}</t></is></c>`).join('') + '</row>').join('') + '</sheetData></worksheet>');
   return zip.generateAsync({type:'nodebuffer'});
@@ -57,6 +58,7 @@ test('Check uploads, authorizes only public matches, and downloads a workbook co
     productList[slug] = { url:u, slug, country:'sg', model:code };
     if (!code.endsWith('111')) selected.set(code,[{url:u,lastmod:''}]);
   }
+  selected.set('QAABB112',[{url:url('QAABB112'),lastmod:''}]);   // LG.com 사이트맵엔 있지만 CLIA 에 크롤된 적 없는 새 제품
   t.mock.method(catalog,'productIndex',()=>({products:productList,byModel:new Map(Object.values(productList).map(p=>[p.model,[p.slug]]))}));
   t.mock.method(sitemap,'index',async (site, opt)=>{assert.equal(opt.directOnly,true);return {idx:site==='sg' ? selected : new Map([['QAABB110', [{url:url('QAABB110','th')}]]])};});
   t.mock.method(countries, 'check', async ()=>null);
@@ -69,7 +71,7 @@ test('Check uploads, authorizes only public matches, and downloads a workbook co
     assert.equal(u.hostname,'www.lg.com');
     const sku=u.pathname.split('/').filter(Boolean).at(-1);
     contacted.push(sku);
-    const status = sku.endsWith('103') ? 404 : sku.endsWith('106') ? 503 : 200;
+    const status = sku.endsWith('103') ? 404 : sku.endsWith('106') || sku.endsWith('112') ? 503 : 200;
     const html=productHead(u.href)+(sku.endsWith('102') ? '<meta name="robots" content="noindex"/>' : '')+'</head></html>';
     return new Response(html,{status,headers:{'content-type':'text/html'}});
   });
@@ -86,9 +88,10 @@ test('Check uploads, authorizes only public matches, and downloads a workbook co
     const bytes=await workbook(status);
     const upload=await fetch(base+'/upload?country=sg&name=shopee.xlsx&check=1',{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:bytes});
     const parsed=await upload.json(); assert.equal(upload.status,200,JSON.stringify(parsed)); made.push(parsed.id);
-    assert.equal(parsed.rows.length,11);
+    assert.equal(parsed.rows.length,12);
     assert.equal(parsed.checkMatchBy,status?'status':'match');
-    const allowed=status?[2,8]:[2,5,8];
+    // 7(QAABB106): LG.com 이 잠깐 막았지만 이미 CLIA 에 있는 제품 → 포함 (2026-11-28). 13(QAABB112): 막혔고 CLIA 에도 없음 → 원본 유지
+    const allowed=status?[2,7,8]:[2,5,7,8];
     assert.deepEqual(parsed.rows.filter(r=>r.candidates.length||r.lg||r.bundleParts).map(r=>r.row),allowed);
     if(status)assert.ok(!contacted.includes('qaabb104'));
     // Malformed/mismatched UI item mappings do not widen the server output scope.
@@ -96,7 +99,7 @@ test('Check uploads, authorizes only public matches, and downloads a workbook co
     const build=await fetch(base+'/build',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(request)});
     assert.equal(build.status,200,JSON.stringify(await build.json()));
     assert.deepEqual(j.items.map(it=>it.row),allowed); assert.deepEqual(j.skus,[]);
-    assert.equal(j.check.skipRows,11-allowed.length);
+    assert.equal(j.check.skipRows,12-allowed.length);
     assert.ok(j.items.every(it=>!it.register&&!it.url.includes('qaabb102')));
     rendered=new Map();
     for(const it of j.items){it.status='ok';it.unified=true;it.hash='0123456789abcdefabcd';it.ai=[];it.check='ok';it.checkedHash=it.hash;it.checkedChannel='shopee';const text='https://cdn.example.test/'+it.model+'.jpg';it.contentDigest=createHash('sha256').update(text).digest('hex');it.checkedContentDigest=it.contentDigest;rendered.set(it.row,text);}

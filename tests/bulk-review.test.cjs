@@ -89,9 +89,10 @@ test('Excel membership, locations and approval use one retained PDP, also for sa
     const bytes = await initial.generateAsync({ type: 'nodebuffer' });
     const cases = [
       { title: 'original spec 13 becomes actual Excel spec 12 with gallery removed', spec: 12, long: 0, filtered: true, ok: true },
-      { title: 'authoritative spec 13 is outside the actual 12', spec: 13, long: 0, filtered: false, ok: false },
-      { title: 'table split across retained and omitted slices', spec: 13, partial: true, long: 0, filtered: false, ok: false },
-      { title: '3000-character cutoff after filtering leaves authoritative spec 12 out', spec: 12, long: 270, filtered: true, ok: false },
+      // Shopee 한도(앞 12장 · 3,000자)로 스펙 표가 엑셀 밖으로 밀려도 PDP 에 그려져 있으면 빠짐이 아니다 — 앞 12장만 넣고 포함 가능 (2026-11-28 결정)
+      { title: 'spec 13 drawn in the PDP, outside the first 12 Shopee keeps', spec: 13, long: 0, filtered: false, ok: true },
+      { title: 'table split across retained and omitted slices', spec: 13, partial: true, long: 0, filtered: false, ok: true },
+      { title: '3000-character cutoff leaves the drawn spec 12 out of the cell', spec: 12, long: 270, filtered: true, ok: true },
     ];
     for (edit of [false, true]) {
       for (const scenario of cases) {

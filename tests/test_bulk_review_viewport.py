@@ -49,7 +49,7 @@ def open_review(page, origin, lang, before=False, blocked=False):
         item = job["items"][0]
         item["unified"] = True
         item["imgs"] += [origin + f"/fixture/export.svg?slice={i}" for i in range(2, 13)]
-        item["ai"] = [{"k": "n12", "ok": False, "blocked": True, "used": 12, "all": 13},
+        item["ai"] = [{"k": "n12", "ok": True, "cut": True, "used": 12, "all": 13},
                       {"k": "spec", "ok": False, "blocked": True, "issues": [{"lines": ["Screen width: 42 cm"], "regions": []}]}]
     page.route("**/api/v1/bulk/jobs/**", lambda route: route.fulfill(json=job))
     page.route("**/fixture/*.svg*", lambda route: route.fulfill(
@@ -137,7 +137,9 @@ class ReviewViewportTest(unittest.TestCase):
                     context.close()
             browser.close()
 
-    def test_truncated_export_cannot_be_included_from_viewer(self):
+    def test_shopee_cut_is_not_a_problem_only_missing_spec_blocks(self):
+        # Shopee 한도로 앞 12장만 엑셀에 — 그것만으로는 문제도, 막힘도 아니다 (2026-11-28 결정).
+        # 이 제품을 막는 것은 PDP 에 없는 스펙 표 하나뿐이고, 화면에도 그 문제 하나만 나온다.
         evidence = Path(EVIDENCE) if EVIDENCE else None
         with serve() as origin, sync_playwright() as p:
             options = {"headless": True}
@@ -148,18 +150,13 @@ class ReviewViewportTest(unittest.TestCase):
             open_review(page, origin, "en", blocked=True)
             expect(page.locator(".dk-on .ck-imgs img")).to_have_count(12)
             expect(page.locator(".dk-on .ck-imgs img").first).to_have_attribute("src", origin + "/fixture/export.svg")
-            expect(page.locator(".dk-cmp-h")).to_have_text("Shopee limits cut off part of the Excel PDP")
+            expect(page.locator(".dk-cmp-h")).to_have_text("lg.com spec table is missing")
+            expect(page.locator(".dk-cnav button")).to_have_count(0)
+            expect(page.locator(".dk-cmp-b")).to_have_text("Screen width: 42 cm")
             expect(page.locator('[data-a="ok"]')).to_be_disabled()
             expect(page.locator('[data-a="remove"]')).to_be_enabled()
             if evidence:
-                page.screenshot(path=evidence / "v2.2-export-limit-blocked.png")
-            page.locator(".dk-cnav button").click()
-            expect(page.locator(".dk-cmp-b")).to_have_text("Screen width: 42 cm")
-            expect(page.locator(".dk-cmp-location")).to_have_text("Location in PDP unknown")
-            expect(page.locator(".dk-on .dk-bad")).to_have_count(0)
-            expect(page.locator('[data-a="ok"]')).to_be_disabled()
-            if evidence:
-                page.screenshot(path=evidence / "v2.2-spec-outside-excel.png")
+                page.screenshot(path=evidence / "v2.3-shopee-cut-not-a-problem.png")
             browser.close()
 
     def test_stale_approval_refreshes_visible_pdp_without_resubmitting(self):

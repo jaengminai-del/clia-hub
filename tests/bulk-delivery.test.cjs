@@ -57,7 +57,7 @@ async function fixture(t, gate = '0') {
 test('mixed, legacy and reviewed workbooks share the email and API guard, root static stays private', async t => {
   const { j, texts, root } = await fixture(t);
   const [a, b] = j.items;
-  b.ai = [{ k: 'n12', ok: false, blocked: true, used: 12, all: 13 }];
+  b.ai = [{ k: 'spec', ok: false, blocked: true, issues: [{ rows: [{ label: 'Width', value: '42 cm' }], regions: [] }] }];   // 스펙 표가 PDP 에 없음 → 막힘
   await jobs._writeResult(j, texts);
   assert.equal((await jobs.checkAction(j, [2], 'ok', 'fixture', false, reviewed(j.items))).ok, true);
   const request = global.fetch;

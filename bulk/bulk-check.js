@@ -654,7 +654,8 @@
       sc.scrollBy({ top: px != null ? px : page * sc.clientHeight * 0.85, behavior: reduced() ? 'auto' : 'smooth' });
     }
     function key(ev) {
-      if (ev.target && (ev.target.closest?.('.dk-cmp') || /input|textarea|select/i.test(ev.target.tagName))) return;
+      // 오른쪽 칸의 근거 목록(스크롤 영역) 안에서만 키를 그 목록에 맡긴다 — 칸 밑 '다음' 버튼을 누른 뒤에도 N · ← → 는 그대로
+      if (ev.target && (ev.target.closest?.('.dk-cmp-b') || /input|textarea|select/i.test(ev.target.tagName))) return;
       if (ev.target === viewport && ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(ev.key)) return;
       const k = ev.key;
       if (k === 'ArrowDown' || k === 'ArrowUp') { ev.preventDefault(); scrollBy(0, k === 'ArrowDown' ? 160 : -160); return; }
@@ -705,9 +706,9 @@
     return el;
   }
   const finLine = (core, todo) => { const T = C.T, ck = C.job.check || {}, removed = C.units.filter(isRemoved).length;
-    return `<b>${core.esc(T.allDone)}</b><span>${core.esc([T.fReady + ' ' + todo.length, removed ? T.removed(removed) : '', T.skipped(ck.skipModels || 0)].filter(Boolean).join(' · '))}</span>`; };
+    return `<b>${core.esc(T.allDone)}</b><span>${core.esc([T.fReady + ' ' + todo.length, removed ? T.removed(removed) : '', ck.skipModels ? T.skipped(ck.skipModels) : ''].filter(Boolean).join(' · '))}</span>`; };
   const doneLine = (core) => { const T = C.T, ck = C.job.check || {};
-    return `${CK}<b>${core.esc(T.doneT(ck.confirmed || 0))}</b><span>${core.esc([ck.removed ? T.removed(ck.removed) : '', T.skipped(ck.skipModels || 0)].filter(Boolean).join(' · '))}</span>`; };
+    return `${CK}<b>${core.esc(T.doneT(ck.confirmed || 0))}</b><span>${core.esc([ck.removed ? T.removed(ck.removed) : '', ck.skipModels ? T.skipped(ck.skipModels) : ''].filter(Boolean).join(' · '))}</span>`; };
   const dlBtn = (core) => `<a class="dk-act pri" id="ckDl" href="${core.esc(C.job.file || '#')}" download>${core.esc(C.T.dl)}</a>`;
   // 끝: 준비된 것을 한 번에 확인 (승인 기록 via 'bulk' + 본 이미지 해시) → 받기. 시트는 설명 칸이 빈 채로 미리 보이고, 확인하면 채워진다
   async function finishView(core) {

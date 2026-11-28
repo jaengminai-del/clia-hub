@@ -15,23 +15,27 @@ function pagePublic(html, u, robots) {
   return !!canonical && keyOf(canonical) === keyOf(u) && /"@type"\s*:\s*(?:"Product"|\[[^\]]*"Product")/i.test(html);
 }
 // One light request per distinct sitemap URL, shared across uploads and builds.
-// A denied/timed-out page is unverified, never taken as public or retried with paid crawling.
+// 결과: true(공개 PDP) · false(LG 가 없다고 답함 — 404·410·다른 곳으로 보냄·비공개 표시) · null(확인 못 함 — 차단 403·429·5xx·시간 초과).
+// 확인 못 한 것은 공개로 치지 않지만, 이미 CLIA 에 크롤돼 있는 제품이면 빼지 않는다 (2026-11-28 — 운영 서버에서 LG.com 이
+// 페이지 요청을 자주 막아, 태국 Shopee 파일의 Live 142행 중 22행만 남고 나머지 라이브 제품이 '원본 유지'로 빠지던 것)
 const cache = new Map();
 let active = 0;
 const queue = [];
 function pump() {
   while (active < 8 && queue.length) {
     const { url, resolve } = queue.shift(); active++;
-    verifyPage(url).then(resolve, () => resolve(false)).finally(() => { active--; pump(); });
+    verifyPage(url).then(resolve, () => resolve(null)).finally(() => { active--; pump(); });
   }
 }
 async function verifyPage(u) {
   const res = await fetch(u.href, { redirect: 'manual', headers: { Accept: 'text/html' }, signal: AbortSignal.timeout(6500) });
   if (res.status !== 200 || !/text\/html/i.test(res.headers.get('content-type') || '') || hidden(res.headers.get('x-robots-tag'))) {
-    await res.body?.cancel(); return false;
+    await res.body?.cancel();
+    const gone = [301, 302, 303, 307, 308, 404, 410].includes(res.status) || (res.status === 200 && hidden(res.headers.get('x-robots-tag')));
+    return gone ? false : null;
   }
   const reader = res.body?.getReader();
-  if (!reader) return false;
+  if (!reader) return null;
   const decode = new TextDecoder(); let text = '', bytes = 0;
   try {
     while (bytes < 384 * 1024) {
@@ -42,7 +46,7 @@ async function verifyPage(u) {
     }
   } finally { await reader.cancel().catch(() => {}); }
   const end = text.search(/<\/head\s*>/i);
-  return end >= 0 && pagePublic(text.slice(0, end), u);
+  return end < 0 ? null : pagePublic(text.slice(0, end), u);
 }
 function publicPage(value) {
   const u = parsed(value); if (!u) return Promise.resolve(false);
@@ -52,7 +56,7 @@ function publicPage(value) {
   if (cache.size >= 3000) for (const [key, x] of cache) { if (x.until <= Date.now()) cache.delete(key); }
   const entry = { until: Infinity };
   entry.promise = new Promise(resolve => { queue.push({ url: u, resolve }); pump(); })
-    .then(ok => { entry.until = Date.now() + (ok ? 5 * 60 * 1000 : 30 * 1000); return ok; });
+    .then(ok => { entry.until = Date.now() + (ok === true ? 5 * 60 * 1000 : 30 * 1000); return ok; });
   cache.set(k, entry); return entry.promise;
 }
 const tokenKeys = name => [...new Set(String(name || '').toUpperCase().split(/[^A-Z0-9.\-]+/).flatMap(s => skuKeys(s)).filter(k => /[A-Z]/.test(k) && /\d/.test(k)))];
@@ -83,7 +87,11 @@ async function select(out, country, idx, probe = publicPage) {
       }
     }
     const ranked = [...paths.values()].sort((a, b) => Number(!!b.local) - Number(!!a.local) || String(b.lastmod).localeCompare(String(a.lastmod)) || a.url.localeCompare(b.url));
-    for (const p of ranked) if (await probe(p.url)) return p.local || { ...classifyUrl(p.url), register: true };
+    for (const p of ranked) {
+      const seen = await probe(p.url);
+      if (seen === true) return p.local || { ...classifyUrl(p.url), register: true };
+      if (seen === null && p.local) return p.local;   // 확인 못 함 + 이미 CLIA 에 있는 제품 → 빼지 않는다
+    }
     return null;
   };
   const pending = new Map();
