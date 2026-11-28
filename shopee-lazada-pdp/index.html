@@ -51,10 +51,15 @@ body{font-family:'LGEIText', 'LINESeedSansTH',Arial,sans-serif;background:#F6F3E
 .slice-guide>div{position:absolute;box-sizing:border-box}
 .slice-guide .sg-line{left:-10px;right:-10px;height:0;border-top:2px dashed #111}
 .slice-guide .sg-sc{left:-34px;transform:translateY(-50%);font-size:22px;line-height:1;color:#111}
-.slice-guide .sg-no{right:8px;top:0;margin-top:6px;display:flex;align-items:baseline;gap:5px;background:#111;color:#fff;padding:5px 12px;border-radius:8px;font-size:14px;font-weight:600;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.2)}
-.slice-guide .sg-no u{text-decoration:none;font-size:24px;font-weight:800;line-height:1}
-.slice-guide .sg-no s{text-decoration:none;opacity:.75}
-.slice-guide .sg-warn{right:8px;margin-top:44px;background:#F28B00;color:#fff;padding:3px 10px;border-radius:6px;font-size:13px;font-weight:700;white-space:nowrap}
+.slice-guide .sg-band{left:-14px;right:-14px}   /* 장마다 파랑 · 주황 번갈아 옅은 색 — 색 구간 하나 = Shopee 이미지 한 장 (컨텐츠 카드와 헷갈리지 않게, 2026-11-28) */
+.slice-guide .sg-band.a{background:rgba(30,110,220,.10)}.slice-guide .sg-band.b{background:rgba(242,139,0,.10)}
+.slice-guide .sg-tag{left:-14px;display:flex;align-items:baseline;gap:4px;color:#fff;padding:5px 12px;border-radius:0 0 10px 0;font-size:14px;font-weight:600;white-space:nowrap}
+.slice-guide .sg-tag.a{background:#1E6EDC}.slice-guide .sg-tag.b{background:#F28B00}
+.slice-guide .sg-tag b{font-size:22px;font-weight:800;line-height:1}
+.slice-guide .sg-tag s{text-decoration:none;opacity:.85}
+/* 슬라이스 보기 토글 (툴바) */
+.panel-left > .panel-head .btn-sm.slice-toggle[aria-pressed="true"]{background:#1E6EDC;border-color:#1E6EDC;color:#fff}
+.slice-guide .sg-warn{right:8px;margin-top:6px;background:#F28B00;color:#fff;padding:3px 10px;border-radius:6px;font-size:13px;font-weight:700;white-space:nowrap}
 .slice-guide .sg-line.bad{border-top:3px solid #F28B00}
 .slice-guide .sg-sc.bad{color:#F28B00}
 .slice-guide .sg-hit{border:2px dashed #F28B00;border-radius:3px;background:rgba(242,139,0,.08)}
@@ -263,6 +268,7 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
         <!-- 툴바 (2026-11-25): 왼쪽 lg.com 원본 보기 · 오른쪽 편집 · 상품 정보 · 저장. 상태 · 내보내기는 허브 머리줄에(허브 밖에서는 여기 끝에) -->
         <button class="btn-sm" id="btnFull" type="button" onclick="openFullPage()" disabled>View lg.com page</button>
         <button class="btn-sm shp-chip" id="shpChip" type="button" onclick="reduceInEdit()" hidden></button>
+        <button class="btn-sm slice-toggle" id="btnSlices" type="button" onclick="toggleSliceGuide()" aria-pressed="true" title="Show where the Shopee images are cut" hidden>✂ Slices</button>
         <span class="tb-gap"></span>
         <span class="saved-info" id="savedInfo" hidden></span>
         <span class="save-note" id="saveNote" hidden>Saving sends it back for review</span>
@@ -847,7 +853,8 @@ function updateContentInfo() {
 // 다운로드 이미지(/api/v1/slice-html → crawler-py/content_gen/slices.py)가 「실제로」 잘리는 자리를 미리보기에 그린다.
 // 자르는 규칙은 slices.py 의 _JS_LAYOUT · _cuts · 자동 장수와 같은 계산 (Shopee 규격: 폭 1000px, 한 장 ≤ 폭 × 1.95,
 // 섹션 경계 → 표 행 · 문단 경계 → 이미지 안쪽은 피함). 미리보기와 서버는 같은 HTML · 같은 폭(.lg-container 800px)이라 위치가 같다.
-//   · 장마다 시작점에 ✂ 절취선 + 「N / 12」 (N장의 시작 = N-1장의 끝이라 라벨은 하나만)
+//   · 장마다 파랑 · 주황 번갈아 옅은 색 띠 + 왼쪽 위 「Shopee image N / 12」 태그, 경계엔 ✂ 절취선 (컨텐츠 카드와 헷갈리지 않게)
+//   · 툴바 「✂ Slices」 로 켜고 끔 (기본 켬, 브라우저에 기억)
 //   · 12장이 끝나는 자리는 굵은 빨간 선, 그 아래(13장~)는 Shopee 에 노출 안 됨 — 빨간 사선
 //   · 안전장치: 그래도 선이 글자 줄 · 이미지 가운데를 지나가면 주황 선 + 「⚠ cuts …」 (정상이면 안 나옴 — 나오면 slices.py 를 고칠 일)
 // 미리보기 바깥 형제 요소에 그려 결과물 · 편집 감시와 무관. slices.py 의 자르기 규칙을 바꾸면 여기도 같이 바꿀 것.
@@ -967,7 +974,10 @@ function drawSliceGuide() {
   const g = document.getElementById('sliceGuide'), frame = document.getElementById('previewFrame');
   const sc = document.getElementById('previewScroll');
   if (!g || !frame || !sc) return;
-  if (!shopeeLimit() || frame.style.display === 'none' || !frame.innerHTML.trim()) { g.hidden = true; g.innerHTML = ''; return; }
+  const has = shopeeLimit() && frame.style.display !== 'none' && !!frame.innerHTML.trim();
+  const tg = document.getElementById('btnSlices');
+  if (tg) { tg.hidden = !has; tg.setAttribute('aria-pressed', String(sliceShow)); }
+  if (!has || !sliceShow) { g.hidden = true; g.innerHTML = ''; return; }
   const box = frame.getBoundingClientRect(), sr = sc.getBoundingClientRect();
   if (!box.width) return;
   const S = sliceCuts(frame);
@@ -983,8 +993,10 @@ function drawSliceGuide() {
   for (let k = 1; k <= Math.min(S.n, N); k++) {   // k 장의 시작점
     const y = Y(S.cuts[k - 1]), hits = k > 1 ? cutsAt(S.cuts[k - 1]) : [], cls = hits.length ? ' bad' : '';
     if (hits.length) { bad++; html += hits.map(hitBox).join(''); }
+    const y1 = Y(S.cuts[k]), ab = k % 2 ? 'a' : 'b';
+    html += `<div class="sg-band ${ab}" style="top:${y}px;height:${y1 - y}px"></div>`;
     if (k > 1) html += `<div class="sg-line${cls}" style="top:${y}px"></div><div class="sg-sc${cls}" style="top:${y}px">✂</div>`;
-    html += `<div class="sg-no" style="top:${y}px"><u>${k}</u><s>/ ${N}</s></div>`;
+    html += `<div class="sg-tag ${ab}" style="top:${y}px"><span>Shopee image</span><b>${k}</b><s>/ ${N}</s></div>`;
     if (hits.length) html += `<div class="sg-warn" style="top:${y}px">⚠ cuts ${what(hits)}</div>`;
   }
   if (S.n > N) {   // 12장이 끝나는 자리 = 13장의 시작
@@ -994,6 +1006,14 @@ function drawSliceGuide() {
           + `<div class="sg-endtag" style="top:${y}px">▲ ${N} / ${N} end · Shopee shows up to here — below is cut${hits.length ? ` · ⚠ cuts ${what(hits)}` : ''}</div>`;
   }
   g.innerHTML = html; g.hidden = false; g.dataset.cuts = bad; g.dataset.n = S.n;
+}
+// 슬라이스 보기 토글 (툴바 「✂ Slices」, 2026-11-28): 기본 켬 · 끄면 이 브라우저에 기억
+let sliceShow = true;
+try { sliceShow = localStorage.getItem('clia.sliceGuide') !== 'off'; } catch (_) {}
+function toggleSliceGuide() {
+  sliceShow = !sliceShow;
+  try { localStorage.setItem('clia.sliceGuide', sliceShow ? 'on' : 'off'); } catch (_) {}
+  drawSliceGuide();
 }
 let _sgRaf = 0;
 const redrawSliceGuide = () => { cancelAnimationFrame(_sgRaf); _sgRaf = requestAnimationFrame(drawSliceGuide); };
