@@ -1,6 +1,7 @@
 """벌크 Check 전체 그리드 (2026-11-28, bulk/bulk-check.js grid) — Chromium 에서 화면 · 동작 확인.
 
-스캔은 그리드로 → 자동 재시도까지 다 끝나면 결과 화면(확인이 필요한 PDP 만 · '확인이 필요한 PDP N개' · 검토) → 검토 필요는 하나씩(검수 화면 'review').
+스캔은 그리드로 → 첫 판이 끝나면 바로 결과 화면(확인이 필요한 PDP 만 · 자동 재시도 중인 것도 '다시 준비 중'으로 · '확인이 필요한 PDP N개' · 검토)
+→ 재시도가 통과하면 그 칸이 빠지고 숫자가 줄어듦 → 검토 필요는 하나씩(검수 화면 'review').
 
 작업 API(/api/v1/bulk/jobs/**)는 page.route 로 흉내 낸다: 처음엔 진행 중(반은 아직) → 다 끝남,
 자동 재시도 중인 한 제품은 끝난 뒤 몇 번 더 물으면 통과로 바뀐다. 운영 · 승인 기록은 건드리지 않는다.
@@ -50,14 +51,18 @@ OK_AI = [{"k": "img", "ok": True, "n": 0}, {"k": "txt", "ok": True}, {"k": "spec
 class FakeJob:
     """GET 할 때마다 한 걸음: 1번째 = 진행 중(뒤 절반은 대기), 2번째부터 다 끝남. 재시도 중인 것은 끝난 뒤 3번 더 물으면 통과."""
 
-    def __init__(self, origin, clean=False):
+    def __init__(self, origin, clean=False, retry_only=False):
         self.img = img = lambda k, n=4: [f"{origin}/fixture/p{k}.svg?s={i}" for i in range(1, n + 1)]
         items = [{"row": 10 + k, "slug": f"p-{k}", "model": f"MODEL-{k:02d}", "status": "ok", "imgs": img(k),
                   "hash": f"h{k}", "contentDigest": f"d{k}", "ai": copy.deepcopy(OK_AI)} for k in range(PASSED)]
         self.posts = []
         self.gets = 0
         self.ready_gets = 0
-        if clean:   # 검토할 것 없음
+        if clean or retry_only:   # 검토할 것 없음 · 자동 재시도 하나뿐 (통과하면 모두 준비됨)
+            if retry_only:
+                items.append({"row": 103, "slug": "retry", "model": "RETRY-OK", "status": "ok", "retrying": 1, "imgs": img(103),
+                              "hash": "hR", "contentDigest": "dR",
+                              "ai": [{"k": "txt", "ok": False, "issues": [{"lines": ["Line"], "regions": [{"slice": 1, "y": 0.2, "h": 0.1}]}]}]})
             self.items = items
             return
         items.insert(2, {"row": 100, "slug": "bad-img", "model": "BAD-IMG", "status": "ok", "imgs": img(100),
@@ -150,15 +155,20 @@ class BulkCheckGridTest(unittest.TestCase):
         page, errors = open_page(browser, origin, width, height, lang, job)
         expect(page.locator("html")).to_have_attribute("dir", "rtl" if rtl else "ltr")
         inside = lambda *sels: self.inside(page, width, height, *sels)
-        # 1) 스캔 끝 · 자동 재시도 중: 그리드에 머물고 '다시 준비 중 1…' — 알림도, '검토 N' 도 아직
-        expect(page.locator(".gd-it")).to_have_count(PASSED + 4)
-        expect(page.locator("#gdB")).to_have_text("4", timeout=10000)
-        expect(page.locator("#gdA")).to_have_text(str(PASSED))
-        expect(page.locator('.gd-it[data-row="103"]')).to_have_class("gd-it gd-busy")
-        expect(page.locator("#gdNote")).to_have_text(re.compile("1"))
-        expect(page.locator("#gdRh")).to_have_count(0)
-        expect(page.locator("#gdRev")).to_be_disabled()
-        expect(page.locator("#gdGo")).to_be_disabled()
+        # 1) 첫 판이 끝나면 바로 결과 화면 — 자동 재시도 중인 것도 줄에 '다시 준비 중'으로 (기다리지 않음), 숫자에 들어감
+        head = page.locator("#gdRhH")
+        expect(head).to_be_visible(timeout=10000)
+        expect(page.locator(".gd-top")).to_be_hidden()
+        shown = page.locator(".gd-it:not(.gd-hide)")
+        expect(shown).to_have_count(4)
+        self.assertEqual(sorted(shown.evaluate_all("ts => ts.map(t => t.dataset.row)")), ["100", "101", "102", "103"])
+        retry = page.locator('.gd-it[data-row="103"]')
+        expect(retry).to_have_class("gd-it gd-busy")
+        if lang == "en":
+            expect(retry.locator(".gd-st")).to_have_text("Preparing again")
+        expect(head.locator("b")).to_have_text("4")
+        expect(page.locator("#gdRhGo")).to_be_enabled()
+        expect(page.locator(".gd-it:not(.gd-hide) .gd-ra, .gd-it:not(.gd-hide) button")).to_have_count(0)
         bad_img = page.locator('.gd-it[data-row="100"]')
         expect(bad_img).to_have_class("gd-it gd-bad")
         expect(bad_img.locator(".gd-mk")).to_have_count(1)
@@ -169,17 +179,10 @@ class BulkCheckGridTest(unittest.TestCase):
         expect(page.locator('.gd-it[data-row="102"] .gd-pdp')).to_have_class("gd-pdp none")
         self.assertLessEqual(page.evaluate("document.documentElement.scrollWidth"), width)
         self.assertLessEqual(page.evaluate("(() => { const l = document.getElementById('gdList'); return l.scrollWidth - l.clientWidth; })()"), 0)
-        spot = page.locator("#gdGo").bounding_box()
-        # 2) 재시도가 통과로 끝나면 결과 화면 (최종 숫자): 그리드는 사라지고 확인이 필요한 PDP 3개만, 머리글은 검정 · 숫자와 글 같은 크기
-        head = page.locator("#gdRhH")
-        expect(head).to_be_visible(timeout=15000)
-        expect(page.locator("#gdNote")).to_be_hidden()
-        expect(page.locator(".gd-top")).to_be_hidden()
-        shown = page.locator(".gd-it:not(.gd-hide)")
+        # 2) 재시도가 통과하면 그 칸은 줄에서 빠지고 숫자가 줄어든다 (머리글은 검정 · 숫자와 글 같은 크기)
+        expect(retry).to_have_class("gd-it gd-ok gd-hide", timeout=15000)
         expect(shown).to_have_count(3)
         self.assertEqual(sorted(shown.evaluate_all("ts => ts.map(t => t.dataset.row)")), ["100", "101", "102"])
-        expect(page.locator('.gd-it[data-row="103"]')).to_have_class("gd-it gd-ok gd-hide")
-        expect(page.locator(".gd-it:not(.gd-hide) .gd-ra, .gd-it:not(.gd-hide) button")).to_have_count(0)
         expect(head.locator("b")).to_have_text("3")
         if lang == "en":
             expect(head).to_have_text("3 PDPs need to be checked")
@@ -219,9 +222,11 @@ class BulkCheckGridTest(unittest.TestCase):
         page.locator("#dkBack").click()
         expect(page.locator(".gd-it")).to_have_count(PASSED + 4)
         expect(page.locator("#gdRev")).to_be_enabled()
+        expect(page.locator("#gdGo")).to_be_disabled()
         page.wait_for_timeout(700)
         expect(page.locator("#gdRh")).to_have_count(0)
-        self.assertEqual(page.locator("#gdGo").bounding_box()["y"], spot["y"])
+        inside("#gdRev", "#gdGo")
+        spot = page.locator("#gdGo").bounding_box()
         # 칸을 누르면 자세히 보기 → 돌아가기
         page.locator('.gd-it[data-row="10"] .gd-pdp').click()
         expect(page.locator(".dk-on .ck-imgs img")).to_have_count(4)
@@ -284,6 +289,32 @@ class BulkCheckGridTest(unittest.TestCase):
         self.assertEqual(errors, [])
         page.close()
 
+    def run_retry_only(self, browser, origin, width, height, lang):
+        # 자동 재시도 하나뿐: 결과 화면에 그것 하나('다시 준비 중') → 통과하면 줄이 비고 '모두 준비됨' + 확인하고 받기 (같은 자리)
+        job = FakeJob(origin, retry_only=True)
+        page, errors = open_page(browser, origin, width, height, lang, job)
+        head, go = page.locator("#gdRhH"), page.locator("#gdRhGo")
+        expect(head).to_be_visible(timeout=10000)
+        expect(page.locator(".gd-it:not(.gd-hide)")).to_have_count(1)
+        expect(page.locator('.gd-it[data-row="103"]')).to_have_class("gd-it gd-busy")
+        expect(head.locator("b")).to_have_text("1")
+        if lang == "en":
+            expect(head).to_have_text("1 PDP needs to be checked")
+        spot = go.bounding_box()
+        expect(page.locator(".gd-it:not(.gd-hide)")).to_have_count(0, timeout=15000)
+        expect(head.locator("b")).to_have_text(str(PASSED + 1))
+        if lang == "en":
+            expect(head).to_have_text(f"All {PASSED + 1} PDPs are ready")
+            expect(go).to_have_text("Confirm & download")
+        self.assertEqual(go.bounding_box()["y"], spot["y"])
+        self.inside(page, width, height, "#gdRhH", "#gdRhGo")
+        with page.expect_download():
+            go.click()
+        expect(page.locator("#ckDl")).to_be_visible()
+        self.assertEqual(sorted(job.posts[-1]["rows"]), [10 + k for k in range(PASSED)] + [103])
+        self.assertEqual(errors, [])
+        page.close()
+
     def test_grid_scan_result_screen_then_one_by_one_review_and_download(self):
         with serve() as origin, sync_playwright() as p:
             options = {"headless": True}
@@ -295,6 +326,8 @@ class BulkCheckGridTest(unittest.TestCase):
                     self.run_flow(browser, origin, width, height, lang)
                 with self.subTest(clean=True, width=width, height=height, lang=lang):
                     self.run_clean(browser, origin, width, height, lang)
+                with self.subTest(retry_only=True, width=width, height=height, lang=lang):
+                    self.run_retry_only(browser, origin, width, height, lang)
             browser.close()
 
 
