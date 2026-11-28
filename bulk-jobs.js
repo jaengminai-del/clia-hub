@@ -40,6 +40,11 @@ const crawlSlot = limiter(CRAWL_CONC);
 //   동시 2 → 45s · 4 → 22s · 8 → 12s · 16 → 6s (거의 비례). 기본 16, BULK_CONTENT_CONC 로 1~24
 const CONTENT_CONC = Math.max(1, Math.min(24, parseInt(process.env.BULK_CONTENT_CONC, 10) || 16));
 const contentSlot = limiter(CONTENT_CONC);
+// 슬라이스 그리기(파이썬 + 크로미움)는 따로 더 좁게 (2026-11-28): 캐시가 없는 제품을 한꺼번에 그리면 서버가 프로세스 한도에 걸린다 —
+//   운영 11-27 실제 Check(72개)에서 spawn EAGAIN · 'Chromium을 실행할 수 없습니다' · 'browser has been closed', 11-28 엔 8개 동시에 2개 실패.
+//   캐시가 있는 것은 바로 지나간다. 기본 4, BULK_SLICE_CONC 로 1~16
+const SLICE_CONC = Math.max(1, Math.min(16, parseInt(process.env.BULK_SLICE_CONC, 10) || 4));
+const sliceSlot = limiter(SLICE_CONC);
 
 // ── 올린 파일 (로컬 + 버킷) ──
 async function saveUpload(id, buf, meta) {
@@ -296,7 +301,7 @@ async function contentFor(channel, url, opt = {}) {   // opt.fresh: 슬라이스
 async function sliceContent(html, sliceOpts, check, slug) {
   const mirror = check && slug && readJson(path.join(OUT_DIR(), slug, 'mirror.json'));
   const gallery = ((mirror && mirror._gallery) || []).flatMap(g => [g.pc_url, g.mobile_url, g.unified_url]).filter(Boolean).map(imgKey);
-  return post('/api/v1/slice-html', { html, ...sliceOpts, ...(check ? { review: true, reviewGallery: gallery } : {}) }, 12 * 60 * 1000);
+  return sliceSlot(() => post('/api/v1/slice-html', { html, ...sliceOpts, ...(check ? { review: true, reviewGallery: gallery } : {}) }, 12 * 60 * 1000));
 }
 const sliceEvidence = (sl, check) => ({
   loaded: sl.images_loaded, broken: sl.broken || null,
