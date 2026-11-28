@@ -159,8 +159,9 @@ function countryOf(j) {
 const units = (its) => { const m = new Map(); for (const it of its) { const k = it.bundle ? 'b:' + it.row : it.slug || it.url || 'r:' + it.row; if (!m.has(k)) m.set(k, []); m.get(k).push(it); } return [...m.values()]; };
 const reviewWrites = new WeakSet();
 const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
+const blocking = x => x.blocked && !x.ok && x.k !== 'n12';   // 예전 작업 기록의 'Shopee 12장 차단'은 이제 막지 않는다
 const incompletePdp = it => it.unified !== true || !it.hash || !it.contentDigest ||
-  (it.ai || []).some(x => x.blocked && !x.ok);
+  (it.ai || []).some(blocking);
 const exportBlocked = it => reviewWrites.has(it) || (it.check !== 'removed' &&
   (it.status !== 'ok' || it.retrying || incompletePdp(it)));
 const skuConflict = ({ descCol, skuCol, skus }) => Number(descCol) === Number(skuCol) && !!skus?.length;
@@ -235,13 +236,15 @@ function jobView(j) {
   const pending = done ? approvals.pendingOf(j.items, j.check ? j.channel : undefined) : [];
   const pendingSlugs = new Set(pending.map(x => x.slug).filter(Boolean));
   const its = (done ? j.items.map((it) => { const flags = currentFlags(j, it); return withVideos(flags === it.flags ? it : { ...it, flags }); }) : j.items)
+    .map(it => (j.check && (it.ai || []).some(x => x.k === 'n12' && !x.ok)
+      ? { ...it, ai: it.ai.map(x => (x.k === 'n12' ? { ...x, ok: true, blocked: false, cut: true } : x)) } : it))   // 예전 기록의 12장 차단은 정보로만
     .map(it => {
       if (!j.check || it.check === 'removed' || it.status !== 'ok') return it;
       if (!exportBlocked(it) && isCurrentRow(j, it)) {
         return it.check !== 'ok' || (it.checkedHash === it.hash && it.checkedChannel === j.channel &&
           it.checkedContentDigest === it.contentDigest && (!approvals.gateOn() || !pendingSlugs.has(it.slug))) ? it : { ...it, check: null };
       }
-      if (it.unified && it.contentDigest && ((it.ai || []).some(x => x.blocked && !x.ok) || it.retrying)) return { ...it, check: null };
+      if (it.unified && it.contentDigest && ((it.ai || []).some(blocking) || it.retrying)) return { ...it, check: null };
       return { ...it, check: null, imgs: [], ai: [{ k: 'preview', ok: false, blocked: true }] };
     });
   const fin = (x) => x.status === 'ok' || x.status === 'failed';
@@ -408,7 +411,8 @@ function aiChecks(j, it, c) {
   };
   const imageIssues = (q.imageIssues || []).map((x) => ({ src: x.src, regions: regions(x) }));
   const specsInMirror = !!q.mirror?.sections?.some(s => s.specs?.length);
-  const completeInCell = regions => !!regions?.length && regions.every(r => Number.isInteger(r.slice) && r.slice > 0 && r.slice <= used);
+  // 스펙 표가 PDP 에 그려져 있으면 있는 것 — Shopee 한도로 앞 12장 밖에 있어도 '빠짐'이 아니다 (2026-11-28 결정)
+  const completeInCell = regions => !!regions?.length && regions.every(r => Number.isInteger(r.slice) && r.slice > 0);
   const rowKey = pair => JSON.stringify(pair.map(v => String(v ?? '').normalize('NFC').trim().replace(/\s+/g, ' ')));
   const specSources = it.bundle?.length
     ? it.bundle.map((component, i) => ({ qa: component.slug ? qaOf(component.slug) : null,
@@ -465,8 +469,8 @@ function aiChecks(j, it, c) {
   out.push({ k: 'txt', ok: texts < 5, n: texts, issues: textIssues });
   if (!it.bundle && /lg\.com\/th\//i.test(it.url || '')) out.push({ k: 'sum', ok: !(c && c.summaryErr) });
   if (j.channel === 'shopee') {
-    const truncated = used < (c?.allImages ?? used) || !!c?.tooLong;
-    out.push({ k: 'n12', ok: !truncated, blocked: truncated, used, all: c?.allImages ?? used });
+    // Shopee 한도(앞 12장 · 3,000자)로 뒤가 잘리는 것은 자동 — 앞 12장만 엑셀에 넣고 막지 않는다 (2026-11-28 결정)
+    out.push({ k: 'n12', ok: true, cut: used < (c?.allImages ?? used) || !!c?.tooLong, used, all: c?.allImages ?? used });
   }
   out.push({ k: 'spec', ok: !specIssues.length && !legacyUnknown, unknown: legacyUnknown && specIssues.every(x => x.unknown), blocked: !!specIssues.length || legacyUnknown,
     crawl: it.bundle ? !!crawlParts.length : !specsInMirror || legacyUnknown || !!q.legacySpecs?.length, crawlParts, issues: specIssues });
@@ -480,7 +484,7 @@ const aiFail = (ai) => (ai || []).some((x) => !x.ok);
 //     (운영 로그 11-25~27 크롤 41건: 중앙값 31초 · 느린 것 ~2분. 하루 전 새로 크롤한 제품도 같은 글이 계속 빠져 있어 — 크롤러가 못 읽는 구조 —
 //      더 돌려도 크롤 비용과 기다림만 늘어난다. 3번이면 일시적 실패(네트워크 · 차단)에 간격을 두고 두 번 더 기회)
 //   슬라이스에서 못 가져온 이미지 · 요약 실패 → 다시 그리기(슬라이스 캐시 무시) 최대 2번
-//   Shopee 제한으로 잘린 PDP는 자동 재시도 없이 검수에서 차단한다.
+//   Shopee 12장은 자동(앞 12장만 엑셀에)이라 묻지도 막지도 않는다 (2026-11-28 결정).
 const MAX_CRAWLS = 3, CRAWL_GAP = [0, 30 * 1000, 90 * 1000], MAX_DRAWS = 2;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 function fixPlan(it, ai) {
@@ -489,7 +493,7 @@ function fixPlan(it, ai) {
   const img = (ai || []).find((x) => x.k === 'img') || {};
   const spec = (ai || []).find((x) => x.k === 'spec');
   const crawl = (!it.bundle && ((!img.ok && img.lg > 0) || bad('txt'))) || (bad('spec') && spec.crawl !== false);
-  const draw = (!img.ok && img.bad > 0) || bad('sum') || bad('preview') || (bad('spec') && spec.crawl === false && !bad('n12'));
+  const draw = (!img.ok && img.bad > 0) || bad('sum') || bad('preview') || (bad('spec') && spec.crawl === false);
   return crawl || draw ? { crawl, draw } : null;
 }
 const retryable = (it, ai) => { const p = fixPlan(it, ai); return !!p && ((p.crawl && (it.crawls || 0) < MAX_CRAWLS) || (p.draw && (it.tries || 0) < MAX_DRAWS)); };
