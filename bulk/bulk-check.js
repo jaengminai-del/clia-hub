@@ -184,7 +184,7 @@
   const aiRows = (u) => (u[0].status === 'failed' ? [{ k: 'fail', ok: false, msg: u[0].error }] : u[0].ai || []);
   // 이미지: 슬라이스에서 못 가져온 것이나 크롤에서 빠진 것이나 사람 눈에는 같은 '빠진 이미지'
   const whyImg = (x) => C.T.w_img(x.n);
-  const why = (x) => ({ img: () => whyImg(x), txt: () => C.T.w_txt(x.n), sum: () => C.T.w_sum, spec: () => x.unknown ? C.T.bSpecUnknown : C.T.w_spec, preview: () => C.T.bPreview, n12: () => C.T.bLimit, fail: () => C.T.w_fail + (x.msg ? ' — ' + x.msg : ''), redo: () => C.T.w_fail + (x.msg ? ' — ' + x.msg : '') }[x.k] || (() => x.k))();
+  const why = (x) => ({ img: () => whyImg(x), txt: () => C.T.w_txt(x.n), sum: () => C.T.w_sum, spec: () => x.unknown ? C.T.bSpecUnknown : C.T.w_spec, preview: () => C.T.bPreview, n12: () => C.T.bLimit, fail: () => C.T.w_fail, redo: () => C.T.w_fail }[x.k] || (() => x.k))();   // 실패 이유: 서버의 기술 오류 문구(영어)는 화면에 내지 않는다 — 로그 · 작업 기록에만 (2026-11-28)
   const reduced = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (_) { return false; } };
   const EZ = { out: 'cubic-bezier(.16,1,.3,1)', p3out: 'cubic-bezier(.33,1,.68,1)', p3in: 'cubic-bezier(.32,0,.67,0)', io: 'cubic-bezier(.45,0,.55,1)' };
   const busy = (u) => u.some((x) => x.status === 'working' || x.retrying);

@@ -229,8 +229,10 @@ function cleanSections(sections) {
 }
 function stripNonContent() {
   let n = 0;
+  const healed = [];   // 검토 준비가 기능 섹션을 다 숨겨 빈 PDP 가 된 제품 → 되돌림 (lg-visibility.heal, 2026-11-28)
   for (const slug of fs.existsSync(OUT_DIR) ? fs.readdirSync(OUT_DIR) : []) {
     const fp = path.join(OUT_DIR, slug, 'mirror.json');
+    if (fs.existsSync(fp) && require('./lg-visibility').heal(path.join(OUT_DIR, slug))) { healed.push(slug); continue; }
     const m = fs.existsSync(fp) ? readJson(fp) : null;
     if (!m || !Array.isArray(m.sections)) continue;
     const { out, changed } = cleanSections(m.sections);
@@ -240,6 +242,10 @@ function stripNonContent() {
     n++;
   }
   if (n) console.log(`[crawl] 컨텐츠 아닌 컴포넌트(${[...NON_CONTENT_COMPONENTS, ...ACCESSORY_COMPONENTS]}) 정리: ${n}개 제품`);
+  if (healed.length) {
+    console.log(`[crawl] 빈 PDP 되돌림 (기능 섹션을 다 숨겼던 제품): ${healed.length}개 — ${healed.slice(0, 10).join(', ')}`);
+    store.pushPaths(healed.map((s) => path.join(OUT_DIR, s, 'mirror.json'))).catch((e) => console.warn('[crawl] 되돌림 버킷 업로드 실패', e.message));
+  }
   return n;
 }
 

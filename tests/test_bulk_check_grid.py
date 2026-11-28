@@ -199,6 +199,8 @@ class BulkCheckGridTest(unittest.TestCase):
         self.assertGreaterEqual(mk["y"], pdp["y"] - 1)
         self.assertLessEqual(mk["y"] + mk["height"], pdp["y"] + pdp["height"] + 1)
         expect(page.locator('.gd-it[data-row="102"] .gd-pdp')).to_have_class("gd-pdp none")
+        # 실패 이유는 짧은 안내만 — 서버의 기술 오류 문구(영어)는 화면에 내지 않음
+        expect(page.locator('.gd-it[data-row="102"]')).not_to_contain_text("returned no HTML")
         self.assertLessEqual(page.evaluate("document.documentElement.scrollWidth"), width)
         self.assertLessEqual(page.evaluate("(() => { const l = document.getElementById('gdList'); return l.scrollWidth - l.clientWidth; })()"), 0)
         # 2) 재시도가 통과하면 그 칸은 줄에서 빠지고 숫자가 줄어든다 (머리글은 검정 · 숫자와 글 같은 크기)

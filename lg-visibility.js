@@ -47,11 +47,22 @@ function applyTo(dir, boxes) {
   if (m._lg_hidden) return null;
   const c = check(m, boxes);
   if (!c || !c.hide) return null;
+  // 숨기면 남는 섹션이 없으면 숨기지 않는다 (2026-11-28) — 빈 PDP 는 만들 수 없어서 벌크 Check 가 '준비 못 함'으로 실패하고
+  //   다시 크롤로 살아나도 다음 검토 준비가 또 숨겼다 (운영 T2310NBTB: 기능 섹션 4개 숨김 · 남은 것 0개)
+  if (!m.sections.some((s) => !isAem(s))) return null;
   const hidden = m.sections.filter(isAem);
   m.sections = m.sections.filter((s) => !isAem(s));
   m._lg_hidden = { at: Date.now(), reason: 'lg.com 화면에 기능 섹션이 없음 (페이지 데이터에만 있음) — lg.com 처럼 스펙만', visible: `${c.visible}/${c.media}`, sections: hidden };
   fs.writeFileSync(fp, JSON.stringify(m, null, 2));
   return { ...c, kept: m.sections.length };
+}
+
+/** 다 숨겨서 빈 PDP 가 된 제품을 되돌린다 (위 규칙 전에 숨긴 것) → 되돌렸으면 true */
+function heal(dir) {
+  const fp = path.join(dir, 'mirror.json');
+  let m;
+  try { m = JSON.parse(fs.readFileSync(fp, 'utf8')); } catch (_) { return false; }
+  return !!m._lg_hidden && !(m.sections || []).length && restore(dir);
 }
 
 /** 되돌리기 (lg.com 이 페이지를 고쳤거나 그래도 쓰기로 했을 때) */
@@ -67,4 +78,4 @@ function restore(dir) {
   return true;
 }
 
-module.exports = { check, applyTo, restore, stem };
+module.exports = { check, applyTo, restore, heal, stem };
