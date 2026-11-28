@@ -175,10 +175,46 @@ _JS_LAYOUT = """() => {
           const c = getComputedStyle(e);
           if (c.overflowY !== 'visible' || c.overflow !== 'visible') { const q = e.getBoundingClientRect(); top = Math.max(top, q.top); bot = Math.min(bot, q.bottom); }
         }
-        const a = Math.round(top + window.scrollY - rootTop), b = Math.round(bot + window.scrollY - rootTop);
+        // 위는 내림 · 아래는 올림 (2026-11-28): 반올림하면 이미지 맨 윗줄 1px 이 앞 장 끝에 남았다
+        const a = Math.floor(top + window.scrollY - rootTop), b = Math.ceil(bot + window.scrollY - rootTop);
         if (b - a > 20) out.push([a, b]);
       });
       return out;
+    })(),
+    // 보이는 글자 줄이 차지하는 세로 구간 (2026-11-28) — 이 안쪽에서도 자르지 않는다. 옆 칸에 이미지가 있는 카드처럼
+    // 다른 요소 끝(edges)이 글자 줄 한가운데 오는 경우가 있어서. 넘침을 가리는 상위 요소 밖 · 옆으로 숨은 줄은 뺀다
+    textSpans: (() => {
+      const clipOf = new Map();
+      const clip = (el) => {
+        if (clipOf.has(el)) return clipOf.get(el);
+        let c = { top: -Infinity, bottom: Infinity, left: -Infinity, right: Infinity, hidden: false };
+        for (let e = el; e && e !== document.body; e = e.parentElement) {
+          const st = getComputedStyle(e);
+          if (st.display === 'none' || st.visibility === 'hidden' || +st.opacity === 0) { c.hidden = true; break; }
+          if (e !== el && (st.overflowY !== 'visible' || st.overflow !== 'visible')) {
+            const q = e.getBoundingClientRect();
+            c = { ...c, top: Math.max(c.top, q.top), bottom: Math.min(c.bottom, q.bottom), left: Math.max(c.left, q.left), right: Math.min(c.right, q.right) };
+          }
+        }
+        clipOf.set(el, c); return c;
+      };
+      const out = [];
+      const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      const rg = document.createRange();
+      for (let n; (n = w.nextNode());) {
+        if (!n.nodeValue.trim() || !n.parentElement) continue;
+        const c = clip(n.parentElement); if (c.hidden) continue;
+        rg.selectNodeContents(n);
+        for (const r of rg.getClientRects()) {
+          const top = Math.max(r.top, c.top), bot = Math.min(r.bottom, c.bottom);
+          if (r.width < 1 || bot - top < 2 || Math.min(r.right, c.right) - Math.max(r.left, c.left) < 1) continue;
+          out.push([Math.floor(top + window.scrollY - rootTop), Math.ceil(bot + window.scrollY - rootTop)]);
+        }
+      }
+      out.sort((a, b) => a[0] - b[0]);
+      const merged = [];   // 겹치는 줄은 하나로
+      for (const s of out) { const m = merged[merged.length - 1]; if (m && s[0] < m[1]) m[1] = Math.max(m[1], s[1]); else merged.push(s.slice()); }
+      return merged;
     })(),
   };
 }"""
@@ -261,6 +297,8 @@ def _shrink_jpeg(data: bytes, q: int, min_q: int, max_bytes: int) -> bytes:
 def _cuts(layout: dict, n: int, max_span: float = 0, avoid_img: bool = False) -> list:
     """자를 위치: 이상적인 등분점에서 가장 가까운 섹션 경계로 스냅.
     경계가 너무 멀면(등분 높이의 45% 초과) 표 행/문단 경계. 보이는 이미지 안쪽은 후보에서 뺀다(2026-11-09).
+    보이는 글자 줄 안쪽도 뺀다(2026-11-28) — 옆에 이미지가 있는 카드에서 이미지 끝이 옆 칸 글자 줄을 자르던 것. 줄 사이는 후보로 더한다.
+    프리뷰 슬라이스 라인(shopee-lazada-pdp/index.html sliceCutsFor)이 같은 계산을 한다 — 바꾸면 같이 바꿀 것.
     그래도 없으면 한 장 최대 높이 안에서 등분점에 가장 가까운 안전한 위치(보통 그 이미지 바로 위) —
     한 장보다 긴 이미지처럼 안전한 위치가 아예 없을 때만 등분점/최대 높이에서 자른다."""
     H = layout["height"]
@@ -268,11 +306,12 @@ def _cuts(layout: dict, n: int, max_span: float = 0, avoid_img: bool = False) ->
     cuts = [0]
     # avoid_img(규격 slices.avoid_image_cuts): 보이는 이미지 안쪽에서는 자르지 않는다. 끄면 원본 규칙 그대로
     spans = [(a, b) for a, b in (layout.get("imgSpans") or []) if b - a > 4] if avoid_img else []
+    lines = [(a, b) for a, b in (layout.get("textSpans") or [])] if avoid_img else []
 
-    def inside(y):          # 보이는 이미지의 안쪽 (위·아래 끝 2px 은 경계로 본다)
-        return any(a + 2 < y < b - 2 for a, b in spans)
+    def inside(y):          # 보이는 이미지의 안쪽 (위·아래 끝 2px 은 경계로 본다) · 글자 줄의 안쪽 (줄 끝에 딱 닿는 건 괜찮음)
+        return any(a + 2 < y < b - 2 for a, b in spans) or any(a < y < b for a, b in lines)
 
-    safe = sorted({e for e in list(layout["edges"]) + list(layout["fineEdges"]) + [a for a, _ in spans]
+    safe = sorted({e for e in list(layout["edges"]) + list(layout["fineEdges"]) + [a for a, _ in spans] + [b for _, b in lines]
                    if 0 < e < H and not inside(e)})
 
     def nearest(lst, target, min_y, tol):
