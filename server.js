@@ -12,6 +12,7 @@ app.use(require('./crawler-routes')); // 내장 PDP 크롤러 (/api/v1/*) — �
 app.use(require('./listing-routes').router); // 제품별 리스팅 문구 (프로모션·제품 상세·배송·사후 케어·반품) 버전 저장
 app.use(require('./video-frames').router); // 동영상 카드 장면 고르기 (빌더 카드 목록 팝업 → ffmpeg 장면 추출)
 app.use(require('./bulk-routes').router); // Shopee/Lazada 벌크 엑셀 설명 칸 채우기 (/bulk/ 화면)
+app.use(require('./image-cache').router); // lg.com 이미지 사본 — 슬라이스 그리기가 lg.com 을 직접 부르지 않게 (/api/v1/img-cache)
 app.use(require('./slice-preview').router); // 상세 이미지 작은 미리보기 /media/slices-p/ (벌크 Check 6개 한 번에 — 원본은 그대로)
 app.use(require('./edits').router); // 빌더 편집본 저장 — 벌크 엑셀이 편집본으로 채운다
 app.use(require('./approvals').router); // 검토·승인 상태 — 빌더 「승인 전」 배지, APPROVAL_GATE=1 이면 다운로드 잠금
@@ -2494,7 +2495,8 @@ function renderSlicesPy(body) {
   const zipPath = path.join(os.tmpdir(), `slices-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.zip`);
   return new Promise((resolve, reject) => {
     const proc = spawn(py, ['-m', 'content_gen.slices', zipPath], {
-      cwd: crawlerDir, env: { ...process.env, PYTHONIOENCODING: 'utf-8' },
+      // 이미지는 lg.com 이 아니라 이 서버의 사본(image-cache.js)으로 받는다 — 한꺼번에 많이 그리면 lg.com 이 막아 빈칸이 되던 것 (2026-11-28)
+      cwd: crawlerDir, env: { ...process.env, PYTHONIOENCODING: 'utf-8', CLIA_IMAGE_CACHE: `http://127.0.0.1:${PORT}/api/v1/img-cache?url=` },
     });
     let out = '', err = '';
     const timer = setTimeout(() => proc.kill('SIGKILL'), 10 * 60 * 1000);
@@ -2539,15 +2541,26 @@ app.post('/api/v1/slice-html', async (req, res) => {
   const ver = med === 'shopee_lazada' ? 'v3' : 'v1';   // v3 (2026-11-28): 글자 줄 가운데도 자르지 않음 · 이미지 위 끝 1px 남던 것 — slices.py
   const gallery = review === true && Array.isArray(reviewGallery) ? [...new Set(reviewGallery.filter(x => typeof x === 'string'))].sort() : [];
   const reviewKey = review === true ? '|pdp-authoritative-v4|' + JSON.stringify(gallery) : '';
-  const hash = crypto.createHash('sha1').update(`${ver}|${med}|${html}${rv}${reviewKey}`).digest('hex').slice(0, 20);
-  const dir = path.join(SLICE_CACHE, hash);
+  const key = `${ver}|${med}|${html}${rv}${reviewKey}`;
+  let hash = crypto.createHash('sha1').update(key).digest('hex').slice(0, 20);
+  let dir = path.join(SLICE_CACHE, hash);
+  // 그려 둔 묶음: 로컬 → 버킷 (재배포 뒤 로컬 캐시가 비어 있어도 버킷에 같은 묶음이 있으면 다시 그리지 않는다 — 이미지는 /media/slices 가 버킷에서 가져옴)
+  const kept = async (h) => {
+    try { return JSON.parse(fs.readFileSync(path.join(SLICE_CACHE, h, 'manifest.json'), 'utf8')); } catch (_) {}
+    const mb = await sliceStore.getBuffer(`media-slices/${h}/manifest.json`).catch(() => null);
+    try { if (mb) { const m = JSON.parse(mb.toString('utf8')); if ((m.images || []).length) return m; } } catch (_) {}
+    return null;
+  };
   try {
-    let man = null;
-    try { man = JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8')); } catch (_) {}
-    if (!man) {
-      // 재배포 뒤 로컬 캐시가 비어 있어도 버킷에 같은 묶음이 있으면 다시 그리지 않는다 (이미지는 /media/slices 가 버킷에서 가져옴)
-      const mb = await sliceStore.getBuffer(`media-slices/${hash}/manifest.json`).catch(() => null);
-      try { if (mb) { const m = JSON.parse(mb.toString('utf8')); if ((m.images || []).length) man = m; } } catch (_) {}
+    let man = await kept(hash);
+    // 이미지가 빠진 채 그려 둔 묶음은 한 번 더 그린다 (2026-11-28) — 예전엔 lg.com 이 막아 빈칸으로 잘린 것이 같은 해시로 계속 재사용됐다.
+    // 이제 이미지는 사본(image-cache.js)으로 받으니 다시 그리면 채워진다. 이미 나간 주소(엑셀 · 1년 캐시)는 그대로 두고 새 해시에 그린다.
+    // 다시 그려도 빠지면(lg.com 에서 정말 없어진 이미지) 그 결과를 그대로 쓴다 — 한 번만
+    const [got, all] = String(man?.images_loaded || '').split('/').map(Number);
+    if (man && all > got) {
+      hash = crypto.createHash('sha1').update(`${key}|img-copy`).digest('hex').slice(0, 20);
+      dir = path.join(SLICE_CACHE, hash);
+      man = await kept(hash);
     }
     if (!man) {
       const { meta } = await renderSlicesPy({ html, medium: med, name: 'slice', imagesDir: dir, review: review === true, reviewGallery: gallery });
