@@ -367,9 +367,18 @@ function qaOf(slug) {
   const keyOf = x => cov.source_ownership === 2 ? x.source_key : undefined;
   const imageIssues = gone.map((x) => ({ src: fullImg(dir, x.image), source_key: keyOf(x) }));
   const textIssues = tx.map(x => ({ ...x, source_key: keyOf(x) }));
-  const sourceSpecs = Array.isArray(cov.source_specs) ? cov.source_specs.map(x => ({ ...x, source_key: keyOf(x) })) : null;
+  // 스펙 원본: 검사 기록의 source_specs. 그 전 방식으로 크롤한 제품(기록에 source_specs 가 없음)은 크롤 결과(mirror)의 스펙 행으로 (2026-11-28).
+  //   예전엔 그 기록의 '빠진 글' 중 스펙 영역 글자(표 제목 'สรุป' · 'ข้อมูลจำเพาะพื้นฐาน' 등)를 빠진 스펙으로 세서, 태국 Shopee Live 140개 중
+  //   35개가 '빠진 스펙'이 되고 다시 크롤(제품마다 3번)이 한꺼번에 몰렸다. 스펙 행은 크롤 결과에 그대로 있으니 다시 크롤할 필요가 없다
+  const mirrorSpecs = (mirror?.sections || []).filter(s => s.specs?.length).map(s => ({ component_id: s.component_id, section: s.component_id,
+    source_key: (s.source_keys || [])[0], rows: s.specs.map(r => ({ label: r.label, value: r.value })), fromMirror: true }));
+  const sourceSpecs = Array.isArray(cov.source_specs) ? cov.source_specs.map(x => ({ ...x, source_key: keyOf(x) }))
+    : mirrorSpecs.length ? mirrorSpecs : null;
+  const specIds = new Set(mirrorSpecs.map(x => x.component_id).filter(Boolean));
   const legacySpecs = sourceSpecs === null ? (cov.missing_texts || []).filter(x => x.component_id === 'PD0008') : [];
-  return { images, texts, files, mirror, imageIssues, textIssues, sourceSpecs, legacySpecs };
+  // 스펙 영역 글자는 스펙 표로 확인하니 '빠진 글'로 따로 세지 않는다 (예전 기록만 — 새 기록은 이미 스펙 행으로 나뉜다)
+  const textIssuesOut = sourceSpecs?.[0]?.fromMirror ? textIssues.filter(x => !specIds.has(x.component_id)) : textIssues;
+  return { images, texts: textIssuesOut.length, files, mirror, imageIssues, textIssues: textIssuesOut, sourceSpecs, legacySpecs };
 }
 
 // 검사 기록의 이미지 주소는 끝 120자만 남아 있을 수 있다 → 크롤한 원문(pc.html)에서 그 끝으로 끝나는 전체 주소를 찾는다
@@ -423,10 +432,12 @@ function aiChecks(j, it, c) {
     const pairs = new Set((table.rows || []).map(rowKey));
     return rows.every(r => pairs.has(rowKey([r.label, r.value])));
   };
-  const hasTable = ({ source_key, rows, part }) => {
+  const hasTable = ({ source_key, rows, part, fromMirror }) => {
     const tables = (c?.specTables || []).filter(t => (t.part || 0) === part);
     const keyed = source_key ? tables.filter(t => t.sourceKeys.includes(source_key)) : [];
     if (keyed.length) return keyed.some(t => completeInCell(t.regions) && expectedRows(t, rows));
+    // 예전 방식 크롤(크롤 결과의 스펙 행으로 확인): 그 행이 전부 들어 있는 표가 PDP 에 다 그려져 있으면 있는 것
+    if (fromMirror && !part) return tables.some(t => completeInCell(t.regions) && expectedRows(t, rows));
     // Older saved HTML has no section key. Only the exact expected pairs in a
     // single, complete, unkeyed table can corroborate the source.
     if (part || !c?.edited) return false;
