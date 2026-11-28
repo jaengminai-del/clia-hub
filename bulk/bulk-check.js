@@ -160,8 +160,9 @@
   // 그리드는 사라지고 확인이 필요한 PDP 만 위쪽에 큰 칸으로 한 줄(문제 자리까지 내려 둠 · 빨간 칸), 가운데 위 '확인이 필요한 PDP 6개'(검정 · 숫자와 글 같은 크기)
   // 바로 아래 가운데 버튼 하나 '검토' — 다음 화면(검수 화면)의 'n / N' · 버튼 줄과 같은 자리. 저절로 넘어가지 않음(Enter 도). 0개면 '모두 준비됨' + 확인하고 받기.
   // 모션: 스프링(stiffness 260 · damping 26, 라이브러리 없이 linear() 이징)으로 아주 조금 올라옴 — PDP 14px(50ms 차례) · 머리글 8px · 검수 화면 가운데 카드 16px.
-  // 자동 재시도 중인 것도 그 줄에 — 칸 아래 찾은 문제 · 지금 하는 일(lg.com 다시 크롤 · PDP 다시 그림 · 차례 기다림) · '성공하면 확인됨',
-  // 다시 크롤 · 그림 중이면 띠가 천천히 반복해 훑는다(보이는 칸만). 계속 물어보다 통과하면 잠깐 ✓ 확인됨 → 줄에서 빠지고 숫자가 줄어든다(다 빠지면 '모두 준비됨').
+  // 자동 재시도 중인 것도 그 줄에 — 확인이 필요 없을 수도 있어 그림 위에 분명히: 썸네일을 어둡게 · 살짝 흐리게 덮고 정가운데 흰 글로 지금 하는 일(lg.com 다시 크롤 ·
+  // PDP 다시 그림 · 차례 기다림) + '성공하면 확인됨'(장혁 피드백). 찾은 문제는 다른 칸처럼 칸 아래. 다시 크롤 · 그림 중이면 밝은 띠가 천천히 반복해 훑는다(보이는 칸만, 글 뒤).
+  // 계속 물어보다 통과하면 가운데 ✓ 확인됨(덮개가 걷히며) → 줄에서 빠지고 숫자가 줄어든다(다 빠지면 '모두 준비됨').
   // 결과 화면은 한 번만 (돌아온 뒤엔 위 '검토' 버튼으로).
   // 칸을 누르면 그 제품의 자세히 보기(viewer 'all'), 돌아오면 같은 상태.
   // 자동 재시도는 서버가 뒤에서 — 고쳐지면 그 칸이 준비됨으로 옮겨 간다. 100~300개여도 부드럽게: 작은 미리보기 앞 몇 장만 · lazy, 연출은 보이는 몇십 개만.
@@ -336,17 +337,35 @@
       band.animate([{ transform: 'translateY(-100%)', opacity: 1 }, { transform: 'translateY(0)', opacity: 1 }], { duration: 420, easing: EZ.io })
         .finished.catch(() => {}).then(() => t.classList.remove('gd-scan'));
     }
+    // 썸네일 덮개 (자동 재시도 · 확인됨): 어두운 회색 막(gd-dim, 띠 아래) + 가운데 글(gd-ov, 띠 위). 필요할 때만 만든다
+    function cover(t, html) {
+      const p = t.querySelector('.gd-pdp'); let o = p.querySelector('.gd-ov');
+      if (html == null) { if (o) { o.remove(); p.querySelector('.gd-dim').remove(); } return; }
+      if (!o) { p.insertAdjacentHTML('beforeend', '<span class="gd-dim"></span><span class="gd-ov"><span class="gd-ovt"></span></span>'); o = p.querySelector('.gd-ov'); }
+      o.firstElementChild.innerHTML = html;
+    }
     function paint(t, u, anim) {
       const prev = t._cat, cat = catOf(u, G.landed.has(t._k)), changed = cat !== 'wait' && fill(t, u);
       const rd = cat === 'busy' ? redoOf(u) : null, reasons = aiRows(u).filter((x) => !x.ok).map(why).join(' · '), sk = [cat, rd, reasons].join('|');
-      if (t._sk !== sk && !t._checked) {   // 상태 줄 (다시 크롤 · 다시 그림 · 기다림이 바뀌어도)
+      // 결과 화면에서 다시 준비 · 자동 재시도가 통과: 잠깐(~1초) 썸네일 가운데 ✓ 확인됨 (어둡게 덮인 것이 걷히며) → rowNow 가 줄에서 뺀다
+      if (!t._checked && prev === 'busy' && cat === 'ok' && G.root.classList.contains('gd-rs') && !t.classList.contains('gd-hide')) {
+        t._checked = performance.now(); t._sk = null;
+        t.classList.add('gd-checked'); t.classList.remove('gd-crawl', 'gd-draw', 'gd-queue');
+        cover(t, `<span class="gd-okl">${CK}${e(T.chk)}</span>`);
+        t.querySelector('.gd-st').textContent = '';
+        rise(t.querySelector('.gd-okl'), 6);
+      }
+      if (t._sk !== sk && !t._checked) {   // 상태 (다시 크롤 · 다시 그림 · 기다림이 바뀌어도)
         t._sk = sk;
         t.className = `gd-it gd-${cat}${rd ? ' gd-rd gd-' + (rd === 'wait' ? 'queue' : rd) : ''}${G.vis.has(t) ? ' gd-vis' : ''}${t.classList.contains('gd-hide') ? ' gd-hide' : ''}`;
         const st = t.querySelector('.gd-st');
-        if (rd) {   // 자동 재시도: 찾은 문제 · 지금 하는 일 · 성공하면 확인됨 (세 줄, 짧게)
-          st.innerHTML = `<span class="gd-l1">${e(reasons)}</span><span class="gd-l2">${e(redoLine(u))}</span><span class="gd-l3">${e(T.rcHint)}</span>`;
-          st.title = [reasons, redoLine(u), T.rcHint].filter(Boolean).join(' · ');
-        } else st.textContent = st.title = { wait: '', ok: T.fReady, busy: T.redoing, in: T.okIn, out: T.removedL }[cat] ?? reasons;   // 사람이 정한 것: 포함 · 뺌 (검수 화면과 같은 말)
+        if (rd) {   // 자동 재시도: 썸네일 가운데(어둡게 · 흐리게 덮고) 지금 하는 일 · 성공하면 확인됨. 찾은 문제는 다른 칸처럼 칸 아래
+          cover(t, `<span class="gd-o2">${e(redoLine(u))}</span><span class="gd-o3">${e(T.rcHint)}</span>`);
+          st.textContent = st.title = reasons;
+        } else {
+          cover(t, null);
+          st.textContent = st.title = { wait: '', ok: T.fReady, busy: T.redoing, in: T.okIn, out: T.removedL }[cat] ?? reasons;   // 사람이 정한 것: 포함 · 뺌 (검수 화면과 같은 말)
+        }
       }
       if (cat !== prev || changed) {
         t._cat = cat;
@@ -478,24 +497,16 @@
       const tiles = [...G.tiles.values()], out = tiles.filter((t) => !t.classList.contains('gd-hide') && !inRow(t)), back = tiles.filter((t) => t.classList.contains('gd-hide') && inRow(t));
       const n = tiles.filter(inRow).length;
       if (!out.length && !back.length) { headline(n); return; }
-      // 자동 재시도가 통과한 칸: 잠깐(~1초) ✓ '확인됨' 을 보여 준 뒤 줄에서 빠진다
-      const won = out.filter((t) => t._cat === 'ok' && !t._checked);
-      if (won.length) {
-        for (const t of won) {
-          t._checked = true; t.classList.add('gd-checked');
-          const st = t.querySelector('.gd-st'); st.innerHTML = `<span class="gd-okl">${CK}${e(T.chk)}</span>`; st.title = T.chk;
-          if (!reduced()) rise(st.firstElementChild, 6);
-        }
-        await sleep(1000);
-        if (!G.alive || !byId('gdRh')) return;
-      }
+      // 통과한 칸(paint 가 ✓ 확인됨을 띄움): ~1초 보여 준 뒤 줄에서 빠진다
+      const wait = Math.max(0, ...out.map((t) => (t._checked ? t._checked + 1000 - performance.now() : 0)));
+      if (wait > 0) { await sleep(wait); if (!G.alive || !byId('gdRh')) return; }
       anim = anim && !reduced();
       const stay = tiles.filter((t) => !t.classList.contains('gd-hide') && inRow(t)), first = new Map(anim ? stay.map((t) => [t, t.getBoundingClientRect()]) : []);
       if (anim) await Promise.all(out.map((t) => t.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-6px) scale(.94)' }], { duration: 260, easing: EZ.p3in, fill: 'forwards' }).finished.catch(() => {})));
       if (!G.alive || !byId('gdRh')) return;
       for (const t of out) {   // 그리드로 돌아가면 보통 통과 칸
         t.classList.add('gd-hide'); t.getAnimations().forEach((a) => a.cancel());
-        if (t._checked) { t._checked = false; t._sk = null; t.classList.remove('gd-checked'); const u = unitOf(t._k); if (u) paint(t, u, false); }
+        if (t._checked) { t._checked = 0; t._sk = null; t.classList.remove('gd-checked'); cover(t, null); const u = unitOf(t._k); if (u) paint(t, u, false); }
       }
       for (const t of back) t.classList.remove('gd-hide');
       bigVars(n); headline(n);

@@ -176,9 +176,10 @@ class BulkCheckGridTest(unittest.TestCase):
         retry = page.locator('.gd-it[data-row="103"]')
         expect(retry).to_have_class(re.compile(r"\bgd-busy\b.*\bgd-queue\b"))
         if lang == "en":   # 찾은 문제 · 차례 기다림 · 성공하면 확인됨
-            expect(retry.locator(".gd-l1")).to_have_text("1 missing line")
-            expect(retry.locator(".gd-l2")).to_have_text("Waiting to retry…")
-            expect(retry.locator(".gd-l3")).to_have_text("Checked when it succeeds")
+            expect(retry.locator(".gd-ov .gd-o2")).to_have_text("Waiting to retry…")   # 그림 위 가운데: 지금 하는 일 · 성공하면 확인됨
+            expect(retry.locator(".gd-ov .gd-o3")).to_have_text("Checked when it succeeds")
+            expect(retry.locator(".gd-st")).to_have_text("1 missing line")   # 찾은 문제는 다른 칸처럼 칸 아래
+        expect(page.locator('.gd-it[data-row="100"] .gd-ov, .gd-it[data-row="100"] .gd-dim')).to_have_count(0)   # 검토 필요 칸엔 덮개 없음
         expect(head.locator("b")).to_have_text("4")
         expect(page.locator("#gdRhGo")).to_be_enabled()
         expect(page.locator(".gd-it:not(.gd-hide) .gd-ra, .gd-it:not(.gd-hide) button")).to_have_count(0)
@@ -193,7 +194,7 @@ class BulkCheckGridTest(unittest.TestCase):
         self.assertLessEqual(page.evaluate("document.documentElement.scrollWidth"), width)
         self.assertLessEqual(page.evaluate("(() => { const l = document.getElementById('gdList'); return l.scrollWidth - l.clientWidth; })()"), 0)
         # 2) 재시도가 통과하면 그 칸은 줄에서 빠지고 숫자가 줄어든다 (머리글은 검정 · 숫자와 글 같은 크기)
-        expect(retry.locator(".gd-okl")).to_be_visible(timeout=15000)   # 잠깐 ✓ 확인됨 → 빠짐
+        expect(retry.locator(".gd-ov .gd-okl")).to_be_visible(timeout=15000)   # 잠깐 썸네일 가운데 ✓ 확인됨 → 빠짐
         expect(retry).to_have_class(re.compile(r"\bgd-ok\b.*\bgd-hide\b"), timeout=5000)
         expect(shown).to_have_count(3)
         self.assertEqual(sorted(shown.evaluate_all("ts => ts.map(t => t.dataset.row)")), ["100", "101", "102"])
@@ -345,12 +346,27 @@ class BulkCheckGridTest(unittest.TestCase):
         tile = lambda row: page.locator(f'.gd-it[data-row="{row}"]')
         for row, cls, line in [(103, "gd-crawl", "Re-crawling from lg.com…"), (104, "gd-draw", "Preparing the PDP again…"), (105, "gd-queue", "Waiting to retry…")]:
             expect(tile(row)).to_have_class(re.compile(rf"\bgd-busy\b.*\b{cls}\b"))
+            ov = tile(row).locator(".gd-ov")
+            expect(ov.locator(".gd-o1")).to_have_count(0)   # 찾은 문제는 덮개가 아니라 칸 아래
             if lang == "en":
-                expect(tile(row).locator(".gd-l1")).to_have_text("3 missing images")
-                expect(tile(row).locator(".gd-l2")).to_have_text(line)
-                expect(tile(row).locator(".gd-l3")).to_have_text("Checked when it succeeds")
+                expect(ov.locator(".gd-o2")).to_have_text(line)
+                expect(ov.locator(".gd-o3")).to_have_text("Checked when it succeeds")
+                expect(tile(row).locator(".gd-st")).to_have_text("3 missing images")
             else:
-                expect(tile(row).locator(".gd-l2")).not_to_have_text("")
+                expect(ov.locator(".gd-o2")).not_to_have_text("")
+                expect(tile(row).locator(".gd-st")).not_to_have_text("")
+            # 썸네일을 어둡게 덮고(막 · 흐림) 글은 정가운데 · 흰 글 · 칸 아래엔 상태 줄 없음
+            expect(tile(row).locator(".gd-pdp .gd-dim")).to_have_count(1)
+            self.assertEqual(tile(row).locator(".gd-dim").evaluate("d => getComputedStyle(d).backgroundColor"), "rgba(38, 38, 38, 0.74)")
+            self.assertIn("blur", tile(row).locator(".gd-mv").evaluate("m => getComputedStyle(m).filter"))
+            self.assertEqual(ov.evaluate("o => getComputedStyle(o).color"), "rgb(255, 255, 255)")
+            self.assertEqual(tile(row).locator(".gd-st").evaluate("x => getComputedStyle(x).color"), "rgb(165, 0, 52)")   # 다른 검토 필요 칸과 같은 와인색
+            tile(row).scroll_into_view_if_needed()
+            box, pdp = ov.locator(".gd-ovt").bounding_box(), tile(row).locator(".gd-pdp").bounding_box()
+            self.assertAlmostEqual(box["x"] + box["width"] / 2, pdp["x"] + pdp["width"] / 2, delta=3)
+            self.assertAlmostEqual(box["y"] + box["height"] / 2, pdp["y"] + pdp["height"] / 2, delta=3)
+            self.assertLessEqual(box["height"], pdp["height"])
+            self.assertFalse(ov.locator(".gd-o2").evaluate("x => x.scrollWidth > x.clientWidth"))   # 잘리지 않고 줄바꿈
         self.inside(page, width, height, "#gdRhH", "#gdRhGo")
         band = lambda row: tile(row).locator(".gd-band").evaluate("b => getComputedStyle(b).animationName")
         if motion == "reduce":   # 움직이지 않는 표시
@@ -359,10 +375,16 @@ class BulkCheckGridTest(unittest.TestCase):
             expect(tile(103)).to_have_class(re.compile(r"\bgd-vis\b"))
             self.assertEqual([band(103), band(104), band(105)], ["gdloop", "gdloop", "none"])
         # 다시 크롤이 통과하면: 잠깐 ✓ 확인됨 → 줄에서 빠지고 숫자가 줄어든다
-        ok = tile(103).locator(".gd-okl")
+        ok = tile(103).locator(".gd-ov .gd-okl")
         expect(ok).to_be_visible(timeout=15000)
         if lang == "en":
             expect(ok).to_have_text("Checked")
+        okb, pdp = ok.bounding_box(), tile(103).locator(".gd-pdp").bounding_box()
+        self.assertAlmostEqual(okb["x"] + okb["width"] / 2, pdp["x"] + pdp["width"] / 2, delta=3)
+        self.assertAlmostEqual(okb["y"] + okb["height"] / 2, pdp["y"] + pdp["height"] / 2, delta=3)
+        expect(tile(103)).to_have_class(re.compile(r"\bgd-checked\b"))
+        if motion == "reduce":   # 막이 걷힘 (모션이 있으면 0.9초에 걸쳐)
+            self.assertEqual(tile(103).locator(".gd-dim").evaluate("d => getComputedStyle(d).opacity"), "0")
         expect(head.locator("b")).to_have_text("3")
         expect(tile(103)).to_have_class(re.compile(r"\bgd-hide\b"), timeout=5000)
         expect(head.locator("b")).to_have_text("2")
