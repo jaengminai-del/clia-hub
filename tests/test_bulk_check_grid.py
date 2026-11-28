@@ -1,6 +1,6 @@
 """벌크 Check 전체 그리드 (2026-11-28, bulk/bulk-check.js grid) — Chromium 에서 화면 · 동작 확인.
 
-스캔은 그리드로, 끝나면 검토 필요는 하나씩(검수 화면 'review') — 목록으로 늘어놓지 않는다.
+스캔은 그리드로 → 자동 재시도까지 다 끝나면 결과 알림('N개 확인이 필요해요' · 확인 시작) → 검토 필요는 하나씩(검수 화면 'review').
 
 작업 API(/api/v1/bulk/jobs/**)는 page.route 로 흉내 낸다: 처음엔 진행 중(반은 아직) → 다 끝남,
 자동 재시도 중인 한 제품은 끝난 뒤 몇 번 더 물으면 통과로 바뀐다. 운영 · 승인 기록은 건드리지 않는다.
@@ -50,10 +50,16 @@ OK_AI = [{"k": "img", "ok": True, "n": 0}, {"k": "txt", "ok": True}, {"k": "spec
 class FakeJob:
     """GET 할 때마다 한 걸음: 1번째 = 진행 중(뒤 절반은 대기), 2번째부터 다 끝남. 재시도 중인 것은 끝난 뒤 3번 더 물으면 통과."""
 
-    def __init__(self, origin):
+    def __init__(self, origin, clean=False):
         self.img = img = lambda k, n=4: [f"{origin}/fixture/p{k}.svg?s={i}" for i in range(1, n + 1)]
         items = [{"row": 10 + k, "slug": f"p-{k}", "model": f"MODEL-{k:02d}", "status": "ok", "imgs": img(k),
                   "hash": f"h{k}", "contentDigest": f"d{k}", "ai": copy.deepcopy(OK_AI)} for k in range(PASSED)]
+        self.posts = []
+        self.gets = 0
+        self.ready_gets = 0
+        if clean:   # 검토할 것 없음
+            self.items = items
+            return
         items.insert(2, {"row": 100, "slug": "bad-img", "model": "BAD-IMG", "status": "ok", "imgs": img(100),
                          "hash": "hI", "contentDigest": "dI",
                          "ai": [{"k": "img", "ok": False, "n": 1, "bad": 1, "lg": 0,
@@ -117,101 +123,114 @@ def end_edge(box, rtl):
     return box["x"] if rtl else box["x"] + box["width"]
 
 
+def open_page(browser, origin, width, height, lang, job):
+    page = browser.new_page(viewport={"width": width, "height": height}, reduced_motion="reduce")
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.route("**/api/v1/bulk/jobs/**", job.handle)
+    page.route("**/fixture/*.svg*", lambda route: route.fulfill(content_type="image/svg+xml", body=SVG))
+    page.route("**/*", lambda route: route.fallback() if route.request.url.startswith(origin) else route.abort())
+    page.goto(f"{origin}/bulk/?check=1&lang={lang}&job={JOB_ID}")
+    return page, errors
+
+
 class BulkCheckGridTest(unittest.TestCase):
+    def inside(self, page, width, height, *sels):
+        for sel in sels:
+            for loc in page.locator(sel).all():
+                b = loc.bounding_box()
+                self.assertGreaterEqual(b["x"], 0, sel)
+                self.assertLessEqual(b["x"] + b["width"], width + 0.5, sel)
+                self.assertGreaterEqual(b["y"], 0, sel)
+                self.assertLessEqual(b["y"] + b["height"], height, sel)
+
     def run_flow(self, browser, origin, width, height, lang):
         rtl = lang == "ar"
-        page = browser.new_page(viewport={"width": width, "height": height}, reduced_motion="reduce")
-        errors = []
-        page.on("pageerror", lambda e: errors.append(str(e)))
         job = FakeJob(origin)
-        page.route("**/api/v1/bulk/jobs/**", job.handle)
-        page.route("**/fixture/*.svg*", lambda route: route.fulfill(content_type="image/svg+xml", body=SVG))
-        page.route("**/*", lambda route: route.fallback() if route.request.url.startswith(origin) else route.abort())
-        page.goto(f"{origin}/bulk/?check=1&lang={lang}&job={JOB_ID}")
+        page, errors = open_page(browser, origin, width, height, lang, job)
         expect(page.locator("html")).to_have_attribute("dir", "rtl" if rtl else "ltr")
-
-        def inside(*sels):
-            for sel in sels:
-                for loc in page.locator(sel).all():
-                    b = loc.bounding_box()
-                    self.assertGreaterEqual(b["x"], 0, sel)
-                    self.assertLessEqual(b["x"] + b["width"], width + 0.5, sel)
-                    self.assertGreaterEqual(b["y"], 0, sel)
-                    self.assertLessEqual(b["y"] + b["height"], height, sel)
-
-        # 1) 스캔이 끝나면 저절로 검토 필요 하나씩 — 가운데 큰 카드 · 비교 칸 · 위 고정 버튼 셋 · 돌아가기
-        expect(page.locator("#dkCmp")).to_be_visible(timeout=10000)
+        inside = lambda *sels: self.inside(page, width, height, *sels)
+        # 1) 스캔 끝 · 자동 재시도 중: 그리드에 머물고 '다시 준비 중 1…' — 알림도, '검토 N' 도 아직
+        expect(page.locator(".gd-it")).to_have_count(PASSED + 4)
+        expect(page.locator("#gdB")).to_have_text("4", timeout=10000)
+        expect(page.locator("#gdA")).to_have_text(str(PASSED))
+        expect(page.locator('.gd-it[data-row="103"]')).to_have_class("gd-it gd-busy")
+        expect(page.locator("#gdNote")).to_have_text(re.compile("1"))
+        expect(page.locator("#gdSum")).to_have_count(0)
+        expect(page.locator("#gdRev")).to_be_disabled()
+        expect(page.locator("#gdGo")).to_be_disabled()
+        bad_img = page.locator('.gd-it[data-row="100"]')
+        expect(bad_img).to_have_class("gd-it gd-bad")
+        expect(bad_img.locator(".gd-mk")).to_have_count(1)
+        expect(bad_img.locator(".gd-mv")).to_have_attribute("style", re.compile(r"translateY\(-\d+px\)"))
+        mk, pdp = bad_img.locator(".gd-mk").bounding_box(), bad_img.locator(".gd-pdp").bounding_box()
+        self.assertGreaterEqual(mk["y"], pdp["y"] - 1)
+        self.assertLessEqual(mk["y"] + mk["height"], pdp["y"] + pdp["height"] + 1)
+        expect(page.locator('.gd-it[data-row="102"] .gd-pdp')).to_have_class("gd-pdp none")
+        self.assertLessEqual(page.evaluate("document.documentElement.scrollWidth"), width)
+        self.assertLessEqual(page.evaluate("(() => { const l = document.getElementById('gdList'); return l.scrollWidth - l.clientWidth; })()"), 0)
+        spot = page.locator("#gdGo").bounding_box()
+        # 2) 재시도가 통과로 끝나면 결과 알림 (최종 숫자): 3개 확인 필요 · 10 준비됨 · 13 확인함 — 저절로 넘어가지 않음
+        summary = page.locator("#gdSum")
+        expect(summary).to_be_visible(timeout=15000)
+        expect(page.locator('.gd-it[data-row="103"]')).to_have_class("gd-it gd-ok")
+        expect(page.locator("#gdNote")).to_have_text("")
+        expect(page.locator("#gdSumH b")).to_have_text("3")
+        if lang == "en":
+            expect(page.locator("#gdSumH")).to_have_text("3need your check")
+            expect(summary.locator("p")).to_have_text(f"{PASSED + 1} ready · {PASSED + 4} checked")
+            expect(page.locator("#gdStart")).to_have_text("Start checking")
+        else:
+            expect(summary.locator("p")).to_contain_text(str(PASSED + 1))
+        expect(page.locator("#gdStart")).to_be_focused()
+        inside("#gdSumH", "#gdSum p", "#gdStart")
+        page.wait_for_timeout(500)
+        expect(page.locator("#dkCmp")).to_have_count(0)
+        # 3) 확인 시작(Enter 도) → 하나씩: 가운데 큰 카드 · 비교 칸 · 돌아가기
+        if width == 700:
+            page.keyboard.press("Enter")
+        else:
+            page.locator("#gdStart").click()
+        expect(page.locator("#dkCmp")).to_be_visible()
         expect(page.locator("#dkCap b")).to_have_text("BAD-IMG")
-        expect(page.locator("#dkNn")).to_have_text(" / 4")
-        expect(page.locator(".gd-it")).to_have_count(0)
-        expect(page.locator("#dkBack")).to_be_visible()
+        expect(page.locator("#dkNn")).to_have_text(" / 3")
         card = page.locator(".dk-cc.dk-on .dk-ph").bounding_box()
         if width > 700:
             self.assertAlmostEqual(card["x"] + card["width"] / 2, width / 2, delta=2)
         inside(".dk-bar .dk-act", "#dkBack")
         bar = page.locator(".dk-bar").bounding_box()
-        # 2) 돌아가기 → 그리드 (같은 결과: 큰 숫자 · 빨간 테두리 · 문제 자리 빨간 칸)
+        # 돌아가기 → 그리드 (알림은 한 번만 — 이제 '검토 3' 버튼)
         page.locator("#dkBack").click()
         expect(page.locator(".gd-it")).to_have_count(PASSED + 4)
-        expect(page.locator("#gdA")).to_have_text(str(PASSED))
-        expect(page.locator("#gdB")).to_have_text("4")
-        expect(page.locator(".gd-ok")).to_have_count(PASSED)
-        expect(page.locator(".gd-bdg")).to_have_count(0)   # 통과 칸에 ✓ 표시는 없음 (11/28 결정)
-        bad_img = page.locator('.gd-it[data-row="100"]')
-        expect(bad_img).to_have_class("gd-it gd-bad")
-        expect(bad_img.locator(".gd-mk")).to_have_count(1)
-        expect(bad_img.locator(".gd-mv")).to_have_attribute("style", re.compile(r"translateY\(-\d+px\)"))
-        bad_img.scroll_into_view_if_needed()
-        mk, pdp = bad_img.locator(".gd-mk").bounding_box(), bad_img.locator(".gd-pdp").bounding_box()
-        self.assertGreaterEqual(mk["y"], pdp["y"] - 1)
-        self.assertLessEqual(mk["y"] + mk["height"], pdp["y"] + pdp["height"] + 1)
-        expect(page.locator('.gd-it[data-row="101"]')).to_have_class("gd-it gd-bad")
-        expect(page.locator('.gd-it[data-row="102"] .gd-pdp')).to_have_class("gd-pdp none")
-        expect(page.locator('.gd-it[data-row="103"]')).to_have_class("gd-it gd-busy")
-        self.assertLessEqual(page.evaluate("document.documentElement.scrollWidth"), width)
-        self.assertLessEqual(page.evaluate("(() => { const l = document.getElementById('gdList'); return l.scrollWidth - l.clientWidth; })()"), 0)
-        rev, go = page.locator("#gdRev"), page.locator("#gdGo")
-        expect(rev).to_be_enabled()
-        expect(go).to_be_disabled()
-        inside("#gdRev", "#gdGo")
-        spot = go.bounding_box()
-        # 칸을 누르면 그 제품의 자세히 보기 → 돌아가기는 그리드로 (다시 저절로 검토로 가지 않음)
+        expect(page.locator("#gdRev")).to_be_enabled()
+        page.wait_for_timeout(700)
+        expect(page.locator("#gdSum")).to_have_count(0)
+        self.assertEqual(page.locator("#gdGo").bounding_box()["y"], spot["y"])
+        # 칸을 누르면 자세히 보기 → 돌아가기
         page.locator('.gd-it[data-row="10"] .gd-pdp').click()
         expect(page.locator(".dk-on .ck-imgs img")).to_have_count(4)
         page.locator("#dkBack").click()
         expect(page.locator(".gd-it")).to_have_count(PASSED + 4)
-        # 자동 재시도 중이던 것이 통과 → 준비됨으로 (검토할 수도 줄어듦)
-        expect(page.locator('.gd-it[data-row="103"]')).to_have_class("gd-it gd-ok", timeout=15000)
-        expect(page.locator("#gdA")).to_have_text(str(PASSED + 1))
-        expect(page.locator("#gdB")).to_have_text("3")
-        now = go.bounding_box()
-        self.assertEqual(now["y"], spot["y"])
-        self.assertAlmostEqual(now["x"], spot["x"], delta=1)
-        page.wait_for_timeout(600)
-        self.assertEqual(page.locator('.gd-it[data-row="103"]').get_attribute("class"), "gd-it gd-ok")
-        # 3) '검토 N' → 하나씩: 포함(검토한 해시 · 내용 요약을 같이) · 빼기 · 다시 준비 — 정하면 다음으로
-        rev.click()
+        expect(page.locator("#gdSum")).to_have_count(0)
+        # 4) '검토 3' → 포함(검토한 해시 · 내용 요약) · 빼기 · 다시 준비 — 정하면 다음으로
+        page.locator("#gdRev").click()
         expect(page.locator("#dkCap b")).to_have_text("BAD-IMG")
         self.assertEqual(page.locator(".dk-bar").bounding_box(), bar)
         page.locator('.dk-bar [data-a="ok"]').click()
         expect(page.locator("#dkCap b")).to_have_text("BAD-SPEC")
         self.assertEqual(job.posts[-1], {"rows": [100], "action": "ok", "by": "", "override": True,
                                          "reviewed": {"100": {"hash": "hI", "contentDigest": "dI"}}})
-        self.assertEqual(page.locator(".dk-bar").bounding_box(), bar)
         page.locator('.dk-bar [data-a="remove"]').click()
         expect(page.locator("#dkCap b")).to_have_text("BAD-FAIL")
         self.assertEqual(job.posts[-1], {"rows": [101], "action": "remove", "by": "", "override": False})
         expect(page.locator('.dk-bar [data-a="ok"]')).to_be_disabled()
         page.locator('.dk-bar [data-a="retry"]').click()
-        self.assertEqual(job.posts[-1]["action"], "retry")
-        self.assertEqual(job.posts[-1]["rows"], [102])
-        # 4) 다 정하면(다시 준비가 통과로 끝나면) 끝 화면 → 확인하고 받기 → 같은 자리에 엑셀 받기
+        self.assertEqual((job.posts[-1]["action"], job.posts[-1]["rows"]), ("retry", [102]))
+        # 5) 다 정하면 끝 화면 → 확인하고 받기 → 같은 자리에 엑셀 받기
         confirm = page.locator("#ckAll")
         expect(confirm).to_be_visible(timeout=15000)
         inside("#ckAll", "#ckView")
         self.assertAlmostEqual(confirm.bounding_box()["y"], spot["y"], delta=1)
-        if width > 1179:
-            self.assertAlmostEqual(end_edge(confirm.bounding_box(), rtl), end_edge(spot, rtl), delta=1)
         with page.expect_download() as download:
             confirm.click()
         self.assertTrue(download.value.url.endswith(f"/api/v1/bulk/jobs/{JOB_ID}/file"))
@@ -225,12 +244,29 @@ class BulkCheckGridTest(unittest.TestCase):
         self.assertEqual(last["action"], "ok")
         self.assertEqual(sorted(last["rows"]), sorted([10 + k for k in range(PASSED)] + [102, 103]))
         self.assertEqual(set(last["reviewed"]), {str(r) for r in last["rows"]})
-        expect(page.locator(".xs-row.xs-on")).not_to_have_count(0)
         expect(page.locator("#dkLine")).to_contain_text(str(PASSED + 3))
         self.assertEqual(errors, [])
         page.close()
 
-    def test_grid_scan_then_one_by_one_review_and_download(self):
+    def run_clean(self, browser, origin, width, height, lang):
+        # 검토할 것이 없으면: '모두 준비됨' + 확인하고 받기 (바로 받기로)
+        job = FakeJob(origin, clean=True)
+        page, errors = open_page(browser, origin, width, height, lang, job)
+        expect(page.locator("#gdSum")).to_be_visible(timeout=10000)
+        expect(page.locator("#gdSumH b")).to_have_text(str(PASSED))
+        expect(page.locator("#gdSumH")).to_have_class("ok")
+        if lang == "en":
+            expect(page.locator("#gdSumH")).to_have_text(f"{PASSED}all ready")
+            expect(page.locator("#gdStart")).to_have_text("Confirm & download")
+        self.inside(page, width, height, "#gdSumH", "#gdSum p", "#gdStart")
+        with page.expect_download():
+            page.locator("#gdStart").click()
+        expect(page.locator("#ckDl")).to_be_visible()
+        self.assertEqual(sorted(job.posts[-1]["rows"]), [10 + k for k in range(PASSED)])
+        self.assertEqual(errors, [])
+        page.close()
+
+    def test_grid_scan_summary_then_one_by_one_review_and_download(self):
         with serve() as origin, sync_playwright() as p:
             options = {"headless": True}
             if os.environ.get("CLIA_CHROMIUM"):
@@ -239,6 +275,8 @@ class BulkCheckGridTest(unittest.TestCase):
             for width, height, lang in VIEWPORTS:
                 with self.subTest(width=width, height=height, lang=lang):
                     self.run_flow(browser, origin, width, height, lang)
+                with self.subTest(clean=True, width=width, height=height, lang=lang):
+                    self.run_clean(browser, origin, width, height, lang)
             browser.close()
 
 

@@ -65,7 +65,14 @@ def open_review(page, origin, lang, before=False, blocked=False):
             content = subprocess.check_output(["git", "show", f"9ce27fd:bulk/{name}"], cwd=ROOT)
             page.route(pattern, lambda route, *, content=content, kind=kind: route.fulfill(body=content, content_type=kind))
     page.goto(f"{origin}/bulk/?check=1&lang={lang}&job=0000000000001234")
+    if not before:
+        start_review(page)
     expect(page.locator("#dkCmp")).to_be_visible()
+
+
+def start_review(page):
+    # 2026-11-28: 자동 체크가 끝나면 결과 알림('N개 확인이 필요해요') — 그 버튼으로 하나씩 검수 화면에 들어간다
+    page.locator("#gdStart").click()
 
 
 class ReviewViewportTest(unittest.TestCase):
@@ -189,6 +196,7 @@ class ReviewViewportTest(unittest.TestCase):
                     open_review(page, origin, lang)
                     page.route("**/api/v1/bulk/jobs/**", handle)
                     page.reload()
+                    start_review(page)
                     expect(page.locator(".dk-cmp-b")).to_have_text("Evidence 0")
                     if evidence and lang == "ko":
                         page.screenshot(path=evidence / "v2.4-stale-before-ko.png")
