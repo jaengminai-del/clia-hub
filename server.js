@@ -2534,8 +2534,8 @@ app.post('/api/v1/slice-html', async (req, res) => {
   const med = /^[a-z_]+$/.test(medium) ? medium : 'shopee_lazada';
   // rev: 같은 HTML 이라도 자르기 규칙이 바뀐 것만 새로 그리게 하는 선택 값 (없으면 기존 해시 그대로)
   const rv = /^[\w.-]{1,20}$/.test(String(rev)) ? `|${rev}` : '';
-  // 해시 판(v): Shopee·Lazada 는 자르기 규칙이 바뀐 v2, 그 밖의 매체는 원본과 같은 v1 (원본 서버가 만든 슬라이스 주소 그대로)
-  const ver = med === 'shopee_lazada' ? 'v2' : 'v1';
+  // 해시 판(v): Shopee·Lazada 는 자르기 규칙이 바뀐 v2 → v3(11/28 글자 줄 보호), 그 밖의 매체는 원본과 같은 v1 (원본 서버가 만든 슬라이스 주소 그대로)
+  const ver = med === 'shopee_lazada' ? 'v3' : 'v1';   // v3 (2026-11-28): 글자 줄 가운데도 자르지 않음 · 이미지 위 끝 1px 남던 것 — slices.py
   const hash = crypto.createHash('sha1').update(`${ver}|${med}|${html}${rv}`).digest('hex').slice(0, 20);
   const dir = path.join(SLICE_CACHE, hash);
   try {
