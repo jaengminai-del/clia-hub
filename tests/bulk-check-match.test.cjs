@@ -24,7 +24,9 @@ test('public LG product must have exact canonical and Product evidence, without 
   assert.equal(match.pagePublic(productHead(u.href), u, 'googlebot: noindex'), false);
   assert.equal(match.pagePublic(productHead(url('QA102')), u), false);
   assert.equal(match.pagePublic(productHead(url('QA101', 'th')), u), false);
-  assert.equal(match.pagePublic(`<link href='${u.href}' rel='canonical'>`, u), false);
+  // 제품 정보가 없는 응답(봇 확인 페이지 등)은 '없음'이 아니라 '모름' — 매칭에서 빼지 않는다 (2026-11-28)
+  assert.equal(match.pagePublic(`<link href='${u.href}' rel='canonical'>`, u), null);
+  assert.equal(match.pagePublic('<title>Access check</title>', u), null);
 });
 
 async function workbook(status) {
@@ -60,7 +62,8 @@ test('Check uploads, authorizes only public matches, and downloads a workbook co
   }
   selected.set('QAABB112',[{url:url('QAABB112'),lastmod:''}]);   // LG.com 사이트맵엔 있지만 CLIA 에 크롤된 적 없는 새 제품
   t.mock.method(catalog,'productIndex',()=>({products:productList,byModel:new Map(Object.values(productList).map(p=>[p.model,[p.slug]]))}));
-  t.mock.method(sitemap,'index',async (site, opt)=>{assert.equal(opt.directOnly,true);return {idx:site==='sg' ? selected : new Map([['QAABB110', [{url:url('QAABB110','th')}]]])};});
+  let sitemapDown = false;   // 사이트맵을 못 받는 경우(운영 서버에서 lg.com 이 막음)도 아래에서 확인
+  t.mock.method(sitemap,'index',async (site)=>{if(sitemapDown)throw new Error('LG.com sitemap not available');return {idx:site==='sg' ? selected : new Map([['QAABB110', [{url:url('QAABB110','th')}]]])};});
   t.mock.method(countries, 'check', async ()=>null);
   t.mock.method(countries, 'remember', async ()=>{});
   t.mock.method(store, 'putBuffer', async ()=>{});
@@ -90,8 +93,8 @@ test('Check uploads, authorizes only public matches, and downloads a workbook co
     const parsed=await upload.json(); assert.equal(upload.status,200,JSON.stringify(parsed)); made.push(parsed.id);
     assert.equal(parsed.rows.length,12);
     assert.equal(parsed.checkMatchBy,status?'status':'match');
-    // 7(QAABB106): LG.com 이 잠깐 막았지만 이미 CLIA 에 있는 제품 → 포함 (2026-11-28). 13(QAABB112): 막혔고 CLIA 에도 없음 → 원본 유지
-    const allowed=status?[2,7,8]:[2,5,7,8];
+    // 7(QAABB106) · 13(QAABB112): 사이트맵에 있고 LG.com 이 잠깐 막았을 뿐 → 포함 (2026-11-28). 4(QAABB103 404) · 3(QAABB102 noindex) → 원본 유지
+    const allowed=status?[2,7,8,13]:[2,5,7,8,13];
     assert.deepEqual(parsed.rows.filter(r=>r.candidates.length||r.lg||r.bundleParts).map(r=>r.row),allowed);
     if(status)assert.ok(!contacted.includes('qaabb104'));
     // Malformed/mismatched UI item mappings do not widen the server output scope.
@@ -100,7 +103,7 @@ test('Check uploads, authorizes only public matches, and downloads a workbook co
     assert.equal(build.status,200,JSON.stringify(await build.json()));
     assert.deepEqual(j.items.map(it=>it.row),allowed); assert.deepEqual(j.skus,[]);
     assert.equal(j.check.skipRows,12-allowed.length);
-    assert.ok(j.items.every(it=>!it.register&&!it.url.includes('qaabb102')));
+    assert.ok(j.items.every(it=>!!it.register===(it.row===13)&&!it.url.includes('qaabb102')));   // 13: CLIA 에 없던 새 제품 → 크롤해서 등록
     rendered=new Map();
     for(const it of j.items){it.status='ok';it.unified=true;it.hash='0123456789abcdefabcd';it.ai=[];it.check='ok';it.checkedHash=it.hash;it.checkedChannel='shopee';const text='https://cdn.example.test/'+it.model+'.jpg';it.contentDigest=createHash('sha256').update(text).digest('hex');it.checkedContentDigest=it.contentDigest;rendered.set(it.row,text);}
     await jobs._writeResult(j,rendered);
@@ -110,4 +113,9 @@ test('Check uploads, authorizes only public matches, and downloads a workbook co
       assert.equal(after.sheets[0].rows.get(r).get(c),c===4&&rendered.has(r)?rendered.get(r):value);
     }
   }
+  // 사이트맵을 못 받으면: 이미 CLIA 에 크롤된 제품만 모델로 매칭, CLIA 에 없는 것(105 · 112)은 그대로 — 404 인 103 · noindex 인 102 는 여전히 빠짐
+  sitemapDown = true;
+  const down = await fetch(base+'/upload?country=sg&name=shopee.xlsx&check=1',{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:await workbook(true)});
+  const downParsed = await down.json(); assert.equal(down.status,200,JSON.stringify(downParsed)); made.push(downParsed.id);
+  assert.deepEqual(downParsed.rows.filter(r=>r.candidates.length||r.lg||r.bundleParts).map(r=>r.row),[2,7,8,12]);
 });
