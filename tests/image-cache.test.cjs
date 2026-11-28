@@ -23,14 +23,14 @@ test('only lg.com https image addresses are accepted', () => {
 
 test('image copy: lg.com once (retrying a block), then local; a gone image is not retried', async (t) => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'img-cache-'));
-  const old = { DIR: cache.DIR, DELAYS: cache.DELAYS, fetchRemote: cache.fetchRemote };
+  const old = { DIR: cache.DIR, DELAYS: cache.DELAYS, COOL: cache.COOL, fetchRemote: cache.fetchRemote };
   const put = [];
   t.mock.method(store, 'getBuffer', async () => null);
   t.mock.method(store, 'putBuffer', async (key, buf, type) => { put.push({ key, type }); return true; });
   const calls = new Map();
   let blocks = 2;
   Object.assign(cache, {
-    DIR: dir, DELAYS: [0, 5, 5, 5],
+    DIR: dir, DELAYS: [0, 5, 5, 5], COOL: 0,
     fetchRemote: async (u) => {
       calls.set(u.pathname, (calls.get(u.pathname) || 0) + 1);
       await new Promise((r) => setTimeout(r, 20));
@@ -79,4 +79,26 @@ test('a copy kept in the bucket is used after a redeploy without asking lg.com',
   const got = await cache.get(lg('kept'));
   assert.equal(got.from, 'bucket'); assert.equal(asked, 0);
   assert.equal((await cache.get(lg('kept'))).from, 'local');
+});
+
+test('after lg.com blocks once, every image waits out the cool-down before asking again', async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'img-cache-'));
+  const old = { DIR: cache.DIR, DELAYS: cache.DELAYS, COOL: cache.COOL, fetchRemote: cache.fetchRemote };
+  t.mock.method(store, 'getBuffer', async () => null);
+  t.mock.method(store, 'putBuffer', async () => true);
+  const asked = [];
+  let blocked = true;
+  Object.assign(cache, { DIR: dir, DELAYS: [0, 10], COOL: 300, fetchRemote: async (u) => {
+    asked.push([u.pathname, Date.now()]);
+    if (blocked) { blocked = false; throw Object.assign(new Error('lg.com 403 (not an image)'), { status: 403 }); }
+    return JPEG;
+  } });
+  t.after(() => { Object.assign(cache, old); fs.rmSync(dir, { recursive: true, force: true }); });
+  const t0 = Date.now();
+  const first = cache.get(lg('cool-a'));
+  await new Promise((r) => setTimeout(r, 20));
+  const second = cache.get(lg('cool-b'));   // 다른 이미지도 막힌 뒤에는 쉬었다가
+  await Promise.all([first, second]);
+  const after = asked.filter(([p]) => p.includes('cool-b'))[0][1] - t0;
+  assert.ok(after >= 280, `second image asked lg.com ${after} ms after the block`);
 });

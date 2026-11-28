@@ -79,17 +79,27 @@ function fetchOnce(u, hops = 0) {
   });
 }
 
-// 막힘(403 · 429 · 5xx · 이미지 아님 · 시간 초과)은 잠깐 기다렸다 다시. 없어진 이미지(404 · 410)는 바로 끝
+// 막힘(403 · 429 · 5xx · 이미지 아님 · 시간 초과)은 기다렸다 다시. 없어진 이미지(404 · 410)는 바로 끝.
+// lg.com 이 한 번 막으면 서버 전체가 잠깐(COOL) 쉬었다 간다 (2026-11-28) — 예전엔 이미지마다 1.5 · 4 · 8초 뒤 다시 두드려서 막힌 동안 계속 403
+//   (운영 140개 Check: 다시 그린 4개 PDP 의 이미지가 11:12 에 전부 403, 몇 분 뒤 같은 이미지는 모두 200). 기다림 합계는 슬라이스가 이미지 하나를
+//   기다리는 90초(slices.py) 안으로
 const api = {
   DIR,
-  DELAYS: [0, 1500, 4000, 8000],
+  DELAYS: [0, 4000, 12000, 25000, 40000],
+  COOL: 15000,
   fetchRemote: fetchOnce,
 };
+let coolUntil = 0;
+const cooled = async () => { for (let w; (w = coolUntil - Date.now()) > 0;) await new Promise((r) => setTimeout(r, Math.min(w, 5000))); };
 async function fromLg(u) {
   let last;
   for (const wait of api.DELAYS) {
     if (wait) await new Promise((r) => setTimeout(r, wait));
-    try { return await slot(() => api.fetchRemote(u)); } catch (e) { last = e; if (e.gone) break; }
+    try { return await slot(async () => { await cooled(); return api.fetchRemote(u); }); }
+    catch (e) {
+      last = e; if (e.gone) break;
+      if (e.status === 403 || e.status === 429) coolUntil = Math.max(coolUntil, Date.now() + api.COOL);
+    }
   }
   throw last;
 }
