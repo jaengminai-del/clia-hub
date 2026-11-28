@@ -40,6 +40,48 @@ test('dropped child and legacy spec evidence never borrow a rendered parent', ()
   }
 });
 
+test('a product crawled before source specs is judged by its crawled spec rows, not the old missing-text list', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'bulk-legacy-spec-'));
+  const oldDir = crawler.OUT_DIR;
+  crawler.OUT_DIR = dir;
+  try {
+    const product = path.join(dir, 'legacy');
+    fs.mkdirSync(product);
+    const specs = [{ label: 'สี', value: 'สีเบจ', group: 'สเปคทั่วไป' }, { label: 'CADR (CMM)', value: '3.22', group: 'สเปคทั่วไป' }];
+    // 그 전 방식의 검사 기록: source_specs 가 없고, 스펙 영역의 표 제목 글자가 '빠진 글'로 들어 있다 (운영 태국 AS25GCBY0 등)
+    fs.writeFileSync(path.join(product, 'qa_report.json'), JSON.stringify({ coverage: { missing_texts: [
+      { component_id: 'PD0008', text: 'สรุป' }, { component_id: 'PD0008', text: 'ข้อมูลจำเพาะพื้นฐาน' }] } }));
+    const item = { slug: 'legacy', status: 'ok' };
+    const check = (mirror, specTables) => {
+      fs.writeFileSync(path.join(product, 'mirror.json'), JSON.stringify(mirror));
+      return Object.fromEntries(jobs.aiChecks({ channel: 'shopee' }, item, { urls: ['1', '2'], sections: {}, specTables }).map(x => [x.k, x]));
+    };
+    const mirror = { sections: [{ component_id: 'PD0008', specs }] };
+    const drawn = [{ sourceKeys: [], rows: [['สี', 'สีเบจ'], ['CADR (CMM)', '3.22']], regions: [{ slice: 2, y: 0.1, h: 0.5 }] }];
+    // 스펙 행이 전부 그려져 있으면 통과 — 제목 글자는 빠진 스펙도, 빠진 글도 아니고, 다시 크롤하지 않는다
+    let r = check(mirror, drawn);
+    assert.equal(r.spec.ok, true);
+    assert.equal(r.spec.crawl, false);
+    assert.equal(r.txt.n, 0);
+    // 스펙 표가 PDP 에 없으면 여전히 막는다 (빠진 행을 보여 줌)
+    r = check(mirror, []);
+    assert.equal(r.spec.ok, false);
+    assert.equal(r.spec.blocked, true);
+    assert.deepEqual(r.spec.issues[0].rows, specs.map(({ label, value }) => ({ label, value })));
+    // 행이 하나라도 다르면 그 표로 인정하지 않는다
+    r = check(mirror, [{ ...drawn[0], rows: [['สี', 'สีเบจ']] }]);
+    assert.equal(r.spec.ok, false);
+    // 크롤 결과에도 스펙이 없으면 예전처럼: 기록의 글자를 보여 주고 다시 크롤
+    r = check({ sections: [] }, []);
+    assert.equal(r.spec.ok, false);
+    assert.equal(r.spec.crawl, true);
+    assert.deepEqual(r.spec.issues[0].lines, ['สรุป', 'ข้อมูลจำเพาะพื้นฐาน']);
+  } finally {
+    crawler.OUT_DIR = oldDir;
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('Excel membership, locations and approval use one retained PDP, also for saved edits', async t => {
   const oldFetch = global.fetch, oldEdit = edits.getEdit, oldDir = crawler.OUT_DIR;
   const listing = require('../listing-routes'), oldCurrent = listing.currentFor;
