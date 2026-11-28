@@ -44,22 +44,27 @@
     en: { rmS: 'Remove', viewAll: (n) => `View all ${n}`, moreBelow: 'More below', back: '← Back', prev: 'Previous', next: 'Next', removedL: 'Removed from this Excel', fReady: 'Ready', fReview: 'Needs review', aiChk: 'AI checking', goDl: 'Confirm & download',
       okIn: 'Looks fine · include',
       rsNeed: (n) => (n === 1 ? `${n} PDP needs to be checked` : `${n} PDPs need to be checked`), rsAll: (n) => `All ${n} PDPs are ready`, rv: 'Review', redoN: (n) => `Preparing ${n} again…`,
+      rcCrawl: 'Re-crawling from lg.com…', rcDraw: 'Preparing the PDP again…', rcWait: 'Waiting to retry…', rcHint: 'Checked when it succeeds', chk: 'Checked',
       allDone: 'All checked', colModel: 'Model', colDesc: 'Description', imgsN: (n) => `${n} images`, moreRows: (n) => `+ ${n} more rows`, confirmDl: (n) => `Confirm ${n} & download` },
     th: { rmS: 'นำออก', viewAll: (n) => `ดูทั้งหมด ${n}`, moreBelow: 'ยังมีด้านล่าง', back: '← กลับ', prev: 'ก่อนหน้า', next: 'ถัดไป', removedL: 'นำออกจาก Excel นี้แล้ว', fReady: 'พร้อม', fReview: 'ต้องตรวจสอบ', aiChk: 'AI กำลังตรวจ', goDl: 'ยืนยันและดาวน์โหลด',
       okIn: 'ดูแล้วโอเค · ใส่ไว้',
       rsNeed: (n) => `PDP ที่ต้องตรวจสอบ ${n} รายการ`, rsAll: (n) => `PDP ทั้ง ${n} รายการพร้อมแล้ว`, rv: 'ตรวจสอบ', redoN: (n) => `กำลังเตรียมใหม่ ${n} รายการ…`,
+      rcCrawl: 'กำลังดึงข้อมูลจาก lg.com ใหม่…', rcDraw: 'กำลังเตรียม PDP ใหม่…', rcWait: 'รอลองใหม่…', rcHint: 'สำเร็จแล้วจะเป็น “ตรวจแล้ว”', chk: 'ตรวจแล้ว',
       allDone: 'ตรวจครบแล้ว', colModel: 'รุ่น', colDesc: 'คำอธิบาย', imgsN: (n) => `${n} รูป`, moreRows: (n) => `+ อีก ${n} แถว`, confirmDl: (n) => `ยืนยัน ${n} และดาวน์โหลด` },
     ko: { rmS: '빼기', viewAll: (n) => `전체 보기 ${n}`, moreBelow: '아래에 더 있음', back: '← 돌아가기', prev: '이전', next: '다음', removedL: '이번 엑셀에서 뺌', fReady: '준비됨', fReview: '검토 필요', aiChk: 'AI 확인 중', goDl: '확인하고 받기',
       okIn: '괜찮음 · 포함',
       rsNeed: (n) => `확인이 필요한 PDP ${n}개`, rsAll: (n) => `PDP ${n}개 모두 준비됨`, rv: '검토', redoN: (n) => `${n}개 다시 준비 중…`,
+      rcCrawl: 'lg.com에서 다시 크롤링 중…', rcDraw: 'PDP 다시 만드는 중…', rcWait: '다시 시도 대기 중…', rcHint: '성공하면 확인됨으로 바뀌어요', chk: '확인됨',
       allDone: '모두 확인함', colModel: '모델', colDesc: '설명', imgsN: (n) => `이미지 ${n}장`, moreRows: (n) => `+ ${n}행 더`, confirmDl: (n) => `${n}개 확인하고 받기` },
     de: { rmS: 'Entfernen', viewAll: (n) => `Alle ${n} ansehen`, moreBelow: 'Weiter unten', back: '← Zurück', prev: 'Zurück', next: 'Weiter', removedL: 'Aus dieser Excel entfernt', fReady: 'Bereit', fReview: 'Zu prüfen', aiChk: 'KI prüft', goDl: 'Bestätigen & herunterladen',
       okIn: 'Passt · übernehmen',
       rsNeed: (n) => (n === 1 ? `${n} PDP muss geprüft werden` : `${n} PDPs müssen geprüft werden`), rsAll: (n) => `Alle ${n} PDPs sind bereit`, rv: 'Prüfen', redoN: (n) => `${n} werden neu vorbereitet…`,
+      rcCrawl: 'Wird neu von lg.com geladen…', rcDraw: 'PDP wird neu erstellt…', rcWait: 'Wartet auf neuen Versuch…', rcHint: 'Bei Erfolg als geprüft markiert', chk: 'Geprüft',
       allDone: 'Alles geprüft', colModel: 'Modell', colDesc: 'Beschreibung', imgsN: (n) => `${n} Bilder`, moreRows: (n) => `+ ${n} weitere Zeilen`, confirmDl: (n) => `${n} bestätigen & herunterladen` },
     ar: { rmS: 'إزالة', viewAll: (n) => `عرض الكل ${n}`, moreBelow: 'المزيد بالأسفل', back: 'رجوع →', prev: 'السابق', next: 'التالي', removedL: 'أُزيل من ملف Excel هذا', fReady: 'جاهز', fReview: 'بحاجة إلى مراجعة', aiChk: 'الذكاء الاصطناعي يفحص', goDl: 'تأكيد وتنزيل',
       okIn: 'يبدو جيدًا · تضمين',
       rsNeed: (n) => `${n} صفحات تفاصيل تحتاج إلى مراجعة`, rsAll: (n) => `جميع صفحات التفاصيل (${n}) جاهزة`, rv: 'مراجعة', redoN: (n) => `جارٍ إعادة تجهيز ${n}…`,
+      rcCrawl: 'جارٍ الجلب من lg.com مجددًا…', rcDraw: 'جارٍ تجهيز صفحة التفاصيل مجددًا…', rcWait: 'بانتظار إعادة المحاولة…', rcHint: 'ستُعلَّم كمُتحقَّق منها عند النجاح', chk: 'تم التحقق',
       allDone: 'تم فحص الكل', colModel: 'الطراز', colDesc: 'الوصف', imgsN: (n) => `${n} صور`, moreRows: (n) => `+ ${n} صفوف أخرى`, confirmDl: (n) => `تأكيد ${n} والتنزيل` },
   };
   // 문제 문구 (2026-11-27 장혁 피드백 '단순하게'): 오른쪽 칸 맨 위 큰 한 문장 · 다섯 언어 같은 톤. w_* 는 그리드 칸 아래 짧은 글
@@ -155,7 +160,9 @@
   // 그리드는 사라지고 확인이 필요한 PDP 만 위쪽에 큰 칸으로 한 줄(문제 자리까지 내려 둠 · 빨간 칸), 가운데 위 '확인이 필요한 PDP 6개'(검정 · 숫자와 글 같은 크기)
   // 바로 아래 가운데 버튼 하나 '검토' — 다음 화면(검수 화면)의 'n / N' · 버튼 줄과 같은 자리. 저절로 넘어가지 않음(Enter 도). 0개면 '모두 준비됨' + 확인하고 받기.
   // 모션: 스프링(stiffness 260 · damping 26, 라이브러리 없이 linear() 이징)으로 아주 조금 올라옴 — PDP 14px(50ms 차례) · 머리글 8px · 검수 화면 가운데 카드 16px.
-  // 자동 재시도 중인 것도 그 줄에 '다시 준비 중'으로 — 계속 물어보다 통과하면 그 칸이 줄에서 빠지고 숫자가 줄어든다(다 빠지면 '모두 준비됨').
+  // 자동 재시도 중인 것도 그 줄에 — 확인이 필요 없을 수도 있어 그림 위에 분명히: 썸네일을 어둡게 · 살짝 흐리게 덮고 정가운데 흰 글로 지금 하는 일(lg.com 다시 크롤 ·
+  // PDP 다시 그림 · 차례 기다림) + '성공하면 확인됨'(장혁 피드백). 찾은 문제는 다른 칸처럼 칸 아래. 다시 크롤 · 그림 중이면 밝은 띠가 천천히 반복해 훑는다(보이는 칸만, 글 뒤).
+  // 계속 물어보다 통과하면 가운데 ✓ 확인됨(덮개가 걷히며) → 줄에서 빠지고 숫자가 줄어든다(다 빠지면 '모두 준비됨').
   // 결과 화면은 한 번만 (돌아온 뒤엔 위 '검토' 버튼으로).
   // 칸을 누르면 그 제품의 자세히 보기(viewer 'all'), 돌아오면 같은 상태.
   // 자동 재시도는 서버가 뒤에서 — 고쳐지면 그 칸이 준비됨으로 옮겨 간다. 100~300개여도 부드럽게: 작은 미리보기 앞 몇 장만 · lazy, 연출은 보이는 몇십 개만.
@@ -181,6 +188,9 @@
   const reduced = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (_) { return false; } };
   const EZ = { out: 'cubic-bezier(.16,1,.3,1)', p3out: 'cubic-bezier(.33,1,.68,1)', p3in: 'cubic-bezier(.32,0,.67,0)', io: 'cubic-bezier(.45,0,.55,1)' };
   const busy = (u) => u.some((x) => x.status === 'working' || x.retrying);
+  // 자동 재시도에서 지금 하는 일 (2026-11-28, 서버 retryLater 가 it.redo 를 둔다): crawl lg.com 다시 크롤 · draw PDP 다시 그림 · 없으면 차례 기다림. 사람이 누른 '다시 준비'는 null
+  const redoOf = (u) => { const it = u.find((x) => x.retrying); return !it ? null : it.redo === 'crawl' || it.redo === 'draw' ? it.redo : 'wait'; };
+  const redoLine = (u) => ({ crawl: C.T.rcCrawl, draw: C.T.rcDraw, wait: C.T.rcWait }[redoOf(u)] || C.T.redoing);
   const settled = (u) => u.every((x) => x.status === 'ok' || x.status === 'failed' || x.status === 'cancelled');
   const passed = (u) => !busy(u) && u.every((x) => x.status === 'ok') && aiRows(u).every((x) => x.ok);
   const isRemoved = (u) => u.every((x) => x.check === 'removed');
@@ -246,6 +256,20 @@
     el.classList.toggle('dk-prob', !passed(u) && !isRemoved(u) && !busy(u) && !isOk(u) && el._issues.length > 0);
     el.querySelector('.dk-st').textContent = isRemoved(u) ? C.T.removedL : busy(u) ? C.T.redoing
       : passed(u) ? C.T.fReady : bad.map(why).join(' · ');
+    // 다시 준비 · 자동 재시도 중인 카드 (2026-11-28, 결과 화면 칸과 같은 모양): 어둡게 · 흐리게 덮고 가운데 지금 하는 일 + '성공하면 확인됨'.
+    //   다시 크롤 · 그림이면 밝은 띠가 반복. 비교 칸은 없음(dk-prob 아님) · 버튼 셋은 흐리게 (panel)
+    if (el._checked) return;   // ✓ 확인됨을 보여 주는 중
+    el.classList.remove('dk-checked');
+    const rd = busy(u) ? redoOf(u) || 'work' : null;
+    for (const k of ['crawl', 'draw', 'wait', 'work']) el.classList.toggle('dk-' + k, rd === k);
+    el.classList.toggle('dk-rd', !!rd);
+    cardCover(el, rd ? `<span class="dk-o2">${C.core.esc(redoLine(u))}</span><span class="dk-o3">${C.core.esc(C.T.rcHint)}</span>` : null);
+  }
+  function cardCover(el, html) {
+    const ph = el.querySelector('.dk-ph'); let o = ph.querySelector('.dk-ov');
+    if (html == null) { if (o) { o.remove(); ph.querySelector('.dk-dim').remove(); ph.querySelector('.dk-bnd').remove(); } return; }
+    if (!o) { ph.insertAdjacentHTML('beforeend', '<span class="dk-dim"></span><span class="dk-bnd"></span><span class="dk-ov"><span class="dk-ovt"></span></span>'); o = ph.querySelector('.dk-ov'); }
+    o.firstElementChild.innerHTML = html;
   }
   async function refresh(core) { try { C.job = await core.api('/api/v1/bulk/jobs/' + C.job.id); C.units = units(C.job); } catch (_) {} }
   const running = () => C.job.status === 'running' || C.job.status === 'queued';
@@ -327,14 +351,38 @@
       band.animate([{ transform: 'translateY(-100%)', opacity: 1 }, { transform: 'translateY(0)', opacity: 1 }], { duration: 420, easing: EZ.io })
         .finished.catch(() => {}).then(() => t.classList.remove('gd-scan'));
     }
+    // 썸네일 덮개 (자동 재시도 · 확인됨): 어두운 회색 막(gd-dim, 띠 아래) + 가운데 글(gd-ov, 띠 위). 필요할 때만 만든다
+    function cover(t, html) {
+      const p = t.querySelector('.gd-pdp'); let o = p.querySelector('.gd-ov');
+      if (html == null) { if (o) { o.remove(); p.querySelector('.gd-dim').remove(); } return; }
+      if (!o) { p.insertAdjacentHTML('beforeend', '<span class="gd-dim"></span><span class="gd-ov"><span class="gd-ovt"></span></span>'); o = p.querySelector('.gd-ov'); }
+      o.firstElementChild.innerHTML = html;
+    }
     function paint(t, u, anim) {
       const prev = t._cat, cat = catOf(u, G.landed.has(t._k)), changed = cat !== 'wait' && fill(t, u);
+      const rd = cat === 'busy' ? redoOf(u) : null, reasons = aiRows(u).filter((x) => !x.ok).map(why).join(' · '), sk = [cat, rd, reasons].join('|');
+      // 결과 화면에서 다시 준비 · 자동 재시도가 통과: 잠깐(~1초) 썸네일 가운데 ✓ 확인됨 (어둡게 덮인 것이 걷히며) → rowNow 가 줄에서 뺀다
+      if (!t._checked && prev === 'busy' && cat === 'ok' && G.root.classList.contains('gd-rs') && !t.classList.contains('gd-hide')) {
+        t._checked = performance.now(); t._sk = null;
+        t.classList.add('gd-checked'); t.classList.remove('gd-crawl', 'gd-draw', 'gd-queue');
+        cover(t, `<span class="gd-okl">${CK}${e(T.chk)}</span>`);
+        t.querySelector('.gd-st').textContent = '';
+        rise(t.querySelector('.gd-okl'), 6);
+      }
+      if (t._sk !== sk && !t._checked) {   // 상태 (다시 크롤 · 다시 그림 · 기다림이 바뀌어도)
+        t._sk = sk;
+        t.className = `gd-it gd-${cat}${rd ? ' gd-rd gd-' + (rd === 'wait' ? 'queue' : rd) : ''}${G.vis.has(t) ? ' gd-vis' : ''}${t.classList.contains('gd-hide') ? ' gd-hide' : ''}`;
+        const st = t.querySelector('.gd-st');
+        if (rd) {   // 자동 재시도: 썸네일 가운데(어둡게 · 흐리게 덮고) 지금 하는 일 · 성공하면 확인됨. 찾은 문제는 다른 칸처럼 칸 아래
+          cover(t, `<span class="gd-o2">${e(redoLine(u))}</span><span class="gd-o3">${e(T.rcHint)}</span>`);
+          st.textContent = st.title = reasons;
+        } else {
+          cover(t, null);
+          st.textContent = st.title = { wait: '', ok: T.fReady, busy: T.redoing, in: T.okIn, out: T.removedL }[cat] ?? reasons;   // 사람이 정한 것: 포함 · 뺌 (검수 화면과 같은 말)
+        }
+      }
       if (cat !== prev || changed) {
         t._cat = cat;
-        t.className = `gd-it gd-${cat}`;
-        const reasons = aiRows(u).filter((x) => !x.ok).map(why).join(' · ');
-        const st = t.querySelector('.gd-st');   // 사람이 정한 것: 포함 · 뺌 (검수 화면과 같은 말)
-        st.textContent = st.title = { wait: '', ok: T.fReady, busy: T.redoing, in: T.okIn, out: T.removedL }[cat] ?? reasons;
         t.querySelector('.gd-pdp').tabIndex = cat === 'wait' ? -1 : 0;
         const scan = anim && !reduced() && G.vis.has(t) && cat !== 'wait' && cat !== 'busy' && (prev === 'wait' || prev === 'busy' || changed);   // 보이는 칸만
         if (scan) sweep(t);
@@ -369,7 +417,7 @@
     }
     // 보이는 칸 (연출 · 따라가기는 이것만): 칸 위치를 매번 읽지 않게 IntersectionObserver 로
     G.vis = new Set();
-    G.io = new IntersectionObserver((es) => { for (const en of es) { if (en.isIntersecting) G.vis.add(en.target); else G.vis.delete(en.target); } }, { root: G.list, rootMargin: '80px 0px' });
+    G.io = new IntersectionObserver((es) => { for (const en of es) { if (en.isIntersecting) G.vis.add(en.target); else G.vis.delete(en.target); en.target.classList.toggle('gd-vis', en.isIntersecting); } }, { root: G.list, rootMargin: '80px 0px' });   // gd-vis: 보이는 칸만 반복 띠
     for (const t of G.tiles.values()) G.io.observe(t);
     ['wheel', 'touchstart', 'pointerdown', 'keydown'].forEach((ev) => G.list.addEventListener(ev, () => { G.follow = false; }, { passive: true }));
     function land(k, anim) {
@@ -463,11 +511,17 @@
       const tiles = [...G.tiles.values()], out = tiles.filter((t) => !t.classList.contains('gd-hide') && !inRow(t)), back = tiles.filter((t) => t.classList.contains('gd-hide') && inRow(t));
       const n = tiles.filter(inRow).length;
       if (!out.length && !back.length) { headline(n); return; }
+      // 통과한 칸(paint 가 ✓ 확인됨을 띄움): ~1초 보여 준 뒤 줄에서 빠진다
+      const wait = Math.max(0, ...out.map((t) => (t._checked ? t._checked + 1000 - performance.now() : 0)));
+      if (wait > 0) { await sleep(wait); if (!G.alive || !byId('gdRh')) return; }
       anim = anim && !reduced();
       const stay = tiles.filter((t) => !t.classList.contains('gd-hide') && inRow(t)), first = new Map(anim ? stay.map((t) => [t, t.getBoundingClientRect()]) : []);
       if (anim) await Promise.all(out.map((t) => t.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-6px) scale(.94)' }], { duration: 260, easing: EZ.p3in, fill: 'forwards' }).finished.catch(() => {})));
       if (!G.alive || !byId('gdRh')) return;
-      for (const t of out) { t.classList.add('gd-hide'); t.getAnimations().forEach((a) => a.cancel()); }
+      for (const t of out) {   // 그리드로 돌아가면 보통 통과 칸
+        t.classList.add('gd-hide'); t.getAnimations().forEach((a) => a.cancel());
+        if (t._checked) { t._checked = 0; t._sk = null; t.classList.remove('gd-checked'); cover(t, null); const u = unitOf(t._k); if (u) paint(t, u, false); }
+      }
       for (const t of back) t.classList.remove('gd-hide');
       bigVars(n); headline(n);
       for (const t of back) { if (t._marks) { t._ty = 0; t.querySelector('.gd-mv').style.transform = ''; focus(t, false); } if (anim) rise(t, 14); }
@@ -535,6 +589,7 @@
   function viewer(core, mode, start, from) {
     const T = C.T, e = core.esc, rtl = document.documentElement.dir === 'rtl', all = mode === 'all';
     const open = (u) => !isRemoved(u) && !isOk(u) && !passed(u);   // 사람이 아직 정하지 않은 것
+    const countable = (u) => !busy(u) && !passed(u);   // 검토 'n / N': 사람이 정할 수 있는 것 (정한 것 포함 · 다시 준비 중 · 저절로 통과한 것 제외)
     let list = all ? C.units.slice() : needs(), i = Math.max(0, Math.min(list.length - 1, start)), el = null, alive = true, polling = false;
     if (!all) { const j = list.findIndex((u) => open(u) && !busy(u)); if (j >= 0) i = j; }
     const view = frame(core, 2);
@@ -714,16 +769,23 @@
     function panel() {
       const u = list[i], it = u[0], g = G, s = stateOf(u);
       D.root.dataset.st = s;   // 화면 배경 · 카드 테두리가 상태를 따른다
-      document.getElementById('dkI').textContent = i + 1; document.getElementById('dkNn').textContent = ' / ' + list.length;
-      document.getElementById('dkProg').style.width = ((i + 1) / list.length * 100) + '%';
+      if (all) {
+        document.getElementById('dkI').textContent = i + 1; document.getElementById('dkNn').textContent = ' / ' + list.length;
+        document.getElementById('dkProg').style.width = ((i + 1) / list.length * 100) + '%';
+      } else {   // 검토: 지금 정할 수 있는 것만 센다 (다시 준비 중 · 저절로 통과한 것은 빼고) — 다시 준비 중인 카드에 있으면 'n' 자리는 –
+        const cnt = list.filter(countable), k = cnt.indexOf(u);
+        document.getElementById('dkI').textContent = k >= 0 ? k + 1 : '–'; document.getElementById('dkNn').textContent = ' / ' + cnt.length;
+        if (k >= 0) document.getElementById('dkProg').style.width = ((k + 1) / cnt.length * 100) + '%';
+      }
       // 위엔 모델명과 제품군만 표시.
       const fam = familyOf(u);
-      cap.innerHTML = `<div class="dk-cr"><b>${e(it.model || '')}</b>${fam ? `<span class="dk-fam">${e(fam)}</span>` : ''}</div>` + (s === 'busy' ? `<span>${e(T.redoing)}</span>` : '');
+      cap.innerHTML = `<div class="dk-cr"><b>${e(it.model || '')}</b>${fam ? `<span class="dk-fam">${e(fam)}</span>` : ''}</div>` + (s === 'busy' ? `<span>${e(redoLine(u))}</span>` : '');
       cmp();
       cap.style.left = g.x + 'px'; cap.style.width = g.cw + 'px';
       (rtl ? nextB : prevB).disabled = !i; (rtl ? prevB : nextB).disabled = i >= list.length - 1;
       // 버튼 셋은 늘 같은 자리 — 상태에 맞지 않는 것은 흐리게
-      const can = { remove: s !== 'rm' && s !== 'busy', retry: s !== 'rm' && s !== 'busy', ok: s === 'review' && u.every(x => x.status === 'ok' && !(x.ai || []).some(a => !a.ok && a.blocked)) };
+      const chk = !!(el && el._checked);   // ✓ 확인됨을 보여 주는 동안은 누를 것 없음
+      const can = { remove: !chk && s !== 'rm' && s !== 'busy', retry: !chk && s !== 'rm' && s !== 'busy', ok: s === 'review' && u.every(x => x.status === 'ok' && !(x.ai || []).some(a => !a.ok && a.blocked)) };
       acts.forEach((b) => { b.disabled = !can[b.dataset.a]; });
     }
     acts.forEach((b) => { b.onclick = async () => {
@@ -734,7 +796,9 @@
       if (!alive) return;
       if (all) { if (i < list.length - 1) go(1); return; }
       // 검토: 아직 정하지 않은 다음 건으로 (다시 준비 중인 것은 건너뜀) — 없으면 다시 준비가 끝나길 기다렸다가 완료로
-      const n = list.length, j = [...Array(n).keys()].map((k) => (i + 1 + k) % n).find((k) => open(list[k]) && !busy(list[k]));
+      const n = list.length, order = [...Array(n).keys()].map((k) => (i + 1 + k) % n);
+      let j = order.find((k) => open(list[k]) && !busy(list[k]));
+      if (j == null) j = order.find((k) => open(list[k]));   // 남은 것이 다시 준비 중뿐이면 그 카드로 (통과하면 ✓ 확인됨 → 끝 화면)
       if (j != null && j !== i) { const d = Math.sign(j - i); i = j; layout(true, d); return; }
       if (j === i && open(list[i]) && !busy(list[i])) return;
       if (!list.some((x) => open(x))) { leave(); return; }
@@ -744,6 +808,14 @@
       list = list.map((u) => by.get(ukey(u)) || u);
       for (const [k, c] of cards) {
         const it = list[k][0];
+        if (c._checked) { if (performance.now() - c._checked < 1200) continue; c._checked = 0; }
+        if (c.classList.contains('dk-rd') && !busy(list[k]) && passed(list[k])) {   // 다시 준비 · 자동 재시도가 통과: 가운데 ✓ 확인됨, 덮개가 걷힌다
+          c._checked = performance.now();
+          c.classList.remove('dk-rd', 'dk-crawl', 'dk-draw', 'dk-wait', 'dk-work'); c.classList.add('dk-checked');
+          cardCover(c, `<span class="dk-okl">${CK}${e(T.chk)}</span>`);
+          rise(c.querySelector('.dk-okl'), 6);
+          continue;
+        }
         if (c._content === JSON.stringify([it.status === 'failed', pdpImgs(it), it.ai])) {
           cardState(c, list[k]);
           if (c === el && c.classList.contains('dk-prob') && c._pi == null) seek(c, 0);
@@ -763,8 +835,16 @@
         (async () => {
           while (alive && list.some((u) => busy(u) && !isRemoved(u))) {
             await sleep(2000); await refresh(core); if (!alive) break; sync();
+            if (el && el._checked) {   // ✓ 확인됨을 잠깐 본 뒤 — 그 카드는 새 내용으로
+              await sleep(Math.max(0, el._checked + 1100 - performance.now())); if (!alive) break;
+              for (const c of cards.values()) c._checked = 0;
+              sync();
+            }
             if (!all && !list.some((x) => open(x))) { leave(); break; }   // 다시 준비가 통과로 끝나 남은 게 없으면 완료로
-            if (!all && busy(list[i]) === false && !open(list[i])) { const j = list.findIndex((x) => open(x) && !busy(x)); if (j >= 0 && j !== i) { const d = Math.sign(j - i); i = j; layout(true, d); } }
+            if (!all && busy(list[i]) === false && !open(list[i])) {
+              let j = list.findIndex((x) => open(x) && !busy(x)); if (j < 0) j = list.findIndex((x) => open(x));
+              if (j >= 0 && j !== i) { const d = Math.sign(j - i); i = j; layout(true, d); }
+            }
           }
           polling = false;
         })();
