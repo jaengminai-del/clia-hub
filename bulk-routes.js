@@ -215,7 +215,15 @@ async function addCheckMatches(out, country) {
   return { ...out, products, checkMatchBy: by };
 }
 
+// 재배포 · 재시작 직후 버킷에서 제품 데이터를 받는 동안(운영 약 2분)은 매칭 · 준비를 시작하지 않는다 (2026-11-28).
+//   받기 전에 시작하면 이미 크롤된 제품도 '크롤 데이터 없음'으로 실패하고 다시 크롤이 몰린다 — 운영 140개 Check 에서 127개가 그렇게 실패
+async function warm(res) {
+  if (await require('./crawl-store').whenPulled(3 * 60 * 1000)) return true;
+  res.status(503).json({ error: 'The server is still loading product data. Try again in a minute.', code: 'warming_up' });
+  return false;
+}
 router.post('/api/v1/bulk/upload', raw, async (req, res) => {
+  if (!(await warm(res))) return;
   const buf = req.body;
   if (!Buffer.isBuffer(buf) || !buf.length) return res.status(400).json({ error: 'file required (.xlsx body)' });
   const fileName = cleanName(req.query.name);
@@ -261,6 +269,7 @@ function lgUrlOk(u, country) {
 }
 
 router.post('/api/v1/bulk/build', async (req, res) => {
+  if (!(await warm(res))) return;
   const b = req.body || {};
   const up = await bulkJobs.readUpload(b.id);
   if (!up) return res.status(404).json({ error: 'upload not found — upload again' });
