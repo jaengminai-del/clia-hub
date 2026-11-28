@@ -497,6 +497,11 @@ const aiFail = (ai) => (ai || []).some((x) => !x.ok);
 //   슬라이스에서 못 가져온 이미지 · 요약 실패 → 다시 그리기(슬라이스 캐시 무시) 최대 2번
 //   Shopee 12장은 자동(앞 12장만 엑셀에)이라 묻지도 막지도 않는다 (2026-11-28 결정).
 const MAX_CRAWLS = 3, CRAWL_GAP = [0, 30 * 1000, 90 * 1000], MAX_DRAWS = 2;
+// 자동 재시도는 서버 전체에서 동시에 BULK_RETRY_CONC(기본 2)개 제품만 (2026-11-28). 한 제품의 재시도 = 크롤 + 페이지 생성 + 슬라이스 + 요약이라
+//   무겁다 — 운영에서 127개가 한꺼번에 재시도에 들어가자 'can't start new thread' · spawn EAGAIN · 'Chromium을 실행할 수 없습니다'로
+//   재시도 자체가 실패했다. 사람이 연 작업(첫 결과)은 이 줄을 서지 않는다
+const RETRY_CONC = Math.max(1, Math.min(8, parseInt(process.env.BULK_RETRY_CONC, 10) || 2));
+const retrySlot = limiter(RETRY_CONC);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 function fixPlan(it, ai) {
   if (it.status === 'failed') return it.bundle ? { crawl: false, draw: true } : { crawl: true, draw: false };
@@ -671,32 +676,34 @@ async function retryLater(j, it, same) {
     const plan = fixPlan(it, it.ai); if (!plan) break;
     const doCrawl = plan.crawl && (it.crawls || 0) < MAX_CRAWLS, doDraw = plan.draw && (it.tries || 0) < MAX_DRAWS;
     if (!doCrawl && !doDraw) break;
-    try {
-      if (doCrawl) {   // 누락이면 크롤 시점과 상관없이 force 로 — 간격을 두고 (화면은 기다리지 않는다, 뒤에서)
-        const k = it.crawls || 0;
-        if (CRAWL_GAP[k]) await sleep(CRAWL_GAP[k]);
-        await transact(j, async () => {
-          for (const x of all) x.crawls = k + 1;
-          await persist(j, true);
-        });
-        const targets = it.bundle ? (it.ai.find(x => x.k === 'spec')?.crawlParts || [])
-          .map(part => it.bundle[part - 1]?.url).filter(Boolean) : [it.url];
-        for (const url of new Set(targets)) {
-          await crawlSlot(() => cr.crawl(url, { force: true, base: j.base })).catch((e) => console.warn('[bulk] check auto crawl', it.slug, e.message));
+    if (doCrawl && CRAWL_GAP[it.crawls || 0]) await sleep(CRAWL_GAP[it.crawls || 0]);   // 기다리는 동안은 자리를 잡지 않는다
+    await retrySlot(async () => {
+      try {
+        if (doCrawl) {   // 누락이면 크롤 시점과 상관없이 force 로 — 간격을 두고 (화면은 기다리지 않는다, 뒤에서)
+          const k = it.crawls || 0;
+          await transact(j, async () => {
+            for (const x of all) x.crawls = k + 1;
+            await persist(j, true);
+          });
+          const targets = it.bundle ? (it.ai.find(x => x.k === 'spec')?.crawlParts || [])
+            .map(part => it.bundle[part - 1]?.url).filter(Boolean) : [it.url];
+          for (const url of new Set(targets)) {
+            await crawlSlot(() => cr.crawl(url, { force: true, base: j.base })).catch((e) => console.warn('[bulk] check auto crawl', it.slug, e.message));
+          }
+          catalog.invalidate();
         }
-        catalog.invalidate();
+        if (doDraw) await transact(j, () => { const tries = (it.tries || 0) + 1; for (const x of all) x.tries = tries; });
+        const c = await contentSlot(() => (it.bundle ? contentForBundle(j.channel, it, it.bundleTitle, { fresh: true, check: j.check }) : contentFor(j.channel, it.url, { fresh: true, check: j.check })));
+        if (c.text.length > CELL_MAX) throw new Error(`too long for one Excel cell (${c.text.length} chars)`);
+        const ai = aiChecks(j, it, c);
+        if (!retryable({ ...it, status: 'ok' }, ai)) await settleImg(ai);   // 마지막이면 lg.com 원본도 확인
+        await commitRender(j, all, c, ai);
+        for (const x of all) require('./slice-preview').ensure(x.imgs).catch(() => {});
+      } catch (e) {
+        console.warn('[bulk] check auto retry', j.id, it.slug, it.crawls || 0, it.tries || 0, e.message);
+        if (it.status === 'failed') await transact(j, () => { for (const x of all) x.error = String(e.message || e).slice(0, 300); });
       }
-      if (doDraw) await transact(j, () => { const tries = (it.tries || 0) + 1; for (const x of all) x.tries = tries; });
-      const c = await contentSlot(() => (it.bundle ? contentForBundle(j.channel, it, it.bundleTitle, { fresh: true, check: j.check }) : contentFor(j.channel, it.url, { fresh: true, check: j.check })));
-      if (c.text.length > CELL_MAX) throw new Error(`too long for one Excel cell (${c.text.length} chars)`);
-      const ai = aiChecks(j, it, c);
-      if (!retryable({ ...it, status: 'ok' }, ai)) await settleImg(ai);   // 마지막이면 lg.com 원본도 확인
-      await commitRender(j, all, c, ai);
-      for (const x of all) require('./slice-preview').ensure(x.imgs).catch(() => {});
-    } catch (e) {
-      console.warn('[bulk] check auto retry', j.id, it.slug, it.crawls || 0, it.tries || 0, e.message);
-      if (it.status === 'failed') await transact(j, () => { for (const x of all) x.error = String(e.message || e).slice(0, 300); });
-    }
+    });
     await transact(j, () => persist(j, true));
   }
   await transact(j, async () => { for (const x of all) delete x.retrying; await persist(j, true); });
@@ -992,4 +999,4 @@ function emailOk(e) {
   return !allow.length || allow.some((d) => String(e).toLowerCase().endsWith('@' + d) || String(e).toLowerCase().endsWith('.' + d));
 }
 
-module.exports = { countryOf, create, cancel, setNotify, getJob, jobView, resumeAll, saveUpload, readUpload, mailReady, emailOk, CRAWL_CONC, DIR, checkAction, exportBlocked, deliver, aiChecks, skuConflict, _kickRetries: kickRetries, _commitRender: commitRender, _sendMail: sendMail, _contentFor: contentFor, _writeResult: writeResult, _fixPlan: fixPlan, _settleImg: settleImg, _retryable: retryable };
+module.exports = { countryOf, create, cancel, setNotify, getJob, jobView, resumeAll, saveUpload, readUpload, mailReady, emailOk, CRAWL_CONC, DIR, checkAction, exportBlocked, deliver, aiChecks, skuConflict, _kickRetries: kickRetries, RETRY_CONC, _commitRender: commitRender, _sendMail: sendMail, _contentFor: contentFor, _writeResult: writeResult, _fixPlan: fixPlan, _settleImg: settleImg, _retryable: retryable };

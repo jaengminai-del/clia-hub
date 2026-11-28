@@ -181,6 +181,8 @@ function launchPipeline(jobId, url, usePro, geminiKey, fullAi, html = null, base
   Object.assign(job, { slug, out, proc, exited: false });
   proc.on('exit', (code, signal) => {
     const ok = code === 0 && fs.existsSync(path.join(out, 'mirror.json'));
+    if (!ok) job.failedRun = true;
+    try { settlePrev(out, ok); } catch (e) { console.warn('[crawl] 지난 결과 정리 실패', slug, e.message); }
     if (!ok) {
       job.signal = signal || null;
       const f = failureOf(job);
@@ -203,7 +205,7 @@ function launchPipeline(jobId, url, usePro, geminiKey, fullAi, html = null, base
         store.pushProduct(slug).then((n) => n && console.log(`[crawl-store] ${slug}: ${n}개 파일 업로드`));
       });
   });
-  proc.on('error', (e) => { job.exited = true; job.spawnError = e.message; console.error(`[crawl] 실패 #${refOf(jobId)} ${url} — 시작 못 함 · ${e.message}`); });
+  proc.on('error', (e) => { job.failedRun = true; try { settlePrev(out, false); } catch (_) {} job.exited = true; job.spawnError = e.message; console.error(`[crawl] 실패 #${refOf(jobId)} ${url} — 시작 못 함 · ${e.message}`); });
 }
 
 // 컨텐츠가 아닌 컴포넌트를 캐시된 mirror.json 에서도 뺀다 (crawler-py/component_mirror.py NON_CONTENT_COMPONENTS 와 같은 목록)
@@ -251,7 +253,8 @@ function snapshot(jobId) {
     return { job_id: jobId, status: 'processing', progress_percent: 98,
       log_message: '동영상 대표 장면 확인 중...', step: 'video', updated_at: Date.now() / 1000 };
   }
-  if (fs.existsSync(mirrorFp) && fs.statSync(mirrorFp).mtimeMs / 1000 >= job.startedAt - 1) {
+  // 다시 크롤이 실패해 지난 결과로 되돌린 경우(job.failedRun)는 완료가 아니라 실패
+  if (!job.failedRun && fs.existsSync(mirrorFp) && fs.statSync(mirrorFp).mtimeMs / 1000 >= job.startedAt - 1) {
     return {
       job_id: jobId, status: 'completed', progress_percent: 100,
       completed_at: fs.statSync(mirrorFp).mtimeMs / 1000,
@@ -318,6 +321,30 @@ router.get('/healthz', (req, res) => res.json({
   firecrawl: !!process.env.FIRECRAWL_API_KEY,
 }));
 
+const PREV_FILES = ['mirror.json', 'final.json', 'pc.md', 'pc.html', 'pc_raw.html', 'pc_full.png', 'lgcom_full.jpg', 'progress.json', 'qa_report.json', 'components.json'];
+const PREV = '.prev';   // 다시 크롤하는 동안 지난 결과를 두는 곳 (버킷에는 올리지 않음 — crawl-store EXCLUDE)
+function stashPrev(out) {
+  const dir = path.join(out, PREV);
+  // 지난번 다시 크롤이 끝나지 못하고 남긴 .prev 가 있으면 그것이 마지막으로 성공한 결과 — 덮어쓰지 않는다
+  if (fs.existsSync(path.join(dir, 'mirror.json'))) { for (const f of PREV_FILES) { try { fs.unlinkSync(path.join(out, f)); } catch {} } return; }
+  fs.rmSync(dir, { recursive: true, force: true });
+  fs.mkdirSync(dir, { recursive: true });
+  for (const f of PREV_FILES) { try { fs.renameSync(path.join(out, f), path.join(dir, f)); } catch {} }
+}
+// 새 크롤 성공 → .prev 지움 · 실패 → 지난 결과를 되돌림 (새 크롤이 반쯤 쓴 파일은 버림)
+function settlePrev(out, ok) {
+  const dir = path.join(out, PREV);
+  if (!fs.existsSync(dir)) return;
+  if (!ok && fs.existsSync(path.join(dir, 'mirror.json'))) {
+    for (const f of PREV_FILES) {
+      if (fs.existsSync(path.join(dir, f))) fs.renameSync(path.join(dir, f), path.join(out, f));
+      else { try { fs.unlinkSync(path.join(out, f)); } catch {} }
+    }
+    console.warn(`[crawl] 다시 크롤 실패 → 지난 결과로 되돌림 ${path.basename(out)}`);
+  }
+  fs.rmSync(dir, { recursive: true, force: true });
+}
+
 // 크롤 작업 등록 → { jobId, cached }. 캐시(mirror.json)가 있으면 파이프라인 없이 즉시 완료.
 function startCrawl(url, { force = false, pro = false, geminiKey = null, fullAi = false, html = null, base = '' } = {}) {
   url = cleanUrl(url);
@@ -338,11 +365,10 @@ function startCrawl(url, { force = false, pro = false, geminiKey = null, fullAi 
     jobs.set(jobId, { url, slug, out, startedAt: 0, proc: null, exited: true });
     return { jobId, cached: true };
   }
-  if (force && fs.existsSync(out)) {
-    for (const f of ['mirror.json', 'final.json', 'pc.md', 'pc.html', 'pc_raw.html', 'pc_full.png', 'lgcom_full.jpg', 'progress.json']) {
-      try { fs.unlinkSync(path.join(out, f)); } catch {}
-    }
-  }
+  // 다시 크롤(force): 지난 결과를 지우지 않고 .prev 로 옮겨 둔다 → 새 크롤이 실패하면 되돌린다 (2026-11-28).
+  //   예전엔 먼저 지웠다 — 운영에서 재크롤이 몰려 서버 자원이 바닥나 크롤이 실패하자(can't start new thread · EAGAIN)
+  //   제품 35개가 허브 목록에서 사라졌다 (재시작해 버킷에서 다시 받아 복구)
+  if (force && fs.existsSync(out)) stashPrev(out);
   const jobId = 'job_' + crypto.randomBytes(6).toString('hex');
   jobs.set(jobId, { url, slug, startedAt: Date.now() / 1000 });
   launchPipeline(jobId, url, pro, geminiKey, fullAi, html, base);
@@ -732,6 +758,7 @@ require('./drain').register({ name: 'crawl', pause: () => {}, busy: () => [...jo
 
 module.exports = router;
 module.exports.crawl = crawl;
+module.exports._prev = { stashPrev, settlePrev, PREV };
 module.exports.cleanUrl = cleanUrl;
 module.exports.slugify = slugify;
 module.exports.stripNonContent = stripNonContent;

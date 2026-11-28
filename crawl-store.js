@@ -33,6 +33,7 @@ const EXCLUDE = [
   /(^|\/)\.DS_Store$/,
   /(^|\/)\.imgdims-cache\.json$/,
   /^_trash\//,                      // 삭제한 제품 보관함 (deleteProduct) — 버킷은 trash/ 접두사로 따로 보관
+  /(^|\/)\.prev\//,                 // 다시 크롤하는 동안 지난 결과 (crawler-routes stashPrev) — 로컬 전용
 ];
 const shouldSync = (rel) => !EXCLUDE.some((re) => re.test(rel));
 
