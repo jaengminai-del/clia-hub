@@ -51,7 +51,7 @@ body{font-family:'LGEIText', 'LINESeedSansTH',Arial,sans-serif;background:#F6F3E
 .slice-guide>div{position:absolute;box-sizing:border-box}
 .slice-guide .sg-line{left:-10px;right:-10px;height:0;border-top:2px dashed #1E7F4F}   /* 절취선은 초록 (검수창 같은 영역 테두리와 같은 색, 2026-11-28) */
 .slice-guide .sg-sc{left:-34px;transform:translateY(-50%);font-size:22px;line-height:1;color:#1E7F4F}
-.slice-guide .sg-tag{left:-14px;background:#333;display:flex;align-items:baseline;gap:4px;color:#fff;padding:5px 12px;border-radius:0 0 10px 0;font-size:14px;font-weight:600;white-space:nowrap}
+.slice-guide .sg-tag{left:-14px;background:#1E7F4F;display:flex;align-items:baseline;gap:4px;color:#fff;padding:5px 12px;border-radius:0 0 10px 0;font-size:14px;font-weight:600;white-space:nowrap}
 .slice-guide .sg-tag b{font-size:22px;font-weight:800;line-height:1}
 .slice-guide .sg-tag s{text-decoration:none;opacity:.85}
 /* 슬라이스 보기 토글 (툴바) */
@@ -837,7 +837,7 @@ function updateContentInfo() {
 // 다운로드 이미지(/api/v1/slice-html → crawler-py/content_gen/slices.py)가 「실제로」 잘리는 자리를 미리보기에 그린다.
 // 자르는 규칙은 slices.py 의 _JS_LAYOUT · _cuts · 자동 장수와 같은 계산 (Shopee 규격: 폭 1000px, 한 장 ≤ 폭 × 1.95,
 // 섹션 경계 → 표 행 · 문단 경계 → 이미지 안쪽은 피함). 미리보기와 서버는 같은 HTML · 같은 폭(.lg-container 800px)이라 위치가 같다.
-//   · 경계마다 초록 ✂ 절취선 + 장 시작에 차콜 「Description image N / 12」 태그 (색 띠는 11/28 뺌 — 컨텐츠를 안 가리게)
+//   · 경계마다 초록 ✂ 절취선 + 장 시작에 초록 「Description image N / 12」 태그 (색 띠는 11/28 뺌 — 컨텐츠를 안 가리게)
 //   · 툴바 「Description images N / 12」 스위치로 켜고 끔 (기본 켬, 브라우저에 기억). 장수도 여기 — 12장 넘으면 빨강
 //   · 12장이 끝나는 자리는 굵은 빨간 선, 그 아래(13장~)는 Shopee 에 노출 안 됨 — 빨간 사선
 //   · 안전장치: 그래도 선이 글자 줄 · 이미지 가운데를 지나가면 주황 선 + 「⚠ cuts …」 (정상이면 안 나옴 — 나오면 slices.py 를 고칠 일)
