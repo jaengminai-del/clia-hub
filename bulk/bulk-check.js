@@ -256,6 +256,20 @@
     el.classList.toggle('dk-prob', !passed(u) && !isRemoved(u) && !busy(u) && !isOk(u) && el._issues.length > 0);
     el.querySelector('.dk-st').textContent = isRemoved(u) ? C.T.removedL : busy(u) ? C.T.redoing
       : passed(u) ? C.T.fReady : bad.map(why).join(' · ');
+    // 다시 준비 · 자동 재시도 중인 카드 (2026-11-28, 결과 화면 칸과 같은 모양): 어둡게 · 흐리게 덮고 가운데 지금 하는 일 + '성공하면 확인됨'.
+    //   다시 크롤 · 그림이면 밝은 띠가 반복. 비교 칸은 없음(dk-prob 아님) · 버튼 셋은 흐리게 (panel)
+    if (el._checked) return;   // ✓ 확인됨을 보여 주는 중
+    el.classList.remove('dk-checked');
+    const rd = busy(u) ? redoOf(u) || 'work' : null;
+    for (const k of ['crawl', 'draw', 'wait', 'work']) el.classList.toggle('dk-' + k, rd === k);
+    el.classList.toggle('dk-rd', !!rd);
+    cardCover(el, rd ? `<span class="dk-o2">${C.core.esc(redoLine(u))}</span><span class="dk-o3">${C.core.esc(C.T.rcHint)}</span>` : null);
+  }
+  function cardCover(el, html) {
+    const ph = el.querySelector('.dk-ph'); let o = ph.querySelector('.dk-ov');
+    if (html == null) { if (o) { o.remove(); ph.querySelector('.dk-dim').remove(); ph.querySelector('.dk-bnd').remove(); } return; }
+    if (!o) { ph.insertAdjacentHTML('beforeend', '<span class="dk-dim"></span><span class="dk-bnd"></span><span class="dk-ov"><span class="dk-ovt"></span></span>'); o = ph.querySelector('.dk-ov'); }
+    o.firstElementChild.innerHTML = html;
   }
   async function refresh(core) { try { C.job = await core.api('/api/v1/bulk/jobs/' + C.job.id); C.units = units(C.job); } catch (_) {} }
   const running = () => C.job.status === 'running' || C.job.status === 'queued';
@@ -575,6 +589,7 @@
   function viewer(core, mode, start, from) {
     const T = C.T, e = core.esc, rtl = document.documentElement.dir === 'rtl', all = mode === 'all';
     const open = (u) => !isRemoved(u) && !isOk(u) && !passed(u);   // 사람이 아직 정하지 않은 것
+    const countable = (u) => !busy(u) && !passed(u);   // 검토 'n / N': 사람이 정할 수 있는 것 (정한 것 포함 · 다시 준비 중 · 저절로 통과한 것 제외)
     let list = all ? C.units.slice() : needs(), i = Math.max(0, Math.min(list.length - 1, start)), el = null, alive = true, polling = false;
     if (!all) { const j = list.findIndex((u) => open(u) && !busy(u)); if (j >= 0) i = j; }
     const view = frame(core, 2);
@@ -754,8 +769,14 @@
     function panel() {
       const u = list[i], it = u[0], g = G, s = stateOf(u);
       D.root.dataset.st = s;   // 화면 배경 · 카드 테두리가 상태를 따른다
-      document.getElementById('dkI').textContent = i + 1; document.getElementById('dkNn').textContent = ' / ' + list.length;
-      document.getElementById('dkProg').style.width = ((i + 1) / list.length * 100) + '%';
+      if (all) {
+        document.getElementById('dkI').textContent = i + 1; document.getElementById('dkNn').textContent = ' / ' + list.length;
+        document.getElementById('dkProg').style.width = ((i + 1) / list.length * 100) + '%';
+      } else {   // 검토: 지금 정할 수 있는 것만 센다 (다시 준비 중 · 저절로 통과한 것은 빼고) — 다시 준비 중인 카드에 있으면 'n' 자리는 –
+        const cnt = list.filter(countable), k = cnt.indexOf(u);
+        document.getElementById('dkI').textContent = k >= 0 ? k + 1 : '–'; document.getElementById('dkNn').textContent = ' / ' + cnt.length;
+        if (k >= 0) document.getElementById('dkProg').style.width = ((k + 1) / cnt.length * 100) + '%';
+      }
       // 위엔 모델명과 제품군만 표시.
       const fam = familyOf(u);
       cap.innerHTML = `<div class="dk-cr"><b>${e(it.model || '')}</b>${fam ? `<span class="dk-fam">${e(fam)}</span>` : ''}</div>` + (s === 'busy' ? `<span>${e(redoLine(u))}</span>` : '');
@@ -763,7 +784,8 @@
       cap.style.left = g.x + 'px'; cap.style.width = g.cw + 'px';
       (rtl ? nextB : prevB).disabled = !i; (rtl ? prevB : nextB).disabled = i >= list.length - 1;
       // 버튼 셋은 늘 같은 자리 — 상태에 맞지 않는 것은 흐리게
-      const can = { remove: s !== 'rm' && s !== 'busy', retry: s !== 'rm' && s !== 'busy', ok: s === 'review' && u.every(x => x.status === 'ok' && !(x.ai || []).some(a => !a.ok && a.blocked)) };
+      const chk = !!(el && el._checked);   // ✓ 확인됨을 보여 주는 동안은 누를 것 없음
+      const can = { remove: !chk && s !== 'rm' && s !== 'busy', retry: !chk && s !== 'rm' && s !== 'busy', ok: s === 'review' && u.every(x => x.status === 'ok' && !(x.ai || []).some(a => !a.ok && a.blocked)) };
       acts.forEach((b) => { b.disabled = !can[b.dataset.a]; });
     }
     acts.forEach((b) => { b.onclick = async () => {
@@ -774,7 +796,9 @@
       if (!alive) return;
       if (all) { if (i < list.length - 1) go(1); return; }
       // 검토: 아직 정하지 않은 다음 건으로 (다시 준비 중인 것은 건너뜀) — 없으면 다시 준비가 끝나길 기다렸다가 완료로
-      const n = list.length, j = [...Array(n).keys()].map((k) => (i + 1 + k) % n).find((k) => open(list[k]) && !busy(list[k]));
+      const n = list.length, order = [...Array(n).keys()].map((k) => (i + 1 + k) % n);
+      let j = order.find((k) => open(list[k]) && !busy(list[k]));
+      if (j == null) j = order.find((k) => open(list[k]));   // 남은 것이 다시 준비 중뿐이면 그 카드로 (통과하면 ✓ 확인됨 → 끝 화면)
       if (j != null && j !== i) { const d = Math.sign(j - i); i = j; layout(true, d); return; }
       if (j === i && open(list[i]) && !busy(list[i])) return;
       if (!list.some((x) => open(x))) { leave(); return; }
@@ -784,6 +808,14 @@
       list = list.map((u) => by.get(ukey(u)) || u);
       for (const [k, c] of cards) {
         const it = list[k][0];
+        if (c._checked) { if (performance.now() - c._checked < 1200) continue; c._checked = 0; }
+        if (c.classList.contains('dk-rd') && !busy(list[k]) && passed(list[k])) {   // 다시 준비 · 자동 재시도가 통과: 가운데 ✓ 확인됨, 덮개가 걷힌다
+          c._checked = performance.now();
+          c.classList.remove('dk-rd', 'dk-crawl', 'dk-draw', 'dk-wait', 'dk-work'); c.classList.add('dk-checked');
+          cardCover(c, `<span class="dk-okl">${CK}${e(T.chk)}</span>`);
+          rise(c.querySelector('.dk-okl'), 6);
+          continue;
+        }
         if (c._content === JSON.stringify([it.status === 'failed', pdpImgs(it), it.ai])) {
           cardState(c, list[k]);
           if (c === el && c.classList.contains('dk-prob') && c._pi == null) seek(c, 0);
@@ -803,8 +835,16 @@
         (async () => {
           while (alive && list.some((u) => busy(u) && !isRemoved(u))) {
             await sleep(2000); await refresh(core); if (!alive) break; sync();
+            if (el && el._checked) {   // ✓ 확인됨을 잠깐 본 뒤 — 그 카드는 새 내용으로
+              await sleep(Math.max(0, el._checked + 1100 - performance.now())); if (!alive) break;
+              for (const c of cards.values()) c._checked = 0;
+              sync();
+            }
             if (!all && !list.some((x) => open(x))) { leave(); break; }   // 다시 준비가 통과로 끝나 남은 게 없으면 완료로
-            if (!all && busy(list[i]) === false && !open(list[i])) { const j = list.findIndex((x) => open(x) && !busy(x)); if (j >= 0 && j !== i) { const d = Math.sign(j - i); i = j; layout(true, d); } }
+            if (!all && busy(list[i]) === false && !open(list[i])) {
+              let j = list.findIndex((x) => open(x) && !busy(x)); if (j < 0) j = list.findIndex((x) => open(x));
+              if (j >= 0 && j !== i) { const d = Math.sign(j - i); i = j; layout(true, d); }
+            }
           }
           polling = false;
         })();

@@ -51,13 +51,21 @@ OK_AI = [{"k": "img", "ok": True, "n": 0}, {"k": "txt", "ok": True}, {"k": "spec
 class FakeJob:
     """GET 할 때마다 한 걸음: 1번째 = 진행 중(뒤 절반은 대기), 2번째부터 다 끝남. 재시도 중인 것은 끝난 뒤 3번 더 물으면 통과."""
 
-    def __init__(self, origin, clean=False, retry_only=False, retry_states=False):
+    def __init__(self, origin, clean=False, retry_only=False, retry_states=False, retry_review=False):
         self.img = img = lambda k, n=4: [f"{origin}/fixture/p{k}.svg?s={i}" for i in range(1, n + 1)]
         items = [{"row": 10 + k, "slug": f"p-{k}", "model": f"MODEL-{k:02d}", "status": "ok", "imgs": img(k),
                   "hash": f"h{k}", "contentDigest": f"d{k}", "ai": copy.deepcopy(OK_AI)} for k in range(PASSED)]
         self.posts = []
         self.gets = 0
         self.ready_gets = 0
+        if retry_review:   # 검토 필요 하나 + 다시 크롤 중 하나 (몇 번 더 물으면 통과)
+            items.append({"row": 100, "slug": "bad-img", "model": "BAD-IMG", "status": "ok", "imgs": img(100), "hash": "hI", "contentDigest": "dI",
+                          "ai": [{"k": "img", "ok": False, "n": 1, "bad": 1, "lg": 0, "at": [{"src": "https://www.lg.com/x.jpg", "regions": [{"slice": 2, "y": 0.5, "h": 0.1}]}]}]})
+            items.append({"row": 103, "slug": "retry-103", "model": "RETRY-103", "status": "ok", "retrying": 1, "redo": "crawl", "imgs": img(103),
+                          "hash": "h103", "contentDigest": "d103", "_passAt": 4,
+                          "ai": [{"k": "img", "ok": False, "n": 3, "bad": 3, "lg": 0, "at": [{"src": "https://www.lg.com/x.jpg", "regions": [{"slice": 2, "y": 0.5, "h": 0.1}]}]}]})
+            self.items = items
+            return
         if retry_states:   # 자동 재시도 셋: lg.com 다시 크롤(먼저 통과) · PDP 다시 그림 · 차례 기다림 (서버 retryLater 의 redo)
             for row, redo, at in [(103, "crawl", 3), (104, "draw", 99), (105, None, 99)]:
                 it = {"row": row, "slug": f"retry-{row}", "model": f"RETRY-{row}", "status": "ok", "retrying": 1, "imgs": img(row),
@@ -211,6 +219,9 @@ class BulkCheckGridTest(unittest.TestCase):
         self.assertEqual((style[2], style[4]), (style[3], style[5]))
         self.assertFalse(head.evaluate("h => h.scrollWidth > h.clientWidth"))   # 한 줄
         go_box, head_box = page.locator("#gdRhGo").bounding_box(), head.bounding_box()
+        # 버튼 글은 큰 버튼에 맞게 (17px · 좁으면 16px, 굵게) — 버튼 크기 · 자리는 검수 화면 버튼과 같게
+        self.assertEqual(page.locator("#gdRhGo").evaluate("b => [getComputedStyle(b).fontSize, getComputedStyle(b).fontWeight]"), ["16px" if width <= 420 else "17px", "700"])
+        self.assertEqual((go_box["width"], go_box["height"]), (176, 46))
         self.assertAlmostEqual(go_box["x"] + go_box["width"] / 2, width / 2, delta=1)
         inside("#gdRhH", "#gdRhGo")
         page.wait_for_timeout(500)
@@ -297,6 +308,10 @@ class BulkCheckGridTest(unittest.TestCase):
             expect(page.locator("#gdRhGo")).to_have_text("Confirm & download")
         self.assertEqual(head.evaluate("h => getComputedStyle(h).color"), "rgb(38, 38, 38)")
         self.inside(page, width, height, "#gdRhH", "#gdRhGo")
+        go = page.locator("#gdRhGo")   # 긴 글('확인하고 받기')도 한 줄 · 큰 글
+        self.assertEqual(go.evaluate("b => getComputedStyle(b).fontSize"), "16px" if width <= 420 else "17px")
+        self.assertEqual(go.bounding_box()["height"], 46)
+        self.assertFalse(go.evaluate("b => b.scrollWidth > b.clientWidth"))
         with page.expect_download():
             page.locator("#gdRhGo").click()
         expect(page.locator("#ckDl")).to_be_visible()
@@ -392,6 +407,67 @@ class BulkCheckGridTest(unittest.TestCase):
         self.assertEqual(errors, [])
         page.close()
 
+    def run_review_busy(self, browser, origin, width, height, lang, decide_first):
+        # 검수 화면(하나씩)의 다시 크롤 중 카드: 덮개 · 가운데 글 · 버튼 흐림 · 비교 칸 없음 · 'n / N' 에서 빠짐 → 통과하면 ✓ 확인됨 → 다음으로 / 끝 화면
+        rtl = lang == "ar"
+        job = FakeJob(origin, retry_review=True)
+        page, errors = open_page(browser, origin, width, height, lang, job)
+        expect(page.locator("#gdRhGo")).to_be_visible(timeout=10000)
+        page.locator("#gdRhGo").click()
+        expect(page.locator("#dkCap b")).to_have_text("BAD-IMG")
+        expect(page.locator("#dkI")).to_have_text("1")
+        expect(page.locator("#dkNn")).to_have_text(" / 1")   # 다시 크롤 중인 것은 세지 않음
+        if decide_first:   # 정하고 나면 남은 것은 다시 크롤 중 하나 — 그 카드로
+            page.locator('.dk-bar [data-a="ok"]').click()
+        else:
+            page.keyboard.press("ArrowLeft" if rtl else "ArrowRight")
+        expect(page.locator("#dkCap b")).to_have_text("RETRY-103")
+        page.wait_for_timeout(800)
+        card = page.locator(".dk-cc.dk-on")
+        expect(card).to_have_class(re.compile(r"\bdk-rd\b"))
+        expect(card).to_have_class(re.compile(r"\bdk-crawl\b"))
+        expect(page.locator("#dkI")).to_have_text("–")
+        expect(page.locator("#dkNn")).to_have_text(" / 1")
+        expect(page.locator("#dkCmp")).to_be_hidden()
+        for b in page.locator(".dk-bar .dk-act").all():
+            expect(b).to_be_disabled()
+        ov = card.locator(".dk-ov")
+        if lang == "en":
+            expect(ov.locator(".dk-o2")).to_have_text("Re-crawling from lg.com…")
+            expect(ov.locator(".dk-o3")).to_have_text("Checked when it succeeds")
+        self.assertEqual(card.locator(".dk-dim").evaluate("d => getComputedStyle(d).backgroundColor"), "rgba(38, 38, 38, 0.74)")
+        self.assertIn("blur", card.locator(".dk-sc").evaluate("x => getComputedStyle(x).filter"))
+        box, ph = ov.locator(".dk-ovt").bounding_box(), card.locator(".dk-ph").bounding_box()
+        self.assertAlmostEqual(box["x"] + box["width"] / 2, ph["x"] + ph["width"] / 2, delta=3)
+        self.assertAlmostEqual(box["y"] + box["height"] / 2, ph["y"] + ph["height"] / 2, delta=3)
+        # 통과: 가운데 ✓ 확인됨 → 다음 정할 것으로(정할 것이 남았으면) · 아니면 끝 화면
+        ok = page.locator(".dk-cc.dk-on .dk-okl")
+        expect(ok).to_be_visible(timeout=15000)
+        if lang == "en":
+            expect(ok).to_have_text("Checked")
+        okb = ok.bounding_box()
+        self.assertAlmostEqual(okb["x"] + okb["width"] / 2, ph["x"] + ph["width"] / 2, delta=3)
+        if decide_first:
+            expect(page.locator("#ckAll")).to_be_visible(timeout=5000)
+        else:
+            expect(page.locator("#dkCap b")).to_have_text("BAD-IMG", timeout=5000)
+            expect(page.locator("#dkNn")).to_have_text(" / 1")
+            page.locator('.dk-bar [data-a="ok"]').click()
+            expect(page.locator("#ckAll")).to_be_visible(timeout=5000)
+        self.assertEqual(errors, [])
+        page.close()
+
+    def test_review_viewer_busy_card(self):
+        with serve() as origin, sync_playwright() as p:
+            options = {"headless": True}
+            if os.environ.get("CLIA_CHROMIUM"):
+                options["executable_path"] = os.environ["CLIA_CHROMIUM"]
+            browser = p.chromium.launch(**options)
+            for width, height, lang, first in [(1366, 768, "en", False), (1366, 768, "en", True), (360, 340, "ar", False)]:
+                with self.subTest(width=width, height=height, lang=lang, decide_first=first):
+                    self.run_review_busy(browser, origin, width, height, lang, first)
+            browser.close()
+
     def test_retry_status_lines_animation_and_checked(self):
         with serve() as origin, sync_playwright() as p:
             options = {"headless": True}
@@ -412,6 +488,9 @@ class BulkCheckGridTest(unittest.TestCase):
             for width, height, lang in VIEWPORTS:
                 with self.subTest(width=width, height=height, lang=lang):
                     self.run_flow(browser, origin, width, height, lang)
+                with self.subTest(clean=True, width=width, height=height, lang=lang):
+                    self.run_clean(browser, origin, width, height, lang)
+            for width, height, lang in [(360, 340, "de"), (700, 450, "th"), (1366, 768, "de")]:   # 긴 '확인하고 받기'
                 with self.subTest(clean=True, width=width, height=height, lang=lang):
                     self.run_clean(browser, origin, width, height, lang)
                 with self.subTest(retry_only=True, width=width, height=height, lang=lang):
