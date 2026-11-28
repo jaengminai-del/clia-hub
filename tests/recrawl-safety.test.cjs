@@ -88,3 +88,22 @@ test('a PDP with only missing images is drawn again once, other problems twice',
   assert.equal(retryable({ status: 'ok', tries: 1 }, sum), true);
   assert.equal(retryable({ status: 'ok', tries: 2 }, sum), false);
 });
+
+test('a product with no content on lg.com is not an error: no retry, row left as it is, download not blocked', (t) => {
+  const bj = require('../bulk-jobs');
+  const slug = `clia-test-empty-${process.pid}`, dir = path.join(cr.OUT_DIR, slug);
+  fs.mkdirSync(dir, { recursive: true });
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  // lg.com 화면에 기능 섹션이 없어 다 숨긴 제품 (예: T2310NBTB)
+  fs.writeFileSync(path.join(dir, 'mirror.json'), JSON.stringify({ sections: [], _lg_hidden: { visible: '0/10', sections: [{ component_id: 'AEM:heroimage' }] } }));
+  assert.equal(bj._lgEmpty(slug), true);
+  // 크롤이 안 된 것(섹션 0 · 숨김 없음)은 내용 없음이 아니다 — 다시 크롤
+  fs.writeFileSync(path.join(dir, 'mirror.json'), JSON.stringify({ sections: [] }));
+  assert.equal(bj._lgEmpty(slug), false);
+  assert.equal(bj._lgEmpty('clia-test-missing'), false);
+  const empty = { status: 'failed', empty: true };
+  assert.equal(bj._retryable(empty, []), false);
+  assert.equal(bj._retryable({ status: 'failed' }, []), true);
+  assert.equal(bj.exportBlocked(empty), false);
+  assert.equal(bj.exportBlocked({ status: 'failed' }), true);
+});

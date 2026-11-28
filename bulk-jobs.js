@@ -162,7 +162,8 @@ const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const blocking = x => x.blocked && !x.ok && x.k !== 'n12';   // 예전 작업 기록의 'Shopee 12장 차단'은 이제 막지 않는다
 const incompletePdp = it => it.unified !== true || !it.hash || !it.contentDigest ||
   (it.ai || []).some(blocking);
-const exportBlocked = it => reviewWrites.has(it) || (it.check !== 'removed' &&
+// lg.com 에 내용이 없는 제품(empty): 엑셀 행은 그대로 두고 받기를 막지 않는다 (2026-11-28 결정)
+const exportBlocked = it => reviewWrites.has(it) || (it.check !== 'removed' && !it.empty &&
   (it.status !== 'ok' || it.retrying || incompletePdp(it)));
 const skuConflict = ({ descCol, skuCol, skus }) => Number(descCol) === Number(skuCol) && !!skus?.length;
 function assertSeparateColumns(job) {
@@ -178,6 +179,12 @@ async function workbookMatches(j, bytes, proofs) {
   } catch (_) { return false; }
 }
 const included = it => it.status === 'ok' && it.check !== 'removed';
+// lg.com 화면에 기능 섹션도 스펙도 없는 제품 (lg-visibility 가 페이지 데이터에만 있는 섹션을 다 숨김, 예: T2310NBTB): 만들 PDP 가 없다 —
+//   실패가 아니라 'lg.com 에 내용 없음', 엑셀 행은 그대로 (2026-11-28 결정: lg.com 에 있는데 못 가져온 것만 오류)
+function lgEmpty(slug) {
+  const m = slug ? readJson(path.join(OUT_DIR(), slug, 'mirror.json')) : null;
+  return !!(m && m._lg_hidden && !(m.sections || []).length);
+}
 const isCurrentRow = (j, it) => {
   const row = j.resultRows?.[it.row];
   return !!row && row.hash === it.hash && row.contentDigest === it.contentDigest;
@@ -504,6 +511,7 @@ const RETRY_CONC = Math.max(1, Math.min(8, parseInt(process.env.BULK_RETRY_CONC,
 const retrySlot = limiter(RETRY_CONC);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 function fixPlan(it, ai) {
+  if (it.empty) return null;   // lg.com 에 내용이 없음 — 다시 크롤해도 같다
   if (it.status === 'failed') return it.bundle ? { crawl: false, draw: true } : { crawl: true, draw: false };
   const bad = (k) => (ai || []).some((x) => x.k === k && !x.ok);
   const img = (ai || []).find((x) => x.k === 'img') || {};
@@ -843,6 +851,7 @@ async function run(j) {
       }
       if (!it.slug) it.slug = cr.slugify(it.url);
       if (!j.items.some((x) => (x.register || x.force) && !x.crawled && x.status !== 'failed')) j.phase = 'content';
+      if (lgEmpty(it.slug)) throw Object.assign(new Error('no content on lg.com'), { empty: true });
       it.status = 'working'; persist(j);
       if (!contentBy.has(it.slug)) contentBy.set(it.slug, contentSlot(() => { stop(); return contentFor(j.channel, it.url, { check: j.check }); }));
       let c = await contentBy.get(it.slug);
@@ -862,6 +871,7 @@ async function run(j) {
       if (e.cancelled || j.status === 'cancelled') { it.status = 'cancelled'; persist(j); return; }
       if (e.paused) { it.status = 'queued'; return; }   // 새 서버가 이어서 (크롤이 끝난 것은 crawled 로 남아 다시 크롤하지 않는다)
       const msg = String(e.message || e).slice(0, 300);
+      if (e.empty) { Object.assign(it, { status: 'failed', empty: true, error: msg, flags: [{ code: 'empty', sev: 'info', msg }] }); persist(j); return; }
       const stage = (it.register || it.force) && !it.crawled ? 'crawl' : 'content';
       Object.assign(it, { status: 'failed', error: msg, flags: [{ code: stage, sev: 'error', msg }] });
       if (j.check && retryable(it, [])) it.retrying = 1;   // 벌크 Check: 준비 실패도 작업이 끝난 뒤 자동으로 다시 크롤
@@ -1004,4 +1014,4 @@ function emailOk(e) {
   return !allow.length || allow.some((d) => String(e).toLowerCase().endsWith('@' + d) || String(e).toLowerCase().endsWith('.' + d));
 }
 
-module.exports = { countryOf, create, cancel, setNotify, getJob, jobView, resumeAll, saveUpload, readUpload, mailReady, emailOk, CRAWL_CONC, DIR, checkAction, exportBlocked, deliver, aiChecks, skuConflict, _kickRetries: kickRetries, RETRY_CONC, _commitRender: commitRender, _sendMail: sendMail, _contentFor: contentFor, _writeResult: writeResult, _fixPlan: fixPlan, _settleImg: settleImg, _retryable: retryable };
+module.exports = { countryOf, create, cancel, setNotify, getJob, jobView, resumeAll, saveUpload, readUpload, mailReady, emailOk, CRAWL_CONC, DIR, checkAction, exportBlocked, deliver, aiChecks, skuConflict, _kickRetries: kickRetries, RETRY_CONC, _commitRender: commitRender, _sendMail: sendMail, _contentFor: contentFor, _writeResult: writeResult, _fixPlan: fixPlan, _settleImg: settleImg, _retryable: retryable, _lgEmpty: lgEmpty };
