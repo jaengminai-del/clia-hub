@@ -65,7 +65,14 @@ def open_review(page, origin, lang, before=False, blocked=False):
             content = subprocess.check_output(["git", "show", f"9ce27fd:bulk/{name}"], cwd=ROOT)
             page.route(pattern, lambda route, *, content=content, kind=kind: route.fulfill(body=content, content_type=kind))
     page.goto(f"{origin}/bulk/?check=1&lang={lang}&job=0000000000001234")
+    if not before:
+        open_tile(page)
     expect(page.locator("#dkCmp")).to_be_visible()
+
+
+def open_tile(page):
+    # 2026-11-28 그리드: 결과는 먼저 전체 그리드에 — 칸을 누르면 같은 검수 화면(전체 보기)이 그 제품부터 열린다
+    page.locator(".gd-it:not(.gd-wait) .gd-pdp").first.click()
 
 
 class ReviewViewportTest(unittest.TestCase):
@@ -189,6 +196,7 @@ class ReviewViewportTest(unittest.TestCase):
                     open_review(page, origin, lang)
                     page.route("**/api/v1/bulk/jobs/**", handle)
                     page.reload()
+                    open_tile(page)
                     expect(page.locator(".dk-cmp-b")).to_have_text("Evidence 0")
                     if evidence and lang == "ko":
                         page.screenshot(path=evidence / "v2.4-stale-before-ko.png")
