@@ -679,6 +679,8 @@ async function retryLater(j, it, same) {
     const plan = fixPlan(it, it.ai); if (!plan) break;
     const doCrawl = plan.crawl && (it.crawls || 0) < MAX_CRAWLS, doDraw = plan.draw && (it.tries || 0) < drawsFor(it.ai);
     if (!doCrawl && !doDraw) break;
+    // 화면에 무엇을 다시 하는지 알린다 (2026-11-28): 'crawl' lg.com 에서 다시 크롤 · 'draw' PDP 를 다시 그림 — 문제는 it.ai 그대로
+    await transact(j, async () => { for (const x of all) x.redo = doCrawl ? 'crawl' : 'draw'; await persist(j, true); });
     if (doCrawl && CRAWL_GAP[it.crawls || 0]) await sleep(CRAWL_GAP[it.crawls || 0]);   // 기다리는 동안은 자리를 잡지 않는다
     await retrySlot(async () => {
       try {
@@ -709,7 +711,7 @@ async function retryLater(j, it, same) {
     });
     await transact(j, () => persist(j, true));
   }
-  await transact(j, async () => { for (const x of all) delete x.retrying; await persist(j, true); });
+  await transact(j, async () => { for (const x of all) { delete x.retrying; delete x.redo; } await persist(j, true); });
 }
 async function redoAll(j, its) {
   await Promise.all(units(its).map(([first, ...rest]) => redo(j, first, rest)));
