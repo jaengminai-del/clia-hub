@@ -41,20 +41,20 @@
   };
   // Check 화면 (덱 2026-11-27 → 그리드 2026-11-28) 문구 — 위 TX 에 덧붙인다
   const TXD = {
-    en: { rmS: 'Remove', viewAll: (n) => `View all ${n}`, moreBelow: 'More below', back: '← Back', prev: 'Previous', next: 'Next', removedL: 'Removed from this Excel', fReady: 'Ready', fReview: 'Needs review', aiChk: 'AI checking', onlyRev: 'Needs review only', goDl: 'Confirm & download',
-      inc: 'Include', incd: 'Included', outd: 'Removed', okIn: 'Looks fine · include',
+    en: { rmS: 'Remove', viewAll: (n) => `View all ${n}`, moreBelow: 'More below', back: '← Back', prev: 'Previous', next: 'Next', removedL: 'Removed from this Excel', fReady: 'Ready', fReview: 'Needs review', aiChk: 'AI checking', revN: (n) => `Review ${n}`, goDl: 'Confirm & download',
+      okIn: 'Looks fine · include',
       allDone: 'All checked', colModel: 'Model', colDesc: 'Description', imgsN: (n) => `${n} images`, moreRows: (n) => `+ ${n} more rows`, confirmDl: (n) => `Confirm ${n} & download` },
-    th: { rmS: 'นำออก', viewAll: (n) => `ดูทั้งหมด ${n}`, moreBelow: 'ยังมีด้านล่าง', back: '← กลับ', prev: 'ก่อนหน้า', next: 'ถัดไป', removedL: 'นำออกจาก Excel นี้แล้ว', fReady: 'พร้อม', fReview: 'ต้องตรวจสอบ', aiChk: 'AI กำลังตรวจ', onlyRev: 'เฉพาะที่ต้องตรวจสอบ', goDl: 'ยืนยันและดาวน์โหลด',
-      inc: 'ใส่ไว้', incd: 'ใส่ไว้แล้ว', outd: 'นำออกแล้ว', okIn: 'ดูแล้วโอเค · ใส่ไว้',
+    th: { rmS: 'นำออก', viewAll: (n) => `ดูทั้งหมด ${n}`, moreBelow: 'ยังมีด้านล่าง', back: '← กลับ', prev: 'ก่อนหน้า', next: 'ถัดไป', removedL: 'นำออกจาก Excel นี้แล้ว', fReady: 'พร้อม', fReview: 'ต้องตรวจสอบ', aiChk: 'AI กำลังตรวจ', revN: (n) => `ตรวจสอบ ${n} รายการ`, goDl: 'ยืนยันและดาวน์โหลด',
+      okIn: 'ดูแล้วโอเค · ใส่ไว้',
       allDone: 'ตรวจครบแล้ว', colModel: 'รุ่น', colDesc: 'คำอธิบาย', imgsN: (n) => `${n} รูป`, moreRows: (n) => `+ อีก ${n} แถว`, confirmDl: (n) => `ยืนยัน ${n} และดาวน์โหลด` },
-    ko: { rmS: '빼기', viewAll: (n) => `전체 보기 ${n}`, moreBelow: '아래에 더 있음', back: '← 돌아가기', prev: '이전', next: '다음', removedL: '이번 엑셀에서 뺌', fReady: '준비됨', fReview: '검토 필요', aiChk: 'AI 확인 중', onlyRev: '검토 필요만', goDl: '확인하고 받기',
-      inc: '포함', incd: '포함함', outd: '뺌', okIn: '괜찮음 · 포함',
+    ko: { rmS: '빼기', viewAll: (n) => `전체 보기 ${n}`, moreBelow: '아래에 더 있음', back: '← 돌아가기', prev: '이전', next: '다음', removedL: '이번 엑셀에서 뺌', fReady: '준비됨', fReview: '검토 필요', aiChk: 'AI 확인 중', revN: (n) => `${n}개 검토하기`, goDl: '확인하고 받기',
+      okIn: '괜찮음 · 포함',
       allDone: '모두 확인함', colModel: '모델', colDesc: '설명', imgsN: (n) => `이미지 ${n}장`, moreRows: (n) => `+ ${n}행 더`, confirmDl: (n) => `${n}개 확인하고 받기` },
-    de: { rmS: 'Entfernen', viewAll: (n) => `Alle ${n} ansehen`, moreBelow: 'Weiter unten', back: '← Zurück', prev: 'Zurück', next: 'Weiter', removedL: 'Aus dieser Excel entfernt', fReady: 'Bereit', fReview: 'Zu prüfen', aiChk: 'KI prüft', onlyRev: 'Nur zu prüfende', goDl: 'Bestätigen & herunterladen',
-      inc: 'Übernehmen', incd: 'Übernommen', outd: 'Entfernt', okIn: 'Passt · übernehmen',
+    de: { rmS: 'Entfernen', viewAll: (n) => `Alle ${n} ansehen`, moreBelow: 'Weiter unten', back: '← Zurück', prev: 'Zurück', next: 'Weiter', removedL: 'Aus dieser Excel entfernt', fReady: 'Bereit', fReview: 'Zu prüfen', aiChk: 'KI prüft', revN: (n) => `${n} prüfen`, goDl: 'Bestätigen & herunterladen',
+      okIn: 'Passt · übernehmen',
       allDone: 'Alles geprüft', colModel: 'Modell', colDesc: 'Beschreibung', imgsN: (n) => `${n} Bilder`, moreRows: (n) => `+ ${n} weitere Zeilen`, confirmDl: (n) => `${n} bestätigen & herunterladen` },
-    ar: { rmS: 'إزالة', viewAll: (n) => `عرض الكل ${n}`, moreBelow: 'المزيد بالأسفل', back: 'رجوع →', prev: 'السابق', next: 'التالي', removedL: 'أُزيل من ملف Excel هذا', fReady: 'جاهز', fReview: 'بحاجة إلى مراجعة', aiChk: 'الذكاء الاصطناعي يفحص', onlyRev: 'ما يحتاج إلى مراجعة فقط', goDl: 'تأكيد وتنزيل',
-      inc: 'تضمين', incd: 'مُضمَّن', outd: 'أُزيل', okIn: 'يبدو جيدًا · تضمين',
+    ar: { rmS: 'إزالة', viewAll: (n) => `عرض الكل ${n}`, moreBelow: 'المزيد بالأسفل', back: 'رجوع →', prev: 'السابق', next: 'التالي', removedL: 'أُزيل من ملف Excel هذا', fReady: 'جاهز', fReview: 'بحاجة إلى مراجعة', aiChk: 'الذكاء الاصطناعي يفحص', revN: (n) => `مراجعة ${n}`, goDl: 'تأكيد وتنزيل',
+      okIn: 'يبدو جيدًا · تضمين',
       allDone: 'تم فحص الكل', colModel: 'الطراز', colDesc: 'الوصف', imgsN: (n) => `${n} صور`, moreRows: (n) => `+ ${n} صفوف أخرى`, confirmDl: (n) => `تأكيد ${n} والتنزيل` },
   };
   // 문제 문구 (2026-11-27 장혁 피드백 '단순하게'): 오른쪽 칸 맨 위 큰 한 문장 · 다섯 언어 같은 톤. w_* 는 그리드 칸 아래 짧은 글
@@ -143,8 +143,10 @@
   // ── Check: 전체 그리드 (2026-11-28 결정 · 예시 A — 덱 · 양쪽 더미를 대신) ──
   // 처음부터 모든 제품이 한 그리드에 칸으로 있고, 서버(bulk-jobs.js CONTENT_CONC)의 결과가 닿는 대로 그 칸만 스캔 띠가 한 번 훑는다 →
   // 통과는 작은 ✓, 검토 필요는 빨간 테두리 + 문제 자리 빨간 칸(PDP 를 그 자리까지 내려 둠). 연출 때문에 기다리게 하지 않는다 — 몰리면 간격을 줄인다.
-  // 위 고정 줄: 가운데 큰 숫자(진행 중엔 'AI 확인 중 n / N' + 얇은 막대) · 버튼은 늘 같은 자리(끝 쪽) — '검토 필요만' · '확인하고 받기'.
-  // '검토 필요만': 통과한 칸은 접히고 검토 필요만 크게, 칸 아래 빼기 · 다시 준비 · 포함 → 정한 것은 칩으로. 칸을 누르면 자세히 보기(viewer 'all'), 돌아오면 같은 상태.
+  // 위 고정 줄: 가운데 큰 숫자(진행 중엔 'AI 확인 중 n / N' + 얇은 막대) · 버튼은 늘 같은 자리(끝 쪽) — '검토 N' · '확인하고 받기'.
+  // 사람이 정할 것은 목록으로 늘어놓지 않는다 (2026-11-28 장혁 피드백): 다 끝나면 숫자를 잠깐(~1초) 보여 주고 하나씩 검수 화면(viewer 'review')으로 —
+  // 가운데 큰 카드 · 비교 칸 · 위 고정 버튼 셋, 하나 정하면 다음으로. 돌아가기는 그리드로, 다 정하면 끝 화면(확인하고 받기).
+  // 칸을 누르면 그 제품의 자세히 보기(viewer 'all'), 돌아오면 같은 상태.
   // 자동 재시도는 서버가 뒤에서 — 고쳐지면 그 칸이 준비됨으로 옮겨 간다. 100~300개여도 부드럽게: 작은 미리보기 앞 몇 장만 · lazy, 연출은 보이는 몇십 개만.
   const small = (u) => String(u || '').replace('/media/slices/', '/media/slices-p/');
   const ukey = (u) => (u[0].bundle ? 'b:' + u[0].row : u[0].slug || u[0].url || 'r:' + u[0].row);
@@ -237,8 +239,7 @@
   async function refresh(core) { try { C.job = await core.api('/api/v1/bulk/jobs/' + C.job.id); C.units = units(C.job); } catch (_) {} }
   const running = () => C.job.status === 'running' || C.job.status === 'queued';
   const needs = () => C.units.filter((u) => !isRemoved(u) && !isOk(u) && !passed(u));   // 사람이 아직 정하지 않은 것 (다시 준비 중 포함)
-  // 칸 상태: wait(결과 전) · ok(통과) · bad(검토 필요) · busy(다시 준비 중) · in(사람이 포함) · out(뺌). '검토 필요만'에는 REV 만 남는다
-  const REV = new Set(['bad', 'busy', 'in', 'out']);
+  // 칸 상태: wait(결과 전) · ok(통과) · bad(검토 필요) · busy(다시 준비 중) · in(사람이 포함) · out(뺌)
   const catOf = (u, landed) => (!landed ? 'wait' : isRemoved(u) ? 'out' : busy(u) ? 'busy' : passed(u) ? 'ok' : isOk(u) ? 'in' : 'bad');
   const fadeIn = (x, ms, dy) => (reduced() ? null : x.animate([{ opacity: 0, transform: `translateY(${dy}px)`, filter: 'blur(6px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }], { duration: ms, easing: EZ.out, fill: 'backwards' }));
   function roll(id, v) {   // 숫자가 바뀔 때 위에서 내려앉기 (블러 · 페이드). 진행 중 숫자는 연출 없이 (몰려오면 계속 다시 시작돼 안 보임)
@@ -248,25 +249,24 @@
   const imgsReady = (ims) => Promise.all(ims.map((im) => (im.complete ? 0 : new Promise((r) => { im.addEventListener('load', r, { once: true }); im.addEventListener('error', r, { once: true }); }))));
 
   function grid(core) {
-    const T = C.T, e = core.esc, gv = C.gv || (C.gv = { only: false, scroll: 0, seen: false });
+    const T = C.T, e = core.esc, gv = C.gv || (C.gv = { scroll: 0, seen: false, entered: false });
     if (C.g) { C.g.alive = false; if (C.g.io) C.g.io.disconnect(); }
     C.units = units(C.job);
     const N = C.units.length, byId = (id) => document.getElementById(id), restore = gv.seen;
     const el = frame(core, 2);
-    el.innerHTML = `<div class="gd" id="gd"><div class="gd-top"><div class="gd-acts"><button class="dk-act" id="gdOnly" type="button" aria-pressed="false" disabled>${e(T.onlyRev)}</button><button class="dk-act pri" id="gdGo" type="button" disabled>${e(T.goDl)}</button></div>
+    el.innerHTML = `<div class="gd" id="gd"><div class="gd-top"><div class="gd-acts"><button class="dk-act" id="gdRev" type="button" disabled>${e(T.revN(0))}</button><button class="dk-act pri" id="gdGo" type="button" disabled>${e(T.goDl)}</button></div>
       <div class="gd-nums" id="gdNums" aria-live="polite"></div><div class="gd-prog" id="gdProgW"><i id="gdProg"></i></div></div>
       <div class="gd-list" id="gdList"><div class="gd-grid" id="gdGrid"></div></div></div><div id="ckGo"></div>`;
     const G = C.g = { alive: true, root: byId('gd'), list: byId('gdList'), tiles: new Map(), landed: new Set(), q: [], qs: new Set(), follow: !restore, chain: Promise.resolve(), mode: running() ? 'scan' : 'done', fT: 0 };
     gv.seen = true;
     const unitOf = (k) => { if (G.byU !== C.units) { G.byU = C.units; G.by = new Map(C.units.map((u) => [ukey(u), u])); } return G.by.get(k); };
-    // 칸: PDP 썸네일(장을 세로로 쌓음 — 문제 자리 표시는 PDP 와 같이 움직이게 안에) · 모델 · 한 줄 · (검토 필요만) 버튼 셋 · 정한 것 칩
+    // 칸: PDP 썸네일(장을 세로로 쌓음 — 문제 자리 표시는 PDP 와 같이 움직이게 안에) · 모델 · 한 줄
     const gridEl = byId('gdGrid'), frag = document.createDocumentFragment();
     for (const u of C.units) {
       const t = document.createElement('div'), it = u[0];
       t.className = 'gd-it gd-wait'; t._k = ukey(u); t._cat = 'wait'; t.dataset.row = it.row;
       t.innerHTML = `<div class="gd-pdp" tabindex="-1" aria-label="${e(it.model || '')}"><div class="gd-mv"></div><span class="gd-band"></span><span class="gd-bdg">${CK}</span></div>
-        <div class="gd-mt"><div class="gd-mo">${e(it.model || '')}</div><div class="gd-st"></div></div>
-        <div class="gd-ra"><button class="gd-b" data-a="remove" type="button">${e(T.rmS)}</button><button class="gd-b ink" data-a="ok" type="button">${e(T.inc)}</button><button class="gd-b" data-a="retry" type="button">${e(T.redo)}</button></div><div class="gd-res"></div>`;
+        <div class="gd-mt"><div class="gd-mo">${e(it.model || '')}</div><div class="gd-st"></div></div>`;
       G.tiles.set(t._k, t); frag.appendChild(t);
     }
     gridEl.appendChild(frag);
@@ -290,7 +290,7 @@
       const mv = t.querySelector('.gd-mv'), pdp = mv.parentElement, mk = mv.querySelector('.gd-mk'), tok = t._ft = {};
       if (!mk) { if (t._ty) { t._ty = 0; mv.style.transform = ''; } return; }
       await imgsReady([...mv.querySelectorAll('img')]);
-      if (t._ft !== tok || !G.alive || t.classList.contains('gd-hide')) return;
+      if (t._ft !== tok || !G.alive) return;
       const H = pdp.clientHeight, y = mk.getBoundingClientRect().top - mv.getBoundingClientRect().top;
       const ty = Math.round(Math.max(0, Math.min(mv.offsetHeight - H, y - H * 0.35))), from = t._ty || 0;
       if (ty === from) return;
@@ -309,23 +309,20 @@
       const prev = t._cat, cat = catOf(u, G.landed.has(t._k)), changed = cat !== 'wait' && fill(t, u);
       if (cat !== prev || changed) {
         t._cat = cat;
-        t.className = `gd-it gd-${cat}${t.classList.contains('gd-hide') ? ' gd-hide' : ''}`;
+        t.className = `gd-it gd-${cat}`;
         const reasons = aiRows(u).filter((x) => !x.ok).map(why).join(' · ');
-        const st = t.querySelector('.gd-st'); st.textContent = st.title = cat === 'wait' ? '' : cat === 'ok' ? T.fReady : cat === 'busy' ? T.redoing : reasons;
-        t.querySelector('.gd-res').innerHTML = cat === 'in' ? `<span class="gd-chip">${CK}${e(T.incd)}</span>` : cat === 'out' ? `<span class="gd-chip out">${e(T.outd)}</span>` : '';
+        const st = t.querySelector('.gd-st');   // 사람이 정한 것: 포함 · 뺌 (검수 화면과 같은 말)
+        st.textContent = st.title = { wait: '', ok: T.fReady, busy: T.redoing, in: T.okIn, out: T.removedL }[cat] ?? reasons;
         t.querySelector('.gd-pdp').tabIndex = cat === 'wait' ? -1 : 0;
         const scan = anim && !reduced() && G.vis.has(t) && cat !== 'wait' && cat !== 'busy' && (prev === 'wait' || prev === 'busy' || changed);   // 보이는 칸만
         if (scan) sweep(t);
         if (t._marks && (changed || prev === 'wait')) setTimeout(() => focus(t, anim), scan ? 380 : 0);
       }
-      // 버튼 셋은 늘 같은 자리 — 상태에 맞지 않는 것은 흐리게 (검수 화면과 같은 규칙)
-      const can = { remove: cat === 'bad', retry: cat === 'bad', ok: cat === 'bad' && u.every((x) => x.status === 'ok' && !(x.ai || []).some((a) => !a.ok && a.blocked)) };
-      t.querySelectorAll('.gd-ra button').forEach((b) => { b.disabled = !can[b.dataset.a]; });
       return cat !== prev;
     }
     function nums() {
-      let ok = 0, rev = 0, out = 0, inn = 0;
-      for (const t of G.tiles.values()) { const c = t._cat; if (c === 'ok' || c === 'in') ok++; if (c === 'bad' || c === 'busy') rev++; if (c === 'out') out++; if (REV.has(c)) inn++; }
+      let ok = 0, rev = 0, out = 0;
+      for (const t of G.tiles.values()) { const c = t._cat; if (c === 'ok' || c === 'in') ok++; if (c === 'bad' || c === 'busy') rev++; if (c === 'out') out++; }
       const box = byId('gdNums'), key = G.mode + (out ? 'o' : '');
       if (box._key !== key) {
         box._key = key;
@@ -335,7 +332,8 @@
       byId('gdProgW').classList.toggle('off', G.mode !== 'scan');
       if (G.mode === 'scan') { byId('gdA').textContent = G.landed.size; byId('gdProg').style.width = (G.landed.size / Math.max(1, N) * 100) + '%'; }
       else { roll('gdA', ok); roll('gdB', rev); const c = byId('gdC'); if (c) c.textContent = T.removed(out); }
-      byId('gdOnly').disabled = G.mode === 'scan' || (!gv.only && !inn);
+      const rb = byId('gdRev'), rl = T.revN(rev); if (rb.textContent !== rl) rb.textContent = rl;
+      rb.disabled = G.mode === 'scan' || !rev;
       byId('gdGo').disabled = G.mode === 'scan' || C.job.status !== 'ready' || rev > 0;
     }
     // 결과가 나오는 대로 아래 줄을 따라 내려간다 — 사람이 스크롤하면 그만
@@ -355,65 +353,16 @@
       G.landed.add(k); paint(t, u, anim); if (anim) follow(t);
     }
     function update(anim) {
-      let vis = false;
       for (const [k, t] of G.tiles) {
         const u = unitOf(k); if (!u) continue;
         if (!G.landed.has(k)) { if (settled(u) && !G.qs.has(k)) { G.qs.add(k); G.q.push(k); } continue; }
-        const prev = t._cat;
-        if (paint(t, u, anim) && REV.has(prev) !== REV.has(t._cat)) vis = true;
+        paint(t, u, anim);
       }
-      if (vis && gv.only) relayout(anim);
       nums();
-    }
-    // '검토 필요만' 켜고 끄기 · 칸이 빠지거나 들어올 때: 보이는 칸만 FLIP (위치는 transform 으로) — 많아도 몇십 개만 움직인다
-    const relayout = (anim) => (G.chain = G.chain.then(() => flip(anim)).catch(() => {}));
-    async function flip(anim) {
-      if (!G.alive) return;
-      const on = !!gv.only, tiles = [...G.tiles.values()], hide = (t) => on && !REV.has(t._cat);
-      const ob = byId('gdOnly'); ob.classList.toggle('on', on); ob.setAttribute('aria-pressed', String(on));
-      const ch = tiles.filter((t) => t.classList.contains('gd-hide') !== hide(t)), mode = G.root.classList.contains('gd-only') !== on;
-      if (!ch.length && !mode) return;
-      anim = anim && !reduced();
-      const first = new Map();
-      if (anim) {
-        const lr = G.list.getBoundingClientRect();
-        for (const t of tiles) {
-          if (first.size >= 48) break;
-          if (t.classList.contains('gd-hide')) continue;
-          const r = t.getBoundingClientRect(); if (r.bottom > lr.top && r.top < lr.bottom) first.set(t, r);
-        }
-        const out = ch.filter((t) => hide(t) && first.has(t));
-        await Promise.all(out.map((t) => t.animate([{ opacity: 1, filter: 'blur(0)' }, { opacity: 0, filter: 'blur(6px)' }], { duration: 240, easing: EZ.p3in, fill: 'forwards' }).finished.catch(() => {})));
-        if (!G.alive) return;
-      }
-      for (const t of ch) { t.getAnimations().forEach((a) => a.cancel()); t.classList.toggle('gd-hide', hide(t)); }
-      if (mode) { G.root.classList.toggle('gd-only', on); G.list.scrollTop = 0; }
-      sizeVars();
-      if (anim) {
-        const lr = G.list.getBoundingClientRect(); let n = 0, m = 0;
-        for (const [t, r0] of first) {
-          if (t.classList.contains('gd-hide')) continue;
-          const r1 = t.getBoundingClientRect(), dx = r0.left - r1.left, dy = r0.top - r1.top;
-          if (Math.abs(dx) + Math.abs(dy) >= 1) t.animate([{ transform: `translate(${dx}px,${dy}px)` }, { transform: 'none' }], { duration: 650, delay: Math.min(n++, 12) * 45, easing: EZ.io, fill: 'backwards' });
-        }
-        for (const t of ch) {
-          if (t.classList.contains('gd-hide') || first.has(t) || m >= 60) continue;
-          const r = t.getBoundingClientRect(); if (r.bottom > lr.top && r.top < lr.bottom) t.animate([{ opacity: 0, filter: 'blur(6px)', transform: 'translateY(8px)' }, { opacity: 1, filter: 'blur(0)', transform: 'none' }], { duration: 420, delay: Math.min(m++, 30) * 10, easing: EZ.out, fill: 'backwards' });
-        }
-      }
-      for (const t of tiles) if (t._marks && !t.classList.contains('gd-hide')) focus(t, anim);
-    }
-    // 크게 볼 때 칸 크기: 검토 필요가 한 줄에 다 들어가면 그 폭(150~196px), 아니면 196px 로 여러 줄(좁으면 두 칸씩) · PDP 높이는 남은 높이에 맞춰 (430px 까지)
-    function sizeVars() {
-      const w = G.list.clientWidth, h = G.list.clientHeight, narrow = innerWidth <= 560, gap = narrow ? 14 : 22, avail = w - (narrow ? 28 : 48);
-      let n = 0; for (const t of G.tiles.values()) if (REV.has(t._cat)) n++;
-      const fit = (avail - gap * (Math.max(1, n) - 1)) / Math.max(1, n);
-      const bw = Math.floor(fit >= 150 ? Math.min(196, fit) : Math.max(128, Math.min(196, (avail - gap) / 2))), bh = Math.round(Math.max(150, Math.min(430, h - 150, bw * 2.2)));
-      G.root.style.setProperty('--bw', bw + 'px'); G.root.style.setProperty('--bh', bh + 'px');
     }
     const onResize = () => {
       if (!G.alive) { removeEventListener('resize', onResize); return; }
-      clearTimeout(G.rz); G.rz = setTimeout(() => { sizeVars(); for (const t of G.tiles.values()) if (t._marks && !t.classList.contains('gd-hide')) focus(t, false); }, 150);
+      clearTimeout(G.rz); G.rz = setTimeout(() => { for (const t of G.tiles.values()) if (t._marks) focus(t, false); }, 150);
     };
     addEventListener('resize', onResize);
     function leaveGrid() { if (!G.alive) return false; G.alive = false; gv.scroll = G.list.scrollTop; removeEventListener('resize', onResize); G.io.disconnect(); return true; }
@@ -422,23 +371,24 @@
       if (!t || t._cat === 'wait' || !leaveGrid()) return;
       viewer(core, 'all', Math.max(0, C.units.findIndex((u) => ukey(u) === t._k)), 'grid');
     }
-    async function decide(t, a) {
-      const u = unitOf(t._k); if (!u) return;
-      t.querySelectorAll('.gd-ra button').forEach((b) => { b.disabled = true; });
-      await act(core, u, a, a === 'ok' ? { override: true } : null);   // 409 review_changed: act 가 새 내용을 받아 둠 → 칸이 새 PDP 로 (다시 보고 정하게)
+    // 검토 필요는 하나씩 (가운데 큰 카드 · 비교 칸 · 위 고정 버튼 셋) — 그리드가 블러 · 페이드로 물러나고 검수 화면이 올라온다
+    async function review() {
       if (!G.alive) return;
-      update(true); watch();
+      const anim = !reduced();
+      gv.entered = true;
+      if (anim) await G.list.animate([{ opacity: 1, filter: 'blur(0)', transform: 'none' }, { opacity: 0, filter: 'blur(6px)', transform: 'scale(.985)' }], { duration: 240, easing: EZ.p3in, fill: 'forwards' }).finished.catch(() => {});
+      if (!leaveGrid()) return;
+      viewer(core, 'review', 0, 'grid');
+      const dk = byId('dk'); if (anim && dk) fadeIn(dk, 420, 8);
     }
     gridEl.addEventListener('click', (ev) => {
-      const t = ev.target.closest('.gd-it'); if (!t) return;
-      const b = ev.target.closest('.gd-ra button');
-      if (b) { if (!b.disabled) decide(t, b.dataset.a); return; }
-      if (ev.target.closest('.gd-pdp, .gd-mt')) openAt(t);
+      const t = ev.target.closest('.gd-it');
+      if (t && ev.target.closest('.gd-pdp, .gd-mt')) openAt(t);
     });
     gridEl.addEventListener('keydown', (ev) => {
       if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.classList.contains('gd-pdp')) { ev.preventDefault(); openAt(ev.target.closest('.gd-it')); }
     });
-    byId('gdOnly').onclick = () => { gv.only = !gv.only; relayout(true); nums(); };
+    byId('gdRev').onclick = () => review();
     byId('gdGo').onclick = () => { if (leaveGrid()) finishView(core, true); };
     // 자동 재시도 · 다시 준비 중인 칸: 끝날 때까지 2초마다 (통과하면 그 칸이 준비됨으로)
     async function watch() {
@@ -451,8 +401,7 @@
     (async () => {
       // 이미 끝난 것은 연출 없이 바로 (이어 보기 · 자세히 보기에서 돌아올 때)
       update(false); while (G.q.length) land(G.q.shift(), false);
-      sizeVars(); nums();
-      if (gv.only) await relayout(false);
+      nums();
       if (restore) G.list.scrollTop = gv.scroll;
       else if (!reduced()) {
         fadeIn(G.root.querySelector('.gd-top'), 420, 6);
@@ -483,11 +432,15 @@
       }
       if (C.job.status !== 'ready') { alertLine(core, T.err + (C.job.error || C.job.status)); return; }
       watch();
+      // 처음 한 번은 저절로: 숫자를 잠깐 보여 주고(~1초, 모션 줄이기면 바로) 검토 필요를 하나씩. 그 뒤엔 '검토 N' 버튼으로
+      if (gv.entered || !needs().length) return;
+      if (anim) await sleep(1100);
+      if (G.alive && !gv.entered && needs().length) review();
     })().catch((err) => alertLine(core, T.err + err.message));
   }
 
   // ── 검수 화면 (2026-11-27): 검토 필요만(review) · 전체 보기(all, 선택) 같은 화면 ──
-  // 2026-11-28 그리드부터: 칸을 누르면 'all' 로 그 제품부터 (from 'grid' — 돌아가기는 그리드 같은 상태로). 'review'(하나씩)는 기본 흐름에서 빠짐
+  // 2026-11-28 그리드부터: 스캔이 끝나면 'review'(하나씩, from 'grid') · 칸을 누르면 'all' 로 그 제품부터. 둘 다 돌아가기는 그리드 같은 상태로
   // PDP 는 가운데 크게 · 이전/다음은 양옆 · 위에 'n / N' 과 한 줄(상태 · 모델 · 이유 — 한 번만) · 아래 고정 버튼 셋(빼기 · 다시 준비 · 괜찮음·포함).
   // 검토 필요 카드면 화면 배경부터 다르게 (와인 톤) — 준비됨(기본 톤) · 뺌(회색)과 한눈에 구분. 하나 처리하면 다음 건으로 자동으로.
   // 키보드: ← → 넘기기 · ↑ ↓ · 스페이스로 PDP 내리기 · (전체 보기) Esc 돌아가기
@@ -498,7 +451,8 @@
     if (!all) { const j = list.findIndex((u) => open(u) && !busy(u)); if (j >= 0) i = j; }
     const view = frame(core, 2);
     view.innerHTML = '<div class="dk dk-br" id="dk"></div><div id="ckGo"></div>';
-    if (all) document.getElementById('ckSteps').insertAdjacentHTML('afterbegin', `<button class="ck-sback" id="dkBack" type="button">${e(T.back)}</button>`);
+    const back = all || from === 'grid';   // 돌아가기: 전체 보기 · 그리드에서 온 검토 (같은 자리)
+    if (back) document.getElementById('ckSteps').insertAdjacentHTML('afterbegin', `<button class="ck-sback" id="dkBack" type="button">${e(T.back)}</button>`);
     C.dk = { root: document.getElementById('dk'), els: new Map(), side: new Map(), pile: [], minis: [], q: [], readyN: 0, shown: 0 };
     const D = C.dk;
     // 위: 'n / N' + 진행 막대 · 그 아래 고정 버튼 셋 · 카드 바로 위 제목(모델 / 상태 · 이유)
@@ -809,18 +763,18 @@
       if (k === ' ' || k === 'PageDown' || k === 'PageUp') { ev.preventDefault(); scrollBy(k === 'PageUp' || (k === ' ' && ev.shiftKey) ? -1 : 1); return; }
       if (k === 'Home' || k === 'End') { ev.preventDefault(); const sc = el && el.querySelector('.dk-sc'); if (sc) sc.scrollTo({ top: k === 'Home' ? 0 : sc.scrollHeight, behavior: reduced() ? 'auto' : 'smooth' }); return; }
       if ((k === 'n' || k === 'N') && el && el.classList.contains('dk-prob')) { ev.preventDefault(); seek(el, (el._pi || 0) + 1); return; }
-      if (k === 'ArrowRight') { ev.preventDefault(); go(rtl ? -1 : 1); } else if (k === 'ArrowLeft') { ev.preventDefault(); go(rtl ? 1 : -1); } else if (k === 'Escape' && all) { ev.preventDefault(); leave(); }
+      if (k === 'ArrowRight') { ev.preventDefault(); go(rtl ? -1 : 1); } else if (k === 'ArrowLeft') { ev.preventDefault(); go(rtl ? 1 : -1); } else if (k === 'Escape' && back) { ev.preventDefault(); leave(true); }
     }
     function onResize() { if (!alive) return; place(); for (const [k, c] of cards) { c.style.left = cardLeft(k) + 'px'; c.style.width = G.cw + 'px'; c.querySelector('.dk-ph').style.height = G.ch + 'px'; const cm = c.querySelector('.cm'); if (cm) cm.style.zoom = (G.cw / 426).toFixed(3); c._upd(); } layout(false); if (el) seek(el, el._pi || 0); }
     const cmpSize = new ResizeObserver(() => cmp());
     cmpSize.observe(cmpBox);
-    function leave() {
+    function leave(toGrid) {   // toGrid: 돌아가기 · Esc — 그리드에서 왔으면 그리드로. 아니면(다 정함 · 끝 화면에서 옴) 끝 화면으로
       if (!alive) return;
       alive = false; cancelAnimationFrame(pointFrame); clearTimeout(cmpT); cmpSize.disconnect(); document.removeEventListener('keydown', key); removeEventListener('resize', onResize);
-      if (all && from === 'grid') grid(core); else finishView(core);
+      if (toGrid && from === 'grid') grid(core); else finishView(core);
     }
     document.addEventListener('keydown', key);
-    if (all) document.getElementById('dkBack').onclick = () => leave();
+    if (back) document.getElementById('dkBack').onclick = () => leave(true);
     place(); layout(false); sync();
     addEventListener('resize', onResize);
   }
@@ -861,7 +815,7 @@
     const T = C.T, e = core.esc;
     // 전체 보기에서 다시 준비한 것: 끝날 때까지 기다렸다가, 걸리면 검토로
     while (C.units.some((u) => busy(u) && !isRemoved(u))) { alertLine(core, T.redoing + '…'); await sleep(2000); await refresh(core); }
-    if (needs().length) return grid(core);
+    if (needs().length) return viewer(core, 'review', 0, 'grid');   // 아직 정할 것이 있으면 하나씩 (돌아가기는 그리드로)
     const todo = C.units.filter((u) => passed(u) && !isOk(u) && !isRemoved(u));
     if (!todo.length) return doneView(core);
     const sh = sheet(core);
