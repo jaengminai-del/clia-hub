@@ -78,3 +78,13 @@ test('bulk upload and build wait for the bucket copy, and say so if it takes too
 test('automatic retries run two products at a time by default', () => {
   assert.equal(require('../bulk-jobs').RETRY_CONC, 2);
 });
+
+test('a PDP with only missing images is drawn again once, other problems twice', () => {
+  const { _retryable: retryable } = require('../bulk-jobs');
+  const img = [{ k: 'img', ok: false, n: 2, bad: 2, lg: 0 }];
+  assert.equal(retryable({ status: 'ok', tries: 0 }, img), true);
+  assert.equal(retryable({ status: 'ok', tries: 1 }, img), false);   // 같은 이미지가 또 빠지면 사람에게
+  const sum = [{ k: 'sum', ok: false }];
+  assert.equal(retryable({ status: 'ok', tries: 1 }, sum), true);
+  assert.equal(retryable({ status: 'ok', tries: 2 }, sum), false);
+});

@@ -512,7 +512,10 @@ function fixPlan(it, ai) {
   const draw = (!img.ok && img.bad > 0) || bad('sum') || bad('preview') || (bad('spec') && spec.crawl === false);
   return crawl || draw ? { crawl, draw } : null;
 }
-const retryable = (it, ai) => { const p = fixPlan(it, ai); return !!p && ((p.crawl && (it.crawls || 0) < MAX_CRAWLS) || (p.draw && (it.tries || 0) < MAX_DRAWS)); };
+// 다시 그리기 횟수: 빠진 이미지만이면 1번 (2026-11-28) — 같은 이미지가 또 빠지면 다시 그려도 그대로라 사람에게 바로 넘긴다.
+//   운영 140개 Check: 처음 결과는 30초에 나왔는데 같은 4개를 2번씩 다시 그리느라(이미지마다 최대 90초 기다림) 4분 30초를 더 썼고 결과는 같았다
+const drawsFor = (ai) => { const bad = (k) => (ai || []).some((x) => x.k === k && !x.ok); return bad('sum') || bad('preview') || bad('spec') ? MAX_DRAWS : 1; };
+const retryable = (it, ai) => { const p = fixPlan(it, ai); return !!p && ((p.crawl && (it.crawls || 0) < MAX_CRAWLS) || (p.draw && (it.tries || 0) < drawsFor(ai))); };
 // 다시 해도 못 가져온 이미지: lg.com 원본 주소를 직접 열어 본다 — lg.com 에서도 없으면(404 · 410) PDP 에 없는 게 맞다 → 문제 아님
 async function settleImg(ai) {
   const img = (ai || []).find((x) => x.k === 'img'); if (!img || img.ok || !(img.at || []).length) return ai;
@@ -674,7 +677,7 @@ async function retryLater(j, it, same) {
   const cr = require('./crawler-routes'), all = [it, ...same];
   for (;;) {
     const plan = fixPlan(it, it.ai); if (!plan) break;
-    const doCrawl = plan.crawl && (it.crawls || 0) < MAX_CRAWLS, doDraw = plan.draw && (it.tries || 0) < MAX_DRAWS;
+    const doCrawl = plan.crawl && (it.crawls || 0) < MAX_CRAWLS, doDraw = plan.draw && (it.tries || 0) < drawsFor(it.ai);
     if (!doCrawl && !doDraw) break;
     if (doCrawl && CRAWL_GAP[it.crawls || 0]) await sleep(CRAWL_GAP[it.crawls || 0]);   // 기다리는 동안은 자리를 잡지 않는다
     await retrySlot(async () => {

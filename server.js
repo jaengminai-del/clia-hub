@@ -2526,6 +2526,18 @@ function renderSlicesPy(body) {
 ────────────────────────────────────────── */
 const SLICE_CACHE = require('path').join(__dirname, 'media-cache', 'slices');
 const sliceStore = require('./crawl-store');
+// 빠진 이미지 없이 다시 그린 묶음의 해시 — 원래 묶음 옆에 (로컬 media-cache/slices/<원래>/fixed.json + 버킷 media-slices/<원래>/fixed.json)
+async function readFixed(h) {
+  const fp = require('path').join(SLICE_CACHE, h, 'fixed.json');
+  let x = null; try { x = JSON.parse(require('fs').readFileSync(fp, 'utf8')); } catch (_) {}
+  if (!x) { const b = await sliceStore.getBuffer(`media-slices/${h}/fixed.json`).catch(() => null); try { x = b && JSON.parse(b.toString('utf8')); } catch (_) {} }
+  return x && /^[0-9a-f]{20}$/.test(x.hash || '') ? x.hash : null;
+}
+async function writeFixed(h, fixed) {
+  const fs = require('fs'), path = require('path'), body = Buffer.from(JSON.stringify({ hash: fixed, at: Date.now() }));
+  try { fs.mkdirSync(path.join(SLICE_CACHE, h), { recursive: true }); fs.writeFileSync(path.join(SLICE_CACHE, h, 'fixed.json'), body); } catch (_) {}
+  await sliceStore.putBuffer(`media-slices/${h}/fixed.json`, body, 'application/json').catch(() => {});
+}
 
 app.post('/api/v1/slice-html', async (req, res) => {
   const path = require('path'), fs = require('fs'), crypto = require('crypto');
@@ -2555,13 +2567,22 @@ app.post('/api/v1/slice-html', async (req, res) => {
     let man = await kept(hash);
     // 이미지가 빠진 채 그려 둔 묶음은 다시 그린다 (2026-11-28) — 예전엔 lg.com 이 막아 빈칸으로 잘린 것이 같은 해시로 계속 재사용됐다.
     // 이제 이미지는 사본(image-cache.js)으로 받으니 다시 그리면 채워진다. 이미 나간 주소(엑셀 · 1년 캐시)는 그대로 두고 새 해시에 그린다.
-    // 최대 3번 (img-copy · img-copy2 · img-copy3): 한 번으로 막았더니 사본 받기가 밀린 때 다시 그린 것도 빈칸이라 그대로 굳었다
-    //   (운영 140개 Check — 같은 4개가 두 번 '빠진 이미지', 그 이미지들은 다 열림). 세 번 다 빠지면(lg.com 에서 정말 없어진 이미지) 마지막 것을 쓴다
+    //  - 다시 그려서 다 채워졌으면 그 해시를 원래 묶음 옆에 적어 두고(fixed.json) 다음부터 그것을 쓴다
+    //  - 아직 빠지면 같은 시간(1시간) 안에는 그 결과를 쓰고, 다음 시간에 한 번 더 — 횟수로 막았더니(3번) 사본 받기가 밀린 때 세 번 다 빈칸이라
+    //    그대로 굳었다 (운영 140개 Check 세 번 모두 같은 4개 — 그 이미지들은 운영 슬라이스에서도 3/3 열림)
     const broken = (m) => { const [got, all] = String(m?.images_loaded || '').split('/').map(Number); return !!m && all > got; };
-    for (let n = 1; n <= 3 && broken(man); n++) {
-      hash = crypto.createHash('sha1').update(`${key}|img-copy${n > 1 ? n : ''}`).digest('hex').slice(0, 20);
-      dir = path.join(SLICE_CACHE, hash);
-      man = await kept(hash);
+    const first = hash;
+    let fixedNow = false;
+    if (broken(man)) {
+      const fx = await readFixed(first);
+      const good = fx && await kept(fx);
+      if (good && !broken(good)) { hash = fx; dir = path.join(SLICE_CACHE, hash); man = good; }
+      else {
+        hash = crypto.createHash('sha1').update(`${key}|img-copy|${new Date().toISOString().slice(0, 13)}`).digest('hex').slice(0, 20);
+        dir = path.join(SLICE_CACHE, hash);
+        man = await kept(hash);
+        fixedNow = !man;   // 새로 그리면 끝나고 채워졌는지 보고 적어 둔다
+      }
     }
     if (!man) {
       const { meta } = await renderSlicesPy({ html, medium: med, name: 'slice', imagesDir: dir, review: review === true, reviewGallery: gallery });
@@ -2573,6 +2594,7 @@ app.post('/api/v1/slice-html', async (req, res) => {
           console.warn('[slice-html] 버킷 업로드 실패', im.file, e.message));
       }
       await sliceStore.putBuffer(`media-slices/${hash}/manifest.json`, fs.readFileSync(path.join(dir, 'manifest.json')), 'application/json').catch(() => {});
+      if (fixedNow && !broken(man)) await writeFixed(first, hash);
     }
     const base = (process.env.PUBLIC_BASE_URL || `${req.get('x-forwarded-proto') || req.protocol}://${req.get('host')}`).replace(/\/$/, '');
     const esc = (t) => String(t || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

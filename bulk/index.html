@@ -433,6 +433,7 @@ button.eb { cursor: pointer; }
 .gd-rs .gd-grid { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 22px; padding-top: 4px; }
 .gd-rs .gd-it { width: var(--bw, 196px); }
 .gd-rs .gd-pdp { aspect-ratio: auto; height: var(--bh, 430px); }
+.gd-rs .gd-busy .gd-pdp { opacity: .6; transition: opacity .3s; }   /* 자동 재시도 중 — 줄에 두되 살짝 흐리게, 아래 '다시 준비 중' */
 .gd-rs .gd-mo { font-size: 14px; } .gd-rs .gd-st { min-height: 0; font-size: 12.5px; line-height: 1.35; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 @media (max-width: 760px) { .gd-rh h2 { font-size: 26px; letter-spacing: -.4px; } }
 @media (max-width: 420px) { .gd-rh h2 { font-size: 20px; letter-spacing: -.2px; } .gd-rs .gd-grid { gap: 14px; } }

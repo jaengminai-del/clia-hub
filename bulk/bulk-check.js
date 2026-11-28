@@ -151,10 +151,11 @@
   // 위 고정 줄: 가운데 큰 숫자(진행 중엔 'AI 확인 중 n / N' + 얇은 막대) · 버튼은 늘 같은 자리(끝 쪽) — '검토 N' · '확인하고 받기'.
   // 사람이 정할 것은 목록으로 늘어놓지 않는다 (2026-11-28 장혁 피드백): 하나씩 검수 화면(viewer 'review') — 가운데 큰 카드 · 비교 칸 · 위 고정 버튼 셋,
   // 하나 정하면 다음으로. 돌아가기는 그리드로, 다 정하면 끝 화면(확인하고 받기).
-  // 결과 화면 (2026-11-28 장혁 시안 확정): 자동 재시도 · 다시 준비가 다 끝나면(그동안은 그리드에 '다시 준비 중 N…') 장면이 바로 바뀐다 —
+  // 결과 화면 (2026-11-28 장혁 시안 확정): 첫 판이 끝나면 바로(자동 재시도를 기다리지 않음 — 운영 140개에서 4분 반을 헛기다림) 장면이 바뀐다 —
   // 그리드는 사라지고 확인이 필요한 PDP 만 위쪽에 큰 칸으로 한 줄(문제 자리까지 내려 둠 · 빨간 칸), 가운데 위 '확인이 필요한 PDP 6개'(검정 · 숫자와 글 같은 크기)
   // 바로 아래 가운데 버튼 하나 '검토' — 다음 화면(검수 화면)의 'n / N' · 버튼 줄과 같은 자리. 저절로 넘어가지 않음(Enter 도). 0개면 '모두 준비됨' + 확인하고 받기.
   // 모션: 스프링(stiffness 260 · damping 26, 라이브러리 없이 linear() 이징)으로 아주 조금 올라옴 — PDP 14px(50ms 차례) · 머리글 8px · 검수 화면 가운데 카드 16px.
+  // 자동 재시도 중인 것도 그 줄에 '다시 준비 중'으로 — 계속 물어보다 통과하면 그 칸이 줄에서 빠지고 숫자가 줄어든다(다 빠지면 '모두 준비됨').
   // 결과 화면은 한 번만 (돌아온 뒤엔 위 '검토' 버튼으로).
   // 칸을 누르면 그 제품의 자세히 보기(viewer 'all'), 돌아오면 같은 상태.
   // 자동 재시도는 서버가 뒤에서 — 고쳐지면 그 칸이 준비됨으로 옮겨 간다. 100~300개여도 부드럽게: 작은 미리보기 앞 몇 장만 · lazy, 연출은 보이는 몇십 개만.
@@ -356,7 +357,7 @@
       if (G.mode === 'scan') { byId('gdA').textContent = G.landed.size; byId('gdProg').style.width = (G.landed.size / Math.max(1, N) * 100) + '%'; }
       else { roll('gdA', ok); roll('gdB', rev); const c = byId('gdC'); if (c) c.textContent = T.removed(out); }
       const rb = byId('gdRev');
-      rb.disabled = G.mode === 'scan' || !rev || bz > 0;   // 다 끝날 때까지 (끝나면 알림)
+      rb.disabled = G.mode === 'scan' || !rev;   // 다시 준비 중인 것은 검수 화면이 건너뛴다
       byId('gdGo').disabled = G.mode === 'scan' || C.job.status !== 'ready' || rev > 0;
     }
     // 결과가 나오는 대로 아래 줄을 따라 내려간다 — 사람이 스크롤하면 그만
@@ -382,6 +383,7 @@
         paint(t, u, anim);
       }
       nums();
+      if (byId('gdRh')) row(anim);   // 결과 화면: 통과한 칸은 줄에서 빠지고 숫자가 줄어든다
     }
     const onResize = () => {
       if (!G.alive) { removeEventListener('resize', onResize); return; }
@@ -417,28 +419,25 @@
     const anyBusy = () => C.units.some((u) => busy(u) && !isRemoved(u));
     async function watch() {
       if (G.watching || running()) return;
+      if (!gv.summed && C.job.status === 'ready') result();   // 첫 판이 끝나면 바로 (자동 재시도는 결과 화면에서 계속)
       G.watching = true;
       while (G.alive && anyBusy()) { await sleep(2000); if (!G.alive) break; await refresh(core); if (G.alive) update(true); }
       G.watching = false;
-      if (!G.alive || gv.summed || anyBusy() || C.job.status !== 'ready') return;
-      if (!reduced()) await sleep(500);   // 숫자가 자리 잡은 뒤
-      if (G.alive && !gv.summed) result();
     }
     // 결과 화면: 장면이 바로 바뀐다 — 그리드 · 위 줄은 숨고 확인이 필요한 칸만 크게, 머리글 · 버튼 '검토' 는 검수 화면의 'n / N' · 버튼 줄 자리.
     //   Enter 도 '검토', Esc 는 그리드로 (그 뒤엔 위 '검토' 버튼)
+    const inRow = (t) => t._cat === 'bad' || t._cat === 'busy';   // 결과 화면 줄: 확인이 필요한 것 + 자동 재시도 중인 것
     function result() {
       gv.summed = true;
-      const bad = [...G.tiles.values()].filter((t) => t._cat === 'bad'), n = bad.length;
-      const num = n || N, full = (n ? T.rsNeed : T.rsAll)(num), at = full.indexOf(String(num));   // 숫자는 글과 같은 크기 · 굵기 (자리만 <b>)
-      const txt = [full.slice(0, at), full.slice(at + String(num).length)].map(e);
+      const bad = [...G.tiles.values()].filter(inRow);
       const head = document.createElement('div'); head.className = 'gd-rh'; head.id = 'gdRh';
-      head.innerHTML = `<h2 id="gdRhH">${txt[0]}<b>${num}</b>${txt[1]}</h2><button class="dk-act pri" id="gdRhGo" type="button">${e(n ? T.rv : T.goDl)}</button>`;
+      head.innerHTML = '<h2 id="gdRhH"></h2><button class="dk-act pri" id="gdRhGo" type="button"></button>';
       G.root.insertBefore(head, G.list);
       G.root.classList.add('gd-rs');
       for (const t of G.tiles.values()) t.classList.toggle('gd-hide', !bad.includes(t));
-      G.list.scrollTop = 0; bigVars(n);
+      G.list.scrollTop = 0; bigVars(bad.length); headline(bad.length);
       for (const t of bad) if (t._marks) { t._ty = 0; t.querySelector('.gd-mv').style.transform = ''; focus(t, false); }   // 큰 칸 크기로 문제 자리 다시
-      const b = byId('gdRhGo'); b.onclick = () => (n ? review() : confirmGo());
+      const b = byId('gdRhGo'); b.onclick = () => (G.rowN ? review() : confirmGo());
       G.rsKey = (ev) => {
         if (ev.key === 'Escape') { ev.preventDefault(); leaveResult(); }
         else if (ev.key === 'Enter' && !ev.target.closest?.('button, a, input')) { ev.preventDefault(); b.click(); }
@@ -446,6 +445,37 @@
       document.addEventListener('keydown', G.rsKey);   // 버튼에 포커스를 두지 않는다 (검수 화면 버튼 자리에 포커스 테두리가 남지 않게) — Enter 는 위에서
       rise(byId('gdRhH'), 8);
       bad.slice(0, 24).forEach((t, k) => rise(t, 14, 40 + k * 50));
+    }
+    // 머리글 · 버튼: n 개면 '확인이 필요한 PDP n개' + 검토, 0 이면 '모두 준비됨' + 확인하고 받기. 글이 같으면 숫자만 굴린다
+    function headline(n) {
+      const h = byId('gdRhH'), b = byId('gdRhGo'); if (!h) return;
+      const num = n || N, full = (n ? T.rsNeed : T.rsAll)(num), at = full.indexOf(String(num));   // 숫자는 글과 같은 크기 · 굵기 (자리만 <b>)
+      const txt = [full.slice(0, at), full.slice(at + String(num).length)].map(e), key = (n ? 'n' : 'a') + txt.join('|');
+      if (h._key === key) roll('gdRhN', num);
+      else { const first = h._key == null; h._key = key; h.innerHTML = `${txt[0]}<b id="gdRhN">${num}</b>${txt[1]}`; if (!first) rise(h, 8); }
+      const bl = n ? T.rv : T.goDl; if (b.textContent !== bl) b.textContent = bl;
+      G.rowN = n;
+    }
+    // 결과 화면 줄 다시: 통과한 칸은 살짝 작아지며 사라지고(짧게) 남은 칸은 제자리로 미끄러진다 (FLIP · 위치는 transform 만). 모션 줄이기면 바로
+    const row = (anim) => (G.rowChain = (G.rowChain || Promise.resolve()).then(() => rowNow(anim)).catch(() => {}));
+    async function rowNow(anim) {
+      if (!G.alive || !byId('gdRh')) return;
+      const tiles = [...G.tiles.values()], out = tiles.filter((t) => !t.classList.contains('gd-hide') && !inRow(t)), back = tiles.filter((t) => t.classList.contains('gd-hide') && inRow(t));
+      const n = tiles.filter(inRow).length;
+      if (!out.length && !back.length) { headline(n); return; }
+      anim = anim && !reduced();
+      const stay = tiles.filter((t) => !t.classList.contains('gd-hide') && inRow(t)), first = new Map(anim ? stay.map((t) => [t, t.getBoundingClientRect()]) : []);
+      if (anim) await Promise.all(out.map((t) => t.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-6px) scale(.94)' }], { duration: 260, easing: EZ.p3in, fill: 'forwards' }).finished.catch(() => {})));
+      if (!G.alive || !byId('gdRh')) return;
+      for (const t of out) { t.classList.add('gd-hide'); t.getAnimations().forEach((a) => a.cancel()); }
+      for (const t of back) t.classList.remove('gd-hide');
+      bigVars(n); headline(n);
+      for (const t of back) { if (t._marks) { t._ty = 0; t.querySelector('.gd-mv').style.transform = ''; focus(t, false); } if (anim) rise(t, 14); }
+      for (const [t, r0] of first) {
+        const r1 = t.getBoundingClientRect(), dx = r0.left - r1.left, dy = r0.top - r1.top;
+        if (Math.abs(dx) + Math.abs(dy) >= 1) t.animate([{ transform: `translate(${dx}px,${dy}px)` }, { transform: 'none' }], { duration: SPR.duration, easing: SPR.easing });
+      }
+      if (first.size && [...first.keys()].some((t) => t._marks)) for (const t of first.keys()) if (t._marks) focus(t, false);   // 칸 폭이 바뀌었으면 문제 자리 다시
     }
     function leaveResult() {
       const head = byId('gdRh'); if (!head) return;
