@@ -1006,6 +1006,15 @@ const redrawSliceGuide = () => { cancelAnimationFrame(_sgRaf); _sgRaf = requestA
 window.addEventListener('resize', redrawSliceGuide);
 if (window.ResizeObserver) new ResizeObserver(redrawSliceGuide).observe(document.getElementById('previewFrame'));
 document.getElementById('previewFrame').addEventListener('input', redrawSliceGuide);   // 편집 모드에서 글을 고치면 다시 그림
+// 카드 순서 바꾸기 · 지우기 · 이미지 바꾸기 등 미리보기 안이 바뀌면 다시 그림 (2026-11-28) — 편집 모드에서 카드끼리 자리만 바꾸면
+// 전체 높이가 같아 ResizeObserver 가 안 불리고 onCardsReordered 도 편집 중엔 바로 끝나서 절취선이 예전 자리에 남았다.
+// 틀 자체의 style 변경은 뺀다 (sliceCuts 가 재는 동안 zoom · width 를 잠깐 바꾸므로 — 넣으면 끝없이 다시 그림)
+let _sgMoT = 0;   // 글을 칠 때마다 다시 재지 않게 200ms 모아서
+new MutationObserver((ms) => {
+  if (!ms.some((m) => !(m.type === 'attributes' && m.target.id === 'previewFrame'))) return;
+  clearTimeout(_sgMoT); _sgMoT = setTimeout(redrawSliceGuide, 200);
+})
+  .observe(document.getElementById('previewFrame'), { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['src', 'style', 'class', 'hidden'] });
 
 // ══════════════════════════════════════════
 // ── 검토·승인 상태 (2026-11-24, approvals.js) ─────────────────────────────
