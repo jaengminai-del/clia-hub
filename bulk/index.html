@@ -413,11 +413,29 @@ button.eb { cursor: pointer; }
 .gd-n .ck svg { width: 11px; height: 11px; fill: none; stroke: #fff; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
 .gd-n .dot { align-self: center; width: 9px; height: 9px; border-radius: 50%; background: var(--clia-heritage); }
 .gd-n.out span { font-size: 14px; font-weight: 500; }
+.gd-sub { position: relative; width: 360px; max-width: 100%; height: 18px; }   /* 진행 막대 · '다시 준비 중 N…' 같은 자리 (줄 높이가 바뀌지 않게) */
+.gd-sub .gd-prog { position: absolute; left: 0; right: 0; top: 7px; }
+.gd-note { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--clia-gray-600); white-space: nowrap; }
+.gd-note:not(:empty)::before { content: ''; flex: none; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--clia-gray-200); border-top-color: var(--clia-gray-900); animation: ckspin .7s linear infinite; }
 .gd-prog { width: 360px; max-width: 100%; height: 4px; border-radius: 2px; background: var(--clia-gray-200, #E8E6E3); overflow: hidden; transition: opacity .3s; }
 .gd-prog i { display: block; height: 100%; width: 0; background: var(--clia-gray-900); transition: width .25s; }
 .gd-prog.off { opacity: 0; }
 .gd-pg .gd-nums.dk-line { font-size: 18px; gap: 4px 10px; align-items: center; } .gd-pg .dk-line span { font-size: 15px; }
 .gd .dk-body { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 28px 40px; }
+/* 결과 화면 (2026-11-28 시안): 장면이 바로 바뀜 — 위 줄 · 통과 칸은 숨고 확인이 필요한 칸만 크게. 머리글 · 버튼은 검수 화면(.dk-br)의
+   'n / N'(위 12px) · 버튼 줄(위 56px, 높이 46px)과 같은 자리 — 누르면 버튼이 거의 그 자리에 다시 나온다. 머리글은 검정 · 숫자와 글 같은 크기 */
+.gd-rs > .gd-top { display: none; }
+.gd-rh { flex: none; position: relative; height: 116px; }
+.gd-rh h2 { position: absolute; left: 16px; right: 16px; top: -2px; height: 48px; margin: 0; overflow: hidden; text-align: center; white-space: nowrap; text-overflow: ellipsis; font-size: 40px; font-weight: 700; line-height: 48px; letter-spacing: -.8px; color: var(--clia-gray-900); }
+.gd-rh h2 b { font: inherit; letter-spacing: inherit; color: inherit; font-variant-numeric: tabular-nums; }
+.gd-rh .dk-act { position: absolute; top: 56px; left: 0; right: 0; width: fit-content; margin: 0 auto; }
+.gd-hide { display: none !important; }
+.gd-rs .gd-grid { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 22px; padding-top: 4px; }
+.gd-rs .gd-it { width: var(--bw, 196px); }
+.gd-rs .gd-pdp { aspect-ratio: auto; height: var(--bh, 430px); }
+.gd-rs .gd-mo { font-size: 14px; } .gd-rs .gd-st { min-height: 0; font-size: 12.5px; line-height: 1.35; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+@media (max-width: 760px) { .gd-rh h2 { font-size: 26px; letter-spacing: -.4px; } }
+@media (max-width: 420px) { .gd-rh h2 { font-size: 20px; letter-spacing: -.2px; } .gd-rs .gd-grid { gap: 14px; } }
 .gd-list { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
 .gd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--tw, 104px), 1fr)); gap: 18px 14px; max-width: 1680px; margin: 0 auto; padding: 6px 24px 40px; }
 .gd-it { position: relative; min-width: 0; }
@@ -460,7 +478,7 @@ button.eb { cursor: pointer; }
   .gd-acts .dk-act { height: 36px; }
   .gd-n b { font-size: 26px; } .gd-n span { font-size: 13px; } .gd-n .of { font-size: 15px; }
 }
-@media (prefers-reduced-motion: reduce) { .gd-mv, .gd-mk, .gd-prog i, .gd-pdp::after { transition: none; } .gd-busy .gd-st::before { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .gd-mv, .gd-mk, .gd-prog i, .gd-pdp::after { transition: none; } .gd-busy .gd-st::before, .gd-note::before { animation: none; } }
 .dk-card { position: absolute; left: 0; top: 0; width: 260px; transform-origin: 0 0; will-change: transform; }
 .dk-card .dk-ph { position: relative; height: 480px; border: 1px solid var(--clia-heritage); box-shadow: 0 0 0 3px rgba(165,0,52,.08); border-radius: 14px; background: #fff; overflow: hidden; transition: border-color .25s, box-shadow .25s; }
 .dk-card .dk-sc { position: absolute; inset: 0; overflow-y: auto; scrollbar-width: none; } .dk-card .dk-sc::-webkit-scrollbar { display: none; } .dk-card .cm { zoom: .61; }

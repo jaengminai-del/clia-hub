@@ -2553,12 +2553,13 @@ app.post('/api/v1/slice-html', async (req, res) => {
   };
   try {
     let man = await kept(hash);
-    // 이미지가 빠진 채 그려 둔 묶음은 한 번 더 그린다 (2026-11-28) — 예전엔 lg.com 이 막아 빈칸으로 잘린 것이 같은 해시로 계속 재사용됐다.
+    // 이미지가 빠진 채 그려 둔 묶음은 다시 그린다 (2026-11-28) — 예전엔 lg.com 이 막아 빈칸으로 잘린 것이 같은 해시로 계속 재사용됐다.
     // 이제 이미지는 사본(image-cache.js)으로 받으니 다시 그리면 채워진다. 이미 나간 주소(엑셀 · 1년 캐시)는 그대로 두고 새 해시에 그린다.
-    // 다시 그려도 빠지면(lg.com 에서 정말 없어진 이미지) 그 결과를 그대로 쓴다 — 한 번만
-    const [got, all] = String(man?.images_loaded || '').split('/').map(Number);
-    if (man && all > got) {
-      hash = crypto.createHash('sha1').update(`${key}|img-copy`).digest('hex').slice(0, 20);
+    // 최대 3번 (img-copy · img-copy2 · img-copy3): 한 번으로 막았더니 사본 받기가 밀린 때 다시 그린 것도 빈칸이라 그대로 굳었다
+    //   (운영 140개 Check — 같은 4개가 두 번 '빠진 이미지', 그 이미지들은 다 열림). 세 번 다 빠지면(lg.com 에서 정말 없어진 이미지) 마지막 것을 쓴다
+    const broken = (m) => { const [got, all] = String(m?.images_loaded || '').split('/').map(Number); return !!m && all > got; };
+    for (let n = 1; n <= 3 && broken(man); n++) {
+      hash = crypto.createHash('sha1').update(`${key}|img-copy${n > 1 ? n : ''}`).digest('hex').slice(0, 20);
       dir = path.join(SLICE_CACHE, hash);
       man = await kept(hash);
     }
