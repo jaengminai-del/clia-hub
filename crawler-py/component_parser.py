@@ -16,6 +16,7 @@ eBay 빌더가 동일한 레이아웃을 재현할 수 있도록 구조화된 �
 
 import os
 import re
+from hashlib import sha256
 from urllib.parse import quote
 from bs4 import BeautifulSoup, Tag
 from typing import Optional, List, Dict, Any
@@ -196,6 +197,7 @@ class ParsedComponent:
     background_value: Optional[str] = None     # 배경 이미지 URL 또는 색상
     elements: ComponentElement = field(default_factory=ComponentElement)
     raw_html: Optional[str] = None             # 원본 HTML (디버깅용)
+    source_key: str = ""
     dom_index: int = -1                        # HTML DOM 등장 순번 (0부터). 섹션 정렬의 진실 기준
     column_count: int = 0                      # DOM이 선언한 컬럼 수(column-N 클래스). 0=미선언
     wrapper_classes: List[str] = field(default_factory=list)  # c-wrapper 수식 클래스 (no-spacing·bg-*·width-* 등)
@@ -207,6 +209,7 @@ class ParsedComponent:
         return {
             "component_id": self.component_id,
             "dom_index": self.dom_index,
+            "source_key": self.source_key,
             "component_type": self.component_type,
             "layout_type": self.layout_type.value,
             "column_count": self.column_count,
@@ -284,6 +287,7 @@ class ComponentParser:
         """
         self.soup = BeautifulSoup(html, 'html.parser')
         self.components: List[ParsedComponent] = []
+        self.source_keys = {}
 
     def parse_all(self) -> List[ParsedComponent]:
         """
@@ -298,6 +302,7 @@ class ComponentParser:
         # 캐러셀(Swiper) 루프 모드는 무한 회전처럼 보이도록 슬라이드를 복제해 앞뒤에 붙인다.
         # 복제본은 원본과 id·data-swiper-slide-index·이미지·문구가 모두 같으므로
         # (캐러셀, 슬라이드 번호)가 이미 나온 슬라이드는 건너뛰고, 슬라이드는 원래 순서로 정렬한다.
+        wrappers_by_component = {}
         seen_slides = set()
         carousel_slots = {}   # 캐러셀 → 그 캐러셀 슬라이드들이 차지한 components 위치 목록
         for wrapper in wrappers:
@@ -314,6 +319,7 @@ class ComponentParser:
                     carousel_slots.setdefault(id(carousel), []).append(
                         (len(self.components), int(slide.get('data-swiper-slide-index') or 0)))
                 self.components.append(component)
+                wrappers_by_component[id(component)] = wrapper
 
         # 같은 캐러셀의 슬라이드는 슬라이드 번호 순서(1→2→3)로 재배치 (루프 모드는 DOM 순서가 회전돼 있음)
         for slots in carousel_slots.values():
@@ -324,6 +330,11 @@ class ComponentParser:
 
         for i, component in enumerate(self.components):
             component.dom_index = i  # DOM 등장 순번 부여
+            wrapper = wrappers_by_component.get(id(component))
+            if wrapper is not None:
+                digest = sha256(str(wrapper).encode()).hexdigest()[:16]
+                component.source_key = f"{component.component_id}:{i}:{digest}"
+                self.source_keys[id(wrapper)] = component.source_key
         return self.components
 
     def _parse_component(self, element: Tag) -> Optional[ParsedComponent]:
@@ -656,7 +667,7 @@ class ComponentParser:
                         if 'c-image-compare__disclaimer' not in ' '.join(d.get('class') or []))
         return {"before": before, "after": after}, consumed
 
-    def _parse_spec_pairs(self, component: Tag):
+    def _parse_spec_pairs(self, component: Tag, owns=None):
         """라벨/값이 한 컨테이너에 짝으로 들어있는 스펙 항목을 추출.
 
         LG 스펙 영역은 두 가지 마크업을 쓴다.
@@ -675,6 +686,8 @@ class ComponentParser:
         consumed = set()
 
         def add(label_el, value_el, group=None, section=None):
+            if owns is not None and (not owns(label_el) or not owns(value_el)):
+                return False
             label = self._element_text(label_el)
             value = self._element_text(value_el)
             if not label or not value or label == value:

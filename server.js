@@ -2040,7 +2040,7 @@ async function probeImageSize(url) {
    eBay Listing HTML Generator (Template-based, no AI dependency)
 ────────────────────────────────────────── */
 app.post('/api/ebay-generate', async (req, res) => {
-  const { features, url } = req.body;
+  const { features, url, reviewMap } = req.body;
   // 1차 컨텐츠 생성 매체 규격 (crawler-py/content_gen/media/<medium>) — 기본 eBay
   const medium = /^[a-z_]{2,32}$/.test(req.body.medium || '') ? req.body.medium : 'ebay';
   // features 는 크롤 캐시(mirror)가 없을 때 쓰는 예비 템플릿용 — url 이 있으면 캐시로 먼저 만든다
@@ -2065,8 +2065,9 @@ app.post('/api/ebay-generate', async (req, res) => {
           const venvPy = path.join(__dirname, 'crawler-py', '.venv', 'bin', 'python');
           const py = fs.existsSync(venvPy) ? venvPy : 'python3';
           const script = path.join(__dirname, 'crawler-py', 'ebay_builder.py');
-          const outName = `${medium}_content.html`;   // ebay → ebay_content.html (기존 파일명 유지)
+          const outName = `${medium}${reviewMap === true ? '_review' : ''}_content.html`;   // ebay → ebay_content.html (기존 파일명 유지)
           const args = [script, slugDir, '--fragment', '--medium', medium, '-o', outName];
+          if (reviewMap === true) args.push('--map-sections');
           // 리스팅 문구: 프로모션은 맨 위, 제품 상세·배송·사후 케어·반품은 맨 아래 (Shopee 는 listing:false → 텍스트 복사만)
           const LR = require('./listing-routes');
           const listing = req.body.listing === false ? null : LR.forRender(await LR.currentFor(url), url);   // 태국 Product details 는 맨 위 요약 자리라 빼고
@@ -2526,7 +2527,7 @@ const sliceStore = require('./crawl-store');
 
 app.post('/api/v1/slice-html', async (req, res) => {
   const path = require('path'), fs = require('fs'), crypto = require('crypto');
-  const { html: rawHtml, medium = 'shopee_lazada', name = 'pdp', rev = '' } = req.body || {};
+  const { html: rawHtml, medium = 'shopee_lazada', name = 'pdp', rev = '', review = false, reviewGallery } = req.body || {};
   if (typeof rawHtml !== 'string' || !rawHtml) return res.status(400).json({ error: 'html required' });
   // 편집 화면용 동영상 표시(data-video-src, 동영상 장면 고르기)는 그림에 영향이 없다 — 빼고 해시해야
   // 같은 컨텐츠가 표시 유무에 따라 다른 주소(새 슬라이스 묶음)로 갈라지지 않는다
@@ -2536,7 +2537,9 @@ app.post('/api/v1/slice-html', async (req, res) => {
   const rv = /^[\w.-]{1,20}$/.test(String(rev)) ? `|${rev}` : '';
   // 해시 판(v): Shopee·Lazada 는 자르기 규칙이 바뀐 v2 → v3(11/28 글자 줄 보호), 그 밖의 매체는 원본과 같은 v1 (원본 서버가 만든 슬라이스 주소 그대로)
   const ver = med === 'shopee_lazada' ? 'v3' : 'v1';   // v3 (2026-11-28): 글자 줄 가운데도 자르지 않음 · 이미지 위 끝 1px 남던 것 — slices.py
-  const hash = crypto.createHash('sha1').update(`${ver}|${med}|${html}${rv}`).digest('hex').slice(0, 20);
+  const gallery = review === true && Array.isArray(reviewGallery) ? [...new Set(reviewGallery.filter(x => typeof x === 'string'))].sort() : [];
+  const reviewKey = review === true ? '|pdp-authoritative-v4|' + JSON.stringify(gallery) : '';
+  const hash = crypto.createHash('sha1').update(`${ver}|${med}|${html}${rv}${reviewKey}`).digest('hex').slice(0, 20);
   const dir = path.join(SLICE_CACHE, hash);
   try {
     let man = null;
@@ -2547,7 +2550,7 @@ app.post('/api/v1/slice-html', async (req, res) => {
       try { if (mb) { const m = JSON.parse(mb.toString('utf8')); if ((m.images || []).length) man = m; } } catch (_) {}
     }
     if (!man) {
-      const { meta } = await renderSlicesPy({ html, medium: med, name: 'slice', imagesDir: dir });
+      const { meta } = await renderSlicesPy({ html, medium: med, name: 'slice', imagesDir: dir, review: review === true, reviewGallery: gallery });
       console.log(`[slice-html] ${meta.log}`);
       man = JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8'));
       // 버킷에도 올림 (재배포·재시작 후에도 주소 유지)
@@ -2564,7 +2567,7 @@ app.post('/api/v1/slice-html', async (req, res) => {
       + `style="width:100%;max-width:100%;height:auto;display:block;border:0;margin:0;padding:0;">`);
     const out = `<div style="max-width:${man.images[0] ? man.images[0].width : 1000}px;margin:0 auto;">\n${imgs.join('\n')}\n</div>`;
     res.json({ html: out, hash, count: man.images.length, width: man.images[0] && man.images[0].width,
-               images_loaded: man.images_loaded, urls: man.images.map((im) => `${base}/media/slices/${hash}/${im.file}`) });
+               images_loaded: man.images_loaded, broken: man.broken || null, sections: man.sections || null, specSections: man.spec_sections || null, hasTable: man.has_table, specTables: man.spec_tables || null, urls: man.images.map((im) => `${base}/media/slices/${hash}/${im.file}`) });
   } catch (e) {
     console.error('/api/v1/slice-html error:', e.message);
     res.status(500).json({ error: e.message });

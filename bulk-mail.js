@@ -94,7 +94,7 @@ const TX = {
     why: { crawl: 'No product page could be fetched from LG.com.', content: 'The server that makes the description images did not respond.', items: 'None of the selected products could be filled.', upload: 'The uploaded Excel could not be found again.', server: 'An unexpected error happened on the server.' },
     ask: 'Contact the admin',
     mailSub: (id) => `[CLIA] Bulk Excel failed — job ${id}`, mailBody: (id, f) => `Job number: ${id}\nFile: ${f}\n\n`,
-    rSkip: 'Not live — skipped', rOk: 'Matched SKUs', rRv: 'SKUs needing review', rFile: 'Bulk upload file', att: 'Attached to this email', n: (x) => String(x),
+    rSkip: 'Left unchanged', rOk: 'Matched SKUs', rRv: 'SKUs needing review', rFile: 'Bulk upload file', att: 'Attached to this email', n: (x) => String(x),
     open: 'Check in CLIA',
   },
   th: {
@@ -106,7 +106,7 @@ const TX = {
     why: { crawl: 'ดึงหน้าสินค้าจาก LG.com ไม่ได้เลย', content: 'เซิร์ฟเวอร์สร้างรูปรายละเอียดไม่ตอบสนอง', items: 'เติมสินค้าที่เลือกไม่ได้เลย', upload: 'ไม่พบไฟล์ Excel ที่อัปโหลดไว้', server: 'เกิดข้อผิดพลาดที่ไม่คาดคิดบนเซิร์ฟเวอร์' },
     ask: 'ติดต่อผู้ดูแล',
     mailSub: (id) => `[CLIA] Bulk Excel ไม่สำเร็จ — งาน ${id}`, mailBody: (id, f) => `หมายเลขงาน: ${id}\nไฟล์: ${f}\n\n`,
-    rSkip: 'ไม่ได้ไลฟ์ — ข้ามไป', rOk: 'SKU ที่จับคู่ได้', rRv: 'SKU ที่ต้องตรวจสอบ', rFile: 'ชื่อไฟล์ Bulk Upload', att: 'แนบในอีเมลแล้ว', n: (x) => `${x} รายการ`,
+    rSkip: 'คงเดิม', rOk: 'SKU ที่จับคู่ได้', rRv: 'SKU ที่ต้องตรวจสอบ', rFile: 'ชื่อไฟล์ Bulk Upload', att: 'แนบในอีเมลแล้ว', n: (x) => `${x} รายการ`,
     open: 'ตรวจสอบใน CLIA',
   },
   ko: {
@@ -118,7 +118,7 @@ const TX = {
     why: { crawl: 'LG.com 에서 제품 페이지를 하나도 가져오지 못했습니다.', content: '설명 이미지를 만드는 서버가 응답하지 않았습니다.', items: '선택한 제품을 하나도 채우지 못했습니다.', upload: '올린 엑셀 파일을 다시 찾지 못했습니다.', server: '서버에서 예상하지 못한 오류가 났습니다.' },
     ask: '담당자에게 문의',
     mailSub: (id) => `[CLIA] 벌크 엑셀 실패 — 작업 ${id}`, mailBody: (id, f) => `작업 번호: ${id}\n파일: ${f}\n\n`,
-    rSkip: '라이브 아님 — 건너뜀', rOk: '매칭된 SKU', rRv: '확인 필요한 SKU', rFile: '벌크 업로드 파일명', att: '메일 첨부 완료', n: (x) => `${x}개`,
+    rSkip: '원본 유지', rOk: '매칭된 SKU', rRv: '확인 필요한 SKU', rFile: '벌크 업로드 파일명', att: '메일 첨부 완료', n: (x) => `${x}개`,
     open: 'CLIA 확인',
   },
   de: {
@@ -130,7 +130,7 @@ const TX = {
     why: { crawl: 'Keine Produktseite konnte von LG.com abgerufen werden.', content: 'Der Server für die Beschreibungsbilder hat nicht geantwortet.', items: 'Keines der ausgewählten Produkte konnte befüllt werden.', upload: 'Die hochgeladene Excel-Datei wurde nicht mehr gefunden.', server: 'Auf dem Server ist ein unerwarteter Fehler aufgetreten.' },
     ask: 'Admin kontaktieren',
     mailSub: (id) => `[CLIA] Bulk-Excel fehlgeschlagen — Auftrag ${id}`, mailBody: (id, f) => `Auftragsnummer: ${id}\nDatei: ${f}\n\n`,
-    rSkip: 'Nicht live — übersprungen', rOk: 'Zugeordnete SKUs', rRv: 'Zu prüfende SKUs', rFile: 'Bulk-Upload-Datei', att: 'An diese E-Mail angehängt', n: (x) => String(x),
+    rSkip: 'Unverändert', rOk: 'Zugeordnete SKUs', rRv: 'Zu prüfende SKUs', rFile: 'Bulk-Upload-Datei', att: 'An diese E-Mail angehängt', n: (x) => String(x),
     open: 'In CLIA prüfen',
   },
   ar: {
@@ -142,7 +142,7 @@ const TX = {
     why: { crawl: 'تعذّر جلب أي صفحة منتج من LG.com.', content: 'لم يستجب الخادم الذي ينشئ صور الوصف.', items: 'تعذّر ملء أي من المنتجات المحددة.', upload: 'تعذّر العثور على ملف Excel المرفوع.', server: 'حدث خطأ غير متوقع في الخادم.' },
     ask: 'تواصل مع المسؤول',
     mailSub: (id) => `[CLIA] فشل ملف Excel المجمّع — المهمة ${id}`, mailBody: (id, f) => `رقم المهمة: ${id}\nالملف: ${f}\n\n`,
-    rSkip: 'غير نشط — تم تخطيه', rOk: 'رموز SKU المطابقة', rRv: 'رموز SKU التي تحتاج مراجعة', rFile: 'اسم ملف الرفع المجمّع', att: 'مرفق بهذا البريد', n: (x) => String(x),
+    rSkip: 'دون تغيير', rOk: 'رموز SKU المطابقة', rRv: 'رموز SKU التي تحتاج مراجعة', rFile: 'اسم ملف الرفع المجمّع', att: 'مرفق بهذا البريد', n: (x) => String(x),
     open: 'تحقّق في CLIA',
   },
 };
@@ -162,7 +162,7 @@ function failKind(j) {
 const admins = () => String(process.env.BULK_ADMIN_EMAIL || '').split(',').map((x) => x.trim()).filter((x) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x));
 
 // admin: BULK_ADMIN_EMAIL 의 주소들 — 첫 번째가 받는 사람(To), 나머지는 참조(CC)
-function build(j, { base = '', attached = false, lang, admin = admins() } = {}) {
+function build(j, { base = '', attached = false, reviewRequired = false, lang, admin = admins() } = {}) {
   const adm = [].concat(admin || []).filter(Boolean);
   const want = lang || (j.notify && j.notify.lang) || j.lang;
   const L = TX[want] ? want : 'en';
@@ -187,17 +187,25 @@ function build(j, { base = '', attached = false, lang, admin = admins() } = {}) 
       text: [t.hFail, '', t.pFail, '', `${t.open}: ${open}`, ...(adm.length ? [`${t.ask}: ${adm[0]}${adm.length > 1 ? ` (cc ${adm.slice(1).join(', ')})` : ''}`] : [])].join('\n'),
     };
   }
-  const p = attached ? t.pOk : t.pBig;
+  const reviewText = {
+    ko: '엑셀을 받으려면 CLIA에서 검수를 마쳐 주세요.',
+    en: 'Finish reviewing the PDPs in CLIA to download the Excel file.',
+    th: 'ตรวจสอบ PDP ใน CLIA ให้เสร็จเพื่อดาวน์โหลดไฟล์ Excel',
+    de: 'Schließen Sie die PDP-Prüfung in CLIA ab, um die Excel-Datei herunterzuladen.',
+    ar: 'أكمل مراجعة صفحات التفاصيل في CLIA لتنزيل ملف Excel.',
+  };
+  const p = reviewRequired ? reviewText[L] : attached ? t.pOk : t.pBig;
   // 표: 매칭된 SKU → 확인 필요한 SKU → 벌크 업로드 파일명 (메일에 첨부했으면 "메일 첨부 완료")
   const file = `${esc(j.outName || '')}${attached ? `<br>${tag(t.att)}` : ''}`;
   const skip = j.check ? j.check.skipModels || 0 : null;   // 벌크 Check: 라이브 아닌 제품(모델) 수 — 화면 완료 화면과 같은 숫자
   const rows = dataRow(t.rOk, t.n(ok), T.fg, false, true) + dataRow(t.rRv, t.n(rv), rv ? T.accent : T.fg) + (skip != null ? dataRow(t.rSkip, t.n(skip), T.fg) : '') + dataRow(t.rFile, file, T.fg, true);
-  const content = `${heading(t.hOk)}${paragraph(p)}${panel(rows)}${button(t.open, open)}`;
-  const subject = t.sOk(ok, rv);
+  const title = reviewRequired ? reviewText[L] : t.hOk;
+  const content = `${heading(title)}${reviewRequired ? '' : paragraph(p)}${panel(rows)}${button(t.open, open)}`;
+  const subject = reviewRequired ? title : t.sOk(ok, rv);
   return {
     subject,
     html: shell({ lang: L, title: subject, logo, preheader: `${p} ${t.rOk} ${t.n(ok)} · ${t.rRv} ${t.n(rv)}`, content }),
-    text: [t.hOk, '', p, '', `${t.rOk}: ${t.n(ok)}`, `${t.rRv}: ${t.n(rv)}`, ...(skip != null ? [`${t.rSkip}: ${t.n(skip)}`] : []), `${t.rFile}: ${j.outName || ''}${attached ? ` (${t.att})` : ''}`, '', `${t.open}: ${open}`].join('\n'),
+    text: [title, '', ...(reviewRequired ? [] : [p, '']), `${t.rOk}: ${t.n(ok)}`, `${t.rRv}: ${t.n(rv)}`, ...(skip != null ? [`${t.rSkip}: ${t.n(skip)}`] : []), `${t.rFile}: ${j.outName || ''}${attached ? ` (${t.att})` : ''}`, '', `${t.open}: ${open}`].join('\n'),
   };
 }
 

@@ -11,6 +11,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const os = require('os');
 const xlsx = require('./bulk-xlsx');
 const store = require('./crawl-store');
 const catalog = require('./bulk-catalog');
@@ -35,6 +36,15 @@ function limiter(n) {
   return (fn) => new Promise((ok, no) => { q.push({ fn, ok, no }); next(); });
 }
 const crawlSlot = limiter(CRAWL_CONC);
+// 내용 만들기(페이지 생성 · 슬라이스 · 요약)도 서버 전체 공용. 예전엔 작업마다 2개 — 운영 측정(2026-11-27, 100개 같은 호출):
+//   동시 2 → 45s · 4 → 22s · 8 → 12s · 16 → 6s (거의 비례). 기본 16, BULK_CONTENT_CONC 로 1~24
+const CONTENT_CONC = Math.max(1, Math.min(24, parseInt(process.env.BULK_CONTENT_CONC, 10) || 16));
+const contentSlot = limiter(CONTENT_CONC);
+// 슬라이스 그리기(파이썬 + 크로미움)는 따로 더 좁게 (2026-11-28): 캐시가 없는 제품을 한꺼번에 그리면 서버가 프로세스 한도에 걸린다 —
+//   운영 11-27 실제 Check(72개)에서 spawn EAGAIN · 'Chromium을 실행할 수 없습니다' · 'browser has been closed', 11-28 엔 8개 동시에 2개 실패.
+//   캐시가 있는 것은 바로 지나간다. 기본 4, BULK_SLICE_CONC 로 1~16
+const SLICE_CONC = Math.max(1, Math.min(16, parseInt(process.env.BULK_SLICE_CONC, 10) || 4));
+const sliceSlot = limiter(SLICE_CONC);
 
 // ── 올린 파일 (로컬 + 버킷) ──
 async function saveUpload(id, buf, meta) {
@@ -67,6 +77,7 @@ function cleanup() {
 
 // ── 작업 보관 ──
 const jobs = new Map();
+const loadingJobs = new Map();
 const jobFile = (id) => path.join(DIR, 'jobs', `${id}.json`);
 let saveTimers = new Map();
 function persist(j, now) {
@@ -96,10 +107,26 @@ async function activeList(update) {
 async function getJob(id) {
   if (!idOk(id)) return null;
   if (jobs.has(id)) return jobs.get(id);
-  let j = readJson(jobFile(id));
-  if (!j) { const b = await store.getBuffer(`bulk/jobs/${id}.json`).catch(() => null); try { j = b && JSON.parse(b.toString('utf8')); } catch (_) {} }
-  if (j) jobs.set(id, j);
-  return j || null;
+  if (!loadingJobs.has(id)) {
+    loadingJobs.set(id, (async () => {
+      let j = readJson(jobFile(id));
+      if (!j) { const b = await store.getBuffer(`bulk/jobs/${id}.json`).catch(() => null); try { j = b && JSON.parse(b.toString('utf8')); } catch (_) {} }
+      if (j) {
+        jobs.set(id, j);
+        if (j.status === 'ready') {
+          for (const it of j.items) {
+            if (j.check && it.status === 'working') {
+              clearConfirmation(it);
+              Object.assign(it, { status: 'failed', unified: false, error: 'Preparation interrupted' });
+            }
+          }
+          kickRetries(j);
+        }
+      }
+      return j || null;
+    })().finally(() => loadingJobs.delete(id)));
+  }
+  return loadingJobs.get(id);
 }
 
 // 끝난 작업을 다시 열 때 '확인 필요'를 지금 규칙으로 다시 센다 (2026-11-23) — 작업 기록·결과 엑셀은 그대로, 화면에 보내는 값만.
@@ -130,12 +157,96 @@ function countryOf(j) {
 }
 
 const units = (its) => { const m = new Map(); for (const it of its) { const k = it.bundle ? 'b:' + it.row : it.slug || it.url || 'r:' + it.row; if (!m.has(k)) m.set(k, []); m.get(k).push(it); } return [...m.values()]; };
+const reviewWrites = new WeakSet();
+const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
+const blocking = x => x.blocked && !x.ok && x.k !== 'n12';   // 예전 작업 기록의 'Shopee 12장 차단'은 이제 막지 않는다
+const incompletePdp = it => it.unified !== true || !it.hash || !it.contentDigest ||
+  (it.ai || []).some(blocking);
+const exportBlocked = it => reviewWrites.has(it) || (it.check !== 'removed' &&
+  (it.status !== 'ok' || it.retrying || incompletePdp(it)));
+const skuConflict = ({ descCol, skuCol, skus }) => Number(descCol) === Number(skuCol) && !!skus?.length;
+function assertSeparateColumns(job) {
+  if (skuConflict(job)) throw new Error('SKU and PDP description must use different columns');
+}
+async function workbookMatches(j, bytes, proofs) {
+  try {
+    const sheet = (await xlsx.load(bytes)).sheets.find(s => s.path === j.sheet);
+    return !!sheet && Object.entries(proofs).every(([row, proof]) => {
+      const text = sheet.rows.get(Number(row))?.get(Number(j.descCol));
+      return typeof text === 'string' && digest(text) === proof.contentDigest;
+    });
+  } catch (_) { return false; }
+}
+const included = it => it.status === 'ok' && it.check !== 'removed';
+const isCurrentRow = (j, it) => {
+  const row = j.resultRows?.[it.row];
+  return !!row && row.hash === it.hash && row.contentDigest === it.contentDigest;
+};
+function deliveryDenial(j) {
+  if (j.status !== 'ready') return { status: 404, error: 'file not ready' };
+  if (skuConflict(j)) return { status: 409, error: 'SKU and PDP description must use different columns', code: 'sku_description_conflict' };
+  const rows = j.check ? j.items.filter(included) : [];
+  if (j.check && (!j.resultDigest || !j.resultRows || Object.keys(j.resultRows).length !== rows.length ||
+      j.items.some(exportBlocked) || rows.some(it => !isCurrentRow(j, it) || it.check !== 'ok' ||
+        it.checkedHash !== it.hash || it.checkedChannel !== j.channel ||
+        it.checkedContentDigest !== it.contentDigest))) {
+    return { status: 409, error: 'Some PDPs are incomplete or need review again', code: 'pdp_export_blocked' };
+  }
+  const approvals = require('./approvals');
+  if (approvals.gateOn()) {
+    const pending = approvals.pendingOf(j.items, j.check ? j.channel : undefined);
+    if (pending.length) return { status: 409, error: 'not approved', code: 'not_approved', pending: pending.length,
+      models: pending.slice(0, 20).map(x => x.model || x.slug) };
+  }
+  return null;
+}
+async function resultBytes(j) {
+  const fp = path.join(DIR, j.upload, `result-${j.id}.xlsx`);
+  const buf = fs.existsSync(fp) ? fs.readFileSync(fp) : await store.getBuffer(`bulk/${j.upload}/result-${j.id}.xlsx`).catch(() => null);
+  if (!j.check || !buf) return buf;
+  if (skuConflict(j) || !j.resultRows || !j.resultDigest || digest(buf) !== j.resultDigest) return null;
+  return await workbookMatches(j, buf, j.resultRows) ? buf : null;
+}
+const jobTransactions = new Map();
+function transact(j, fn) {
+  const run = (jobTransactions.get(j.id) || Promise.resolve()).then(fn);
+  const tail = run.catch(() => {});
+  jobTransactions.set(j.id, tail);
+  tail.then(() => { if (jobTransactions.get(j.id) === tail) jobTransactions.delete(j.id); });
+  return run;
+}
+function deliver(j, row) {
+  return transact(j, async () => {
+    const denial = deliveryDenial(j);
+    if (denial) return denial;
+    if (row !== undefined && !j.items.some(it => it.row === row && included(it))) {
+      return { status: 404, error: 'row not filled by this job', code: 'not_filled' };
+    }
+    const bytes = await resultBytes(j);
+    return deliveryDenial(j) || (bytes ? { bytes } : { status: j.check ? 409 : 404, error: 'file unavailable or needs preparation again' });
+  });
+}
+
 function jobView(j) {
   const done = j.status !== 'running' && j.status !== 'queued';
   // 동영상 수(장면 바꾸기 버튼)는 이 기능 전에 끝난 작업 기록에 없어서 다시 열 때 센다
   const withVideos = (it) => (it.status === 'ok' && it.slug && it.videos == null
     ? { ...it, videos: productVideos(readJson(path.join(OUT_DIR(), it.slug, 'mirror.json'))).length } : it);
-  const its = done ? j.items.map((it) => { const flags = currentFlags(j, it); return withVideos(flags === it.flags ? it : { ...it, flags }); }) : j.items;
+  const approvals = require('./approvals');
+  const pending = done ? approvals.pendingOf(j.items, j.check ? j.channel : undefined) : [];
+  const pendingSlugs = new Set(pending.map(x => x.slug).filter(Boolean));
+  const its = (done ? j.items.map((it) => { const flags = currentFlags(j, it); return withVideos(flags === it.flags ? it : { ...it, flags }); }) : j.items)
+    .map(it => (j.check && (it.ai || []).some(x => x.k === 'n12' && !x.ok)
+      ? { ...it, ai: it.ai.map(x => (x.k === 'n12' ? { ...x, ok: true, blocked: false, cut: true } : x)) } : it))   // 예전 기록의 12장 차단은 정보로만
+    .map(it => {
+      if (!j.check || it.check === 'removed' || it.status !== 'ok') return it;
+      if (!exportBlocked(it) && isCurrentRow(j, it)) {
+        return it.check !== 'ok' || (it.checkedHash === it.hash && it.checkedChannel === j.channel &&
+          it.checkedContentDigest === it.contentDigest && (!approvals.gateOn() || !pendingSlugs.has(it.slug))) ? it : { ...it, check: null };
+      }
+      if (it.unified && it.contentDigest && ((it.ai || []).some(blocking) || it.retrying)) return { ...it, check: null };
+      return { ...it, check: null, imgs: [], ai: [{ k: 'preview', ok: false, blocked: true }] };
+    });
   const fin = (x) => x.status === 'ok' || x.status === 'failed';
   return { id: j.id, upload: j.upload, status: j.status, error: j.error, channel: j.channel, country: countryOf(j), phase: j.phase,
     total: its.length, done: its.filter(fin).length,
@@ -144,12 +255,12 @@ function jobView(j) {
     crawlTotal: its.filter((x) => x.register || x.force).length, crawlDone: its.filter((x) => (x.register || x.force) && (x.crawled || x.status === 'failed')).length,
     review: its.filter((x) => (x.flags || []).some((f) => f.sev !== 'info')).length,
     notify: j.notify ? { email: !!j.notify.email, sent: !!j.notify.sent } : null,
-    skus: j.skus || [], items: its, file: j.status === 'ready' ? `/api/v1/bulk/jobs/${j.id}/file` : null, fileName: j.outName, at: j.at, finishedAt: j.finishedAt,
+    skus: j.skus || [], items: its, file: j.status === 'ready' && (!j.check || !deliveryDenial(j)) ? `/api/v1/bulk/jobs/${j.id}/file` : null, fileName: j.outName, at: j.at, finishedAt: j.finishedAt,
     // 벌크 Check (?check=1): 라이브 아닌 것 건너뜀 수 · 확인 · 뺀 수
     // 확인 · 뺀 수는 제품 기준 (같은 제품의 여러 행은 하나) — 진행 막대 · 건너뜀 수와 같은 단위
     check: j.check ? { ...j.check, confirmed: units(its).filter((u) => u.every((x) => x.check === 'ok')).length, removed: units(its).filter((u) => u.every((x) => x.check === 'removed')).length } : null,
     // 검토·승인 (approvals.js): 승인 안 된 제품 수. gate 가 켜져 있으면 엑셀 받기가 잠긴다
-    approval: done ? (() => { const a = require('./approvals'); const p = a.pendingOf(its); return { gate: a.gateOn(), pending: p.length, models: p.slice(0, 20).map((x) => x.model || x.slug) }; })() : null };
+    approval: done ? { gate: approvals.gateOn(), pending: pending.length, models: pending.slice(0, 20).map(x => x.model || x.slug) } : null };
 }
 
 // ── 내용 만들기 (같은 서버의 기존 API) ──
@@ -159,21 +270,23 @@ async function post(p, body, timeoutMs) {
   if (!r.ok) throw new Error(j.error || j.detail || `HTTP ${r.status} ${p}`);
   return j;
 }
-async function contentFor(channel, url) {
-  const listing = channel === 'lazada';
+async function contentFor(channel, url, opt = {}) {   // opt.fresh: 슬라이스를 새로 그림(캐시 무시 — 자동 다시 하기)
+  const listing = channel === 'lazada' && !opt.check;
   // PDP 요약(태국어)은 태국 제품만 — 싱가포르 등은 요약 없이 이미지만 (2026-11-23). Shopee 도 (2026-11-24, 글로 이미지 주소 위에)
   const summaryP = /lg\.com\/th\//i.test(url) ? post('/api/v1/pdp-summary', { url }, 7 * 60 * 1000).catch((e) => ({ error: e.message })) : null;
   // 빌더에서 저장한 편집본이 있으면 그것으로 (edits.js) — 없으면 크롤 데이터로 새로 만든다
-  const ed = require('./edits').getEdit(require('./crawler-routes').slugify(url), channel);
-  const g = ed ? { html: ed.html } : await post('/api/ebay-generate', { url, medium: 'shopee_lazada', listing }, 5 * 60 * 1000);
+  const slug = require('./crawler-routes').slugify(url);
+  const ed = require('./edits').getEdit(slug, channel);
+  const g = ed ? { html: ed.html } : await post('/api/ebay-generate', { url, medium: 'shopee_lazada', listing, ...(opt.check ? { reviewMap: true } : {}) }, 5 * 60 * 1000);
   if (!g.html) throw new Error('generate returned no HTML');
-  const sl = await post('/api/v1/slice-html', { html: g.html, medium: 'shopee_lazada' }, 12 * 60 * 1000);
+  const sliceOpts = { medium: 'shopee_lazada', ...(opt.fresh ? { rev: 'r' + Date.now().toString(36) } : {}) };
+  const sl = await sliceContent(g.html, sliceOpts, opt.check, slug);
   const sm = await summaryP;
   if (channel === 'shopee') {
     // Shopee 설명은 HTML 을 받지 않는다 → Promotion(상품 설명 정보) · 요약(태국)은 태그 없는 글로 위, 그 아래 이미지 주소 (한 줄에 하나, 앞 12장),
     // 맨 아래 상품 설명 정보의 나머지 (2026-11-25 — 태국은 Product details 가 요약 자리)
     const LR = require('./listing-routes');
-    const parts = LR.shopeeParts(await LR.currentFor(url).catch(() => null), url);
+    const parts = opt.check ? {} : LR.shopeeParts(await LR.currentFor(url).catch(() => null), url);
     const head = (parts.top ? parts.top + '\n\n' : '') + (sm && sm.text ? sm.text.trim() + '\n\n' : '');
     const tail = parts.bottom ? '\n\n' + parts.bottom : '';
     const urls = (sl.urls || []).slice(0, SHOPEE_MAX_IMAGES);
@@ -181,11 +294,22 @@ async function contentFor(channel, url) {
     if (!urls.length) throw new Error('no images');
     const text = head + urls.join('\n') + tail;
     return { text, images: urls.length, allImages: sl.count, summaryErr: sm && sm.error ? sm.error.slice(0, 200) : '', edited: !!ed,
-             tooLong: text.length > SHOPEE_DESC_MAX ? text.length : 0, urls, hash: sl.hash, loaded: sl.images_loaded };
+             tooLong: text.length > SHOPEE_DESC_MAX ? text.length : 0, urls, hash: sl.hash, ...sliceEvidence(sl, opt.check) };
   }
   return { text: (sm && sm.html ? sm.html + '\n' : '') + sl.html, images: sl.count, allImages: sl.count, summaryErr: sm && sm.error ? sm.error.slice(0, 200) : '', edited: !!ed,
-           urls: sl.urls || [], hash: sl.hash, loaded: sl.images_loaded };
+           urls: sl.urls || [], hash: sl.hash, ...sliceEvidence(sl, opt.check) };
 }
+
+// Check sends only the PDP render to XLSX and reviews the exact URLs retained in that cell.
+async function sliceContent(html, sliceOpts, check, slug) {
+  const mirror = check && slug && readJson(path.join(OUT_DIR(), slug, 'mirror.json'));
+  const gallery = ((mirror && mirror._gallery) || []).flatMap(g => [g.pc_url, g.mobile_url, g.unified_url]).filter(Boolean).map(imgKey);
+  return sliceSlot(() => post('/api/v1/slice-html', { html, ...sliceOpts, ...(check ? { review: true, reviewGallery: gallery } : {}) }, 12 * 60 * 1000));
+}
+const sliceEvidence = (sl, check) => ({
+  loaded: sl.images_loaded, broken: sl.broken || null,
+  ...(check ? { unified: true, sections: sl.sections, specTables: sl.specTables } : {}),
+});
 
 // 묶음 상품 ('A + B' 행, 2026-11-23): 구성품 크롤 결과를 빌더 번들과 같은 모양으로 합쳐(crawler-py/bundle_pto.py combine)
 // 같은 렌더러(ebay_builder.py)로 그리고, 단품과 같은 슬라이스 이미지로 만든다. 묶음 결과는 media-cache/bulk/bundles/<키>/ (제품 목록엔 안 나옴)
@@ -194,21 +318,29 @@ const python = () => process.env.CRAWLER_PYTHON || (fs.existsSync(path.join(PY_D
 const runPy = (args, timeoutMs) => new Promise((resolve, reject) => require('child_process').execFile(python(), args, { cwd: PY_DIR, timeout: timeoutMs },
   (err, out, stderr) => (err ? reject(new Error(String(stderr || err.message).trim().split('\n').pop().slice(0, 300))) : resolve(String(out)))));
 const bundleKey = (it) => crypto.createHash('sha1').update(it.bundle.map((x) => x.slug).join('+')).digest('hex').slice(0, 16);
-async function contentForBundle(channel, it, title) {
-  const dir = path.join(DIR, 'bundles', bundleKey(it));
-  fs.mkdirSync(dir, { recursive: true });
+async function contentForBundle(channel, it, title, opt = {}) {
+  const dir = opt.check ? fs.mkdtempSync(path.join(os.tmpdir(), 'clia-check-bundle-')) : path.join(DIR, 'bundles', bundleKey(it));
   const spec = { title: title || it.model, components: it.bundle.map((x) => ({ model: x.model || '', url: x.url, slug: x.slug })) };
-  fs.writeFileSync(path.join(dir, 'spec.json'), JSON.stringify(spec));
-  await runPy(['bundle_pto.py', 'combine', dir, path.join(dir, 'spec.json')], 60 * 1000);
-  await runPy(['ebay_builder.py', dir, '--fragment', '--medium', 'shopee_lazada', '-o', 'content.html'], 3 * 60 * 1000);
-  const html = fs.readFileSync(path.join(dir, 'content.html'), 'utf8');
-  const sl = await post('/api/v1/slice-html', { html, medium: 'shopee_lazada' }, 12 * 60 * 1000);
+  const outputName = opt.check ? 'check-content.html' : 'content.html';
+  let html;
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, 'spec.json'), JSON.stringify(spec));
+    await runPy(['bundle_pto.py', 'combine', dir, path.join(dir, 'spec.json')], 60 * 1000);
+    await runPy(['ebay_builder.py', dir, '--fragment', '--medium', 'shopee_lazada', '-o', outputName, ...(opt.check ? ['--map-sections'] : [])], 3 * 60 * 1000);
+    html = fs.readFileSync(path.join(dir, outputName), 'utf8');
+  } finally {
+    if (opt.check) fs.rmSync(dir, { recursive: true, force: true });
+  }
+  const sliceOpts = { medium: 'shopee_lazada', ...(opt.fresh ? { rev: 'r' + Date.now().toString(36) } : {}) };
+  const sl = await sliceContent(html, sliceOpts, opt.check);
   if (channel === 'shopee') {
     const urls = (sl.urls || []).slice(0, SHOPEE_MAX_IMAGES);
+    if (opt.check) while (urls.length > 1 && urls.join('\n').length > SHOPEE_DESC_MAX) urls.pop();
     if (!urls.length) throw new Error('no images');
-    return { text: urls.join('\n'), images: urls.length, allImages: sl.count, summaryErr: '', urls, hash: sl.hash, loaded: sl.images_loaded };
+    return { tooLong: opt.check && urls.join('\n').length > SHOPEE_DESC_MAX, text: urls.join('\n'), images: urls.length, allImages: sl.count, summaryErr: '', urls, hash: sl.hash, ...sliceEvidence(sl, opt.check) };
   }
-  return { text: sl.html, images: sl.count, allImages: sl.count, summaryErr: '', urls: sl.urls || [], hash: sl.hash, loaded: sl.images_loaded };   // 묶음은 PDP 요약 없이 (요약은 제품 하나 기준)
+  return { text: sl.html, images: sl.count, allImages: sl.count, summaryErr: '', urls: sl.urls || [], hash: sl.hash, ...sliceEvidence(sl, opt.check) };   // 묶음은 PDP 요약 없이 (요약은 제품 하나 기준)
 }
 
 // 크롤 검사 기록(qa_report)으로 센 원문 누락 — 확인 필요(flagsFor) · 벌크 Check 의 AI 체크(aiChecks)가 같이 쓴다
@@ -221,14 +353,35 @@ function qaOf(slug) {
   // 실제로 빠진 이미지가 있거나, 본문 글이 5개 이상 빠졌을 때만
   const cov = qa.coverage || {}, chk = qa.checks || {};
   const real = (x) => x && !NON_CONTENT.has(x.component_id);
-  const texts = (cov.missing_texts || []).filter((x) => real(x) && !x.only_in_cards).length;
+  const tx = (cov.missing_texts || []).filter((x) => real(x) && !GALLERY.has(x.component_id) && !x.only_in_cards), texts = tx.length;
   // 예전에 크롤한 결과의 검사 기록에는 '크롤러가 일부러 뺀 이미지(LG 가 404·자리표시를 내줌)'가 누락으로 들어 있다 — 그것은 빼고 센다.
   // 새 크롤은 검사가 이미 제외한다. 주소가 겹쳐 있던 것은 실제로 이미지를 잃은 것이라 그대로 센다 (다시 가져오면 고쳐진다).
   const dead = new Set(((mirror && mirror._dead_media_dropped) || []).filter((d) => !DUP_DAM.test(d.url || '')).map((d) => imgKey(d.url)));
-  const gone = (cov.missing_images || []).filter(real).filter((x) => !dead.has(imgKey(x.image)));
+  // 갤러리는 우리가 만드는 것(엑셀 설명 칸)이 아니다 — 갤러리 컴포넌트(PD0012 · PD0033)나 갤러리 사진과 같은 그림은 세지 않는다.
+  // 새 크롤은 검사(coverage_check.py)가 이미 빼지만, 예전 기록에 섞여 있어도 걸리지 않게 (2026-11-27)
+  const gal = new Set(((mirror && mirror._gallery) || []).flatMap((g) => [g.pc_url, g.mobile_url]).filter(Boolean).map(imgKey));
+  const gone = (cov.missing_images || []).filter(real).filter((x) => !GALLERY.has(x.component_id) && !gal.has(imgKey(x.image)) && !dead.has(imgKey(x.image)));
   const images = gone.length + (chk.images_missing_url || 0);
   const files = gone.slice(0, 3).map((x) => String(x.image || '').split('/').pop());   // 어떤 이미지가 빠졌는지 (화면에서 마우스를 올리면 보임)
-  return { images, texts, files, mirror };
+  // Keep the original evidence and its source section together.
+  const keyOf = x => cov.source_ownership === 2 ? x.source_key : undefined;
+  const imageIssues = gone.map((x) => ({ src: fullImg(dir, x.image), source_key: keyOf(x) }));
+  const textIssues = tx.map(x => ({ ...x, source_key: keyOf(x) }));
+  const sourceSpecs = Array.isArray(cov.source_specs) ? cov.source_specs.map(x => ({ ...x, source_key: keyOf(x) })) : null;
+  const legacySpecs = sourceSpecs === null ? (cov.missing_texts || []).filter(x => x.component_id === 'PD0008') : [];
+  return { images, texts, files, mirror, imageIssues, textIssues, sourceSpecs, legacySpecs };
+}
+
+// 검사 기록의 이미지 주소는 끝 120자만 남아 있을 수 있다 → 크롤한 원문(pc.html)에서 그 끝으로 끝나는 전체 주소를 찾는다
+function fullImg(dir, tail) {
+  tail = String(tail || '');
+  const abs = (u) => (/^https?:\/\//.test(u) ? u : u.startsWith('//') ? 'https:' + u : u.startsWith('/') ? 'https://www.lg.com' + u : null);
+  if (/^(https?:)?\/\/|^\/content\//.test(tail)) return abs(tail);
+  let html = ''; try { html = fs.readFileSync(path.join(dir, 'pc.html'), 'utf8'); } catch (_) { return null; }
+  if (!tail) return null;
+  const i = html.indexOf(tail); if (i < 0) return null;
+  let s = i; while (s > 0 && !/["'\s(,=]/.test(html[s - 1])) s--;
+  return abs(html.slice(s, i + tail.length));
 }
 
 // ── 벌크 Check (?check=1, 2026-11-26) ──
@@ -236,42 +389,124 @@ function qaOf(slug) {
 //   ok=false 인 항목이 있으면 사람이 '다시 준비' / '이번 엑셀에서 빼기'. Shopee 12장 넘는 것은 자동으로 앞 12장 — 통과 + 회색 안내.
 function aiChecks(j, it, c) {
   const out = [];
-  const m = /^(\d+)\/(\d+)$/.exec(String((c && c.loaded) || ''));
-  const notLoaded = m ? Math.max(0, +m[2] - +m[1]) : 0;
   const q = it.bundle ? { images: 0, texts: 0, mirror: null } : qaOf(it.slug);
   const lgImg = q.images;
-  out.push({ k: 'img', ok: !notLoaded && !lgImg, n: notLoaded + lgImg });
-  out.push({ k: 'txt', ok: q.texts < 5, n: q.texts });   // 글 몇 줄은 캐러셀 버튼 글자 같은 오탐이 많다 — 확인 필요 규칙과 같게 5줄부터
+  const collect = (report, used) => {
+    const m = /^(\d+)\/(\d+)$/.exec(String(report?.loaded || ''));
+    if (!Array.isArray(report?.broken)) {
+      return Array.from({ length: m ? Math.max(0, +m[2] - +m[1]) : 0 }, () => ({}));
+    }
+    return report.broken.flatMap(b => {
+      if (!Array.isArray(b.regions)) return !used || b.slice <= used ? [{ ...b, regions: [b] }] : [];
+      const regions = b.regions.filter(r => r.slice <= used);
+      return regions.length || !b.regions.length ? [{ ...b, regions }] : [];
+    });
+  };
+  const used = c?.urls?.length || 0;
+  const at = collect(c, used);
+  const bad = at.length;
+  const regions = ({ source_key }) => {
+    const map = c?.sections || {};
+    return source_key && Object.hasOwn(map, source_key) ? map[source_key].filter(r => r.slice <= used) : [];
+  };
+  const imageIssues = (q.imageIssues || []).map((x) => ({ src: x.src, regions: regions(x) }));
+  const specsInMirror = !!q.mirror?.sections?.some(s => s.specs?.length);
+  // 스펙 표가 PDP 에 그려져 있으면 있는 것 — Shopee 한도로 앞 12장 밖에 있어도 '빠짐'이 아니다 (2026-11-28 결정)
+  const completeInCell = regions => !!regions?.length && regions.every(r => Number.isInteger(r.slice) && r.slice > 0);
+  const rowKey = pair => JSON.stringify(pair.map(v => String(v ?? '').normalize('NFC').trim().replace(/\s+/g, ' ')));
+  const specSources = it.bundle?.length
+    ? it.bundle.map((component, i) => ({ qa: component.slug ? qaOf(component.slug) : null,
+      part: i + 1, model: component.model || component.slug || String(i + 1) }))
+    : [{ qa: q, part: 0, model: '' }];
+  const expectedRows = (table, rows) => {
+    if (!rows?.length) return false;
+    const pairs = new Set((table.rows || []).map(rowKey));
+    return rows.every(r => pairs.has(rowKey([r.label, r.value])));
+  };
+  const hasTable = ({ source_key, rows, part }) => {
+    const tables = (c?.specTables || []).filter(t => (t.part || 0) === part);
+    const keyed = source_key ? tables.filter(t => t.sourceKeys.includes(source_key)) : [];
+    if (keyed.length) return keyed.some(t => completeInCell(t.regions) && expectedRows(t, rows));
+    // Older saved HTML has no section key. Only the exact expected pairs in a
+    // single, complete, unkeyed table can corroborate the source.
+    if (part || !c?.edited) return false;
+    const matches = tables.filter(t => !t.sourceKeys.length && expectedRows(t, rows));
+    return matches.length === 1 && completeInCell(matches[0].regions);
+  };
+  const missingTables = specSources.flatMap(({ qa, part, model }) =>
+    (qa?.sourceSpecs || []).map(x => ({ ...x, part, model })).filter(x => !hasTable(x)));
+  const specIssues = missingTables.map(x => ({
+    ...(x.model ? { model: x.model } : {}), rows: x.rows,
+    regions: x.source_key ? regions({ source_key: x.part ? `part:${x.part}:${x.source_key}` : x.source_key }) : [],
+  }));
+  const specComponents = new Set(missingTables.map(x => x.source_key || x.component_id));
+  const crawlParts = specSources.filter(({ qa, part }) => part &&
+    (!Array.isArray(qa?.sourceSpecs) || (missingTables.some(x => x.part === part) && !qa?.mirror?.sections?.some(s => s.specs?.length))))
+    .map(x => x.part);
+  let legacyUnknown = false;
+  for (const { qa, model } of specSources) {
+    if (Array.isArray(qa?.sourceSpecs)) continue;
+    const lines = qa?.legacySpecs?.map(x => x.text).filter(Boolean) || [];
+    if (lines.length) {
+      specIssues.push({ ...(model ? { model } : {}), lines, regions: [] });
+      specComponents.add('PD0008');
+    } else {
+      legacyUnknown = true;
+      if (model) specIssues.push({ model, unknown: true, regions: [] });
+    }
+  }
+  const textGroups = new Map();
+  for (const x of q.textIssues || []) {
+    if (specComponents.has(x.source_key || x.component_id)) continue;
+    const key = x.source_key || x.section || x.component_id;
+    if (!textGroups.has(key)) textGroups.set(key, { lines: [], regions: regions(x) });
+    textGroups.get(key).lines.push(x.text);
+  }
+  const textIssues = [...textGroups.values()];
+  const texts = textIssues.reduce((n, x) => n + x.lines.length, 0);
+  out.push({ k: 'img', ok: !bad && !lgImg, n: bad + lgImg, bad, lg: lgImg,
+    ...(at && at.length ? { at } : {}), issues: imageIssues });
+  out.push({ k: 'txt', ok: texts < 5, n: texts, issues: textIssues });
   if (!it.bundle && /lg\.com\/th\//i.test(it.url || '')) out.push({ k: 'sum', ok: !(c && c.summaryErr) });
-  if (j.channel === 'shopee') out.push({ k: 'n12', ok: true, used: c ? c.images : 0, all: c ? c.allImages : 0 });
-  const specs = q.mirror ? (q.mirror.sections || []).reduce((n, s) => n + ((s.specs || []).length), 0) : (it.bundle ? 1 : 0);
-  out.push({ k: 'spec', ok: specs > 0 });
+  if (j.channel === 'shopee') {
+    // Shopee 한도(앞 12장 · 3,000자)로 뒤가 잘리는 것은 자동 — 앞 12장만 엑셀에 넣고 막지 않는다 (2026-11-28 결정)
+    out.push({ k: 'n12', ok: true, cut: used < (c?.allImages ?? used) || !!c?.tooLong, used, all: c?.allImages ?? used });
+  }
+  out.push({ k: 'spec', ok: !specIssues.length && !legacyUnknown, unknown: legacyUnknown && specIssues.every(x => x.unknown), blocked: !!specIssues.length || legacyUnknown,
+    crawl: it.bundle ? !!crawlParts.length : !specsInMirror || legacyUnknown || !!q.legacySpecs?.length, crawlParts, issues: specIssues });
   return out;
 }
 const aiFail = (ai) => (ai || []).some((x) => !x.ok);
-// 상품 페이지 프리뷰(bulk/bulk-market.js)에 넣을 제목 · 갤러리 · 스펙 — 크롤 데이터에서 (묶음은 첫 구성품)
-function storeOf(it) {
-  const slug = it.bundle ? (it.bundle[0] || {}).slug : it.slug;
-  const m = readJson(path.join(OUT_DIR(), slug || '', 'mirror.json'));
-  const CM = require('./bulk/bulk-market.js');
-  return { title: (it.bundle ? it.bundleTitle : m && m.product_title) || it.title || it.model || '', gallery: m ? CM.galleryOf(m) : [], specs: m ? CM.specsOf(m) : [] };
+// 고쳐질 수 있는 문제(이미지 · 글 누락)면 한 번 자동으로 다시 (retryLater — 작업이 끝난 뒤 뒤에서):
+// 마지막 크롤이 하루보다 오래됐으면 다시 크롤, 아니면 다시 그리기만 (방금 크롤한 것은 다시 크롤해도 같다 — 크롤 비용만 든다)
+// 자동으로 고칠 수 있는 것 (2026-11-27, PR #103 표 · 장혁 결정): 사람에게 묻기 전에 뒤에서 다시.
+//   누락(lg.com 이미지 · 글 · 스펙 표, 준비 실패) → 크롤 시점과 상관없이 force 로 다시 크롤 — 누락이 없어질 때까지, 안전장치: 최대 3번 · 간격 0 / 30초 / 90초
+//     (운영 로그 11-25~27 크롤 41건: 중앙값 31초 · 느린 것 ~2분. 하루 전 새로 크롤한 제품도 같은 글이 계속 빠져 있어 — 크롤러가 못 읽는 구조 —
+//      더 돌려도 크롤 비용과 기다림만 늘어난다. 3번이면 일시적 실패(네트워크 · 차단)에 간격을 두고 두 번 더 기회)
+//   슬라이스에서 못 가져온 이미지 · 요약 실패 → 다시 그리기(슬라이스 캐시 무시) 최대 2번
+//   Shopee 12장은 자동(앞 12장만 엑셀에)이라 묻지도 막지도 않는다 (2026-11-28 결정).
+const MAX_CRAWLS = 3, CRAWL_GAP = [0, 30 * 1000, 90 * 1000], MAX_DRAWS = 2;
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+function fixPlan(it, ai) {
+  if (it.status === 'failed') return it.bundle ? { crawl: false, draw: true } : { crawl: true, draw: false };
+  const bad = (k) => (ai || []).some((x) => x.k === k && !x.ok);
+  const img = (ai || []).find((x) => x.k === 'img') || {};
+  const spec = (ai || []).find((x) => x.k === 'spec');
+  const crawl = (!it.bundle && ((!img.ok && img.lg > 0) || bad('txt'))) || (bad('spec') && spec.crawl !== false);
+  const draw = (!img.ok && img.bad > 0) || bad('sum') || bad('preview') || (bad('spec') && spec.crawl === false);
+  return crawl || draw ? { crawl, draw } : null;
 }
-// 고쳐질 수 있는 문제(이미지 · 글 누락)면 한 번 자동으로 다시: 마지막 크롤이 하루보다 오래됐으면 다시 크롤, 아니면 다시 그리기만.
-// (방금 크롤한 것은 다시 크롤해도 같다 — 크롤 비용만 든다)
-async function autoRetry(j, it, c) {
-  const ai = aiChecks(j, it, c);
-  if (it.bundle || !aiFail(ai) || it.retried) return { c, ai };
-  const bad = new Set(ai.filter((x) => !x.ok).map((x) => x.k));
-  if (!bad.has('img') && !bad.has('txt')) return { c, ai };
-  it.retried = 1;
-  const cr = require('./crawler-routes');
-  const src = readJson(path.join(OUT_DIR(), it.slug, 'source.json')) || {};
-  if (Date.now() / 1000 - (Number(src.crawled_at) || 0) > 24 * 3600) {
-    await crawlSlot(() => cr.crawl(it.url, { force: true, base: j.base })).catch((e) => console.warn('[bulk] check retry crawl', it.slug, e.message));
-    catalog.invalidate();
-  }
-  try { const c2 = await contentFor(j.channel, it.url); return { c: c2, ai: aiChecks(j, it, c2) }; }
-  catch (e) { console.warn('[bulk] check retry content', it.slug, e.message); return { c, ai }; }
+const retryable = (it, ai) => { const p = fixPlan(it, ai); return !!p && ((p.crawl && (it.crawls || 0) < MAX_CRAWLS) || (p.draw && (it.tries || 0) < MAX_DRAWS)); };
+// 다시 해도 못 가져온 이미지: lg.com 원본 주소를 직접 열어 본다 — lg.com 에서도 없으면(404 · 410) PDP 에 없는 게 맞다 → 문제 아님
+async function settleImg(ai) {
+  const img = (ai || []).find((x) => x.k === 'img'); if (!img || img.ok || !(img.at || []).length) return ai;
+  await Promise.all(img.at.map(async (b) => {
+    if (!/^https:\/\/www\.lg\.com\//.test(b.src || '')) return;
+    try { const r = await fetch(b.src, { method: 'HEAD', signal: AbortSignal.timeout(8000), headers: { 'User-Agent': 'Mozilla/5.0', Referer: 'https://www.lg.com/' } }); if (r.status === 404 || r.status === 410) b.lgGone = 1; } catch (_) {}
+  }));
+  const left = img.at.filter((b) => !b.lgGone).length;
+  img.goneOnLg = img.at.length - left; img.bad = left; img.n = left + (img.lg || 0); img.ok = !img.n;
+  return ai;
 }
 // 작업 결과 글(행 → 설명 칸)을 남겨 둔다 — Check 에서 뺀 행만 빼고 엑셀을 다시 만들 때 (로컬 + 버킷)
 const textsFile = (j) => path.join(DIR, j.upload, `texts-${j.id}.json`);
@@ -288,71 +523,193 @@ async function loadTexts(j) {
 }
 // 결과 엑셀 = 올린 파일 + (빼지 않은) 채운 행. 뺀 행은 원래 내용 그대로
 async function writeResult(j, texts) {
+  assertSeparateColumns(j);
   const up = await readUpload(j.upload);
   if (!up) throw new Error('uploaded file expired');
   const wb = await xlsx.load(up.buf);
   const sheet = wb.sheets.find((x) => x.path === j.sheet);
   if (!sheet) throw new Error('sheet not found');
   let n = 0;
+  const resultRows = {};
   for (const it of j.items) {
-    if (it.status !== 'ok' || it.check === 'removed' || !texts.has(it.row)) continue;
+    if (it.status !== 'ok' || it.check === 'removed' || (j.check && incompletePdp(it)) || !texts.has(it.row)) continue;
+    if (j.check) {
+      if (digest(texts.get(it.row)) !== it.contentDigest) continue;
+      resultRows[it.row] = { hash: it.hash, contentDigest: it.contentDigest };
+    }
     it.prevLen = String((sheet.rows.get(it.row) || new Map()).get(j.descCol) || '').trim().length;
     wb.setCell(j.sheet, it.row, j.descCol, texts.get(it.row));
     n++;
   }
   for (const x of j.skus || []) if (j.skuCol) wb.setCell(j.sheet, x.row, j.skuCol, x.sku);
   const buf = await wb.save();
+  if (j.check && !(await workbookMatches(j, buf, resultRows))) throw new Error('Written PDP cells differ from review');
   fs.mkdirSync(path.join(DIR, j.upload), { recursive: true });
   fs.writeFileSync(path.join(DIR, j.upload, `result-${j.id}.xlsx`), buf);
   await store.putBuffer(`bulk/${j.upload}/result-${j.id}.xlsx`, buf, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet').catch(() => {});
+  if (j.check) { j.resultDigest = digest(buf); j.resultRows = resultRows; }
   return n;
 }
 // Check 화면의 버튼 — 한 제품(같은 제품의 여러 행)에 한 번: ok(확인하고 다음 → 승인 기록 via 'bulk' + 본 이미지 해시) ·
 //   remove(이번 엑셀에서 빼기 — 그 행들은 원래 내용 그대로) · retry(다시 준비)
-async function checkAction(j, rows, action, by) {
-  const its = j.items.filter((x) => rows.includes(x.row));
-  if (!j.check || !its.length) return { error: 'not found', status: 404 };
-  if (j.status !== 'ready') return { error: 'job is not ready', status: 409 };
-  if (action === 'ok') {
-    if (its.some((it) => it.status !== 'ok')) return { error: 'item is not ready', status: 409 };
-    const who = String(by || '').slice(0, 120), done = new Set();
-    for (const it of its) {
-      it.check = 'ok'; it.checkedBy = who; it.checkedAt = Date.now();
-      // 묶음 상품은 구성품마다 따로 검토 — 여기서는 기록하지 않는다
-      if (!it.bundle && it.hash && it.slug && !done.has(it.slug)) { done.add(it.slug); require('./approvals').write(it.slug, { state: 'approved', by: who, via: 'bulk', hashes: { [j.channel]: it.hash } }); }
-    }
-  } else if (action === 'remove') {
-    for (const it of its) it.check = 'removed';
-    await writeResult(j, await loadTexts(j));
-  } else if (action === 'retry') {
-    if (its.some((it) => it.status === 'working')) return { error: 'already preparing', status: 409 };
-    for (const it of its) { it.check = null; it.status = 'working'; }
-    redoAll(j, its).catch((e) => console.warn('[bulk] check redo', j.id, rows.join(','), e.message));
-  } else return { error: 'unknown action', status: 400 };
-  await persist(j, true);
-  return { ok: true };
+function clearConfirmation(it) {
+  it.check = null;
+  delete it.checkedHash;
+  delete it.checkedChannel;
+  delete it.checkedContentDigest;
+  delete it.checkedBy;
+  delete it.checkedAt;
 }
-async function redoAll(j, its) { const [first, ...rest] = its; await redo(j, first, rest); }
+function checkAction(j, rows, action, by, override, reviewed) {
+  return transact(j, async () => {
+    const its = j.items.filter(x => rows.includes(x.row));
+    if (!j.check || !its.length) return { error: 'not found', status: 404 };
+    if (j.status !== 'ready') return { error: 'job is not ready', status: 409 };
+    if (its.some(it => reviewWrites.has(it) || it.status === 'working' || it.retrying)) {
+      return { error: 'already preparing', status: 409 };
+    }
+    if (action === 'ok') {
+      if (its.some(it => {
+        const seen = reviewed?.[it.row];
+        return !it.hash || !it.contentDigest || seen?.hash !== it.hash || seen?.contentDigest !== it.contentDigest;
+      })) return { error: 'The PDP changed. Review it again before confirming.', status: 409, code: 'review_changed' };
+      if (its.some(it => !included(it) || incompletePdp(it) || !isCurrentRow(j, it)) || !(await resultBytes(j))) {
+        return { error: 'Review the actual Excel PDP before including this item', status: 409 };
+      }
+      const who = String(by || '').slice(0, 120), stamped = new Map(), approvals = require('./approvals');
+      if (approvals.gateOn()) {
+        const hashes = new Map();
+        for (const it of j.items.filter(x => included(x) && !x.bundle && x.slug)) {
+          if (hashes.has(it.slug) && hashes.get(it.slug) !== it.hash) hashes.set(it.slug, null);
+          else hashes.set(it.slug, it.hash);
+        }
+        if (its.some(it => !it.bundle && hashes.get(it.slug) === null)) {
+          return { error: 'Prepare the rows for this product together before confirming', status: 409 };
+        }
+      }
+      for (const it of its) {
+        if (!it.bundle && it.slug && stamped.get(it.slug) !== it.hash) {
+          stamped.set(it.slug, it.hash);
+          const prior = approvals.status(it.slug);
+          const hashes = prior.status === 'approved' ? prior.hashes : null;
+          approvals.write(it.slug, { state: 'approved', by: who, via: override ? 'bulk-override' : 'bulk',
+            hashes: { ...hashes, [j.channel]: it.hash } });
+        }
+        Object.assign(it, { check: 'ok', checkedBy: who, checkedAt: Date.now(),
+          checkedHash: it.hash, checkedChannel: j.channel, checkedContentDigest: it.contentDigest });
+      }
+    } else if (action === 'remove') {
+      await commitRows(j, its.map(it => ({ it, apply: staged => { clearConfirmation(staged); staged.check = 'removed'; } })));
+      return { ok: true };
+    } else if (action === 'retry') {
+      for (const it of its) { clearConfirmation(it); it.status = 'working'; reviewWrites.add(it); }
+      await persist(j, true);
+      redoAll(j, its).catch(e => console.warn('[bulk] check redo', j.id, rows.join(','), e.message));
+      return { ok: true };
+    } else return { error: 'unknown action', status: 400 };
+    await persist(j, true);
+    return { ok: true };
+  });
+}
+
+// The caller holds the per-job transaction. Stage row changes while storage awaits,
+// then publish the row state and the proof for the workbook in the same turn.
+async function commitRows(j, updates) {
+  const texts = await loadTexts(j);
+  const staged = { ...j, items: j.items.map(it => ({ ...it })) };
+  for (const { it, text, apply } of updates) {
+    const other = staged.items.find(x => x.row === it.row);
+    apply(other);
+    if (text !== undefined) texts.set(it.row, text);
+  }
+  await saveTexts(staged, texts, true);
+  await writeResult(staged, texts);
+  await persist(staged, true);
+  for (const { it: item } of updates) {
+    const other = staged.items.find(x => x.row === item.row);
+    for (const k of Object.keys(item)) if (!Object.hasOwn(other, k)) delete item[k];
+    Object.assign(item, other);
+  }
+  j.resultDigest = staged.resultDigest;
+  j.resultRows = staged.resultRows;
+}
+function commitRender(j, items, c, ai) {
+  return transact(j, () => commitRows(j, items.map(it => ({
+    it, text: c.text, apply: staged => {
+      clearConfirmation(staged);
+      Object.assign(staged, { status: 'ok', error: '', images: c.images, allImages: c.allImages,
+        chars: c.text.length, summaryErr: c.summaryErr || '', imgs: c.urls || [], unified: c.unified === true,
+        hash: c.hash || '', contentDigest: digest(c.text), ai: JSON.parse(JSON.stringify(ai)) });
+      staged.flags = flagsFor(j, staged, c);
+    },
+  }))));
+}
+// 자동 재시도 (2026-11-27): 작업이 끝난 뒤 뒤에서 — 사람은 결과를 바로 보고, 고쳐지면 그 제품이 '준비됨'으로 옮겨 간다
+const retryingJobs = new Set();
+function kickRetries(j) {
+  if (!j.check || retryingJobs.has(j.id)) return;
+  const its = j.items.filter((x) => x.retrying && (x.status === 'ok' || x.status === 'failed'));
+  if (!its.length) return;
+  retryingJobs.add(j.id);
+  return Promise.all(units(its).map(([it, ...same]) => retryLater(j, it, same)))
+    .finally(() => retryingJobs.delete(j.id));
+}
+async function retryLater(j, it, same) {
+  const cr = require('./crawler-routes'), all = [it, ...same];
+  for (;;) {
+    const plan = fixPlan(it, it.ai); if (!plan) break;
+    const doCrawl = plan.crawl && (it.crawls || 0) < MAX_CRAWLS, doDraw = plan.draw && (it.tries || 0) < MAX_DRAWS;
+    if (!doCrawl && !doDraw) break;
+    try {
+      if (doCrawl) {   // 누락이면 크롤 시점과 상관없이 force 로 — 간격을 두고 (화면은 기다리지 않는다, 뒤에서)
+        const k = it.crawls || 0;
+        if (CRAWL_GAP[k]) await sleep(CRAWL_GAP[k]);
+        await transact(j, async () => {
+          for (const x of all) x.crawls = k + 1;
+          await persist(j, true);
+        });
+        const targets = it.bundle ? (it.ai.find(x => x.k === 'spec')?.crawlParts || [])
+          .map(part => it.bundle[part - 1]?.url).filter(Boolean) : [it.url];
+        for (const url of new Set(targets)) {
+          await crawlSlot(() => cr.crawl(url, { force: true, base: j.base })).catch((e) => console.warn('[bulk] check auto crawl', it.slug, e.message));
+        }
+        catalog.invalidate();
+      }
+      if (doDraw) await transact(j, () => { const tries = (it.tries || 0) + 1; for (const x of all) x.tries = tries; });
+      const c = await contentSlot(() => (it.bundle ? contentForBundle(j.channel, it, it.bundleTitle, { fresh: true, check: j.check }) : contentFor(j.channel, it.url, { fresh: true, check: j.check })));
+      if (c.text.length > CELL_MAX) throw new Error(`too long for one Excel cell (${c.text.length} chars)`);
+      const ai = aiChecks(j, it, c);
+      if (!retryable({ ...it, status: 'ok' }, ai)) await settleImg(ai);   // 마지막이면 lg.com 원본도 확인
+      await commitRender(j, all, c, ai);
+      for (const x of all) require('./slice-preview').ensure(x.imgs).catch(() => {});
+    } catch (e) {
+      console.warn('[bulk] check auto retry', j.id, it.slug, it.crawls || 0, it.tries || 0, e.message);
+      if (it.status === 'failed') await transact(j, () => { for (const x of all) x.error = String(e.message || e).slice(0, 300); });
+    }
+    await transact(j, () => persist(j, true));
+  }
+  await transact(j, async () => { for (const x of all) delete x.retrying; await persist(j, true); });
+}
+async function redoAll(j, its) {
+  await Promise.all(units(its).map(([first, ...rest]) => redo(j, first, rest)));
+}
 // 다시 준비 (사람이 누름): 다시 크롤 → 내용 → AI 체크(자동 재시도 없이) → 엑셀 다시
 async function redo(j, it, same = []) {
   const cr = require('./crawler-routes');
   try {
-    if (!it.bundle) { await crawlSlot(() => cr.crawl(it.url, { force: true, base: j.base })); catalog.invalidate(); }
-    const c = it.bundle ? await contentForBundle(j.channel, it, it.bundleTitle) : await contentFor(j.channel, it.url);
-    it.retried = 1;
-    const texts = await loadTexts(j);
-    for (const x of [it, ...same]) {
-      texts.set(x.row, c.text);
-      Object.assign(x, { status: 'ok', error: '', images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: c.summaryErr || '',
-        imgs: c.urls || [], hash: c.hash || '', ai: aiChecks(j, x, c), store: storeOf(x) });
-      x.flags = flagsFor(j, x, c);
-    }
-    await saveTexts(j, texts, true);
-    await writeResult(j, texts);
+    const targets = it.bundle ? it.bundle.map(x => x.url).filter(Boolean) : [it.url];
+    for (const url of new Set(targets)) await crawlSlot(() => cr.crawl(url, { force: true, base: j.base }));
+    catalog.invalidate();
+    const c = it.bundle ? await contentForBundle(j.channel, it, it.bundleTitle, { check: j.check }) : await contentFor(j.channel, it.url, { check: j.check });
+    if (c.text.length > CELL_MAX) throw new Error(`too long for one Excel cell (${c.text.length} chars)`);
+    await commitRender(j, [it, ...same], c, aiChecks(j, it, c));
   } catch (e) {
-    for (const x of [it, ...same]) Object.assign(x, { status: x.error && !x.imgs ? 'failed' : 'ok', ai: [...(x.ai || []).filter((y) => y.k !== 'redo'), { k: 'redo', ok: false, msg: String(e.message || e).slice(0, 200) }] });
+    await transact(j, () => {
+      for (const x of [it, ...same]) Object.assign(x, { status: x.error && !x.imgs ? 'failed' : 'ok',
+        unified: false, ai: [...(x.ai || []).filter(y => y.k !== 'redo'), { k: 'redo', ok: false, msg: String(e.message || e).slice(0, 200) }] });
+    });
   }
-  await persist(j, true);
+  await transact(j, async () => { for (const x of [it, ...same]) reviewWrites.delete(x); await persist(j, true); });
 }
 
 // ── 확인 필요 ──
@@ -368,6 +725,7 @@ const imgKey = (u) => {
   try { k = decodeURIComponent(k); } catch (_) {}
   return k.replace(/[._-]\d{2,4}x\d{2,4}/g, '');
 };
+const GALLERY = new Set(['PD0012', 'PD0033']);   // 제품 갤러리 (큰 사진 + 썸네일) — 상세(PDP)가 아니다
 const NON_CONTENT = new Set(['ST0018', 'PD0016']);   // 누락으로 세지 않는 영역: 바로가기 링크(ST0018) · 구매처(PD0016)
 const DUP_DAM = /(?:\/content\/dam\/channel\/wcms){2,}/;   // LG 페이지가 경로를 두 번 붙인 주소 — 이미지가 실제로 있어서 크롤러가 바로잡는다
 function flagsFor(j, it, c) {
@@ -393,6 +751,7 @@ let paused = false, runningJobs = 0;
 require('./drain').register({ name: 'bulk', pause: () => { paused = true; }, busy: () => runningJobs });
 
 async function run(j) {
+  assertSeparateColumns(j);
   const cr = require('./crawler-routes');
   const wbUp = await readUpload(j.upload);
   if (!wbUp) throw new Error('uploaded file expired');
@@ -401,7 +760,6 @@ async function run(j) {
   if (!sheet) throw new Error('sheet not found');
   const contentBy = new Map();     // slug → Promise<content>
   const texts = new Map();         // row → 설명 칸 내용 (작업 기록에는 넣지 않는다)
-  const contentSlot = limiter(2);
   // 같은 제품은 작업 안에서 한 번만 크롤 (단품 행과 여러 묶음의 구성품이 겹칠 수 있다 — 같은 폴더에 두 크롤이 동시에 쓰지 않게)
   const crawlBy = new Map();
   const crawlOnce = (url, force, onStart) => {   // onStart: 차례가 와서 실제로 크롤을 시작할 때 ('등록 대기' → '가져오는 중')
@@ -430,13 +788,19 @@ async function run(j) {
         }
         if (!j.items.some((x) => (x.register || x.force) && !x.crawled && x.status !== 'failed')) j.phase = 'content';
         it.status = 'working'; persist(j);
-        const key = 'bundle:' + bundleKey(it);
-        if (!contentBy.has(key)) contentBy.set(key, contentSlot(() => { stop(); return contentForBundle(j.channel, it, it.bundleTitle); }));
+        const key = 'bundle:' + (j.check ? it.row : bundleKey(it));
+        if (!contentBy.has(key)) contentBy.set(key, contentSlot(() => { stop(); return contentForBundle(j.channel, it, it.bundleTitle, { check: j.check }); }));
         const c = await contentBy.get(key);
         stop();
         if (c.text.length > CELL_MAX) throw Object.assign(new Error(`too long for one Excel cell (${c.text.length} chars)`), { stage: 'content' });
         texts.set(it.row, c.text);
-        if (j.check) { Object.assign(it, { ai: aiChecks(j, it, c), imgs: c.urls || [], hash: c.hash || '', store: storeOf(it) }); await saveTexts(j, texts, false); require('./slice-preview').ensure(it.imgs).catch(() => {}); }
+        if (j.check) {
+          const ai = aiChecks(j, it, c);
+          if (retryable({ ...it, status: 'ok' }, ai)) it.retrying = 1;
+          Object.assign(it, { contentDigest: digest(c.text), ai, imgs: c.urls || [], unified: c.unified === true, hash: c.hash || '' });
+          await saveTexts(j, texts, false);
+          require('./slice-preview').ensure(it.imgs).catch(() => {});
+        }
         Object.assign(it, { status: 'ok', error: '', images: c.images, allImages: c.allImages, chars: c.text.length, summaryErr: '' });
         it.flags = flagsFor(j, it, c);
         it.videos = 0;
@@ -457,10 +821,13 @@ async function run(j) {
       if (!it.slug) it.slug = cr.slugify(it.url);
       if (!j.items.some((x) => (x.register || x.force) && !x.crawled && x.status !== 'failed')) j.phase = 'content';
       it.status = 'working'; persist(j);
-      if (!contentBy.has(it.slug)) contentBy.set(it.slug, contentSlot(() => { stop(); return contentFor(j.channel, it.url); }));
+      if (!contentBy.has(it.slug)) contentBy.set(it.slug, contentSlot(() => { stop(); return contentFor(j.channel, it.url, { check: j.check }); }));
       let c = await contentBy.get(it.slug);
       stop();
-      if (j.check) { const r = await autoRetry(j, it, c); c = r.c; Object.assign(it, { ai: r.ai, imgs: c.urls || [], hash: c.hash || '', store: storeOf(it) }); stop();
+      if (j.check) {   // 자동 재시도(다시 크롤)는 기다리지 않는다 — 작업이 끝난 뒤 뒤에서 (retryLater). 그동안 화면엔 '검토 필요 · 다시 시도 중'
+        const ai = aiChecks(j, it, c);
+        if (retryable(it, ai)) it.retrying = 1;
+        Object.assign(it, { ai, contentDigest: digest(c.text), imgs: c.urls || [], unified: c.unified === true, hash: c.hash || '' }); stop();
         require('./slice-preview').ensure(it.imgs).catch(() => {}); }   // Check 화면용 작은 미리보기를 미리 (원본은 그대로)
       if (c.text.length > CELL_MAX) throw Object.assign(new Error(`too long for one Excel cell (${c.text.length} chars)`), { stage: 'content' });
       texts.set(it.row, c.text);
@@ -474,21 +841,25 @@ async function run(j) {
       const msg = String(e.message || e).slice(0, 300);
       const stage = (it.register || it.force) && !it.crawled ? 'crawl' : 'content';
       Object.assign(it, { status: 'failed', error: msg, flags: [{ code: stage, sev: 'error', msg }] });
+      if (j.check && retryable(it, [])) it.retrying = 1;   // 벌크 Check: 준비 실패도 작업이 끝난 뒤 자동으로 다시 크롤
     }
     persist(j);
   }));
   if (j.status === 'cancelled') return;   // 중단했으면 엑셀을 만들지 않는다
   if (paused) return;                      // 재배포: 새 서버가 이어서 엑셀까지 만든다
   j.phase = 'write';
+  if (j.check) {
+    await transact(j, async () => { await saveTexts(j, texts, true); await writeResult(j, texts); });
+    return;
+  }
   for (const it of j.items) {
-    if (it.status !== 'ok') continue;
+    if (it.status !== 'ok' || (j.check && incompletePdp(it))) continue;
     it.prevLen = String((sheet.rows.get(it.row) || new Map()).get(j.descCol) || '').trim().length;
     wb.setCell(j.sheet, it.row, j.descCol, texts.get(it.row));
   }
   // SKU 번호가 비어 있던 행에 사용자가 넣은 SKU
   for (const x of j.skus || []) if (j.skuCol) wb.setCell(j.sheet, x.row, j.skuCol, x.sku);
   if (!j.items.some((x) => x.status === 'ok')) throw new Error('no row could be filled');
-  if (j.check) await saveTexts(j, texts, true);
   const buf = await wb.save();
   fs.mkdirSync(path.join(DIR, j.upload), { recursive: true });
   fs.writeFileSync(path.join(DIR, j.upload, `result-${j.id}.xlsx`), buf);
@@ -515,8 +886,9 @@ function start(j) {
       console.log(`[bulk] ${j.status} ${j.outName}: ok ${j.items.filter((x) => x.status === 'ok').length}, failed ${j.items.filter((x) => x.status === 'failed').length}`);
       if (j.status !== 'cancelled') await notify(j).catch((e) => console.warn('[bulk] notify', e.message));   // 중단한 작업은 메일을 보내지 않는다
       if (j.status === 'failed') await alertAdmin(j).catch((e) => console.warn('[bulk] admin alert', e.message));
-      await persist(j, true);
+      await transact(j, () => persist(j, true));
       await activeList((ids) => ids.filter((x) => x !== j.id)).catch(() => {});
+      if (j.status === 'ready') kickRetries(j);
     });
   return j;
 }
@@ -555,23 +927,23 @@ async function resumeAll() {
 }
 
 // ── 끝났을 때 메일 (lge-d2c.com Resend) — 내용은 bulk-mail.js ──
-async function notify(j) {
-  const to = j.notify && j.notify.email;
-  const key = process.env.RESEND_API_KEY, from = process.env.CLIA_MAIL_FROM;
-  if (!to || !key || !from || j.notify.sent || j.notify.sending) return;
-  j.notify.sending = true;   // 끝날 때 · 주소를 받을 때 거의 동시에 불려도 한 번만
-  try { await sendMail(j, to, key, from); } finally { j.notify.sending = false; }
+function notify(j) {
+  return transact(j, async () => {
+    const to = j.notify && j.notify.email;
+    const key = process.env.RESEND_API_KEY, from = process.env.CLIA_MAIL_FROM;
+    if (!to || !key || !from || j.notify.sent) return;
+    await sendMail(j, to, key, from);
+  });
 }
 async function sendMail(j, to, key, from) {
   const base = (process.env.PUBLIC_BASE_URL || j.base || '').replace(/\/$/, '');
   // 완성된 엑셀을 메일에 첨부 (너무 크면 받기 링크만)
   let attachments;
-  if (j.status === 'ready') {
-    const fp = path.join(DIR, j.upload, `result-${j.id}.xlsx`);
-    const buf = fs.existsSync(fp) ? fs.readFileSync(fp) : await store.getBuffer(`bulk/${j.upload}/result-${j.id}.xlsx`).catch(() => null);
-    if (buf && buf.length <= MAIL_ATTACH_MAX) attachments = [{ filename: j.outName, content: buf.toString('base64') }];
-  }
-  const m = require('./bulk-mail').build(j, { base, attached: !!attachments });
+  const denied = deliveryDenial(j);
+  const bytes = denied ? null : await resultBytes(j);
+  const buf = bytes && !deliveryDenial(j) ? bytes : null;
+  if (buf && buf.length <= MAIL_ATTACH_MAX) attachments = [{ filename: j.outName, content: buf.toString('base64') }];
+  const m = require('./bulk-mail').build(j, { base, attached: !!attachments, reviewRequired: !!(j.check && !buf) });
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ from, to: [to], subject: m.subject, html: m.html, text: m.text, ...(attachments ? { attachments } : {}) }), signal: AbortSignal.timeout(60000) });
@@ -595,9 +967,11 @@ async function alertAdmin(j) {
 const MAIL_ATTACH_MAX = 15 * 1024 * 1024;   // Resend 한도(40MB)보다 넉넉히 작게
 // 내보내기 시작 뒤 팝업에서 받은 메일 주소 — 이미 끝났으면 바로 보낸다
 async function setNotify(j, email, lang) {
-  j.notify = { email, lang: lang || j.lang || 'en' };
-  await persist(j, true);
-  if (j.status !== 'running') { await notify(j); await persist(j, true); }
+  await transact(j, async () => {
+    j.notify = { email, lang: lang || j.lang || 'en' };
+    await persist(j, true);
+  });
+  if (j.status !== 'running') { await notify(j); await transact(j, () => persist(j, true)); }
   return j;
 }
 const mailReady = () => !!(process.env.RESEND_API_KEY && process.env.CLIA_MAIL_FROM);
@@ -607,4 +981,4 @@ function emailOk(e) {
   return !allow.length || allow.some((d) => String(e).toLowerCase().endsWith('@' + d) || String(e).toLowerCase().endsWith('.' + d));
 }
 
-module.exports = { countryOf, create, cancel, setNotify, getJob, jobView, resumeAll, saveUpload, readUpload, mailReady, emailOk, CRAWL_CONC, DIR, checkAction, aiChecks };
+module.exports = { countryOf, create, cancel, setNotify, getJob, jobView, resumeAll, saveUpload, readUpload, mailReady, emailOk, CRAWL_CONC, DIR, checkAction, exportBlocked, deliver, aiChecks, skuConflict, _kickRetries: kickRetries, _commitRender: commitRender, _sendMail: sendMail, _contentFor: contentFor, _writeResult: writeResult, _fixPlan: fixPlan, _settleImg: settleImg, _retryable: retryable };

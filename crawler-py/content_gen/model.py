@@ -168,6 +168,8 @@ def _merge_card_rows(sections: list, max_cols: int, use_group_heading: bool = Fa
                         "layout_type": "card_row",
                         "component_id": s.get("component_id", ""),
                         "order": s.get("order"),
+                        "source_keys": s.get("source_keys") or [],
+                        "bundle_part": s.get("bundle_part"),
                         "cols": per,
                         "heading": heading_text if k == 0 else "",
                         "cards": cards[k:k + per],
@@ -249,6 +251,8 @@ def build_blocks(mirror: dict, rules: dict) -> list:
                     (c.get("crop") or {}).get("kind") == "badge" or _is_award_url(c.get("img")) for c in cards)))
             blocks.append({"kind": "card_row", "component_id": s.get("component_id", ""),
                            "cols": s.get("cols"), "heading": s.get("heading", ""),
+                           "source_keys": s.get("source_keys") or [],
+                           "bundle_part": s.get("bundle_part"),
                            "cards": cards, "award": award,
                            **({"disclaimers": s["disclaimers"]} if s.get("disclaimers") else {})})
             continue

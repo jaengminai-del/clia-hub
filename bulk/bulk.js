@@ -85,7 +85,7 @@
     $('pfile').textContent = f.name; $('pmsg').textContent = t('reading');
     show('s2');
     const t0 = Date.now();
-    const req = fetch(`/api/v1/bulk/upload?name=${encodeURIComponent(f.name)}&country=${encodeURIComponent(home)}`, { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: f })
+    const req = fetch(`/api/v1/bulk/upload?name=${encodeURIComponent(f.name)}&country=${encodeURIComponent(home)}${CHECK ? '&check=1' : ''}`, { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: f })
       .then(async (r) => {
         const d = await r.json().catch(() => ({ code: r.status === 413 ? 'too_big' : 'other' }));
         if (!r.ok) throw Object.assign(new Error(d.error || 'HTTP ' + r.status), { code: d.code || 'other', maxMb: d.maxMb, info: d });

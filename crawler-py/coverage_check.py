@@ -13,10 +13,9 @@ Gemini 시각 QA 대신, 크롤러가 받은 HTML(pc.html)의 컨텐츠 컴포�
 import json
 import re
 import sys
+from collections import Counter
 from pathlib import Path
 from urllib.parse import unquote
-
-from bs4 import BeautifulSoup
 
 from component_parser import ComponentParser
 
@@ -81,19 +80,23 @@ def _is_ui(el) -> bool:
 
 def html_inventory(html: str) -> list:
     """컨텐츠 컴포넌트별 문구·이미지 목록."""
-    soup = BeautifulSoup(html, "html.parser")
-    wrappers = soup.find_all(class_=re.compile(r"c-wrapper"))
+    parser = ComponentParser(html)
+    wrapper_class = re.compile(r"c-wrapper")
+    wrappers = parser.soup.find_all(class_=wrapper_class)
+
+    def owned_by(node, wrapper):
+        return node.find_parent(class_=wrapper_class) is wrapper
+    parser.parse_all()
+    counts = Counter(cls for w in wrappers for cls in w.get("class", []) if _ID_RE.fullmatch(cls))
     out = []
     for w in wrappers:
-        if w.find_parent(class_=re.compile(r"c-wrapper")):
-            continue                                   # 중첩 래퍼는 바깥 것에서 함께 본다
         m = _ID_RE.search(" ".join(w.get("class") or []))
         cid = m.group(0) if m else ""
-        if not cid or cid[:2] in SKIP_PREFIX or cid in SKIP_IDS:
+        if cid[:2] in SKIP_PREFIX or cid in SKIP_IDS or (not cid and not w.find_parent(class_=wrapper_class)):
             continue
         texts, seen = [], set()
         for el in w.find_all(_TEXT_TAGS):
-            if el.find(_TEXT_TAGS) or _is_ui(el):
+            if not owned_by(el, w) or el.find(_TEXT_TAGS) or el.find(class_=wrapper_class) or _is_ui(el):
                 continue
             t = re.sub(r"\s+", " ", el.get_text(" ", strip=True))
             k = _norm(t)
@@ -103,14 +106,16 @@ def html_inventory(html: str) -> list:
             texts.append(t)
         imgs, iseen = [], set()
         for pic in w.find_all(["picture", "img"]):
+            if not owned_by(pic, w):
+                continue
             if pic.name == "img" and pic.find_parent("picture"):
                 continue
             if _is_ui(pic) or ComponentParser._is_ui_control_media(pic):
                 continue                                   # 링크·클릭 동작이 걸린 UI 이미지 — 크롤러와 같은 규칙
             urls = []
             if pic.name == "picture":
-                urls = [s.get("srcset", "").split(",")[0].strip() for s in pic.find_all("source")]
-                img = pic.find("img")
+                urls = [s.get("srcset", "").split(",")[0].strip() for s in pic.find_all("source") if owned_by(s, w)]
+                img = next((im for im in pic.find_all("img") if owned_by(im, w)), None)
                 if img is not None:
                     urls.append(img.get("src") or img.get("data-src") or "")
             else:
@@ -123,8 +128,14 @@ def html_inventory(html: str) -> list:
                 continue
             iseen |= keys
             imgs.append({"url": urls[-1], "keys": sorted(keys)})
-        if texts or imgs:
-            out.append({"component_id": cid, "texts": texts, "images": imgs})
+        specs = []
+        if cid in ComponentParser.SPEC_COMPONENT_IDS:
+            pairs, _ = parser._parse_spec_pairs(w, owns=lambda node: owned_by(node, w))
+            specs = [{"label": pair.label, "value": pair.value} for pair in pairs]
+        if texts or imgs or specs:
+            out.append({"component_id": cid, "section": cid if counts[cid] == 1 else None,
+                        "source_key": parser.source_keys.get(id(w)),
+                        "texts": texts, "images": imgs, "specs": specs})
     return out
 
 
@@ -161,7 +172,7 @@ def check(html: str, mirror: dict) -> dict:
         for t in c["texts"]:
             n_t += 1
             if _norm(t) not in blob and not _only_ui(t, blob):
-                missing_t.append({"component_id": c["component_id"], "text": t[:160],
+                missing_t.append({"component_id": c["component_id"], "section": c["section"], "source_key": c["source_key"], "text": t,
                                   "only_in_cards": _norm(t) in card_blob})
         for im in c["images"]:
             n_i += 1
@@ -169,11 +180,14 @@ def check(html: str, mirror: dict) -> dict:
                 if set(im["keys"]) & dead:
                     n_dead += 1          # LG 에도 없는 이미지 — 의도한 제외
                     continue
-                missing_i.append({"component_id": c["component_id"], "image": im["url"].split("?")[0][-120:],
+                missing_i.append({"component_id": c["component_id"], "section": c["section"], "source_key": c["source_key"], "image": im["url"],
                                   "only_in_cards": bool(set(im["keys"]) & card_imgs)})
     return {
+        "source_ownership": 2,
         "texts_total": n_t, "texts_missing": len(missing_t),
         "images_total": n_i, "images_missing": len(missing_i), "images_dead_on_lg": n_dead,
+        "source_specs": [{"component_id": c["component_id"], "section": c["section"], "source_key": c["source_key"], "rows": c["specs"]}
+                         for c in inv if c["specs"]],
         "missing_texts": missing_t[:40], "missing_images": missing_i[:40],
     }
 
