@@ -58,7 +58,14 @@ body{font-family:'LGEIText', 'LINESeedSansTH',Arial,sans-serif;background:#F6F3E
 .slice-guide .sg-tag b{font-size:22px;font-weight:800;line-height:1}
 .slice-guide .sg-tag s{text-decoration:none;opacity:.85}
 /* 슬라이스 보기 토글 (툴바) */
-.panel-left > .panel-head .btn-sm.slice-toggle[aria-pressed="true"]{background:#1E6EDC;border-color:#1E6EDC;color:#fff}
+.panel-left > .panel-head .btn-sm.sg-switch{gap:8px}
+.panel-left > .panel-head .btn-sm.sg-switch[hidden]{display:none}
+.sg-switch .sw{position:relative;flex:none;width:30px;height:17px;border-radius:9px;background:#CBC8C2;transition:background .15s}
+.sg-switch .sw::after{content:'';position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+.sg-switch[aria-checked="true"] .sw{background:#1E6EDC}
+.sg-switch[aria-checked="true"] .sw::after{transform:translateX(13px)}
+.sg-switch .sw-state{font-size:10.5px;font-weight:700;color:#999;min-width:20px}
+.sg-switch[aria-checked="true"] .sw-state{color:#1E6EDC}
 .slice-guide .sg-warn{right:8px;margin-top:6px;background:#F28B00;color:#fff;padding:3px 10px;border-radius:6px;font-size:13px;font-weight:700;white-space:nowrap}
 .slice-guide .sg-line.bad{border-top:3px solid #F28B00}
 .slice-guide .sg-sc.bad{color:#F28B00}
@@ -268,7 +275,7 @@ body.from-bulk #btnBulk,body.from-bulk #btnSave{display:none!important}
         <!-- 툴바 (2026-11-25): 왼쪽 lg.com 원본 보기 · 오른쪽 편집 · 상품 정보 · 저장. 상태 · 내보내기는 허브 머리줄에(허브 밖에서는 여기 끝에) -->
         <button class="btn-sm" id="btnFull" type="button" onclick="openFullPage()" disabled>View lg.com page</button>
         <button class="btn-sm shp-chip" id="shpChip" type="button" onclick="reduceInEdit()" hidden></button>
-        <button class="btn-sm slice-toggle" id="btnSlices" type="button" onclick="toggleSliceGuide()" aria-pressed="true" title="Show where the Shopee images are cut" hidden>✂ Slices</button>
+        <button class="btn-sm sg-switch" id="btnSlices" type="button" role="switch" aria-checked="true" onclick="toggleSliceGuide()" title="Show where the page is split into Shopee images" hidden><span class="sw" aria-hidden="true"></span><span>Image breaks</span><span class="sw-state" id="btnSlicesState">ON</span></button>
         <span class="tb-gap"></span>
         <span class="saved-info" id="savedInfo" hidden></span>
         <span class="save-note" id="saveNote" hidden>Saving sends it back for review</span>
@@ -854,7 +861,7 @@ function updateContentInfo() {
 // 자르는 규칙은 slices.py 의 _JS_LAYOUT · _cuts · 자동 장수와 같은 계산 (Shopee 규격: 폭 1000px, 한 장 ≤ 폭 × 1.95,
 // 섹션 경계 → 표 행 · 문단 경계 → 이미지 안쪽은 피함). 미리보기와 서버는 같은 HTML · 같은 폭(.lg-container 800px)이라 위치가 같다.
 //   · 장마다 파랑 · 주황 번갈아 옅은 색 띠 + 왼쪽 위 「Shopee image N / 12」 태그, 경계엔 ✂ 절취선 (컨텐츠 카드와 헷갈리지 않게)
-//   · 툴바 「✂ Slices」 로 켜고 끔 (기본 켬, 브라우저에 기억)
+//   · 툴바 「Image breaks」 스위치로 켜고 끔 (기본 켬, 브라우저에 기억)
 //   · 12장이 끝나는 자리는 굵은 빨간 선, 그 아래(13장~)는 Shopee 에 노출 안 됨 — 빨간 사선
 //   · 안전장치: 그래도 선이 글자 줄 · 이미지 가운데를 지나가면 주황 선 + 「⚠ cuts …」 (정상이면 안 나옴 — 나오면 slices.py 를 고칠 일)
 // 미리보기 바깥 형제 요소에 그려 결과물 · 편집 감시와 무관. slices.py 의 자르기 규칙을 바꾸면 여기도 같이 바꿀 것.
@@ -976,7 +983,7 @@ function drawSliceGuide() {
   if (!g || !frame || !sc) return;
   const has = shopeeLimit() && frame.style.display !== 'none' && !!frame.innerHTML.trim();
   const tg = document.getElementById('btnSlices');
-  if (tg) { tg.hidden = !has; tg.setAttribute('aria-pressed', String(sliceShow)); }
+  if (tg) { tg.hidden = !has; tg.setAttribute('aria-checked', String(sliceShow)); const st = document.getElementById('btnSlicesState'); if (st) st.textContent = sliceShow ? 'ON' : 'OFF'; }
   if (!has || !sliceShow) { g.hidden = true; g.innerHTML = ''; return; }
   const box = frame.getBoundingClientRect(), sr = sc.getBoundingClientRect();
   if (!box.width) return;
@@ -1007,7 +1014,7 @@ function drawSliceGuide() {
   }
   g.innerHTML = html; g.hidden = false; g.dataset.cuts = bad; g.dataset.n = S.n;
 }
-// 슬라이스 보기 토글 (툴바 「✂ Slices」, 2026-11-28): 기본 켬 · 끄면 이 브라우저에 기억
+// 이미지 나눔 보기 스위치 (툴바 「Image breaks」 ON/OFF, 2026-11-28): 기본 켬 · 끄면 이 브라우저에 기억
 let sliceShow = true;
 try { sliceShow = localStorage.getItem('clia.sliceGuide') !== 'off'; } catch (_) {}
 function toggleSliceGuide() {
