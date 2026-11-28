@@ -389,7 +389,9 @@ def _open_page(browser, vw: int, scale: float, doc: str):
     _route_images(ctx)
     page = ctx.new_page()
     page.set_content(doc, wait_until="domcontentloaded", timeout=60000)
-    stat = page.evaluate(_JS_WAIT_ASSETS, 25000)
+    # 이미지 하나를 기다리는 시간: 서버 사본(CLIA_IMAGE_CACHE)으로 받을 때는 90초 (2026-11-28) — 제품을 한꺼번에 그리면 사본 받기가
+    # 줄을 서서 25초로는 모자랐다 (운영 140개 Check: 4개가 '빠진 이미지', 그 이미지들은 나중에 다 열렸음)
+    stat = page.evaluate(_JS_WAIT_ASSETS, 90000 if os.environ.get("CLIA_IMAGE_CACHE") else 25000)
     time.sleep(0.4)
     return ctx, page, stat
 

@@ -1,9 +1,9 @@
 /* bulk-check.js — 벌크 업로드 Check 단계 (?check=1 일 때만, 2026-11-26)
-   흐름: 첨부 › 준비 › Check › 받기. 라이브 제품만 준비 · 결과가 나오는 대로 덱에서 두 더미로(통과 · 검토 필요), 사람은 검토 필요만 하나씩.
+   흐름: 첨부 › 준비 › Check › 받기. 라이브 제품만 준비 · 모든 제품을 한 그리드에 나열하고 결과가 나오는 대로 칸마다 검토 필요만 빨강 (통과 칸엔 표시 없음) (2026-11-28 예시 A).
    - Status 칸이 있으면 Live/Active만, 없으면 모든 상품 행을 공개 LG.com 매칭 후보로 삼는다.
      매칭되지 않았거나 라이브가 아닌 행의 원래 내용은 그대로 둔다.
    - 건너뛴 수는 제품(모델) 기준 — 진행 막대와 같은 단위. 목록에는 엑셀 행 수도.
-   - AI 체크는 서버가 계산(bulk-jobs.js aiChecks) · 화면은 기다리게 하지 않는다 (스캔 띠는 날아가는 카드 위에서만).
+   - AI 체크는 서버가 계산(bulk-jobs.js aiChecks) · 화면은 기다리게 하지 않는다 (스캔 띠는 결과가 닿은 칸 위에서만).
    - 확인 = 승인 기록(approvals.js, via 'bulk' + 본 이미지 해시). 실제 다운로드 잠금은 APPROVAL_GATE 켤 때만.
    bulk.js 가 매칭(setData)까지 하고 BulkCheck.begin(core) 로 넘긴다. 기존 벌크 흐름은 그대로. */
 (function () {
@@ -39,25 +39,25 @@
       w_fail: 'تعذّر التجهيز', w_retried: 'ما زال بعد إعادة المحاولة', redo: 'إعادة التجهيز', remove: 'إزالة من ملف Excel هذا',
       redoing: 'جارٍ إعادة التجهيز', doneT: (n) => `تم فحص ${n}`, removed: (n) => `أُزيل ${n}`, skipped: n=>`${n} منتج دون تغيير`, dl: 'تنزيل Excel', err: 'حدث خطأ: ', reviewChanged: 'تغيّرت صفحة تفاصيل المنتج. راجع النسخة المحدّثة قبل التأكيد.' },
   };
-  // 덱 화면 (2026-11-27) 문구 — 위 TX 에 덧붙인다
+  // Check 화면 (덱 2026-11-27 → 그리드 2026-11-28) 문구 — 위 TX 에 덧붙인다
   const TXD = {
-    en: { rmS: 'Remove', viewAll: (n) => `View all ${n}`, moreBelow: 'More below', back: '← Back', prev: 'Previous', next: 'Next', removedL: 'Removed from this Excel', fReady: 'Ready', fReview: 'Needs review', checkingAll: (n) => `AI is checking all ${n} at once`, sumT: (r, m) => `${r} ready · ${m} need${m === 1 ? 's' : ''} your review`,
-      sumS: (n, s, m) => `Checked ${n} in ${s} s — now just ${m === 1 ? 'this one' : 'these ' + m}`, okIn: 'Looks fine · include',
+    en: { rmS: 'Remove', viewAll: (n) => `View all ${n}`, moreBelow: 'More below', back: '← Back', prev: 'Previous', next: 'Next', removedL: 'Removed from this Excel', fReady: 'Ready', fReview: 'Needs review', aiChk: 'AI checking', revN: (n) => `Review ${n}`, goDl: 'Confirm & download',
+      okIn: 'Looks fine · include',
       allDone: 'All checked', colModel: 'Model', colDesc: 'Description', imgsN: (n) => `${n} images`, moreRows: (n) => `+ ${n} more rows`, confirmDl: (n) => `Confirm ${n} & download` },
-    th: { rmS: 'นำออก', viewAll: (n) => `ดูทั้งหมด ${n}`, moreBelow: 'ยังมีด้านล่าง', back: '← กลับ', prev: 'ก่อนหน้า', next: 'ถัดไป', removedL: 'นำออกจาก Excel นี้แล้ว', fReady: 'พร้อม', fReview: 'ต้องตรวจสอบ', checkingAll: (n) => `AI กำลังตรวจทั้ง ${n} รายการพร้อมกัน`, sumT: (r, m) => `พร้อม ${r} · ต้องตรวจสอบ ${m}`,
-      sumS: (n, s, m) => `ตรวจ ${n} รายการใน ${s} วินาที — เหลือดูแค่ ${m}`, okIn: 'ดูแล้วโอเค · ใส่ไว้',
+    th: { rmS: 'นำออก', viewAll: (n) => `ดูทั้งหมด ${n}`, moreBelow: 'ยังมีด้านล่าง', back: '← กลับ', prev: 'ก่อนหน้า', next: 'ถัดไป', removedL: 'นำออกจาก Excel นี้แล้ว', fReady: 'พร้อม', fReview: 'ต้องตรวจสอบ', aiChk: 'AI กำลังตรวจ', revN: (n) => `ตรวจสอบ ${n} รายการ`, goDl: 'ยืนยันและดาวน์โหลด',
+      okIn: 'ดูแล้วโอเค · ใส่ไว้',
       allDone: 'ตรวจครบแล้ว', colModel: 'รุ่น', colDesc: 'คำอธิบาย', imgsN: (n) => `${n} รูป`, moreRows: (n) => `+ อีก ${n} แถว`, confirmDl: (n) => `ยืนยัน ${n} และดาวน์โหลด` },
-    ko: { rmS: '빼기', viewAll: (n) => `전체 보기 ${n}`, moreBelow: '아래에 더 있음', back: '← 돌아가기', prev: '이전', next: '다음', removedL: '이번 엑셀에서 뺌', fReady: '준비됨', fReview: '검토 필요', checkingAll: (n) => `AI가 ${n}개를 한꺼번에 확인 중`, sumT: (r, m) => `${r}개 준비됨 · ${m}개 검토 필요`,
-      sumS: (n, s, m) => `${n}개를 ${s}초에 확인 — 이제 ${m}개만 보면 돼요`, okIn: '괜찮음 · 포함',
+    ko: { rmS: '빼기', viewAll: (n) => `전체 보기 ${n}`, moreBelow: '아래에 더 있음', back: '← 돌아가기', prev: '이전', next: '다음', removedL: '이번 엑셀에서 뺌', fReady: '준비됨', fReview: '검토 필요', aiChk: 'AI 확인 중', revN: (n) => `${n}개 검토하기`, goDl: '확인하고 받기',
+      okIn: '괜찮음 · 포함',
       allDone: '모두 확인함', colModel: '모델', colDesc: '설명', imgsN: (n) => `이미지 ${n}장`, moreRows: (n) => `+ ${n}행 더`, confirmDl: (n) => `${n}개 확인하고 받기` },
-    de: { rmS: 'Entfernen', viewAll: (n) => `Alle ${n} ansehen`, moreBelow: 'Weiter unten', back: '← Zurück', prev: 'Zurück', next: 'Weiter', removedL: 'Aus dieser Excel entfernt', fReady: 'Bereit', fReview: 'Zu prüfen', checkingAll: (n) => `KI prüft alle ${n} gleichzeitig`, sumT: (r, m) => `${r} bereit · ${m} zu prüfen`,
-      sumS: (n, s, m) => `${n} in ${s} s geprüft — jetzt nur noch ${m}`, okIn: 'Passt · übernehmen',
+    de: { rmS: 'Entfernen', viewAll: (n) => `Alle ${n} ansehen`, moreBelow: 'Weiter unten', back: '← Zurück', prev: 'Zurück', next: 'Weiter', removedL: 'Aus dieser Excel entfernt', fReady: 'Bereit', fReview: 'Zu prüfen', aiChk: 'KI prüft', revN: (n) => `${n} prüfen`, goDl: 'Bestätigen & herunterladen',
+      okIn: 'Passt · übernehmen',
       allDone: 'Alles geprüft', colModel: 'Modell', colDesc: 'Beschreibung', imgsN: (n) => `${n} Bilder`, moreRows: (n) => `+ ${n} weitere Zeilen`, confirmDl: (n) => `${n} bestätigen & herunterladen` },
-    ar: { rmS: 'إزالة', viewAll: (n) => `عرض الكل ${n}`, moreBelow: 'المزيد بالأسفل', back: 'رجوع →', prev: 'السابق', next: 'التالي', removedL: 'أُزيل من ملف Excel هذا', fReady: 'جاهز', fReview: 'بحاجة إلى مراجعة', checkingAll: (n) => `الذكاء الاصطناعي يفحص جميع ${n} معًا`, sumT: (r, m) => `${r} جاهز · ${m} بحاجة إلى مراجعتك`,
-      sumS: (n, s, m) => `تم فحص ${n} في ${s} ث — تبقّى ${m} فقط`, okIn: 'يبدو جيدًا · تضمين',
+    ar: { rmS: 'إزالة', viewAll: (n) => `عرض الكل ${n}`, moreBelow: 'المزيد بالأسفل', back: 'رجوع →', prev: 'السابق', next: 'التالي', removedL: 'أُزيل من ملف Excel هذا', fReady: 'جاهز', fReview: 'بحاجة إلى مراجعة', aiChk: 'الذكاء الاصطناعي يفحص', revN: (n) => `مراجعة ${n}`, goDl: 'تأكيد وتنزيل',
+      okIn: 'يبدو جيدًا · تضمين',
       allDone: 'تم فحص الكل', colModel: 'الطراز', colDesc: 'الوصف', imgsN: (n) => `${n} صور`, moreRows: (n) => `+ ${n} صفوف أخرى`, confirmDl: (n) => `تأكيد ${n} والتنزيل` },
   };
-  // 문제 문구 (2026-11-27 장혁 피드백 '단순하게'): 오른쪽 칸 맨 위 큰 한 문장 · 다섯 언어 같은 톤. w_* 는 덱 더미 카드 아래 짧은 글
+  // 문제 문구 (2026-11-27 장혁 피드백 '단순하게'): 오른쪽 칸 맨 위 큰 한 문장 · 다섯 언어 같은 톤. w_* 는 그리드 칸 아래 짧은 글
   const TXP = {
     en: { fam: { dish: 'Dishwasher', tower: 'WashTower', wd: 'Washer-dryer', styler: 'Styler', dryer: 'Dryer', washer: 'Washer', fridge: 'Refrigerator', buds: 'Earbuds', soundbar: 'Soundbar', speaker: 'Speaker', monitor: 'Monitor', tv: 'TV', ac: 'Air conditioner', purifier: 'Air purifier', dehum: 'Dehumidifier', micro: 'Microwave', vacuum: 'Vacuum', laptop: 'Laptop', projector: 'Projector' },
       bImg: 'lg.com image is missing', bLines: 'lg.com text is missing', bSum: 'Thai summary not made', bSpec: 'lg.com spec table is missing', bFail: "PDP couldn't be made", noOrig: 'Original image unavailable', noLocation: 'Location in PDP unknown', bSpecUnknown: 'Could not verify lg.com specifications', bPreview: 'Excel PDP needs to be prepared again', bLimit: 'Shopee limits cut off part of the Excel PDP',
@@ -140,11 +140,14 @@
     const v = document.getElementById('ckView'); if (v) v.onclick = (ev) => { ev.preventDefault(); C.open = !C.open; prepView(core); };
   }
 
-  // ── Check: 덱 + 양쪽 더미 (2026-11-27) ──
-  // 서버가 내용을 여러 개 동시에 만들고(bulk-jobs.js CONTENT_CONC) AI 체크 결과가 나오는 대로: 통과는 덱에서 오른쪽 더미로 우르르
-  // (나올 때 스캔 띠가 빠르게 훑고 ✓), 검토 필요만 왼쪽에 쌓인다. 연출 때문에 기다리게 하지 않는다 — 결과가 몰리면 간격을 줄인다.
-  // 다 끝나면 사람은 검토 필요만 큰 카드로 하나씩 (괜찮음 · 다시 준비 · 빼기). 마지막에 준비된 것을 한 번에 확인 → 받기.
-  // 자동 재시도는 서버가 뒤에서 — 고쳐지면 그 카드가 왼쪽에서 오른쪽으로 옮겨 간다.
+  // ── Check: 전체 그리드 (2026-11-28 결정 · 예시 A — 덱 · 양쪽 더미를 대신) ──
+  // 처음부터 모든 제품이 한 그리드에 칸으로 있고, 서버(bulk-jobs.js CONTENT_CONC)의 결과가 닿는 대로 그 칸만 스캔 띠가 한 번 훑는다 →
+  // 통과 칸엔 표시를 두지 않고(11/28), 검토 필요는 빨간 테두리 + 문제 자리 빨간 칸(PDP 를 그 자리까지 내려 둠). 연출 때문에 기다리게 하지 않는다 — 몰리면 간격을 줄인다.
+  // 위 고정 줄: 가운데 큰 숫자(진행 중엔 'AI 확인 중 n / N' + 얇은 막대) · 버튼은 늘 같은 자리(끝 쪽) — '검토 N' · '확인하고 받기'.
+  // 사람이 정할 것은 목록으로 늘어놓지 않는다 (2026-11-28 장혁 피드백): 다 끝나면 숫자를 잠깐(~1초) 보여 주고 하나씩 검수 화면(viewer 'review')으로 —
+  // 가운데 큰 카드 · 비교 칸 · 위 고정 버튼 셋, 하나 정하면 다음으로. 돌아가기는 그리드로, 다 정하면 끝 화면(확인하고 받기).
+  // 칸을 누르면 그 제품의 자세히 보기(viewer 'all'), 돌아오면 같은 상태.
+  // 자동 재시도는 서버가 뒤에서 — 고쳐지면 그 칸이 준비됨으로 옮겨 간다. 100~300개여도 부드럽게: 작은 미리보기 앞 몇 장만 · lazy, 연출은 보이는 몇십 개만.
   const small = (u) => String(u || '').replace('/media/slices/', '/media/slices-p/');
   const ukey = (u) => (u[0].bundle ? 'b:' + u[0].row : u[0].slug || u[0].url || 'r:' + u[0].row);
   // 제품군 (2026-11-27 장혁 피드백): 크롤 데이터엔 카테고리가 따로 없어 lg.com 주소의 카테고리 경로로 — 묶음은 첫 구성품.
@@ -171,31 +174,8 @@
   const passed = (u) => !busy(u) && u.every((x) => x.status === 'ok') && aiRows(u).every((x) => x.ok);
   const isRemoved = (u) => u.every((x) => x.check === 'removed');
   const isOk = (u) => u.every((x) => x.check === 'ok');
-  const CW = 260;   // 큰 카드 폭 (검토 · 왼쪽 더미는 이걸 줄여서)
 
-  function deckView(core) {
-    const T = C.T, e = core.esc, N = C.units.length || C.liveN, sk = C.skip;
-    const el = frame(core, 2);
-    el.innerHTML = `<div class="dk" id="dk">
-      <div class="dk-cnt dk-l"><span class="d"></span>${e(T.fReview)}<b id="dkLn">0</b></div><div class="dk-slot dk-ls" id="dkLs"></div>
-      <div class="dk-cnt dk-r"><span class="k">${CK}</span>${e(T.fReady)}<b id="dkRn">0</b></div><div class="dk-slot dk-rs" id="dkRs"></div>
-      <div class="dk-deck" id="dkDeck"><i style="transform:translate(6px,6px)"></i><i style="transform:translate(4px,4px)"></i><i style="transform:translate(2px,2px)"></i><i></i><span class="dk-sweep"></span></div>
-      <div class="dk-big" id="dkBig"><div class="n"><span id="dkN">0</span> <small>/ ${N}</small></div><div class="l">${e(T.checkingAll(N))}</div><div class="ck-bar"><i id="dkBar" style="width:0"></i></div>
-        ${sk.n ? `<div class="dk-sk">${e(T.skip(sk.n))}</div>` : ''}</div></div><div id="ckGo"></div>`;
-    return document.getElementById('dk');
-  }
   const rel = (el) => { const a = el.getBoundingClientRect(), b = C.dk.root.getBoundingClientRect(); return { x: a.left - b.left, y: a.top - b.top, w: a.width, h: a.height }; };
-  const T3 = (o) => `translate(${o.x}px,${o.y}px) scale(${o.s == null ? 1 : o.s}) rotate(${o.r || 0}deg)`;
-  async function moveTo(el, to, ms, ease, extra) {
-    const from = el._pos || { x: 0, y: 0, s: 1, r: 0 }; to = { s: 1, r: 0, ...to }; el._pos = to;
-    if (reduced()) { el.style.transform = T3(to); return; }
-    const a = el.animate([{ transform: T3(from), ...((extra || {}).from || {}) }, { transform: T3(to), ...((extra || {}).to || {}) }], { duration: ms, easing: ease, fill: 'forwards' });
-    await a.finished.catch(() => {}); el.style.transform = T3(to); if (!(extra || {}).keep) a.cancel();
-  }
-  function bump(id, n) {
-    const b = document.getElementById(id); if (!b) return; b.textContent = n;
-    if (!reduced()) b.animate([{ transform: 'translateY(-60%)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 260, easing: EZ.out });
-  }
   function problems(it) {
     if (it.status === 'failed') return [{ kind: 'fail' }];
     const out = [];
@@ -219,20 +199,25 @@
   }
 
   const pdpImgs = it => it.imgs || [];
-  function cardEl(core, u) {
-    const e = core.esc, it = u[0], issues = problems(it);
-    const images = it.status === 'failed' ? [] : pdpImgs(it);
-    const marks = images.map(() => []);
-    issues.forEach((issue, index) => {
+  // 문제 자리 (issues[].regions — 몇 번째 장 slice · y · h · x · w, 장 안의 비율): 장마다 [{ i: 문제 번호, … }]. 검수 카드 · 그리드 칸이 같이 쓴다
+  function regionsBySlice(issues, n) {
+    const out = Array.from({ length: n }, () => []);
+    issues.forEach((issue, i) => {
       for (const r of issue.regions || []) {
-        if (!marks[r.slice - 1] || !Number.isFinite(r.y) || !Number.isFinite(r.h) ||
+        if (!out[r.slice - 1] || !Number.isFinite(r.y) || !Number.isFinite(r.h) ||
             r.y < 0 || r.y >= 1 || r.h <= 0 || r.h > 1) continue;
         const x = r.x ?? 0, w = r.w ?? 1;
         if (!Number.isFinite(x) || !Number.isFinite(w) || x < 0 || w <= 0 || x + w > 1.00001) continue;
-        marks[r.slice - 1].push(
-          `<span class="dk-bad${r.kind === 'gone' ? ' gone' : ''}${issue.kind === 'img' ? '' : ' dk-copy-mark'}" data-issue="${index}" aria-hidden="true" style="top:${r.y * 100}%;height:${r.h * 100}%;left:${x * 100}%;width:${w * 100}%"></span>`);
+        out[r.slice - 1].push({ i, kind: issue.kind, gone: r.kind === 'gone', y: r.y, h: r.h, x, w });
       }
     });
+    return out;
+  }
+  function cardEl(core, u) {
+    const e = core.esc, it = u[0], issues = problems(it);
+    const images = it.status === 'failed' ? [] : pdpImgs(it);
+    const marks = regionsBySlice(issues, images.length).map((ms) => ms.map((m) =>
+      `<span class="dk-bad${m.gone ? ' gone' : ''}${m.kind === 'img' ? '' : ' dk-copy-mark'}" data-issue="${m.i}" aria-hidden="true" style="top:${m.y * 100}%;height:${m.h * 100}%;left:${m.x * 100}%;width:${m.w * 100}%"></span>`));
     const slices = images.map((src, k) =>
       `<span class="dk-si"><img src="${e(small(src))}" alt="" decoding="async">${marks[k].join('')}</span>`).join('');
     const el = document.createElement('div'); el.className = 'dk-card';
@@ -251,97 +236,211 @@
     el.querySelector('.dk-st').textContent = isRemoved(u) ? C.T.removedL : busy(u) ? C.T.redoing
       : passed(u) ? C.T.fReady : bad.map(why).join(' · ');
   }
-  const pileAt = (k) => { const s = rel(document.getElementById('dkLs')); const sc = s.w / CW; return { x: s.x + Math.min(k, 7) * 4, y: s.y + Math.min(k, 7) * 8, s: sc, r: [-2.5, 2, -1, 1.5][k % 4] }; };
-  const readyAt = (k) => { const s = rel(document.getElementById('dkRs')); return { x: s.x + (k % 6) * 2, y: s.y + 8 + (k % 6) * 2, s: s.w / 74, r: (k % 5 - 2) * 1.2 }; };
-  const deckAt = () => { const d = rel(document.getElementById('dkDeck')); return { x: d.x, y: d.y }; };
-  function toReady(core, u, anim) {   // 덱 → (가운데를 스치며 스캔) → 오른쪽 더미. 날아가는 동안만 DOM 에, 더미엔 위 몇 장만
-    const D = C.dk, k = D.readyN++;
-    if (!anim || reduced()) { bump('dkRn', D.readyN); return; }
-    const it = u[0], e = core.esc;
-    const m = document.createElement('div'); m.className = 'dk-mini ok';
-    m.innerHTML = `<img src="${e(small(pdpImgs(it)[0] || ''))}" alt=""><b>${e(it.model || '')}</b>`;   // 상세 첫 장 (갤러리 아님)
-    m.style.zIndex = 30 + (k % 50); D.root.appendChild(m);
-    const a = deckAt(), to = readyAt(k), mid = { x: (a.x + to.x) / 2 - 40, y: Math.min(a.y, to.y) + (Math.abs(a.y - to.y) * 0.45) };
-    m.animate([{ transform: `translate(${a.x}px,${a.y}px) scale(1)` }, { transform: `translate(${mid.x}px,${mid.y}px) scale(1.4) rotate(-6deg)`, offset: 0.45 }, { transform: T3(to) }], { duration: 520, easing: EZ.p3out, fill: 'forwards' })
-      .finished.then(() => { bump('dkRn', D.readyN); D.minis.push(m); if (D.minis.length > 8) D.minis.shift().remove(); }, () => {});
-  }
-  function toReview(core, u, anim) {   // 덱 → 왼쪽 더미 (큰 카드가 작아져 쌓임)
-    const D = C.dk, k = D.pile.length, el = cardEl(core, u);
-    el.style.zIndex = 20 + k; el.classList.add('dk-pile'); D.pile.push(ukey(u)); D.els.set(ukey(u), el);
-    const to = pileAt(k);
-    if (!anim || reduced()) { el._pos = to; el.style.transform = T3(to); bump('dkLn', D.pile.length); return; }
-    const a = deckAt(); el._pos = { x: a.x, y: a.y, s: 74 / CW };
-    moveTo(el, to, 700, EZ.p3out).then(() => bump('dkLn', D.pile.length));
-  }
-  function place(core, u, anim) {
-    const D = C.dk;
-    if (isRemoved(u)) D.side.set(ukey(u), 'removed');   // 이어 볼 때: 이미 뺀 것 · 확인한 것
-    else if (passed(u) || isOk(u)) { D.side.set(ukey(u), 'ready'); toReady(core, u, anim); }
-    else { D.side.set(ukey(u), 'review'); toReview(core, u, anim); }
-    D.shown++; const n = document.getElementById('dkN'); if (n) n.textContent = D.shown;
-    const bar = document.getElementById('dkBar'); if (bar) bar.style.width = (D.shown / Math.max(1, C.units.length) * 100) + '%';
-  }
   async function refresh(core) { try { C.job = await core.api('/api/v1/bulk/jobs/' + C.job.id); C.units = units(C.job); } catch (_) {} }
-  // 결과가 나오는 대로 — 몰려오면 간격을 줄여 화면이 서버를 따라잡게 (연출 때문에 기다리지 않는다)
-  async function rush(core, instant) {
-    const D = C.dk = { root: null, side: new Map(), els: new Map(), pile: [], minis: [], q: [], readyN: 0, shown: 0, t0: performance.now() };
+  const running = () => C.job.status === 'running' || C.job.status === 'queued';
+  const needs = () => C.units.filter((u) => !isRemoved(u) && !isOk(u) && !passed(u));   // 사람이 아직 정하지 않은 것 (다시 준비 중 포함)
+  // 칸 상태: wait(결과 전) · ok(통과) · bad(검토 필요) · busy(다시 준비 중) · in(사람이 포함) · out(뺌)
+  const catOf = (u, landed) => (!landed ? 'wait' : isRemoved(u) ? 'out' : busy(u) ? 'busy' : passed(u) ? 'ok' : isOk(u) ? 'in' : 'bad');
+  const fadeIn = (x, ms, dy) => (reduced() ? null : x.animate([{ opacity: 0, transform: `translateY(${dy}px)`, filter: 'blur(6px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }], { duration: ms, easing: EZ.out, fill: 'backwards' }));
+  function roll(id, v) {   // 숫자가 바뀔 때 위에서 내려앉기 (블러 · 페이드). 진행 중 숫자는 연출 없이 (몰려오면 계속 다시 시작돼 안 보임)
+    const b = document.getElementById(id); if (!b || b.textContent === String(v)) return; b.textContent = v;
+    if (!reduced() && !b.getAnimations().length) b.animate([{ transform: 'translateY(-40%)', opacity: 0, filter: 'blur(3px)' }, { transform: 'none', opacity: 1, filter: 'blur(0)' }], { duration: 300, easing: EZ.out });
+  }
+  const imgsReady = (ims) => Promise.all(ims.map((im) => (im.complete ? 0 : new Promise((r) => { im.addEventListener('load', r, { once: true }); im.addEventListener('error', r, { once: true }); }))));
+
+  function grid(core) {
+    const T = C.T, e = core.esc, gv = C.gv || (C.gv = { scroll: 0, seen: false, entered: false });
+    if (C.g) { C.g.alive = false; if (C.g.io) C.g.io.disconnect(); }
     C.units = units(C.job);
-    D.root = deckView(core);
-    D.root.classList.add('dk-run');
-    const enqueue = () => { for (const u of C.units) { const k = ukey(u); if (D.side.has(k) || D.q.some((x) => x.k === k) || !settled(u)) continue; D.q.push({ k, u }); } };
-    let pumping = true;
-    const pump = (async () => {
-      while (pumping || D.q.length) {
-        const x = D.q.shift();
-        if (!x) { await sleep(40); continue; }
-        place(core, x.u, !instant);
-        if (!instant) await sleep(Math.max(14, Math.min(90, 900 / (D.q.length + 1))));
-      }
-    })();
-    enqueue();
-    while (C.job.status === 'running' || C.job.status === 'queued') {
-      await sleep(600); await refresh(core); enqueue();
-    }
-    enqueue(); pumping = false; await pump;
-    D.root.classList.remove('dk-run');
-    if (C.job.status !== 'ready') { alertLine(core, C.T.err + (C.job.error || C.job.status)); return; }
-    D.secs = ((performance.now() - D.t0) / 1000).toFixed(1);
-    await sleep(instant ? 0 : 450);   // 마지막 카드가 내려앉게
-    return reviewFlow(core, instant);
-  }
-  // 검토 필요만 하나씩. 자동 재시도 중인 것은 뒤로 — 고쳐지면 오른쪽으로 옮겨 가고, 아니면 차례가 온다
-  const needs = () => C.units.filter((u) => C.dk.side.get(ukey(u)) === 'review' && !isRemoved(u) && !isOk(u));
-  async function settle(core) {   // 왼쪽에 있다가 (자동 재시도 · 다시 준비로) 통과한 것 → 오른쪽 더미로
-    const D = C.dk;
+    const N = C.units.length, byId = (id) => document.getElementById(id), restore = gv.seen;
+    const el = frame(core, 2);
+    el.innerHTML = `<div class="gd" id="gd"><div class="gd-top"><div class="gd-acts"><button class="dk-act" id="gdRev" type="button" disabled>${e(T.revN(0))}</button><button class="dk-act pri" id="gdGo" type="button" disabled>${e(T.goDl)}</button></div>
+      <div class="gd-nums" id="gdNums" aria-live="polite"></div><div class="gd-prog" id="gdProgW"><i id="gdProg"></i></div></div>
+      <div class="gd-list" id="gdList"><div class="gd-grid" id="gdGrid"></div></div></div><div id="ckGo"></div>`;
+    const G = C.g = { alive: true, root: byId('gd'), list: byId('gdList'), tiles: new Map(), landed: new Set(), q: [], qs: new Set(), follow: !restore, chain: Promise.resolve(), mode: running() ? 'scan' : 'done', fT: 0 };
+    gv.seen = true;
+    const unitOf = (k) => { if (G.byU !== C.units) { G.byU = C.units; G.by = new Map(C.units.map((u) => [ukey(u), u])); } return G.by.get(k); };
+    // 칸: PDP 썸네일(장을 세로로 쌓음 — 문제 자리 표시는 PDP 와 같이 움직이게 안에) · 모델 · 한 줄
+    const gridEl = byId('gdGrid'), frag = document.createDocumentFragment();
     for (const u of C.units) {
-      const k = ukey(u); if (D.side.get(k) !== 'review' || !passed(u)) continue;
-      const el = D.els.get(k); D.side.set(k, 'ready'); D.pile = D.pile.filter((x) => x !== k); bump('dkLn', D.pile.length);
-      if (el) { cardState(el, u); const r = readyAt(D.readyN); await moveTo(el, { ...r, s: r.s * 74 / CW }, 560, EZ.p3in, { to: { opacity: 0 }, keep: true }); el.remove(); D.els.delete(k); }
-      D.readyN++; bump('dkRn', D.readyN);
+      const t = document.createElement('div'), it = u[0];
+      t.className = 'gd-it gd-wait'; t._k = ukey(u); t._cat = 'wait'; t.dataset.row = it.row;
+      t.innerHTML = `<div class="gd-pdp" tabindex="-1" aria-label="${e(it.model || '')}"><div class="gd-mv"></div><span class="gd-band"></span></div>
+        <div class="gd-mt"><div class="gd-mo">${e(it.model || '')}</div><div class="gd-st"></div></div>`;
+      G.tiles.set(t._k, t); frag.appendChild(t);
     }
-  }
-  function header(core, h, p) {
-    let t = document.getElementById('dkTitle');
-    if (!t) { t = document.createElement('div'); t.className = 'dk-title'; t.id = 'dkTitle'; C.dk.root.appendChild(t); }
-    t.innerHTML = `<h2>${core.esc(h)}</h2>${p ? `<p>${core.esc(p)}</p>` : ''}`;
-  }
-  async function reviewFlow(core, instant) {
-    const T = C.T, D = C.dk, token = C.flow = {};
-    const big = document.getElementById('dkBig');
-    if (big) { if (!instant && !reduced()) await big.animate([{ opacity: 1 }, { opacity: 0, filter: 'blur(6px)' }], { duration: 220, fill: 'forwards' }).finished.catch(() => {}); big.remove(); }
-    await settle(core);
-    const total = needs().length;
-    if (!total) return finishView(core);
-    // 체크가 끝났으면 오른쪽 Ready 더미를 눌러 전체 보기 (선택)
-    const rs = document.getElementById('dkRs');
-    if (rs) { rs.classList.add('dk-click'); rs.title = T.viewAll(C.units.length); rs.onclick = () => { C.flow = null; viewer(core, 'all', Math.max(0, C.units.findIndex(passed)), 'deck'); }; }
-    header(core, T.sumT(D.readyN, total), instant ? '' : T.sumS(C.units.length, D.secs, total));
-    if (!instant) await sleep(1100);
-    if (C.flow !== token) return;   // 그사이 전체 보기로 들어감
-    return viewer(core, 'review', 0, 'deck');
+    gridEl.appendChild(frag);
+
+    // PDP 내용: 통과한 칸은 앞 3장만(lazy) — 칸 높이를 채우기에 충분. 문제 칸은 마지막 문제 자리 다음 장까지(바로 불러옴 · 몇 개뿐)
+    function fill(t, u) {
+      const it = u[0], key = JSON.stringify([it.status === 'failed', pdpImgs(it), it.ai]);
+      if (t._content === key) return false;
+      t._content = key;
+      const imgs = it.status === 'failed' ? [] : pdpImgs(it), marks = regionsBySlice(problems(it), imgs.length), open = !passed(u);
+      const last = open ? marks.reduce((a, ms, k) => (ms.length ? k : a), -1) : -1, n = Math.min(imgs.length, Math.max(3, last + 2));
+      const mv = t.querySelector('.gd-mv');
+      mv.innerHTML = imgs.slice(0, n).map((src, k) => `<span class="gd-si"><img src="${e(small(src))}" alt="" decoding="async"${open ? '' : ' loading="lazy"'}>${open ? marks[k].map((m) =>
+        `<span class="gd-mk" style="top:calc(${m.y * 100}% - 4px);height:calc(${m.h * 100}% + 8px);left:calc(${m.x * 100}% + 3px);width:calc(${m.w * 100}% - 6px)"></span>`).join('') : ''}</span>`).join('');
+      mv.style.transform = ''; t._ty = 0; t._marks = last >= 0;
+      t.querySelector('.gd-pdp').classList.toggle('none', !imgs.length);
+      return true;
+    }
+    // 문제 자리가 보이게 PDP 를 그만큼 내려 둔다 (자리는 첫 문제 표시)
+    async function focus(t, anim) {
+      const mv = t.querySelector('.gd-mv'), pdp = mv.parentElement, mk = mv.querySelector('.gd-mk'), tok = t._ft = {};
+      if (!mk) { if (t._ty) { t._ty = 0; mv.style.transform = ''; } return; }
+      await imgsReady([...mv.querySelectorAll('img')]);
+      if (t._ft !== tok || !G.alive) return;
+      const H = pdp.clientHeight, y = mk.getBoundingClientRect().top - mv.getBoundingClientRect().top;
+      const ty = Math.round(Math.max(0, Math.min(mv.offsetHeight - H, y - H * 0.35))), from = t._ty || 0;
+      if (ty === from) return;
+      t._ty = ty; mv.style.transform = `translateY(${-ty}px)`;
+      if (anim && !reduced()) mv.animate([{ transform: `translateY(${-from}px)` }, { transform: `translateY(${-ty}px)` }], { duration: 600, easing: EZ.io });
+    }
+    // 스캔 띠: 결과가 닿은 칸을 한 번 훑고(0.42초) → 검토 필요면 빨강 (그동안 결과 표시는 숨김)
+    //   띠는 칸 높이만 한 투명 판의 아래 끝에 그려져 있어 transform 의 % 만으로 위 → 아래 (칸 크기를 읽지 않음 — 많아도 레이아웃을 다시 하지 않게)
+    function sweep(t) {
+      const band = t.querySelector('.gd-band');
+      t.classList.add('gd-scan');
+      band.animate([{ transform: 'translateY(-100%)', opacity: 1 }, { transform: 'translateY(0)', opacity: 1 }], { duration: 420, easing: EZ.io })
+        .finished.catch(() => {}).then(() => t.classList.remove('gd-scan'));
+    }
+    function paint(t, u, anim) {
+      const prev = t._cat, cat = catOf(u, G.landed.has(t._k)), changed = cat !== 'wait' && fill(t, u);
+      if (cat !== prev || changed) {
+        t._cat = cat;
+        t.className = `gd-it gd-${cat}`;
+        const reasons = aiRows(u).filter((x) => !x.ok).map(why).join(' · ');
+        const st = t.querySelector('.gd-st');   // 사람이 정한 것: 포함 · 뺌 (검수 화면과 같은 말)
+        st.textContent = st.title = { wait: '', ok: T.fReady, busy: T.redoing, in: T.okIn, out: T.removedL }[cat] ?? reasons;
+        t.querySelector('.gd-pdp').tabIndex = cat === 'wait' ? -1 : 0;
+        const scan = anim && !reduced() && G.vis.has(t) && cat !== 'wait' && cat !== 'busy' && (prev === 'wait' || prev === 'busy' || changed);   // 보이는 칸만
+        if (scan) sweep(t);
+        if (t._marks && (changed || prev === 'wait')) setTimeout(() => focus(t, anim), scan ? 380 : 0);
+      }
+      return cat !== prev;
+    }
+    function nums() {
+      let ok = 0, rev = 0, out = 0;
+      for (const t of G.tiles.values()) { const c = t._cat; if (c === 'ok' || c === 'in') ok++; if (c === 'bad' || c === 'busy') rev++; if (c === 'out') out++; }
+      const box = byId('gdNums'), key = G.mode + (out ? 'o' : '');
+      if (box._key !== key) {
+        box._key = key;
+        box.innerHTML = G.mode === 'scan' ? `<div class="gd-n"><span>${e(T.aiChk)}</span><b id="gdA">${G.landed.size}</b><span class="of">/ ${N}</span></div>`
+          : `<div class="gd-n"><span class="ck">${CK}</span><b id="gdA">${ok}</b><span>${e(T.fReady)}</span></div><div class="gd-n bad"><i class="dot"></i><b id="gdB">${rev}</b><span>${e(T.fReview)}</span></div>${out ? '<div class="gd-n out"><span id="gdC"></span></div>' : ''}`;
+      }
+      byId('gdProgW').classList.toggle('off', G.mode !== 'scan');
+      if (G.mode === 'scan') { byId('gdA').textContent = G.landed.size; byId('gdProg').style.width = (G.landed.size / Math.max(1, N) * 100) + '%'; }
+      else { roll('gdA', ok); roll('gdB', rev); const c = byId('gdC'); if (c) c.textContent = T.removed(out); }
+      const rb = byId('gdRev'), rl = T.revN(rev); if (rb.textContent !== rl) rb.textContent = rl;
+      rb.disabled = G.mode === 'scan' || !rev;
+      byId('gdGo').disabled = G.mode === 'scan' || C.job.status !== 'ready' || rev > 0;
+    }
+    // 결과가 나오는 대로 아래 줄을 따라 내려간다 — 사람이 스크롤하면 그만
+    function follow(t) {
+      if (!G.follow || G.mode !== 'scan' || G.vis.has(t) || performance.now() < G.fT) return;
+      G.fT = performance.now() + 450;
+      const y = t.offsetTop - G.list.offsetTop;   // 아래 줄일 때만 (늦게 온 윗줄 때문에 되돌아가지 않음)
+      if (y > G.list.scrollTop) G.list.scrollTo({ top: y - t.offsetHeight - 24, behavior: reduced() ? 'auto' : 'smooth' });
+    }
+    // 보이는 칸 (연출 · 따라가기는 이것만): 칸 위치를 매번 읽지 않게 IntersectionObserver 로
+    G.vis = new Set();
+    G.io = new IntersectionObserver((es) => { for (const en of es) { if (en.isIntersecting) G.vis.add(en.target); else G.vis.delete(en.target); } }, { root: G.list, rootMargin: '80px 0px' });
+    for (const t of G.tiles.values()) G.io.observe(t);
+    ['wheel', 'touchstart', 'pointerdown', 'keydown'].forEach((ev) => G.list.addEventListener(ev, () => { G.follow = false; }, { passive: true }));
+    function land(k, anim) {
+      G.qs.delete(k); const t = G.tiles.get(k), u = unitOf(k); if (!t || !u || !G.alive) return;
+      G.landed.add(k); paint(t, u, anim); if (anim) follow(t);
+    }
+    function update(anim) {
+      for (const [k, t] of G.tiles) {
+        const u = unitOf(k); if (!u) continue;
+        if (!G.landed.has(k)) { if (settled(u) && !G.qs.has(k)) { G.qs.add(k); G.q.push(k); } continue; }
+        paint(t, u, anim);
+      }
+      nums();
+    }
+    const onResize = () => {
+      if (!G.alive) { removeEventListener('resize', onResize); return; }
+      clearTimeout(G.rz); G.rz = setTimeout(() => { for (const t of G.tiles.values()) if (t._marks) focus(t, false); }, 150);
+    };
+    addEventListener('resize', onResize);
+    function leaveGrid() { if (!G.alive) return false; G.alive = false; gv.scroll = G.list.scrollTop; removeEventListener('resize', onResize); G.io.disconnect(); return true; }
+    // 칸을 누르면 그 제품의 자세히 보기 (비교 칸 포함) — 돌아가기는 이 그리드 같은 상태로
+    function openAt(t) {
+      if (!t || t._cat === 'wait' || !leaveGrid()) return;
+      viewer(core, 'all', Math.max(0, C.units.findIndex((u) => ukey(u) === t._k)), 'grid');
+    }
+    // 검토 필요는 하나씩 (가운데 큰 카드 · 비교 칸 · 위 고정 버튼 셋) — 그리드가 블러 · 페이드로 물러나고 검수 화면이 올라온다
+    async function review() {
+      if (!G.alive) return;
+      const anim = !reduced();
+      gv.entered = true;
+      if (anim) await G.list.animate([{ opacity: 1, filter: 'blur(0)', transform: 'none' }, { opacity: 0, filter: 'blur(6px)', transform: 'scale(.985)' }], { duration: 240, easing: EZ.p3in, fill: 'forwards' }).finished.catch(() => {});
+      if (!leaveGrid()) return;
+      viewer(core, 'review', 0, 'grid');
+      const dk = byId('dk'); if (anim && dk) fadeIn(dk, 420, 8);
+    }
+    gridEl.addEventListener('click', (ev) => {
+      const t = ev.target.closest('.gd-it');
+      if (t && ev.target.closest('.gd-pdp, .gd-mt')) openAt(t);
+    });
+    gridEl.addEventListener('keydown', (ev) => {
+      if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.classList.contains('gd-pdp')) { ev.preventDefault(); openAt(ev.target.closest('.gd-it')); }
+    });
+    byId('gdRev').onclick = () => review();
+    byId('gdGo').onclick = () => { if (leaveGrid()) finishView(core, true); };
+    // 자동 재시도 · 다시 준비 중인 칸: 끝날 때까지 2초마다 (통과하면 그 칸이 준비됨으로)
+    async function watch() {
+      if (G.watching || running()) return;
+      G.watching = true;
+      while (G.alive && C.units.some((u) => busy(u) && !isRemoved(u))) { await sleep(2000); if (!G.alive) break; await refresh(core); if (G.alive) update(true); }
+      G.watching = false;
+    }
+
+    (async () => {
+      // 이미 끝난 것은 연출 없이 바로 (이어 보기 · 자세히 보기에서 돌아올 때)
+      update(false); while (G.q.length) land(G.q.shift(), false);
+      nums();
+      if (restore) G.list.scrollTop = gv.scroll;
+      else if (!reduced()) {
+        fadeIn(G.root.querySelector('.gd-top'), 420, 6);
+        const lr = G.list.getBoundingClientRect(); let m = 0;
+        for (const t of G.tiles.values()) { if (m >= 44 || t.getBoundingClientRect().top > lr.bottom) break; fadeIn(t, 420, 8).effect.updateTiming({ delay: m++ * 8 }); }
+      }
+      const anim = !reduced();
+      let pumping = true;
+      const pump = (async () => {
+        while (G.alive && (pumping || G.q.length)) {
+          if (!G.q.length) { await sleep(40); continue; }
+          // 몰려오면 한 번에 여러 칸 (화면이 서버를 따라잡게) · 간격도 줄인다
+          for (let n = Math.max(1, Math.ceil(G.q.length / 12)); n > 0 && G.q.length; n--) land(G.q.shift(), anim);
+          nums();
+          if (anim) await sleep(Math.max(14, Math.min(90, 900 / (G.q.length + 1))));
+        }
+      })();
+      while (G.alive && running()) { await sleep(600); if (!G.alive) break; await refresh(core); if (G.alive) update(anim); }
+      pumping = false; await pump;
+      if (!G.alive) return;
+      if (G.mode === 'scan') {   // 다 끝남: 막대는 사라지고 숫자가 '준비됨 · 검토 필요'로 (블러 페이드), 따라 내려갔으면 맨 위로
+        const box = byId('gdNums');
+        if (anim) { await sleep(400); await box.animate([{ opacity: 1, filter: 'blur(0)' }, { opacity: 0, filter: 'blur(6px)' }], { duration: 200, easing: EZ.p3in, fill: 'forwards' }).finished.catch(() => {}); }
+        if (!G.alive) return;
+        G.mode = 'done'; nums(); box.getAnimations().forEach((a) => a.cancel());
+        if (anim) fadeIn(box, 520, 6);
+        if (G.follow && G.list.scrollTop > 0) G.list.scrollTo({ top: 0, behavior: anim ? 'smooth' : 'auto' });
+      }
+      if (C.job.status !== 'ready') { alertLine(core, T.err + (C.job.error || C.job.status)); return; }
+      watch();
+      // 처음 한 번은 저절로: 숫자를 잠깐 보여 주고(~1초, 모션 줄이기면 바로) 검토 필요를 하나씩. 그 뒤엔 '검토 N' 버튼으로
+      if (gv.entered || !needs().length) return;
+      if (anim) await sleep(1100);
+      if (G.alive && !gv.entered && needs().length) review();
+    })().catch((err) => alertLine(core, T.err + err.message));
   }
 
   // ── 검수 화면 (2026-11-27): 검토 필요만(review) · 전체 보기(all, 선택) 같은 화면 ──
+  // 2026-11-28 그리드부터: 스캔이 끝나면 'review'(하나씩, from 'grid') · 칸을 누르면 'all' 로 그 제품부터. 둘 다 돌아가기는 그리드 같은 상태로
   // PDP 는 가운데 크게 · 이전/다음은 양옆 · 위에 'n / N' 과 한 줄(상태 · 모델 · 이유 — 한 번만) · 아래 고정 버튼 셋(빼기 · 다시 준비 · 괜찮음·포함).
   // 검토 필요 카드면 화면 배경부터 다르게 (와인 톤) — 준비됨(기본 톤) · 뺌(회색)과 한눈에 구분. 하나 처리하면 다음 건으로 자동으로.
   // 키보드: ← → 넘기기 · ↑ ↓ · 스페이스로 PDP 내리기 · (전체 보기) Esc 돌아가기
@@ -352,7 +451,8 @@
     if (!all) { const j = list.findIndex((u) => open(u) && !busy(u)); if (j >= 0) i = j; }
     const view = frame(core, 2);
     view.innerHTML = '<div class="dk dk-br" id="dk"></div><div id="ckGo"></div>';
-    if (all) document.getElementById('ckSteps').insertAdjacentHTML('afterbegin', `<button class="ck-sback" id="dkBack" type="button">${e(T.back)}</button>`);
+    const back = all || from === 'grid';   // 돌아가기: 전체 보기 · 그리드에서 온 검토 (같은 자리)
+    if (back) document.getElementById('ckSteps').insertAdjacentHTML('afterbegin', `<button class="ck-sback" id="dkBack" type="button">${e(T.back)}</button>`);
     C.dk = { root: document.getElementById('dk'), els: new Map(), side: new Map(), pile: [], minis: [], q: [], readyN: 0, shown: 0 };
     const D = C.dk;
     // 위: 'n / N' + 진행 막대 · 그 아래 고정 버튼 셋 · 카드 바로 위 제목(모델 / 상태 · 이유)
@@ -663,18 +763,18 @@
       if (k === ' ' || k === 'PageDown' || k === 'PageUp') { ev.preventDefault(); scrollBy(k === 'PageUp' || (k === ' ' && ev.shiftKey) ? -1 : 1); return; }
       if (k === 'Home' || k === 'End') { ev.preventDefault(); const sc = el && el.querySelector('.dk-sc'); if (sc) sc.scrollTo({ top: k === 'Home' ? 0 : sc.scrollHeight, behavior: reduced() ? 'auto' : 'smooth' }); return; }
       if ((k === 'n' || k === 'N') && el && el.classList.contains('dk-prob')) { ev.preventDefault(); seek(el, (el._pi || 0) + 1); return; }
-      if (k === 'ArrowRight') { ev.preventDefault(); go(rtl ? -1 : 1); } else if (k === 'ArrowLeft') { ev.preventDefault(); go(rtl ? 1 : -1); } else if (k === 'Escape' && all) { ev.preventDefault(); leave(); }
+      if (k === 'ArrowRight') { ev.preventDefault(); go(rtl ? -1 : 1); } else if (k === 'ArrowLeft') { ev.preventDefault(); go(rtl ? 1 : -1); } else if (k === 'Escape' && back) { ev.preventDefault(); leave(true); }
     }
     function onResize() { if (!alive) return; place(); for (const [k, c] of cards) { c.style.left = cardLeft(k) + 'px'; c.style.width = G.cw + 'px'; c.querySelector('.dk-ph').style.height = G.ch + 'px'; const cm = c.querySelector('.cm'); if (cm) cm.style.zoom = (G.cw / 426).toFixed(3); c._upd(); } layout(false); if (el) seek(el, el._pi || 0); }
     const cmpSize = new ResizeObserver(() => cmp());
     cmpSize.observe(cmpBox);
-    function leave() {
+    function leave(toGrid) {   // toGrid: 돌아가기 · Esc — 그리드에서 왔으면 그리드로. 아니면(다 정함 · 끝 화면에서 옴) 끝 화면으로
       if (!alive) return;
       alive = false; cancelAnimationFrame(pointFrame); clearTimeout(cmpT); cmpSize.disconnect(); document.removeEventListener('keydown', key); removeEventListener('resize', onResize);
-      if (all && from === 'deck') rush(core, true); else finishView(core);
+      if (toGrid && from === 'grid') grid(core); else finishView(core);
     }
     document.addEventListener('keydown', key);
-    if (all) document.getElementById('dkBack').onclick = () => leave();
+    if (back) document.getElementById('dkBack').onclick = () => leave(true);
     place(); layout(false); sync();
     addEventListener('resize', onResize);
   }
@@ -697,11 +797,11 @@
     }
   }
   function alertLine(core, msg) { const g = document.getElementById('ckGo'); if (g) g.innerHTML = msg ? `<div class="ck-why">${core.esc(msg)}</div>` : ''; }
-  // 끝 · 완료 (2026-11-27): 검수 화면과 같은 틀 — 맨 위 한 줄(상태) · 그 아래 같은 자리의 버튼 줄 · 본문은 엑셀 시트.
+  // 끝 · 완료 (2026-11-27 · 2026-11-28 그리드와 같은 위 줄): 가운데 한 줄(상태) · 버튼은 그리드와 같은 자리(끝 쪽) · 본문은 엑셀 시트.
   //   버튼은 늘 위 (벌크 Check 전체 규칙 — 아래에는 누르는 것을 두지 않는다)
   function pageFrame(core, step, line, btns, body) {
     const el = frame(core, step, true);
-    el.innerHTML = `<div class="dk dk-br dk-pg" id="dk"><div class="dk-top"><div class="dk-line" id="dkLine">${line}</div></div><div class="dk-bar" id="dkBar">${btns}</div>
+    el.innerHTML = `<div class="gd gd-pg" id="dk"><div class="gd-top"><div class="gd-acts" id="dkBar">${btns}</div><div class="gd-nums dk-line" id="dkLine">${line}</div></div>
       <div class="dk-body"><div class="xs-wrap">${body}</div></div></div><div id="ckGo"></div>`;
     return el;
   }
@@ -711,17 +811,17 @@
     return `${CK}<b>${core.esc(T.doneT(ck.confirmed || 0))}</b><span>${core.esc([ck.removed ? T.removed(ck.removed) : '', ck.skipModels ? T.skipped(ck.skipModels) : ''].filter(Boolean).join(' · '))}</span>`; };
   const dlBtn = (core) => `<a class="dk-act pri" id="ckDl" href="${core.esc(C.job.file || '#')}" download>${core.esc(C.T.dl)}</a>`;
   // 끝: 준비된 것을 한 번에 확인 (승인 기록 via 'bulk' + 본 이미지 해시) → 받기. 시트는 설명 칸이 빈 채로 미리 보이고, 확인하면 채워진다
-  async function finishView(core) {
+  async function finishView(core, go) {   // go: 그리드의 '확인하고 받기'로 왔으면 바로 확인 → 받기
     const T = C.T, e = core.esc;
     // 전체 보기에서 다시 준비한 것: 끝날 때까지 기다렸다가, 걸리면 검토로
     while (C.units.some((u) => busy(u) && !isRemoved(u))) { alertLine(core, T.redoing + '…'); await sleep(2000); await refresh(core); }
-    if (C.units.some((u) => !passed(u) && !isRemoved(u) && !isOk(u))) return rush(core, true);
+    if (needs().length) return viewer(core, 'review', 0, 'grid');   // 아직 정할 것이 있으면 하나씩 (돌아가기는 그리드로)
     const todo = C.units.filter((u) => passed(u) && !isOk(u) && !isRemoved(u));
     if (!todo.length) return doneView(core);
     const sh = sheet(core);
     pageFrame(core, 2, finLine(core, todo), `<button class="dk-act" id="ckView" type="button">${e(T.viewAll(C.units.length))}</button><button class="dk-act pri" id="ckAll" type="button">${e(T.confirmDl(todo.length))}</button>`, sh.html);
     document.getElementById('ckView').onclick = () => viewer(core, 'all', 0, 'finish');
-    const b = document.getElementById('ckAll'); b.focus();
+    const b = document.getElementById('ckAll');
     b.onclick = async () => {
       document.querySelectorAll('#dkBar .dk-act').forEach((x) => { x.disabled = true; });
       const anim = !reduced(), okP = act(core, todo.flat(), 'ok');
@@ -741,6 +841,7 @@
       download(); doneTop(core);
       if (!anim) fillSheet(core, sh, false);
     };
+    if (go) b.click(); else b.focus();
   }
   function download() { if (C.job.file) { const a = document.createElement('a'); a.href = C.job.file; a.download = ''; document.body.appendChild(a); a.click(); a.remove(); } }
   function doneTop(core) {   // 같은 자리에서: 확인 버튼 → 엑셀 받기, 위 한 줄 → 완료
@@ -807,7 +908,7 @@
         check: { skipModels: k.models.length, skipRows: k.skip.length, by: k.by, asOf: k.asOf } });
       C.skip = { ...C.skip, n: C.job.check?.skipModels ?? C.skip.n, rows: C.job.check?.skipRows ?? C.skip.rows };
       core.remember(C.job.id);
-      await rush(core);
+      grid(core);
     } catch (e) { alertLine(core, C.T.err + e.message); }
     return true;
   }
@@ -815,8 +916,7 @@
     C = { core, T: tOf(core.L), job, units: units(job), open: false, fileName: job.fileName || '', rowsN: 0, liveN: units(job).length,
       // 이어 볼 때는 건너뛴 목록 없이 숫자만
       skip: { n: (job.check && job.check.skipModels) || 0, models: [], rows: (job.check && job.check.skipRows) || 0, by: job.check && job.check.by, asOf: job.check && job.check.asOf } };
-    if (job.status === 'running' || job.status === 'queued') return rush(core);
-    if (job.status === 'ready') return rush(core, true);   // 이어 볼 때는 날아가는 것 없이 바로 더미로
+    if (job.status === 'running' || job.status === 'queued' || job.status === 'ready') return grid(core);   // 이어 볼 때: 이미 끝난 칸은 연출 없이 바로
     prepView(core); alertLine(core, C.T.err + (job.error || job.status));
   }
   window.BulkCheck = { begin, resume, _classify: classify, _units: units };
